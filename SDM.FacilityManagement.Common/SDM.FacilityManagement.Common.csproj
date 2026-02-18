@@ -18,7 +18,7 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Authors>SkylineCommunications</Authors>
     <Company>Skyline Communications</Company>
-    <Description></Description>
+    <Description>Standard API for Facility Management operations in DataMiner</Description>
   </PropertyGroup>
 
   <ItemGroup>
