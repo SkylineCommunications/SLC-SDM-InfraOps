@@ -1,10 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>net48</TargetFramework>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
-    <AssemblyName>Skyline.DataMiner.SDM.InfraOps.Common</AssemblyName>
-    <RootNamespace>Skyline.DataMiner.SDM.InfraOps</RootNamespace>
+    <AssemblyName>Skyline.DataMiner.SDM.AssetManagement.Protocol</AssemblyName>
+    <RootNamespace>Skyline.DataMiner.SDM.AssetManagement.Protocol</RootNamespace>
     <PackageVersion>1.0.1</PackageVersion>
     <Version>1.0.1</Version>
     <PackageTags>Skyline;DataMiner</PackageTags>
@@ -17,7 +17,7 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Authors>SkylineCommunications</Authors>
     <Company>Skyline Communications</Company>
-    <Description>Standard API for InfraOps</Description>
+    <Description></Description>
   </PropertyGroup>
 
   <ItemGroup>
@@ -27,9 +27,14 @@
   </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="Skyline.DataMiner.Utils.SecureCoding.Analyzers" Version="2.2.1">
+    <PackageReference Include="Skyline.DataMiner.Dev.Protocol"/>
+    <PackageReference Include="Skyline.DataMiner.Utils.SecureCoding.Analyzers">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\SDM.AssetManagement.Common\SDM.AssetManagement.Common.csproj" />
   </ItemGroup>
 </Project>

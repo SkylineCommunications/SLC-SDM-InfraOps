@@ -1,0 +1,25 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Add your package versions here -->
+    <!-- Example: -->
+      <PackageVersion Include="Newtonsoft.Json" Version="13.0.4" />
+      <PackageVersion Include="Skyline.DataMiner.SDM.Abstractions" Version="0.3.1" />
+      <PackageVersion Include="Skyline.DataMiner.SDM.Linq" Version="0.3.1" />
+      <!--<PackageVersion Include="Skyline.DataMiner.SDM.SourceGenerator" Version="0.3.1" OutputItemType="Analyzer" ReferenceoutputAssembly="false" />-->
+      <PackageVersion Include="Skyline.DataMiner.Utils.DOM" Version="10.5.2.4" />
+      <PackageVersion Include="Skyline.DataMiner.Utils.PerformanceAnalyzer" Version="3.0.2" />
+      <PackageVersion Include="Skyline.DataMiner.Utils.SecureCoding" Version="2.2.1" />
+      <PackageVersion Include="Skyline.DataMiner.Utils.SecureCoding.Analyzers" Version="2.2.1" />
+      <PackageVersion Include="FluentAssertions" Version="7.2.0" />
+      <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+      <PackageVersion Include="Moq" Version="4.20.72" />
+      <PackageVersion Include="MSTest.TestAdapter" Version="3.8.2" />
+      <PackageVersion Include="MSTest.TestFramework" Version="3.8.2" />
+      <PackageVersion Include="Skyline.DataMiner.Dev.Protocol" Version="10.6.1" />
+      <PackageVersion Include="Skyline.DataMiner.Dev.Automation" Version="10.6.1" />
+  </ItemGroup>
+</Project>

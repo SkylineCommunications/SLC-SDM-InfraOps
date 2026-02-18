@@ -1,3 +1,15 @@
 <Solution>
-  <Project Path="SDM.InfraOps.Common/SDM.InfraOps.Common.csproj" />
+  <Folder Name="/SDM.Tests/">
+    <Project Path="SDM.AssetManagementTests/SDM.AssetManagement.Tests.csproj" />
+    <Project Path="SDM.FacilityManagement.Tests/SDM.FacilityManagement.Tests.csproj" />
+  </Folder>
+  <Project Path="SDM.AssetManagement.Automation/SDM.AssetManagement.Automation.csproj" Id="51016b20-9524-44df-b4b1-a2e16ae70603" />
+  <Project Path="SDM.AssetManagement.Common/SDM.AssetManagement.Common.csproj" />
+  <Project Path="SDM.AssetManagement.GQI/SDM.AssetManagement.GQI.csproj" Id="728f5590-32b0-4e81-ad97-a287d3ccda34" />
+  <Project Path="SDM.AssetManagement.Protocol/SDM.AssetManagement.Protocol.csproj" Id="5b2b0aaf-94fd-4e7d-9154-f95797c6264c" />
+  <Project Path="SDM.FacilityManagement.Automation/SDM.FacilityManagement.Automation.csproj" Id="461747c3-f095-4573-8db7-89cbe085be80" />
+  <Project Path="SDM.FacilityManagement.Common/SDM.FacilityManagement.Common.csproj" Id="43129b6d-34c1-4d71-8900-8836dcc2cdcc" />
+  <Project Path="SDM.FacilityManagement.GQI/SDM.FacilityManagement.GQI.csproj" Id="fa02bb09-b0ca-4888-a9be-afb648c59199" />
+  <Project Path="SDM.FacilityManagement.Protocol/SDM.FacilityManagement.Protocol.csproj" Id="9450733d-d8ec-430e-8403-6dc440537c73" />
+  <Project Path="SharedMappers/SharedMappers.shproj" Id="4a22402e-e149-417d-9777-f79bb1002566" />
 </Solution>
