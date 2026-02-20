@@ -28,7 +28,6 @@
 				AssetClass = null, // Set if you have a valid AssetClass reference
 				AssetDescription = "Sample asset for unit test",
 				FwOs = "FW1.0",
-				Notes = "Test notes",
 				SerialNumber = "SN123456",
 				HardwareVersion = "HW1.0",
 				NetworkDetails = new AssetNetworkDetails

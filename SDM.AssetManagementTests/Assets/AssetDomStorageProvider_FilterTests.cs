@@ -60,7 +60,6 @@
 				asset.AssetName.Should().Be(DemoData.Assets[3].AssetName);
 				asset.AssetId.Should().Be(DemoData.Assets[3].AssetId);
 				asset.FwOs.Should().Be(DemoData.Assets[3].FwOs);
-				asset.Notes.Should().Be(DemoData.Assets[3].Notes);
 				asset.Custody.TeamId.Should().Be(DemoData.Assets[3].Custody.TeamId);
 			}
 		}
@@ -144,7 +143,6 @@
 				asset.AssetName.Should().Be(DemoData.Assets[9].AssetName);
 				asset.AssetId.Should().Be(DemoData.Assets[9].AssetId);
 				asset.AssetDescription.Should().Be(DemoData.Assets[9].AssetDescription);
-				asset.Notes.Should().Be(DemoData.Assets[9].Notes);
 				asset.Location.Side.Should().Be(DemoData.Assets[9].Location.Side);
 				asset.Custody.From.Should().Be(DemoData.Assets[9].Custody.From);
 				asset.Lifecycle.ModificationDate.Should().Be(DemoData.Assets[9].Lifecycle.ModificationDate);

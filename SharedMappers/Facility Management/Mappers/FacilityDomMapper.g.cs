@@ -14,23 +14,24 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 	[SdmDomMapper]
 	internal static class FacilityDomMapper
 	{
-		internal const string ModuleId = "(slc)facility_management";
-		internal static DomDefinitionId DomDefinitionId = new DomDefinitionId(new Guid("dab0442b-b092-4dbf-a249-19dd421c69db"))
+		internal const string ModuleId = SharedMappers.DomIds.SlcFacility_Management.ModuleId;
+
+        internal static DomDefinitionId DomDefinitionId = new DomDefinitionId(SharedMappers.DomIds.SlcFacility_Management.Definitions.Facility.Id)
 		{ ModuleId = ModuleId };
 		internal static class FacilityProperties
 		{
-			internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(new Guid("125d4f2c-4d9f-4efe-9af6-1e6a5d4bcaab"))
+			internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(SharedMappers.DomIds.SlcFacility_Management.Sections.FacilityInformation.Id.Id)
 			{ ModuleId = ModuleId };
-			internal static FieldDescriptorID FacilityId = new FieldDescriptorID(new Guid("4ca5dc9c-4bb5-4e46-8a95-0bcf95d2265c"));
-			internal static FieldDescriptorID Name = new FieldDescriptorID(new Guid("259e31ed-65e9-4a1f-b8f9-20d94e3e09b3"));
-			internal static FieldDescriptorID Description = new FieldDescriptorID(new Guid("fd4dbb48-ed5a-4fc7-bf49-a1f119d09883"));
-			internal static FieldDescriptorID FacilityType = new FieldDescriptorID(new Guid("37dbb06b-efcd-4295-a646-00ee1eb30d01"));
-			internal static FieldDescriptorID Address = new FieldDescriptorID(new Guid("370f8d27-5ce8-4308-ae3e-130c9dbbf366"));
-			internal static FieldDescriptorID City = new FieldDescriptorID(new Guid("4fa9677f-0022-4012-b371-c884840db7ea"));
-			internal static FieldDescriptorID ZipCode = new FieldDescriptorID(new Guid("91359fc6-ffa8-47b5-a849-20036307a3d8"));
-			internal static FieldDescriptorID Country = new FieldDescriptorID(new Guid("613d7d84-8d85-4e29-9af8-9dc752208789"));
-			internal static FieldDescriptorID Latitude = new FieldDescriptorID(new Guid("def40fd7-3d08-4f1b-88e8-e95ce0ca2606"));
-			internal static FieldDescriptorID Longitude = new FieldDescriptorID(new Guid("872360fb-bc51-46c6-bfd0-8282c6a913f6"));
+			internal static FieldDescriptorID FacilityId = SharedMappers.DomIds.SlcFacility_Management.Sections.FacilityInformation.FacilityID;
+			internal static FieldDescriptorID Name = SharedMappers.DomIds.SlcFacility_Management.Sections.FacilityInformation.Name;
+			internal static FieldDescriptorID Description = SharedMappers.DomIds.SlcFacility_Management.Sections.FacilityInformation.Description;
+			internal static FieldDescriptorID FacilityType = SharedMappers.DomIds.SlcFacility_Management.Sections.FacilityInformation.FacilityType;
+			internal static FieldDescriptorID Address = SharedMappers.DomIds.SlcFacility_Management.Sections.FacilityInformation.Address;
+			internal static FieldDescriptorID City = SharedMappers.DomIds.SlcFacility_Management.Sections.FacilityInformation.City;
+			internal static FieldDescriptorID ZipCode = SharedMappers.DomIds.SlcFacility_Management.Sections.FacilityInformation.ZipCode;
+			internal static FieldDescriptorID Country = SharedMappers.DomIds.SlcFacility_Management.Sections.FacilityInformation.Country;
+			internal static FieldDescriptorID Latitude = SharedMappers.DomIds.SlcFacility_Management.Sections.FacilityInformation.Latitude;
+			internal static FieldDescriptorID Longitude = SharedMappers.DomIds.SlcFacility_Management.Sections.FacilityInformation.Longitude;
 		}
 	}
 }

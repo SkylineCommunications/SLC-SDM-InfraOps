@@ -14,44 +14,45 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 	[SdmDomMapper]
 	internal static class DataPortDomMapper
 	{
-		internal const string ModuleId = "(slc)asset_management";
-		internal static DomDefinitionId DomDefinitionId = new DomDefinitionId(new Guid("280b26f8-7245-4b67-85c1-d42bcf3e9c41"))
+		internal const string ModuleId = SharedMappers.DomIds.SlcAsset_Management.ModuleId;
+        internal static DomDefinitionId DomDefinitionId = new DomDefinitionId(SharedMappers.DomIds.SlcAsset_Management.Definitions.DataPort.Id)
 		{ ModuleId = ModuleId };
 		internal static class DataPortInfo
 		{
-			internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(new Guid("7918fb83-c6de-43c7-82d1-e561aefac746"))
+			internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(SharedMappers.DomIds.SlcAsset_Management.Sections.DataPortInfo.Id.Id)
 			{ ModuleId = ModuleId };
-			internal static FieldDescriptorID Name = new FieldDescriptorID(new Guid("b697fc76-bb00-449c-b971-2f78a5b2623f"));
-			internal static FieldDescriptorID PortNumber = new FieldDescriptorID(new Guid("46ae4b8b-4cd1-4673-909f-c8d3cd2f9298"));
-			internal static FieldDescriptorID OutputType = new FieldDescriptorID(new Guid("638988c3-731a-4c54-8ed7-df5281eaa8b8"));
-			internal static FieldDescriptorID PortExposure = new FieldDescriptorID(new Guid("603653d8-7b1d-4d04-b30d-20ca35984bb1"));
-			internal static FieldDescriptorID Label = new FieldDescriptorID(new Guid("b9127350-96ac-4708-9863-abd5724238d0"));
-			internal static FieldDescriptorID Type = new FieldDescriptorID(new Guid("0ba7fcc1-dcbc-45e0-b918-1a2e1ab194e5"));
-		}
+            internal static FieldDescriptorID Name = SharedMappers.DomIds.SlcAsset_Management.Sections.DataPortInfo.PortName;
+			internal static FieldDescriptorID PortNumber = SharedMappers.DomIds.SlcAsset_Management.Sections.DataPortInfo.PortNumber;
+			internal static FieldDescriptorID OutputType = SharedMappers.DomIds.SlcAsset_Management.Sections.DataPortInfo.OutputType;
+			internal static FieldDescriptorID PortExposure = SharedMappers.DomIds.SlcAsset_Management.Sections.DataPortInfo.PortExposure;
+			internal static FieldDescriptorID Label = SharedMappers.DomIds.SlcAsset_Management.Sections.DataPortInfo.Label;
+            internal static FieldDescriptorID Type = SharedMappers.DomIds.SlcAsset_Management.Sections.DataPortInfo.PortType;
+        }
 
 		internal static class AssetRelationProperties
 		{
-			internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(new Guid("45368cbd-a605-4930-8bf2-d0f649edeae0"))
+			internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(SharedMappers.DomIds.SlcAsset_Management.Sections.Asset.Id.Id)
 			{ ModuleId = ModuleId };
-			internal static FieldDescriptorID Asset = new FieldDescriptorID(new Guid("71dd3307-3015-43f8-86fd-1618c31a7ab2"));
-		}
+            internal static FieldDescriptorID Asset = SharedMappers.DomIds.SlcAsset_Management.Sections.Asset.AssetID;
+
+        }
 
 		internal static class AddressInfo
 		{
-			internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(new Guid("73f92de5-317d-41dc-b8c3-2563fcb13e50"))
+			internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(SharedMappers.DomIds.SlcAsset_Management.Sections.AddressInfo.Id.Id)
 			{ ModuleId = ModuleId };
-			internal static FieldDescriptorID Ipv4Address = new FieldDescriptorID(new Guid("3fbfbfc8-b80f-4c89-b494-218701b1cd16"));
-			internal static FieldDescriptorID Ipv6Address = new FieldDescriptorID(new Guid("d9d5c461-5076-4565-b621-ddcb208e03e6"));
-			internal static FieldDescriptorID Hostname = new FieldDescriptorID(new Guid("956464e3-6b17-4fa2-9987-02d8241d23ce"));
-			internal static FieldDescriptorID DNS = new FieldDescriptorID(new Guid("96f7776d-dfca-4465-9131-33448b98753d"));
+			internal static FieldDescriptorID Ipv4Address = SharedMappers.DomIds.SlcAsset_Management.Sections.AddressInfo.IPV4Address;
+			internal static FieldDescriptorID Ipv6Address = SharedMappers.DomIds.SlcAsset_Management.Sections.AddressInfo.IPV6Address;
+			internal static FieldDescriptorID Hostname = SharedMappers.DomIds.SlcAsset_Management.Sections.AddressInfo.Hostname;
+			internal static FieldDescriptorID DNS = SharedMappers.DomIds.SlcAsset_Management.Sections.AddressInfo.DNS;
 		}
 
 		internal static class PrimaryPortRelation
 		{
-			internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(new Guid("2ad90463-9998-4df9-a068-93a13cfa2e6a"))
+			internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(SharedMappers.DomIds.SlcAsset_Management.Sections.PrimaryPortRelation.Id.Id)
 			{ ModuleId = ModuleId };
-			internal static FieldDescriptorID IsPrimaryIpv4 = new FieldDescriptorID(new Guid("884f0a95-c1e8-447c-ba1d-0061deaca70d"));
-			internal static FieldDescriptorID IsPrimaryIpv6 = new FieldDescriptorID(new Guid("a81dc9d7-fc3d-447d-83cb-e9a54c1df5f6"));
+			internal static FieldDescriptorID IsPrimaryIpv4 = SharedMappers.DomIds.SlcAsset_Management.Sections.PrimaryPortRelation.Isprimaryipv4;
+			internal static FieldDescriptorID IsPrimaryIpv6 = SharedMappers.DomIds.SlcAsset_Management.Sections.PrimaryPortRelation.Isprimaryipv6;
 		}
 	}
 }

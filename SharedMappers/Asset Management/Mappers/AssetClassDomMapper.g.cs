@@ -6,101 +6,81 @@
 //------------------------------------------------------------------------------
 namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
-	using System;
-	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-	using Skyline.DataMiner.Net.Sections;
-	using Skyline.DataMiner.SDM;
+    using System;
 
-	[SdmDomMapper]
-	internal static class AssetClassDomMapper
-	{
-		internal const string ModuleId = "(slc)asset_management";
-		internal static DomDefinitionId DomDefinitionId = new DomDefinitionId(new Guid("d6f9c4c8-9f8d-4e8c-a7e0-1e1500563416"))
-		{ ModuleId = ModuleId };
-		internal static class AssetClassProperties
-		{
-			internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(new Guid("311b421b-8c62-4fb2-b211-3740a6a17b40"))
-			{ ModuleId = ModuleId };
+    using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+    using Skyline.DataMiner.Net.Sections;
+    using Skyline.DataMiner.SDM;
 
-			internal static FieldDescriptorID DeviceName = new FieldDescriptorID(new Guid("64e8da13-cdfa-459c-9185-77555e874f7d"));
-			internal static FieldDescriptorID DeviceType = new FieldDescriptorID(new Guid("e7661d39-0325-488f-a8e8-51ba18f29fba"));
-			internal static FieldDescriptorID DeviceDescription = new FieldDescriptorID(new Guid("b8adb2c5-3531-446f-8ad6-670c32dadad1"));
-			internal static FieldDescriptorID Manufacturer = new FieldDescriptorID(new Guid("065a0dde-a9be-4021-a8a3-490ddf7987a4"));
-			internal static FieldDescriptorID Height = new FieldDescriptorID(new Guid("84820351-6e13-4ee3-aec5-8d6e725c2194"));
-			internal static FieldDescriptorID Depth = new FieldDescriptorID(new Guid("14a1b2f6-cccc-41cd-bfaf-eb7edcccd730"));
-			internal static FieldDescriptorID Width = new FieldDescriptorID(new Guid("481f1010-cf0f-4fb5-947a-11accd221a79"));
-			internal static FieldDescriptorID HeightU = new FieldDescriptorID(new Guid("c6493f31-5651-4da0-af44-d24c73511030"));
-			internal static FieldDescriptorID Weight = new FieldDescriptorID(new Guid("df1cd95b-f534-4795-8363-08c3d2f17e9a"));
-			internal static FieldDescriptorID MaximumPowerConsumption = new FieldDescriptorID(new Guid("28427166-97df-44f3-8651-28fd1236f566"));
-			internal static FieldDescriptorID TypicalPowerConsumption = new FieldDescriptorID(new Guid("9c01fc26-2449-46f1-8ad1-fc32e9e18c97"));
-			internal static FieldDescriptorID FrontImage = new FieldDescriptorID(new Guid("23edd575-f266-4444-bfc3-43a35d9b3ed0"));
-			internal static FieldDescriptorID BackImage = new FieldDescriptorID(new Guid("2183802a-7157-41cf-b342-c18ce8623fae"));
-			internal static FieldDescriptorID PowerSupply = new FieldDescriptorID(new Guid("cebfc16b-88d3-4d3e-8969-0ebcef5fd442"));
-		}
+    [SdmDomMapper]
+    internal static class AssetClassDomMapper
+    {
+        internal const string ModuleId = SharedMappers.DomIds.SlcAsset_Management.ModuleId;
 
-		internal static class Lifecycle
-		{
-			internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(new Guid("7146ed89-798f-46f9-a534-99ed91d15e29"))
-			{ ModuleId = ModuleId };
+        internal static DomDefinitionId DomDefinitionId = new DomDefinitionId(SharedMappers.DomIds.SlcAsset_Management.Definitions.AssetClass.Id)
+        { ModuleId = ModuleId };
+        internal static class AssetClassProperties
+        {
+            internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(SharedMappers.DomIds.SlcAsset_Management.Sections.AssetClassInfo.Id.Id)
+            { ModuleId = ModuleId };
 
-			internal static FieldDescriptorID EndOfLife = new FieldDescriptorID(new Guid("7a38322c-2409-43fc-a6a7-1fd03ac9c5c4"));
-			internal static FieldDescriptorID EndOfService = new FieldDescriptorID(new Guid("535dedd7-4c31-4d01-b369-5d76c3661c96"));
-			internal static FieldDescriptorID NominalLifetime = new FieldDescriptorID(new Guid("c518fadb-fd43-4c82-80ab-a5f05d067d85"));
-		}
+            internal static FieldDescriptorID DeviceName = SharedMappers.DomIds.SlcAsset_Management.Sections.AssetClassInfo.Name;
+            internal static FieldDescriptorID DeviceType = SharedMappers.DomIds.SlcAsset_Management.Sections.AssetClassInfo.DeviceType;
+            internal static FieldDescriptorID DeviceDescription = SharedMappers.DomIds.SlcAsset_Management.Sections.AssetClassInfo.Description;
+            internal static FieldDescriptorID Manufacturer = SharedMappers.DomIds.SlcAsset_Management.Sections.AssetClassInfo.Manufacturer;
+            internal static FieldDescriptorID Height = SharedMappers.DomIds.SlcAsset_Management.Sections.AssetClassInfo.Height;
+            internal static FieldDescriptorID Depth = SharedMappers.DomIds.SlcAsset_Management.Sections.AssetClassInfo.Depth;
+            internal static FieldDescriptorID Width = SharedMappers.DomIds.SlcAsset_Management.Sections.AssetClassInfo.Width;
+            internal static FieldDescriptorID HeightU = SharedMappers.DomIds.SlcAsset_Management.Sections.AssetClassInfo.HeightU;
+            internal static FieldDescriptorID Weight = SharedMappers.DomIds.SlcAsset_Management.Sections.AssetClassInfo.Weight;
+            internal static FieldDescriptorID MaximumPowerConsumption = SharedMappers.DomIds.SlcAsset_Management.Sections.AssetClassInfo.MaximumPowerConsumption;
+            internal static FieldDescriptorID TypicalPowerConsumption = SharedMappers.DomIds.SlcAsset_Management.Sections.AssetClassInfo.TypicalPowerConsumption;
+            internal static FieldDescriptorID FrontImage = SharedMappers.DomIds.SlcAsset_Management.Sections.AssetClassInfo.FrontImage;
+            internal static FieldDescriptorID BackImage = SharedMappers.DomIds.SlcAsset_Management.Sections.AssetClassInfo.BackImage;
+            internal static FieldDescriptorID PowerSupply = SharedMappers.DomIds.SlcAsset_Management.Sections.AssetClassInfo.PowerSupply;
+        }
 
-		internal static class DataPorts
-		{
-			internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(new Guid("7918fb83-c6de-43c7-82d1-e561aefac746"))
-			{ ModuleId = ModuleId };
-			internal static FieldDescriptorID Name = new FieldDescriptorID(new Guid("b697fc76-bb00-449c-b971-2f78a5b2623f"));
-			internal static FieldDescriptorID PortNumber = new FieldDescriptorID(new Guid("46ae4b8b-4cd1-4673-909f-c8d3cd2f9298"));
-			internal static FieldDescriptorID OutputType = new FieldDescriptorID(new Guid("638988c3-731a-4c54-8ed7-df5281eaa8b8"));
-			internal static FieldDescriptorID PortExposure = new FieldDescriptorID(new Guid("603653d8-7b1d-4d04-b30d-20ca35984bb1"));
-			internal static FieldDescriptorID Label = new FieldDescriptorID(new Guid("b9127350-96ac-4708-9863-abd5724238d0"));
-			internal static FieldDescriptorID Type = new FieldDescriptorID(new Guid("0ba7fcc1-dcbc-45e0-b918-1a2e1ab194e5"));
-		}
+        internal static class Lifecycle
+        {
+            internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(SharedMappers.DomIds.SlcAsset_Management.Sections.AssetLifecycle.Id.Id)
+            { ModuleId = ModuleId };
 
-		internal static class PowerPorts
-		{
-			internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(new Guid("75f703c9-dff8-44ef-9606-49c94a3f2ee4"))
-			{ ModuleId = ModuleId };
-			internal static FieldDescriptorID Name = new FieldDescriptorID(new Guid("9733a4a7-9d20-480d-a419-073c88a9c6db"));
-			internal static FieldDescriptorID PortNumber = new FieldDescriptorID(new Guid("64262d36-61e5-4d51-8aef-a408d714d7ea"));
-			internal static FieldDescriptorID OutputType = new FieldDescriptorID(new Guid("6378c911-7cbc-4246-bd17-3343536c10af"));
-			internal static FieldDescriptorID PortExposure = new FieldDescriptorID(new Guid("8985105e-888f-487c-ac0e-e28a3f48a0b0"));
-			internal static FieldDescriptorID PortType = new FieldDescriptorID(new Guid("ca8e6205-8b15-4633-a497-202c509c0e4c"));
-			internal static FieldDescriptorID Label = new FieldDescriptorID(new Guid("57fb12ed-907b-41d1-9f3f-c1211718f338"));
-		}
+            internal static FieldDescriptorID EndOfLife = SharedMappers.DomIds.SlcAsset_Management.Sections.AssetClassLifecycleInformation.EOLDate;
+            internal static FieldDescriptorID EndOfService = SharedMappers.DomIds.SlcAsset_Management.Sections.AssetClassLifecycleInformation.EOSDate;
+            internal static FieldDescriptorID NominalLifetime = SharedMappers.DomIds.SlcAsset_Management.Sections.AssetClassLifecycleInformation.NominalLifetime;
+        }
 
-		internal static class Holders
-		{
-			internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(new Guid("f2048e2c-8d4a-4d18-a808-f2bff352905f"))
-			{ ModuleId = ModuleId };
+        internal static class DataPorts
+        {
+            internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(SharedMappers.DomIds.SlcAsset_Management.Sections.DataPortInfo.Id.Id)
+            { ModuleId = ModuleId };
+            internal static FieldDescriptorID Name = SharedMappers.DomIds.SlcAsset_Management.Sections.DataPortInfo.PortName;
+            internal static FieldDescriptorID PortNumber = SharedMappers.DomIds.SlcAsset_Management.Sections.DataPortInfo.PortNumber;
+            internal static FieldDescriptorID OutputType = SharedMappers.DomIds.SlcAsset_Management.Sections.DataPortInfo.OutputType;
+            internal static FieldDescriptorID PortExposure = SharedMappers.DomIds.SlcAsset_Management.Sections.DataPortInfo.PortExposure;
+            internal static FieldDescriptorID Label = SharedMappers.DomIds.SlcAsset_Management.Sections.DataPortInfo.Label;
+            internal static FieldDescriptorID Type = SharedMappers.DomIds.SlcAsset_Management.Sections.DataPortInfo.PortType;
+        }
 
-			internal static FieldDescriptorID SlotNumber = new FieldDescriptorID(new Guid("303c7d9e-7dbe-4e25-a462-e22f0d993dd8"));
-			internal static FieldDescriptorID HierarchyRole = new FieldDescriptorID(new Guid("c25c6d3a-ef44-4f31-be9f-d81fddbd4160")); // enum
-		}
+        internal static class PowerPorts
+        {
+            internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(SharedMappers.DomIds.SlcAsset_Management.Sections.PowerPortInfo.Id.Id)
+            { ModuleId = ModuleId };
+            internal static FieldDescriptorID Name = SharedMappers.DomIds.SlcAsset_Management.Sections.PowerPortInfo.PortName;
+            internal static FieldDescriptorID PortNumber = SharedMappers.DomIds.SlcAsset_Management.Sections.PowerPortInfo.PortNumber;
+            internal static FieldDescriptorID OutputType = SharedMappers.DomIds.SlcAsset_Management.Sections.PowerPortInfo.OutputType;
+            internal static FieldDescriptorID PortExposure = SharedMappers.DomIds.SlcAsset_Management.Sections.PowerPortInfo.PortExposure;
+            internal static FieldDescriptorID PortType = SharedMappers.DomIds.SlcAsset_Management.Sections.PowerPortInfo.PortType;
+            internal static FieldDescriptorID Label = SharedMappers.DomIds.SlcAsset_Management.Sections.PowerPortInfo.Label;
+        }
 
-		internal static class AssetPortsProperties
-		{
-			internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(new Guid("7918fb83-c6de-43c7-82d1-e561aefac746"))
-			{ ModuleId = ModuleId };
+        internal static class Holders
+        {
+            internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(SharedMappers.DomIds.SlcAsset_Management.Sections.Holders.Id.Id)
+            { ModuleId = ModuleId };
 
-			internal static FieldDescriptorID PortNumber = new FieldDescriptorID(new Guid("46ae4b8b-4cd1-4673-909f-c8d3cd2f9298"));
-			internal static FieldDescriptorID PortName = new FieldDescriptorID(new Guid("b697fc76-bb00-449c-b971-2f78a5b2623f"));
-			internal static FieldDescriptorID PortType = new FieldDescriptorID(new Guid("0f039e8b-aaa3-4836-a358-80a02b55f566")); // DOM ref?
-			internal static FieldDescriptorID Exposure = new FieldDescriptorID(new Guid("603653d8-7b1d-4d04-b30d-20ca35984bb1")); // enum
-			internal static FieldDescriptorID OutputType = new FieldDescriptorID(new Guid("638988c3-731a-4c54-8ed7-df5281eaa8b8")); // enum
-		}
-
-		internal static class AssetPowerPortsProperties
-		{
-			internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(new Guid("8eea31ae-45b9-4b08-b3e0-989eba8a08b3"))
-			{ ModuleId = ModuleId };
-
-			internal static FieldDescriptorID PortNumber = new FieldDescriptorID(new Guid("db6bcc43-2902-4640-b45e-353671e569f8"));
-			internal static FieldDescriptorID Exposure = new FieldDescriptorID(new Guid("324cb796-7539-4a5d-a194-41ea06115d8a")); // enum
-			internal static FieldDescriptorID OutputType = new FieldDescriptorID(new Guid("8beaf894-8115-45c6-a922-c1e7185f8628")); // enum
-		}
-	}
+            internal static FieldDescriptorID SlotNumber = SharedMappers.DomIds.SlcAsset_Management.Sections.Holders.SlotNumber;
+            internal static FieldDescriptorID HierarchyRole = SharedMappers.DomIds.SlcAsset_Management.Sections.Holders.HierarchyRole;
+        }
+    }
 }

@@ -544,12 +544,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 					obj.FwOs = _fwos.Value;
 				}
 
-				var _notes = _assetpropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.Notes);
-				if (_notes != null)
-				{
-					obj.Notes = _notes.Value;
-				}
-
 				var _serialnumber = _assetpropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.SerialNumber);
 				if (_serialnumber != null)
 				{
@@ -832,11 +826,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				_assetproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.FwOs, Convert.ToString(obj.FwOs));
 			}
 
-			if (obj.Notes != default)
-			{
-				_assetproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.Notes, Convert.ToString(obj.Notes));
-			}
-
 			if (obj.SerialNumber != default)
 			{
 				_assetproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.SerialNumber, Convert.ToString(obj.SerialNumber));
@@ -1060,8 +1049,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.AssetDescription), comparer, (string)value);
 				case "FwOs":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.FwOs), comparer, (string)value);
-				case "Notes":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.Notes), comparer, (string)value);
 				case "SerialNumber":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.SerialNumber), comparer, (string)value);
 				case "HardwareVersion":
@@ -1143,8 +1130,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.AssetDescription), sortOrder, naturalSort);
 				case "FwOs":
 					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.FwOs), sortOrder, naturalSort);
-				case "Notes":
-					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.Notes), sortOrder, naturalSort);
 				case "SerialNumber":
 					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.SerialNumber), sortOrder, naturalSort);
 				case "HardwareVersion":

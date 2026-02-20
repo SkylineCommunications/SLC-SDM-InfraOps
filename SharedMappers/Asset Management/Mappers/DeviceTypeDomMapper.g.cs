@@ -14,32 +14,33 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 	[SdmDomMapper]
 	internal static class DeviceTypeDomMapper
 	{
-		internal const string ModuleId = "(slc)asset_management";
-		internal static DomDefinitionId DomDefinitionId = new DomDefinitionId(new Guid("f369e97b-51b2-4cdc-90b4-7a4f86fad82c"))
+		internal const string ModuleId = SharedMappers.DomIds.SlcAsset_Management.ModuleId;
+        internal static DomDefinitionId DomDefinitionId = new DomDefinitionId(SharedMappers.DomIds.SlcAsset_Management.Definitions.DeviceType.Id)
 		{ ModuleId = ModuleId };
 		internal static class DeviceTypeProperties
 		{
-			internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(new Guid("516210a2-f739-4462-9df8-2a8146c30bf0"))
+			internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(SharedMappers.DomIds.SlcAsset_Management.Sections.DeviceTypeInformation.Id.Id)
 			{ ModuleId = ModuleId };
 
-			internal static FieldDescriptorID Name = new FieldDescriptorID(new Guid("df767b3b-8fc4-4d3e-b4fa-5e78d4a705fa"));
-			internal static FieldDescriptorID Description = new FieldDescriptorID(new Guid("f5f51839-3f2b-42e2-a67f-b9e34d87b129"));
+			internal static FieldDescriptorID Name = SharedMappers.DomIds.SlcAsset_Management.Sections.DeviceTypeInformation.Name;
+			internal static FieldDescriptorID Description = SharedMappers.DomIds.SlcAsset_Management.Sections.DeviceTypeInformation.Description;
 		}
 
 		internal static class TagsInfo
 		{
-			internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(new Guid("9d0bbc4b-e0be-45e9-8280-6fe36efe12e8"))
+			internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(SharedMappers.DomIds.SlcAsset_Management.Sections.TagsInfo.Id.Id)
 			{ ModuleId = ModuleId };
 
-			internal static FieldDescriptorID Tags = new FieldDescriptorID(new Guid("9109438c-72dc-4822-8891-4199d2dc0ed7"));
-		}
+            internal static FieldDescriptorID Tags = SharedMappers.DomIds.SlcAsset_Management.Sections.TagsInfo.Tags;
+
+        }
 
 		internal static class HierarchyInfo
 		{
-			internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(new Guid("ca44f3ce-2725-49f1-93f2-8eb53d1d858c"))
+			internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(SharedMappers.DomIds.SlcAsset_Management.Sections.HierarchyInfo.Id.Id)
 			{ ModuleId = ModuleId };
 
-			internal static FieldDescriptorID HierarchyRole = new FieldDescriptorID(new Guid("fa9a8c23-7f13-43bf-89d5-66962f9f56f8"));
+			internal static FieldDescriptorID HierarchyRole = SharedMappers.DomIds.SlcAsset_Management.Sections.HierarchyInfo.HierarchyRole;
 		}
 	}
 }

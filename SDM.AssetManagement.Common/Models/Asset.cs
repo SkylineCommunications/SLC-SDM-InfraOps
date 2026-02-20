@@ -18,8 +18,6 @@
 
 		public string FwOs { get; set; }
 
-		public string Notes { get; set; }
-
 		public string SerialNumber { get; set; }
 
 		public string HardwareVersion { get; set; }

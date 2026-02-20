@@ -173,7 +173,6 @@
 				AssetClass = null,
 				AssetDescription = $"Sample asset {orderNo}",
 				FwOs = $"FW1.{orderNo}",
-				Notes = "Test notes",
 				SerialNumber = serialNumber,
 				HardwareVersion = $"HW1.{orderNo}",
 				NetworkDetails = new AssetNetworkDetails
