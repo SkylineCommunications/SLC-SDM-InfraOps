@@ -61,10 +61,7 @@
 				powerPort.PowerPortInfo.Name.Should().Be(DemoData.PowerPorts[3].PowerPortInfo.Name);
 				powerPort.Identifier.Should().Be(DemoData.PowerPorts[3].Identifier);
 
-				powerPort.PowerPortInfo.Should().Be(DemoData.PowerPorts[3].PowerPortInfo);
-
-				powerPort.PrimaryPortRelation.IsPrimaryIpv4.Should().Be(DemoData.PowerPorts[3].PrimaryPortRelation.IsPrimaryIpv4);
-				powerPort.PrimaryPortRelation.IsPrimaryIpv6.Should().Be(DemoData.PowerPorts[3].PrimaryPortRelation.IsPrimaryIpv6);
+				powerPort.PowerPortInfo.Should().Be(DemoData.PowerPorts[3].PowerPortInfo);				
 			}
 		}
 
@@ -111,26 +108,6 @@
 		}
 
 		[TestMethod]
-		public void PowerPortDomStorageProvider_NestedReadFilter_PrimaryPortRelation_IsIpV6_Equal()
-		{
-			// 10 power ports
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulatePowerPorts();
-
-			var filter = PowerPortExposers.PrimaryPortRelation.IsPrimaryIpv6.Equal(true);
-
-			var powerPortsRetrieved = helper.PowerPorts.Read(filter);
-			var expected = DemoData.PowerPorts.Where(filter.getLambda());
-
-			using (new AssertionScope())
-			{
-				powerPortsRetrieved.Should().NotBeNull();
-				powerPortsRetrieved.Should().BeEquivalentTo(expected);
-				powerPortsRetrieved.Should().AllSatisfy(port => port.PrimaryPortRelation.IsPrimaryIpv6.Should().BeTrue());
-			}
-		}
-
-		[TestMethod]
 		public void PowerPortDomStorageProvider_ReadFilter_PortNumber_Equal()
 		{
 			// 10 power ports
@@ -170,25 +147,6 @@
 				powerPortsRetrieved.Should().NotBeNull();
 				powerPortsRetrieved.Should().BeEquivalentTo(expected);
 				powerPortsRetrieved.Should().AllSatisfy(port => port.PowerPortInfo.Label.Should().Contain("Power"));
-			}
-		}
-
-		[TestMethod]
-		public void PowerPortDomStorageProvider_NestedReadFilter_IsIpV4_Equal_True()
-		{
-			// 10 power ports
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulatePowerPorts();
-
-			var filter = PowerPortExposers.PrimaryPortRelation.IsPrimaryIpv4.Equal(true);
-
-			var powerPortsRetrieved = helper.PowerPorts.Read(filter);
-			var expected = DemoData.PowerPorts.Where(pp => pp.PrimaryPortRelation.IsPrimaryIpv4);
-
-			using (new AssertionScope())
-			{
-				powerPortsRetrieved.Should().NotBeNull();
-				powerPortsRetrieved.Should().BeEmpty();
 			}
 		}
 	}

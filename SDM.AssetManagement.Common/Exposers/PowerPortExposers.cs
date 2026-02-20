@@ -30,11 +30,5 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort, System.Guid> PortType = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort, System.Guid>((obj) => obj.PowerPortInfo.PortType, "PowerPortInfo.PortType");
 			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort, string> Label = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort, string>((obj) => obj.PowerPortInfo.Label, "PowerPortInfo.Label");
 		}
-
-		public static partial class PrimaryPortRelation
-		{
-			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort, bool> IsPrimaryIpv6 = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort, bool>((obj) => obj.PrimaryPortRelation.IsPrimaryIpv6, "PrimaryPortRelation.IsPrimaryIpv6");
-			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort, bool> IsPrimaryIpv4 = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort, bool>((obj) => obj.PrimaryPortRelation.IsPrimaryIpv4, "PrimaryPortRelation.IsPrimaryIpv4");
-		}
 	}
 }

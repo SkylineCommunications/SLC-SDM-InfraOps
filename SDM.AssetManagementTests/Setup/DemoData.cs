@@ -97,11 +97,6 @@
 					Label = $"Power Port Label {i}",
 				},
 				Asset = new SdmObjectReference<Asset>(Assets[i].Identifier),
-				PrimaryPortRelation = new PrimaryPortRelation
-				{
-					IsPrimaryIpv4 = false,
-					IsPrimaryIpv6 = true,
-				},
 			};
 		}
 

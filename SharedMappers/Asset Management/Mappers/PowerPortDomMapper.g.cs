@@ -35,13 +35,5 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			{ ModuleId = ModuleId };
 			internal static FieldDescriptorID Asset = SharedMappers.DomIds.SlcAsset_Management.Sections.Asset.AssetID;
 		}
-
-		internal static class PrimaryPortRelation
-		{
-			internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(SharedMappers.DomIds.SlcAsset_Management.Sections.PrimaryPortRelation.Id.Id)
-			{ ModuleId = ModuleId };
-			internal static FieldDescriptorID IsPrimaryIpv4 = SharedMappers.DomIds.SlcAsset_Management.Sections.PrimaryPortRelation.Isprimaryipv4;
-			internal static FieldDescriptorID IsPrimaryIpv6 = SharedMappers.DomIds.SlcAsset_Management.Sections.PrimaryPortRelation.Isprimaryipv6;
-		}
 	}
 }

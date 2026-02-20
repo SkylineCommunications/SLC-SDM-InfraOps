@@ -10,8 +10,6 @@
 
 		// within AssetRelation section definition
 		public SdmObjectReference<Asset> Asset { get; set; }
-
-		public PrimaryPortRelation PrimaryPortRelation { get; set; } = new PrimaryPortRelation();
 	}
 
 	public sealed class PowerPortInfo : SdmObject<PowerPortInfo>, IEquatable<PowerPortInfo>

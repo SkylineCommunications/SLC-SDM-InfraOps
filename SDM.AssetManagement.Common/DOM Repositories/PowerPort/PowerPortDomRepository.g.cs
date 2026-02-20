@@ -556,23 +556,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				}
 			}
 
-			var _primaryportrelationSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortDomMapper.PrimaryPortRelation.SectionDefinitionId));
-			if (_primaryportrelationSection != default)
-			{
-				obj.PrimaryPortRelation = new Skyline.DataMiner.SDM.AssetManagement.Models.PrimaryPortRelation();
-				var _primaryportrelationisprimaryipv6 = _primaryportrelationSection.GetValue<bool>(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortDomMapper.PrimaryPortRelation.IsPrimaryIpv6);
-				if (_primaryportrelationisprimaryipv6 != null)
-				{
-					obj.PrimaryPortRelation.IsPrimaryIpv6 = _primaryportrelationisprimaryipv6.Value;
-				}
-
-				var _primaryportrelationisprimaryipv4 = _primaryportrelationSection.GetValue<bool>(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortDomMapper.PrimaryPortRelation.IsPrimaryIpv4);
-				if (_primaryportrelationisprimaryipv4 != null)
-				{
-					obj.PrimaryPortRelation.IsPrimaryIpv4 = _primaryportrelationisprimaryipv4.Value;
-				}
-			}
-
 			var _assetrelationSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortDomMapper.AssetRelationProperties.SectionDefinitionId));
 			if (_assetrelationSection != default)
 			{
@@ -638,22 +621,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				instance.Sections.Add(_powerportinfo);
 			}
 
-			if (obj.PrimaryPortRelation != null)
-			{
-				var _primaryportrelation = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortDomMapper.PrimaryPortRelation.SectionDefinitionId);
-				if (obj.PrimaryPortRelation.IsPrimaryIpv6 != default)
-				{
-					_primaryportrelation.AddOrUpdateValue<bool>(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortDomMapper.PrimaryPortRelation.IsPrimaryIpv6, (bool)obj.PrimaryPortRelation.IsPrimaryIpv6);
-				}
-
-				if (obj.PrimaryPortRelation.IsPrimaryIpv4 != default)
-				{
-					_primaryportrelation.AddOrUpdateValue<bool>(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortDomMapper.PrimaryPortRelation.IsPrimaryIpv4, (bool)obj.PrimaryPortRelation.IsPrimaryIpv4);
-				}
-
-				instance.Sections.Add(_primaryportrelation);
-			}
-
 			if (obj.Asset != null)
 			{
 				var _assetrelation = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortDomMapper.AssetRelationProperties.SectionDefinitionId);
@@ -690,10 +657,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.PortType), comparer, Convert.ToString((System.Guid)value));
 				case "PowerPortInfo.Label":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.Label), comparer, (string)value);
-				case "PrimaryPortRelation.IsPrimaryIpv6":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortDomMapper.PrimaryPortRelation.IsPrimaryIpv6), comparer, (bool)value);
-				case "PrimaryPortRelation.IsPrimaryIpv4":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortDomMapper.PrimaryPortRelation.IsPrimaryIpv4), comparer, (bool)value);
 				default:
 					throw new NotImplementedException();
 			}
@@ -721,10 +684,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.PortType), sortOrder, naturalSort);
 				case "PowerPortInfo.Label":
 					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.Label), sortOrder, naturalSort);
-				case "PrimaryPortRelation.IsPrimaryIpv6":
-					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortDomMapper.PrimaryPortRelation.IsPrimaryIpv6), sortOrder, naturalSort);
-				case "PrimaryPortRelation.IsPrimaryIpv4":
-					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortDomMapper.PrimaryPortRelation.IsPrimaryIpv4), sortOrder, naturalSort);
 				default:
 					throw new NotImplementedException();
 			}

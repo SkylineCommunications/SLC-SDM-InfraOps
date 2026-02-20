@@ -36,11 +36,6 @@
 					Label = "Power Port 1",
 				},
 				Asset = new SdmObjectReference<Asset>(Guid.NewGuid().ToString()),
-				PrimaryPortRelation = new PrimaryPortRelation
-				{
-					IsPrimaryIpv4 = true,
-					IsPrimaryIpv6 = false,
-				},
 			};
 		}
 
@@ -82,11 +77,6 @@
 					Label = "Power Port 2",
 				},
 				Asset = referencePowerPort.Asset,
-				PrimaryPortRelation = new PrimaryPortRelation
-				{
-					IsPrimaryIpv4 = true,
-					IsPrimaryIpv6 = false,
-				},
 			};
 
 			helper.PowerPorts.CreateOrUpdate([updatedPowerPort]);
@@ -198,8 +188,6 @@
 				createdPowerPort.Asset.Should().NotBeNull();
 				createdPowerPort.Asset.Should().BeAssignableTo<SdmObjectReference<Asset>>();
 
-				createdPowerPort.PrimaryPortRelation.Should().NotBeNull();
-				createdPowerPort.PrimaryPortRelation.Equals(referencePowerPort.PrimaryPortRelation).Should().BeTrue();
 			}
 		}
 	}
