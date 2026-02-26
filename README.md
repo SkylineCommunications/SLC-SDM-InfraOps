@@ -40,8 +40,6 @@ This package enables Infrastructure‑as‑Data modeling and offers predictable,
 - 🧱 Eight NuGets separating common logic from host‑specific entry points  
 - 🔧 Customizable repositories via Extensions and Middleware partial classes  
 
----
-
 ## 📦 NuGet Packages
 
 ### Asset Management
@@ -56,15 +54,12 @@ This package enables Infrastructure‑as‑Data modeling and offers predictable,
 - Skyline.DataMiner.SDM.FacilityManagement.Protocol  
 - Skyline.DataMiner.SDM.FacilityManagement.GQI  
 
----
 
 ## 🧬 Model Schema
 
 ### Asset Models
 
 Asset, DeviceType, DataPort, PowerPort schemas...
-
----
 
 ## 🔧 Core Usage
 
@@ -74,26 +69,26 @@ var asset = new Asset { Name = "Core Switch A1" };
 var created = api.Assets.Create(asset);
 
 ### 🔄 CreateOrUpdate
+```csharp
 api.Assets.CreateOrUpdate(asset);
 api.Assets.CreateOrUpdate(new[] { assetA, assetB });
+```
 
 ### 📄 ReadPaged
+```csharp
 var results = api.Assets.ReadPaged(filter, 100);
+```
 
 ### ❌ Delete
+```csharp
 api.Assets.Delete(assetToDelete);
+```
 
----
-
-## 🧪 Testing
+### 🧪 Testing
 Large suite of CRUD, filter, paging, and bulk tests.
 
----
-
-## 📝 Best Practices
+### 📝 Best Practices
 Use bulk operations, typed exposers, paged reads, GUIDs, helper caching, etc.
-
----
 
 ## 🤝 Contributing
 We welcome contributions from the community!
@@ -102,7 +97,6 @@ We welcome contributions from the community!
 3. Follow Coding Guidelines
 4. Submit a Pull Request
 
----
 
 ## About DataMiner
 https://aka.dataminer.services/about-dataminer
