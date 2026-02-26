@@ -78,9 +78,6 @@ var results = api.Assets.ReadPaged(filter, 100);
 api.Assets.Delete(assetToDelete);
 ```
 
-### 🧪 Testing
-Large suite of CRUD, filter, paging, and bulk tests.
-
 ### 📝 Best Practices
 Use bulk operations, typed exposers, paged reads, GUIDs, helper caching, etc.
 
