@@ -14,13 +14,7 @@ It covers two primary functional domains:
 ### Strongly‑Typed Infrastructure Modeling
 - 🔧 Rich models for Assets, Device Types, Data Ports, Power Ports, Locations, and more  
 - 🧩 Clear domain boundaries for Asset & Facility management  
-- 🏷️ Reference‑safe relationships between SDM entities  
-
-### DOM Repository Layer
-- 📦 Auto‑generated repository classes (CRUD, pagination, filtering)  
-- 🔄 Smart CreateOrUpdate upsert logic  
-- 🔍 Strongly‑typed Exposers enabling type‑safe filtering  
-- 🚀 Bulk operations optimized for large‑scale infra datasets  
+- 🏷️ Reference‑safe relationships between SDM entities   
 
 ### Multi‑Context Integration
 - 🤖 Automation helpers  
