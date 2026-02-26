@@ -56,9 +56,11 @@ Asset, DeviceType, DataPort, PowerPort schemas...
 ## 🔧 Core Usage
 
 ### ▶️ Create
+```csharp
 var api = engine.GetAssetManagementApiHelper();
 var asset = new Asset { Name = "Core Switch A1" };
 var created = api.Assets.Create(asset);
+```
 
 ### 🔄 CreateOrUpdate
 ```csharp
