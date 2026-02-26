@@ -1,27 +1,111 @@
-# Skyline.DataMiner.SDM.InfraOps
+# SDM InfraOps
 
-## About
+📋 **About**  
+**Skyline.DataMiner.SDM.InfraOps** is a Standard Data Model (SDM) package that provides a strongly‑typed, high‑performance API for managing **Infrastructure Operations** within the DataMiner ecosystem.  
+It covers two primary functional domains:
 
-Standard API for InfraOps
+- **Asset Management** — Assets, Ports, Classes, Types, Holders, Locations  
+- **Facility Management** — Facility metadata, geospatial attributes, hierarchical facility structures  
 
-## Projects
+This package enables Infrastructure‑as‑Data modeling and offers predictable, safe, and reusable workflows for DataMiner solutions leveraging the SDM / DOM foundation.
 
-* For more information about Skyline.DataMiner.SDM.InfraOps, see [SDM.InfraOps/README.md](SDM.InfraOps/README.md).
+---
 
-### About DataMiner
+## 🚀 Key Features
 
-DataMiner is a transformational platform that provides vendor-independent control and monitoring of devices and services. Out of the box and by design, it addresses key challenges such as security, complexity, multi-cloud, and much more. It has a pronounced open architecture and powerful capabilities enabling users to evolve easily and continuously.
+### Strongly‑Typed Infrastructure Modeling
+- 🔧 Rich models for Assets, Device Types, Data Ports, Power Ports, Locations, and more  
+- 🧩 Clear domain boundaries for Asset & Facility management  
+- 🏷️ Reference‑safe relationships between SDM entities  
 
-The foundation of DataMiner is its powerful and versatile data acquisition and control layer. With DataMiner, there are no restrictions to what data users can access. Data sources may reside on premises, in the cloud, or in a hybrid setup.
+### DOM Repository Layer
+- 📦 Auto‑generated repository classes (CRUD, pagination, filtering)  
+- 🔄 Smart CreateOrUpdate upsert logic  
+- 🔍 Strongly‑typed Exposers enabling type‑safe filtering  
+- 🚀 Bulk operations optimized for large‑scale infra datasets  
 
-A unique catalog of 7000+ connectors already exists. In addition, you can leverage DataMiner Development Packages to build your own connectors (also known as "protocols" or "drivers").
+### Multi‑Context Integration
+- 🤖 Automation helpers  
+  - engine.GetAssetManagementApiHelper()  
+  - engine.GetFacilityManagementApiHelper()
+- 🔌 Protocol helpers  
+  - protocol.GetAssetManagementApiHelper()  
+  - protocol.GetFacilityManagementApiHelper()
+- 🧠 GQI helpers  
+  - args.DMS.GetAssetManagementApiHelper()  
+  - args.DMS.GetFacilityManagementApiHelper()
 
-> **Note**
-> See also: [About DataMiner](https://aka.dataminer.services/about-dataminer).
+### Developer Experience
+- 🧪 Extensive unit test suite (CRUD, Filters, Paging, Bulk)  
+- 🧱 Eight NuGets separating common logic from host‑specific entry points  
+- 🔧 Customizable repositories via Extensions and Middleware partial classes  
 
-### About Skyline Communications
+---
 
-At Skyline Communications, we deal with world-class solutions that are deployed by leading companies around the globe. Check out [our proven track record](https://aka.dataminer.services/about-skyline) and see how we make our customers' lives easier by empowering them to take their operations to the next level.
+## 📦 NuGet Packages
 
-<!-- Uncomment below and add more info to provide more information about how to use this package. -->
-<!-- ## Getting Started -->
+### Asset Management
+- Skyline.DataMiner.SDM.AssetManagement.Common  
+- Skyline.DataMiner.SDM.AssetManagement.Automation  
+- Skyline.DataMiner.SDM.AssetManagement.Protocol  
+- Skyline.DataMiner.SDM.AssetManagement.GQI  
+
+### Facility Management
+- Skyline.DataMiner.SDM.FacilityManagement.Common  
+- Skyline.DataMiner.SDM.FacilityManagement.Automation  
+- Skyline.DataMiner.SDM.FacilityManagement.Protocol  
+- Skyline.DataMiner.SDM.FacilityManagement.GQI  
+
+---
+
+## 🧬 Model Schema
+
+### Asset Models
+
+Asset, DeviceType, DataPort, PowerPort schemas...
+
+---
+
+## 🔧 Core Usage
+
+### ▶️ Create
+var api = engine.GetAssetManagementApiHelper();
+var asset = new Asset { Name = "Core Switch A1" };
+var created = api.Assets.Create(asset);
+
+### 🔄 CreateOrUpdate
+api.Assets.CreateOrUpdate(asset);
+api.Assets.CreateOrUpdate(new[] { assetA, assetB });
+
+### 📄 ReadPaged
+var results = api.Assets.ReadPaged(filter, 100);
+
+### ❌ Delete
+api.Assets.Delete(assetToDelete);
+
+---
+
+## 🧪 Testing
+Large suite of CRUD, filter, paging, and bulk tests.
+
+---
+
+## 📝 Best Practices
+Use bulk operations, typed exposers, paged reads, GUIDs, helper caching, etc.
+
+---
+
+## 🤝 Contributing
+We welcome contributions from the community!
+1. Open an Issue
+2. Fork the Repository
+3. Follow Coding Guidelines
+4. Submit a Pull Request
+
+---
+
+## About DataMiner
+https://aka.dataminer.services/about-dataminer
+
+## About Skyline Communications
+https://aka.dataminer.services/about-skyline
