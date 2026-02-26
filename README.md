@@ -1,13 +1,11 @@
 # SDM InfraOps
 
 📋 **About**  
-**Skyline.DataMiner.SDM.InfraOps** is a Standard Data Model (SDM) package that provides a strongly‑typed, high‑performance API for managing **Infrastructure Operations** within the DataMiner ecosystem.  
+**Skyline.DataMiner.SDM.InfraOps** is a Standard Data Model (SDM) package that provides a strongly‑typed, high‑performance API for managing your infrastructure within the DataMiner ecosystem.  
 It covers two primary functional domains:
 
 - **Asset Management** — Assets, Ports, Classes, Types, Holders, Locations  
 - **Facility Management** — Facility metadata, geospatial attributes, hierarchical facility structures  
-
-This package enables Infrastructure‑as‑Data modeling and offers predictable, safe, and reusable workflows for DataMiner solutions leveraging the SDM / DOM foundation.
 
 ---
 
