@@ -58,7 +58,7 @@ Asset, DeviceType, DataPort, PowerPort schemas...
 ### ▶️ Create
 ```csharp
 var api = engine.GetAssetManagementApiHelper();
-var asset = new Asset { Name = "Core Switch A1" };
+var asset = new Asset { AssetName = "Core Switch A1" };
 var created = api.Assets.Create(asset);
 ```
 
