@@ -14,7 +14,7 @@
     <PackageReference Include="MSTest.TestAdapter" />
     <PackageReference Include="MSTest.TestFramework" />
     <PackageReference Include="Newtonsoft.Json" />
-    <PackageReference Include="Skyline.DataMiner.SDM.Abstractions" />
+    <PackageReference Include="Skyline.DataMiner.Dev.Utils.SDM.Abstractions" />
     <PackageReference Include="Skyline.DataMiner.Utils.DOM" />
   </ItemGroup>
 

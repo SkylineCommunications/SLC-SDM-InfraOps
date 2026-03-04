@@ -11,7 +11,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 	using Skyline.DataMiner.Net.Sections;
 	using Skyline.DataMiner.SDM;
 
-	[SdmDomMapper]
+	//[SdmDomMapper]
 	internal static class DataPortDomMapper
 	{
 		internal const string ModuleId = SharedMappers.DomIds.SlcAsset_Management.ModuleId;
