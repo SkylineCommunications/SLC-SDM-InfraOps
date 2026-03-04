@@ -3,8 +3,8 @@
 	using System.Collections.Generic;
 	using Skyline.DataMiner.SDM;
 
-	[GenerateExposers]
-	[SdmDomStorage("(slc)asset_management")]
+	//[GenerateExposers]
+	//[SdmDomStorage("(slc)asset_management")]
 	public class DeviceType : SdmObject<DeviceType>
 	{
 		public string Name { get; set; }
