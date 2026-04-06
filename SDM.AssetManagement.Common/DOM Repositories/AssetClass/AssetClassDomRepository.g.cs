@@ -518,7 +518,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				var _devicename = _assetclasspropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.DeviceName);
 				if (_devicename != null)
 				{
-					obj.DeviceName = _devicename.Value;
+					obj.DeviceName.Value = _devicename.Value;
 				}
 
 				var _deviceType = _assetclasspropertiesSection.GetValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.DeviceType);
@@ -780,9 +780,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				}
 			};
 			var _assetclassproperties = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.SectionDefinitionId);
-			if (obj.DeviceName != default)
+			if (obj.DeviceName.Value != default)
 			{
-				_assetclassproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.DeviceName, Convert.ToString(obj.DeviceName));
+				_assetclassproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.DeviceName, Convert.ToString(obj.DeviceName.Value));
 			}
 
 			if (obj.DeviceTypeId != default)

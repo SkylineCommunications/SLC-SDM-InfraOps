@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>c89d184b-e9af-41e0-9a33-4d218a04bcf7</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>SharedValidation</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\SharedValidation\DomInstanceField\ChangeTrackingArrayField.cs" />
+    <Compile Include="..\SharedValidation\DomInstanceField\ChangeTrackingField.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DomInstanceField\DomInstanceFieldHandler.cs" />
+    <Compile Include="..\SharedValidation\DomInstanceField\ChangeTrackingStringField.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DomInstanceField\IChangeTrackingField.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DomInstanceField\IDomInstanceFieldApplyChanges.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Validation\ValidationResult.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Validation\ValidatorContext.cs" />
+  </ItemGroup>
+</Project>

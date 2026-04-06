@@ -2,34 +2,37 @@
 {
 	using System;
 	using System.Collections.Generic;
+
 	using Newtonsoft.Json;
+
 	using Skyline.DataMiner.SDM;
 	using Skyline.DataMiner.SDM.AssetManagement;
+    using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
-	//[GenerateExposers]
-	//[SdmDomStorage("(slc)asset_management")]
-	public class AssetClass : SdmObject<AssetClass>
+    //[GenerateExposers]
+    //[SdmDomStorage("(slc)asset_management")]
+    public class AssetClass : SdmObject<AssetClass>
 	{
 		[JsonIgnore]
 		public Guid Id { get; set; }
 
-		public string DeviceName { get; set; }
+		public IChangeTrackingField<string> DeviceName { get; set; }
 
-		public SdmObjectReference<DeviceType> DeviceTypeId { get; set; }
+		public IChangeTrackingField<SdmObjectReference<DeviceType>> DeviceTypeId { get; set; }
 
 		public string DeviceDescription { get; set; }
 
 		public Guid Manufacturer { get; set; }
 
-		public double Depth { get; set; }
+		public IChangeTrackingField<double> Depth { get; set; }
 
-		public double Height { get; set; }
+		public IChangeTrackingField<double> Height { get; set; }
 
-		public double Width { get; set; }
+		public IChangeTrackingField<double> Width { get; set; }
 
-		public double HeightU { get; set; }
+		public IChangeTrackingField<double> HeightU { get; set; }
 
-		public double Weight { get; set; }
+		public IChangeTrackingField<double> Weight { get; set; }
 
 		public string FrontImage { get; set; }
 
@@ -39,7 +42,7 @@
 
 		public double MaximumPowerConsumption { get; set; }
 
-		public SlcAssetManagement.Enums.PowerSupply PowerSupply { get; set; }
+		public IChangeTrackingField<SlcAssetManagement.Enums.PowerSupply> PowerSupply { get; set; }
 
 		public AssetClassLifecycle Lifecycle { get; set; } = new AssetClassLifecycle();
 

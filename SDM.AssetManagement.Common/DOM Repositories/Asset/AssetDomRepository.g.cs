@@ -27,6 +27,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 	{
 		private readonly IConnection connection;
 		private readonly DomHelper helper;
+
 		public AssetDomRepository(IConnection connection)
 		{
 			this.connection = connection;
@@ -63,7 +64,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			var SuccessfulItems = new List<Asset>();
 			var failures = new Dictionary<string, Exception>();
 			var objects = createObjects.Where(obj => !existing.Contains(obj.Identifier)).ToDictionary(obj => obj.Identifier);
-			foreach (var batch in createObjects.Select(ToInstance).Batch(helper.DomInstances.MaxAmountBulkOperation))
+
+            foreach (var batch in createObjects.Select(ToInstance).Batch(helper.DomInstances.MaxAmountBulkOperation))
 			{
 				helper.DomInstances.TryCreateOrUpdate(batch.ToList(), out var result);
 				foreach (var failure in result.UnsuccessfulIds)

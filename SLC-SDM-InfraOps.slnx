@@ -12,4 +12,5 @@
   <Project Path="SDM.FacilityManagement.GQI/SDM.FacilityManagement.GQI.csproj" Id="fa02bb09-b0ca-4888-a9be-afb648c59199" />
   <Project Path="SDM.FacilityManagement.Protocol/SDM.FacilityManagement.Protocol.csproj" Id="9450733d-d8ec-430e-8403-6dc440537c73" />
   <Project Path="SharedMappers/SharedMappers.shproj" Id="4a22402e-e149-417d-9777-f79bb1002566" />
+  <Project Path="SharedValidation/SharedCommonLibrary.shproj" Id="c89d184b-e9af-41e0-9a33-4d218a04bcf7" />
 </Solution>

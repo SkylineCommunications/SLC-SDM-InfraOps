@@ -41,5 +41,11 @@
 		<PackageReference Include="Skyline.DataMiner.Utils.SecureCoding" />
   </ItemGroup>
   
+  <ItemGroup>
+    <Folder Include="Validation\" />
+  </ItemGroup>
+  
   <Import Project="..\SharedMappers\SharedMappers.projitems" Label="Shared" />
+  
+  <Import Project="..\SharedValidation\SharedValidation.projitems" Label="Shared" />
 </Project>
