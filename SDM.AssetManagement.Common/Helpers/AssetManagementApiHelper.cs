@@ -1,31 +1,52 @@
-﻿namespace Skyline.DataMiner.SDM.AssetManagement
+﻿using Skyline.DataMiner.Net;
+using Skyline.DataMiner.SDM;
+using Skyline.DataMiner.SDM.AssetManagement.Common.Middleware;
+using Skyline.DataMiner.SDM.AssetManagement.Helpers;
+using Skyline.DataMiner.SDM.AssetManagement.Models;
+using Skyline.DataMiner.SDM.AssetManagement.Validation;
+
+public class AssetManagementApiHelper : IAssetManagementApiHelper
 {
-	using Skyline.DataMiner.Net;
-	using Skyline.DataMiner.SDM.AssetManagement.Helpers;
-	using Skyline.DataMiner.SDM.AssetManagement.Models;
+    private readonly AssetDomRepository _assetRepository;
+    private readonly AssetClassDomRepository _assetClassRepository;
+    private readonly DeviceTypeDomRepository _deviceTypeRepository;
+    private readonly AssetClassValidator _assetClassValidator;
+    private readonly DeviceTypeValidator _deviceTypeValidator;
 
-	public class AssetManagementApiHelper : IAssetManagementApiHelper
-	{
-		public AssetManagementApiHelper(IConnection connection)
-		{
-			Connection = connection;
-			Assets = new AssetDomRepository(connection);
-			AssetClasses = new AssetClassDomRepository(connection);
-			PowerPorts = new PowerPortDomRepository(connection);
-			DataPorts = new DataPortDomRepository(connection);
-			DeviceTypes = new DeviceTypeDomRepository(connection);
-		}
+    public AssetManagementApiHelper(IConnection connection)
+    {
+        Connection = connection;
 
-		public IConnection Connection { get; }
+        // Initialize repositories
+        _assetRepository = new AssetDomRepository(connection);
+        _assetClassRepository = new AssetClassDomRepository(connection);
+        _deviceTypeRepository = new DeviceTypeDomRepository(connection);
+        PowerPorts = new PowerPortDomRepository(connection);
+        DataPorts = new DataPortDomRepository(connection);
 
-		public IBulkRepository<Asset> Assets { get; }
+        // Initialize validators
+        _assetClassValidator = new AssetClassValidator(
+            _assetClassRepository,
+            _deviceTypeRepository);
 
-		public IBulkRepository<AssetClass> AssetClasses { get; }
+        _deviceTypeValidator = new DeviceTypeValidator(
+            _deviceTypeRepository,
+            _assetRepository);
 
-		public IBulkRepository<PowerPort> PowerPorts { get; }
+        // Wrap with middleware
+        Assets = _assetRepository;  // Add middleware when ready
+        AssetClasses = _assetClassRepository.WithMiddleware(
+            new AssetClassValidationMiddleware(_assetClassValidator));
+        DeviceTypes = _deviceTypeRepository;  // Add middleware when ready
+    }
 
-		public IBulkRepository<DataPort> DataPorts { get; }
+    public IConnection Connection { get; }
+    public IBulkRepository<Asset> Assets { get; }
+    public IBulkRepository<AssetClass> AssetClasses { get; }
+    public IBulkRepository<PowerPort> PowerPorts { get; }
+    public IBulkRepository<DataPort> DataPorts { get; }
+    public IBulkRepository<DeviceType> DeviceTypes { get; }
 
-		public IBulkRepository<DeviceType> DeviceTypes { get; }
-	}
+    public AssetClassValidator AssetClassValidator => _assetClassValidator;
+    public DeviceTypeValidator DeviceTypeValidator => _deviceTypeValidator;
 }

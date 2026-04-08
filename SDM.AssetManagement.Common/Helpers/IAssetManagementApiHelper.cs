@@ -2,6 +2,7 @@
 {
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.SDM.AssetManagement.Models;
+    using Skyline.DataMiner.SDM.AssetManagement.Validation;
 
 	public interface IAssetManagementApiHelper
 	{
@@ -16,5 +17,9 @@
 		IBulkRepository<DataPort> DataPorts { get; }
 
 		IBulkRepository<DeviceType> DeviceTypes { get; }
-	}
+
+        AssetClassValidator AssetClassValidator { get; }
+
+        DeviceTypeValidator DeviceTypeValidator { get; }
+    }
 }

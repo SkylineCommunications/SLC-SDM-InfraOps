@@ -2,6 +2,8 @@
 {
     using System.Collections.Generic;
 
+    using SharedMappers.DomIds;
+
     using Skyline.DataMiner.SDM;
 
     // [GenerateExposers]
@@ -56,5 +58,7 @@
 		/// Gets or sets the list of DataMiner element links.
 		/// </summary>
 		public List<ElementLink> ElementLinks { get; set; } = new List<ElementLink>();
-	}
+
+        public SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum Status { get; set; }
+    }
 }

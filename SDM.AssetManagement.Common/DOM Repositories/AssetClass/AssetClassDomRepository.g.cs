@@ -10,6 +10,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.Linq;
+
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Apps.Sections.Sections;
@@ -20,21 +21,26 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 	using Skyline.DataMiner.Net.Sections;
 	using Skyline.DataMiner.Net.SubscriptionFilters;
 	using Skyline.DataMiner.SDM;
-	using SLDataGateway.API.Querying;
+    using Skyline.DataMiner.SDM.AssetManagement.Repositories;
+    using Skyline.DataMiner.SDM.AssetManagement.Validation;
+
+    using SLDataGateway.API.Querying;
 	using SLDataGateway.API.Types.Querying;
+
 	using static Skyline.DataMiner.SDM.AssetManagement.SlcAssetManagement.Enums;
 
-	internal partial class AssetClassDomRepository : IBulkRepository<AssetClass>
-	{
+	internal partial class AssetClassDomRepository : IBulkRepository<AssetClass>, IAssetClassQueryRepository
+    {
 		private readonly IConnection connection;
 		private readonly DomHelper helper;
-		public AssetClassDomRepository(IConnection connection)
+
+        public AssetClassDomRepository(IConnection connection)
 		{
 			this.connection = connection;
 			this.helper = new DomHelper(connection.HandleMessages, Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.ModuleId);
 		}
 
-		public AssetClass Create(AssetClass createObject)
+        public AssetClass Create(AssetClass createObject)
 		{
 			if (createObject is null)
 			{
@@ -518,7 +524,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				var _devicename = _assetclasspropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.DeviceName);
 				if (_devicename != null)
 				{
-					obj.DeviceName.Value = _devicename.Value;
+					obj.DeviceName = _devicename.Value;
 				}
 
 				var _deviceType = _assetclasspropertiesSection.GetValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.DeviceType);
@@ -740,6 +746,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			}
 
 			obj.Holders = _holdersList;
+
+            obj.ResetChangeTracking();
+
 			return obj;
 		}
 
@@ -780,9 +789,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				}
 			};
 			var _assetclassproperties = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.SectionDefinitionId);
-			if (obj.DeviceName.Value != default)
+			if (obj.DeviceName != default)
 			{
-				_assetclassproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.DeviceName, Convert.ToString(obj.DeviceName.Value));
+				_assetclassproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.DeviceName, Convert.ToString(obj.DeviceName));
 			}
 
 			if (obj.DeviceTypeId != default)

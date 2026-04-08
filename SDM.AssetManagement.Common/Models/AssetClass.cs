@@ -1,55 +1,257 @@
 ﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
-	using System;
-	using System.Collections.Generic;
+    using System;
+    using System.Collections.Generic;
+    using System.Runtime.Serialization;
 
-	using Newtonsoft.Json;
+    using Newtonsoft.Json;
 
-	using Skyline.DataMiner.SDM;
-	using Skyline.DataMiner.SDM.AssetManagement;
+    using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.AssetManagement;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
+
+    using Skyline.DataMiner.SDM.Extensions;
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)asset_management")]
     public class AssetClass : SdmObject<AssetClass>
-	{
-		[JsonIgnore]
-		public Guid Id { get; set; }
+    {
+        [JsonIgnore]
+        private ChangeTrackingFieldHandler _fieldHandler;
 
-		public IChangeTrackingField<string> DeviceName { get; set; }
+        public AssetClass()
+        {
+            _fieldHandler = new ChangeTrackingFieldHandler();
+        }
 
-		public IChangeTrackingField<SdmObjectReference<DeviceType>> DeviceTypeId { get; set; }
+        // Ensure _fieldHandler is always initialized (handles JSON deserialization without constructor)
+        [JsonIgnore]
+        private ChangeTrackingFieldHandler FieldHandler
+        {
+            get
+            {
+                if (_fieldHandler == null)
+                {
+                    _fieldHandler = new ChangeTrackingFieldHandler();
+                }
+                return _fieldHandler;
+            }
+        }
 
-		public string DeviceDescription { get; set; }
+        // Called after JSON deserialization to reset change tracking
+        [OnDeserialized]
+        internal void OnDeserializedMethod(StreamingContext context)
+        {
+            // Apply all current values as "original" values to reset change tracking
+            ResetChangeTracking();
+        }
 
-		public Guid Manufacturer { get; set; }
+        [JsonIgnore]
+        public Guid Id { get; set; }
 
-		public IChangeTrackingField<double> Depth { get; set; }
+        // PUBLIC API: Simple types (consumers see these)
+        public string DeviceName
+        {
+            get => DeviceNameField.Value;
+            set => DeviceNameField.Value = value;
+        }
 
-		public IChangeTrackingField<double> Height { get; set; }
+        public SdmObjectReference<DeviceType> DeviceTypeId
+        {
+            get => DeviceTypeIdField.Value;
+            set => DeviceTypeIdField.Value = value;
+        }
 
-		public IChangeTrackingField<double> Width { get; set; }
+        public string DeviceDescription
+        {
+            get => DeviceDescriptionField.Value;
+            set => DeviceDescriptionField.Value = value;
+        }
 
-		public IChangeTrackingField<double> HeightU { get; set; }
+        public Guid Manufacturer
+        {
+            get => ManufacturerField.Value;
+            set => ManufacturerField.Value = value;
+        }
 
-		public IChangeTrackingField<double> Weight { get; set; }
+        public double Depth
+        {
+            get => DepthField.Value;
+            set => DepthField.Value = value;
+        }
 
-		public string FrontImage { get; set; }
+        public double Height
+        {
+            get => HeightField.Value;
+            set => HeightField.Value = value;
+        }
 
-		public string BackImage { get; set; }
+        public double Width
+        {
+            get => WidthField.Value;
+            set => WidthField.Value = value;
+        }
 
-		public double TypicalPowerConsumption { get; set; }
+        public double HeightU
+        {
+            get => HeightUField.Value;
+            set => HeightUField.Value = value;
+        }
 
-		public double MaximumPowerConsumption { get; set; }
+        public double Weight
+        {
+            get => WeightField.Value;
+            set => WeightField.Value = value;
+        }
 
-		public IChangeTrackingField<SlcAssetManagement.Enums.PowerSupply> PowerSupply { get; set; }
+        public string FrontImage
+        {
+            get => FrontImageField.Value;
+            set => FrontImageField.Value = value;
+        }
 
-		public AssetClassLifecycle Lifecycle { get; set; } = new AssetClassLifecycle();
+        public string BackImage
+        {
+            get => BackImageField.Value;
+            set => BackImageField.Value = value;
+        }
 
-		public List<DataPortInfo> DataPorts { get; set; } = new List<DataPortInfo>();
+        public double TypicalPowerConsumption
+        {
+            get => TypicalPowerConsumptionField.Value;
+            set => TypicalPowerConsumptionField.Value = value;
+        }
 
-		public List<PowerPortInfo> PowerPorts { get; set; } = new List<PowerPortInfo>();
+        public double MaximumPowerConsumption
+        {
+            get => MaximumPowerConsumptionField.Value;
+            set => MaximumPowerConsumptionField.Value = value;
+        }
 
-		public List<AssetHolder> Holders { get; set; } = new List<AssetHolder>();
-	}
+        public SlcAssetManagement.Enums.PowerSupply PowerSupply
+        {
+            get => PowerSupplyField.Value;
+            set => PowerSupplyField.Value = value;
+        }
+
+        public AssetClassLifecycle Lifecycle
+        {
+            get => LifecycleField.Value ?? new AssetClassLifecycle();
+            set => LifecycleField.Value = value;
+        }
+
+        public List<DataPortInfo> DataPorts
+        {
+            get => DataPortsField.Value ?? new List<DataPortInfo>();
+            set => DataPortsField.Value = value;
+        }
+
+        public List<PowerPortInfo> PowerPorts
+        {
+            get => PowerPortsField.Value ?? new List<PowerPortInfo>();
+            set => PowerPortsField.Value = value;
+        }
+
+        public List<AssetHolder> Holders
+        {
+            get => HoldersField.Value ?? new List<AssetHolder>();
+            set => HoldersField.Value = value;
+        }
+
+        // INTERNAL: Change tracking fields (validation handler uses these)
+        [JsonIgnore]
+        internal IChangeTrackingField<string> DeviceNameField => FieldHandler.GetOrCreateField(
+            nameof(DeviceName),
+            () => new ChangeTrackingStringField(null));
+
+        [JsonIgnore]
+        internal IChangeTrackingField<SdmObjectReference<DeviceType>> DeviceTypeIdField => FieldHandler.GetOrCreateField(
+            nameof(DeviceTypeId),
+            () => new ChangeTrackingField<SdmObjectReference<DeviceType>>(default));
+
+        [JsonIgnore]
+        internal IChangeTrackingField<string> DeviceDescriptionField => FieldHandler.GetOrCreateField(
+            nameof(DeviceDescription),
+            () => new ChangeTrackingStringField(null));
+
+        [JsonIgnore]
+        internal IChangeTrackingField<Guid> ManufacturerField => FieldHandler.GetOrCreateField(
+            nameof(Manufacturer),
+            () => new ChangeTrackingField<Guid>(Guid.Empty));
+
+        [JsonIgnore]
+        internal IChangeTrackingField<double> DepthField => FieldHandler.GetOrCreateField(
+            nameof(Depth),
+            () => new ChangeTrackingField<double>(0));
+
+        [JsonIgnore]
+        internal IChangeTrackingField<double> HeightField => FieldHandler.GetOrCreateField(
+            nameof(Height),
+            () => new ChangeTrackingField<double>(0));
+
+        [JsonIgnore]
+        internal IChangeTrackingField<double> WidthField => FieldHandler.GetOrCreateField(
+            nameof(Width),
+            () => new ChangeTrackingField<double>(0));
+
+        [JsonIgnore]
+        internal IChangeTrackingField<double> HeightUField => FieldHandler.GetOrCreateField(
+            nameof(HeightU),
+            () => new ChangeTrackingField<double>(0));
+
+        [JsonIgnore]
+        internal IChangeTrackingField<double> WeightField => FieldHandler.GetOrCreateField(
+            nameof(Weight),
+            () => new ChangeTrackingField<double>(0));
+
+        [JsonIgnore]
+        internal IChangeTrackingField<string> FrontImageField => FieldHandler.GetOrCreateField(
+            nameof(FrontImage),
+            () => new ChangeTrackingStringField(null));
+
+        [JsonIgnore]
+        internal IChangeTrackingField<string> BackImageField => FieldHandler.GetOrCreateField(
+            nameof(BackImage),
+            () => new ChangeTrackingStringField(null));
+
+        [JsonIgnore]
+        internal IChangeTrackingField<double> TypicalPowerConsumptionField => FieldHandler.GetOrCreateField(
+            nameof(TypicalPowerConsumption),
+            () => new ChangeTrackingField<double>(0));
+
+        [JsonIgnore]
+        internal IChangeTrackingField<double> MaximumPowerConsumptionField => FieldHandler.GetOrCreateField(
+            nameof(MaximumPowerConsumption),
+            () => new ChangeTrackingField<double>(0));
+
+        [JsonIgnore]
+        internal IChangeTrackingField<SlcAssetManagement.Enums.PowerSupply> PowerSupplyField => FieldHandler.GetOrCreateField(
+            nameof(PowerSupply),
+            () => new ChangeTrackingField<SlcAssetManagement.Enums.PowerSupply>(default));
+
+        [JsonIgnore]
+        internal IChangeTrackingField<AssetClassLifecycle> LifecycleField => FieldHandler.GetOrCreateField(
+            nameof(Lifecycle),
+            () => new ChangeTrackingField<AssetClassLifecycle>(new AssetClassLifecycle()));
+
+        [JsonIgnore]
+        internal ChangeTrackingArrayField<DataPortInfo> DataPortsField => FieldHandler.GetOrCreateArrayField(
+            nameof(DataPorts),
+            () => new ChangeTrackingArrayField<DataPortInfo>(new List<DataPortInfo>()));
+
+        [JsonIgnore]
+        internal ChangeTrackingArrayField<PowerPortInfo> PowerPortsField => FieldHandler.GetOrCreateArrayField(
+            nameof(PowerPorts),
+            () => new ChangeTrackingArrayField<PowerPortInfo>(new List<PowerPortInfo>()));
+
+        [JsonIgnore]
+        internal ChangeTrackingArrayField<AssetHolder> HoldersField => FieldHandler.GetOrCreateArrayField(
+            nameof(Holders),
+            () => new ChangeTrackingArrayField<AssetHolder>(new List<AssetHolder>()));
+
+        public void ResetChangeTracking()
+        {
+            FieldHandler?.ApplyChanges();
+        }
+    }
 }

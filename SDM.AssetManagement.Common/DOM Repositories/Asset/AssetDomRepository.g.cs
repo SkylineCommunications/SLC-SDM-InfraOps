@@ -9,7 +9,10 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-	using Skyline.DataMiner.Net;
+
+    using SharedMappers.DomIds;
+
+    using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Apps.Sections.Sections;
 	using Skyline.DataMiner.Net.Helper;
@@ -19,12 +22,15 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 	using Skyline.DataMiner.Net.Sections;
 	using Skyline.DataMiner.Net.SubscriptionFilters;
 	using Skyline.DataMiner.SDM;
-	using SLDataGateway.API.Querying;
+    using Skyline.DataMiner.SDM.AssetManagement.Repositories;
+
+    using SLDataGateway.API.Querying;
 	using SLDataGateway.API.Types.Querying;
+
 	using static Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper;
 
-	internal partial class AssetDomRepository : IBulkRepository<Asset>
-	{
+	internal partial class AssetDomRepository : IBulkRepository<Asset>, IAssetQueryRepository
+    {
 		private readonly IConnection connection;
 		private readonly DomHelper helper;
 
@@ -511,8 +517,10 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 		{
 			var obj = new Asset
 			{
-				Identifier = instance.ID.Id.ToString()
+				Identifier = instance.ID.Id.ToString(),
+                Status = SlcAsset_Management.Behaviors.Asset_Behavior.Statuses.ToEnum(instance.StatusId),
 			};
+
 			var _assetpropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.SectionDefinitionId));
 			if (_assetpropertiesSection != default)
 			{

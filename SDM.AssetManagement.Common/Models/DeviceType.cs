@@ -1,28 +1,94 @@
 ﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
-	using System.Collections.Generic;
-	using Skyline.DataMiner.SDM;
+    using System.Runtime.Serialization;
 
-	//[GenerateExposers]
-	//[SdmDomStorage("(slc)asset_management")]
-	public class DeviceType : SdmObject<DeviceType>
-	{
-		public string Name { get; set; }
+    using Newtonsoft.Json;
 
-		public string Description { get; set; }
+    using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
-		public TagsInfo TagsInfo { get; set; } = new TagsInfo();
+    //[GenerateExposers]
+    //[SdmDomStorage("(slc)asset_management")]
+    public class DeviceType : SdmObject<DeviceType>
+    {
+        [JsonIgnore]
+        private ChangeTrackingFieldHandler _fieldHandler;
 
-		public HierarchyInfo HierarchyInfo { get; set; } = new HierarchyInfo();
-	}
+        public DeviceType()
+        {
+            _fieldHandler = new ChangeTrackingFieldHandler();
+        }
 
-	public class TagsInfo : SdmObject<TagsInfo>
-	{
-		public List<SlcAssetManagement.Enums.TagOption> Tags { get; set; }
-	}
+        // Ensure _fieldHandler is always initialized (handles JSON deserialization without constructor)
+        [JsonIgnore]
+        private ChangeTrackingFieldHandler FieldHandler
+        {
+            get
+            {
+                if (_fieldHandler == null)
+                {
+                    _fieldHandler = new ChangeTrackingFieldHandler();
+                }
+                return _fieldHandler;
+            }
+        }
 
-	public class HierarchyInfo : SdmObject<HierarchyInfo>
-	{
-		public SlcAssetManagement.Enums.HierarchyRole HierarchyRole { get; set; }
-	}
+        // Called after JSON deserialization to reset change tracking
+        [OnDeserialized]
+        internal void OnDeserializedMethod(StreamingContext context)
+        {
+            ResetChangeTracking();
+        }
+
+        // PUBLIC API: Simple types (consumers see these)
+        public string Name
+        {
+            get => NameField.Value;
+            set => NameField.Value = value;
+        }
+
+        public string Description
+        {
+            get => DescriptionField.Value;
+            set => DescriptionField.Value = value;
+        }
+
+        public TagsInfo TagsInfo
+        {
+            get => TagsInfoField.Value ?? new TagsInfo();
+            set => TagsInfoField.Value = value;
+        }
+
+        public HierarchyInfo HierarchyInfo
+        {
+            get => HierarchyInfoField.Value ?? new HierarchyInfo();
+            set => HierarchyInfoField.Value = value;
+        }
+
+        // INTERNAL: Change tracking fields (validation handler uses these)
+        [JsonIgnore]
+        internal IChangeTrackingField<string> NameField => FieldHandler.GetOrCreateField(
+            nameof(Name),
+            () => new ChangeTrackingStringField(null));
+
+        [JsonIgnore]
+        internal IChangeTrackingField<string> DescriptionField => FieldHandler.GetOrCreateField(
+            nameof(Description),
+            () => new ChangeTrackingStringField(null));
+
+        [JsonIgnore]
+        internal IChangeTrackingField<TagsInfo> TagsInfoField => FieldHandler.GetOrCreateField(
+            nameof(TagsInfo),
+            () => new ChangeTrackingField<TagsInfo>(new TagsInfo()));
+
+        [JsonIgnore]
+        internal IChangeTrackingField<HierarchyInfo> HierarchyInfoField => FieldHandler.GetOrCreateField(
+            nameof(HierarchyInfo),
+            () => new ChangeTrackingField<HierarchyInfo>(new HierarchyInfo()));
+
+        public void ResetChangeTracking()
+        {
+            _fieldHandler?.ApplyChanges();
+        }
+    }
 }

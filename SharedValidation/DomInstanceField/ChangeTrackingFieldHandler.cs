@@ -4,11 +4,11 @@
 	using System.Collections.Generic;
 	using System.Linq;
 
-	public class DomInstanceFieldHandler
-	{
+	public class ChangeTrackingFieldHandler
+    {
 		private readonly Dictionary<string, IDomInstanceFieldApplyChanges> _fields;
 
-		public DomInstanceFieldHandler()
+		public ChangeTrackingFieldHandler()
 		{
 			_fields = new Dictionary<string, IDomInstanceFieldApplyChanges>();
 		}

@@ -4,13 +4,9 @@
     using System.Collections.Generic;
     using System.Linq;
 
-    public class ChangeTrackingField<T1> : IChangeTrackingField<T1>, IDomInstanceFieldApplyChanges, IEquatable<ChangeTrackingField<T1>>, IEquatable<T1>
+    public class ChangeTrackingField<T1> : IChangeTrackingField<T1>, IEquatable<ChangeTrackingField<T1>>, IEquatable<T1>
 	{
-		private readonly Action<T1, T1> _applyChanges;
-
 		private readonly Func<T1, object> _getChangesConverter;
-
-		private readonly Func<T1, bool> _valueIsNullChecker;
 
 		private readonly Action<Action<T1>, T1> _fieldSetter;
 
@@ -18,28 +14,51 @@
 		private object _originalValueChanges;
 		private T1 _currentValue;
 
-		public ChangeTrackingField(T1 value, Action<T1, T1> applyChanges, Func<T1, bool> valueIsNullChecker = null, Func<T1, object> getChangesConverter = null)
-		{
-			if (!typeof(T1).IsValueType && typeof(T1) != typeof(string))
-			{
-				throw new InvalidOperationException("DomInstanceField does not support reference types.");
-			}
+        public ChangeTrackingField(T1 value, Func<T1, object> getChangesConverter = null)
+        {
+            if (!typeof(T1).IsValueType && typeof(T1) != typeof(string))
+            {
+                throw new InvalidOperationException("ChangeTrackingField does not support reference types.");
+            }
 
-			_fieldSetter = null;
+            _fieldSetter = null;
 
-			_applyChanges = applyChanges ?? throw new ArgumentNullException(nameof(applyChanges));
-			_getChangesConverter = getChangesConverter;
-			_valueIsNullChecker = valueIsNullChecker ?? ((val) => val == null);
+            //_applyChanges = applyChanges ?? throw new ArgumentNullException(nameof(applyChanges));
+            _getChangesConverter = getChangesConverter;
+            //_valueIsNullChecker = valueIsNullChecker ?? ((val) => val == null);
 
-			_originalValue = value;
-			_originalValueChanges = getChangesConverter?.Invoke(_originalValue) ?? _originalValue;
-			_currentValue = value;
-		}
+            _originalValue = value;
+            _originalValueChanges = getChangesConverter?.Invoke(_originalValue) ?? _originalValue;
+            _currentValue = value;
+        }
 
-		public ChangeTrackingField(T1 value, Action<Action<T1>, T1> fieldSetter, Action<T1, T1> applyChanges, Func<T1, bool> valueIsNullChecker = null, Func<T1, object> getChangesConverter = null) : this(value, applyChanges, valueIsNullChecker, getChangesConverter)
-		{
-			_fieldSetter = fieldSetter ?? throw new ArgumentNullException(nameof(fieldSetter));
-		}
+        public ChangeTrackingField(T1 value, Action<Action<T1>, T1> fieldSetter, Func<T1, object> getChangesConverter = null) : this(value,  getChangesConverter)
+        {
+            _fieldSetter = fieldSetter ?? throw new ArgumentNullException(nameof(fieldSetter));
+        }
+
+        //      public ChangeTrackingField(T1 value, Action<T1, T1> applyChanges, Func<T1, bool> valueIsNullChecker = null, Func<T1, object> getChangesConverter = null)
+        //{
+        //	if (!typeof(T1).IsValueType && typeof(T1) != typeof(string))
+        //	{
+        //		throw new InvalidOperationException("DomInstanceField does not support reference types.");
+        //	}
+
+        //	_fieldSetter = null;
+
+        //	//_applyChanges = applyChanges ?? throw new ArgumentNullException(nameof(applyChanges));
+        //	_getChangesConverter = getChangesConverter;
+        //	_valueIsNullChecker = valueIsNullChecker ?? ((val) => val == null);
+
+        //	_originalValue = value;
+        //	_originalValueChanges = getChangesConverter?.Invoke(_originalValue) ?? _originalValue;
+        //	_currentValue = value;
+        //}
+
+  //      public ChangeTrackingField(T1 value, Action<Action<T1>, T1> fieldSetter, Action<T1, T1> applyChanges, Func<T1, bool> valueIsNullChecker = null, Func<T1, object> getChangesConverter = null) : this(value, applyChanges, valueIsNullChecker, getChangesConverter)
+		//{
+		//	_fieldSetter = fieldSetter ?? throw new ArgumentNullException(nameof(fieldSetter));
+		//}
 
 		public T1 OriginalValue
 		{
@@ -73,8 +92,8 @@
 		{
 			get
 			{
-				bool originalIsNull = _valueIsNullChecker.Invoke(_originalValue);
-				bool currentIsNull = _valueIsNullChecker.Invoke(_currentValue);
+                bool originalIsNull = IsValueNull(_originalValue);
+				bool currentIsNull = IsValueNull(_currentValue);
 
 				if (originalIsNull)
 				{
@@ -112,12 +131,12 @@
 			Value = _originalValue;
 		}
 
-		public void ApplyChanges()
-		{
-			_applyChanges.Invoke(_originalValue, _currentValue);
-			_originalValue = _currentValue;
-			_originalValueChanges = _getChangesConverter?.Invoke(_originalValue) ?? _originalValue;
-		}
+		//public void ApplyChanges()
+		//{
+		//	_applyChanges.Invoke(_originalValue, _currentValue);
+		//	_originalValue = _currentValue;
+		//	_originalValueChanges = _getChangesConverter?.Invoke(_originalValue) ?? _originalValue;
+		//}
 
 		#region Equatable
 
@@ -170,6 +189,16 @@
 		{
 			return !field.Equals(value);
 		}
+
+        private bool IsValueNull(T1 value)
+        {
+            if(value is string str)
+            {
+                return String.IsNullOrWhiteSpace(str);
+            }
+
+            return value == null;
+        }
 
 		#endregion
 	}

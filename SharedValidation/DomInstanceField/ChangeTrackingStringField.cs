@@ -4,11 +4,11 @@
 
 	public class ChangeTrackingStringField : ChangeTrackingField<string>
 	{
-		public ChangeTrackingStringField(string value, Action<string, string> applyChanges, Func<string, object> getChangesConverter = null) : base(value, applyChanges, String.IsNullOrWhiteSpace, getChangesConverter)
+		public ChangeTrackingStringField(string value) : base(value)
 		{
 		}
 
-		public ChangeTrackingStringField(string value, Action<Action<string>, string> fieldSetter, Action<string, string> applyChanges, Func<string, object> getChangesConverter = null) : base(value, fieldSetter, applyChanges, String.IsNullOrWhiteSpace, getChangesConverter)
+		public ChangeTrackingStringField(string value, Action<Action<string>, string> fieldSetter) : base(value, fieldSetter)
 		{
 		}
 	}

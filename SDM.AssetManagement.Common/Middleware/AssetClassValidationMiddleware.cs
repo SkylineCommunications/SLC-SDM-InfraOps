@@ -4,14 +4,23 @@
     using System.Collections.Generic;
 
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
+    using Skyline.DataMiner.Net.SLConfiguration;
     using Skyline.DataMiner.SDM.AssetManagement.Common.Validation;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
-    using Skyline.DataMiner.Utils.InfraOps.Validations;
+    using Skyline.DataMiner.SDM.AssetManagement.Validation;
+    using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
     using SLDataGateway.API.Types.Querying;
 
     internal class AssetClassValidationMiddleware : IBulkRepositoryMiddleware<AssetClass>
     {
+        private readonly AssetClassValidator _validator;
+
+        internal AssetClassValidationMiddleware(AssetClassValidator validator)
+        {
+            _validator = validator ?? throw new ArgumentNullException(nameof(validator));
+        }
+
         public long OnCount(FilterElement<AssetClass> filter, Func<FilterElement<AssetClass>, long> next)
         {
             if (filter == null)
@@ -103,9 +112,9 @@
             throw new NotImplementedException();
         }
 
-        private static ValidationResult Validate(AssetClass assetClass)
+        private ValidationResult Validate(AssetClass assetClass)
         {
-           return AssetClassValidationHandler.ValidateAssetClass(assetClass, new ValidatorContext<AssetClass>());
+            return _validator.Validate(assetClass);
         }
     }
 }

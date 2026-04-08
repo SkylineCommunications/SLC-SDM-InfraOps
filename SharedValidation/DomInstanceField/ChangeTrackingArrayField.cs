@@ -7,7 +7,7 @@
 
     public sealed class ChangeTrackingArrayField<T1> : IChangeTrackingField<List<T1>>, IDomInstanceFieldApplyChanges, IList<T1>, IReadOnlyList<T1>
 	{
-		private readonly Action<List<T1>, List<T1>> _applyChanges;
+		//private readonly Action<List<T1>, List<T1>> _applyChanges;
 
 		private readonly Func<List<T1>, object> _getChangesConverter;
 
@@ -15,12 +15,12 @@
 		private object _originalValueChanges;
 		private List<T1> _currentValue;
 
-		public ChangeTrackingArrayField(IEnumerable<T1> value, Action<List<T1>, List<T1>> applyChanges, Func<List<T1>, object> getChangesConverter = null)
+		public ChangeTrackingArrayField(IEnumerable<T1> value, Func<List<T1>, object> getChangesConverter = null)
 		{
 			_originalValue = value.ToList();
 			_originalValueChanges = getChangesConverter?.Invoke(_originalValue) ?? _originalValue;
 			_currentValue = value.ToList();
-			_applyChanges = applyChanges ?? throw new ArgumentNullException(nameof(applyChanges));
+			//_applyChanges = applyChanges ?? throw new ArgumentNullException(nameof(applyChanges));
 			_getChangesConverter = getChangesConverter;
 		}
 
@@ -108,7 +108,7 @@
 
 		public void ApplyChanges()
 		{
-			_applyChanges.Invoke(_originalValue, _currentValue);
+			//_applyChanges.Invoke(_originalValue, _currentValue);
 
 			_originalValue = _currentValue.ToList();
 			_originalValueChanges = _getChangesConverter?.Invoke(_originalValue) ?? _originalValue;
