@@ -10,6 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\SDMObjectReferenceExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Validation\ValidationFactory.cs" />
     <Compile Include="..\SharedValidation\DomInstanceField\ChangeTrackingArrayField.cs" />
     <Compile Include="..\SharedValidation\DomInstanceField\ChangeTrackingField.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DomInstanceField\ChangeTrackingFieldHandler.cs" />

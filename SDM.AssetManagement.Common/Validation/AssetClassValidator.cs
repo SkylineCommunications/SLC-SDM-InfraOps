@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Xml.Linq;
 
     using SharedMappers.DomIds;
 
@@ -33,8 +34,7 @@
         /// Only validates fields that have Changed = true.
         /// </summary>
         /// <param name="assetClass">The asset class to validate.</param>
-        /// <param name="exceptIdentifiers">Identifiers to exclude from uniqueness Name checks (e.g., the object being updated).</param>
-        public ValidationResult Validate(AssetClass assetClass, List<string> exceptIdentifiers = null)
+        public ValidationResult Validate(AssetClass assetClass)
         {
             if (assetClass == null)
             {
@@ -44,8 +44,7 @@
             // Modular validation - each concern separated
             List<Func<ValidationResult>> validations = new List<Func<ValidationResult>>()
             {
-                () => ValidateInfo(assetClass, exceptIdentifiers),
-                () => ValidateLifecycle(assetClass),
+                () => ValidateInfo(assetClass),
                 () => ValidateDimensions(assetClass),
                 () => ValidatePowerConsumption(assetClass),
                 () => ValidateCollections(assetClass),
@@ -81,6 +80,14 @@
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Validates name uniqueness. Useful for real-time UI validation.
+        /// </summary>
+        public ValidationResult ValidateNameUniqueness(AssetClass assetClass)
+        {
+            return ValidateNameUniqueness(assetClass.DeviceName, new List<string> { assetClass.Identifier });
         }
 
         #region Private Validation Methods
@@ -119,14 +126,100 @@
             return _deviceTypeRepository.Read(filter).FirstOrDefault();
         }
 
-        private ValidationResult ValidateInfo(AssetClass assetClass, List<string> exceptIdentifiers)
+        private static ValidationResult ValidateAssetClassInfo(AssetClass assetClass)
+        {
+            var validationFactory = ValidationFactory<AssetClassWrapper>
+                .PrepareValidation(
+                (dat) => dat.Object.NameField.Changed,
+                (dat) =>
+                {
+                    IsAssetClassNameValid(dat.Object.ModuleHandlers, dat.Object.Name, dat.Context, out var result);
+                    return result;
+                })
+                .AddValidation(
+                (dat) => !dat.Object.HasDeviceType || dat.Object.DeviceTypeIdField.Changed || dat.Object.PowerSupplyField.Changed,
+                (dat) =>
+                {
+                    ValidationResult result = new ValidationResult();
+                    if (!IsAssetClassDeviceTypeValid(dat.Object, out var deviceTypeResult))
+                    {
+                        result.CombineResults(deviceTypeResult);
+                    }
+
+                    if (dat.Context.ReturnWhenInvalid && !result.IsValid)
+                    {
+                        return result;
+                    }
+
+                    if (dat.Object.HasDeviceType && !IsAssetClassPowerSupplyValid(dat.Object, out var powerSupplyResult))
+                    {
+                        result.CombineResults(powerSupplyResult);
+                    }
+
+                    return result;
+                })
+                .AddValidation(
+                (dat) => dat.Object.DepthField.Changed,
+                (dat) =>
+                {
+                    IsDepthValid(dat.Object, out var result);
+                    return result;
+                })
+                .AddValidation(
+                (dat) => dat.Object.WidthField.Changed,
+                (dat) =>
+                {
+                    IsWidthValid(dat.Object, out var result);
+                    return result;
+                })
+                .AddValidation(
+                (dat) => dat.Object.HeightField.Changed,
+                (dat) =>
+                {
+                    IsHeightValid(dat.Object, out var result);
+                    return result;
+                })
+                .AddValidation(
+                (dat) => dat.Object.HeightUField.Changed,
+                (dat) =>
+                {
+                    IsHeightUnitValid(dat.Object, out var result);
+                    return result;
+                })
+                .AddValidation(
+                (dat) => dat.Object.WeightField.Changed,
+                (dat) =>
+                {
+                    IsWeightValid(dat.Object, out var result);
+                    return result;
+                })
+                .AddValidation(
+                (dat) => dat.Object.TypicalPowerConsumptionField.Changed,
+                (dat) =>
+                {
+                    IsTypicalPowerConsumptionValid(dat.Object, out var result);
+                    return result;
+                })
+                .AddValidation(
+                (dat) => dat.Object.MaximumPowerConsumptionField.Changed,
+                (dat) =>
+                {
+                    IsMaxPowerConsumptionValid(dat.Object, out var result);
+                    return result;
+                });
+
+            validationFactory.Validate(assetClass, context, out var assetClassValidationResult);
+            return assetClassValidationResult;
+        }
+
+        private ValidationResult ValidateInfo(AssetClass assetClass)
         {
             var result = new ValidationResult();
 
             // Name validation
             if (assetClass.DeviceNameField.Changed)
             {
-                result.CombineResults(ValidateNameUniqueness(assetClass.DeviceName, exceptIdentifiers));
+                result.CombineResults(ValidateNameUniqueness(assetClass));
             }
 
             if (assetClass.DeviceTypeIdField.Changed || assetClass.PowerSupplyField.Changed)
@@ -141,16 +234,6 @@
                     result.CombineResults(ValidatePowerSupply(assetClass));
                 }
             }
-
-            return result;
-        }
-
-        private ValidationResult ValidateLifecycle(AssetClass assetClass)
-        {
-            var result = new ValidationResult();
-
-            // Add lifecycle validation when needed
-            // if (assetClass.LifecycleField.Changed) { ... }
 
             return result;
         }
