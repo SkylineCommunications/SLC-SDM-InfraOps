@@ -1,90 +1,147 @@
 ﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
-	using System;
-	using Skyline.DataMiner.SDM;
-	using Skyline.DataMiner.SDM.AssetManagement;
+    using System;
+    using System.ComponentModel;
+    using System.Runtime.Serialization;
+    using System.Security.Cryptography;
 
-	public sealed class AssetLocation : IEquatable<AssetLocation>
-	{
-		public long HolderNumber { get; set; }
+    using Newtonsoft.Json;
 
-		public SdmObjectReference<Asset> ParentAsset { get; set; }
+    using SharedMappers.DomIds;
 
-		public Guid RackId { get; set; }
+    using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
-		public long RackPosition { get; set; }
+    using static SharedMappers.DomIds.SlcFacility_Management.Sections;
 
-		public SlcAssetManagement.Enums.Side Side { get; set; }
+    public class AssetLocation
+    {
+        [JsonIgnore]
+        private ChangeTrackingFieldHandler _fieldHandler;
 
-		public Guid DeskId { get; set; }
+        public AssetLocation()
+        {
+            _fieldHandler = new ChangeTrackingFieldHandler();
+        }
 
-		public Guid ContainerId { get; set; }
+        [JsonIgnore]
+        private ChangeTrackingFieldHandler FieldHandler
+        {
+            get
+            {
+                if (_fieldHandler == null)
+                {
+                    _fieldHandler = new ChangeTrackingFieldHandler();
+                }
+                return _fieldHandler;
+            }
+        }
 
-		public Guid RoomId { get; set; }
+        [OnDeserialized]
+        internal void OnDeserializedMethod(StreamingContext context)
+        {
+            ResetChangeTracking();
+        }
 
-		public static bool operator ==(AssetLocation left, AssetLocation right)
-		{
-			if (ReferenceEquals(left, right))
-			{
-				return true;
-			}
+        #region Public Properties
 
-			if (left is null || right is null)
-			{
-				return false;
-			}
+        public SdmObjectReference<Asset> ParentAsset
+        {
+            get => ParentAssetField.Value;
+            set => ParentAssetField.Value = value;
+        }
 
-			return left.Equals(right);
-		}
+        public long HolderNumber
+        {
+            get => HolderNumberField.Value;
+            set => HolderNumberField.Value = value;
+        }
 
-		public static bool operator !=(AssetLocation left, AssetLocation right)
-		{
-			return !(left == right);
-		}
+        public Guid RackId
+        {
+            get => RackIdField.Value;
+            set => RackIdField.Value = value;
+        }
 
-		public override bool Equals(object obj)
-		{
-			return Equals(obj as AssetLocation);
-		}
+        public long RackPosition
+        {
+            get => RackPositionField.Value;
+            set => RackPositionField.Value = value;
+        }
 
-		public bool Equals(AssetLocation other)
-		{
-			if (other is null)
-			{
-				return false;
-			}
+        public SlcAsset_Management.Enums.SideEnum Side
+        {
+            get => SideField.Value;
+            set => SideField.Value = value;
+        }
 
-			if (ReferenceEquals(this, other))
-			{
-				return true;
-			}
+        public Guid DeskId
+        {
+            get => DeskIdField.Value;
+            set => DeskIdField.Value = value;
+        }
 
-			return
-				HolderNumber == other.HolderNumber &&
-				Equals(ParentAsset, other.ParentAsset) &&
-				RackId.Equals(other.RackId) &&
-				RackPosition == other.RackPosition &&
-				Side == other.Side &&
-				DeskId.Equals(other.DeskId) &&
-				ContainerId.Equals(other.ContainerId) &&
-				RoomId.Equals(other.RoomId);
-		}
+        public SdmObjectReference<FacilityManagement.Models.Facility> ContainerId
+        {
+            get => ContainerIdField.Value;
+            set => ContainerIdField.Value = value;
+        }
 
-		public override int GetHashCode()
-		{
-			unchecked
-			{
-				int hash = 17;
-				hash = (hash * 23) + HolderNumber.GetHashCode();
-				hash = (hash * 23) + (ParentAsset != null ? ParentAsset.GetHashCode() : 0);
-				hash = (hash * 23) + RackId.GetHashCode();
-				hash = (hash * 23) + RackPosition.GetHashCode();
-				hash = (hash * 23) + Side.GetHashCode();
-				hash = (hash * 23) + DeskId.GetHashCode();
-				hash = (hash * 23) + ContainerId.GetHashCode();
-				hash = (hash * 23) + RoomId.GetHashCode();
-				return hash;
-			}
-		}
-	}
+        public Guid RoomId
+        {
+            get => RoomIdField.Value;
+            set => RoomIdField.Value = value;
+        }
+
+        #endregion
+
+        #region Internal Tracking Fields
+
+        [JsonIgnore]
+        internal IChangeTrackingField<SdmObjectReference<Asset>> ParentAssetField => FieldHandler.GetOrCreateField(
+            nameof(ParentAsset),
+            () => new ChangeTrackingField<SdmObjectReference<Asset>>(default));
+
+        [JsonIgnore]
+        internal IChangeTrackingField<long> HolderNumberField => FieldHandler.GetOrCreateField(
+            nameof(HolderNumber),
+            () => new ChangeTrackingField<long>(0));
+
+        [JsonIgnore]
+        internal IChangeTrackingField<Guid> RackIdField => FieldHandler.GetOrCreateField(
+            nameof(RackId),
+            () => new ChangeTrackingField<Guid>(default));
+
+        [JsonIgnore]
+        internal IChangeTrackingField<long> RackPositionField => FieldHandler.GetOrCreateField(
+            nameof(RackPosition),
+            () => new ChangeTrackingField<long>(0));
+
+        [JsonIgnore]
+        internal IChangeTrackingField<SlcAsset_Management.Enums.SideEnum> SideField => FieldHandler.GetOrCreateField(
+            nameof(Side),
+            () => new ChangeTrackingField<SlcAsset_Management.Enums.SideEnum>(default));
+
+        [JsonIgnore]
+        internal IChangeTrackingField<Guid> DeskIdField => FieldHandler.GetOrCreateField(
+            nameof(DeskId),
+            () => new ChangeTrackingField<Guid>(default));
+
+        [JsonIgnore]
+        internal IChangeTrackingField<SdmObjectReference<FacilityManagement.Models.Facility>> ContainerIdField => FieldHandler.GetOrCreateField(
+            nameof(ContainerId),
+            () => new ChangeTrackingField<SdmObjectReference<FacilityManagement.Models.Facility>>(default));
+
+        [JsonIgnore]
+        internal IChangeTrackingField<Guid> RoomIdField => FieldHandler.GetOrCreateField(
+            nameof(RoomId),
+            () => new ChangeTrackingField<Guid>(default));
+
+        #endregion
+
+        public void ResetChangeTracking()
+        {
+            FieldHandler?.ApplyChanges();
+        }
+    }
 }

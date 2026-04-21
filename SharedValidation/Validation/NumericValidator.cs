@@ -36,6 +36,8 @@ namespace Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations
             return result.IsValid;
         }
 
+
+        //todo when nullables are supported, we can add overloads for nullable numeric types (e.g., int?, double?) that first check for null and then apply the same validation logic to the underlying value.
         /// <summary>
         /// Validates that a numeric value is not negative.
         /// </summary>

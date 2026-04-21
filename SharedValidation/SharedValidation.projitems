@@ -10,6 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\SDMObjectReferenceExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\Models\Facility.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)validation\InfraOpsException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)validation\NumericValidator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)validation\ValidationException.cs" />
