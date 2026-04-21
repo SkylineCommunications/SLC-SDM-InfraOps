@@ -6,11 +6,12 @@
 
     using Newtonsoft.Json;
 
+    using SharedMappers.DomIds;
+
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement;
-    using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
-
     using Skyline.DataMiner.SDM.Extensions;
+    using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)asset_management")]
@@ -128,7 +129,7 @@
             set => MaximumPowerConsumptionField.Value = value;
         }
 
-        public SlcAssetManagement.Enums.PowerSupply PowerSupply
+        public SlcAsset_Management.Enums.PowerSupplyEnum PowerSupply
         {
             get => PowerSupplyField.Value;
             set => PowerSupplyField.Value = value;
@@ -225,9 +226,9 @@
             () => new ChangeTrackingField<double>(0));
 
         [JsonIgnore]
-        internal IChangeTrackingField<SlcAssetManagement.Enums.PowerSupply> PowerSupplyField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<SlcAsset_Management.Enums.PowerSupplyEnum> PowerSupplyField => FieldHandler.GetOrCreateField(
             nameof(PowerSupply),
-            () => new ChangeTrackingField<SlcAssetManagement.Enums.PowerSupply>(default));
+            () => new ChangeTrackingField<SlcAsset_Management.Enums.PowerSupplyEnum>(default));
 
         [JsonIgnore]
         internal IChangeTrackingField<AssetClassLifecycle> LifecycleField => FieldHandler.GetOrCreateField(
