@@ -6,1201 +6,1183 @@
 //------------------------------------------------------------------------------
 namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
 
     using SharedMappers.DomIds;
 
     using Skyline.DataMiner.Net;
-	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-	using Skyline.DataMiner.Net.Apps.Sections.Sections;
-	using Skyline.DataMiner.Net.Helper;
-	using Skyline.DataMiner.Net.ManagerStore;
-	using Skyline.DataMiner.Net.Messages;
-	using Skyline.DataMiner.Net.Messages.SLDataGateway;
-	using Skyline.DataMiner.Net.Sections;
-	using Skyline.DataMiner.Net.SubscriptionFilters;
-	using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+    using Skyline.DataMiner.Net.Apps.Sections.Sections;
+    using Skyline.DataMiner.Net.Helper;
+    using Skyline.DataMiner.Net.ManagerStore;
+    using Skyline.DataMiner.Net.Messages;
+    using Skyline.DataMiner.Net.Messages.SLDataGateway;
+    using Skyline.DataMiner.Net.Sections;
+    using Skyline.DataMiner.Net.SubscriptionFilters;
+    using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Repositories;
 
     using SLDataGateway.API.Querying;
-	using SLDataGateway.API.Types.Querying;
+    using SLDataGateway.API.Types.Querying;
 
-	using static Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper;
+    using static Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper;
 
-	internal partial class AssetDomRepository : IBulkRepository<Asset>, IAssetQueryRepository
+    internal partial class AssetDomRepository : IBulkRepository<Asset>, IAssetQueryRepository
     {
-		private readonly IConnection connection;
-		private readonly DomHelper helper;
+        private readonly IConnection connection;
+        private readonly DomHelper helper;
 
-		public AssetDomRepository(IConnection connection)
-		{
-			this.connection = connection;
-			this.helper = new DomHelper(connection.HandleMessages, Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.ModuleId);
-		}
+        public AssetDomRepository(IConnection connection)
+        {
+            this.connection = connection;
+            this.helper = new DomHelper(connection.HandleMessages, Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.ModuleId);
+        }
 
-		public Asset Create(Asset createObject)
-		{
-			if (createObject is null)
-			{
-				throw new ArgumentNullException(nameof(createObject));
-			}
+        public Asset Create(Asset createObject)
+        {
+            if (createObject is null)
+            {
+                throw new ArgumentNullException(nameof(createObject));
+            }
 
-			var instance = ToInstance(createObject);
-			instance = helper.DomInstances.Create(instance);
-			return FromInstance(instance);
-		}
+            var instance = ToInstance(createObject);
+            instance = helper.DomInstances.Create(instance);
+            return FromInstance(instance);
+        }
 
-		public IReadOnlyCollection<Asset> Create(IEnumerable<Asset> createObjects)
-		{
-			if (createObjects is null || !createObjects.Any())
-			{
-				return Array.Empty<Asset>();
-			}
+        public IReadOnlyCollection<Asset> Create(IEnumerable<Asset> createObjects)
+        {
+            if (createObjects is null || !createObjects.Any())
+            {
+                return Array.Empty<Asset>();
+            }
 
-			// Check if some of the objects already exist
-			var existing = new HashSet<string>();
-			foreach (var batch in createObjects.Batch(500))
-			{
-				existing.UnionWith(Read(new ORFilterElement<Asset>(batch.Select(obj => AssetExposers.Identifier.Equal(obj.Identifier)).ToArray())).Select(obj => obj.Identifier));
-			}
+            // Check if some of the objects already exist
+            var existing = new HashSet<string>();
+            foreach (var batch in createObjects.Batch(500))
+            {
+                existing.UnionWith(Read(new ORFilterElement<Asset>(batch.Select(obj => AssetExposers.Identifier.Equal(obj.Identifier)).ToArray())).Select(obj => obj.Identifier));
+            }
 
-			// Create the remainder
-			var SuccessfulItems = new List<Asset>();
-			var failures = new Dictionary<string, Exception>();
-			var objects = createObjects.Where(obj => !existing.Contains(obj.Identifier)).ToDictionary(obj => obj.Identifier);
+            // Create the remainder
+            var SuccessfulItems = new List<Asset>();
+            var failures = new Dictionary<string, Exception>();
+            var objects = createObjects.Where(obj => !existing.Contains(obj.Identifier)).ToDictionary(obj => obj.Identifier);
 
             foreach (var batch in createObjects.Select(ToInstance).Batch(helper.DomInstances.MaxAmountBulkOperation))
-			{
-				helper.DomInstances.TryCreateOrUpdate(batch.ToList(), out var result);
-				foreach (var failure in result.UnsuccessfulIds)
-				{
-					failures.Add(failure.Id.ToString(), new CrudFailedException(result.TraceDataPerItem[failure]));
-				}
-
-				foreach (var success in result.SuccessfulItems)
-				{
-					SuccessfulItems.Add(FromInstance(success));
-				}
-			}
-
-			// If everything went fine, return the successful creations
-			if (!existing.Any() && !failures.Any())
-			{
-				return SuccessfulItems;
-			}
-
-			// Otherwise, build and throw an exception
-			var exceptionBuilder = new SdmBulkCrudException<Asset>.Builder();
-			foreach (var obj in createObjects)
-			{
-				if (existing.Contains(obj.Identifier))
-				{
-					exceptionBuilder.AddFailed(obj, new SdmCrudException<Asset>(obj, $"Could not create Asset with guid: '{obj.Identifier}', it already exists."));
-					continue;
-				}
-
-				if (failures.ContainsKey(obj.Identifier))
-				{
-					exceptionBuilder.AddFailed(obj, failures[obj.Identifier]);
-					continue;
-				}
-
-				exceptionBuilder.AddSuccessful(obj);
-			}
-
-			throw exceptionBuilder.Build();
-		}
-
-		public IReadOnlyCollection<Asset> CreateOrUpdate(IEnumerable<Asset> items)
-		{
-			if (items is null || !items.Any())
-			{
-				return Array.Empty<Asset>();
-			}
-
-			var successful = new List<Asset>();
-			var exceptionBuilder = new SdmBulkCrudException<Asset>.Builder();
-			var objects = items.ToDictionary(obj => obj.Identifier);
-			foreach (var batch in items.Select(ToInstance).Batch(helper.DomInstances.MaxAmountBulkOperation))
-			{
-				helper.DomInstances.TryCreateOrUpdate(batch.ToList(), out var result);
-				foreach (var failure in result.UnsuccessfulIds)
-				{
-					exceptionBuilder.AddFailed(objects[failure.Id.ToString()], new CrudFailedException(result.TraceDataPerItem[failure]));
-				}
-
-				foreach (var success in result.SuccessfulItems)
-				{
-					var item = FromInstance(success);
-					exceptionBuilder.AddSuccessful(item);
-					successful.Add(item);
-				}
-			}
-
-			if (exceptionBuilder.HasFailure)
-			{
-				throw exceptionBuilder.Build();
-			}
-
-			return successful;
-		}
-
-		public long Count(FilterElement<Asset> filter)
-		{
-			if (filter is null)
-			{
-				throw new ArgumentNullException(nameof(filter));
-			}
-
-			var domFilter = TranslateFullFilter(filter);
-			domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DomDefinitionId.Id));
-			return helper.DomInstances.Count(domFilter);
-		}
-
-		public long Count(IQuery<Asset> query)
-		{
-			if (query is null)
-			{
-				throw new ArgumentNullException(nameof(query));
-			}
-
-			var domFilter = TranslateFullFilter(query.Filter);
-			domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DomDefinitionId.Id));
-			var domOrder = TranslateFullOrderBy(query.Order);
-			var domQuery = query.WithFilter(domFilter).WithOrder(domOrder);
-			return helper.DomInstances.Count(domQuery);
-		}
-
-		public IEnumerable<Asset> Read(FilterElement<Asset> filter)
-		{
-			if (filter is null)
-			{
-				throw new ArgumentNullException(nameof(filter));
-			}
-
-			var domFilter = TranslateFullFilter(filter);
-			return Read(domFilter);
-		}
-
-		public IEnumerable<Asset> Read(IQuery<Asset> query)
-		{
-			if (query is null)
-			{
-				throw new ArgumentNullException(nameof(query));
-			}
-
-			var domFilter = TranslateFullFilter(query.Filter);
-			var domOrder = TranslateFullOrderBy(query.Order);
-			var domQuery = query.WithFilter(domFilter).WithOrder(domOrder);
-			return Read(domQuery);
-		}
-
-		public IEnumerable<IPagedResult<Asset>> ReadPaged(FilterElement<Asset> filter)
-		{
-			return ReadPaged(filter, 500);
-		}
-
-		public IEnumerable<IPagedResult<Asset>> ReadPaged(FilterElement<Asset> filter, int pageSize)
-		{
-			if (filter is null)
-			{
-				throw new ArgumentNullException(nameof(filter));
-			}
-
-			if (pageSize <= 0)
-			{
-				throw new ArgumentOutOfRangeException(nameof(pageSize), "The page size must be 1 or higher");
-			}
-
-			var domFilter = TranslateFullFilter(filter);
-			var paging = ReadPaged(domFilter, pageSize).GetEnumerator();
-			var moveNext = paging.MoveNext();
-			var i = 0;
-			while (moveNext)
-			{
-				var page = paging.Current.ToList();
-				moveNext = paging.MoveNext();
-				var result = new PagedResult<Asset>(page, i, pageSize, moveNext);
-				yield return result;
-				i++;
-			}
-		}
-
-		public IEnumerable<IPagedResult<Asset>> ReadPaged(IQuery<Asset> query)
-		{
-			return ReadPaged(query, 500);
-		}
-
-		public IEnumerable<IPagedResult<Asset>> ReadPaged(IQuery<Asset> query, int pageSize)
-		{
-			if (query is null)
-			{
-				throw new ArgumentNullException(nameof(query));
-			}
-
-			if (pageSize <= 0)
-			{
-				throw new ArgumentOutOfRangeException(nameof(pageSize), "The page size must be 1 or higher");
-			}
-
-			var domFilter = TranslateFullFilter(query.Filter);
-			var domOrder = TranslateFullOrderBy(query.Order);
-			var domQuery = query.WithFilter(domFilter).WithOrder(domOrder);
-			var paging = ReadPaged(domQuery, pageSize).GetEnumerator();
-			var moveNext = paging.MoveNext();
-			var i = 0;
-			while (moveNext)
-			{
-				var page = paging.Current.ToList();
-				moveNext = paging.MoveNext();
-				var result = new PagedResult<Asset>(page, i, pageSize, moveNext);
-				yield return result;
-				i++;
-			}
-		}
-
-		public Asset Update(Asset updateObject)
-		{
-			if (updateObject is null)
-			{
-				throw new ArgumentNullException(nameof(updateObject));
-			}
-
-			var instance = ToInstance(updateObject);
-			instance = helper.DomInstances.Update(instance);
-			return FromInstance(instance);
-		}
-
-		public IReadOnlyCollection<Asset> Update(IEnumerable<Asset> updateObjects)
-		{
-			if (updateObjects is null || !updateObjects.Any())
-			{
-				return Array.Empty<Asset>();
-			}
-
-			// Check if which objects already exist
-			var existing = new HashSet<string>();
-			foreach (var batch in updateObjects.Batch(500))
-			{
-				existing.UnionWith(Read(new ORFilterElement<Asset>(batch.Select(obj => AssetExposers.Identifier.Equal(obj.Identifier)).ToArray())).Select(obj => obj.Identifier));
-			}
-
-			// Update the existing objects
-			var successfulItems = new List<Asset>();
-			var failures = new Dictionary<string, Exception>();
-			var objects = updateObjects.Where(obj => existing.Contains(obj.Identifier)).ToDictionary(obj => obj.Identifier);
-			foreach (var batch in updateObjects.Select(ToInstance).Batch(helper.DomInstances.MaxAmountBulkOperation))
-			{
-				helper.DomInstances.TryCreateOrUpdate(batch.ToList(), out var result);
-				foreach (var failure in result.UnsuccessfulIds)
-				{
-					failures.Add(failure.Id.ToString(), new CrudFailedException(result.TraceDataPerItem[failure]));
-				}
-
-				foreach (var success in result.SuccessfulItems)
-				{
-					successfulItems.Add(FromInstance(success));
-				}
-			}
-
-			// Check for failures and build exception if needed
-			var exceptionBuilder = new SdmBulkCrudException<Asset>.Builder();
-			foreach (var obj in updateObjects)
-			{
-				if (!existing.Contains(obj.Identifier))
-				{
-					exceptionBuilder.AddFailed(obj, new SdmCrudException<Asset>(obj, "Could not update a non existing Asset"));
-					continue;
-				}
-
-				if (failures.ContainsKey(obj.Identifier))
-				{
-					exceptionBuilder.AddFailed(obj, failures[obj.Identifier]);
-					continue;
-				}
-
-				exceptionBuilder.AddSuccessful(obj);
-			}
-
-			if (exceptionBuilder.HasFailure)
-			{
-				throw exceptionBuilder.Build();
-			}
-
-			return successfulItems;
-		}
-
-		public void Delete(Asset deleteObject)
-		{
-			if (deleteObject is null)
-			{
-				throw new ArgumentNullException(nameof(deleteObject));
-			}
-
-			var instance = ToInstance(deleteObject);
-			helper.DomInstances.Delete(instance);
-		}
-
-		public void Delete(IEnumerable<Asset> deleteObjects)
-		{
-			if (deleteObjects is null || !deleteObjects.Any())
-			{
-				return;
-			}
-
-			var exceptionBuilder = new SdmBulkCrudException<Asset>.Builder();
-			var objects = deleteObjects.ToDictionary(obj => obj.Identifier);
-			foreach (var batch in deleteObjects.Select(ToInstance).Batch(helper.DomInstances.MaxAmountBulkOperation))
-			{
-				helper.DomInstances.TryDelete(batch.ToList(), out var result);
-				foreach (var failure in result.UnsuccessfulIds)
-				{
-					exceptionBuilder.AddFailed(objects[failure.Id.ToString()], new CrudFailedException(result.TraceDataPerItem[failure]));
-				}
-
-				foreach (var success in result.SuccessfulIds)
-				{
-					exceptionBuilder.AddSuccessful(objects[success.Id.ToString()]);
-				}
-			}
-
-			if (exceptionBuilder.HasFailure)
-			{
-				throw exceptionBuilder.Build();
-			}
-		}
-
-		private IEnumerable<Asset> Read(FilterElement<DomInstance> domFilter)
-		{
-			if (domFilter is null)
-			{
-				throw new ArgumentNullException(nameof(domFilter));
-			}
-
-			domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DomDefinitionId.Id));
-			var domInstances = helper.DomInstances.Read(domFilter);
-			return domInstances.Select(FromInstance);
-		}
-
-		private IEnumerable<Asset> Read(IQuery<DomInstance> domQuery)
-		{
-			if (domQuery is null)
-			{
-				throw new ArgumentNullException(nameof(domQuery));
-			}
-
-			var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DomDefinitionId.Id));
-			domQuery = domQuery.WithFilter(domFilter);
-			var domInstances = helper.DomInstances.Read(domQuery);
-			return domInstances.Select(FromInstance);
-		}
-
-		private IEnumerable<IEnumerable<Asset>> ReadPaged(FilterElement<DomInstance> domFilter, int pageSize)
-		{
-			if (domFilter is null)
-			{
-				throw new ArgumentNullException(nameof(domFilter));
-			}
-
-			domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DomDefinitionId.Id));
-			var pagingHelper = helper.DomInstances.PreparePaging(domFilter, pageSize);
-			while (pagingHelper.MoveToNextPage())
-			{
-				yield return pagingHelper.GetCurrentPage().Select(FromInstance);
-			}
-		}
-
-		private IEnumerable<IEnumerable<Asset>> ReadPaged(IQuery<DomInstance> domQuery, int pageSize)
-		{
-			if (domQuery is null)
-			{
-				throw new ArgumentNullException(nameof(domQuery));
-			}
-
-			var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DomDefinitionId.Id));
-			domQuery = domQuery.WithFilter(domFilter);
-			var pagingHelper = helper.DomInstances.PreparePaging(domQuery, pageSize);
-			while (pagingHelper.MoveToNextPage())
-			{
-				yield return pagingHelper.GetCurrentPage().Select(FromInstance);
-			}
-		}
-
-		private FilterElement<DomInstance> TranslateFullFilter(FilterElement<Asset> filter)
-		{
-			if (filter is null)
-			{
-				throw new ArgumentNullException(nameof(filter));
-			}
-
-			FilterElement<DomInstance> translated;
-			if (filter is ANDFilterElement<Asset> and)
-			{
-				translated = new ANDFilterElement<DomInstance>(and.subFilters.Select(TranslateFullFilter).ToArray());
-			}
-			else if (filter is ORFilterElement<Asset> or)
-			{
-				translated = new ORFilterElement<DomInstance>(or.subFilters.Select(TranslateFullFilter).ToArray());
-			}
-			else if (filter is NOTFilterElement<Asset> not)
-			{
-				translated = new NOTFilterElement<DomInstance>(TranslateFullFilter(not));
-			}
-			else if (filter is TRUEFilterElement<Asset>)
-			{
-				translated = new TRUEFilterElement<DomInstance>();
-			}
-			else if (filter is FALSEFilterElement<Asset>)
-			{
-				translated = new FALSEFilterElement<DomInstance>();
-			}
-			else if (filter is ManagedFilterIdentifier managedFilter)
-			{
-				translated = TranslateFilter(managedFilter);
-			}
-			else
-			{
-				throw new NotSupportedException($"Unsupported filter: {filter}");
-			}
-
-			return translated;
-		}
-
-		private IOrderBy TranslateFullOrderBy(IOrderBy order)
-		{
-			if (order is null)
-			{
-				throw new ArgumentNullException(nameof(order));
-			}
-
-			var translatedElements = new List<IOrderByElement>();
-			foreach (var orderByElement in order.Elements)
-			{
-				var translated = TranslateOrderBy(orderByElement);
-				translatedElements.Add(translated);
-			}
-
-			return new OrderBy(translatedElements);
-		}
-
-		private FilterElement<DomInstance> TranslateFilter(ManagedFilterIdentifier managedFilter)
-		{
-			if (managedFilter is null)
-			{
-				throw new ArgumentNullException(nameof(managedFilter));
-			}
-
-			var fieldName = managedFilter.getFieldName().fieldName;
-			var comparer = managedFilter.getComparer();
-			var value = managedFilter.getValue();
-			var translated = CreateFilter(fieldName, comparer, value);
-			return translated;
-		}
-
-		private IOrderByElement TranslateOrderBy(IOrderByElement orderByElement)
-		{
-			if (orderByElement is null)
-			{
-				throw new ArgumentNullException(nameof(orderByElement));
-			}
-
-			var fieldName = orderByElement.Exposer.fieldName;
-			var sortOrder = orderByElement.SortOrder;
-			var naturalSort = orderByElement.Options.NaturalSort;
-			var translated = CreateOrderBy(fieldName, sortOrder, naturalSort);
-			return translated;
-		}
-
-		private Asset FromInstance(DomInstance instance)
-		{
-			var obj = new Asset
-			{
-				Identifier = instance.ID.Id.ToString(),
-                Status = SlcAsset_Management.Behaviors.Asset_Behavior.Statuses.ToEnum(instance.StatusId),
-			};
-
-			var _assetpropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.SectionDefinitionId));
-			if (_assetpropertiesSection != default)
-			{
-				var _assetid = _assetpropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.AssetId);
-				if (_assetid != null)
-				{
-					obj.AssetId = _assetid.Value;
-				}
-
-				var _assetname = _assetpropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.AssetName);
-				if (_assetname != null)
-				{
-					obj.AssetName = _assetname.Value;
-				}
-
-				var _assetclass = _assetpropertiesSection.GetValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.AssetClass);
-				if (_assetclass != null)
-				{
-					obj.AssetClass = new Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass>(Convert.ToString(_assetclass.Value));
-				}
-
-				var _assetdescription = _assetpropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.AssetDescription);
-				if (_assetdescription != null)
-				{
-					obj.AssetDescription = _assetdescription.Value;
-				}
-
-				var _fwos = _assetpropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.FwOs);
-				if (_fwos != null)
-				{
-					obj.FwOs = _fwos.Value;
-				}
-
-				var _serialnumber = _assetpropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.SerialNumber);
-				if (_serialnumber != null)
-				{
-					obj.SerialNumber = _serialnumber.Value;
-				}
-
-				var _hardwareversion = _assetpropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.HardwareVersion);
-				if (_hardwareversion != null)
-				{
-					obj.HardwareVersion = _hardwareversion.Value;
-				}
-			}
-
-			var _networkdetailsSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.NetworkDetails.SectionDefinitionId));
-			if (_networkdetailsSection != default)
-			{
-				obj.NetworkDetails = new Skyline.DataMiner.SDM.AssetManagement.Models.AssetNetworkDetails();
-				var _networkdetailsmacaddress = _networkdetailsSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.NetworkDetails.MACAddress);
-				if (_networkdetailsmacaddress != null)
-				{
-					obj.NetworkDetails.MACAddress = _networkdetailsmacaddress.Value;
-				}
-			}
-
-			var _locationSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.SectionDefinitionId));
-			if (_locationSection != default)
-			{
-				obj.Location = new Skyline.DataMiner.SDM.AssetManagement.Models.AssetLocation();
-				var _locationholdernumber = _locationSection.GetValue<long>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.HolderNumber);
-				if (_locationholdernumber != null)
-				{
-					obj.Location.HolderNumber = _locationholdernumber.Value;
-				}
-
-				var _locationparentasset = _locationSection.GetValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.ParentAsset);
-				if (_locationparentasset != null)
-				{
-					obj.Location.ParentAsset = new Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.Asset>(Convert.ToString(_locationparentasset.Value));
-				}
-
-				var _locationrackposition = _locationSection.GetValue<long>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.RackPosition);
-				if (_locationrackposition != null)
-				{
-					obj.Location.RackPosition = _locationrackposition.Value;
-				}
-
-				var _locationside = _locationSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Side);
-				if (_locationside != null)
-				{
-					obj.Location.Side = (Skyline.DataMiner.SDM.AssetManagement.SlcAssetManagement.Enums.Side)Enum.Parse(typeof(Skyline.DataMiner.SDM.AssetManagement.SlcAssetManagement.Enums.Side), _locationside.Value);
-				}
-
-				var _locationrack = _locationSection.GetValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Rack);
-				if (_locationrack != null)
-				{
-					obj.Location.RackId = System.Guid.Parse(Convert.ToString(_locationrack.Value));
-				}
-
-				var _locationdesk = _locationSection.GetValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Desk);
-				if (_locationdesk != null)
-				{
-					obj.Location.DeskId = System.Guid.Parse(Convert.ToString(_locationdesk.Value));
-				}
-
-				var _locationcontainer = _locationSection.GetValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Container);
-				if (_locationcontainer != null)
-				{
-					obj.Location.ContainerId = System.Guid.Parse(Convert.ToString(_locationcontainer.Value));
-				}
-
-				var _locationroom = _locationSection.GetValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Room);
-				if (_locationroom != null)
-				{
-					obj.Location.RoomId = System.Guid.Parse(Convert.ToString(_locationroom.Value));
-				}
-			}
-
-			var _lifecycleSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.SectionDefinitionId));
-			if (_lifecycleSection != default)
-			{
-				obj.Lifecycle = new Skyline.DataMiner.SDM.AssetManagement.Models.AssetLifecycle();
-				var _lifecyclepurchasedate = _lifecycleSection.GetValue<DateTime>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.PurchaseDate);
-				if (_lifecyclepurchasedate != null)
-				{
-					obj.Lifecycle.PurchaseDate = (DateTime)_lifecyclepurchasedate.Value;
-				}
-
-				var _lifecyclefirstusedate = _lifecycleSection.GetValue<DateTime>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.FirstUseDate);
-				if (_lifecyclefirstusedate != null)
-				{
-					obj.Lifecycle.FirstUseDate = (DateTime)_lifecyclefirstusedate.Value;
-				}
-
-				var _lifecycleendofwarrantydate = _lifecycleSection.GetValue<DateTime>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.EndOfWarrantyDate);
-				if (_lifecycleendofwarrantydate != null)
-				{
-					obj.Lifecycle.EndOfWarrantyDate = (DateTime)_lifecycleendofwarrantydate.Value;
-				}
-
-				var _lifecycleinstallationdate = _lifecycleSection.GetValue<DateTime>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.InstallationDate);
-				if (_lifecycleinstallationdate != null)
-				{
-					obj.Lifecycle.InstallationDate = (DateTime)_lifecycleinstallationdate.Value;
-				}
-
-				var _lifecyclemodificationdate = _lifecycleSection.GetValue<DateTime>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.ModificationDate);
-				if (_lifecyclemodificationdate != null)
-				{
-					obj.Lifecycle.ModificationDate = (DateTime)_lifecyclemodificationdate.Value;
-				}
-
-				var _lifecycleendoflife = _lifecycleSection.GetValue<DateTime>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.EndOfLife);
-				if (_lifecycleendoflife != null)
-				{
-					obj.Lifecycle.EndOfLife = (DateTime)_lifecycleendoflife.Value;
-				}
-			}
-
-			var _ownershipSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Ownership.SectionDefinitionId));
-			if (_ownershipSection != default)
-			{
-				obj.Ownership = new Skyline.DataMiner.SDM.AssetManagement.Models.AssetOwnership();
-
-				var _organization = _ownershipSection.GetValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Ownership.Organization);
-				if (_organization != null)
-				{
-					obj.Ownership.Organization = _organization.Value;
-				}
-			}
-
-			var _custodySection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.SectionDefinitionId));
-			if (_custodySection != default)
-			{
-				obj.Custody = new Skyline.DataMiner.SDM.AssetManagement.Models.AssetCustody();
-				var _custodyfrom = _custodySection.GetValue<DateTime>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.From);
-				if (_custodyfrom != null)
-				{
-					obj.Custody.From = (DateTime)_custodyfrom.Value;
-				}
-
-				var _custodytill = _custodySection.GetValue<DateTime>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.Till);
-				if (_custodytill != null)
-				{
-					obj.Custody.Till = (DateTime)_custodytill.Value;
-				}
-
-				var _custodyOrganization = _custodySection.GetValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.Organization);
-				if (_custodyOrganization != null)
-				{
-					obj.Custody.OrganizationId = System.Guid.Parse(Convert.ToString(_custodyOrganization.Value));
-				}
-
-				var _custodycontactperson = _custodySection.GetValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.ContactPerson);
-				if (_custodycontactperson != null)
-				{
-					obj.Custody.ContactPersonId = System.Guid.Parse(Convert.ToString(_custodycontactperson.Value));
-				}
-
-				var _custodycontactpersonrole = _custodySection.GetValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.ContactPersonRole);
-				if (_custodycontactpersonrole != null)
-				{
-					obj.Custody.ContactPersonRoleId = System.Guid.Parse(Convert.ToString(_custodycontactpersonrole.Value));
-				}
-
-				var _custodyteam = _custodySection.GetValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.Team);
-				if (_custodyteam != null)
-				{
-					obj.Custody.TeamId = System.Guid.Parse(Convert.ToString(_custodyteam.Value));
-				}
-			}
-
-			var _holdersList = new System.Collections.Generic.List<Skyline.DataMiner.SDM.AssetManagement.Models.AssetHolder>();
-			foreach (var _holdersSection in instance.Sections.Where(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Holders.SectionDefinitionId)))
-			{
-				var holders = new Skyline.DataMiner.SDM.AssetManagement.Models.AssetHolder()
-				{
-					Identifier = _holdersSection.ID.Id.ToString()
-				};
-				var _holdersslotnumber = _holdersSection.GetValue<long>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Holders.SlotNumber);
-				if (_holdersslotnumber != null)
-				{
-					holders.SlotNumber = _holdersslotnumber.Value;
-				}
-
-				var _holdershierarchyrole = _holdersSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Holders.HierarchyRole);
-				if (_holdershierarchyrole != null)
-				{
-					holders.HierarchyRole = FromDomHierarchyRole(_holdershierarchyrole.Value);
-				}
-
-				_holdersList.Add(holders);
-			}
-
-			obj.Holders = _holdersList;
-			var _elementlinksList = new System.Collections.Generic.List<Skyline.DataMiner.SDM.AssetManagement.Models.ElementLink>();
-			foreach (var _elementlinksSection in instance.Sections.Where(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.ElementLinks.SectionDefinitionId)))
-			{
-				var elementlinks = new Skyline.DataMiner.SDM.AssetManagement.Models.ElementLink()
-				{
-					Identifier = _elementlinksSection.ID.Id.ToString()
-				};
-				var _elementlinkselementid = _elementlinksSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.ElementLinks.ElementID);
-				if (_elementlinkselementid != null)
-				{
-					elementlinks.ElementID = _elementlinkselementid.Value;
-				}
-
-				var _elementlinksisprimary = _elementlinksSection.GetValue<bool>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.ElementLinks.IsPrimary);
-				if (_elementlinksisprimary != null)
-				{
-					elementlinks.IsPrimary = _elementlinksisprimary.Value;
-				}
-
-				_elementlinksList.Add(elementlinks);
-			}
-
-			obj.ElementLinks = _elementlinksList;
-			return obj;
-		}
-
-		private static SlcAssetManagement.Enums.HierarchyRole FromDomHierarchyRole(string value)
-		{
-			switch (value)
-			{
-				case "Sub-Card":
-					return SlcAssetManagement.Enums.HierarchyRole.SubCard;
-
-				case "Power Supply":
-					return SlcAssetManagement.Enums.HierarchyRole.PowerSupply;
-
-				default:
-					return (SlcAssetManagement.Enums.HierarchyRole)
-						Enum.Parse(typeof(SlcAssetManagement.Enums.HierarchyRole), value);
-			}
-		}
-
-		private DomInstance ToInstance(Asset obj)
-		{
-			Guid id = default(Guid);
-			if (!String.IsNullOrEmpty(obj.Identifier))
-			{
-				id = Guid.Parse(obj.Identifier);
-			}
-			else
-			{
-				id = Guid.NewGuid();
-			}
-
-			var instance = new DomInstance
-			{
-				DomDefinitionId = Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DomDefinitionId,
-				ID = new DomInstanceId(id)
-				{
-					ModuleId = Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.ModuleId
-				}
-			};
-			var _assetproperties = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.SectionDefinitionId);
-			if (obj.AssetId != default)
-			{
-				_assetproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.AssetId, Convert.ToString(obj.AssetId));
-			}
-
-			if (obj.AssetName != default)
-			{
-				_assetproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.AssetName, Convert.ToString(obj.AssetName));
-			}
-
-			if (obj.AssetClass != default)
-			{
-				_assetproperties.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.AssetClass, System.Guid.Parse(obj.AssetClass.Identifier));
-			}
-
-			if (obj.AssetDescription != default)
-			{
-				_assetproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.AssetDescription, Convert.ToString(obj.AssetDescription));
-			}
-
-			if (obj.FwOs != default)
-			{
-				_assetproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.FwOs, Convert.ToString(obj.FwOs));
-			}
-
-			if (obj.SerialNumber != default)
-			{
-				_assetproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.SerialNumber, Convert.ToString(obj.SerialNumber));
-			}
-
-			if (obj.HardwareVersion != default)
-			{
-				_assetproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.HardwareVersion, Convert.ToString(obj.HardwareVersion));
-			}
-
-			instance.Sections.Add(_assetproperties);
-			if (obj.NetworkDetails != null)
-			{
-				var _networkdetails = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.NetworkDetails.SectionDefinitionId);
-				if (obj.NetworkDetails.MACAddress != default)
-				{
-					_networkdetails.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.NetworkDetails.MACAddress, Convert.ToString(obj.NetworkDetails.MACAddress));
-				}
-
-				instance.Sections.Add(_networkdetails);
-			}
-
-			if (obj.Location != null)
-			{
-				var _location = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.SectionDefinitionId);
-				if (obj.Location.HolderNumber != default)
-				{
-					_location.AddOrUpdateValue<long>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.HolderNumber, (long)obj.Location.HolderNumber);
-				}
-
-				if (obj.Location.ParentAsset != default)
-				{
-					_location.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.ParentAsset, System.Guid.Parse(obj.Location.ParentAsset.Identifier));
-				}
-
-				if (obj.Location.RackPosition != default)
-				{
-					_location.AddOrUpdateValue<long>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.RackPosition, (long)obj.Location.RackPosition);
-				}
-
-				if (obj.Location.RackId != default)
-				{
-					_location.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Rack, obj.Location.RackId);
-				}
-
-				if (obj.Location.DeskId != default)
-				{
-					_location.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Desk, obj.Location.DeskId);
-				}
-
-				if (obj.Location.ContainerId != default)
-				{
-					_location.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Container, obj.Location.ContainerId);
-				}
-
-				if (obj.Location.RoomId != default)
-				{
-					_location.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Room, obj.Location.RoomId);
-				}
-
-				if (obj.Location.Side != default)
-				{
-					_location.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Side, Convert.ToString(obj.Location.Side));
-				}
-
-				instance.Sections.Add(_location);
-			}
-
-			if (obj.Lifecycle != null)
-			{
-				var _lifecycle = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.SectionDefinitionId);
-				if (obj.Lifecycle.PurchaseDate != default)
-				{
-					_lifecycle.AddOrUpdateValue<DateTime>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.PurchaseDate, (DateTime)obj.Lifecycle.PurchaseDate);
-				}
-
-				if (obj.Lifecycle.FirstUseDate != default)
-				{
-					_lifecycle.AddOrUpdateValue<DateTime>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.FirstUseDate, (DateTime)obj.Lifecycle.FirstUseDate);
-				}
-
-				if (obj.Lifecycle.EndOfWarrantyDate != default)
-				{
-					_lifecycle.AddOrUpdateValue<DateTime>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.EndOfWarrantyDate, (DateTime)obj.Lifecycle.EndOfWarrantyDate);
-				}
-
-				if (obj.Lifecycle.InstallationDate != default)
-				{
-					_lifecycle.AddOrUpdateValue<DateTime>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.InstallationDate, (DateTime)obj.Lifecycle.InstallationDate);
-				}
-
-				if (obj.Lifecycle.ModificationDate != default)
-				{
-					_lifecycle.AddOrUpdateValue<DateTime>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.ModificationDate, (DateTime)obj.Lifecycle.ModificationDate);
-				}
-
-				if (obj.Lifecycle.EndOfLife != default)
-				{
-					_lifecycle.AddOrUpdateValue<DateTime>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.EndOfLife, (DateTime)obj.Lifecycle.EndOfLife);
-				}
-
-				instance.Sections.Add(_lifecycle);
-			}
-
-			if (obj.Ownership != null)
-			{
-				var _ownership = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Ownership.SectionDefinitionId);
-				if (obj.Ownership.Organization != default)
-				{
-					_ownership.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Ownership.Organization, obj.Ownership.Organization);
-				}
-
-				instance.Sections.Add(_ownership);
-			}
-
-			if (obj.Custody != null)
-			{
-				var _custody = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.SectionDefinitionId);
-				if (obj.Custody.From != default)
-				{
-					_custody.AddOrUpdateValue<DateTime>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.From, (DateTime)obj.Custody.From);
-				}
-
-				if (obj.Custody.Till != default)
-				{
-					_custody.AddOrUpdateValue<DateTime>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.Till, (DateTime)obj.Custody.Till);
-				}
-
-				if (obj.Custody.OrganizationId != default)
-				{
-					_custody.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.Organization, (System.Guid)obj.Custody.OrganizationId);
-				}
-
-				if (obj.Custody.ContactPersonId != default)
-				{
-					_custody.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.ContactPerson, (System.Guid)obj.Custody.ContactPersonId);
-				}
-
-				if (obj.Custody.ContactPersonRoleId != default)
-				{
-					_custody.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.ContactPersonRole, (System.Guid)obj.Custody.ContactPersonRoleId);
-				}
-
-				if (obj.Custody.TeamId != default)
-				{
-					_custody.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.Team, (System.Guid)obj.Custody.TeamId);
-				}
-
-				instance.Sections.Add(_custody);
-			}
-
-			foreach (var holders in obj.Holders)
-			{
-				var _holdersSection = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Holders.SectionDefinitionId)
-				{
-					ID = new SectionID(System.Guid.Parse(holders.Identifier))
-				};
-				if (holders.SlotNumber != default)
-				{
-					_holdersSection.AddOrUpdateValue<long>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Holders.SlotNumber, (long)holders.SlotNumber);
-				}
-
-				if (holders.HierarchyRole != default)
-				{
-					_holdersSection.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Holders.HierarchyRole, ToDomHierarchyRole(holders.HierarchyRole));
-				}
-
-				instance.Sections.Add(_holdersSection);
-			}
-
-			foreach (var elementlinks in obj.ElementLinks)
-			{
-				var _elementlinksSection = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.ElementLinks.SectionDefinitionId)
-				{
-					ID = new SectionID(System.Guid.Parse(elementlinks.Identifier))
-				};
-				if (elementlinks.ElementID != default)
-				{
-					_elementlinksSection.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.ElementLinks.ElementID, Convert.ToString(elementlinks.ElementID));
-				}
-
-				if (elementlinks.IsPrimary != default)
-				{
-					_elementlinksSection.AddOrUpdateValue<bool>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.ElementLinks.IsPrimary, (bool)elementlinks.IsPrimary);
-				}
-
-				instance.Sections.Add(_elementlinksSection);
-			}
-
-			return instance;
-		}
-
-		private static string ToDomHierarchyRole(SlcAssetManagement.Enums.HierarchyRole role)
-		{
-			switch (role)
-			{
-				case SlcAssetManagement.Enums.HierarchyRole.SubCard:
-					return "Sub-Card";
-
-				case SlcAssetManagement.Enums.HierarchyRole.PowerSupply:
-					return "Power Supply";
-
-				default:
-					return role.ToString();
-			}
-		}
-
-		private FilterElement<DomInstance> CreateFilter(string fieldName, Comparer comparer, object value)
-		{
-			switch (fieldName)
-			{
-				case "Identifier":
-					return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.Id, comparer, Guid.Parse((string)value));
-				case "AssetId":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.AssetId), comparer, (string)value);
-				case "AssetName":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.AssetName), comparer, (string)value);
-				case "AssetClass":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.AssetClass), comparer, System.Guid.Parse(Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass>.Convert(value).Identifier));
-				case "AssetDescription":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.AssetDescription), comparer, (string)value);
-				case "FwOs":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.FwOs), comparer, (string)value);
-				case "SerialNumber":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.SerialNumber), comparer, (string)value);
-				case "HardwareVersion":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.HardwareVersion), comparer, (string)value);
-				case "NetworkDetails.MACAddress":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.NetworkDetails.MACAddress), comparer, (string)value);
-				case "Location.HolderNumber":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.HolderNumber), comparer, (long)value);
-				case "Location.ParentAsset":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.ParentAsset), comparer, System.Guid.Parse(Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.Asset>.Convert(value).Identifier));
-				case "Location.RackPosition":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.RackPosition), comparer, (long)value);
-				case "Location.Side":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Side), comparer, Enum.Parse(typeof(Skyline.DataMiner.SDM.AssetManagement.SlcAssetManagement.Enums.Side), (string)value));
-				case "Location.Rack":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Rack), comparer, Guid.Parse((string)value));
-				case "Location.Desk":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Desk), comparer, Guid.Parse((string)value));
-				case "Location.Container":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Container), comparer, Guid.Parse((string)value));
-				case "Location.Room":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Room), comparer, Guid.Parse((string)value));
-				case "Lifecycle.PurchaseDate":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.PurchaseDate), comparer, (DateTime)(DateTime)value);
-				case "Lifecycle.FirstUseDate":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.FirstUseDate), comparer, (DateTime)(DateTime)value);
-				case "Lifecycle.EndOfWarrantyDate":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.EndOfWarrantyDate), comparer, (DateTime)(DateTime)value);
-				case "Lifecycle.InstallationDate":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.InstallationDate), comparer, (DateTime)(DateTime)value);
-				case "Lifecycle.ModificationDate":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.ModificationDate), comparer, (DateTime)(DateTime)value);
-				case "Lifecycle.EndOfLife":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.EndOfLife), comparer, (DateTime)(DateTime)value);
-				case "Ownership.Organization":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Ownership.Organization), comparer, Guid.Parse((string)value));
-				case "Custody.From":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.From), comparer, (DateTime)(DateTime)value);
-				case "Custody.Till":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.Till), comparer, (DateTime)(DateTime)value);
-				case "Custody.Organization":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.Organization), comparer, Guid.Parse((string)value));
-				case "Custody.ContactPerson":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.ContactPerson), comparer, Guid.Parse((string)value));
-				case "Custody.ContactPersonRole":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.ContactPersonRole), comparer, Guid.Parse((string)value));
-				case "Custody.Team":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.Team), comparer, Guid.Parse((string)value));
-				case "Holders.Identifier":
-					return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.SectionIds, comparer, Guid.Parse((string)value));
-				case "Holders.SlotNumber":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Holders.SlotNumber), comparer, (long)value);
-				case "Holders.HierarchyRole":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Holders.HierarchyRole), comparer, FromDomHierarchyRole((string)value));
-				case "ElementLinks.Identifier":
-					return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.SectionIds, comparer, Guid.Parse((string)value));
-				case "ElementLinks.ElementID":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.ElementLinks.ElementID), comparer, (string)value);
-				case "ElementLinks.IsPrimary":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.ElementLinks.IsPrimary), comparer, (bool)value);
-				default:
-					throw new NotImplementedException();
-			}
-		}
-
-		private IOrderByElement CreateOrderBy(string fieldName, SortOrder sortOrder, bool naturalSort = false)
-		{
-			switch (fieldName)
-			{
-				case "Identifier":
-					return OrderByElementFactory.Create(DomInstanceExposers.Id, sortOrder, naturalSort);
-				case "AssetId":
-					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.AssetId), sortOrder, naturalSort);
-				case "AssetName":
-					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.AssetName), sortOrder, naturalSort);
-				case "AssetClass":
-					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.AssetClass), sortOrder, naturalSort);
-				case "AssetDescription":
-					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.AssetDescription), sortOrder, naturalSort);
-				case "FwOs":
-					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.FwOs), sortOrder, naturalSort);
-				case "SerialNumber":
-					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.SerialNumber), sortOrder, naturalSort);
-				case "HardwareVersion":
-					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.HardwareVersion), sortOrder, naturalSort);
-				case "NetworkDetails.MACAddress":
-					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.NetworkDetails.MACAddress), sortOrder, naturalSort);
-				case "Location.HolderNumber":
-					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.HolderNumber), sortOrder, naturalSort);
-				case "Location.ParentAsset":
-					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.ParentAsset), sortOrder, naturalSort);
-				case "Location.RackPosition":
-					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.RackPosition), sortOrder, naturalSort);
-				case "Location.Side":
-					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Side), sortOrder, naturalSort);
-				case "Location.Rack":
-					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Rack), sortOrder, naturalSort);
-				case "Location.Desk":
-					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Desk), sortOrder, naturalSort);
-				case "Location.Container":
-					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Container), sortOrder, naturalSort);
-				case "Location.Room":
-					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Room), sortOrder, naturalSort);
-				case "Lifecycle.PurchaseDate":
-					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.PurchaseDate), sortOrder, naturalSort);
-				case "Lifecycle.FirstUseDate":
-					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.FirstUseDate), sortOrder, naturalSort);
-				case "Lifecycle.EndOfWarrantyDate":
-					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.EndOfWarrantyDate), sortOrder, naturalSort);
-				case "Lifecycle.InstallationDate":
-					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.InstallationDate), sortOrder, naturalSort);
-				case "Lifecycle.ModificationDate":
-					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.ModificationDate), sortOrder, naturalSort);
-				case "Lifecycle.EndOfLife":
-					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.EndOfLife), sortOrder, naturalSort);
-				case "Custody.From":
-					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.From), sortOrder, naturalSort);
-				case "Custody.Till":
-					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.Till), sortOrder, naturalSort);
-				case "Custody.Organization":
-					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.Organization), sortOrder, naturalSort);
-				case "Custody.ContactPerson":
-					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.ContactPerson), sortOrder, naturalSort);
-				case "Custody.ContactPersonRole":
-					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.ContactPersonRole), sortOrder, naturalSort);
-				case "Custody.Team":
-					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.Team), sortOrder, naturalSort);
-				case "Holders.Identifier":
-					return OrderByElementFactory.Create(DomInstanceExposers.SectionIds, sortOrder, naturalSort);
-				case "Holders.SlotNumber":
-					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Holders.SlotNumber), sortOrder, naturalSort);
-				case "Holders.HierarchyRole":
-					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Holders.HierarchyRole), sortOrder, naturalSort);
-				case "ElementLinks.Identifier":
-					return OrderByElementFactory.Create(DomInstanceExposers.SectionIds, sortOrder, naturalSort);
-				case "ElementLinks.ElementID":
-					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.ElementLinks.ElementID), sortOrder, naturalSort);
-				case "ElementLinks.IsPrimary":
-					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.ElementLinks.IsPrimary), sortOrder, naturalSort);
-				default:
-					throw new NotImplementedException();
-			}
-		}
-	}
+            {
+                helper.DomInstances.TryCreateOrUpdate(batch.ToList(), out var result);
+                foreach (var failure in result.UnsuccessfulIds)
+                {
+                    failures.Add(failure.Id.ToString(), new CrudFailedException(result.TraceDataPerItem[failure]));
+                }
+
+                foreach (var success in result.SuccessfulItems)
+                {
+                    SuccessfulItems.Add(FromInstance(success));
+                }
+            }
+
+            // If everything went fine, return the successful creations
+            if (!existing.Any() && !failures.Any())
+            {
+                return SuccessfulItems;
+            }
+
+            // Otherwise, build and throw an exception
+            var exceptionBuilder = new SdmBulkCrudException<Asset>.Builder();
+            foreach (var obj in createObjects)
+            {
+                if (existing.Contains(obj.Identifier))
+                {
+                    exceptionBuilder.AddFailed(obj, new SdmCrudException<Asset>(obj, $"Could not create Asset with guid: '{obj.Identifier}', it already exists."));
+                    continue;
+                }
+
+                if (failures.ContainsKey(obj.Identifier))
+                {
+                    exceptionBuilder.AddFailed(obj, failures[obj.Identifier]);
+                    continue;
+                }
+
+                exceptionBuilder.AddSuccessful(obj);
+            }
+
+            throw exceptionBuilder.Build();
+        }
+
+        public IReadOnlyCollection<Asset> CreateOrUpdate(IEnumerable<Asset> items)
+        {
+            if (items is null || !items.Any())
+            {
+                return Array.Empty<Asset>();
+            }
+
+            var successful = new List<Asset>();
+            var exceptionBuilder = new SdmBulkCrudException<Asset>.Builder();
+            var objects = items.ToDictionary(obj => obj.Identifier);
+            foreach (var batch in items.Select(ToInstance).Batch(helper.DomInstances.MaxAmountBulkOperation))
+            {
+                helper.DomInstances.TryCreateOrUpdate(batch.ToList(), out var result);
+                foreach (var failure in result.UnsuccessfulIds)
+                {
+                    exceptionBuilder.AddFailed(objects[failure.Id.ToString()], new CrudFailedException(result.TraceDataPerItem[failure]));
+                }
+
+                foreach (var success in result.SuccessfulItems)
+                {
+                    var item = FromInstance(success);
+                    exceptionBuilder.AddSuccessful(item);
+                    successful.Add(item);
+                }
+            }
+
+            if (exceptionBuilder.HasFailure)
+            {
+                throw exceptionBuilder.Build();
+            }
+
+            return successful;
+        }
+
+        public long Count(FilterElement<Asset> filter)
+        {
+            if (filter is null)
+            {
+                throw new ArgumentNullException(nameof(filter));
+            }
+
+            var domFilter = TranslateFullFilter(filter);
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DomDefinitionId.Id));
+            return helper.DomInstances.Count(domFilter);
+        }
+
+        public long Count(IQuery<Asset> query)
+        {
+            if (query is null)
+            {
+                throw new ArgumentNullException(nameof(query));
+            }
+
+            var domFilter = TranslateFullFilter(query.Filter);
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DomDefinitionId.Id));
+            var domOrder = TranslateFullOrderBy(query.Order);
+            var domQuery = query.WithFilter(domFilter).WithOrder(domOrder);
+            return helper.DomInstances.Count(domQuery);
+        }
+
+        public IEnumerable<Asset> Read(FilterElement<Asset> filter)
+        {
+            if (filter is null)
+            {
+                throw new ArgumentNullException(nameof(filter));
+            }
+
+            var domFilter = TranslateFullFilter(filter);
+            return Read(domFilter);
+        }
+
+        public IEnumerable<Asset> Read(IQuery<Asset> query)
+        {
+            if (query is null)
+            {
+                throw new ArgumentNullException(nameof(query));
+            }
+
+            var domFilter = TranslateFullFilter(query.Filter);
+            var domOrder = TranslateFullOrderBy(query.Order);
+            var domQuery = query.WithFilter(domFilter).WithOrder(domOrder);
+            return Read(domQuery);
+        }
+
+        public IEnumerable<IPagedResult<Asset>> ReadPaged(FilterElement<Asset> filter)
+        {
+            return ReadPaged(filter, 500);
+        }
+
+        public IEnumerable<IPagedResult<Asset>> ReadPaged(FilterElement<Asset> filter, int pageSize)
+        {
+            if (filter is null)
+            {
+                throw new ArgumentNullException(nameof(filter));
+            }
+
+            if (pageSize <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(pageSize), "The page size must be 1 or higher");
+            }
+
+            var domFilter = TranslateFullFilter(filter);
+            var paging = ReadPaged(domFilter, pageSize).GetEnumerator();
+            var moveNext = paging.MoveNext();
+            var i = 0;
+            while (moveNext)
+            {
+                var page = paging.Current.ToList();
+                moveNext = paging.MoveNext();
+                var result = new PagedResult<Asset>(page, i, pageSize, moveNext);
+                yield return result;
+                i++;
+            }
+        }
+
+        public IEnumerable<IPagedResult<Asset>> ReadPaged(IQuery<Asset> query)
+        {
+            return ReadPaged(query, 500);
+        }
+
+        public IEnumerable<IPagedResult<Asset>> ReadPaged(IQuery<Asset> query, int pageSize)
+        {
+            if (query is null)
+            {
+                throw new ArgumentNullException(nameof(query));
+            }
+
+            if (pageSize <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(pageSize), "The page size must be 1 or higher");
+            }
+
+            var domFilter = TranslateFullFilter(query.Filter);
+            var domOrder = TranslateFullOrderBy(query.Order);
+            var domQuery = query.WithFilter(domFilter).WithOrder(domOrder);
+            var paging = ReadPaged(domQuery, pageSize).GetEnumerator();
+            var moveNext = paging.MoveNext();
+            var i = 0;
+            while (moveNext)
+            {
+                var page = paging.Current.ToList();
+                moveNext = paging.MoveNext();
+                var result = new PagedResult<Asset>(page, i, pageSize, moveNext);
+                yield return result;
+                i++;
+            }
+        }
+
+        public Asset Update(Asset updateObject)
+        {
+            if (updateObject is null)
+            {
+                throw new ArgumentNullException(nameof(updateObject));
+            }
+
+            var instance = ToInstance(updateObject);
+            instance = helper.DomInstances.Update(instance);
+            return FromInstance(instance);
+        }
+
+        public IReadOnlyCollection<Asset> Update(IEnumerable<Asset> updateObjects)
+        {
+            if (updateObjects is null || !updateObjects.Any())
+            {
+                return Array.Empty<Asset>();
+            }
+
+            // Check if which objects already exist
+            var existing = new HashSet<string>();
+            foreach (var batch in updateObjects.Batch(500))
+            {
+                existing.UnionWith(Read(new ORFilterElement<Asset>(batch.Select(obj => AssetExposers.Identifier.Equal(obj.Identifier)).ToArray())).Select(obj => obj.Identifier));
+            }
+
+            // Update the existing objects
+            var successfulItems = new List<Asset>();
+            var failures = new Dictionary<string, Exception>();
+            var objects = updateObjects.Where(obj => existing.Contains(obj.Identifier)).ToDictionary(obj => obj.Identifier);
+            foreach (var batch in updateObjects.Select(ToInstance).Batch(helper.DomInstances.MaxAmountBulkOperation))
+            {
+                helper.DomInstances.TryCreateOrUpdate(batch.ToList(), out var result);
+                foreach (var failure in result.UnsuccessfulIds)
+                {
+                    failures.Add(failure.Id.ToString(), new CrudFailedException(result.TraceDataPerItem[failure]));
+                }
+
+                foreach (var success in result.SuccessfulItems)
+                {
+                    successfulItems.Add(FromInstance(success));
+                }
+            }
+
+            // Check for failures and build exception if needed
+            var exceptionBuilder = new SdmBulkCrudException<Asset>.Builder();
+            foreach (var obj in updateObjects)
+            {
+                if (!existing.Contains(obj.Identifier))
+                {
+                    exceptionBuilder.AddFailed(obj, new SdmCrudException<Asset>(obj, "Could not update a non existing Asset"));
+                    continue;
+                }
+
+                if (failures.ContainsKey(obj.Identifier))
+                {
+                    exceptionBuilder.AddFailed(obj, failures[obj.Identifier]);
+                    continue;
+                }
+
+                exceptionBuilder.AddSuccessful(obj);
+            }
+
+            if (exceptionBuilder.HasFailure)
+            {
+                throw exceptionBuilder.Build();
+            }
+
+            return successfulItems;
+        }
+
+        public void Delete(Asset deleteObject)
+        {
+            if (deleteObject is null)
+            {
+                throw new ArgumentNullException(nameof(deleteObject));
+            }
+
+            var instance = ToInstance(deleteObject);
+            helper.DomInstances.Delete(instance);
+        }
+
+        public void Delete(IEnumerable<Asset> deleteObjects)
+        {
+            if (deleteObjects is null || !deleteObjects.Any())
+            {
+                return;
+            }
+
+            var exceptionBuilder = new SdmBulkCrudException<Asset>.Builder();
+            var objects = deleteObjects.ToDictionary(obj => obj.Identifier);
+            foreach (var batch in deleteObjects.Select(ToInstance).Batch(helper.DomInstances.MaxAmountBulkOperation))
+            {
+                helper.DomInstances.TryDelete(batch.ToList(), out var result);
+                foreach (var failure in result.UnsuccessfulIds)
+                {
+                    exceptionBuilder.AddFailed(objects[failure.Id.ToString()], new CrudFailedException(result.TraceDataPerItem[failure]));
+                }
+
+                foreach (var success in result.SuccessfulIds)
+                {
+                    exceptionBuilder.AddSuccessful(objects[success.Id.ToString()]);
+                }
+            }
+
+            if (exceptionBuilder.HasFailure)
+            {
+                throw exceptionBuilder.Build();
+            }
+        }
+
+        private IEnumerable<Asset> Read(FilterElement<DomInstance> domFilter)
+        {
+            if (domFilter is null)
+            {
+                throw new ArgumentNullException(nameof(domFilter));
+            }
+
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DomDefinitionId.Id));
+            var domInstances = helper.DomInstances.Read(domFilter);
+            return domInstances.Select(FromInstance);
+        }
+
+        private IEnumerable<Asset> Read(IQuery<DomInstance> domQuery)
+        {
+            if (domQuery is null)
+            {
+                throw new ArgumentNullException(nameof(domQuery));
+            }
+
+            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DomDefinitionId.Id));
+            domQuery = domQuery.WithFilter(domFilter);
+            var domInstances = helper.DomInstances.Read(domQuery);
+            return domInstances.Select(FromInstance);
+        }
+
+        private IEnumerable<IEnumerable<Asset>> ReadPaged(FilterElement<DomInstance> domFilter, int pageSize)
+        {
+            if (domFilter is null)
+            {
+                throw new ArgumentNullException(nameof(domFilter));
+            }
+
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DomDefinitionId.Id));
+            var pagingHelper = helper.DomInstances.PreparePaging(domFilter, pageSize);
+            while (pagingHelper.MoveToNextPage())
+            {
+                yield return pagingHelper.GetCurrentPage().Select(FromInstance);
+            }
+        }
+
+        private IEnumerable<IEnumerable<Asset>> ReadPaged(IQuery<DomInstance> domQuery, int pageSize)
+        {
+            if (domQuery is null)
+            {
+                throw new ArgumentNullException(nameof(domQuery));
+            }
+
+            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DomDefinitionId.Id));
+            domQuery = domQuery.WithFilter(domFilter);
+            var pagingHelper = helper.DomInstances.PreparePaging(domQuery, pageSize);
+            while (pagingHelper.MoveToNextPage())
+            {
+                yield return pagingHelper.GetCurrentPage().Select(FromInstance);
+            }
+        }
+
+        private FilterElement<DomInstance> TranslateFullFilter(FilterElement<Asset> filter)
+        {
+            if (filter is null)
+            {
+                throw new ArgumentNullException(nameof(filter));
+            }
+
+            FilterElement<DomInstance> translated;
+            if (filter is ANDFilterElement<Asset> and)
+            {
+                translated = new ANDFilterElement<DomInstance>(and.subFilters.Select(TranslateFullFilter).ToArray());
+            }
+            else if (filter is ORFilterElement<Asset> or)
+            {
+                translated = new ORFilterElement<DomInstance>(or.subFilters.Select(TranslateFullFilter).ToArray());
+            }
+            else if (filter is NOTFilterElement<Asset> not)
+            {
+                translated = new NOTFilterElement<DomInstance>(TranslateFullFilter(not));
+            }
+            else if (filter is TRUEFilterElement<Asset>)
+            {
+                translated = new TRUEFilterElement<DomInstance>();
+            }
+            else if (filter is FALSEFilterElement<Asset>)
+            {
+                translated = new FALSEFilterElement<DomInstance>();
+            }
+            else if (filter is ManagedFilterIdentifier managedFilter)
+            {
+                translated = TranslateFilter(managedFilter);
+            }
+            else
+            {
+                throw new NotSupportedException($"Unsupported filter: {filter}");
+            }
+
+            return translated;
+        }
+
+        private IOrderBy TranslateFullOrderBy(IOrderBy order)
+        {
+            if (order is null)
+            {
+                throw new ArgumentNullException(nameof(order));
+            }
+
+            var translatedElements = new List<IOrderByElement>();
+            foreach (var orderByElement in order.Elements)
+            {
+                var translated = TranslateOrderBy(orderByElement);
+                translatedElements.Add(translated);
+            }
+
+            return new OrderBy(translatedElements);
+        }
+
+        private FilterElement<DomInstance> TranslateFilter(ManagedFilterIdentifier managedFilter)
+        {
+            if (managedFilter is null)
+            {
+                throw new ArgumentNullException(nameof(managedFilter));
+            }
+
+            var fieldName = managedFilter.getFieldName().fieldName;
+            var comparer = managedFilter.getComparer();
+            var value = managedFilter.getValue();
+            var translated = CreateFilter(fieldName, comparer, value);
+            return translated;
+        }
+
+        private IOrderByElement TranslateOrderBy(IOrderByElement orderByElement)
+        {
+            if (orderByElement is null)
+            {
+                throw new ArgumentNullException(nameof(orderByElement));
+            }
+
+            var fieldName = orderByElement.Exposer.fieldName;
+            var sortOrder = orderByElement.SortOrder;
+            var naturalSort = orderByElement.Options.NaturalSort;
+            var translated = CreateOrderBy(fieldName, sortOrder, naturalSort);
+            return translated;
+        }
+
+        private Asset FromInstance(DomInstance instance)
+        {
+            var obj = new Asset
+            {
+                Identifier = instance.ID.Id.ToString(),
+                State = SlcAsset_Management.Behaviors.Asset_Behavior.Statuses.ToEnum(instance.StatusId),
+            };
+
+            var _assetpropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.SectionDefinitionId));
+            if (_assetpropertiesSection != default)
+            {
+                var _assetid = _assetpropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.AssetId);
+                if (_assetid != null)
+                {
+                    obj.AssetID = _assetid.Value;
+                }
+
+                var _assetname = _assetpropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.AssetName);
+                if (_assetname != null)
+                {
+                    obj.Name = _assetname.Value;
+                }
+
+                var _assetclass = _assetpropertiesSection.GetValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.AssetClass);
+                if (_assetclass != null)
+                {
+                    obj.AssetClassId = new Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass>(Convert.ToString(_assetclass.Value));
+                }
+
+                var _assetdescription = _assetpropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.AssetDescription);
+                if (_assetdescription != null)
+                {
+                    obj.Description = _assetdescription.Value;
+                }
+
+                var _fwos = _assetpropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.FwOs);
+                if (_fwos != null)
+                {
+                    obj.FW_OS = _fwos.Value;
+                }
+
+                var _serialnumber = _assetpropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.SerialNumber);
+                if (_serialnumber != null)
+                {
+                    obj.SerialNumber = _serialnumber.Value;
+                }
+
+                var _hardwareversion = _assetpropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.HardwareVersion);
+                if (_hardwareversion != null)
+                {
+                    obj.HardwareVersion = _hardwareversion.Value;
+                }
+            }
+
+            var _networkdetailsSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.NetworkDetails.SectionDefinitionId));
+            if (_networkdetailsSection != default)
+            {
+                var _networkdetailsmacaddress = _networkdetailsSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.NetworkDetails.MACAddress);
+                if (_networkdetailsmacaddress != null)
+                {
+                    obj.MacAddress = _networkdetailsmacaddress.Value;
+                }
+            }
+
+            var _locationSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.SectionDefinitionId));
+            if (_locationSection != default)
+            {
+                obj.Location = new Skyline.DataMiner.SDM.AssetManagement.Models.AssetLocation();
+                var _locationholdernumber = _locationSection.GetValue<long>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.HolderNumber);
+                if (_locationholdernumber != null)
+                {
+                    obj.Location.HolderNumber = _locationholdernumber.Value;
+                }
+
+                var _locationparentasset = _locationSection.GetValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.ParentAsset);
+                if (_locationparentasset != null)
+                {
+                    obj.Location.ParentAsset = new Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.Asset>(Convert.ToString(_locationparentasset.Value));
+                }
+
+                var _locationrackposition = _locationSection.GetValue<long>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.RackPosition);
+                if (_locationrackposition != null)
+                {
+                    obj.Location.RackPosition = _locationrackposition.Value;
+                }
+
+                var _locationside = _locationSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Side);
+                if (_locationside != null)
+                {
+                    obj.Location.Side = (SharedMappers.DomIds.SlcAsset_Management.Enums.SideEnum)Enum.Parse(typeof(SharedMappers.DomIds.SlcAsset_Management.Enums.SideEnum), _locationside.Value);
+                }
+
+                var _locationrack = _locationSection.GetValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Rack);
+                if (_locationrack != null)
+                {
+                    obj.Location.RackId = System.Guid.Parse(Convert.ToString(_locationrack.Value));
+                }
+
+                var _locationdesk = _locationSection.GetValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Desk);
+                if (_locationdesk != null)
+                {
+                    obj.Location.DeskId = System.Guid.Parse(Convert.ToString(_locationdesk.Value));
+                }
+
+                var _locationcontainer = _locationSection.GetValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Container);
+                if (_locationcontainer != null)
+                {
+                    obj.Location.ContainerId = new Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.FacilityManagement.Models.Facility>(Convert.ToString(_locationcontainer.Value));
+                }
+
+                var _locationroom = _locationSection.GetValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Room);
+                if (_locationroom != null)
+                {
+                    obj.Location.RoomId = System.Guid.Parse(Convert.ToString(_locationroom.Value));
+                }
+            }
+
+            var _lifecycleSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.SectionDefinitionId));
+            if (_lifecycleSection != default)
+            {
+                var _lifecyclepurchasedate = _lifecycleSection.GetValue<DateTime>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.PurchaseDate);
+                if (_lifecyclepurchasedate != null)
+                {
+                    obj.PurchaseDate = (DateTime)_lifecyclepurchasedate.Value;
+                }
+
+                var _lifecyclefirstusedate = _lifecycleSection.GetValue<DateTime>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.FirstUseDate);
+                if (_lifecyclefirstusedate != null)
+                {
+                    obj.FirstUseDate = (DateTime)_lifecyclefirstusedate.Value;
+                }
+
+                var _lifecycleendofwarrantydate = _lifecycleSection.GetValue<DateTime>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.EndOfWarrantyDate);
+                if (_lifecycleendofwarrantydate != null)
+                {
+                    obj.EndOfWarrantyDate = (DateTime)_lifecycleendofwarrantydate.Value;
+                }
+
+                var _lifecycleinstallationdate = _lifecycleSection.GetValue<DateTime>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.InstallationDate);
+                if (_lifecycleinstallationdate != null)
+                {
+                    obj.InstallationDate = (DateTime)_lifecycleinstallationdate.Value;
+                }
+
+                var _lifecyclemodificationdate = _lifecycleSection.GetValue<DateTime>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.ModificationDate);
+                if (_lifecyclemodificationdate != null)
+                {
+                    obj.ModificationDate = (DateTime)_lifecyclemodificationdate.Value;
+                }
+
+                var _lifecycleendoflife = _lifecycleSection.GetValue<DateTime>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.EndOfLife);
+                if (_lifecycleendoflife != null)
+                {
+                    obj.EndOfLifeDate = (DateTime)_lifecycleendoflife.Value;
+                }
+            }
+
+            var _ownershipSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Ownership.SectionDefinitionId));
+            if (_ownershipSection != default)
+            {
+                obj.Ownership = new Skyline.DataMiner.SDM.AssetManagement.Models.AssetOwnership();
+
+                var _organization = _ownershipSection.GetValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Ownership.Organization);
+                if (_organization != null)
+                {
+                    obj.Ownership.Organization = _organization.Value;
+                }
+            }
+
+            var _custodySection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.SectionDefinitionId));
+            if (_custodySection != default)
+            {
+                obj.Custody = new Skyline.DataMiner.SDM.AssetManagement.Models.AssetCustody();
+                var _custodyfrom = _custodySection.GetValue<DateTime>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.From);
+                if (_custodyfrom != null)
+                {
+                    obj.Custody.From = (DateTime)_custodyfrom.Value;
+                }
+
+                var _custodytill = _custodySection.GetValue<DateTime>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.Till);
+                if (_custodytill != null)
+                {
+                    obj.Custody.Till = (DateTime)_custodytill.Value;
+                }
+
+                var _custodyOrganization = _custodySection.GetValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.Organization);
+                if (_custodyOrganization != null)
+                {
+                    obj.Custody.Organization = System.Guid.Parse(Convert.ToString(_custodyOrganization.Value));
+                }
+
+                var _custodycontactperson = _custodySection.GetValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.ContactPerson);
+                if (_custodycontactperson != null)
+                {
+                    obj.Custody.ContactPerson = System.Guid.Parse(Convert.ToString(_custodycontactperson.Value));
+                }
+
+                var _custodycontactpersonrole = _custodySection.GetValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.ContactPersonRole);
+                if (_custodycontactpersonrole != null)
+                {
+                    obj.Custody.ContactPersonRole = System.Guid.Parse(Convert.ToString(_custodycontactpersonrole.Value));
+                }
+
+                var _custodyteam = _custodySection.GetValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.Team);
+                if (_custodyteam != null)
+                {
+                    obj.Custody.Team = System.Guid.Parse(Convert.ToString(_custodyteam.Value));
+                }
+            }
+
+            var _holdersList = new System.Collections.Generic.List<Skyline.DataMiner.SDM.AssetManagement.Models.AssetHolder>();
+            foreach (var _holdersSection in instance.Sections.Where(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Holders.SectionDefinitionId)))
+            {
+                var holders = new Skyline.DataMiner.SDM.AssetManagement.Models.AssetHolder()
+                {
+                    Identifier = _holdersSection.ID.Id.ToString()
+                };
+                var _holdersslotnumber = _holdersSection.GetValue<long>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Holders.SlotNumber);
+                if (_holdersslotnumber != null)
+                {
+                    holders.SlotNumber = _holdersslotnumber.Value;
+                }
+
+                var _holdershierarchyrole = _holdersSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Holders.HierarchyRole);
+                if (_holdershierarchyrole != null)
+                {
+                    holders.HierarchyRole = FromDomHierarchyRole(_holdershierarchyrole.Value);
+                }
+
+                _holdersList.Add(holders);
+            }
+
+            obj.Holders = _holdersList;
+            var _elementlinksList = new System.Collections.Generic.List<Skyline.DataMiner.SDM.AssetManagement.Models.ElementLink>();
+            foreach (var _elementlinksSection in instance.Sections.Where(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.ElementLinks.SectionDefinitionId)))
+            {
+                var elementlinks = new Skyline.DataMiner.SDM.AssetManagement.Models.ElementLink()
+                {
+                    Identifier = _elementlinksSection.ID.Id.ToString()
+                };
+                var _elementlinkselementid = _elementlinksSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.ElementLinks.ElementID);
+                if (_elementlinkselementid != null)
+                {
+                    elementlinks.ElementID = _elementlinkselementid.Value;
+                }
+
+                var _elementlinksisprimary = _elementlinksSection.GetValue<bool>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.ElementLinks.IsPrimary);
+                if (_elementlinksisprimary != null)
+                {
+                    elementlinks.IsPrimary = _elementlinksisprimary.Value;
+                }
+
+                _elementlinksList.Add(elementlinks);
+            }
+
+            obj.Elements = _elementlinksList;
+            return obj;
+        }
+
+        private static SlcAsset_Management.Enums.HierarchyRoleEnum FromDomHierarchyRole(string value)
+        {
+            switch (value)
+            {
+                case "Sub-Card":
+                    return SlcAsset_Management.Enums.HierarchyRoleEnum.SubCard;
+
+                case "Power Supply":
+                    return SlcAsset_Management.Enums.HierarchyRoleEnum.PowerSupply;
+
+                default:
+                    return (SlcAsset_Management.Enums.HierarchyRoleEnum)
+                        Enum.Parse(typeof(SlcAsset_Management.Enums.HierarchyRoleEnum), value);
+            }
+        }
+
+        private DomInstance ToInstance(Asset obj)
+        {
+            Guid id = default(Guid);
+            if (!String.IsNullOrEmpty(obj.Identifier))
+            {
+                id = Guid.Parse(obj.Identifier);
+            }
+            else
+            {
+                id = Guid.NewGuid();
+            }
+
+            var instance = new DomInstance
+            {
+                DomDefinitionId = Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DomDefinitionId,
+                ID = new DomInstanceId(id)
+                {
+                    ModuleId = Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.ModuleId
+                }
+            };
+            var _assetproperties = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.SectionDefinitionId);
+            if (obj.AssetID != default)
+            {
+                _assetproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.AssetId, Convert.ToString(obj.AssetID));
+            }
+
+            if (obj.Name != default)
+            {
+                _assetproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.AssetName, Convert.ToString(obj.Name));
+            }
+
+            if (obj.AssetClassId != default)
+            {
+                _assetproperties.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.AssetClass, System.Guid.Parse(obj.AssetClassId.Identifier));
+            }
+
+            if (obj.Description != default)
+            {
+                _assetproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.AssetDescription, Convert.ToString(obj.Description));
+            }
+
+            if (obj.FW_OS != default)
+            {
+                _assetproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.FwOs, Convert.ToString(obj.FW_OS));
+            }
+
+            if (obj.SerialNumber != default)
+            {
+                _assetproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.SerialNumber, Convert.ToString(obj.SerialNumber));
+            }
+
+            if (obj.HardwareVersion != default)
+            {
+                _assetproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.HardwareVersion, Convert.ToString(obj.HardwareVersion));
+            }
+
+            instance.Sections.Add(_assetproperties);
+
+            var _networkdetails = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.NetworkDetails.SectionDefinitionId);
+
+            if (obj.MacAddress != default)
+            {
+                _networkdetails.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.NetworkDetails.MACAddress, Convert.ToString(obj.MacAddress));
+            }
+
+            instance.Sections.Add(_networkdetails);
+
+
+            if (obj.Location != null)
+            {
+                var _location = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.SectionDefinitionId);
+                if (obj.Location.HolderNumber != default)
+                {
+                    _location.AddOrUpdateValue<long>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.HolderNumber, (long)obj.Location.HolderNumber);
+                }
+
+                if (obj.Location.ParentAsset != default)
+                {
+                    _location.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.ParentAsset, System.Guid.Parse(obj.Location.ParentAsset.Identifier));
+                }
+
+                if (obj.Location.RackPosition != default)
+                {
+                    _location.AddOrUpdateValue<long>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.RackPosition, (long)obj.Location.RackPosition);
+                }
+
+                if (obj.Location.RackId != default)
+                {
+                    _location.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Rack, obj.Location.RackId);
+                }
+
+                if (obj.Location.DeskId != default)
+                {
+                    _location.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Desk, obj.Location.DeskId);
+                }
+
+                if (obj.Location.ContainerId != default)
+                {
+                    _location.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Container, System.Guid.Parse(obj.Location.ContainerId.Identifier));
+                }
+
+                if (obj.Location.RoomId != default)
+                {
+                    _location.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Room, obj.Location.RoomId);
+                }
+
+                if (obj.Location.Side != default)
+                {
+                    _location.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Side, Convert.ToString(obj.Location.Side));
+                }
+
+                instance.Sections.Add(_location);
+            }
+
+
+            var _lifecycle = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.SectionDefinitionId);
+            if (obj.PurchaseDate != default)
+            {
+                _lifecycle.AddOrUpdateValue<DateTime>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.PurchaseDate, (DateTime)obj.PurchaseDate);
+            }
+
+            if (obj.FirstUseDate != default)
+            {
+                _lifecycle.AddOrUpdateValue<DateTime>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.FirstUseDate, (DateTime)obj.FirstUseDate);
+            }
+
+            if (obj.EndOfWarrantyDate != default)
+            {
+                _lifecycle.AddOrUpdateValue<DateTime>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.EndOfWarrantyDate, (DateTime)obj.EndOfWarrantyDate);
+            }
+
+            if (obj.InstallationDate != default)
+            {
+                _lifecycle.AddOrUpdateValue<DateTime>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.InstallationDate, (DateTime)obj.InstallationDate);
+            }
+
+            if (obj.ModificationDate != default)
+            {
+                _lifecycle.AddOrUpdateValue<DateTime>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.ModificationDate, (DateTime)obj.ModificationDate);
+            }
+
+            if (obj.EndOfLifeDate != default)
+            {
+                _lifecycle.AddOrUpdateValue<DateTime>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.EndOfLife, (DateTime)obj.EndOfLifeDate);
+            }
+
+            instance.Sections.Add(_lifecycle);
+
+
+            if (obj.Ownership != null)
+            {
+                var _ownership = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Ownership.SectionDefinitionId);
+                if (obj.Ownership.Organization != default)
+                {
+                    _ownership.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Ownership.Organization, obj.Ownership.Organization);
+                }
+
+                instance.Sections.Add(_ownership);
+            }
+
+            if (obj.Custody != null)
+            {
+                var _custody = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.SectionDefinitionId);
+                if (obj.Custody.From != default)
+                {
+                    _custody.AddOrUpdateValue<DateTime>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.From, (DateTime)obj.Custody.From);
+                }
+
+                if (obj.Custody.Till != default)
+                {
+                    _custody.AddOrUpdateValue<DateTime>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.Till, (DateTime)obj.Custody.Till);
+                }
+
+                if (obj.Custody.Organization != default)
+                {
+                    _custody.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.Organization, (System.Guid)obj.Custody.Organization);
+                }
+
+                if (obj.Custody.ContactPerson != default)
+                {
+                    _custody.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.ContactPerson, (System.Guid)obj.Custody.ContactPerson);
+                }
+
+                if (obj.Custody.ContactPersonRole != default)
+                {
+                    _custody.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.ContactPersonRole, (System.Guid)obj.Custody.ContactPersonRole);
+                }
+
+                if (obj.Custody.Team != default)
+                {
+                    _custody.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.Team, (System.Guid)obj.Custody.Team);
+                }
+
+                instance.Sections.Add(_custody);
+            }
+
+            foreach (var holders in obj.Holders)
+            {
+                var _holdersSection = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Holders.SectionDefinitionId)
+                {
+                    ID = new SectionID(System.Guid.Parse(holders.Identifier))
+                };
+                if (holders.SlotNumber != default)
+                {
+                    _holdersSection.AddOrUpdateValue<long>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Holders.SlotNumber, (long)holders.SlotNumber);
+                }
+
+                if (holders.HierarchyRole != default)
+                {
+                    _holdersSection.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Holders.HierarchyRole, SharedMappers.DomIds.SlcAsset_Management.Enums.Hierarchyrole.ToValue(holders.HierarchyRole));
+                }
+
+                instance.Sections.Add(_holdersSection);
+            }
+
+            foreach (var elementlinks in obj.Elements)
+            {
+                var _elementlinksSection = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.ElementLinks.SectionDefinitionId)
+                {
+                    ID = new SectionID(System.Guid.Parse(elementlinks.Identifier))
+                };
+                if (elementlinks.ElementID != default)
+                {
+                    _elementlinksSection.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.ElementLinks.ElementID, Convert.ToString(elementlinks.ElementID));
+                }
+
+                if (elementlinks.IsPrimary != default)
+                {
+                    _elementlinksSection.AddOrUpdateValue<bool>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.ElementLinks.IsPrimary, (bool)elementlinks.IsPrimary);
+                }
+
+                instance.Sections.Add(_elementlinksSection);
+            }
+
+            return instance;
+        }
+
+        private FilterElement<DomInstance> CreateFilter(string fieldName, Comparer comparer, object value)
+        {
+            switch (fieldName)
+            {
+                case "Identifier":
+                    return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.Id, comparer, Guid.Parse((string)value));
+                case "AssetId":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.AssetId), comparer, (string)value);
+                case "AssetName":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.AssetName), comparer, (string)value);
+                case "AssetClass":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.AssetClass), comparer, System.Guid.Parse(Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass>.Convert(value).Identifier));
+                case "AssetDescription":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.AssetDescription), comparer, (string)value);
+                case "FwOs":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.FwOs), comparer, (string)value);
+                case "SerialNumber":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.SerialNumber), comparer, (string)value);
+                case "HardwareVersion":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.HardwareVersion), comparer, (string)value);
+                case "NetworkDetails.MACAddress":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.NetworkDetails.MACAddress), comparer, (string)value);
+                case "Location.HolderNumber":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.HolderNumber), comparer, (long)value);
+                case "Location.ParentAsset":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.ParentAsset), comparer, System.Guid.Parse(Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.Asset>.Convert(value).Identifier));
+                case "Location.RackPosition":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.RackPosition), comparer, (long)value);
+                case "Location.Side":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Side), comparer, Enum.Parse(typeof(SlcAsset_Management.Enums.SideEnum), (string)value));
+                case "Location.Rack":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Rack), comparer, Guid.Parse((string)value));
+                case "Location.Desk":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Desk), comparer, Guid.Parse((string)value));
+                case "Location.Container":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Container), comparer, Guid.Parse((string)value));
+                case "Location.Room":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Room), comparer, Guid.Parse((string)value));
+                case "Lifecycle.PurchaseDate":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.PurchaseDate), comparer, (DateTime)(DateTime)value);
+                case "Lifecycle.FirstUseDate":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.FirstUseDate), comparer, (DateTime)(DateTime)value);
+                case "Lifecycle.EndOfWarrantyDate":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.EndOfWarrantyDate), comparer, (DateTime)(DateTime)value);
+                case "Lifecycle.InstallationDate":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.InstallationDate), comparer, (DateTime)(DateTime)value);
+                case "Lifecycle.ModificationDate":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.ModificationDate), comparer, (DateTime)(DateTime)value);
+                case "Lifecycle.EndOfLife":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.EndOfLife), comparer, (DateTime)(DateTime)value);
+                case "Ownership.Organization":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Ownership.Organization), comparer, Guid.Parse((string)value));
+                case "Custody.From":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.From), comparer, (DateTime)(DateTime)value);
+                case "Custody.Till":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.Till), comparer, (DateTime)(DateTime)value);
+                case "Custody.Organization":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.Organization), comparer, Guid.Parse((string)value));
+                case "Custody.ContactPerson":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.ContactPerson), comparer, Guid.Parse((string)value));
+                case "Custody.ContactPersonRole":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.ContactPersonRole), comparer, Guid.Parse((string)value));
+                case "Custody.Team":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.Team), comparer, Guid.Parse((string)value));
+                case "Holders.Identifier":
+                    return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.SectionIds, comparer, Guid.Parse((string)value));
+                case "Holders.SlotNumber":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Holders.SlotNumber), comparer, (long)value);
+                case "Holders.HierarchyRole":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Holders.HierarchyRole), comparer, FromDomHierarchyRole((string)value));
+                case "ElementLinks.Identifier":
+                    return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.SectionIds, comparer, Guid.Parse((string)value));
+                case "ElementLinks.ElementID":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.ElementLinks.ElementID), comparer, (string)value);
+                case "ElementLinks.IsPrimary":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.ElementLinks.IsPrimary), comparer, (bool)value);
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        private IOrderByElement CreateOrderBy(string fieldName, SortOrder sortOrder, bool naturalSort = false)
+        {
+            switch (fieldName)
+            {
+                case "Identifier":
+                    return OrderByElementFactory.Create(DomInstanceExposers.Id, sortOrder, naturalSort);
+                case "AssetId":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.AssetId), sortOrder, naturalSort);
+                case "AssetName":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.AssetName), sortOrder, naturalSort);
+                case "AssetClass":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.AssetClass), sortOrder, naturalSort);
+                case "AssetDescription":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.AssetDescription), sortOrder, naturalSort);
+                case "FwOs":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.FwOs), sortOrder, naturalSort);
+                case "SerialNumber":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.SerialNumber), sortOrder, naturalSort);
+                case "HardwareVersion":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.HardwareVersion), sortOrder, naturalSort);
+                case "NetworkDetails.MACAddress":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.NetworkDetails.MACAddress), sortOrder, naturalSort);
+                case "Location.HolderNumber":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.HolderNumber), sortOrder, naturalSort);
+                case "Location.ParentAsset":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.ParentAsset), sortOrder, naturalSort);
+                case "Location.RackPosition":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.RackPosition), sortOrder, naturalSort);
+                case "Location.Side":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Side), sortOrder, naturalSort);
+                case "Location.Rack":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Rack), sortOrder, naturalSort);
+                case "Location.Desk":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Desk), sortOrder, naturalSort);
+                case "Location.Container":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Container), sortOrder, naturalSort);
+                case "Location.Room":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Room), sortOrder, naturalSort);
+                case "Lifecycle.PurchaseDate":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.PurchaseDate), sortOrder, naturalSort);
+                case "Lifecycle.FirstUseDate":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.FirstUseDate), sortOrder, naturalSort);
+                case "Lifecycle.EndOfWarrantyDate":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.EndOfWarrantyDate), sortOrder, naturalSort);
+                case "Lifecycle.InstallationDate":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.InstallationDate), sortOrder, naturalSort);
+                case "Lifecycle.ModificationDate":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.ModificationDate), sortOrder, naturalSort);
+                case "Lifecycle.EndOfLife":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.EndOfLife), sortOrder, naturalSort);
+                case "Custody.From":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.From), sortOrder, naturalSort);
+                case "Custody.Till":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.Till), sortOrder, naturalSort);
+                case "Custody.Organization":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.Organization), sortOrder, naturalSort);
+                case "Custody.ContactPerson":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.ContactPerson), sortOrder, naturalSort);
+                case "Custody.ContactPersonRole":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.ContactPersonRole), sortOrder, naturalSort);
+                case "Custody.Team":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.Team), sortOrder, naturalSort);
+                case "Holders.Identifier":
+                    return OrderByElementFactory.Create(DomInstanceExposers.SectionIds, sortOrder, naturalSort);
+                case "Holders.SlotNumber":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Holders.SlotNumber), sortOrder, naturalSort);
+                case "Holders.HierarchyRole":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Holders.HierarchyRole), sortOrder, naturalSort);
+                case "ElementLinks.Identifier":
+                    return OrderByElementFactory.Create(DomInstanceExposers.SectionIds, sortOrder, naturalSort);
+                case "ElementLinks.ElementID":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.ElementLinks.ElementID), sortOrder, naturalSort);
+                case "ElementLinks.IsPrimary":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.ElementLinks.IsPrimary), sortOrder, naturalSort);
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+    }
 }

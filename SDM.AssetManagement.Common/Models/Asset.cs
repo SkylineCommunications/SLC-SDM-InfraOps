@@ -2,16 +2,13 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Data;
     using System.Runtime.Serialization;
 
     using Newtonsoft.Json;
 
     using SharedMappers.DomIds;
 
-    using Skyline.DataMiner.Net.Authentication.UserIdUtil;
     using Skyline.DataMiner.SDM;
-    using Skyline.DataMiner.SDM.AssetManagement;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     public class Asset : SdmObject<Asset>
@@ -46,6 +43,12 @@
         [JsonIgnore]
         public Guid Id { get; set; }
 
+        public SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum State
+        {
+            get => StateField.Value;
+            set => StateField.Value = value;
+        }
+
         #region Info Properties
 
         public string Name
@@ -78,44 +81,41 @@
             set => DescriptionField.Value = value;
         }
 
+
+        public string FW_OS
+        {
+            get => FwOSField.Value;
+            set => FwOSField.Value = value;
+        }
+
+        public string HardwareVersion
+        {
+            get => HardwareVersionField.Value;
+            set => HardwareVersionField.Value = value;
+        }
+
+        public long OperationalFlags
+        {
+            get => OperationalFlagsField.Value;
+            set => OperationalFlagsField.Value = value;
+        }
+
         #endregion
 
         #region Network Properties
 
-        public string PrimaryIPv4Address
+        public string MacAddress
         {
-            get => PrimaryIPv4AddressField.Value;
-            set => PrimaryIPv4AddressField.Value = value;
-        }
-
-        public string PrimaryIPv6Address
-        {
-            get => PrimaryIPv6AddressField.Value;
-            set => PrimaryIPv6AddressField.Value = value;
-        }
-
-        public string PrimaryMacAddress
-        {
-            get => PrimaryMacAddressField.Value;
-            set => PrimaryMacAddressField.Value = value;
+            get => MacAddressField.Value;
+            set => MacAddressField.Value = value;
         }
 
         #endregion
 
         #region Location Properties
+        public AssetLocation Location { get; set; } = new AssetLocation();
 
-        public AssetLocation Location
-        {
-            get => LocationField.Value ?? new AssetLocation();
-            set => LocationField.Value = value;
-        }
-
-        public AssetLocation DestinationLocation
-        {
-            get => DestinationLocationField.Value ?? new AssetLocation();
-            set => DestinationLocationField.Value = value;
-        }
-
+        public AssetLocation DestinationLocation { get; set; } = new AssetLocation();
         #endregion
 
         #region Lifecycle Properties
@@ -132,6 +132,18 @@
             set => InstallationDateField.Value = value;
         }
 
+        public DateTime? FirstUseDate
+        {
+            get => FirstUseDateField.Value;
+            set => FirstUseDateField.Value = value;
+        }
+
+        public DateTime? PurchaseDate
+        {
+            get => PurchaseDateField.Value;
+            set => PurchaseDateField.Value = value;
+        }
+
         public Guid ModificationUserId
         {
             get => ModificationUserIdField.Value;
@@ -144,55 +156,29 @@
             set => ModificationDateField.Value = value;
         }
 
-        public SlcAsset_Management.Enums.AssetStateEnum State
+        public DateTime? EndOfLifeDate
         {
-            get => StateField.Value;
-            set => StateField.Value = value;
+            get => EndOfLifeDateField.Value;
+            set => EndOfLifeDateField.Value = value;
+        }
+
+        public DateTime? EndOfWarrantyDate
+        {
+            get => EndOfWarrantyDateField.Value;
+            set => EndOfWarrantyDateField.Value = value;
         }
 
         #endregion
 
         #region Ownership Properties
 
-        public SdmObjectReference<ContactPerson> OwnerContactPersonId
-        {
-            get => OwnerContactPersonIdField.Value;
-            set => OwnerContactPersonIdField.Value = value;
-        }
+        public AssetOwnership Ownership { get; set; } = new AssetOwnership();
 
-        public SdmObjectReference<Role> OwnerContactPersonRoleId
-        {
-            get => OwnerContactPersonRoleIdField.Value;
-            set => OwnerContactPersonRoleIdField.Value = value;
-        }
-
-        public SdmObjectReference<ContactPerson> CustodyContactPersonId
-        {
-            get => CustodyContactPersonIdField.Value;
-            set => CustodyContactPersonIdField.Value = value;
-        }
-
-        public SdmObjectReference<Role> CustodyContactPersonRoleId
-        {
-            get => CustodyContactPersonRoleIdField.Value;
-            set => CustodyContactPersonRoleIdField.Value = value;
-        }
+        public AssetCustody Custody { get; set; } = new AssetCustody();
 
         #endregion
 
         #region Collection Properties
-
-        public List<DataPortInfo> DataPorts
-        {
-            get => DataPortsField.Value ?? new List<DataPortInfo>();
-            set => DataPortsField.Value = value;
-        }
-
-        public List<PowerPortInfo> PowerPorts
-        {
-            get => PowerPortsField.Value ?? new List<PowerPortInfo>();
-            set => PowerPortsField.Value = value;
-        }
 
         public List<AssetHolder> Holders
         {
@@ -200,9 +186,9 @@
             set => HoldersField.Value = value;
         }
 
-        public List<AssetElement> Elements
+        public List<ElementLink> Elements
         {
-            get => ElementsField.Value ?? new List<AssetElement>();
+            get => ElementsField.Value ?? new List<ElementLink>();
             set => ElementsField.Value = value;
         }
 
@@ -235,23 +221,28 @@
             nameof(Description),
             () => new ChangeTrackingStringField(null));
 
+        [JsonIgnore]
+        internal IChangeTrackingField<string> FwOSField => FieldHandler.GetOrCreateField(
+            nameof(FW_OS),
+            () => new ChangeTrackingStringField(null));
+
+        [JsonIgnore]
+        internal IChangeTrackingField<string> HardwareVersionField => FieldHandler.GetOrCreateField(
+           nameof(HardwareVersion),
+           () => new ChangeTrackingStringField(null));
+
+        [JsonIgnore]
+        internal IChangeTrackingField<long> OperationalFlagsField => FieldHandler.GetOrCreateField(
+        nameof(OperationalFlags),
+        () => new ChangeTrackingField<long>(0));
+
         #endregion
 
         #region Network Tracking Fields
 
         [JsonIgnore]
-        internal IChangeTrackingField<string> PrimaryIPv4AddressField => FieldHandler.GetOrCreateField(
-            nameof(PrimaryIPv4Address),
-            () => new ChangeTrackingStringField(null));
-
-        [JsonIgnore]
-        internal IChangeTrackingField<string> PrimaryIPv6AddressField => FieldHandler.GetOrCreateField(
-            nameof(PrimaryIPv6Address),
-            () => new ChangeTrackingStringField(null));
-
-        [JsonIgnore]
-        internal IChangeTrackingField<string> PrimaryMacAddressField => FieldHandler.GetOrCreateField(
-            nameof(PrimaryMacAddress),
+        internal IChangeTrackingField<string> MacAddressField => FieldHandler.GetOrCreateField(
+            nameof(MacAddress),
             () => new ChangeTrackingStringField(null));
 
         #endregion
@@ -283,6 +274,16 @@
             () => new ChangeTrackingField<DateTime?>(null));
 
         [JsonIgnore]
+        internal IChangeTrackingField<DateTime?> FirstUseDateField => FieldHandler.GetOrCreateField(
+            nameof(FirstUseDate),
+            () => new ChangeTrackingField<DateTime?>(null));
+
+        [JsonIgnore]
+        internal IChangeTrackingField<DateTime?> PurchaseDateField => FieldHandler.GetOrCreateField(
+            nameof(PurchaseDate),
+            () => new ChangeTrackingField<DateTime?>(null));
+
+        [JsonIgnore]
         internal IChangeTrackingField<Guid> ModificationUserIdField => FieldHandler.GetOrCreateField(
             nameof(ModificationUserId),
             () => new ChangeTrackingField<Guid>(default));
@@ -293,47 +294,23 @@
             () => new ChangeTrackingField<DateTime?>(null));
 
         [JsonIgnore]
-        internal IChangeTrackingField<SlcAsset_Management.Enums.AssetStateEnum> StateField => FieldHandler.GetOrCreateField(
-            nameof(State),
-            () => new ChangeTrackingField<SlcAsset_Management.Enums.AssetStateEnum>(default));
-
-        #endregion
-
-        #region Ownership Tracking Fields
+        internal IChangeTrackingField<DateTime?> EndOfLifeDateField => FieldHandler.GetOrCreateField(
+            nameof(EndOfLifeDate),
+            () => new ChangeTrackingField<DateTime?>(null));
 
         [JsonIgnore]
-        internal IChangeTrackingField<SdmObjectReference<ContactPerson>> OwnerContactPersonIdField => FieldHandler.GetOrCreateField(
-            nameof(OwnerContactPersonId),
-            () => new ChangeTrackingField<SdmObjectReference<ContactPerson>>(default));
+        internal IChangeTrackingField<DateTime?> EndOfWarrantyDateField => FieldHandler.GetOrCreateField(
+          nameof(EndOfWarrantyDate),
+          () => new ChangeTrackingField<DateTime?>(null));
 
         [JsonIgnore]
-        internal IChangeTrackingField<SdmObjectReference<Role>> OwnerContactPersonRoleIdField => FieldHandler.GetOrCreateField(
-            nameof(OwnerContactPersonRoleId),
-            () => new ChangeTrackingField<SdmObjectReference<Role>>(default));
-
-        [JsonIgnore]
-        internal IChangeTrackingField<SdmObjectReference<ContactPerson>> CustodyContactPersonIdField => FieldHandler.GetOrCreateField(
-            nameof(CustodyContactPersonId),
-            () => new ChangeTrackingField<SdmObjectReference<ContactPerson>>(default));
-
-        [JsonIgnore]
-        internal IChangeTrackingField<SdmObjectReference<Role>> CustodyContactPersonRoleIdField => FieldHandler.GetOrCreateField(
-            nameof(CustodyContactPersonRoleId),
-            () => new ChangeTrackingField<SdmObjectReference<Role>>(default));
+        internal IChangeTrackingField<SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum> StateField => FieldHandler.GetOrCreateField(
+            nameof(State),      
+            () => new ChangeTrackingField<SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum>(default));
 
         #endregion
 
         #region Collection Tracking Fields
-
-        [JsonIgnore]
-        internal ChangeTrackingArrayField<DataPortInfo> DataPortsField => FieldHandler.GetOrCreateArrayField(
-            nameof(DataPorts),
-            () => new ChangeTrackingArrayField<DataPortInfo>(new List<DataPortInfo>()));
-
-        [JsonIgnore]
-        internal ChangeTrackingArrayField<PowerPortInfo> PowerPortsField => FieldHandler.GetOrCreateArrayField(
-            nameof(PowerPorts),
-            () => new ChangeTrackingArrayField<PowerPortInfo>(new List<PowerPortInfo>()));
 
         [JsonIgnore]
         internal ChangeTrackingArrayField<AssetHolder> HoldersField => FieldHandler.GetOrCreateArrayField(
@@ -341,9 +318,9 @@
             () => new ChangeTrackingArrayField<AssetHolder>(new List<AssetHolder>()));
 
         [JsonIgnore]
-        internal ChangeTrackingArrayField<AssetElement> ElementsField => FieldHandler.GetOrCreateArrayField(
+        internal ChangeTrackingArrayField<ElementLink> ElementsField => FieldHandler.GetOrCreateArrayField(
             nameof(Elements),
-            () => new ChangeTrackingArrayField<AssetElement>(new List<AssetElement>()));
+            () => new ChangeTrackingArrayField<ElementLink>(new List<ElementLink>()));
 
         #endregion
 

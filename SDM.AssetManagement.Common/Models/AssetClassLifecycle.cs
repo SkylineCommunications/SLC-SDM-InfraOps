@@ -1,68 +1,144 @@
 ﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
-	using System;
+    using System;
+    using System.Runtime.Serialization;
 
-	public sealed class AssetClassLifecycle : IEquatable<AssetClassLifecycle>
-	{
-		public DateTime EndOfLife { get; set; }
+    using Newtonsoft.Json;
 
-		public DateTime EndOfService { get; set; }
+    using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
-		public TimeSpan NominalLifetime { get; set; }
+    public class AssetClassLifecycle : IEquatable<AssetClassLifecycle>
+    {
+        [JsonIgnore]
+        private ChangeTrackingFieldHandler _fieldHandler;
 
-		public static bool operator ==(AssetClassLifecycle left, AssetClassLifecycle right)
-		{
-			if (ReferenceEquals(left, right))
-			{
-				return true;
-			}
+        public AssetClassLifecycle()
+        {
+            _fieldHandler = new ChangeTrackingFieldHandler();
+        }
 
-			if (left is null || right is null)
-			{
-				return false;
-			}
+        [JsonIgnore]
+        private ChangeTrackingFieldHandler FieldHandler
+        {
+            get
+            {
+                if (_fieldHandler == null)
+                {
+                    _fieldHandler = new ChangeTrackingFieldHandler();
+                }
+                return _fieldHandler;
+            }
+        }
 
-			return left.Equals(right);
-		}
+        [OnDeserialized]
+        internal void OnDeserializedMethod(StreamingContext context)
+        {
+            ResetChangeTracking();
+        }
 
-		public static bool operator !=(AssetClassLifecycle left, AssetClassLifecycle right)
-		{
-			return !(left == right);
-		}
+        #region Public Properties
 
-		public override bool Equals(object obj)
-		{
-			return Equals(obj as AssetClassLifecycle);
-		}
+        public DateTime EndOfLife
+        {
+            get => EndOfLifeField.Value;
+            set => EndOfLifeField.Value = value;
+        }
 
-		public bool Equals(AssetClassLifecycle other)
-		{
-			if (other is null)
-			{
-				return false;
-			}
+        public DateTime EndOfService
+        {
+            get => EndOfServiceField.Value;
+            set => EndOfServiceField.Value = value;
+        }
 
-			if (ReferenceEquals(this, other))
-			{
-				return true;
-			}
+        public TimeSpan NominalLifetime
+        {
+            get => NominalLifetimeField.Value;
+            set => NominalLifetimeField.Value = value;
+        }
 
-			return
-				Nullable.Equals(EndOfLife, other.EndOfLife) &&
-				Nullable.Equals(EndOfService, other.EndOfService) &&
-				Nullable.Equals(NominalLifetime, other.NominalLifetime);
-		}
+        #endregion
 
-		public override int GetHashCode()
-		{
-			unchecked
-			{
-				int hash = 17;
-				hash = (hash * 23) + EndOfLife.GetHashCode();
-				hash = (hash * 23) + EndOfService.GetHashCode();
-				hash = (hash * 23) + NominalLifetime.GetHashCode();
-				return hash;
-			}
-		}
-	}
+        #region Internal Tracking Fields
+
+        [JsonIgnore]
+        internal IChangeTrackingField<DateTime> EndOfLifeField => FieldHandler.GetOrCreateField(
+            nameof(EndOfLife),
+            () => new ChangeTrackingField<DateTime>(default));
+
+        [JsonIgnore]
+        internal IChangeTrackingField<DateTime> EndOfServiceField => FieldHandler.GetOrCreateField(
+            nameof(EndOfService),
+            () => new ChangeTrackingField<DateTime>(default));
+
+        [JsonIgnore]
+        internal IChangeTrackingField<TimeSpan> NominalLifetimeField => FieldHandler.GetOrCreateField(
+            nameof(NominalLifetime),
+            () => new ChangeTrackingField<TimeSpan>(default));
+
+        #endregion
+
+        public void ResetChangeTracking()
+        {
+            FieldHandler?.ApplyChanges();
+        }
+
+        #region IEquatable Implementation
+
+        public static bool operator ==(AssetClassLifecycle left, AssetClassLifecycle right)
+        {
+            if (ReferenceEquals(left, right))
+            {
+                return true;
+            }
+
+            if (left is null || right is null)
+            {
+                return false;
+            }
+
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(AssetClassLifecycle left, AssetClassLifecycle right)
+        {
+            return !(left == right);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as AssetClassLifecycle);
+        }
+
+        public bool Equals(AssetClassLifecycle other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return
+                EndOfLife.Equals(other.EndOfLife) &&
+                EndOfService.Equals(other.EndOfService) &&
+                NominalLifetime.Equals(other.NominalLifetime);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 17;
+                hash = (hash * 23) + EndOfLife.GetHashCode();
+                hash = (hash * 23) + EndOfService.GetHashCode();
+                hash = (hash * 23) + NominalLifetime.GetHashCode();
+                return hash;
+            }
+        }
+
+        #endregion
+    }
 }

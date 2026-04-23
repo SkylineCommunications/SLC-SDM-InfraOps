@@ -11,8 +11,8 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 	using Skyline.DataMiner.Net.Sections;
 	using Skyline.DataMiner.SDM;
 
-	//[SdmDomMapper]
-	internal static class FacilityDomMapper
+    //[SdmDomMapper]
+    internal static class FacilityDomMapper
 	{
 		internal const string ModuleId = SharedMappers.DomIds.SlcFacility_Management.ModuleId;
 

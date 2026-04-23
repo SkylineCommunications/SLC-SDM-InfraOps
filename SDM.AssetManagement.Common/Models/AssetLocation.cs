@@ -93,6 +93,12 @@
             set => RoomIdField.Value = value;
         }
 
+        public long PowerSupplyRackPosition
+        {
+            get => PowerSupplyRackPositionField.Value;
+            set => PowerSupplyRackPositionField.Value = value;
+        }
+
         #endregion
 
         #region Internal Tracking Fields
@@ -136,6 +142,11 @@
         internal IChangeTrackingField<Guid> RoomIdField => FieldHandler.GetOrCreateField(
             nameof(RoomId),
             () => new ChangeTrackingField<Guid>(default));
+
+        [JsonIgnore]
+        internal IChangeTrackingField<long> PowerSupplyRackPositionField => FieldHandler.GetOrCreateField(
+        nameof(PowerSupplyRackPosition),
+        () => new ChangeTrackingField<long>(0));
 
         #endregion
 

@@ -10,7 +10,10 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.Linq;
-	using Skyline.DataMiner.Net;
+
+    using SharedMappers.DomIds;
+
+    using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Apps.Sections.Sections;
 	using Skyline.DataMiner.Net.Helper;
@@ -534,13 +537,13 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				var _powerportinfooutputtype = _powerportinfoSection.GetValue<int>(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.OutputType);
 				if (_powerportinfooutputtype != null)
 				{
-					obj.PowerPortInfo.OutputType = (Skyline.DataMiner.SDM.AssetManagement.SlcAssetManagement.Enums.Outputtype)_powerportinfooutputtype.Value;
+					obj.PowerPortInfo.OutputType = (SlcAsset_Management.Enums.Outputtype)_powerportinfooutputtype.Value;
 				}
 
 				var _powerportinfoportexposure = _powerportinfoSection.GetValue<int>(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.PortExposure);
 				if (_powerportinfoportexposure != null)
 				{
-					obj.PowerPortInfo.PortExposure = (Skyline.DataMiner.SDM.AssetManagement.SlcAssetManagement.Enums.PortExposure)_powerportinfoportexposure.Value;
+					obj.PowerPortInfo.PortExposure = (SlcAsset_Management.Enums.PortExposureEnum)_powerportinfoportexposure.Value;
 				}
 
 				var _powerportinfoporttype = _powerportinfoSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.PortType);
@@ -650,9 +653,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				case "PowerPortInfo.PortNumber":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.PortNumber), comparer, (long)value);
 				case "PowerPortInfo.OutputType":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.OutputType), comparer, (int)(Skyline.DataMiner.SDM.AssetManagement.SlcAssetManagement.Enums.Outputtype)value);
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.OutputType), comparer, (int)(SlcAsset_Management.Enums.Outputtype)value);
 				case "PowerPortInfo.PortExposure":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.PortExposure), comparer, (int)(Skyline.DataMiner.SDM.AssetManagement.SlcAssetManagement.Enums.PortExposure)value);
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.PortExposure), comparer, (int)(SlcAsset_Management.Enums.PortExposureEnum)value);
 				case "PowerPortInfo.PortType":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.PortType), comparer, Convert.ToString((System.Guid)value));
 				case "PowerPortInfo.Label":

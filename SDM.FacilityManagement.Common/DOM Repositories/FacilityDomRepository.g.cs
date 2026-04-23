@@ -20,7 +20,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 	using Skyline.DataMiner.Net.Sections;
 	using Skyline.DataMiner.Net.SubscriptionFilters;
 	using Skyline.DataMiner.SDM;
-	using Skyline.DataMiner.SDM.FacilityManagement.Enums;
 	using SLDataGateway.API.Querying;
 	using SLDataGateway.API.Types.Querying;
 
@@ -536,7 +535,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 				var _facilitytype = _facilitypropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityDomMapper.FacilityProperties.FacilityType);
 				if (_facilitytype != null)
 				{
-					obj.FacilityType = (SlcFacilityManagement.Enums.FacilityType)Enum.Parse(typeof(SlcFacilityManagement.Enums.FacilityType), _facilitytype.Value);
+					obj.FacilityType = (SharedMappers.DomIds.SlcFacility_Management.Enums.FacilityTypeEnum)Enum.Parse(typeof(SharedMappers.DomIds.SlcFacility_Management.Enums.FacilityTypeEnum), _facilitytype.Value);
 				}
 
 				var _address = _facilitypropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityDomMapper.FacilityProperties.Address);

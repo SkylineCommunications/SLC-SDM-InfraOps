@@ -29,9 +29,8 @@
   
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" />
-    <PackageReference Include="Skyline.DataMiner.Dev.Utils.SDM.Abstractions" />
+    <PackageReference Include="Skyline.DataMiner.SDM" />
     <PackageReference Include="Skyline.DataMiner.SDM.Linq" />
-    <!--<PackageReference Include="Skyline.DataMiner.SDM.SourceGenerator"/>-->
     <PackageReference Include="Skyline.DataMiner.Utils.DOM" />
     <PackageReference Include="Skyline.DataMiner.Utils.SecureCoding.Analyzers">
       <PrivateAssets>all</PrivateAssets>
@@ -39,5 +38,11 @@
     </PackageReference>
   </ItemGroup>
   
+  <ItemGroup>
+    <Folder Include="Enums\" />
+  </ItemGroup>
+  
   <Import Project="..\SharedMappers\SharedMappers.projitems" Label="Shared" />
+  
+  <Import Project="..\SharedValidation\SharedValidation.projitems" Label="Shared" />
 </Project>

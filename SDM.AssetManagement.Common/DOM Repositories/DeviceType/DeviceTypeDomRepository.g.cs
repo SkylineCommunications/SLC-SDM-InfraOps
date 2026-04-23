@@ -9,7 +9,10 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-	using Skyline.DataMiner.Net;
+
+    using SharedMappers.DomIds;
+
+    using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Apps.Sections.Sections;
 	using Skyline.DataMiner.Net.Helper;
@@ -539,7 +542,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				var _tags = _tagsinfoSection.GetListValue<int>(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.TagsInfo.Tags);
 				if (_tags != null)
 				{
-					obj.TagsInfo.Tags = _tags.Values.Select(v => (SlcAssetManagement.Enums.TagOption)v).ToList();
+					obj.TagsInfo.Tags = _tags.Values.Select(v => (SlcAsset_Management.Enums.TagOption)v).ToList();
 				}
 			}
 
@@ -560,19 +563,20 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			return obj;
 		}
 
-		private static SlcAssetManagement.Enums.HierarchyRole FromDomHierarchyRole(string value)
+		private static SlcAsset_Management.Enums.HierarchyRoleEnum FromDomHierarchyRole(string value)
+
 		{
 			switch (value)
 			{
 				case "Sub-Card":
-					return SlcAssetManagement.Enums.HierarchyRole.SubCard;
+					return SlcAsset_Management.Enums.HierarchyRoleEnum.SubCard;
 
 				case "Power Supply":
-					return SlcAssetManagement.Enums.HierarchyRole.PowerSupply;
+					return SlcAsset_Management.Enums.HierarchyRoleEnum.PowerSupply;
 
 				default:
-					return (SlcAssetManagement.Enums.HierarchyRole)
-						Enum.Parse(typeof(SlcAssetManagement.Enums.HierarchyRole), value);
+					return (SlcAsset_Management.Enums.HierarchyRoleEnum)
+						Enum.Parse(typeof(SlcAsset_Management.Enums.HierarchyRoleEnum), value);
 			}
 		}
 
@@ -636,14 +640,14 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			return instance;
 		}
 
-		private static string ToDomHierarchyRole(SlcAssetManagement.Enums.HierarchyRole role)
+		private static string ToDomHierarchyRole(SlcAsset_Management.Enums.HierarchyRoleEnum role)
 		{
 			switch (role)
 			{
-				case SlcAssetManagement.Enums.HierarchyRole.SubCard:
+				case SlcAsset_Management.Enums.HierarchyRoleEnum.SubCard:
 					return "Sub-Card";
 
-				case SlcAssetManagement.Enums.HierarchyRole.PowerSupply:
+				case SlcAsset_Management.Enums.HierarchyRoleEnum.PowerSupply:
 					return "Power Supply";
 
 				default:
@@ -668,7 +672,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				case "HierarchyInfo.Identifier":
 					return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.SectionIds, comparer, Guid.Parse((string)value));
 				case "HierarchyInfo.HierarchyRole":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.HierarchyInfo.HierarchyRole), comparer, ToDomHierarchyRole((SlcAssetManagement.Enums.HierarchyRole)(int)value));
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.HierarchyInfo.HierarchyRole), comparer, ToDomHierarchyRole((SlcAsset_Management.Enums.HierarchyRoleEnum)(int)value));
 				default:
 					throw new NotImplementedException();
 			}

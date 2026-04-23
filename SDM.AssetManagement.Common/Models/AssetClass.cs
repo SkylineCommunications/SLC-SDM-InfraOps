@@ -9,8 +9,6 @@
     using SharedMappers.DomIds;
 
     using Skyline.DataMiner.SDM;
-    using Skyline.DataMiner.SDM.AssetManagement;
-    using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     //[GenerateExposers]
@@ -51,10 +49,10 @@
         public Guid Id { get; set; }
 
         // PUBLIC API: Simple types (consumers see these)
-        public string DeviceName
+        public string Name
         {
-            get => DeviceNameField.Value;
-            set => DeviceNameField.Value = value;
+            get => NameField.Value;
+            set => NameField.Value = value;
         }
 
         public SdmObjectReference<DeviceType> DeviceTypeId
@@ -63,10 +61,10 @@
             set => DeviceTypeIdField.Value = value;
         }
 
-        public string DeviceDescription
+        public string Description
         {
-            get => DeviceDescriptionField.Value;
-            set => DeviceDescriptionField.Value = value;
+            get => DescriptionField.Value;
+            set => DescriptionField.Value = value;
         }
 
         public Guid Manufacturer
@@ -103,6 +101,12 @@
         {
             get => WeightField.Value;
             set => WeightField.Value = value;
+        }
+
+        public string Plan
+        {
+            get => PlanField.Value;
+            set => PlanField.Value = value;
         }
 
         public string FrontImage
@@ -161,8 +165,8 @@
 
         // INTERNAL: Change tracking fields (validation handler uses these)
         [JsonIgnore]
-        internal IChangeTrackingField<string> DeviceNameField => FieldHandler.GetOrCreateField(
-            nameof(DeviceName),
+        internal IChangeTrackingField<string> NameField => FieldHandler.GetOrCreateField(
+            nameof(Name),
             () => new ChangeTrackingStringField(null));
 
         [JsonIgnore]
@@ -171,8 +175,8 @@
             () => new ChangeTrackingField<SdmObjectReference<DeviceType>>(default));
 
         [JsonIgnore]
-        internal IChangeTrackingField<string> DeviceDescriptionField => FieldHandler.GetOrCreateField(
-            nameof(DeviceDescription),
+        internal IChangeTrackingField<string> DescriptionField => FieldHandler.GetOrCreateField(
+            nameof(Description),
             () => new ChangeTrackingStringField(null));
 
         [JsonIgnore]
@@ -204,6 +208,11 @@
         internal IChangeTrackingField<double> WeightField => FieldHandler.GetOrCreateField(
             nameof(Weight),
             () => new ChangeTrackingField<double>(0));
+
+        [JsonIgnore]
+        internal IChangeTrackingField<string> PlanField => FieldHandler.GetOrCreateField(
+           nameof(FrontImage),
+           () => new ChangeTrackingStringField(null));
 
         [JsonIgnore]
         internal IChangeTrackingField<string> FrontImageField => FieldHandler.GetOrCreateField(

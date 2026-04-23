@@ -28,7 +28,7 @@
   </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="Skyline.DataMiner.Dev.Utils.SDM.Abstractions" />
+    <PackageReference Include="Skyline.DataMiner.SDM" />
     <PackageReference Include="Skyline.DataMiner.Utils.SecureCoding.Analyzers">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -39,6 +39,10 @@
 		<PackageReference Include="Skyline.DataMiner.Utils.DOM" />
 		<PackageReference Include="Skyline.DataMiner.Utils.PerformanceAnalyzer" />
 		<PackageReference Include="Skyline.DataMiner.Utils.SecureCoding" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Folder Include="Enums\" />
   </ItemGroup>
   
   <Import Project="..\SharedMappers\SharedMappers.projitems" Label="Shared" />

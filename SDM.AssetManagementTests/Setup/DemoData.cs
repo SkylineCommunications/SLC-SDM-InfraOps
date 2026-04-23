@@ -242,9 +242,9 @@
 			{
 				Identifier = newId.ToString(),
 				Id = newId,
-				DeviceName = deviceName,
+				Name = deviceName,
 				DeviceTypeId = new SdmObjectReference<DeviceType>(Guid.NewGuid().ToString()),
-				DeviceDescription = deviceDescription,
+				Description = deviceDescription,
 				Manufacturer = Guid.NewGuid(),
 				Depth = depth,
 				Height = height,

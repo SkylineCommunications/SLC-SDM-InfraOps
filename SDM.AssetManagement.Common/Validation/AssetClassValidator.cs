@@ -97,7 +97,7 @@
         /// <returns>A <see cref="ValidationResult"/> indicating whether the asset class name is valid.</returns>
         public ValidationResult IsAssetClassNameValid(AssetClass assetClass)
         {
-            return IsAssetClassNameValid(assetClass.DeviceName, new List<string> { assetClass.Identifier });
+            return IsAssetClassNameValid(assetClass.Name, new List<string> { assetClass.Identifier });
         }
 
         #region Pipeline Construction
@@ -129,7 +129,7 @@
             var result = new ValidationResult();
 
             // Name is critical - must be valid before other checks
-            if (assetClass.DeviceNameField.Changed)
+            if (assetClass.NameField.Changed)
             {
                 result.AddFailuresFrom(IsAssetClassNameValid(assetClass));
             }

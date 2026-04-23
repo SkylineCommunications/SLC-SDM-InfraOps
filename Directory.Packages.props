@@ -6,7 +6,7 @@
     <!-- Add your package versions here -->
     <!-- Example: -->
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.4" />
-    <PackageVersion Include="Skyline.DataMiner.Dev.Utils.SDM.Abstractions" Version="1.0.1" />
+    <PackageVersion Include="Skyline.DataMiner.SDM" Version="1.0.1" />
     <PackageVersion Include="Skyline.DataMiner.SDM.Linq" Version="1.0.1" />
     <PackageVersion Include="Skyline.DataMiner.Utils.DOM" Version="10.5.2.4" />
     <PackageVersion Include="Skyline.DataMiner.Utils.PerformanceAnalyzer" Version="3.0.2" />

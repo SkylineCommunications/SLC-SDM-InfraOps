@@ -19,7 +19,7 @@
 
 			string deviceName = "KVM Switch";
 			var nameFilter = AssetClassExposers.DeviceName.Equal(deviceName);
-			var expected = DemoData.AssetClasses.Single(asset => asset.DeviceName.Equals(deviceName));
+			var expected = DemoData.AssetClasses.Single(asset => asset.Name.Equals(deviceName));
 
 			var classesRetrieved = helper.AssetClasses.Read(nameFilter);
 
@@ -29,7 +29,7 @@
 				classesRetrieved.Count().Should().Be(1);
 				var assetClass = classesRetrieved.First();
 
-				assetClass.DeviceName.Should().Be(expected.DeviceName);
+				assetClass.Name.Should().Be(expected.Name);
 				assetClass.DeviceTypeId.Should().Be(expected.DeviceTypeId);
 				assetClass.Manufacturer.Should().Be(expected.Manufacturer);
 				assetClass.Depth.Should().Be(expected.Depth);
@@ -68,8 +68,8 @@
 				var assetClass = classesRetrieved.First();
 
 				// Assert all fields and properties
-				assetClass.DeviceName.Should().Be(expected.DeviceName);
-				assetClass.DeviceDescription.Should().Be(expected.DeviceDescription);
+				assetClass.Name.Should().Be(expected.Name);
+				assetClass.Description.Should().Be(expected.Description);
 				assetClass.DeviceTypeId.Should().Be(expected.DeviceTypeId);
 				assetClass.Manufacturer.Should().Be(expected.Manufacturer);
 				assetClass.Depth.Should().Be(expected.Depth);
@@ -125,7 +125,7 @@
 				classesRetrieved.Count().Should().Be(1);
 				var assetClass = classesRetrieved.First();
 				assetClass.Width.Should().Be(width);
-				assetClass.DeviceName.Should().Be(expected.DeviceName);
+				assetClass.Name.Should().Be(expected.Name);
 			}
 		}
 
@@ -191,8 +191,8 @@
 				classesRetrieved.Count().Should().Be(1);
 				var assetClass = classesRetrieved.First();
 
-				assetClass.DeviceName.Should().Be(assetClass.DeviceName);
-				assetClass.DeviceDescription.Should().Be(assetClass.DeviceDescription);
+				assetClass.Name.Should().Be(assetClass.Name);
+				assetClass.Description.Should().Be(assetClass.Description);
 				assetClass.DeviceTypeId.Should().Be(assetClass.DeviceTypeId);
 				assetClass.Manufacturer.Should().Be(assetClass.Manufacturer);
 				assetClass.Depth.Should().Be(assetClass.Depth);
@@ -295,8 +295,8 @@
 				classesRetrieved.Count().Should().Be(1);
 				var assetClass = classesRetrieved.First();
 
-				assetClass.DeviceName.Should().Be(expected.DeviceName);
-				assetClass.DeviceDescription.Should().Be(expected.DeviceDescription);
+				assetClass.Name.Should().Be(expected.Name);
+				assetClass.Description.Should().Be(expected.Description);
 				assetClass.DeviceTypeId.Should().Be(expected.DeviceTypeId);
 				assetClass.Manufacturer.Should().Be(expected.Manufacturer);
 				assetClass.Depth.Should().Be(expected.Depth);

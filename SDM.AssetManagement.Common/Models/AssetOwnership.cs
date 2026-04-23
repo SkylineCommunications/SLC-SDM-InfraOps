@@ -1,72 +1,100 @@
 ﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
     using System;
+    using System.Data;
+    using System.Runtime.Serialization;
 
-    public sealed class AssetOwnership : IEquatable<AssetOwnership>
-	{
-		public Guid Organization { get; set; }
+    using Newtonsoft.Json;
 
-		public Guid ContactPersonId { get; set; } // Linked to People DOM Definition in P&O
+    using SharedMappers.DomIds;
 
-		public Guid ContactPersonRoleId { get; set; } // Linked to Roles DOM Definition in P&O
+    using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
-		public Guid TeamId { get; set; } // Linked to Teams DOM Definition in P&O
+    public class AssetOwnership
+    {
+        [JsonIgnore]
+        private ChangeTrackingFieldHandler _fieldHandler;
 
-		public static bool operator ==(AssetOwnership left, AssetOwnership right)
-		{
-			if (ReferenceEquals(left, right))
-			{
-				return true;
-			}
+        public AssetOwnership()
+        {
+            _fieldHandler = new ChangeTrackingFieldHandler();
+        }
 
-			if (left is null || right is null)
-			{
-				return false;
-			}
+        [JsonIgnore]
+        private ChangeTrackingFieldHandler FieldHandler
+        {
+            get
+            {
+                if (_fieldHandler == null)
+                {
+                    _fieldHandler = new ChangeTrackingFieldHandler();
+                }
+                return _fieldHandler;
+            }
+        }
 
-			return left.Equals(right);
-		}
+        [OnDeserialized]
+        internal void OnDeserializedMethod(StreamingContext context)
+        {
+            ResetChangeTracking();
+        }
 
-		public static bool operator !=(AssetOwnership left, AssetOwnership right)
-		{
-			return !(left == right);
-		}
+        #region Public Properties
 
-		public override bool Equals(object obj)
-		{
-			return Equals(obj as AssetOwnership);
-		}
+        public Guid Organization
+        {
+            get => OrganizationField.Value;
+            set => OrganizationField.Value = value;
+        }
 
-		public bool Equals(AssetOwnership other)
-		{
-			if (other is null)
-			{
-				return false;
-			}
+        public Guid ContactPerson
+        {
+            get => ContactPersonField.Value;
+            set => ContactPersonField.Value = value;
+        }
 
-			if (ReferenceEquals(this, other))
-			{
-				return true;
-			}
+        public Guid ContactPersonRole
+        {
+            get => ContactPersonRoleField.Value;
+            set => ContactPersonRoleField.Value = value;
+        }
 
-			return
-				Organization.Equals(other.Organization) &&
-				ContactPersonId.Equals(other.ContactPersonId) &&
-				ContactPersonRoleId.Equals(other.ContactPersonRoleId) &&
-				TeamId.Equals(other.TeamId);
-		}
+        public Guid Team
+        {
+            get => TeamField.Value;
+            set => TeamField.Value = value;
+        }
 
-		public override int GetHashCode()
-		{
-			unchecked
-			{
-				int hash = 17;
-				hash = (hash * 23) + Organization.GetHashCode();
-				hash = (hash * 23) + ContactPersonId.GetHashCode();
-				hash = (hash * 23) + ContactPersonRoleId.GetHashCode();
-				hash = (hash * 23) + TeamId.GetHashCode();
-				return hash;
-			}
-		}
-	}
+        #endregion
+
+        #region Internal Tracking Fields
+
+        [JsonIgnore]
+        internal IChangeTrackingField<Guid> OrganizationField => FieldHandler.GetOrCreateField(
+            nameof(Organization),
+            () => new ChangeTrackingField<Guid>(default));
+
+        [JsonIgnore]
+        internal IChangeTrackingField<Guid> ContactPersonField => FieldHandler.GetOrCreateField(
+            nameof(ContactPerson),
+            () => new ChangeTrackingField<Guid>(default));
+
+        [JsonIgnore]
+        internal IChangeTrackingField<Guid> ContactPersonRoleField => FieldHandler.GetOrCreateField(
+            nameof(ContactPersonRole),
+            () => new ChangeTrackingField<Guid>(default));
+
+        [JsonIgnore]
+        internal IChangeTrackingField<Guid> TeamField => FieldHandler.GetOrCreateField(
+            nameof(Team),
+            () => new ChangeTrackingField<Guid>(default));
+
+        #endregion
+
+        public void ResetChangeTracking()
+        {
+            FieldHandler?.ApplyChanges();
+        }
+    }
 }

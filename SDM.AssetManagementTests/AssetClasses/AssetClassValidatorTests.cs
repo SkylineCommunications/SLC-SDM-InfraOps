@@ -70,7 +70,7 @@
             var assetClass = new AssetClass
             {
                 Identifier = "ac-123",
-                DeviceName = "Valid Device",
+                Name = "Valid Device",
                 DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier),
                 Depth = 10,
                 Width = 20,
@@ -101,7 +101,7 @@
 
             var assetClass = new AssetClass
             {
-                DeviceName = "Test",
+                Name = "Test",
                 DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier),
                 Depth = -5,      // Invalid: negative
                 Width = -10,     // Invalid: negative
@@ -126,7 +126,7 @@
 
             var assetClass = new AssetClass
             {
-                DeviceName = "Test",
+                Name = "Test",
                 DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier),
                 Depth = -5,
                 Width = 20
@@ -205,7 +205,7 @@
             _helper.PopulateAssetClasses(new[] { existingAssetClass });
 
             // Act
-            var result = _validator.IsAssetClassNameValid(existingAssetClass.DeviceName, null);
+            var result = _validator.IsAssetClassNameValid(existingAssetClass.Name, null);
 
             // Assert
             Assert.IsFalse(result.IsValid);
@@ -225,7 +225,7 @@
             var exceptIdentifiers = new List<string> { existingAssetClass.Identifier };
 
             // Act
-            var result = _validator.IsAssetClassNameValid(existingAssetClass.DeviceName, exceptIdentifiers);
+            var result = _validator.IsAssetClassNameValid(existingAssetClass.Name, exceptIdentifiers);
 
             // Assert
             Assert.IsTrue(result.IsValid);
@@ -242,7 +242,7 @@
             var assetClass = new AssetClass
             {
                 Identifier = "ac-123",
-                DeviceName = "Test Device"
+                Name = "Test Device"
             };
 
             // Act
@@ -273,7 +273,7 @@
 
             var assetClass = new AssetClass
             {
-                DeviceName = "Power Device",
+                Name = "Power Device",
                 DeviceTypeId = new SdmObjectReference<DeviceType>(powerProviderDeviceType.Identifier),
                 PowerSupply = SlcAsset_Management.Enums.PowerSupplyEnum.AC,
             };
@@ -291,7 +291,7 @@
             // Arrange
             var assetClass = new AssetClass
             {
-                DeviceName = "Test Device",
+                Name = "Test Device",
                 DeviceTypeId = new SdmObjectReference<DeviceType>("dt-missing"),
                 PowerSupply = SlcAsset_Management.Enums.PowerSupplyEnum.AC
             };
@@ -320,7 +320,7 @@
 
             var assetClass = new AssetClass
             {
-                DeviceName = "Test",
+                Name = "Test",
                 DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier),
                 DataPorts = new List<DataPortInfo>
                 {
@@ -349,7 +349,7 @@
 
             var assetClass = new AssetClass
             {
-                DeviceName = "Test",
+                Name = "Test",
                 DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier),
                 PowerPorts = new List<PowerPortInfo>
                 {
@@ -377,7 +377,7 @@
 
             var assetClass = new AssetClass
             {
-                DeviceName = "Test",
+                Name = "Test",
                 DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier),
                 Holders = new List<AssetHolder>
                 {
@@ -418,7 +418,7 @@
 
             var assetClass = new AssetClass
             {
-                DeviceName = "Test",
+                Name = "Test",
                 DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier),
                 Depth = -10,
                 Width = -20,
@@ -451,7 +451,7 @@
             var newAssetClass = new AssetClass
             {
                 Identifier = "new-ac",
-                DeviceName = "Brand New Device",
+                Name = "Brand New Device",
                 DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier),
                 Depth = 10,
                 Width = 20

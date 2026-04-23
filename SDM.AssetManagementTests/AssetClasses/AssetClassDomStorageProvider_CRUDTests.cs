@@ -23,7 +23,7 @@
 			{
 				Identifier = id.ToString(),
 				Id = id,
-				DeviceName = "Reference Class",
+				Name = "Reference Class",
 				DeviceTypeId = new SdmObjectReference<DeviceType>(Guid.NewGuid().ToString()),
 				Manufacturer = Guid.NewGuid(),
 				Lifecycle = new AssetClassLifecycle
@@ -32,7 +32,7 @@
 					EndOfService = DateTime.UtcNow.AddYears(3),
 					NominalLifetime = TimeSpan.FromDays(365 * 7),
 				},
-				DeviceDescription = "A dummy asset class for testing.",
+				Description = "A dummy asset class for testing.",
 				Height = 2.0,
 				Depth = 0.5,
 				Width = 0.4,
@@ -129,7 +129,7 @@
 			{
 				Identifier = referenceAssetClass.Identifier,
 				Id = referenceAssetClass.Id,
-				DeviceName = "Updated Class Name",
+				Name = "Updated Class Name",
 				DeviceTypeId = new SdmObjectReference<DeviceType>(Guid.NewGuid().ToString()),
 				Manufacturer = Guid.NewGuid(),
 				Lifecycle = new AssetClassLifecycle
@@ -138,7 +138,7 @@
 					EndOfService = DateTime.UtcNow.AddYears(8),
 					NominalLifetime = TimeSpan.FromDays(365 * 10),
 				},
-				DeviceDescription = "Updated asset class description.",
+				Description = "Updated asset class description.",
 				Height = 30.0,
 				Depth = 70.0,
 				Width = 60.0,
@@ -230,10 +230,10 @@
 			using (new AssertionScope())
 			{
 				updated.Id.Should().Be(original.Id);
-				updated.DeviceName.Should().NotBe(original.DeviceName);
-				updated.DeviceName.Should().Be("Updated Class Name");
-				updated.DeviceDescription.Should().NotBe(original.DeviceDescription);
-				updated.DeviceDescription.Should().Be("Updated asset class description.");
+				updated.Name.Should().NotBe(original.Name);
+				updated.Name.Should().Be("Updated Class Name");
+				updated.Description.Should().NotBe(original.Description);
+				updated.Description.Should().Be("Updated asset class description.");
                 updated.Manufacturer.Should().NotBe(original.Manufacturer);
                 updated.Height.Should().Be(30.0);
 				updated.Depth.Should().Be(70.0);
@@ -269,9 +269,9 @@
 
 				var createdClass = helper.AssetClasses.Read(new TRUEFilterElement<AssetClass>()).First();
 				createdClass.Should().NotBeNull();
-				createdClass.DeviceName.Should().Be("Reference Class");
+				createdClass.Name.Should().Be("Reference Class");
                 createdClass.Manufacturer.Should().NotBe(Guid.Empty);
-                createdClass.DeviceDescription.Should().Be("A dummy asset class for testing.");
+                createdClass.Description.Should().Be("A dummy asset class for testing.");
 				createdClass.Height.Should().Be(2.0);
 				createdClass.Depth.Should().Be(0.5);
 				createdClass.Width.Should().Be(0.4);
