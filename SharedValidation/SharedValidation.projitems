@@ -6,11 +6,29 @@
     <SharedGUID>c89d184b-e9af-41e0-9a33-4d218a04bcf7</SharedGUID>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
-    <Import_RootNamespace>SharedValidation</Import_RootNamespace>
+    <Import_RootNamespace>SharedCommonLibrary</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)DomInstanceField\DomInstanceArrayField.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\SDMObjectReferenceExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\Models\Facility.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\Models\FacilityRelation.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)facilitymanagement\models\Floor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\Models\FloorRelation.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\Models\ImageInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)facilitymanagement\models\Rack.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\Models\RackCapacity.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\Models\ResourceLink.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\Models\Room.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)facilitymanagement\models\RoomOwnership.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)facilitymanagement\models\RoomRelation.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\Models\Row.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\Models\RowRelation.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)facilitymanagement\models\Site.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\Models\SiteRelation.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)facilitymanagement\models\Zone.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\Models\ZoneCapacity.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\Models\ZoneRelation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)validation\InfraOpsException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)validation\NumericValidator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)validation\ValidationException.cs" />

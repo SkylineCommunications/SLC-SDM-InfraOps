@@ -33,5 +33,12 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 			internal static FieldDescriptorID Latitude = SharedMappers.DomIds.SlcFacility_Management.Sections.FacilityInformation.Latitude;
 			internal static FieldDescriptorID Longitude = SharedMappers.DomIds.SlcFacility_Management.Sections.FacilityInformation.Longitude;
 		}
-	}
+
+        internal static class SiteFk
+        {
+            internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(SharedMappers.DomIds.SlcFacility_Management.Sections.Site.Id.Id)
+            { ModuleId = ModuleId };
+            internal static FieldDescriptorID Site = SharedMappers.DomIds.SlcFacility_Management.Sections.Site.Site_f08b42c7;
+        }
+    }
 }

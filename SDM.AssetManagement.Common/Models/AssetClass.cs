@@ -145,15 +145,15 @@
             set => LifecycleField.Value = value;
         }
 
-        public List<DataPortInfo> DataPorts
+        public List<DataPort> DataPorts
         {
-            get => DataPortsField.Value ?? new List<DataPortInfo>();
+            get => DataPortsField.Value ?? new List<DataPort>();
             set => DataPortsField.Value = value;
         }
 
-        public List<PowerPortInfo> PowerPorts
+        public List<PowerPort> PowerPorts
         {
-            get => PowerPortsField.Value ?? new List<PowerPortInfo>();
+            get => PowerPortsField.Value ?? new List<PowerPort>();
             set => PowerPortsField.Value = value;
         }
 
@@ -245,14 +245,14 @@
             () => new ChangeTrackingField<AssetClassLifecycle>(new AssetClassLifecycle()));
 
         [JsonIgnore]
-        internal ChangeTrackingArrayField<DataPortInfo> DataPortsField => FieldHandler.GetOrCreateArrayField(
+        internal ChangeTrackingArrayField<DataPort> DataPortsField => FieldHandler.GetOrCreateArrayField(
             nameof(DataPorts),
-            () => new ChangeTrackingArrayField<DataPortInfo>(new List<DataPortInfo>()));
+            () => new ChangeTrackingArrayField<DataPort>(new List<DataPort>()));
 
         [JsonIgnore]
-        internal ChangeTrackingArrayField<PowerPortInfo> PowerPortsField => FieldHandler.GetOrCreateArrayField(
+        internal ChangeTrackingArrayField<PowerPort> PowerPortsField => FieldHandler.GetOrCreateArrayField(
             nameof(PowerPorts),
-            () => new ChangeTrackingArrayField<PowerPortInfo>(new List<PowerPortInfo>()));
+            () => new ChangeTrackingArrayField<PowerPort>(new List<PowerPort>()));
 
         [JsonIgnore]
         internal ChangeTrackingArrayField<AssetHolder> HoldersField => FieldHandler.GetOrCreateArrayField(

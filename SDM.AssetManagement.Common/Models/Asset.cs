@@ -186,7 +186,7 @@
             set => HoldersField.Value = value;
         }
 
-        public List<ElementLink> Elements
+        public List<ElementLink> ElementLinks
         {
             get => ElementsField.Value ?? new List<ElementLink>();
             set => ElementsField.Value = value;
@@ -319,7 +319,7 @@
 
         [JsonIgnore]
         internal ChangeTrackingArrayField<ElementLink> ElementsField => FieldHandler.GetOrCreateArrayField(
-            nameof(Elements),
+            nameof(ElementLinks),
             () => new ChangeTrackingArrayField<ElementLink>(new List<ElementLink>()));
 
         #endregion

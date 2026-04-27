@@ -7,11 +7,6 @@
     using SharedMappers.DomIds;
 
     using Skyline.DataMiner.SDM.AssetManagement.Common.Validation;
-    using Skyline.DataMiner.Utils.InfraOps.Common.DOM_Classes.DOM.Applications.All.Validations;
-    using Skyline.DataMiner.Utils.InfraOps.Common.DOM_Classes.DOM.Applications.Asset_Manager.Wrappers;
-    using Skyline.DataMiner.Utils.InfraOps.Common.DOM_Classes.DOM.Applications.DomIds;
-    using Skyline.DataMiner.Utils.InfraOps.Common.DOM_Classes.DOM.Applications.Facility_Manager.Validations;
-    using Skyline.DataMiner.Utils.InfraOps.Common.Validation;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
     public static class AssetValidationHandler

@@ -2,9 +2,11 @@
 {
 	using System;
 
-	// [GenerateExposers]
-	// [SdmDomStorage("(slc)asset_management")]
-	public class PowerPort : SdmObject<PowerPort>
+    using SharedMappers.DomIds;
+
+    // [GenerateExposers]
+    // [SdmDomStorage("(slc)asset_management")]
+    public class PowerPort : SdmObject<PowerPort>
 	{
 		public PowerPortInfo PowerPortInfo { get; set; } = new PowerPortInfo();
 
@@ -18,9 +20,9 @@
 
 		public long PortNumber { get; set; }
 
-		public SlcAssetManagement.Enums.Outputtype OutputType { get; set; }
+		public SlcAsset_Management.Enums.Outputtype OutputType { get; set; }
 
-		public SlcAssetManagement.Enums.PortExposure PortExposure { get; set; }
+		public SlcAsset_Management.Enums.PortExposureEnum PortExposure { get; set; }
 
 		public Guid PortType { get; set; } = Guid.Empty; // resolve the SdmObjectReference
 

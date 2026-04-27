@@ -2,9 +2,11 @@
 {
 	using System;
 
-	// [GenerateExposers]
-	// [SdmDomStorage("(slc)asset_management")]
-	public sealed class DataPort : SdmObject<DataPort>, IEquatable<DataPort>
+    using SharedMappers.DomIds;
+
+    // [GenerateExposers]
+    // [SdmDomStorage("(slc)asset_management")]
+    public sealed class DataPort : SdmObject<DataPort>, IEquatable<DataPort>
 	{
 		public DataPortInfo DataPortInfo { get; set; } = new DataPortInfo();
 
@@ -59,9 +61,9 @@
 
 		public long PortNumber { get; set; }
 
-		public SlcAssetManagement.Enums.Outputtype OutputType { get; set; }
+		public SlcAsset_Management.Enums.Outputtype OutputType { get; set; }
 
-		public SlcAssetManagement.Enums.PortExposure PortExposure { get; set; }
+		public SlcAsset_Management.Enums.PortExposureEnum PortExposure { get; set; }
 
 		public Guid Type { get; set; } = Guid.Empty;
 

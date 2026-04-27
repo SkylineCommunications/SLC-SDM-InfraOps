@@ -4,7 +4,7 @@
     using System.Collections.Generic;
     using System.Linq;
 
-    public class ChangeTrackingField<T1> : IChangeTrackingField<T1>, IEquatable<ChangeTrackingField<T1>>, IEquatable<T1>
+    public class ChangeTrackingField<T1> : IChangeTrackingField<T1>, IDomInstanceFieldApplyChanges, IEquatable<ChangeTrackingField<T1>>, IEquatable<T1>
 	{
 		private readonly Func<T1, object> _getChangesConverter;
 
@@ -23,7 +23,6 @@
 
             _fieldSetter = null;
 
-            //_applyChanges = applyChanges ?? throw new ArgumentNullException(nameof(applyChanges));
             _getChangesConverter = getChangesConverter;
             //_valueIsNullChecker = valueIsNullChecker ?? ((val) => val == null);
 
@@ -131,16 +130,15 @@
 			Value = _originalValue;
 		}
 
-		//public void ApplyChanges()
-		//{
-		//	_applyChanges.Invoke(_originalValue, _currentValue);
-		//	_originalValue = _currentValue;
-		//	_originalValueChanges = _getChangesConverter?.Invoke(_originalValue) ?? _originalValue;
-		//}
+        public void ApplyChanges()
+        {
+            _originalValue = _currentValue;
+            _originalValueChanges = _getChangesConverter?.Invoke(_originalValue) ?? _originalValue;
+        }
 
-		#region Equatable
+        #region Equatable
 
-		public override bool Equals(object obj)
+        public override bool Equals(object obj)
 		{
 			if (obj is ChangeTrackingField<T1> otherField)
 			{

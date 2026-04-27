@@ -10,7 +10,10 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 	using System.Collections;
 	using System.Collections.Generic;
 	using System.Linq;
-	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+
+    using SharedMappers.DomIds;
+
+    using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.SDM;
 	using Skyline.DataMiner.SDM.Exposers;
 	using SLDataGateway.API.Querying;
@@ -19,16 +22,16 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 	public static partial class AssetExposers
 	{
 		public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, string> Identifier = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, string>((obj) => obj.Identifier, "Identifier");
-		public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, string> AssetId = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, string>((obj) => obj.AssetId, "AssetId");
-		public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, string> AssetName = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, string>((obj) => obj.AssetName, "AssetName");
-		public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass>> AssetClass = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass>>((obj) => obj.AssetClass, "AssetClass");
-		public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, string> AssetDescription = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, string>((obj) => obj.AssetDescription, "AssetDescription");
-		public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, string> FwOs = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, string>((obj) => obj.FwOs, "FwOs");
+		public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, string> AssetId = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, string>((obj) => obj.AssetID, "AssetId");
+		public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, string> AssetName = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, string>((obj) => obj.Name, "AssetName");
+		public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass>> AssetClass = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass>>((obj) => obj.AssetClassId, "AssetClass");
+		public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, string> AssetDescription = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, string>((obj) => obj.Description, "AssetDescription");
+		public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, string> FwOs = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, string>((obj) => obj.FW_OS, "FwOs");
 		public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, string> SerialNumber = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, string>((obj) => obj.SerialNumber, "SerialNumber");
 		public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, string> HardwareVersion = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, string>((obj) => obj.HardwareVersion, "HardwareVersion");
 		public static partial class NetworkDetails
 		{
-			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, string> MACAddress = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, string>((obj) => obj.NetworkDetails.MACAddress, "NetworkDetails.MACAddress");
+			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, string> MACAddress = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, string>((obj) => obj.MacAddress, "NetworkDetails.MacAddress");
 		}
 
 		public static partial class Location
@@ -37,47 +40,47 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.Asset>> ParentAsset = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.Asset>>((obj) => obj.Location.ParentAsset, "Location.ParentAsset");
 			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, System.Guid> RackId = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, System.Guid>((obj) => obj.Location.RackId, "Location.RackId");
 			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, long> RackPosition = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, long>((obj) => obj.Location.RackPosition, "Location.RackPosition");
-			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, Skyline.DataMiner.SDM.AssetManagement.SlcAssetManagement.Enums.Side> Side = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, Skyline.DataMiner.SDM.AssetManagement.SlcAssetManagement.Enums.Side>((obj) => obj.Location.Side, "Location.Side");
+			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, SlcAsset_Management.Enums.SideEnum> Side = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, SlcAsset_Management.Enums.SideEnum>((obj) => obj.Location.Side, "Location.Side");
 			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, System.Guid> DeskId = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, System.Guid>((obj) => obj.Location.DeskId, "Location.DeskId");
-			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, System.Guid> ContainerId = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, System.Guid>((obj) => obj.Location.ContainerId, "Location.ContainerId");
+			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.FacilityManagement.Models.Facility>> ContainerId = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.FacilityManagement.Models.Facility>>((obj) => obj.Location.ContainerId, "Location.ContainerId");
 			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, System.Guid> RoomId = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, System.Guid>((obj) => obj.Location.RoomId, "Location.RoomId");
 		}
 
 		public static partial class Lifecycle
 		{
-			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, DateTime> PurchaseDate = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, DateTime>((obj) => obj.Lifecycle.PurchaseDate, "Lifecycle.PurchaseDate");
-			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, DateTime> FirstUseDate = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, DateTime>((obj) => obj.Lifecycle.FirstUseDate, "Lifecycle.FirstUseDate");
-			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, DateTime> EndOfWarrantyDate = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, DateTime>((obj) => obj.Lifecycle.EndOfWarrantyDate, "Lifecycle.EndOfWarrantyDate");
-			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, DateTime> InstallationDate = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, DateTime>((obj) => obj.Lifecycle.InstallationDate, "Lifecycle.InstallationDate");
-			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, System.Guid> InstallationUserId = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, System.Guid>((obj) => obj.Lifecycle.InstallationUserId, "Lifecycle.InstallationUserId");
-			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, DateTime> ModificationDate = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, DateTime>((obj) => obj.Lifecycle.ModificationDate, "Lifecycle.ModificationDate");
-			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, System.Guid> ModificationUserId = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, System.Guid>((obj) => obj.Lifecycle.ModificationUserId, "Lifecycle.ModificationUserId");
-			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, DateTime> EndOfLife = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, DateTime>((obj) => obj.Lifecycle.EndOfLife, "Lifecycle.EndOfLife");
+			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, DateTime> PurchaseDate = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, DateTime>((obj) => (DateTime)obj.PurchaseDate, "Lifecycle.PurchaseDate");
+			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, DateTime> FirstUseDate = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, DateTime>((obj) => (DateTime)obj.FirstUseDate, "Lifecycle.FirstUseDate");
+			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, DateTime> EndOfWarrantyDate = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, DateTime>((obj) => (DateTime)obj.EndOfWarrantyDate, "Lifecycle.EndOfWarrantyDate");
+			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, DateTime> InstallationDate = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, DateTime>((obj) => (DateTime)obj.InstallationDate, "Lifecycle.InstallationDate");
+			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, System.Guid> InstallationUserId = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, System.Guid>((obj) => obj.InstallationUserId, "Lifecycle.InstallationUserId");
+			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, DateTime> ModificationDate = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, DateTime>((obj) => (DateTime)obj.ModificationDate, "Lifecycle.ModificationDate");
+			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, System.Guid> ModificationUserId = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, System.Guid>((obj) => obj.ModificationUserId, "Lifecycle.ModificationUserId");
+			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, DateTime> EndOfLife = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, DateTime>((obj) => (DateTime)obj.EndOfLifeDate, "Lifecycle.EndOfLife");
 		}
 
 		public static partial class Ownership
 		{
 			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, System.Guid> OrganizationId = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, System.Guid>((obj) => obj.Ownership.Organization, "Ownership.Organization");
-			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, System.Guid> ContactPersonId = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, System.Guid>((obj) => obj.Ownership.ContactPersonId, "Ownership.ContactPersonId");
-			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, System.Guid> ContactPersonRoleId = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, System.Guid>((obj) => obj.Ownership.ContactPersonRoleId, "Ownership.ContactPersonRoleId");
-			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, System.Guid> TeamId = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, System.Guid>((obj) => obj.Ownership.TeamId, "Ownership.TeamId");
+			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, System.Guid> ContactPersonId = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, System.Guid>((obj) => obj.Ownership.ContactPerson, "Ownership.ContactPersonId");
+			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, System.Guid> ContactPersonRoleId = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, System.Guid>((obj) => obj.Ownership.ContactPersonRole, "Ownership.ContactPersonRoleId");
+			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, System.Guid> TeamId = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, System.Guid>((obj) => obj.Ownership.Team, "Ownership.TeamId");
 		}
 
 		public static partial class Custody
 		{
-			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, DateTime> From = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, DateTime>((obj) => obj.Custody.From, "Custody.From");
-			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, DateTime> Till = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, DateTime>((obj) => obj.Custody.Till, "Custody.Till");
-			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, System.Guid> ContactPersonId = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, System.Guid>((obj) => obj.Custody.ContactPersonId, "Custody.ContactPersonId");
-			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, System.Guid> TeamId = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, System.Guid>((obj) => obj.Custody.TeamId, "Custody.TeamId");
-			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, System.Guid> OrganizationId = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, System.Guid>((obj) => obj.Custody.OrganizationId, "Custody.OrganizationId");
-			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, System.Guid> ContactPersonRoleId = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, System.Guid>((obj) => obj.Custody.ContactPersonRoleId, "Custody.ContactPersonRoleId");
+			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, DateTime> From = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, DateTime>((obj) => (DateTime)obj.Custody.From, "Custody.From");
+			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, DateTime> Till = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, DateTime>((obj) => (DateTime)obj.Custody.Till, "Custody.Till");
+			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, System.Guid> ContactPersonId = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, System.Guid>((obj) => obj.Custody.ContactPerson, "Custody.ContactPersonId");
+			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, System.Guid> TeamId = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, System.Guid>((obj) => obj.Custody.Team, "Custody.TeamId");
+			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, System.Guid> OrganizationId = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, System.Guid>((obj) => obj.Custody.Organization, "Custody.OrganizationId");
+			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, System.Guid> ContactPersonRoleId = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, System.Guid>((obj) => obj.Custody.ContactPersonRole, "Custody.ContactPersonRoleId");
 		}
 
 		public static partial class Holders
 		{
 			public static readonly CollectionExposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, string> Identifier = new CollectionExposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, string>((obj) => obj.Holders.Where(x => x != null).Select(x => x.Identifier).Where(x => x != null), "Holders.Identifier");
 			public static readonly CollectionExposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, long> SlotNumber = new CollectionExposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, long>((obj) => obj.Holders.Where(x => x != null).Select(x => x.SlotNumber), "Holders.SlotNumber");
-			public static readonly CollectionExposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, Skyline.DataMiner.SDM.AssetManagement.SlcAssetManagement.Enums.HierarchyRole> HierarchyRole = new CollectionExposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, Skyline.DataMiner.SDM.AssetManagement.SlcAssetManagement.Enums.HierarchyRole>((obj) => obj.Holders.Where(x => x != null).Select(x => x.HierarchyRole), "Holders.HierarchyRole");
+			public static readonly CollectionExposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, SlcAsset_Management.Enums.HierarchyRoleEnum> HierarchyRole = new CollectionExposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, SlcAsset_Management.Enums.HierarchyRoleEnum>((obj) => obj.Holders.Where(x => x != null).Select(x => x.HierarchyRole), "Holders.HierarchyRole");
 		}
 
 		public static partial class ElementLinks

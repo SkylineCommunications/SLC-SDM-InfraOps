@@ -768,7 +768,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 _elementlinksList.Add(elementlinks);
             }
 
-            obj.Elements = _elementlinksList;
+            obj.ElementLinks = _elementlinksList;
             return obj;
         }
 
@@ -1003,7 +1003,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 instance.Sections.Add(_holdersSection);
             }
 
-            foreach (var elementlinks in obj.Elements)
+            foreach (var elementlinks in obj.ElementLinks)
             {
                 var _elementlinksSection = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.ElementLinks.SectionDefinitionId)
                 {
@@ -1045,7 +1045,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.SerialNumber), comparer, (string)value);
                 case "HardwareVersion":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.HardwareVersion), comparer, (string)value);
-                case "NetworkDetails.MACAddress":
+                case "NetworkDetails.MacAddress":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.NetworkDetails.MACAddress), comparer, (string)value);
                 case "Location.HolderNumber":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.HolderNumber), comparer, (long)value);
@@ -1054,14 +1054,14 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 case "Location.RackPosition":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.RackPosition), comparer, (long)value);
                 case "Location.Side":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Side), comparer, Enum.Parse(typeof(SlcAsset_Management.Enums.SideEnum), (string)value));
-                case "Location.Rack":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Side), comparer, (int)(SlcAsset_Management.Enums.SideEnum)value);
+                case "Location.RackId":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Rack), comparer, Guid.Parse((string)value));
-                case "Location.Desk":
+                case "Location.DeskId":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Desk), comparer, Guid.Parse((string)value));
                 case "Location.Container":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Container), comparer, Guid.Parse((string)value));
-                case "Location.Room":
+                case "Location.RoomId":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Room), comparer, Guid.Parse((string)value));
                 case "Lifecycle.PurchaseDate":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.PurchaseDate), comparer, (DateTime)(DateTime)value);
@@ -1077,24 +1077,28 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.EndOfLife), comparer, (DateTime)(DateTime)value);
                 case "Ownership.Organization":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Ownership.Organization), comparer, Guid.Parse((string)value));
+                case "Ownership.ContactPersonId":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Ownership.ContactPerson), comparer, Guid.Parse((string)value));
+                case "Ownership.TeamId":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Ownership.Team), comparer, Guid.Parse((string)value));
                 case "Custody.From":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.From), comparer, (DateTime)(DateTime)value);
                 case "Custody.Till":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.Till), comparer, (DateTime)(DateTime)value);
-                case "Custody.Organization":
+                case "Custody.OrganizationId":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.Organization), comparer, Guid.Parse((string)value));
-                case "Custody.ContactPerson":
+                case "Custody.ContactPersonId":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.ContactPerson), comparer, Guid.Parse((string)value));
-                case "Custody.ContactPersonRole":
+                case "Custody.ContactPersonRoleId":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.ContactPersonRole), comparer, Guid.Parse((string)value));
-                case "Custody.Team":
+                case "Custody.TeamId":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.Team), comparer, Guid.Parse((string)value));
                 case "Holders.Identifier":
                     return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.SectionIds, comparer, Guid.Parse((string)value));
                 case "Holders.SlotNumber":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Holders.SlotNumber), comparer, (long)value);
                 case "Holders.HierarchyRole":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Holders.HierarchyRole), comparer, FromDomHierarchyRole((string)value));
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Holders.HierarchyRole), comparer, (int)(SlcAsset_Management.Enums.HierarchyRoleEnum)value);
                 case "ElementLinks.Identifier":
                     return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.SectionIds, comparer, Guid.Parse((string)value));
                 case "ElementLinks.ElementID":

@@ -16,50 +16,6 @@ namespace SharedMappers.DomIds
         public const string ModuleId = "(slc)asset_management";
         public static class Enums
         {
-            public static class Portexposure
-            {
-                public const string Back = "Back";
-                public const string Front = "Front";
-                public static string ToValue(PortExposureEnum @enum)
-                {
-                    switch (@enum)
-                    {
-                        case PortExposureEnum.Back:
-                            return Back;
-                        case PortExposureEnum.Front:
-                            return Front;
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
-                    }
-                }
-
-                public static PortExposureEnum ToEnum(string s)
-                {
-                    switch (s)
-                    {
-                        case Back:
-                            return PortExposureEnum.Back;
-                        case Front:
-                            return PortExposureEnum.Front;
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
-                    }
-                }
-            }
-
-            public enum PortExposureEnum
-            {
-                Back,
-                Front
-            }
-
-            public enum Outputtype
-            {
-                Out = 0,
-                In = 1,
-                IO = 2
-            }
-
             public static class Hierarchyrole
             {
                 public const string Chassis = "Chassis";
@@ -127,114 +83,54 @@ namespace SharedMappers.DomIds
                 None
             }
 
-            public static class Side
+            public static class Portexposure
             {
-                public const string Front = "Front";
                 public const string Back = "Back";
-                public const string Right = "Right";
-                public const string Left = "Left";
-                public static string ToValue(SideEnum @enum)
+                public const string Front = "Front";
+                public static string ToValue(PortExposureEnum @enum)
                 {
                     switch (@enum)
                     {
-                        case SideEnum.Front:
-                            return Front;
-                        case SideEnum.Back:
+                        case PortExposureEnum.Back:
                             return Back;
-                        case SideEnum.Right:
-                            return Right;
-                        case SideEnum.Left:
-                            return Left;
+                        case PortExposureEnum.Front:
+                            return Front;
                         default:
                             throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
                     }
                 }
 
-                public static SideEnum ToEnum(string s)
+                public static PortExposureEnum ToEnum(string s)
                 {
                     switch (s)
                     {
-                        case Front:
-                            return SideEnum.Front;
                         case Back:
-                            return SideEnum.Back;
-                        case Right:
-                            return SideEnum.Right;
-                        case Left:
-                            return SideEnum.Left;
+                            return PortExposureEnum.Back;
+                        case Front:
+                            return PortExposureEnum.Front;
                         default:
                             throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
                     }
                 }
             }
 
-            public enum SideEnum
+            public enum PortExposureEnum
             {
-                Front,
                 Back,
-                Right,
-                Left
+                Front
+            }
+
+            public enum Outputtype
+            {
+                Out = 0,
+                In = 1,
+                IO = 2
             }
 
             public enum ConnectionType
             {
                 Data = 0,
                 Power = 1
-            }
-
-            public enum Operationalflagsenum
-            {
-                Faulty = 0
-            }
-
-            public static class Powersupply
-            {
-                public const string AC = "AC";
-                public const string DC = "DC";
-                public static string ToValue(PowerSupplyEnum @enum)
-                {
-                    switch (@enum)
-                    {
-                        case PowerSupplyEnum.AC:
-                            return AC;
-                        case PowerSupplyEnum.DC:
-                            return DC;
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
-                    }
-                }
-
-                public static PowerSupplyEnum ToEnum(string s)
-                {
-                    switch (s)
-                    {
-                        case AC:
-                            return PowerSupplyEnum.AC;
-                        case DC:
-                            return PowerSupplyEnum.DC;
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
-                    }
-                }
-            }
-
-            public enum PowerSupplyEnum
-            {
-                AC,
-                DC
-            }
-
-            public enum TagOption
-            {
-                PowerProvider = 0,
-                AcceptsDataConnection = 1,
-                RackUnitConsumer = 2
-            }
-
-            public enum Planandbuildjobpromptenum
-            {
-                Disabled = 0,
-                Enabled = 1
             }
 
             public static class Typeofhistory
@@ -358,80 +254,114 @@ namespace SharedMappers.DomIds
                 Data,
                 Broadcast
             }
+
+            public enum Planandbuildjobpromptenum
+            {
+                Disabled = 0,
+                Enabled = 1
+            }
+
+            public enum TagOption
+            {
+                PowerProvider = 0,
+                AcceptsDataConnection = 1,
+                RackUnitConsumer = 2
+            }
+
+            public static class Powersupply
+            {
+                public const string AC = "AC";
+                public const string DC = "DC";
+                public static string ToValue(PowerSupplyEnum @enum)
+                {
+                    switch (@enum)
+                    {
+                        case PowerSupplyEnum.AC:
+                            return AC;
+                        case PowerSupplyEnum.DC:
+                            return DC;
+                        default:
+                            throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+                    }
+                }
+
+                public static PowerSupplyEnum ToEnum(string s)
+                {
+                    switch (s)
+                    {
+                        case AC:
+                            return PowerSupplyEnum.AC;
+                        case DC:
+                            return PowerSupplyEnum.DC;
+                        default:
+                            throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+                    }
+                }
+            }
+
+            public enum PowerSupplyEnum
+            {
+                AC,
+                DC
+            }
+
+            public enum Operationalflagsenum
+            {
+                Faulty = 0
+            }
+
+            public static class Side
+            {
+                public const string Front = "Front";
+                public const string Back = "Back";
+                public const string Right = "Right";
+                public const string Left = "Left";
+                public static string ToValue(SideEnum @enum)
+                {
+                    switch (@enum)
+                    {
+                        case SideEnum.Front:
+                            return Front;
+                        case SideEnum.Back:
+                            return Back;
+                        case SideEnum.Right:
+                            return Right;
+                        case SideEnum.Left:
+                            return Left;
+                        default:
+                            throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+                    }
+                }
+
+                public static SideEnum ToEnum(string s)
+                {
+                    switch (s)
+                    {
+                        case Front:
+                            return SideEnum.Front;
+                        case Back:
+                            return SideEnum.Back;
+                        case Right:
+                            return SideEnum.Right;
+                        case Left:
+                            return SideEnum.Left;
+                        default:
+                            throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+                    }
+                }
+            }
+
+            public enum SideEnum
+            {
+                Front,
+                Back,
+                Right,
+                Left
+            }
         }
 
         public static class Sections
         {
-            public static class CableInformation
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("d0b3100f-6a88-4c32-b3fd-4cb7a662c75b"))
-                { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID CableLength
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("9de151de-6bfd-4a1c-9202-a059a8e2617f"));
-                public static FieldDescriptorID CableType
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("4d16487d-a173-4969-865d-145cee55e3b7"));
-            }
-
-            public static class AssetCustody
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("db82849f-e6da-478b-b295-dd75de94e0b6"))
-                { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID From
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("b97a40fa-30f3-480c-b0e5-dee12645bf6f"));
-                public static FieldDescriptorID Till
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("2b2d870f-4cc3-41c1-9f83-8dad85f1f8fe"));
-                public static FieldDescriptorID ContactPerson
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("a58869a6-a316-49e7-87a7-e904d74954df"));
-                public static FieldDescriptorID Team
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("a13cd67a-e7f3-4dc0-93f1-98f56a5c4e7d"));
-                public static FieldDescriptorID Organization
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("1af14e1e-ae59-48dd-b3c3-8c1b28ddeb14"));
-                public static FieldDescriptorID ContactPersonRole
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("5a70fb9e-4430-4b72-b6b1-7ed4764d4041"));
-            }
-
             public static class ReservationRack
             {
                 public static SectionDefinitionID Id
@@ -449,133 +379,33 @@ namespace SharedMappers.DomIds
                 = new FieldDescriptorID(new Guid("5cc40c75-11a0-4a88-9e0f-d05c7f2fa0dd"));
             }
 
-            public static class AssetLifecycle
+            public static class Holders
             {
                 public static SectionDefinitionID Id
                 {
                     get;
                 }
 
-                = new SectionDefinitionID(new Guid("8f8353b9-5189-468f-881a-5841595548e8"))
+                = new SectionDefinitionID(new Guid("f2048e2c-8d4a-4d18-a808-f2bff352905f"))
                 { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID PurchaseDate
+                public static FieldDescriptorID SlotNumber
                 {
                     get;
                 }
 
-                = new FieldDescriptorID(new Guid("944d7abf-31b7-4ef9-aabd-defe7cd7982f"));
-                public static FieldDescriptorID FirstUseDate
+                = new FieldDescriptorID(new Guid("303c7d9e-7dbe-4e25-a462-e22f0d993dd8"));
+                public static FieldDescriptorID HierarchyRole
                 {
                     get;
                 }
 
-                = new FieldDescriptorID(new Guid("f6dfe8c6-a97f-4a78-b5c3-1d1872c912f5"));
-                public static FieldDescriptorID EndOfWarrantyDate
+                = new FieldDescriptorID(new Guid("c25c6d3a-ef44-4f31-be9f-d81fddbd4160"));
+                public static FieldDescriptorID Label
                 {
                     get;
                 }
 
-                = new FieldDescriptorID(new Guid("a35b0aeb-976e-4656-9915-4548f79bc2ca"));
-                public static FieldDescriptorID InstallationDate
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("71a78231-a686-4459-9c1a-b7dd0ac7178b"));
-                public static FieldDescriptorID InstallationUser
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("cad2081d-6c5c-4a0a-9cea-d6adcdd60b2a"));
-                public static FieldDescriptorID ModificationDate
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("7c36827c-efa2-475c-aef0-b27167c9071f"));
-                public static FieldDescriptorID ModificationUser
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("bd1fdb19-4913-4cf7-b74b-d037c5febbd7"));
-                public static FieldDescriptorID EndOfLife
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("9b70f622-1146-4239-807d-f81f63d4f46a"));
-            }
-
-            public static class AddressInfo
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("73f92de5-317d-41dc-b8c3-2563fcb13e50"))
-                { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID IPV4Address
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("3fbfbfc8-b80f-4c89-b494-218701b1cd16"));
-                public static FieldDescriptorID IPV6Address
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("d9d5c461-5076-4565-b621-ddcb208e03e6"));
-                public static FieldDescriptorID Hostname
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("956464e3-6b17-4fa2-9987-02d8241d23ce"));
-                public static FieldDescriptorID DNS
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("96f7776d-dfca-4465-9131-33448b98753d"));
-            }
-
-            public static class AssetOwnership
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("7fc5a856-18a4-46fd-8e34-2bbe4c642982"))
-                { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID Organization
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("e0f38c9c-71ec-484b-8544-4cd162319d59"));
-                public static FieldDescriptorID ContactPerson
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("b2e98b27-a1e9-4e45-8158-cc91cf8cd0aa"));
-                public static FieldDescriptorID ContactPersonRole
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("ebd89394-006e-44b0-8839-b41f457b96de"));
-                public static FieldDescriptorID Team
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("3867d676-2d64-43cd-816b-4db25932e0ad"));
+                = new FieldDescriptorID(new Guid("fe11153b-df8b-45ae-b8a1-73be501775a8"));
             }
 
             public static class PowerPortInfo
@@ -625,140 +455,6 @@ namespace SharedMappers.DomIds
                 = new FieldDescriptorID(new Guid("57fb12ed-907b-41d1-9f3f-c1211718f338"));
             }
 
-            public static class CableCompatibility
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("bccf76f0-1c97-4e8b-8c78-156a18ec4e2c"))
-                { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID CableTypes
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("1b8a745d-3f49-42e9-8d6f-fbc82ca36c61"));
-            }
-
-            public static class Holders
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("f2048e2c-8d4a-4d18-a808-f2bff352905f"))
-                { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID SlotNumber
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("303c7d9e-7dbe-4e25-a462-e22f0d993dd8"));
-                public static FieldDescriptorID HierarchyRole
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("c25c6d3a-ef44-4f31-be9f-d81fddbd4160"));
-                public static FieldDescriptorID Label
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("fe11153b-df8b-45ae-b8a1-73be501775a8"));
-            }
-
-            public static class AssetLocationDestination
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("a4b292f2-f634-4e16-b218-783c7a2baa43"))
-                { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID RackPosition
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("0715e5ff-ab9c-477c-bb3e-55c7e9e34f2f"));
-                public static FieldDescriptorID Side
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("fc22e70b-4630-4280-a5ec-556e42e7312b"));
-                public static FieldDescriptorID Rack
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("0a004d82-02ca-41e5-9997-51b7ab965b91"));
-                public static FieldDescriptorID Desk
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("42b6d606-2f76-4148-a68d-8472f748ce99"));
-                public static FieldDescriptorID Container
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("cdc8ef56-c7de-4308-a3b2-dedc70260af9"));
-                public static FieldDescriptorID Room
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("09a567e1-b1eb-4f71-9cb7-322c4c75aa64"));
-                public static FieldDescriptorID PowerSupplyRackPosition
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("3d604a70-9cbc-4b09-a39f-a93cd5c1c904"));
-                public static FieldDescriptorID ParentAsset
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("f8ce6dcb-9e7c-49a0-8fa9-c4c03d40419b"));
-                public static FieldDescriptorID HolderNumber
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("372a2d99-a2dd-488a-b86a-9aacd0e0ed8f"));
-            }
-
-            public static class ElementLink
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("e711b95b-74ea-4e2a-b08a-4f05cb55a8a5"))
-                { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID ElementID
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("f2c0295b-4b49-47b3-87db-9b76b283def5"));
-                public static FieldDescriptorID IsPrimary
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("e967f1aa-3ca5-40db-b67d-7dcb8153b444"));
-            }
-
             public static class ConnectionInfo
             {
                 public static SectionDefinitionID Id
@@ -788,63 +484,235 @@ namespace SharedMappers.DomIds
                 = new FieldDescriptorID(new Guid("c0e0318f-2ce7-43ff-ab69-1b48f7251fd2"));
             }
 
-            public static class AssetInformation
+            public static class HistoryInfo
             {
                 public static SectionDefinitionID Id
                 {
                     get;
                 }
 
-                = new SectionDefinitionID(new Guid("58c1a50e-d1c7-4467-8d19-54a29f985d83"))
+                = new SectionDefinitionID(new Guid("cec87feb-30d0-4270-8bf8-7e8282d0513c"))
                 { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID AssetName
+                public static FieldDescriptorID Description
                 {
                     get;
                 }
 
-                = new FieldDescriptorID(new Guid("43c3c696-03be-461b-b01b-40a47a45648f"));
-                public static FieldDescriptorID SerialNumber
+                = new FieldDescriptorID(new Guid("35c9573b-699d-4b66-806e-45bde72890aa"));
+                public static FieldDescriptorID Job
                 {
                     get;
                 }
 
-                = new FieldDescriptorID(new Guid("550a8136-11f7-4a5e-a4c8-a7abd9b1afa1"));
-                public static FieldDescriptorID AssetClass
+                = new FieldDescriptorID(new Guid("7c2bcda4-0936-4961-ac88-5015d7e83dad"));
+                public static FieldDescriptorID UserID
                 {
                     get;
                 }
 
-                = new FieldDescriptorID(new Guid("1b894f9c-966e-4d73-8f00-c77bb7ece1a6"));
-                public static FieldDescriptorID AssetDescription
+                = new FieldDescriptorID(new Guid("a180d661-80a4-4f01-b525-5f33eef20f3b"));
+                public static FieldDescriptorID InstanceDefinitionID
                 {
                     get;
                 }
 
-                = new FieldDescriptorID(new Guid("243689f0-c594-4fe6-852c-bbffed9fea67"));
-                public static FieldDescriptorID FWOS
+                = new FieldDescriptorID(new Guid("cfab9a69-9d07-4012-9e44-a12e13ecd01c"));
+                public static FieldDescriptorID InstanceID
                 {
                     get;
                 }
 
-                = new FieldDescriptorID(new Guid("d5ffa4aa-c04f-4bca-a9bd-25b009cc3f50"));
-                public static FieldDescriptorID AssetID
+                = new FieldDescriptorID(new Guid("4d913684-12ec-4666-98a2-5e4db7fb5acf"));
+                public static FieldDescriptorID ExtraInfo
                 {
                     get;
                 }
 
-                = new FieldDescriptorID(new Guid("e014bef3-1a42-4e5b-979b-d7dcce5af177"));
-                public static FieldDescriptorID HardwareVersion
+                = new FieldDescriptorID(new Guid("4a668dee-93a0-485b-ab58-a8a710e176ae"));
+                public static FieldDescriptorID TypeOfHistory
                 {
                     get;
                 }
 
-                = new FieldDescriptorID(new Guid("a690819d-32b4-4709-bdc9-68299136dd37"));
-                public static FieldDescriptorID OperationalFlags
+                = new FieldDescriptorID(new Guid("7bf1509d-16f6-4093-a4c3-d2ed14dcad7e"));
+            }
+
+            public static class ReservationInfo
+            {
+                public static SectionDefinitionID Id
                 {
                     get;
                 }
 
-                = new FieldDescriptorID(new Guid("4085a0ba-6303-4cf9-9f0c-eb7d495c2462"));
+                = new SectionDefinitionID(new Guid("2ad67f52-0826-4234-ba7e-bbf9ef046fad"))
+                { ModuleId = "(slc)asset_management" };
+                public static FieldDescriptorID Description
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("c37debdc-4078-4f51-a30b-10d5c361d009"));
+            }
+
+            public static class CategoryLink
+            {
+                public static SectionDefinitionID Id
+                {
+                    get;
+                }
+
+                = new SectionDefinitionID(new Guid("bda370db-b7e1-431b-991d-37044d0b9176"))
+                { ModuleId = "(slc)asset_management" };
+                public static FieldDescriptorID Categories
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("33a42db3-61d2-4ccc-97a6-6c9476efc059"));
+            }
+
+            public static class CableTypeInformation
+            {
+                public static SectionDefinitionID Id
+                {
+                    get;
+                }
+
+                = new SectionDefinitionID(new Guid("08974346-b8ff-4e00-8cdd-34d401774092"))
+                { ModuleId = "(slc)asset_management" };
+                public static FieldDescriptorID Name
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("d4950291-0879-46d1-94f5-423c9fbdee0d"));
+                public static FieldDescriptorID Description
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("47ab4284-97fb-4c45-afcf-f4d7f851f065"));
+            }
+
+            public static class AppSettings
+            {
+                public static SectionDefinitionID Id
+                {
+                    get;
+                }
+
+                = new SectionDefinitionID(new Guid("941488bf-bb5a-46e0-968c-4b96f18fcbf1"))
+                { ModuleId = "(slc)asset_management" };
+                public static FieldDescriptorID EnableAssetHistory
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("9555c359-2741-46f7-9051-040bbce3ce68"));
+                public static FieldDescriptorID PlanAndBuildJobPrompt
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("be7d9f39-8b18-45bf-b9ca-67f03f048134"));
+                public static FieldDescriptorID EnableConnectionHistory
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("62a7768a-76b0-4398-bfbe-7c513a7c0a2c"));
+                public static FieldDescriptorID HistoryTTL
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("c540fb2a-18a8-4fbd-9612-8effd24873c0"));
+                public static FieldDescriptorID HistoryLimit
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("ca9c44c6-e189-4c39-b1a0-37b3ec1d8b78"));
+            }
+
+            public static class AssetNetworkDetails
+            {
+                public static SectionDefinitionID Id
+                {
+                    get;
+                }
+
+                = new SectionDefinitionID(new Guid("67d996e7-d63e-4ab3-8f84-b937af51c1be"))
+                { ModuleId = "(slc)asset_management" };
+                public static FieldDescriptorID MACAddress
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("188825a2-482e-4db1-a058-f539ee9d0878"));
+            }
+
+            public static class AssetClassLifecycleInformation
+            {
+                public static SectionDefinitionID Id
+                {
+                    get;
+                }
+
+                = new SectionDefinitionID(new Guid("7146ed89-798f-46f9-a534-99ed91d15e29"))
+                { ModuleId = "(slc)asset_management" };
+                public static FieldDescriptorID EOLDate
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("7a38322c-2409-43fc-a6a7-1fd03ac9c5c4"));
+                public static FieldDescriptorID EOSDate
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("535dedd7-4c31-4d01-b369-5d76c3661c96"));
+                public static FieldDescriptorID NominalLifetime
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("c518fadb-fd43-4c82-80ab-a5f05d067d85"));
+            }
+
+            public static class TagsInfo
+            {
+                public static SectionDefinitionID Id
+                {
+                    get;
+                }
+
+                = new SectionDefinitionID(new Guid("9d0bbc4b-e0be-45e9-8280-6fe36efe12e8"))
+                { ModuleId = "(slc)asset_management" };
+                public static FieldDescriptorID Tags
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("9109438c-72dc-4822-8891-4199d2dc0ed7"));
+            }
+
+            public static class LinkedJob
+            {
+                public static SectionDefinitionID Id
+                {
+                    get;
+                }
+
+                = new SectionDefinitionID(new Guid("affb2069-39ff-4318-868e-f19b298477f1"))
+                { ModuleId = "(slc)asset_management" };
+                public static FieldDescriptorID Job
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("c6f632ad-33d9-41e3-a8de-74c99a001143"));
             }
 
             public static class AssetClassInfo
@@ -948,61 +816,98 @@ namespace SharedMappers.DomIds
                 = new FieldDescriptorID(new Guid("43fe2474-b7d2-4f2b-b690-b5064e5e7786"));
             }
 
-            public static class Asset
+            public static class AssetLifecycle
             {
                 public static SectionDefinitionID Id
                 {
                     get;
                 }
 
-                = new SectionDefinitionID(new Guid("45368cbd-a605-4930-8bf2-d0f649edeae0"))
+                = new SectionDefinitionID(new Guid("8f8353b9-5189-468f-881a-5841595548e8"))
                 { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID AssetID
+                public static FieldDescriptorID PurchaseDate
                 {
                     get;
                 }
 
-                = new FieldDescriptorID(new Guid("71dd3307-3015-43f8-86fd-1618c31a7ab2"));
+                = new FieldDescriptorID(new Guid("944d7abf-31b7-4ef9-aabd-defe7cd7982f"));
+                public static FieldDescriptorID FirstUseDate
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("f6dfe8c6-a97f-4a78-b5c3-1d1872c912f5"));
+                public static FieldDescriptorID EndOfWarrantyDate
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("a35b0aeb-976e-4656-9915-4548f79bc2ca"));
+                public static FieldDescriptorID InstallationDate
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("71a78231-a686-4459-9c1a-b7dd0ac7178b"));
+                public static FieldDescriptorID InstallationUser
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("cad2081d-6c5c-4a0a-9cea-d6adcdd60b2a"));
+                public static FieldDescriptorID ModificationDate
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("7c36827c-efa2-475c-aef0-b27167c9071f"));
+                public static FieldDescriptorID ModificationUser
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("bd1fdb19-4913-4cf7-b74b-d037c5febbd7"));
+                public static FieldDescriptorID EndOfLife
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("9b70f622-1146-4239-807d-f81f63d4f46a"));
             }
 
-            public static class CableTypeInformation
+            public static class AssetOwnership
             {
                 public static SectionDefinitionID Id
                 {
                     get;
                 }
 
-                = new SectionDefinitionID(new Guid("08974346-b8ff-4e00-8cdd-34d401774092"))
+                = new SectionDefinitionID(new Guid("7fc5a856-18a4-46fd-8e34-2bbe4c642982"))
                 { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID Name
+                public static FieldDescriptorID Organization
                 {
                     get;
                 }
 
-                = new FieldDescriptorID(new Guid("d4950291-0879-46d1-94f5-423c9fbdee0d"));
-                public static FieldDescriptorID Description
+                = new FieldDescriptorID(new Guid("e0f38c9c-71ec-484b-8544-4cd162319d59"));
+                public static FieldDescriptorID ContactPerson
                 {
                     get;
                 }
 
-                = new FieldDescriptorID(new Guid("47ab4284-97fb-4c45-afcf-f4d7f851f065"));
-            }
-
-            public static class AssetNetworkDetails
-            {
-                public static SectionDefinitionID Id
+                = new FieldDescriptorID(new Guid("b2e98b27-a1e9-4e45-8158-cc91cf8cd0aa"));
+                public static FieldDescriptorID ContactPersonRole
                 {
                     get;
                 }
 
-                = new SectionDefinitionID(new Guid("67d996e7-d63e-4ab3-8f84-b937af51c1be"))
-                { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID MACAddress
+                = new FieldDescriptorID(new Guid("ebd89394-006e-44b0-8839-b41f457b96de"));
+                public static FieldDescriptorID Team
                 {
                     get;
                 }
 
-                = new FieldDescriptorID(new Guid("188825a2-482e-4db1-a058-f539ee9d0878"));
+                = new FieldDescriptorID(new Guid("3867d676-2d64-43cd-816b-4db25932e0ad"));
             }
 
             public static class ReservedPositions
@@ -1028,21 +933,126 @@ namespace SharedMappers.DomIds
                 = new FieldDescriptorID(new Guid("0cfa5d47-cb26-47bf-b14e-e1b394943c68"));
             }
 
-            public static class TagsInfo
+            public static class DataPortInfo
             {
                 public static SectionDefinitionID Id
                 {
                     get;
                 }
 
-                = new SectionDefinitionID(new Guid("9d0bbc4b-e0be-45e9-8280-6fe36efe12e8"))
+                = new SectionDefinitionID(new Guid("7918fb83-c6de-43c7-82d1-e561aefac746"))
                 { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID Tags
+                public static FieldDescriptorID PortNumber
                 {
                     get;
                 }
 
-                = new FieldDescriptorID(new Guid("9109438c-72dc-4822-8891-4199d2dc0ed7"));
+                = new FieldDescriptorID(new Guid("46ae4b8b-4cd1-4673-909f-c8d3cd2f9298"));
+                public static FieldDescriptorID PortName
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("b697fc76-bb00-449c-b971-2f78a5b2623f"));
+                public static FieldDescriptorID PortExposure
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("603653d8-7b1d-4d04-b30d-20ca35984bb1"));
+                public static FieldDescriptorID OutputType
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("638988c3-731a-4c54-8ed7-df5281eaa8b8"));
+                public static FieldDescriptorID PortType
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("0f039e8b-aaa3-4836-a358-80a02b55f566"));
+                public static FieldDescriptorID Label
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("0ba7fcc1-dcbc-45e0-b918-1a2e1ab194e5"));
+            }
+
+            public static class AddressInfo
+            {
+                public static SectionDefinitionID Id
+                {
+                    get;
+                }
+
+                = new SectionDefinitionID(new Guid("73f92de5-317d-41dc-b8c3-2563fcb13e50"))
+                { ModuleId = "(slc)asset_management" };
+                public static FieldDescriptorID IPV4Address
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("3fbfbfc8-b80f-4c89-b494-218701b1cd16"));
+                public static FieldDescriptorID IPV6Address
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("d9d5c461-5076-4565-b621-ddcb208e03e6"));
+                public static FieldDescriptorID Hostname
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("956464e3-6b17-4fa2-9987-02d8241d23ce"));
+                public static FieldDescriptorID DNS
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("96f7776d-dfca-4465-9131-33448b98753d"));
+            }
+
+            public static class CableCompatibility
+            {
+                public static SectionDefinitionID Id
+                {
+                    get;
+                }
+
+                = new SectionDefinitionID(new Guid("bccf76f0-1c97-4e8b-8c78-156a18ec4e2c"))
+                { ModuleId = "(slc)asset_management" };
+                public static FieldDescriptorID CableTypes
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("1b8a745d-3f49-42e9-8d6f-fbc82ca36c61"));
+            }
+
+            public static class CableInformation
+            {
+                public static SectionDefinitionID Id
+                {
+                    get;
+                }
+
+                = new SectionDefinitionID(new Guid("d0b3100f-6a88-4c32-b3fd-4cb7a662c75b"))
+                { ModuleId = "(slc)asset_management" };
+                public static FieldDescriptorID CableLength
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("9de151de-6bfd-4a1c-9202-a059a8e2617f"));
+                public static FieldDescriptorID CableType
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("4d16487d-a173-4969-865d-145cee55e3b7"));
             }
 
             public static class SourceInfo
@@ -1074,137 +1084,190 @@ namespace SharedMappers.DomIds
                 = new FieldDescriptorID(new Guid("acd43af5-f224-4e07-bc16-e9bf313e95d7"));
             }
 
-            public static class PrimaryPortRelation
+            public static class HierarchyInfo
             {
                 public static SectionDefinitionID Id
                 {
                     get;
                 }
 
-                = new SectionDefinitionID(new Guid("2ad90463-9998-4df9-a068-93a13cfa2e6a"))
+                = new SectionDefinitionID(new Guid("ca44f3ce-2725-49f1-93f2-8eb53d1d858c"))
                 { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID Isprimaryipv4
+                public static FieldDescriptorID HierarchyRole
                 {
                     get;
                 }
 
-                = new FieldDescriptorID(new Guid("884f0a95-c1e8-447c-ba1d-0061deaca70d"));
-                public static FieldDescriptorID Isprimaryipv6
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("a81dc9d7-fc3d-447d-83cb-e9a54c1df5f6"));
+                = new FieldDescriptorID(new Guid("fa9a8c23-7f13-43bf-89d5-66962f9f56f8"));
             }
 
-            public static class DeviceTypeInformation
+            public static class AssetInformation
             {
                 public static SectionDefinitionID Id
                 {
                     get;
                 }
 
-                = new SectionDefinitionID(new Guid("516210a2-f739-4462-9df8-2a8146c30bf0"))
+                = new SectionDefinitionID(new Guid("58c1a50e-d1c7-4467-8d19-54a29f985d83"))
+                { ModuleId = "(slc)asset_management" };
+                public static FieldDescriptorID AssetName
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("43c3c696-03be-461b-b01b-40a47a45648f"));
+                public static FieldDescriptorID SerialNumber
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("550a8136-11f7-4a5e-a4c8-a7abd9b1afa1"));
+                public static FieldDescriptorID AssetClass
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("1b894f9c-966e-4d73-8f00-c77bb7ece1a6"));
+                public static FieldDescriptorID AssetDescription
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("243689f0-c594-4fe6-852c-bbffed9fea67"));
+                public static FieldDescriptorID FWOS
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("d5ffa4aa-c04f-4bca-a9bd-25b009cc3f50"));
+                public static FieldDescriptorID AssetID
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("e014bef3-1a42-4e5b-979b-d7dcce5af177"));
+                public static FieldDescriptorID HardwareVersion
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("a690819d-32b4-4709-bdc9-68299136dd37"));
+                public static FieldDescriptorID OperationalFlags
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("4085a0ba-6303-4cf9-9f0c-eb7d495c2462"));
+            }
+
+            public static class PortTypeInformation
+            {
+                public static SectionDefinitionID Id
+                {
+                    get;
+                }
+
+                = new SectionDefinitionID(new Guid("7b019f7b-024c-46ec-814d-5a65b1e5fabe"))
                 { ModuleId = "(slc)asset_management" };
                 public static FieldDescriptorID Name
                 {
                     get;
                 }
 
-                = new FieldDescriptorID(new Guid("df767b3b-8fc4-4d3e-b4fa-5e78d4a705fa"));
+                = new FieldDescriptorID(new Guid("42228cc4-bd6e-455f-bf9d-6b309c0fed48"));
                 public static FieldDescriptorID Description
                 {
                     get;
                 }
 
-                = new FieldDescriptorID(new Guid("f5f51839-3f2b-42e2-a67f-b9e34d87b129"));
+                = new FieldDescriptorID(new Guid("c8e21874-9791-4fa9-b572-bd9028fdf367"));
             }
 
-            public static class DestinationInfo
+            public static class ElementLink
             {
                 public static SectionDefinitionID Id
                 {
                     get;
                 }
 
-                = new SectionDefinitionID(new Guid("cae60cfd-5a48-4e6b-8f52-e69e8e468a9c"))
+                = new SectionDefinitionID(new Guid("e711b95b-74ea-4e2a-b08a-4f05cb55a8a5"))
                 { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID CableDestinationTag
+                public static FieldDescriptorID ElementID
                 {
                     get;
                 }
 
-                = new FieldDescriptorID(new Guid("1d26a6f3-bbd8-44f8-9221-4467f13fe135"));
-                public static FieldDescriptorID DestinationPort
+                = new FieldDescriptorID(new Guid("f2c0295b-4b49-47b3-87db-9b76b283def5"));
+                public static FieldDescriptorID IsPrimary
                 {
                     get;
                 }
 
-                = new FieldDescriptorID(new Guid("b01fa755-ce22-4135-b21d-64217c0994f0"));
-                public static FieldDescriptorID DestinationPortType
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("3882369e-78ab-4985-93ef-dcb1641a08b2"));
+                = new FieldDescriptorID(new Guid("e967f1aa-3ca5-40db-b67d-7dcb8153b444"));
             }
 
-            public static class AppSettings
+            public static class Asset
             {
                 public static SectionDefinitionID Id
                 {
                     get;
                 }
 
-                = new SectionDefinitionID(new Guid("941488bf-bb5a-46e0-968c-4b96f18fcbf1"))
+                = new SectionDefinitionID(new Guid("45368cbd-a605-4930-8bf2-d0f649edeae0"))
                 { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID EnableAssetHistory
+                public static FieldDescriptorID AssetID
                 {
                     get;
                 }
 
-                = new FieldDescriptorID(new Guid("9555c359-2741-46f7-9051-040bbce3ce68"));
-                public static FieldDescriptorID PlanAndBuildJobPrompt
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("be7d9f39-8b18-45bf-b9ca-67f03f048134"));
-                public static FieldDescriptorID EnableConnectionHistory
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("62a7768a-76b0-4398-bfbe-7c513a7c0a2c"));
-                public static FieldDescriptorID HistoryTTL
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("c540fb2a-18a8-4fbd-9612-8effd24873c0"));
-                public static FieldDescriptorID HistoryLimit
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("ca9c44c6-e189-4c39-b1a0-37b3ec1d8b78"));
+                = new FieldDescriptorID(new Guid("71dd3307-3015-43f8-86fd-1618c31a7ab2"));
             }
 
-            public static class LinkedJob
+            public static class AssetCustody
             {
                 public static SectionDefinitionID Id
                 {
                     get;
                 }
 
-                = new SectionDefinitionID(new Guid("affb2069-39ff-4318-868e-f19b298477f1"))
+                = new SectionDefinitionID(new Guid("db82849f-e6da-478b-b295-dd75de94e0b6"))
                 { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID Job
+                public static FieldDescriptorID From
                 {
                     get;
                 }
 
-                = new FieldDescriptorID(new Guid("c6f632ad-33d9-41e3-a8de-74c99a001143"));
+                = new FieldDescriptorID(new Guid("b97a40fa-30f3-480c-b0e5-dee12645bf6f"));
+                public static FieldDescriptorID Till
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("2b2d870f-4cc3-41c1-9f83-8dad85f1f8fe"));
+                public static FieldDescriptorID ContactPerson
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("a58869a6-a316-49e7-87a7-e904d74954df"));
+                public static FieldDescriptorID Team
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("a13cd67a-e7f3-4dc0-93f1-98f56a5c4e7d"));
+                public static FieldDescriptorID Organization
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("1af14e1e-ae59-48dd-b3c3-8c1b28ddeb14"));
+                public static FieldDescriptorID ContactPersonRole
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("5a70fb9e-4430-4b72-b6b1-7ed4764d4041"));
             }
 
             public static class AssetLocation
@@ -1272,207 +1335,144 @@ namespace SharedMappers.DomIds
                 = new FieldDescriptorID(new Guid("c0c08b13-ead2-4c22-b29b-2c5c5f2ea902"));
             }
 
-            public static class ReservationInfo
+            public static class DeviceTypeInformation
             {
                 public static SectionDefinitionID Id
                 {
                     get;
                 }
 
-                = new SectionDefinitionID(new Guid("2ad67f52-0826-4234-ba7e-bbf9ef046fad"))
-                { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID Description
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("c37debdc-4078-4f51-a30b-10d5c361d009"));
-            }
-
-            public static class DataPortInfo
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("7918fb83-c6de-43c7-82d1-e561aefac746"))
-                { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID PortNumber
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("46ae4b8b-4cd1-4673-909f-c8d3cd2f9298"));
-                public static FieldDescriptorID PortName
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("b697fc76-bb00-449c-b971-2f78a5b2623f"));
-                public static FieldDescriptorID PortExposure
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("603653d8-7b1d-4d04-b30d-20ca35984bb1"));
-                public static FieldDescriptorID OutputType
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("638988c3-731a-4c54-8ed7-df5281eaa8b8"));
-                public static FieldDescriptorID PortType
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("0f039e8b-aaa3-4836-a358-80a02b55f566"));
-                public static FieldDescriptorID Label
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("0ba7fcc1-dcbc-45e0-b918-1a2e1ab194e5"));
-            }
-
-            public static class AssetClassLifecycleInformation
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("7146ed89-798f-46f9-a534-99ed91d15e29"))
-                { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID EOLDate
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("7a38322c-2409-43fc-a6a7-1fd03ac9c5c4"));
-                public static FieldDescriptorID EOSDate
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("535dedd7-4c31-4d01-b369-5d76c3661c96"));
-                public static FieldDescriptorID NominalLifetime
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("c518fadb-fd43-4c82-80ab-a5f05d067d85"));
-            }
-
-            public static class HierarchyInfo
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("ca44f3ce-2725-49f1-93f2-8eb53d1d858c"))
-                { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID HierarchyRole
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("fa9a8c23-7f13-43bf-89d5-66962f9f56f8"));
-            }
-
-            public static class HistoryInfo
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("cec87feb-30d0-4270-8bf8-7e8282d0513c"))
-                { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID Description
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("35c9573b-699d-4b66-806e-45bde72890aa"));
-                public static FieldDescriptorID Job
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("7c2bcda4-0936-4961-ac88-5015d7e83dad"));
-                public static FieldDescriptorID UserID
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("a180d661-80a4-4f01-b525-5f33eef20f3b"));
-                public static FieldDescriptorID InstanceDefinitionID
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("cfab9a69-9d07-4012-9e44-a12e13ecd01c"));
-                public static FieldDescriptorID InstanceID
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("4d913684-12ec-4666-98a2-5e4db7fb5acf"));
-                public static FieldDescriptorID ExtraInfo
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("4a668dee-93a0-485b-ab58-a8a710e176ae"));
-                public static FieldDescriptorID TypeOfHistory
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("7bf1509d-16f6-4093-a4c3-d2ed14dcad7e"));
-            }
-
-            public static class PortTypeInformation
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("7b019f7b-024c-46ec-814d-5a65b1e5fabe"))
+                = new SectionDefinitionID(new Guid("516210a2-f739-4462-9df8-2a8146c30bf0"))
                 { ModuleId = "(slc)asset_management" };
                 public static FieldDescriptorID Name
                 {
                     get;
                 }
 
-                = new FieldDescriptorID(new Guid("42228cc4-bd6e-455f-bf9d-6b309c0fed48"));
+                = new FieldDescriptorID(new Guid("df767b3b-8fc4-4d3e-b4fa-5e78d4a705fa"));
                 public static FieldDescriptorID Description
                 {
                     get;
                 }
 
-                = new FieldDescriptorID(new Guid("c8e21874-9791-4fa9-b572-bd9028fdf367"));
+                = new FieldDescriptorID(new Guid("f5f51839-3f2b-42e2-a67f-b9e34d87b129"));
             }
 
-            public static class CategoryLink
+            public static class AssetLocationDestination
             {
                 public static SectionDefinitionID Id
                 {
                     get;
                 }
 
-                = new SectionDefinitionID(new Guid("bda370db-b7e1-431b-991d-37044d0b9176"))
+                = new SectionDefinitionID(new Guid("a4b292f2-f634-4e16-b218-783c7a2baa43"))
                 { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID Categories
+                public static FieldDescriptorID RackPosition
                 {
                     get;
                 }
 
-                = new FieldDescriptorID(new Guid("33a42db3-61d2-4ccc-97a6-6c9476efc059"));
+                = new FieldDescriptorID(new Guid("0715e5ff-ab9c-477c-bb3e-55c7e9e34f2f"));
+                public static FieldDescriptorID Side
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("fc22e70b-4630-4280-a5ec-556e42e7312b"));
+                public static FieldDescriptorID Rack
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("0a004d82-02ca-41e5-9997-51b7ab965b91"));
+                public static FieldDescriptorID Desk
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("42b6d606-2f76-4148-a68d-8472f748ce99"));
+                public static FieldDescriptorID Container
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("cdc8ef56-c7de-4308-a3b2-dedc70260af9"));
+                public static FieldDescriptorID Room
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("09a567e1-b1eb-4f71-9cb7-322c4c75aa64"));
+                public static FieldDescriptorID PowerSupplyRackPosition
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("3d604a70-9cbc-4b09-a39f-a93cd5c1c904"));
+                public static FieldDescriptorID ParentAsset
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("f8ce6dcb-9e7c-49a0-8fa9-c4c03d40419b"));
+                public static FieldDescriptorID HolderNumber
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("372a2d99-a2dd-488a-b86a-9aacd0e0ed8f"));
+            }
+
+            public static class PrimaryPortRelation
+            {
+                public static SectionDefinitionID Id
+                {
+                    get;
+                }
+
+                = new SectionDefinitionID(new Guid("2ad90463-9998-4df9-a068-93a13cfa2e6a"))
+                { ModuleId = "(slc)asset_management" };
+                public static FieldDescriptorID Isprimaryipv4
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("884f0a95-c1e8-447c-ba1d-0061deaca70d"));
+                public static FieldDescriptorID Isprimaryipv6
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("a81dc9d7-fc3d-447d-83cb-e9a54c1df5f6"));
+            }
+
+            public static class DestinationInfo
+            {
+                public static SectionDefinitionID Id
+                {
+                    get;
+                }
+
+                = new SectionDefinitionID(new Guid("cae60cfd-5a48-4e6b-8f52-e69e8e468a9c"))
+                { ModuleId = "(slc)asset_management" };
+                public static FieldDescriptorID CableDestinationTag
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("1d26a6f3-bbd8-44f8-9221-4467f13fe135"));
+                public static FieldDescriptorID DestinationPort
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("b01fa755-ce22-4135-b21d-64217c0994f0"));
+                public static FieldDescriptorID DestinationPortType
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("3882369e-78ab-4985-93ef-dcb1641a08b2"));
             }
         }
 
@@ -2306,6 +2306,88 @@ namespace SharedMappers.DomIds
                 = new FieldDescriptorID(new Guid("29d8c8da-00d8-46fa-adff-d7979d3a5665"));
             }
 
+            public static class Site
+            {
+                public static SectionDefinitionID Id
+                {
+                    get;
+                }
+
+                = new SectionDefinitionID(new Guid("9a6552d4-c538-45be-93fd-a879587d25cc"))
+                { ModuleId = "(slc)facility_management" };
+                public static FieldDescriptorID Site_f08b42c7
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("f08b42c7-0c43-42f3-9c93-ec69ee99501a"));
+            }
+
+            public static class SiteInformation
+            {
+                public static SectionDefinitionID Id
+                {
+                    get;
+                }
+
+                = new SectionDefinitionID(new Guid("b082f391-0fdd-4eda-b4dc-f246c5e0063f"))
+                { ModuleId = "(slc)facility_management" };
+                public static FieldDescriptorID Name
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("49e5f5af-555a-4aa6-b859-84b3d6c4016d"));
+                public static FieldDescriptorID Description
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("199e9b2a-737c-4ddf-bb9e-ae41dff3d4ba"));
+                public static FieldDescriptorID Address
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("54866065-c005-4b3e-a8af-9d73b31fbcc7"));
+                public static FieldDescriptorID City
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("a5871ad2-0caf-4d1f-9ae1-9bbd91e9e158"));
+                public static FieldDescriptorID ZipCode
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("22ea6e74-8beb-445c-9e28-c96e7d11986d"));
+                public static FieldDescriptorID Country
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("0b43ef7a-64c3-4757-ae2b-089117316738"));
+                public static FieldDescriptorID Latitude
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("fd3feeaf-9d1e-4752-a1ba-5da40ed16793"));
+                public static FieldDescriptorID Longitude
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("3f7b64ea-7cd7-4e84-8f80-ab69064a93a8"));
+                public static FieldDescriptorID SiteID
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("e9485c2b-accd-4eda-9b86-195540a9cd20"));
+            }
+
             public static class FacilityInformation
             {
                 public static SectionDefinitionID Id
@@ -2549,6 +2631,23 @@ namespace SharedMappers.DomIds
                 = new FieldDescriptorID(new Guid("45922fd2-c869-46ac-a95d-012fad5adb59"));
             }
 
+            public static class Resource
+            {
+                public static SectionDefinitionID Id
+                {
+                    get;
+                }
+
+                = new SectionDefinitionID(new Guid("2f8f34af-8405-4a7e-b996-da6b9d97e61c"))
+                { ModuleId = "(slc)facility_management" };
+                public static FieldDescriptorID LinkedResource
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("af0981cf-d4c0-4016-823b-bd34a385aa2e"));
+            }
+
             public static class DeskInformation
             {
                 public static SectionDefinitionID Id
@@ -2582,23 +2681,6 @@ namespace SharedMappers.DomIds
                 }
 
                 = new FieldDescriptorID(new Guid("488edf47-1b9f-4083-bd6d-8f47fe5bb20e"));
-            }
-
-            public static class Resource
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("2f8f34af-8405-4a7e-b996-da6b9d97e61c"))
-                { ModuleId = "(slc)facility_management" };
-                public static FieldDescriptorID LinkedResource
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("af0981cf-d4c0-4016-823b-bd34a385aa2e"));
             }
 
             public static class ZoneInformation
@@ -2906,12 +2988,12 @@ namespace SharedMappers.DomIds
 
             = new DomDefinitionId(new Guid("9af0e791-b171-4b92-86e7-79dbb8282f66"))
             { ModuleId = "(slc)facility_management" };
-            public static DomDefinitionId Row
+            public static DomDefinitionId Site
             {
                 get;
             }
 
-            = new DomDefinitionId(new Guid("29eef06e-ed52-4a26-95da-fd35cc4433df"))
+            = new DomDefinitionId(new Guid("5320914d-ffec-486a-9950-b69276b6c13f"))
             { ModuleId = "(slc)facility_management" };
             public static DomDefinitionId Facility
             {
@@ -2919,6 +3001,13 @@ namespace SharedMappers.DomIds
             }
 
             = new DomDefinitionId(new Guid("dab0442b-b092-4dbf-a249-19dd421c69db"))
+            { ModuleId = "(slc)facility_management" };
+            public static DomDefinitionId Row
+            {
+                get;
+            }
+
+            = new DomDefinitionId(new Guid("29eef06e-ed52-4a26-95da-fd35cc4433df"))
             { ModuleId = "(slc)facility_management" };
             public static DomDefinitionId Zone
             {
@@ -2952,6 +3041,133 @@ namespace SharedMappers.DomIds
 
         public static class Behaviors
         {
+            public static class Room_Behaviour
+            {
+                public static DomBehaviorDefinitionId Id
+                {
+                    get;
+                }
+
+                = new DomBehaviorDefinitionId(new Guid("cce8f754-26c5-4e5e-97fb-0e474afbec5c"))
+                { ModuleId = "(slc)facility_management" };
+                public static class Statuses
+                {
+                    public const string Draft = "4e2df2d6-7e92-46e4-be9b-66dd8bb7e827";
+                    public const string Active = "84baed08-3f7b-4cd7-9428-79b1263f6a73";
+                    public const string Deprecated = "f5d5027c-3281-44d7-aeb5-fe55fd5cf1bd";
+                    public static string ToValue(StatusesEnum @enum)
+                    {
+                        switch (@enum)
+                        {
+                            case StatusesEnum.Draft:
+                                return Draft;
+                            case StatusesEnum.Active:
+                                return Active;
+                            case StatusesEnum.Deprecated:
+                                return Deprecated;
+                            default:
+                                throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+                        }
+                    }
+
+                    public static StatusesEnum ToEnum(string s)
+                    {
+                        switch (s)
+                        {
+                            case Draft:
+                                return StatusesEnum.Draft;
+                            case Active:
+                                return StatusesEnum.Active;
+                            case Deprecated:
+                                return StatusesEnum.Deprecated;
+                            default:
+                                throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+                        }
+                    }
+                }
+
+                public enum StatusesEnum
+                {
+                    Draft,
+                    Active,
+                    Deprecated
+                }
+
+                public static class Transitions
+                {
+                    public const string Draft_Active = "draft_active";
+                    public const string Active_Deprecated = "active_deprecated";
+                    public static string ToValue(TransitionsEnum @enum)
+                    {
+                        switch (@enum)
+                        {
+                            case TransitionsEnum.Draft_Active:
+                                return Draft_Active;
+                            case TransitionsEnum.Active_Deprecated:
+                                return Active_Deprecated;
+                            default:
+                                throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+                        }
+                    }
+
+                    public static TransitionsEnum ToEnum(string s)
+                    {
+                        switch (s)
+                        {
+                            case Draft_Active:
+                                return TransitionsEnum.Draft_Active;
+                            case Active_Deprecated:
+                                return TransitionsEnum.Active_Deprecated;
+                            default:
+                                throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+                        }
+                    }
+                }
+
+                public enum TransitionsEnum
+                {
+                    Draft_Active,
+                    Active_Deprecated
+                }
+
+                public static class Actions
+                {
+                    public const string Confirm = "confirm";
+                    public const string Archive = "archive";
+                    public static string ToValue(ActionsEnum @enum)
+                    {
+                        switch (@enum)
+                        {
+                            case ActionsEnum.Confirm:
+                                return Confirm;
+                            case ActionsEnum.Archive:
+                                return Archive;
+                            default:
+                                throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+                        }
+                    }
+
+                    public static ActionsEnum ToEnum(string s)
+                    {
+                        switch (s)
+                        {
+                            case Confirm:
+                                return ActionsEnum.Confirm;
+                            case Archive:
+                                return ActionsEnum.Archive;
+                            default:
+                                throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+                        }
+                    }
+                }
+
+                public enum ActionsEnum
+                {
+                    Confirm,
+                    Archive
+                }
+            }
+
             public static class Facility_Behaviour
             {
                 public static DomBehaviorDefinitionId Id
@@ -3079,30 +3295,30 @@ namespace SharedMappers.DomIds
                 }
             }
 
-            public static class Room_Behaviour
+            public static class Site_Behaviour
             {
                 public static DomBehaviorDefinitionId Id
                 {
                     get;
                 }
 
-                = new DomBehaviorDefinitionId(new Guid("cce8f754-26c5-4e5e-97fb-0e474afbec5c"))
+                = new DomBehaviorDefinitionId(new Guid("903a2ba4-5467-4e8e-b728-8f3cd1ff0e72"))
                 { ModuleId = "(slc)facility_management" };
                 public static class Statuses
                 {
-                    public const string Draft = "4e2df2d6-7e92-46e4-be9b-66dd8bb7e827";
-                    public const string Active = "84baed08-3f7b-4cd7-9428-79b1263f6a73";
-                    public const string Deprecated = "f5d5027c-3281-44d7-aeb5-fe55fd5cf1bd";
+                    public const string Draft = "bbdcf703-d257-45f9-8d62-13ec7adc37b3";
+                    public const string Deprecated = "43d4cef9-3d6a-41cf-83dd-5c671efde61d";
+                    public const string Active = "0350936d-9947-43ba-b4fe-362d375f4a85";
                     public static string ToValue(StatusesEnum @enum)
                     {
                         switch (@enum)
                         {
                             case StatusesEnum.Draft:
                                 return Draft;
-                            case StatusesEnum.Active:
-                                return Active;
                             case StatusesEnum.Deprecated:
                                 return Deprecated;
+                            case StatusesEnum.Active:
+                                return Active;
                             default:
                                 throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
                         }
@@ -3114,10 +3330,10 @@ namespace SharedMappers.DomIds
                         {
                             case Draft:
                                 return StatusesEnum.Draft;
-                            case Active:
-                                return StatusesEnum.Active;
                             case Deprecated:
                                 return StatusesEnum.Deprecated;
+                            case Active:
+                                return StatusesEnum.Active;
                             default:
                                 throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
                         }
@@ -3127,8 +3343,8 @@ namespace SharedMappers.DomIds
                 public enum StatusesEnum
                 {
                     Draft,
-                    Active,
-                    Deprecated
+                    Deprecated,
+                    Active
                 }
 
                 public static class Transitions
@@ -4313,6 +4529,12 @@ namespace SharedMappers.DomIds
                 }
 
                 = new FieldDescriptorID(new Guid("8e774923-acf3-4d22-a836-d4c7db5e7182"));
+                public static FieldDescriptorID Type
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("50ff0baa-8312-4b1c-b9e0-cf4eef1367cb"));
             }
 
             public static class JobSettings
@@ -4356,6 +4578,35 @@ namespace SharedMappers.DomIds
                 = new FieldDescriptorID(new Guid("58c275ac-ef36-4a47-9833-f78e5f1d2ca2"));
             }
 
+            public static class JobTypeInfo
+            {
+                public static SectionDefinitionID Id
+                {
+                    get;
+                }
+
+                = new SectionDefinitionID(new Guid("eba2120c-77d0-43c9-a63a-86abd42be359"))
+                { ModuleId = "(slc)plan_and_build" };
+                public static FieldDescriptorID Name
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("3eb96651-a84c-46fd-a114-593c242f17c6"));
+                public static FieldDescriptorID Description
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("0da5e09c-9246-4459-baa1-57b44b13372e"));
+                public static FieldDescriptorID Icon
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("aee7d6e1-4bc2-4f7e-988f-0d84cab0b9db"));
+            }
+
             public static class AssetsUsed
             {
                 public static SectionDefinitionID Id
@@ -4388,6 +4639,13 @@ namespace SharedMappers.DomIds
             }
 
             = new DomDefinitionId(new Guid("529f8806-4f41-44fb-afa7-8df6e40dd509"))
+            { ModuleId = "(slc)plan_and_build" };
+            public static DomDefinitionId JobType
+            {
+                get;
+            }
+
+            = new DomDefinitionId(new Guid("447da12d-a9bc-471b-bb90-f33f140851ee"))
             { ModuleId = "(slc)plan_and_build" };
             public static DomDefinitionId Job
             {

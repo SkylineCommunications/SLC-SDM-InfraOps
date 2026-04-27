@@ -1,9 +1,11 @@
 ﻿namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 {
+    using Skyline.DataMiner.SDM.FacilityManagement.Models;
+
     using SharedMappers.DomIds;
 
     //[GenerateExposers]
-    //[SdmDomStorage("(slc)facility_management")]
+    [SdmDomStorage("(slc)facility_management")]
     public class Facility : SdmObject<Facility>
 	{
 		public string FacilityId { get; set; }
@@ -25,5 +27,7 @@
 		public double Latitude { get; set; }
 
 		public double Longitude { get; set; }
-	}
+
+        public SiteRelation SiteFk { get; set; }
+    }
 }

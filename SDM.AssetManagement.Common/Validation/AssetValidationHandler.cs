@@ -637,7 +637,7 @@
                 return result;
             }
 
-            var elements = asset.Elements ?? new List<ElementLink>();
+            var elements = asset.ElementLinks ?? new List<ElementLink>();
 
             // Check for multiple primary elements
             var primaryCount = elements.Count(e => e.IsPrimary);
