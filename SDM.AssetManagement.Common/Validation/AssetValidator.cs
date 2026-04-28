@@ -4,10 +4,13 @@
     using System.Collections.Generic;
     using System.Linq;
 
+    using SharedMappers.DomIds;
+
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM.AssetManagement.Common.Validation;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.AssetManagement.Repositories;
+    using Skyline.DataMiner.SDM.Common.Services;
     using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
@@ -19,11 +22,7 @@
     public class AssetValidator
     {
         private readonly IAssetQueryRepository _assetRepository;
-        private readonly IAssetClassQueryRepository _assetClassRepository;
-        private readonly IDeviceTypeQueryRepository _deviceTypeRepository;
-        private readonly IDataPortQueryRepository _dataPortRepository;
-        private readonly IPowerPortQueryRepository _powerPortRepository;
-        private readonly IRackQueryRepository _rackRepository;
+        private readonly SdmEntityLoader _entityLoader;
         private readonly Validator<Asset> _validationPipeline;
 
         /// <summary>
@@ -34,19 +33,11 @@
         /// <param name="deviceTypeRepository">Repository for querying device types.</param>
         /// <param name="dataPortRepository">Repository for querying data ports (optional).</param>
         /// <param name="powerPortRepository">Repository for querying power ports (optional).</param>
-        public AssetValidator(
-            IAssetQueryRepository assetRepository,
-            IAssetClassQueryRepository assetClassRepository,
-            IDeviceTypeQueryRepository deviceTypeRepository,
-            IDataPortQueryRepository dataPortRepository = null,
-            IPowerPortQueryRepository powerPortRepository = null,
-            IRackQueryRepository rackRepository = null)
+        /// <param name="rackRepository">Repository for querying racks (optional).</param>
+        public AssetValidator(IAssetQueryRepository assetRepository, SdmEntityLoader entityLoader)
         {
             _assetRepository = assetRepository ?? throw new ArgumentNullException(nameof(assetRepository));
-            _assetClassRepository = assetClassRepository ?? throw new ArgumentNullException(nameof(assetClassRepository));
-            _deviceTypeRepository = deviceTypeRepository ?? throw new ArgumentNullException(nameof(deviceTypeRepository));
-            _dataPortRepository = dataPortRepository;
-            _powerPortRepository = powerPortRepository;
+            _entityLoader = entityLoader ?? throw new ArgumentNullException(nameof(entityLoader));
 
             _validationPipeline = BuildValidationPipeline();
         }
@@ -155,15 +146,10 @@
                 return result;
             }
 
-            if (_dataPortRepository == null)
-            {
-                return result; // Repository not provided, skip validation
-            }
-
             try
             {
                 // Query DataPorts for this Asset
-                var dataPorts = LoadDataPorts(asset);
+                var dataPorts = _entityLoader.LoadDataPorts(asset);
 
                 // Check for negative port numbers
                 var negativeNumbers = dataPorts.Where(p => p.DataPortInfo.PortNumber < 0).ToList();
@@ -227,15 +213,10 @@
                 return result;
             }
 
-            if (_powerPortRepository == null)
-            {
-                return result; // Repository not provided, skip validation
-            }
-
             try
             {
                 // Query PowerPorts for this Asset
-                var powerPorts = LoadPowerPorts(asset);
+                var powerPorts = _entityLoader.LoadPowerPorts(asset);
 
                 // Check for negative port numbers
                 var negativeNumbers = powerPorts.Where(p => p.PowerPortInfo.PortNumber < 0).ToList();
@@ -363,23 +344,10 @@
             var result = new ValidationResult();
 
             // Check if location can be edited based on state
-            if (!AssetValidationHandler.CanEditLocation(asset))
+            if (!AssetValidationHandler.IsLocationChangeAllowed(asset, out var permissionResult))
             {
-                if (asset.Location.ParentAssetField.Changed ||
-                    asset.Location.HolderNumberField.Changed ||
-                    asset.Location.RackIdField.Changed ||
-                    asset.Location.RackPositionField.Changed ||
-                    asset.Location.SideField.Changed ||
-                    asset.Location.DeskIdField.Changed ||
-                    asset.Location.ContainerIdField.Changed ||
-                    asset.Location.RoomIdField.Changed ||
-                    asset.Location.PowerSupplyRackPositionField.Changed)
-                {
-                    result.AddFailReason(AssetValidationField.Asset, "Cannot change Location in current State.");
-                    return result;
-                }
-
-                return result;
+                result.AddFailuresFrom(permissionResult);
+                return result; // Cannot edit location in current state
             }
 
             // Validate single location type
@@ -389,16 +357,28 @@
             }
 
             // Parent Asset + Holder validation
+            result.AddFailuresFrom(ValidateLocationParentAssetHolder(asset));
+
+            // Rack validation
+            result.AddFailuresFrom(ValidateLocationRackPosition(asset));
+
+            return result;
+        }
+
+        private ValidationResult ValidateLocationParentAssetHolder(Asset asset)
+        {
+            var result = new ValidationResult();
+
             if ((asset.Location.ParentAssetField.Changed || asset.Location.HolderNumberField.Changed)
                 && asset.AssetClassId.HasValue())
             {
                 try
                 {
-                    var assetClass = LoadAssetClass(asset.AssetClassId);
+                    var assetClass = _entityLoader.LoadAssetClass(asset.AssetClassId);
                     if (assetClass != null)
                     {
                         // Pure logic validation (no data access)
-                        if (!AssetValidationHandler.IsParentAssetHolderValid(asset, assetClass, out var parentResult))
+                        if (!AssetValidationHandler.IsParentAssetHolderValid(asset, out var parentResult))
                         {
                             result.AddFailuresFrom(parentResult);
                         }
@@ -414,30 +394,6 @@
                 }
             }
 
-            // Rack validation
-            if ((asset.Location.RackIdField.Changed ||
-                 asset.Location.RackPositionField.Changed ||
-                 asset.Location.SideField.Changed)
-                && asset.AssetClassId.HasValue())
-            {
-                try
-                {
-                    var assetClass = LoadAssetClass(asset.AssetClassId);
-                    if (assetClass != null)
-                    {
-                        if (!AssetValidationHandler.IsRackPositionValid(asset, assetClass, out var rackResult))
-                        {
-                            result.AddFailuresFrom(rackResult);
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    result.AddFailReason(AssetValidationField.RackId,
-                        $"Error validating rack position: {ex.Message}");
-                }
-            }
-
             return result;
         }
 
@@ -446,23 +402,10 @@
             var result = new ValidationResult();
 
             // Check if destination location can be edited based on state
-            if (!AssetValidationHandler.CanEditDestinationLocation(asset))
+            if (!AssetValidationHandler.IsDestinationLocationChangeAllowed(asset, out var permissionResult))
             {
-                if (asset.DestinationLocation.ParentAssetField.Changed ||
-                    asset.DestinationLocation.HolderNumberField.Changed ||
-                    asset.DestinationLocation.RackIdField.Changed ||
-                    asset.DestinationLocation.RackPositionField.Changed ||
-                    asset.DestinationLocation.SideField.Changed ||
-                    asset.DestinationLocation.DeskIdField.Changed ||
-                    asset.DestinationLocation.ContainerIdField.Changed ||
-                    asset.DestinationLocation.RoomIdField.Changed ||
-                    asset.DestinationLocation.PowerSupplyRackPositionField.Changed)
-                {
-                    result.AddFailReason(AssetValidationField.Asset, "Cannot change Destination Location in current State.");
-                    return result;
-                }
-
-                return result;
+                result.AddFailuresFrom(permissionResult);
+                return result; // Cannot edit destination location in current state
             }
 
             // Validate single destination location type
@@ -472,50 +415,10 @@
             }
 
             // Destination Parent Asset + Holder validation
-            if ((asset.DestinationLocation.ParentAssetField.Changed || asset.DestinationLocation.HolderNumberField.Changed)
-                && asset.AssetClassId.HasValue())
-            {
-                try
-                {
-                    var assetClass = LoadAssetClass(asset.AssetClassId);
-                    if (assetClass != null)
-                    {
-                        if (!AssetValidationHandler.IsDestinationParentAssetHolderValid(asset, assetClass, out var parentResult))
-                        {
-                            result.AddFailuresFrom(parentResult);
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    result.AddFailReason(AssetValidationField.DestinationParentAsset,
-                        $"Error validating destination parent asset: {ex.Message}");
-                }
-            }
+            result.AddFailuresFrom(ValidateDestinationLocationParentAssetHolder(asset));
 
             // Destination Rack validation
-            if ((asset.DestinationLocation.RackIdField.Changed ||
-                 asset.DestinationLocation.RackPositionField.Changed ||
-                 asset.DestinationLocation.SideField.Changed)
-                && asset.AssetClassId.HasValue())
-            {
-                try
-                {
-                    var assetClass = LoadAssetClass(asset.AssetClassId);
-                    if (assetClass != null)
-                    {
-                        if (!AssetValidationHandler.IsDestinationRackPositionValid(asset, assetClass, out var rackResult))
-                        {
-                            result.AddFailuresFrom(rackResult);
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    result.AddFailReason(AssetValidationField.DestinationRackId,
-                        $"Error validating destination rack position: {ex.Message}");
-                }
-            }
+            result.AddFailuresFrom(ValidateDestinationLocationRackPosition(asset));
 
             return result;
         }
@@ -591,60 +494,6 @@
 
         #region Helper Methods
 
-        private AssetClass LoadAssetClass(SdmObjectReference<AssetClass> reference)
-        {
-            if (reference == null || !reference.HasValue())
-            {
-                return null;
-            }
-
-            try
-            {
-                var filter = AssetClassExposers.Identifier.Equal(reference.Identifier);
-                return _assetClassRepository.Read(filter).FirstOrDefault();
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException($"Failed to load AssetClass: {ex.Message}", ex);
-            }
-        }
-
-        private List<DataPort> LoadDataPorts(Asset asset)
-        {
-            if (_dataPortRepository == null || asset == null || string.IsNullOrEmpty(asset.Identifier))
-            {
-                return new List<DataPort>();
-            }
-
-            try
-            {
-                var filter = DataPortExposers.Asset.Equal(asset);
-                return _dataPortRepository.Read(filter).ToList();
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException($"Failed to load DataPorts: {ex.Message}", ex);
-            }
-        }
-
-        private List<PowerPort> LoadPowerPorts(Asset asset)
-        {
-            if (_powerPortRepository == null || asset == null || string.IsNullOrEmpty(asset.Identifier))
-            {
-                return new List<PowerPort>();
-            }
-
-            try
-            {
-                var filter = PowerPortExposers.Asset.Equal(asset);
-                return _powerPortRepository.Read(filter).ToList();
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException($"Failed to load PowerPorts: {ex.Message}", ex);
-            }
-        }
-
         private bool IsNameInUse(string name, List<string> exceptIdentifiers = null)
         {
             FilterElement<Asset> filter = AssetExposers.AssetName.Equal(name);
@@ -709,7 +558,7 @@
         {
             var result = new ValidationResult();
 
-            if (!asset.Location.ParentAsset.HasValue() || asset.Location.HolderNumber == null)
+            if (!asset.Location.ParentAsset.HasValue() || asset.Location?.HolderNumber == null)
             {
                 return result; // Basic validation already done in handler
             }
@@ -729,7 +578,7 @@
 
                 // Get hierarchy role from device type
                 var deviceTypeFilter = DeviceTypeExposers.Identifier.Equal(assetClass.DeviceTypeId.Identifier);
-                var deviceType = _deviceTypeRepository.Read(deviceTypeFilter).FirstOrDefault();
+                var deviceType = _entityLoader.LoadDeviceType(assetClass.DeviceTypeId);
 
                 if (deviceType?.HierarchyInfo?.HierarchyRole == null)
                 {
@@ -780,45 +629,54 @@
         /// Validates rack space availability - requires loading rack from repository.
         /// Checks if the rack has available space for this asset.
         /// </summary>
-        private ValidationResult ValidateRackSpaceAvailability(Asset asset, AssetClass assetClass)
+        private ValidationResult ValidateRackSpaceAvailability(Asset asset)
         {
             var result = new ValidationResult();
 
-            if (asset.Location.RackId == default || asset.Location.RackPosition == null)
+            if (asset.Location.RackId == default || asset.Location?.RackPosition == null)
             {
                 return result; // Basic validation already done in handler
             }
 
             try
             {
-                // Load the rack from repository (assuming IRackQueryRepository exists)
-                // NOTE: You'll need to add IRackQueryRepository to the constructor
-                // For now, this is a placeholder showing the pattern:
+               
+                var (assetClass, deviceType) = _entityLoader.LoadAssetClassAndDeviceType(asset);
 
-                // var rackFilter = RackExposers.Identifier.Equal(asset.Location.RackId);
-                // var rack = _rackRepository.Read(rackFilter).FirstOrDefault();
+                if (!deviceType.TagsInfo.Tags.Contains(SlcAsset_Management.Enums.TagOption.RackUnitConsumer))
+                {
+                    return result;
+                }
 
-                // if (rack == null)
-                // {
-                //     result.AddFailReason(AssetValidationField.RackId, "Rack not found.");
-                //     return result;
-                // }
+                if (assetClass.HeightU == default || assetClass.HeightU <= 0)
+                {
+                    // If it is rack Consumer but has no height or less than 1, we consider it valid.
+                    return result;
+                }
 
-                // // Check if position is within rack bounds
-                // if (asset.Location.RackPosition > rack.RackUnits)
-                // {
-                //     result.AddFailReason(AssetValidationField.RackPosition,
-                //         $"Invalid Position: Must be within Rack (max {rack.RackUnits} units).");
-                //     return result;
-                // }
+                // Load the rack from repository
+                var rack = _entityLoader.LoadRack(asset.Location.RackId);
+               
+                if (rack == null)
+                {
+                    result.AddFailReason(AssetValidationField.RackId, "Rack not found.");
+                    return result;
+                }
 
-                // // Validate rack space availability
+                // Check if position is within rack bounds
+                if (asset.Location.RackPosition > rack.Capacity.MaximumRackCapacity)
+                {
+                    result.AddFailReason(AssetValidationField.RackPosition,
+                        $"Invalid Position: Must be within Rack (max {rack.Capacity.MaximumRackCapacity} units).");
+                    return result;
+                }
+
+                // TODO: Validate rack space availability using RackValidationHandler
+                // This requires querying all assets in the same rack to check for collisions
                 // if (!RackValidationHandler.ValidateRackSpace(rack, asset, (int)asset.Location.RackPosition, (int)assetClass.HeightU, out var rackSpaceResult))
                 // {
                 //     result.AddFailuresFrom(rackSpaceResult);
                 // }
-
-                // TODO: Implement when IRackQueryRepository is available
             }
             catch (Exception ex)
             {
@@ -869,23 +727,52 @@
             {
                 try
                 {
-                    var assetClass = LoadAssetClass(asset.AssetClassId);
-                    if (assetClass != null)
+                    // Pure logic validation (basic checks)
+                    if (!AssetValidationHandler.IsRackPositionValid(asset, out var rackResult))
                     {
-                        // Pure logic validation (basic checks)
-                        if (!AssetValidationHandler.IsRackPositionValid(asset, assetClass, out var rackResult))
-                        {
-                            result.AddFailuresFrom(rackResult);
-                        }
-
-                        // Advanced validation (rack space availability - requires Rack repository)
-                        result.AddFailuresFrom(ValidateRackSpaceAvailability(asset, assetClass));
+                        result.AddFailuresFrom(rackResult);
                     }
+
+                    // Advanced validation (rack space availability - requires Rack repository)
+                    result.AddFailuresFrom(ValidateRackSpaceAvailability(asset));
+
                 }
                 catch (Exception ex)
                 {
                     result.AddFailReason(AssetValidationField.RackId,
                         $"Error validating rack position: {ex.Message}");
+                }
+            }
+
+            return result;
+        }
+
+        private ValidationResult ValidateDestinationLocationParentAssetHolder(Asset asset)
+        {
+            var result = new ValidationResult();
+
+            if ((asset.DestinationLocation.ParentAssetField.Changed || asset.DestinationLocation.HolderNumberField.Changed)
+                && asset.AssetClassId.HasValue())
+            {
+                try
+                {
+                    var assetClass = _entityLoader.LoadAssetClass(asset.AssetClassId);
+                    if (assetClass != null)
+                    {
+                        // Pure logic validation (no data access)
+                        if (!AssetValidationHandler.IsDestinationParentAssetHolderValid(asset, assetClass, out var parentResult))
+                        {
+                            result.AddFailuresFrom(parentResult);
+                        }
+
+                        // Advanced validation (requires data access)
+                        result.AddFailuresFrom(ValidateDestinationParentAssetHolderAvailability(asset, assetClass));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    result.AddFailReason(AssetValidationField.DestinationParentAsset,
+                        $"Error validating destination parent asset: {ex.Message}");
                 }
             }
 
@@ -903,7 +790,7 @@
             {
                 try
                 {
-                    var assetClass = LoadAssetClass(asset.AssetClassId);
+                    var assetClass = _entityLoader.LoadAssetClass(asset.AssetClassId);
                     if (assetClass != null)
                     {
                         // Pure logic validation (basic checks)
@@ -921,6 +808,81 @@
                     result.AddFailReason(AssetValidationField.DestinationRackId,
                         $"Error validating destination rack position: {ex.Message}");
                 }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Validates destination parent asset holder availability - requires loading parent asset from repository.
+        /// Checks if the destination parent asset has an available holder matching the hierarchy role and slot number.
+        /// </summary>
+        private ValidationResult ValidateDestinationParentAssetHolderAvailability(Asset asset, AssetClass assetClass)
+        {
+            var result = new ValidationResult();
+
+            if (!asset.DestinationLocation.ParentAsset.HasValue() || asset.DestinationLocation.HolderNumber == null)
+            {
+                return result; // Basic validation already done in handler
+            }
+
+            try
+            {
+                // Load the destination parent asset from repository
+                var parentAssetFilter = AssetExposers.Identifier.Equal(asset.DestinationLocation.ParentAsset.Identifier);
+                var parentAsset = _assetRepository.Read(parentAssetFilter).FirstOrDefault();
+
+                if (parentAsset == null)
+                {
+                    result.AddFailReason(AssetValidationField.DestinationParentAsset,
+                        "Destination Parent Asset not found.");
+                    return result;
+                }
+
+                // Get hierarchy role from device type
+                var deviceTypeFilter = DeviceTypeExposers.Identifier.Equal(assetClass.DeviceTypeId.Identifier);
+                var deviceType = _deviceTypeRepository.Read(deviceTypeFilter).FirstOrDefault();
+
+                if (deviceType?.HierarchyInfo?.HierarchyRole == null)
+                {
+                    result.AddFailReason(AssetValidationField.AssetClass,
+                        "Asset Class Device Type must have a Hierarchy Role to be attached to a parent asset.");
+                    return result;
+                }
+
+                var hierarchyRole = deviceType.HierarchyInfo.HierarchyRole;
+                var holderNumber = asset.DestinationLocation.HolderNumber;
+
+                // Check if parent asset has a holder slot matching the holder number and hierarchy role
+                var matchingHolder = parentAsset.Holders?
+                    .FirstOrDefault(h => h.SlotNumber == holderNumber && h.HierarchyRole == hierarchyRole);
+
+                if (matchingHolder == null)
+                {
+                    result.AddFailReason(AssetValidationField.DestinationHolderNumber,
+                        $"Invalid Holder Number: Destination Parent Asset does not have a holder slot '{holderNumber}' for Hierarchy Role '{hierarchyRole}'.");
+                    return result;
+                }
+
+                // Check if the holder slot is already occupied by a different asset
+                var occupiedFilter = AssetExposers.Identifier.NotEqual(asset.Identifier);
+
+                var occupyingAssets = _assetRepository.Read(occupiedFilter)
+                    .Where(a => a.DestinationLocation?.ParentAsset != null &&
+                               a.DestinationLocation.ParentAsset.Identifier == parentAsset.Identifier &&
+                               a.DestinationLocation.HolderNumber == holderNumber)
+                    .ToList();
+
+                if (occupyingAssets.Any())
+                {
+                    result.AddFailReason(AssetValidationField.DestinationHolderNumber,
+                        $"Holder Number '{holderNumber}' is already occupied on the Destination Parent Asset by another asset.");
+                }
+            }
+            catch (Exception ex)
+            {
+                result.AddFailReason(AssetValidationField.DestinationParentAsset,
+                    $"Error validating destination parent asset holder availability: {ex.Message}");
             }
 
             return result;

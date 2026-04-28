@@ -1,7 +1,5 @@
 ﻿namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 {
-    using Skyline.DataMiner.SDM.FacilityManagement.Models;
-
     using SharedMappers.DomIds;
 
     //[GenerateExposers]

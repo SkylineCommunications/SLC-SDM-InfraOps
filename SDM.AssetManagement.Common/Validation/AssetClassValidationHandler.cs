@@ -1,4 +1,4 @@
-﻿namespace Skyline.DataMiner.SDM.AssetManagement.Common.Validation
+﻿namespace Skyline.DataMiner.SDM.AssetManagement.Validation
 {
     using System.Collections.Generic;
     using System.Linq;
@@ -10,7 +10,6 @@
     using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
-    using static Skyline.DataMiner.Utils.InfraOps.Common.DOM_Classes.DOM.Applications.Asset_Manager.Validations.AssetValidationHandler;
 
     public static class AssetClassValidationHandler
     {
@@ -150,15 +149,15 @@
 
             foreach (var port in assetClass.DataPorts)
             {
-                if (port.PortNumber < 0)
+                if (port.DataPortInfo.PortNumber < 0)
                 {
                     result.AddFailReason(AssetClassValidationField.DataPortNumber, "Data Port Number cannot be negative.");
                     return result;
                 }
 
-                if (!seenPorts.Add(port.PortNumber))
+                if (!seenPorts.Add(port.DataPortInfo.PortNumber))
                 {
-                    result.AddFailReason(AssetClassValidationField.DataPortNumber, $"Multiple Data Ports have the same Port Number '{port.PortNumber}'.");
+                    result.AddFailReason(AssetClassValidationField.DataPortNumber, $"Multiple Data Ports have the same Port Number '{port.DataPortInfo.PortNumber}'.");
                     return result;
                 }
             }
@@ -190,15 +189,15 @@
 
             foreach (var port in assetClass.PowerPorts)
             {
-                if (port.PortNumber < 0)
+                if (port.PowerPortInfo.PortNumber < 0)
                 {
                     result.AddFailReason(AssetClassValidationField.PowerPortNumber, "Power Port Number cannot be negative.");
                     return result;
                 }
 
-                if (!seenPorts.Add(port.PortNumber))
+                if (!seenPorts.Add(port.PowerPortInfo.PortNumber))
                 {
-                    result.AddFailReason(AssetClassValidationField.PowerPortNumber, $"Multiple Power Ports have the same Port Number '{port.PortNumber}'.");
+                    result.AddFailReason(AssetClassValidationField.PowerPortNumber, $"Multiple Power Ports have the same Port Number '{port.PowerPortInfo.PortNumber}'.");
                     return result;
                 }
             }
@@ -222,7 +221,7 @@
 
             if (assetClass.Holders == null)
             {
-                result.AddFailReason(AssetValidationField.HolderSlotNumber, $"Asset Class does not contain Holders.");
+                result.AddFailReason(AssetClassValidationField.HolderSlotNumber, $"Asset Class does not contain Holders.");
                 return result;
             }
 

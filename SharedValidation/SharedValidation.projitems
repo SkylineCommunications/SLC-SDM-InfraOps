@@ -9,8 +9,77 @@
     <Import_RootNamespace>SharedCommonLibrary</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\DOM Repositories\AssetClass\AssetClassDomRepository.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\DOM Repositories\AssetClass\AssetClassDomRepository_Extensions.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\DOM Repositories\AssetClass\AssetClassDomRepository_Middleware.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\DOM Repositories\AssetClass\IAssetClassQueryRepository.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\DOM Repositories\Asset\AssetDomRepository.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\DOM Repositories\Asset\AssetDomRepository_Extensions.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\DOM Repositories\Asset\AssetDomRepository_Middleware.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\DOM Repositories\Asset\IAssetQueryRepository.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\DOM Repositories\DataPort\DataPortDomRepository.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\DOM Repositories\DataPort\DataPortDomRepository_Extensions.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\DOM Repositories\DataPort\DataPortDomRepository_Middleware.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\DOM Repositories\DataPort\IDataPortQueryRepository.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\DOM Repositories\DeviceType\DeviceTypeDomRepository.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\DOM Repositories\DeviceType\DeviceTypeDomRepository_Extensions.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\DOM Repositories\DeviceType\DeviceTypeDomRepository_Middleware.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\DOM Repositories\DeviceType\IDeviceTypeQueryRepository.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\DOM Repositories\PowerPort\IPowerPortQueryRepository.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\DOM Repositories\PowerPort\PowerPortDomRepository.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\DOM Repositories\PowerPort\PowerPortDomRepository_Extensions.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\DOM Repositories\PowerPort\PowerPortDomRepository_Middleware.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\Exposers\AssetClassExposers.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\Exposers\AssetExposers.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\Exposers\DataPortExposers.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\Exposers\DeviceTypeExposers.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\Exposers\PowerPortExposers.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\Models\Asset.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\Models\AssetClass.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\Models\AssetClassLifecycle.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\Models\AssetCustody.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\Models\AssetHolder.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\Models\AssetLifecycle.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\Models\AssetLocation.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\Models\AssetNetworkDetails.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\Models\AssetOwnership.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\Models\DataPort.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\Models\DeviceType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\Models\ElementLink.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\Models\HierarchyInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\Models\PowerPort.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\Models\TagsInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DomInstanceField\DomInstanceArrayField.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\SDMObjectReferenceExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\DOM Repositories\Facility\FacilityDomRepository.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\DOM Repositories\Facility\FacilityDomRepository_Extensions.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\DOM Repositories\Facility\FacilityDomRepository_Middleware.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\DOM Repositories\Floor\FloorDomRepository.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\DOM Repositories\Floor\FloorDomRepository_Extensions.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\DOM Repositories\Floor\FloorDomRepository_Middleware.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\DOM Repositories\Rack\IRackQueryRepository.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\DOM Repositories\Rack\RackDomRepository.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\DOM Repositories\Rack\RackDomRepository_Extensions.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\DOM Repositories\Rack\RackDomRepository_Middleware.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\DOM Repositories\Room\RoomDomRepository.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\DOM Repositories\Room\RoomDomRepository_Extensions.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\DOM Repositories\Room\RoomDomRepository_Middleware.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\DOM Repositories\Row\RowDomRepository.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\DOM Repositories\Row\RowDomRepository_Extensions.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\DOM Repositories\Row\RowDomRepository_Middleware.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\DOM Repositories\Site\SiteDomRepository.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\DOM Repositories\Site\SiteDomRepository_Extensions.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\DOM Repositories\Site\SiteDomRepository_Middleware.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\DOM Repositories\Zone\ZoneDomRepository.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\DOM Repositories\Zone\ZoneDomRepository_Extensions.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\DOM Repositories\Zone\ZoneDomRepository_Middleware.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\Exposers\FacilityExposers.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\Exposers\FloorExposers.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\Exposers\RackExposers.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\Exposers\RoomExposers.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\Exposers\RowExposers.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\Exposers\SiteExposers.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\Exposers\ZoneExposers.g.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\Models\Facility.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\Models\FacilityRelation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)facilitymanagement\models\Floor.cs" />
@@ -29,6 +98,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)facilitymanagement\models\Zone.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\Models\ZoneCapacity.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\Models\ZoneRelation.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)sdm\common\SdmEntityLoader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)validation\InfraOpsException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)validation\NumericValidator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)validation\ValidationException.cs" />
@@ -41,5 +111,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)DomInstanceField\IDomInstanceFieldApplyChanges.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Validation\ValidationResult.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Validation\ValidatorContext.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)SDM\Common\" />
   </ItemGroup>
 </Project>

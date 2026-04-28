@@ -23,11 +23,13 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 	using Skyline.DataMiner.Net.Sections;
 	using Skyline.DataMiner.Net.SubscriptionFilters;
 	using Skyline.DataMiner.SDM;
-	using SLDataGateway.API.Querying;
+    using Skyline.DataMiner.SDM.AssetManagement.Repositories;
+
+    using SLDataGateway.API.Querying;
 	using SLDataGateway.API.Types.Querying;
 	using static Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper;
 
-	internal partial class PowerPortDomRepository : IBulkRepository<PowerPort>
+	internal partial class PowerPortDomRepository : IBulkRepository<PowerPort>, IPowerPortQueryRepository
 	{
 		private readonly IConnection connection;
 		private readonly DomHelper helper;

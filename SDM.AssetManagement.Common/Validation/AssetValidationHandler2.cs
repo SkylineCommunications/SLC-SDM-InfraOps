@@ -288,7 +288,7 @@
                 (dat) => dat.Object.DirectRackIdField.Changed || dat.Object.RackPositionField.Changed || dat.Object.RackSideField.Changed,
                 (dat) =>
                 {
-                    IsValidParentAssetAttachment(dat.Object, out var parentRackAttachmentResult);
+                    IsValidRackAttachment(dat.Object, out var parentRackAttachmentResult);
                     return parentRackAttachmentResult;
                 });
 

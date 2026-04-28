@@ -7,9 +7,9 @@
     using SharedMappers.DomIds;
 
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
-    using Skyline.DataMiner.SDM.AssetManagement.Common.Validation;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.AssetManagement.Repositories;
+    using Skyline.DataMiner.SDM.Common.Services;
     using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
@@ -19,18 +19,18 @@
     public class AssetClassValidator
     {
         private readonly IAssetClassQueryRepository _assetClassRepository;
-        private readonly IDeviceTypeQueryRepository _deviceTypeRepository;
         private readonly Validator<AssetClass> _validationPipeline;
+        private readonly SdmEntityLoader _entityLoader;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AssetClassValidator"/> class.
         /// </summary>
         /// <param name="assetClassRepository">Repository for querying asset classes.</param>
         /// <param name="deviceTypeRepository">Repository for querying device types.</param>
-        public AssetClassValidator(IAssetClassQueryRepository assetClassRepository, IDeviceTypeQueryRepository deviceTypeRepository)
+        public AssetClassValidator(IAssetClassQueryRepository assetClassRepository, SdmEntityLoader entityLoader)
         {
             _assetClassRepository = assetClassRepository ?? throw new ArgumentNullException(nameof(assetClassRepository));
-            _deviceTypeRepository = deviceTypeRepository ?? throw new ArgumentNullException(nameof(deviceTypeRepository));
+            _entityLoader = entityLoader ?? throw new ArgumentNullException(nameof(entityLoader));
 
             _validationPipeline = BuildValidationPipeline();
         }
@@ -177,7 +177,7 @@
                 return result;
             }
 
-            var deviceType = LoadDeviceType(assetClass.DeviceTypeId);
+            var deviceType = _entityLoader.LoadDeviceType(assetClass.DeviceTypeId);
 
             if (deviceType == null)
             {
@@ -276,19 +276,6 @@
         #endregion
 
         #region Helper Methods
-
-        private DeviceType LoadDeviceType(SdmObjectReference<DeviceType> reference)
-        {
-            try
-            {
-                var filter = DeviceTypeExposers.Identifier.Equal(reference.Identifier);
-                return _deviceTypeRepository.Read(filter).FirstOrDefault();
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException($"Failed to load DeviceType: {ex.Message}", ex);
-            }
-        }
 
         private bool IsNameInUse(string name, List<string> exceptIdentifiers = null)
         {

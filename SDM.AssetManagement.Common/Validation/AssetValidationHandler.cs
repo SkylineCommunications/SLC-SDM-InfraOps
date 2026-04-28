@@ -144,19 +144,13 @@
         /// <summary>
         /// Validates parent asset holder relationship (pure logic, no data access).
         /// </summary>
-        public static bool IsParentAssetHolderValid(Asset asset, AssetClass assetClass, out ValidationResult result)
+        public static bool IsParentAssetHolderValid(Asset asset, out ValidationResult result)
         {
             result = new ValidationResult();
 
             if (asset == null)
             {
                 result.AddFailReason(AssetValidationField.Asset, "Asset cannot be null.");
-                return result.IsValid;
-            }
-
-            if (assetClass == null)
-            {
-                result.AddFailReason(AssetValidationField.AssetClass, "Asset Class cannot be null.");
                 return result.IsValid;
             }
 
@@ -193,19 +187,13 @@
         /// <summary>
         /// Validates rack position (pure logic, no data access).
         /// </summary>
-        public static bool IsRackPositionValid(Asset asset, AssetClass assetClass, out ValidationResult result)
+        public static bool IsRackPositionValid(Asset asset, out ValidationResult result)
         {
             result = new ValidationResult();
 
             if (asset == null)
             {
                 result.AddFailReason(AssetValidationField.Asset, "Asset cannot be null.");
-                return result.IsValid;
-            }
-
-            if (assetClass == null)
-            {
-                result.AddFailReason(AssetValidationField.AssetClass, "Asset Class cannot be null.");
                 return result.IsValid;
             }
 
@@ -256,17 +244,40 @@
                 return result.IsValid;
             }
 
-            // Validate asset class has height (rack attachable)
-            if (assetClass.HeightU <= 0)
+            return result.IsValid;
+        }
+
+        /// <summary>
+        /// Validates if location can be edited based on asset state (pure logic, no data access).
+        /// </summary>
+        public static bool IsLocationChangeAllowed(Asset asset, out ValidationResult result)
+        {
+            result = new ValidationResult();
+
+            if (asset == null)
             {
-                result.AddFailReason(AssetValidationField.AssetClass,
-                    "Asset Class must have a Height (U) greater than 0 to be attached to a Rack.");
+                result.AddFailReason(AssetValidationField.Asset, "Asset cannot be null.");
                 return result.IsValid;
+            }
+
+            if (!CanEditLocation(asset))
+            {
+                if (asset.Location.ParentAssetField.Changed ||
+                    asset.Location.HolderNumberField.Changed ||
+                    asset.Location.RackIdField.Changed ||
+                    asset.Location.RackPositionField.Changed ||
+                    asset.Location.SideField.Changed ||
+                    asset.Location.DeskIdField.Changed ||
+                    asset.Location.ContainerIdField.Changed ||
+                    asset.Location.RoomIdField.Changed ||
+                    asset.Location.PowerSupplyRackPositionField.Changed)
+                {
+                    result.AddFailReason(AssetValidationField.Asset, "Cannot change Location in current State.");
+                }
             }
 
             return result.IsValid;
         }
-
         #endregion
 
         #region Destination Location Validation
@@ -423,6 +434,38 @@
                 result.AddFailReason(AssetValidationField.AssetClass,
                     "Asset Class must have a Height (U) greater than 0 to be attached to a Rack.");
                 return result.IsValid;
+            }
+
+            return result.IsValid;
+        }
+
+        /// <summary>
+        /// Validates if destination location can be edited based on asset state (pure logic, no data access).
+        /// </summary>
+        public static bool IsDestinationLocationChangeAllowed(Asset asset, out ValidationResult result)
+        {
+            result = new ValidationResult();
+
+            if (asset == null)
+            {
+                result.AddFailReason(AssetValidationField.Asset, "Asset cannot be null.");
+                return result.IsValid;
+            }
+
+            if (!CanEditDestinationLocation(asset))
+            {
+                if (asset.DestinationLocation.ParentAssetField.Changed ||
+                    asset.DestinationLocation.HolderNumberField.Changed ||
+                    asset.DestinationLocation.RackIdField.Changed ||
+                    asset.DestinationLocation.RackPositionField.Changed ||
+                    asset.DestinationLocation.SideField.Changed ||
+                    asset.DestinationLocation.DeskIdField.Changed ||
+                    asset.DestinationLocation.ContainerIdField.Changed ||
+                    asset.DestinationLocation.RoomIdField.Changed ||
+                    asset.DestinationLocation.PowerSupplyRackPositionField.Changed)
+                {
+                    result.AddFailReason(AssetValidationField.Asset, "Cannot change Destination Location in current State.");
+                }
             }
 
             return result.IsValid;

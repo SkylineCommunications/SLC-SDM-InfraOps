@@ -10,6 +10,7 @@
     using SharedMappers.DomIds;
 
     using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.FacilityManagement.Models;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     using static SharedMappers.DomIds.SlcFacility_Management.Sections;
@@ -57,7 +58,7 @@
             set => HolderNumberField.Value = value;
         }
 
-        public Guid RackId
+        public SdmObjectReference<Rack> RackId
         {
             get => RackIdField.Value;
             set => RackIdField.Value = value;
@@ -114,9 +115,9 @@
             () => new ChangeTrackingField<long>(0));
 
         [JsonIgnore]
-        internal IChangeTrackingField<Guid> RackIdField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<SdmObjectReference<Rack>> RackIdField => FieldHandler.GetOrCreateField(
             nameof(RackId),
-            () => new ChangeTrackingField<Guid>(default));
+            () => new ChangeTrackingField<SdmObjectReference<Rack>>(default));
 
         [JsonIgnore]
         internal IChangeTrackingField<long> RackPositionField => FieldHandler.GetOrCreateField(
