@@ -991,58 +991,58 @@
             }
 
             // ===== 7. DESTINATION RACK POSITION OVERLAPS =====
-            var destRackGroups = assets
-                .Where(a => a.DestinationLocation?.RackId != default && a.DestinationLocation?.RackPosition != null)
-                .GroupBy(a => a.DestinationLocation.RackId);
+            //var destRackGroups = assets
+            //    .Where(a => a.DestinationLocation?.RackId != default && a.DestinationLocation?.RackPosition != null)
+            //    .GroupBy(a => a.DestinationLocation.RackId);
 
-            foreach (var rackGroup in destRackGroups)
-            {
-                var rackId = rackGroup.Key;
-                var assetsInRack = rackGroup.ToList();
+            //foreach (var rackGroup in destRackGroups)
+            //{
+            //    var rackId = rackGroup.Key;
+            //    var assetsInRack = rackGroup.ToList();
 
-                if (assetsInRack.Count < 2)
-                {
-                    continue;
-                }
+            //    if (assetsInRack.Count < 2)
+            //    {
+            //        continue;
+            //    }
 
-                var rack = _entityLoader.LoadRack(rackId);
-                if (rack == null)
-                {
-                    continue;
-                }
+            //    var rack = _entityLoader.LoadRack(rackId);
+            //    if (rack == null)
+            //    {
+            //        continue;
+            //    }
 
-                // Check all pairs for overlaps
-                for (int i = 0; i < assetsInRack.Count; i++)
-                {
-                    var asset1 = assetsInRack[i];
-                    var assetClass1 = _entityLoader.LoadAssetClass(asset1.AssetClassId);
-                    if (assetClass1 == null || assetClass1.HeightU <= 0)
-                    {
-                        continue;
-                    }
+            //    // Check all pairs for overlaps
+            //    for (int i = 0; i < assetsInRack.Count; i++)
+            //    {
+            //        var asset1 = assetsInRack[i];
+            //        var assetClass1 = _entityLoader.LoadAssetClass(asset1.AssetClassId);
+            //        if (assetClass1 == null || assetClass1.HeightU <= 0)
+            //        {
+            //            continue;
+            //        }
 
-                    for (int j = i + 1; j < assetsInRack.Count; j++)
-                    {
-                        var asset2 = assetsInRack[j];
-                        var assetClass2 = _entityLoader.LoadAssetClass(asset2.AssetClassId);
-                        if (assetClass2 == null || assetClass2.HeightU <= 0)
-                        {
-                            continue;
-                        }
+            //        for (int j = i + 1; j < assetsInRack.Count; j++)
+            //        {
+            //            var asset2 = assetsInRack[j];
+            //            var assetClass2 = _entityLoader.LoadAssetClass(asset2.AssetClassId);
+            //            if (assetClass2 == null || assetClass2.HeightU <= 0)
+            //            {
+            //                continue;
+            //            }
 
-                        if (DoRackPositionsOverlap(
-                            (int)asset1.DestinationLocation.RackPosition, (int)assetClass1.HeightU,
-                            (int)asset2.DestinationLocation.RackPosition, (int)assetClass2.HeightU,
-                            rack.Position))
-                        {
-                            results[asset1.Identifier].AddFailReason(AssetValidationField.DestinationRackPosition,
-                                $"Destination Rack Position {asset1.DestinationLocation.RackPosition} conflicts with another asset in the validation batch.");
-                            results[asset2.Identifier].AddFailReason(AssetValidationField.DestinationRackPosition,
-                                $"Destination Rack Position {asset2.DestinationLocation.RackPosition} conflicts with another asset in the validation batch.");
-                        }
-                    }
-                }
-            }
+            //            if (DoRackPositionsOverlap(
+            //                (int)asset1.DestinationLocation.RackPosition, (int)assetClass1.HeightU,
+            //                (int)asset2.DestinationLocation.RackPosition, (int)assetClass2.HeightU,
+            //                rack.Position))
+            //            {
+            //                results[asset1.Identifier].AddFailReason(AssetValidationField.DestinationRackPosition,
+            //                    $"Destination Rack Position {asset1.DestinationLocation.RackPosition} conflicts with another asset in the validation batch.");
+            //                results[asset2.Identifier].AddFailReason(AssetValidationField.DestinationRackPosition,
+            //                    $"Destination Rack Position {asset2.DestinationLocation.RackPosition} conflicts with another asset in the validation batch.");
+            //            }
+            //        }
+            //    }
+            //}
 
             return results;
         }

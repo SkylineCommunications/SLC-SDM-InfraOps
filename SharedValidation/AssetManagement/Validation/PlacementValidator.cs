@@ -206,8 +206,6 @@
                 }
             }
 
-            // Check other assets being validated (batch conflicts already checked in Phase 1)
-
             return result;
         }
 
