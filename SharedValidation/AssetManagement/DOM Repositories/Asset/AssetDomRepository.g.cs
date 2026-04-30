@@ -608,7 +608,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 var _locationrack = _locationSection.GetValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Rack);
                 if (_locationrack != null)
                 {
-                    obj.Location.RackId = System.Guid.Parse(Convert.ToString(_locationrack.Value));
+                    obj.Location.RackId = new Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.FacilityManagement.Models.Rack>(Convert.ToString(_locationrack.Value));
                 }
 
                 var _locationdesk = _locationSection.GetValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Desk);
@@ -876,7 +876,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
                 if (obj.Location.RackId != default)
                 {
-                    _location.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Rack, obj.Location.RackId);
+                    _location.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Rack, System.Guid.Parse(obj.Location.RackId.Identifier));
                 }
 
                 if (obj.Location.DeskId != default)

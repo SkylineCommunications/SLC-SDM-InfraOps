@@ -45,23 +45,21 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
             _assetRepository,
             _entityLoader);
 
-        _assetClassValidator = new AssetClassValidator(
-            _assetClassRepository,
-            _entityLoader);
+        _assetClassValidator = new AssetClassValidator(_entityLoader);
 
         _deviceTypeValidator = new DeviceTypeValidator(
             _deviceTypeRepository,
             _assetRepository);
 
         // Wrap with middleware
-        Assets = _assetRepository.WithMiddleware(
-            new AssetValidationMiddleware(_assetValidator));
+        //Assets = _assetRepository.WithMiddleware(
+        //    new AssetValidationMiddleware(_assetValidator));
 
         AssetClasses = _assetClassRepository.WithMiddleware(
             new AssetClassValidationMiddleware(_assetClassValidator));
 
-        DeviceTypes = _deviceTypeRepository.WithMiddleware(
-            new DeviceTypeValidationMiddleware(_deviceTypeValidator));
+        //DeviceTypes = _deviceTypeRepository.WithMiddleware(
+        //    new DeviceTypeValidationMiddleware(_deviceTypeValidator));
 
         // Expose repositories directly (or wrap with middleware later)
         PowerPorts = _powerPortRepository;

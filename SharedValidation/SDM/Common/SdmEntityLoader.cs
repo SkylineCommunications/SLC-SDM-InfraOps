@@ -4,6 +4,8 @@ namespace Skyline.DataMiner.SDM.Common.Services
     using System.Collections.Generic;
     using System.Linq;
 
+    using SharedCommonLibrary.AssetManagement.Models;
+
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.AssetManagement.Repositories;
@@ -12,8 +14,9 @@ namespace Skyline.DataMiner.SDM.Common.Services
     using Skyline.DataMiner.SDM.FacilityManagement.Repositories;
 
     /// <summary>
-    /// Shared service for loading SDM object references across domains.
-    /// Centralizes entity loading logic to avoid duplication.
+    /// Shared service for loading and querying SDM entities across domains.
+    /// Centralizes all data access logic to avoid duplication.
+    /// Acts as a facade for all repository operations.
     /// </summary>
     public class SdmEntityLoader
     {
@@ -23,18 +26,16 @@ namespace Skyline.DataMiner.SDM.Common.Services
         private readonly IRackQueryRepository _rackRepository;
         private readonly IDataPortQueryRepository _dataPortRepository;
         private readonly IPowerPortQueryRepository _powerPortRepository;
+        private readonly IInfraopsReservationQueryRepository _reservationRepository;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SdmEntityLoader"/> class.
-        /// All repositories are optional - only provide the ones you need.
-        /// </summary>
         public SdmEntityLoader(
             IAssetQueryRepository assetRepository = null,
             IAssetClassQueryRepository assetClassRepository = null,
             IDeviceTypeQueryRepository deviceTypeRepository = null,
             IRackQueryRepository rackRepository = null,
             IDataPortQueryRepository dataPortRepository = null,
-            IPowerPortQueryRepository powerPortRepository = null)
+            IPowerPortQueryRepository powerPortRepository = null,
+            IInfraopsReservationQueryRepository reservationRepository = null)
         {
             _assetRepository = assetRepository;
             _assetClassRepository = assetClassRepository;
@@ -42,13 +43,11 @@ namespace Skyline.DataMiner.SDM.Common.Services
             _rackRepository = rackRepository;
             _dataPortRepository = dataPortRepository;
             _powerPortRepository = powerPortRepository;
+            _reservationRepository = reservationRepository;
         }
 
         #region Single Entity Loaders
 
-        /// <summary>
-        /// Loads an Asset by its reference.
-        /// </summary>
         public Asset LoadAsset(SdmObjectReference<Asset> reference)
         {
             if (_assetRepository == null || reference == null || !reference.HasValue())
@@ -67,9 +66,6 @@ namespace Skyline.DataMiner.SDM.Common.Services
             }
         }
 
-        /// <summary>
-        /// Loads an AssetClass by its reference.
-        /// </summary>
         public AssetClass LoadAssetClass(SdmObjectReference<AssetClass> reference)
         {
             if (_assetClassRepository == null || reference == null || !reference.HasValue())
@@ -88,9 +84,6 @@ namespace Skyline.DataMiner.SDM.Common.Services
             }
         }
 
-        /// <summary>
-        /// Loads a DeviceType by its reference.
-        /// </summary>
         public DeviceType LoadDeviceType(SdmObjectReference<DeviceType> reference)
         {
             if (_deviceTypeRepository == null || reference == null || !reference.HasValue())
@@ -109,19 +102,26 @@ namespace Skyline.DataMiner.SDM.Common.Services
             }
         }
 
-        /// <summary>
-        /// Loads a Rack by its Guid identifier.
-        /// </summary>
-        public Rack LoadRack(SdmObjectReference<Rack> reference)
+        public Rack LoadRack(SdmObjectReference<Rack> rack)
         {
-            if (_rackRepository == null || reference == null || !reference.HasValue())
+            if (_rackRepository == null || !rack.HasValue())
+            {
+                return null;
+            }
+
+            return LoadRack(rack.Identifier);
+        }
+
+        public Rack LoadRack(string rackId)
+        {
+            if (_rackRepository == null || rackId == default)
             {
                 return null;
             }
 
             try
             {
-                var filter = RackExposers.Identifier.Equal(reference.Identifier);
+                var filter = RackExposers.Identifier.Equal(rackId.ToString());
                 return _rackRepository.Read(filter).FirstOrDefault();
             }
             catch (Exception ex)
@@ -130,9 +130,6 @@ namespace Skyline.DataMiner.SDM.Common.Services
             }
         }
 
-        /// <summary>
-        /// Loads all DataPorts for an Asset.
-        /// </summary>
         public List<DataPort> LoadDataPorts(Asset asset)
         {
             if (_dataPortRepository == null || asset == null || string.IsNullOrEmpty(asset.Identifier))
@@ -151,9 +148,6 @@ namespace Skyline.DataMiner.SDM.Common.Services
             }
         }
 
-        /// <summary>
-        /// Loads all PowerPorts for an Asset.
-        /// </summary>
         public List<PowerPort> LoadPowerPorts(Asset asset)
         {
             if (_powerPortRepository == null || asset == null || string.IsNullOrEmpty(asset.Identifier))
@@ -176,9 +170,6 @@ namespace Skyline.DataMiner.SDM.Common.Services
 
         #region Hierarchical Loaders
 
-        /// <summary>
-        /// Loads DeviceType through Asset hierarchy (Asset -> AssetClass -> DeviceType).
-        /// </summary>
         public DeviceType LoadDeviceTypeFromAsset(Asset asset)
         {
             if (asset == null || !asset.AssetClassId.HasValue())
@@ -195,10 +186,6 @@ namespace Skyline.DataMiner.SDM.Common.Services
             return LoadDeviceType(assetClass.DeviceTypeId);
         }
 
-        /// <summary>
-        /// Loads AssetClass and DeviceType through Asset reference.
-        /// Returns tuple with both entities, either can be null.
-        /// </summary>
         public (AssetClass AssetClass, DeviceType DeviceType) LoadAssetClassAndDeviceType(Asset asset)
         {
             if (asset == null || !asset.AssetClassId.HasValue())
@@ -214,6 +201,210 @@ namespace Skyline.DataMiner.SDM.Common.Services
 
             var deviceType = LoadDeviceType(assetClass.DeviceTypeId);
             return (assetClass, deviceType);
+        }
+
+        #endregion
+
+        #region Query Methods (Count/Filter Operations)
+
+        /// <summary>
+        /// Counts assets with the specified name, excluding given identifiers.
+        /// </summary>
+        public long CountAssetsByName(string name, List<string> exceptIdentifiers = null)
+        {
+            if (_assetRepository == null || string.IsNullOrWhiteSpace(name))
+            {
+                return 0;
+            }
+
+            FilterElement<Asset> filter = AssetExposers.AssetName.Equal(name);
+
+            if (exceptIdentifiers != null && exceptIdentifiers.Any())
+            {
+                var clauses = exceptIdentifiers
+                    .Select(id => AssetExposers.Identifier.NotEqual(id))
+                    .Cast<FilterElement<Asset>>()
+                    .ToArray();
+                filter = filter.AND(new ANDFilterElement<Asset>(clauses));
+            }
+
+            return _assetRepository.Count(filter);
+        }
+
+        /// <summary>
+        /// Counts assets with the specified AssetID, excluding given identifiers.
+        /// </summary>
+        public long CountAssetsByAssetId(string assetId, List<string> exceptIdentifiers = null)
+        {
+            if (_assetRepository == null || string.IsNullOrWhiteSpace(assetId))
+            {
+                return 0;
+            }
+
+            FilterElement<Asset> filter = AssetExposers.AssetId.Equal(assetId);
+
+            if (exceptIdentifiers != null && exceptIdentifiers.Any())
+            {
+                var clauses = exceptIdentifiers
+                    .Select(id => AssetExposers.Identifier.NotEqual(id))
+                    .Cast<FilterElement<Asset>>()
+                    .ToArray();
+                filter = filter.AND(new ANDFilterElement<Asset>(clauses));
+            }
+
+            return _assetRepository.Count(filter);
+        }
+
+        /// <summary>
+        /// Counts assets with the specified Serial Number and AssetClass, excluding given identifiers.
+        /// </summary>
+        public long CountAssetsBySerialNumber(
+            string serialNumber,
+            SdmObjectReference<AssetClass> assetClassId,
+            List<string> exceptIdentifiers = null)
+        {
+            if (_assetRepository == null ||
+                string.IsNullOrWhiteSpace(serialNumber) ||
+                assetClassId == null ||
+                !assetClassId.HasValue())
+            {
+                return 0;
+            }
+
+            FilterElement<Asset> filter = AssetExposers.SerialNumber.Equal(serialNumber)
+                .AND(AssetExposers.AssetClass.Equal(assetClassId));
+
+            if (exceptIdentifiers != null && exceptIdentifiers.Any())
+            {
+                var clauses = exceptIdentifiers
+                    .Select(id => AssetExposers.Identifier.NotEqual(id))
+                    .Cast<FilterElement<Asset>>()
+                    .ToArray();
+                filter = filter.AND(new ANDFilterElement<Asset>(clauses));
+            }
+
+            return _assetRepository.Count(filter);
+        }
+
+        /// <summary>
+        /// Finds assets in a specific rack, excluding specified asset identifiers.
+        /// </summary>
+        public List<Asset> FindAssetsInRack(string rackIdentifier, List<string> excludeAssetIds = null)
+        {
+            if (_assetRepository == null || string.IsNullOrEmpty(rackIdentifier))
+            {
+                return new List<Asset>();
+            }
+
+            try
+            {
+                FilterElement<Asset> filter = AssetExposers.Identifier.NotEqual(string.Empty);
+
+                if (excludeAssetIds != null && excludeAssetIds.Any())
+                {
+                    var clauses = excludeAssetIds
+                        .Select(id => AssetExposers.Identifier.NotEqual(id))
+                        .Cast<FilterElement<Asset>>()
+                        .ToArray();
+                    filter = filter.AND(new ANDFilterElement<Asset>(clauses));
+                }
+
+                var allAssets = _assetRepository.Read(filter);
+
+                // Filter in memory for assets in this rack
+                return allAssets
+                    .Where(a => (a.Location?.RackId != null && a.Location.RackId.ToString() == rackIdentifier) ||
+                               (a.DestinationLocation?.RackId != null && a.DestinationLocation.RackId.ToString() == rackIdentifier))
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Failed to find assets in rack: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// Finds child assets of a specific parent asset, excluding specified asset identifiers.
+        /// </summary>
+        public List<Asset> FindChildAssets(string parentAssetIdentifier, List<string> excludeAssetIds = null)
+        {
+            if (_assetRepository == null || string.IsNullOrEmpty(parentAssetIdentifier))
+            {
+                return new List<Asset>();
+            }
+
+            try
+            {
+                FilterElement<Asset> filter = AssetExposers.Identifier.NotEqual(string.Empty);
+
+                if (excludeAssetIds != null && excludeAssetIds.Any())
+                {
+                    var clauses = excludeAssetIds
+                        .Select(id => AssetExposers.Identifier.NotEqual(id))
+                        .Cast<FilterElement<Asset>>()
+                        .ToArray();
+                    filter = filter.AND(new ANDFilterElement<Asset>(clauses));
+                }
+
+                var allAssets = _assetRepository.Read(filter);
+
+                // Filter in memory for child assets
+                return allAssets
+                    .Where(a => (a.Location?.ParentAsset != null && a.Location.ParentAsset.Identifier == parentAssetIdentifier) ||
+                               (a.DestinationLocation?.ParentAsset != null && a.DestinationLocation.ParentAsset.Identifier == parentAssetIdentifier))
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Failed to find child assets: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// Counts AssetClasses with the specified name, excluding given identifiers.
+        /// </summary>
+        public long CountAssetClassesByName(string name, List<string> exceptIdentifiers = null)
+        {
+            if (_assetClassRepository == null || string.IsNullOrWhiteSpace(name))
+            {
+                return 0;
+            }
+
+            FilterElement<AssetClass> filter = AssetClassExposers.DeviceName.Equal(name);
+
+            if (exceptIdentifiers != null && exceptIdentifiers.Any())
+            {
+                var clauses = exceptIdentifiers
+                    .Select(id => AssetClassExposers.Identifier.NotEqual(id))
+                    .Cast<FilterElement<AssetClass>>()
+                    .ToArray();
+                filter = filter.AND(new ANDFilterElement<AssetClass>(clauses));
+            }
+
+            return _assetClassRepository.Count(filter);
+        }
+
+
+        /// <summary>
+        /// Finds reservations for a specific rack.
+        /// </summary>
+        public List<InfraopsReservation> FindReservationsInRack(Rack rack)
+        {
+            if (_reservationRepository == null || rack == null)
+            {
+                return new List<InfraopsReservation>();
+            }
+
+            try
+            {
+                // Query reservations for this rack
+                var filter = InfraopsReservationExposers.RackFk.Rack.Equal(rack);
+                return _reservationRepository.Read(filter).ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Failed to find reservations in rack: {ex.Message}", ex);
+            }
         }
 
         #endregion

@@ -546,6 +546,12 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     obj.Height = _rackpropertiesheight.Value;
                 }
 
+                var _rackpropertiesdepth = _rackpropertiesSection.GetValue<double>(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.Depth);
+                if (_rackpropertiesdepth != null)
+                {
+                    obj.Depth = _rackpropertiesdepth.Value;
+                }
+
                 var _rackpropertiesdescription = _rackpropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.Description);
                 if (_rackpropertiesdescription != null)
                 {
@@ -710,6 +716,11 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 _rackproperties.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.Height, (double)obj.Height);
             }
 
+            if (obj.Depth != default)
+            {
+                _rackproperties.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.Depth, (double)obj.Depth);
+            }
+
             if (obj.Description != default)
             {
                 _rackproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.Description, Convert.ToString(obj.Description));
@@ -827,6 +838,8 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.Width), comparer, (double)value);
                 case "RackProperties.Height":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.Height), comparer, (double)value);
+                case "RackProperties.Depth":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.Depth), comparer, (double)value);
                 case "RackProperties.Description":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.Description), comparer, (string)value);
                 case "RackProperties.Bookable":
@@ -878,6 +891,8 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.Width), sortOrder, naturalSort);
                 case "RackProperties.Height":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.Height), sortOrder, naturalSort);
+                case "RackProperties.Depth":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.Depth), sortOrder, naturalSort);
                 case "RackProperties.Description":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.Description), sortOrder, naturalSort);
                 case "RackProperties.Bookable":

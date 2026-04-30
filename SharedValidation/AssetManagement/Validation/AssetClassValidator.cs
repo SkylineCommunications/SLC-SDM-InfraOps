@@ -18,20 +18,18 @@
     /// </summary>
     public class AssetClassValidator
     {
-        private readonly IAssetClassQueryRepository _assetClassRepository;
-        private readonly Validator<AssetClass> _validationPipeline;
         private readonly SdmEntityLoader _entityLoader;
+        private readonly Validator<AssetClass> _validationPipeline;
+
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AssetClassValidator"/> class.
         /// </summary>
         /// <param name="assetClassRepository">Repository for querying asset classes.</param>
         /// <param name="deviceTypeRepository">Repository for querying device types.</param>
-        public AssetClassValidator(IAssetClassQueryRepository assetClassRepository, SdmEntityLoader entityLoader)
+        public AssetClassValidator(SdmEntityLoader entityLoader)
         {
-            _assetClassRepository = assetClassRepository ?? throw new ArgumentNullException(nameof(assetClassRepository));
             _entityLoader = entityLoader ?? throw new ArgumentNullException(nameof(entityLoader));
-
             _validationPipeline = BuildValidationPipeline();
         }
 
@@ -279,18 +277,7 @@
 
         private bool IsNameInUse(string name, List<string> exceptIdentifiers = null)
         {
-            FilterElement<AssetClass> filter = AssetClassExposers.DeviceName.Equal(name);
-
-            if (exceptIdentifiers != null && exceptIdentifiers.Any())
-            {
-                var clauses = exceptIdentifiers
-                    .Select(id => AssetClassExposers.Identifier.NotEqual(id))
-                    .Cast<FilterElement<AssetClass>>()
-                    .ToArray();
-                filter = filter.AND(new ANDFilterElement<AssetClass>(clauses));
-            }
-
-            return _assetClassRepository.Count(filter) > 0;
+            return _entityLoader.CountAssetClassesByName(name, exceptIdentifiers) > 0;
         }
 
         #endregion
