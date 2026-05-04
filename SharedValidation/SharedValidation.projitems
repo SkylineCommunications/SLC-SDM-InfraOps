@@ -54,6 +54,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\Models\HierarchyInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\Models\PowerPort.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\Models\RackRelation.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\Validation\AssetValidationCore.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\Validation\PlacementValidator.cs" />
     <Compile Include="..\SharedValidation\AssetManagement\Models\InfraopsReservation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\Models\InfraopsReservationBounderies.cs" />

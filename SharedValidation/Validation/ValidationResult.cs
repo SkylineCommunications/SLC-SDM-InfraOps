@@ -204,4 +204,19 @@
             }
         }
     }
+
+    public static class ValidationResultExtensions
+    {
+        /// <summary>
+        /// Combines two validation results into one.
+        /// Used for pipeline-style validation composition.
+        /// </summary>
+        public static ValidationResult CombineWith(this ValidationResult first, ValidationResult second)
+        {
+            var combined = new ValidationResult();
+            combined.AddFailuresFrom(first);
+            combined.AddFailuresFrom(second);
+            return combined;
+        }
+    }
 }
