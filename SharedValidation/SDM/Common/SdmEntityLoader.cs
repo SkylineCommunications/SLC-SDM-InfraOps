@@ -6,6 +6,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
 
     using SharedCommonLibrary.AssetManagement.Models;
 
+    using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.AssetManagement.Repositories;
@@ -27,6 +28,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
         private readonly IDataPortQueryRepository _dataPortRepository;
         private readonly IPowerPortQueryRepository _powerPortRepository;
         private readonly IInfraopsReservationQueryRepository _reservationRepository;
+        private readonly IPortTypeQueryRepository _portTypeRepository;
 
         public SdmEntityLoader(
             IAssetQueryRepository assetRepository = null,
@@ -35,7 +37,8 @@ namespace Skyline.DataMiner.SDM.Common.Services
             IRackQueryRepository rackRepository = null,
             IDataPortQueryRepository dataPortRepository = null,
             IPowerPortQueryRepository powerPortRepository = null,
-            IInfraopsReservationQueryRepository reservationRepository = null)
+            IInfraopsReservationQueryRepository reservationRepository = null,
+            IPortTypeQueryRepository portTypeRepository = null)
         {
             _assetRepository = assetRepository;
             _assetClassRepository = assetClassRepository;
@@ -44,6 +47,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
             _dataPortRepository = dataPortRepository;
             _powerPortRepository = powerPortRepository;
             _reservationRepository = reservationRepository;
+            _portTypeRepository = portTypeRepository;
         }
 
         #region Single Entity Loaders
@@ -201,6 +205,52 @@ namespace Skyline.DataMiner.SDM.Common.Services
 
             var deviceType = LoadDeviceType(assetClass.DeviceTypeId);
             return (assetClass, deviceType);
+        }
+
+        /// <summary>
+        /// Loads a PortType by its identifier.
+        /// </summary>
+        /// <param name="portTypeRef">The PortType reference.</param>
+        /// <returns>The PortType instance, or null if not found.</returns>
+        public PortType LoadPortType(SdmObjectReference<PortType> portTypeRef)
+        {
+            if (_portTypeRepository == null || portTypeRef == null || !portTypeRef.HasValue())
+            {
+                return null;
+            }
+
+            try
+            {
+                var filter = PortTypeExposers.Identifier.Equal(portTypeRef.Identifier);
+                return _portTypeRepository.Read(filter).FirstOrDefault();
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Failed to load PortType: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// Loads a PortType by its identifier string.
+        /// </summary>
+        /// <param name="portTypeId">The PortType identifier.</param>
+        /// <returns>The PortType instance, or null if not found.</returns>
+        public PortType LoadPortType(string portTypeId)
+        {
+            if (_portTypeRepository == null || string.IsNullOrWhiteSpace(portTypeId))
+            {
+                return null;
+            }
+
+            try
+            {
+                var filter = PortTypeExposers.Identifier.Equal(portTypeId);
+                return _portTypeRepository.Read(filter).FirstOrDefault();
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Failed to load PortType: {ex.Message}", ex);
+            }
         }
 
         #endregion

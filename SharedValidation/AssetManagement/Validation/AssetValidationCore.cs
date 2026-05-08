@@ -699,6 +699,81 @@
             return result;
         }
 
+        /// <summary>
+        /// Validates DataPorts that are already loaded in memory.
+        /// Avoids redundant database queries when ports are pre-loaded.
+        /// </summary>
+        /// <param name="dataPorts">The loaded DataPorts collection.</param>
+        public ValidationResult ValidateLoadedDataPorts(List<DataPort> dataPorts)
+        {
+            if (dataPorts == null || !dataPorts.Any())
+            {
+                return new ValidationResult();
+            }
+
+            var result = new ValidationResult();
+
+            try
+            {
+                // Use DataPortValidationCore for collection validation
+                var dataPortValidator = new DataPortValidationCore(_entityLoader);
+                result.AddFailuresFrom(dataPortValidator.ValidateDataPortCollection(dataPorts));
+            }
+            catch (Exception ex)
+            {
+                result.AddFailReason(AssetValidationField.DataPort,
+                    $"Error validating loaded data ports: {ex.Message}");
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Validates PowerPorts that are already loaded in memory.
+        /// Avoids redundant database queries when ports are pre-loaded.
+        /// </summary>
+        /// <param name="powerPorts">The loaded PowerPorts collection.</param>
+        public ValidationResult ValidateLoadedPowerPorts(List<PowerPort> powerPorts)
+        {
+            if (powerPorts == null || !powerPorts.Any())
+            {
+                return new ValidationResult();
+            }
+
+            var result = new ValidationResult();
+
+            try
+            {
+                var seenPortNumbers = new HashSet<long>();
+
+                foreach (var port in powerPorts)
+                {
+                    // Check for negative port numbers
+                    if (port.PowerPortInfo.PortNumber < 0)
+                    {
+                        result.AddFailReason(AssetValidationField.PowerPort,
+                            $"Power Port number cannot be negative. Found: {port.PowerPortInfo.PortNumber}");
+                        return result;
+                    }
+
+                    // Check for duplicate port numbers
+                    if (!seenPortNumbers.Add(port.PowerPortInfo.PortNumber))
+                    {
+                        result.AddFailReason(AssetValidationField.PowerPort,
+                            $"Duplicate Power Port number found: {port.PowerPortInfo.PortNumber}");
+                        return result;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                result.AddFailReason(AssetValidationField.PowerPort,
+                    $"Error validating loaded power ports: {ex.Message}");
+            }
+
+            return result;
+        }
+
         #endregion
 
         #region Helper Methods (Database Access)

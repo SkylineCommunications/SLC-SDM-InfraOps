@@ -5,6 +5,7 @@
     using System.Linq;
 
     using Skyline.DataMiner.SDM.AssetManagement.Common.Validation;
+    using Skyline.DataMiner.SDM.AssetManagement.Extensions;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.Common.Services;
     using Skyline.DataMiner.SDM.Extensions;
@@ -50,6 +51,14 @@
                 if (!DataPortValidationHandler.IsAssetLinkValid(dataPort, out var assetLinkResult))
                 {
                     result.AddFailuresFrom(assetLinkResult);
+                }
+            }
+
+            if (dataPort.AddressInfoField.Changed || dataPort.PrimaryPortRelationField.Changed)
+            {
+                if (!DataPortValidationHandler.IsAddressInfoValid(dataPort, out var addressResult))
+                {
+                    result.AddFailuresFrom(addressResult);
                 }
             }
 
@@ -106,7 +115,7 @@
                     return result;
                 }
 
-                if (!portType.IsDataPortType)
+                if (!portType.IsDataPortType())
                 {
                     result.AddFailReason(DataPortValidationField.PortType,
                         "Port Type must be a Data Port Type.");

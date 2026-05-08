@@ -29,6 +29,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\DOM Repositories\DeviceType\DeviceTypeDomRepository_Middleware.g.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\DOM Repositories\DeviceType\IDeviceTypeQueryRepository.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\DOM Repositories\InfraOpsReservation\IInfraopsReservationQueryRepository.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\DOM Repositories\PortType\IPortTypeQueryRepository.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\DOM Repositories\PortType\PortTypeDomRepository.g.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\DOM Repositories\PortType\PortTypeDomRepository_Extensions.g.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\DOM Repositories\PortType\PortTypeDomRepository_Middleware.g.cs" />
@@ -75,6 +76,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\Validation\DataPortValidationHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\Validation\DataPortValidator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\Validation\PlacementValidator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Extensions\PortTypeExtensions.cs" />
     <Compile Include="..\SharedValidation\AssetManagement\Models\InfraopsReservation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\Models\InfraopsReservationBounderies.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\Models\TagsInfo.cs" />

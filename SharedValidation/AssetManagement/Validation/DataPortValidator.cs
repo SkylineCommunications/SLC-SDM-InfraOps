@@ -19,11 +19,13 @@
     {
         private readonly SdmEntityLoader _entityLoader;
         private readonly DataPortValidationCore _validationCore;
+        private readonly Validator<DataPort> _validationPipeline;
 
         public DataPortValidator(SdmEntityLoader entityLoader)
         {
             _entityLoader = entityLoader ?? throw new ArgumentNullException(nameof(entityLoader));
             _validationCore = new DataPortValidationCore(entityLoader);
+            _validationPipeline = BuildValidationPipeline();
         }
 
         #region Single DataPort Validation
@@ -39,17 +41,7 @@
                 throw new ArgumentNullException(nameof(dataPort));
             }
 
-            // Phase 1: No-database validation
-            var result = _validationCore.ValidateWithoutDatabaseAccess(dataPort);
-            if (!result.IsValid)
-            {
-                return result;
-            }
-
-            // Phase 2: Database validation
-            result = result.CombineWith(_validationCore.ValidateWithDatabaseAccess(dataPort));
-
-            return result;
+            return _validationPipeline.Validate(dataPort);
         }
 
         /// <summary>
@@ -58,11 +50,15 @@
         /// </summary>
         public void ValidateAndThrow(DataPort dataPort)
         {
-            var result = Validate(dataPort);
-            if (!result.IsValid)
-            {
-                throw new ValidationException(result);
-            }
+            _validationPipeline.ValidateAndThrow(dataPort);
+        }
+
+        /// <summary>
+        /// Validates with custom error handling callback.
+        /// </summary>
+        public ValidationResult ValidateWithHandler(DataPort dataPort, Action<ValidationResult> onError)
+        {
+            return _validationPipeline.ValidateWithHandler(dataPort, onError);
         }
 
         #endregion
@@ -150,6 +146,41 @@
             }
 
             return results;
+        }
+
+        #endregion
+
+        #region Pipeline Construction
+
+        private Validator<DataPort> BuildValidationPipeline()
+        {
+            // Critical validations (business rules) - stop on failure
+            var criticalValidations = Validator<DataPort>
+                .Create(ValidateCriticalFields)
+                .StopOnFailure();
+
+            // Database validations - collect all errors
+            var databaseValidations = Validator<DataPort>
+                .Create(ValidateDatabaseFields);
+
+            // Combine: critical first, then database
+            return criticalValidations.AndThen(databaseValidations);
+        }
+
+        #endregion
+
+        #region Validation Methods
+
+        private ValidationResult ValidateCriticalFields(DataPort dataPort)
+        {
+            // Phase 1: No-database validation (mandatory fields, business rules)
+            return _validationCore.ValidateWithoutDatabaseAccess(dataPort);
+        }
+
+        private ValidationResult ValidateDatabaseFields(DataPort dataPort)
+        {
+            // Phase 2: Database validation (Port Type, Asset context)
+            return _validationCore.ValidateWithDatabaseAccess(dataPort);
         }
 
         #endregion
