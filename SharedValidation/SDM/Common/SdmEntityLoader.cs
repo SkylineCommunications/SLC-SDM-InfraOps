@@ -139,8 +139,8 @@ namespace Skyline.DataMiner.SDM.Common.Services
 
             try
             {
-                var filter = DataPortExposers.Asset.Equal(asset);
-                return _dataPortRepository.Read(filter).ToList();
+                //var filter = DataPortExposers.AssetFk.Asset.Equal(asset);
+                return _dataPortRepository.Read(null).ToList();
             }
             catch (Exception ex)
             {

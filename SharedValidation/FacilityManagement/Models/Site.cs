@@ -3,7 +3,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
     using Skyline.DataMiner.SDM;
 
     // [GenerateExposers]
-    [SdmDomStorage("(slc)facility_management")]
+    //[SdmDomStorage("(slc)facility_management")]
     public class Site : SdmObject<Site>
     {
         public string Name { get; set; }

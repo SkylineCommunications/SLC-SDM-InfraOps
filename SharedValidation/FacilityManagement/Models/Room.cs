@@ -3,7 +3,7 @@
     using Skyline.DataMiner.SDM;
 
     //[GenerateExposers]
-    [SdmDomStorage("(slc)facility_management")]
+    //[SdmDomStorage("(slc)facility_management")]
     public class Room : SdmObject<Room>
     {
         public string Name { get; set; }

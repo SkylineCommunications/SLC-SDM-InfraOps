@@ -1,6 +1,6 @@
 ﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
-	public sealed class ElementLink : SdmObject<ElementLink>
+	public sealed class ElementLink
 	{
 		public string ElementID { get; set; }
 

@@ -626,7 +626,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 var _locationroom = _locationSection.GetValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Room);
                 if (_locationroom != null)
                 {
-                    obj.Location.RoomId = System.Guid.Parse(Convert.ToString(_locationroom.Value));
+                    obj.Location.RoomId = new Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.FacilityManagement.Models.Room>(Convert.ToString(_locationcontainer.Value));
                 }
             }
 
@@ -726,10 +726,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             var _holdersList = new System.Collections.Generic.List<Skyline.DataMiner.SDM.AssetManagement.Models.AssetHolder>();
             foreach (var _holdersSection in instance.Sections.Where(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Holders.SectionDefinitionId)))
             {
-                var holders = new Skyline.DataMiner.SDM.AssetManagement.Models.AssetHolder()
-                {
-                    Identifier = _holdersSection.ID.Id.ToString()
-                };
+                var holders = new Skyline.DataMiner.SDM.AssetManagement.Models.AssetHolder();
+
                 var _holdersslotnumber = _holdersSection.GetValue<long>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Holders.SlotNumber);
                 if (_holdersslotnumber != null)
                 {
@@ -749,10 +747,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             var _elementlinksList = new System.Collections.Generic.List<Skyline.DataMiner.SDM.AssetManagement.Models.ElementLink>();
             foreach (var _elementlinksSection in instance.Sections.Where(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.ElementLinks.SectionDefinitionId)))
             {
-                var elementlinks = new Skyline.DataMiner.SDM.AssetManagement.Models.ElementLink()
-                {
-                    Identifier = _elementlinksSection.ID.Id.ToString()
-                };
+                var elementlinks = new Skyline.DataMiner.SDM.AssetManagement.Models.ElementLink();
+
                 var _elementlinkselementid = _elementlinksSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.ElementLinks.ElementID);
                 if (_elementlinkselementid != null)
                 {
@@ -891,7 +887,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
                 if (obj.Location.RoomId != default)
                 {
-                    _location.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Room, obj.Location.RoomId);
+                    _location.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Room, System.Guid.Parse(obj.Location.RoomId.Identifier));
                 }
 
                 if (obj.Location.Side != default)
@@ -986,10 +982,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
             foreach (var holders in obj.Holders)
             {
-                var _holdersSection = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Holders.SectionDefinitionId)
-                {
-                    ID = new SectionID(System.Guid.Parse(holders.Identifier))
-                };
+                var _holdersSection = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Holders.SectionDefinitionId);
+
                 if (holders.SlotNumber != default)
                 {
                     _holdersSection.AddOrUpdateValue<long>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Holders.SlotNumber, (long)holders.SlotNumber);
@@ -1005,10 +999,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
             foreach (var elementlinks in obj.ElementLinks)
             {
-                var _elementlinksSection = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.ElementLinks.SectionDefinitionId)
-                {
-                    ID = new SectionID(System.Guid.Parse(elementlinks.Identifier))
-                };
+                var _elementlinksSection = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.ElementLinks.SectionDefinitionId);
+
                 if (elementlinks.ElementID != default)
                 {
                     _elementlinksSection.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.ElementLinks.ElementID, Convert.ToString(elementlinks.ElementID));

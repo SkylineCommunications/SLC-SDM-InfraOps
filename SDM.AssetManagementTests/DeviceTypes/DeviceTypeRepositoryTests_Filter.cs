@@ -5,7 +5,10 @@
 	using FluentAssertions.Execution;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 	using SDM.AssetManagement.Tests.Setup;
-	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+
+    using SharedMappers.DomIds;
+
+    using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.SDM;
 	using Skyline.DataMiner.SDM.AssetManagement.Models;
 
@@ -90,7 +93,7 @@
 			var helper = RepositoryInitialize.InitializeEmptyRepositories();
 			helper.PopulateDeviceTypes();
 
-			var hierarchyRole = Skyline.DataMiner.SDM.AssetManagement.SlcAssetManagement.Enums.HierarchyRole.Chassis;
+			var hierarchyRole = SlcAsset_Management.Enums.HierarchyRoleEnum.Chassis;
 			var filter = DeviceTypeExposers.HierarchyInfo.HierarchyRole.Equal(hierarchyRole);
 
 			// Act
@@ -113,7 +116,7 @@
 			var helper = RepositoryInitialize.InitializeEmptyRepositories();
 			helper.PopulateDeviceTypes();
 
-			var tag = Skyline.DataMiner.SDM.AssetManagement.SlcAssetManagement.Enums.TagOption.AcceptsDataConnection;
+			var tag = SlcAsset_Management.Enums.TagOption.AcceptsDataConnection;
 			var filter = DeviceTypeExposers.TagsInfo.Tags.NotContains(tag);
 
 			// Act

@@ -6,7 +6,7 @@
 
     using Skyline.DataMiner.SDM.AssetManagement;
 
-	public sealed class AssetHolder : SdmObject<AssetHolder>, IEquatable<AssetHolder>
+	public sealed class AssetHolder : IEquatable<AssetHolder>
 	{
 		public long SlotNumber { get; set; }
 

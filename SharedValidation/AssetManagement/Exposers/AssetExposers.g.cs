@@ -38,12 +38,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 		{
 			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, long> HolderNumber = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, long>((obj) => obj.Location.HolderNumber, "Location.HolderNumber");
 			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.Asset>> ParentAsset = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.Asset>>((obj) => obj.Location.ParentAsset, "Location.ParentAsset");
-			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, System.Guid> RackId = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, System.Guid>((obj) => obj.Location.RackId, "Location.RackId");
+			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.FacilityManagement.Models.Rack>> RackId = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.FacilityManagement.Models.Rack>>((obj) => obj.Location.RackId, "Location.RackId");
 			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, long> RackPosition = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, long>((obj) => obj.Location.RackPosition, "Location.RackPosition");
 			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, SlcAsset_Management.Enums.SideEnum> Side = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, SlcAsset_Management.Enums.SideEnum>((obj) => obj.Location.Side, "Location.Side");
 			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, System.Guid> DeskId = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, System.Guid>((obj) => obj.Location.DeskId, "Location.DeskId");
 			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.FacilityManagement.Models.Facility>> ContainerId = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.FacilityManagement.Models.Facility>>((obj) => obj.Location.ContainerId, "Location.ContainerId");
-			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, System.Guid> RoomId = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, System.Guid>((obj) => obj.Location.RoomId, "Location.RoomId");
+			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.FacilityManagement.Models.Room>> RoomId = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.FacilityManagement.Models.Room>>((obj) => obj.Location.RoomId, "Location.RoomId");
 		}
 
 		public static partial class Lifecycle
@@ -78,14 +78,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
 		public static partial class Holders
 		{
-			public static readonly CollectionExposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, string> Identifier = new CollectionExposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, string>((obj) => obj.Holders.Where(x => x != null).Select(x => x.Identifier).Where(x => x != null), "Holders.Identifier");
 			public static readonly CollectionExposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, long> SlotNumber = new CollectionExposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, long>((obj) => obj.Holders.Where(x => x != null).Select(x => x.SlotNumber), "Holders.SlotNumber");
 			public static readonly CollectionExposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, SlcAsset_Management.Enums.HierarchyRoleEnum> HierarchyRole = new CollectionExposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, SlcAsset_Management.Enums.HierarchyRoleEnum>((obj) => obj.Holders.Where(x => x != null).Select(x => x.HierarchyRole), "Holders.HierarchyRole");
 		}
 
 		public static partial class ElementLinks
 		{
-			public static readonly CollectionExposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, string> Identifier = new CollectionExposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, string>((obj) => obj.ElementLinks.Where(x => x != null).Select(x => x.Identifier).Where(x => x != null), "ElementLinks.Identifier");
 			public static readonly CollectionExposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, string> ElementID = new CollectionExposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, string>((obj) => obj.ElementLinks.Where(x => x != null).Select(x => x.ElementID).Where(x => x != null), "ElementLinks.ElementID");
 			public static readonly CollectionExposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, bool> IsPrimary = new CollectionExposer<Skyline.DataMiner.SDM.AssetManagement.Models.Asset, bool>((obj) => obj.ElementLinks.Where(x => x != null).Select(x => x.IsPrimary), "ElementLinks.IsPrimary");
 		}

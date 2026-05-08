@@ -21,7 +21,7 @@
 			helper.Assets.CreateOrUpdate([referenceAsset]);
 			helper.PopulateAssets();
 
-			var nameFilter = AssetExposers.AssetName.Equal(referenceAsset.AssetName);
+			var nameFilter = AssetExposers.AssetName.Equal(referenceAsset.Name);
 
 			var assetsRetrieved = helper.Assets.Read(nameFilter);
 
@@ -31,9 +31,9 @@
 				assetsRetrieved.Count().Should().Be(1);
 				Asset asset = assetsRetrieved.First();
 
-				asset.AssetName.Should().Be(referenceAsset.AssetName);
-				asset.AssetId.Should().Be(referenceAsset.AssetId);
-				asset.Lifecycle.FirstUseDate.Should().Be(referenceAsset.Lifecycle.FirstUseDate);
+				asset.Name.Should().Be(referenceAsset.Name);
+				asset.AssetID.Should().Be(referenceAsset.AssetID);
+				asset.FirstUseDate.Should().Be(referenceAsset.FirstUseDate);
 				asset.Holders.Should().NotBeEmpty();
 				asset.Holders.Should().HaveCount(3);
 			}
@@ -47,7 +47,7 @@
 			helper.Assets.CreateOrUpdate([referenceAsset]);
 			helper.PopulateAssets();
 
-			var descriptionFilter = AssetExposers.AssetDescription.Equal(DemoData.Assets[3].AssetDescription);
+			var descriptionFilter = AssetExposers.AssetDescription.Equal(DemoData.Assets[3].Description);
 
 			var assetsRetrieved = helper.Assets.Read(descriptionFilter);
 
@@ -57,10 +57,10 @@
 				assetsRetrieved.Count().Should().Be(1);
 				Asset asset = assetsRetrieved.First();
 
-				asset.AssetName.Should().Be(DemoData.Assets[3].AssetName);
-				asset.AssetId.Should().Be(DemoData.Assets[3].AssetId);
-				asset.FwOs.Should().Be(DemoData.Assets[3].FwOs);
-				asset.Custody.TeamId.Should().Be(DemoData.Assets[3].Custody.TeamId);
+				asset.Name.Should().Be(DemoData.Assets[3].Name);
+				asset.AssetID.Should().Be(DemoData.Assets[3].AssetID);
+				asset.FW_OS.Should().Be(DemoData.Assets[3].FW_OS);
+				asset.Custody.Team.Should().Be(DemoData.Assets[3].Custody.Team);
 			}
 		}
 
@@ -74,7 +74,7 @@
 			var randomIndex = random.Next(0, 9);
 
 			var assetClass = DemoData.AssetClasses[randomIndex];
-			referenceAsset.AssetClass = new SdmObjectReference<AssetClass>(assetClass.Id.ToString());
+			referenceAsset.AssetClassId = new SdmObjectReference<AssetClass>(assetClass.Id.ToString());
 
 			helper.PopulateAssets([referenceAsset]);
 			Debug.WriteLine(helper.Assets.Count(new TRUEFilterElement<Asset>()));
@@ -88,10 +88,10 @@
 				assetsRetrieved.Count().Should().Be(1);
 				Asset asset = assetsRetrieved.First();
 
-				asset.AssetName.Should().Be(referenceAsset.AssetName);
-				asset.AssetId.Should().Be(referenceAsset.AssetId);
-				asset.AssetClass.Identifier.Should().NotBe(Guid.Empty.ToString());
-				asset.AssetClass.Identifier.Should().Be(assetClass.Id.ToString());
+				asset.Name.Should().Be(referenceAsset.Name);
+				asset.AssetID.Should().Be(referenceAsset.AssetID);
+				asset.AssetClassId.Identifier.Should().NotBe(Guid.Empty.ToString());
+				asset.AssetClassId.Identifier.Should().Be(assetClass.Id.ToString());
 			}
 		}
 
@@ -103,7 +103,7 @@
 			helper.Assets.CreateOrUpdate([referenceAsset]);
 			helper.PopulateAssets();
 
-			var firmwareFilter = AssetExposers.FwOs.Equal(DemoData.Assets[1].FwOs);
+			var firmwareFilter = AssetExposers.FwOs.Equal(DemoData.Assets[1].FW_OS);
 
 			var assetsRetrieved = helper.Assets.Read(firmwareFilter);
 
@@ -113,10 +113,10 @@
 				assetsRetrieved.Count().Should().Be(1);
 				Asset asset = assetsRetrieved.First();
 
-				asset.AssetName.Should().Be(DemoData.Assets[1].AssetName);
-				asset.AssetId.Should().Be(DemoData.Assets[1].AssetId);
-				asset.FwOs.Should().Be(DemoData.Assets[1].FwOs);
-				asset.NetworkDetails.MACAddress.Should().Be(DemoData.Assets[1].NetworkDetails.MACAddress);
+				asset.Name.Should().Be(DemoData.Assets[1].Name);
+				asset.AssetID.Should().Be(DemoData.Assets[1].AssetID);
+				asset.FW_OS.Should().Be(DemoData.Assets[1].FW_OS);
+				asset.MacAddress.Should().Be(DemoData.Assets[1].MacAddress);
 				asset.Custody.Till.Should().Be(DemoData.Assets[1].Custody.Till);
 				asset.Holders.Should().BeEmpty();
 			}
@@ -140,13 +140,13 @@
 				assetsRetrieved.Count().Should().Be(1);
 				Asset asset = assetsRetrieved.First();
 
-				asset.AssetName.Should().Be(DemoData.Assets[9].AssetName);
-				asset.AssetId.Should().Be(DemoData.Assets[9].AssetId);
-				asset.AssetDescription.Should().Be(DemoData.Assets[9].AssetDescription);
+				asset.Name.Should().Be(DemoData.Assets[9].Name);
+				asset.AssetID.Should().Be(DemoData.Assets[9].AssetID);
+				asset.Description.Should().Be(DemoData.Assets[9].Description);
 				asset.Location.Side.Should().Be(DemoData.Assets[9].Location.Side);
 				asset.Custody.From.Should().Be(DemoData.Assets[9].Custody.From);
-				asset.Lifecycle.ModificationDate.Should().Be(DemoData.Assets[9].Lifecycle.ModificationDate);
-				asset.Lifecycle.EndOfWarrantyDate.Should().Be(DemoData.Assets[9].Lifecycle.EndOfWarrantyDate);
+				asset.ModificationDate.Should().Be(DemoData.Assets[9].ModificationDate);
+				asset.EndOfWarrantyDate.Should().Be(DemoData.Assets[9].EndOfWarrantyDate);
 			}
 		}
 
@@ -168,11 +168,11 @@
 				assetsRetrieved.Count().Should().Be(1);
 				Asset asset = assetsRetrieved.First();
 
-				asset.AssetName.Should().Be(DemoData.Assets[4].AssetName);
-				asset.AssetId.Should().Be(DemoData.Assets[4].AssetId);
+				asset.Name.Should().Be(DemoData.Assets[4].Name);
+				asset.AssetID.Should().Be(DemoData.Assets[4].AssetID);
 				asset.SerialNumber.Should().Be(DemoData.Assets[4].SerialNumber);
 				asset.Location.RackPosition.Should().Be(DemoData.Assets[4].Location.RackPosition);
-				asset.Lifecycle.InstallationDate.Should().Be(DemoData.Assets[4].Lifecycle.InstallationDate);
+				asset.InstallationDate.Should().Be(DemoData.Assets[4].InstallationDate);
 			}
 		}
 
@@ -184,7 +184,7 @@
 			helper.Assets.CreateOrUpdate([referenceAsset]);
 			helper.PopulateAssets();
 
-			var macAddress = DemoData.Assets[5].NetworkDetails.MACAddress;
+			var macAddress = DemoData.Assets[5].MacAddress;
 			var macFilter = AssetExposers.NetworkDetails.MACAddress.Equal(macAddress);
 
 			var assetsRetrieved = helper.Assets.Read(macFilter);
@@ -195,13 +195,13 @@
 				assetsRetrieved.Count().Should().Be(1);
 				Asset asset = assetsRetrieved.First();
 
-				asset.AssetName.Should().Be(DemoData.Assets[5].AssetName);
-				asset.AssetId.Should().Be(DemoData.Assets[5].AssetId);
-				asset.AssetDescription.Should().Be(DemoData.Assets[5].AssetDescription);
-				asset.FwOs.Should().Be(DemoData.Assets[5].FwOs);
-				asset.NetworkDetails.MACAddress.Should().Be(macAddress);
-				asset.Custody.TeamId.Should().Be(DemoData.Assets[5].Custody.TeamId);
-				asset.Lifecycle.PurchaseDate.Should().Be(DemoData.Assets[5].Lifecycle.PurchaseDate);
+				asset.Name.Should().Be(DemoData.Assets[5].Name);
+				asset.AssetID.Should().Be(DemoData.Assets[5].AssetID);
+				asset.Description.Should().Be(DemoData.Assets[5].Description);
+				asset.FW_OS.Should().Be(DemoData.Assets[5].FW_OS);
+				asset.MacAddress.Should().Be(macAddress);
+				asset.Custody.Team.Should().Be(DemoData.Assets[5].Custody.Team);
+				asset.PurchaseDate.Should().Be(DemoData.Assets[5].PurchaseDate);
 			}
 		}
 
@@ -216,7 +216,7 @@
 			var filter = AssetExposers.Lifecycle.FirstUseDate.LessThanOrEqual(firstUseDate);
 
 			var assetsRetrieved = helper.Assets.Read(filter);
-			var expected = DemoData.Assets.Where(asset => asset.Lifecycle.FirstUseDate <= firstUseDate).ToList();
+			var expected = DemoData.Assets.Where(asset => asset.FirstUseDate <= firstUseDate).ToList();
 
 			using (new AssertionScope())
 			{
@@ -236,7 +236,7 @@
 			var filter = AssetExposers.Lifecycle.EndOfWarrantyDate.LessThan(endOfWarrantyDate);
 
 			var assetsRetrieved = helper.Assets.Read(filter);
-			var expected = DemoData.Assets.Where(asset => asset.Lifecycle.EndOfWarrantyDate < endOfWarrantyDate).ToList();
+			var expected = DemoData.Assets.Where(asset => asset.EndOfWarrantyDate < endOfWarrantyDate).ToList();
 
 			using (new AssertionScope())
 			{
@@ -261,8 +261,8 @@
 			var assetsRetrieved = helper.Assets.Read(filter);
 			var expected = DemoData.Assets
 				.Where(asset =>
-					asset.Lifecycle.InstallationDate > installationDateStart
-					&& asset.Lifecycle.InstallationDate < installationDateEnd)
+					asset.InstallationDate > installationDateStart
+					&& asset.InstallationDate < installationDateEnd)
 				.ToList();
 
 			using (new AssertionScope())

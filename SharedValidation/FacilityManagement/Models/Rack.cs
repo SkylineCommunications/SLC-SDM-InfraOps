@@ -12,7 +12,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     // [GenerateExposers]
-    [SdmDomStorage("(slc)facility_management")]
+    //[SdmDomStorage("(slc)facility_management")]
     public class Rack : SdmObject<Rack>
     {
         [JsonIgnore]

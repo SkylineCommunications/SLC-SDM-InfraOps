@@ -79,8 +79,8 @@
                 Weight = 50,
                 TypicalPowerConsumption = 100,
                 MaximumPowerConsumption = 150,
-                DataPorts = new List<DataPortInfo>(),
-                PowerPorts = new List<PowerPortInfo>(),
+                DataPorts = new List<DataPort>(),
+                PowerPorts = new List<PowerPort>(),
                 Holders = new List<AssetHolder>()
             };
 
@@ -322,10 +322,10 @@
             {
                 Name = "Test",
                 DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier),
-                DataPorts = new List<DataPortInfo>
+                DataPorts = new List<DataPort>
                 {
-                    new DataPortInfo { PortNumber = 1 },
-                    new DataPortInfo { PortNumber = 1 }  // Duplicate
+                   new DataPort{ DataPortInfo =  new DataPortInfo { PortNumber = 1 } },
+                   new DataPort{ DataPortInfo = new DataPortInfo { PortNumber = 1 } }  // Duplicate
                 }
             };
 
@@ -351,9 +351,9 @@
             {
                 Name = "Test",
                 DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier),
-                PowerPorts = new List<PowerPortInfo>
+                PowerPorts = new List<PowerPort>
                 {
-                    new PowerPortInfo { PortNumber = -1 }  // Negative
+                    new PowerPort{ PowerPortInfo = new PowerPortInfo { PortNumber = -1 } }  // Negative
                 }
             };
 

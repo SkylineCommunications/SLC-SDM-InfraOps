@@ -11,32 +11,32 @@ namespace SharedCommonLibrary.AssetManagement.Models
     using Skyline.DataMiner.Net.Sections;
     using Skyline.DataMiner.SDM;
 
-    [SdmDomMapper]
+    //[SdmDomMapper]
     internal static class ReservationDomMapper
     {
-        internal const string ModuleId = "(slc)asset_management";
-        internal static DomDefinitionId DomDefinitionId = new DomDefinitionId(new Guid("254540ba-bf40-4217-9736-f1eb5a4a84d9"))
-        {ModuleId = ModuleId};
+        internal const string ModuleId = SharedMappers.DomIds.SlcAsset_Management.ModuleId;
+        internal static DomDefinitionId DomDefinitionId = new DomDefinitionId(SharedMappers.DomIds.SlcAsset_Management.Definitions.Reservations.Id)
+        { ModuleId = ModuleId};
         internal static class ReservationProperties
         {
-            internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(new Guid("130915d7-de95-4ce0-a92b-68698753670d"))
+            internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(SharedMappers.DomIds.SlcAsset_Management.Sections.ReservationInfo.Id.Id)
             {ModuleId = ModuleId};
-            internal static FieldDescriptorID Description = new FieldDescriptorID(new Guid("dff6a678-1acc-4566-8253-6a3147c034a2"));
+            internal static FieldDescriptorID Description = SharedMappers.DomIds.SlcAsset_Management.Sections.ReservationInfo.Description;
         }
 
         internal static class RackFk
         {
-            internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(new Guid("1c1e7a87-6412-4577-bb5d-199407e9b62f"))
+            internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(SharedMappers.DomIds.SlcAsset_Management.Sections.ReservationRack.Id.Id)
             {ModuleId = ModuleId};
-            internal static FieldDescriptorID Rack = new FieldDescriptorID(new Guid("1155baa0-91e5-45eb-aac4-c108cdac36c5"));
+            internal static FieldDescriptorID Rack = SharedMappers.DomIds.SlcAsset_Management.Sections.ReservationRack.Rack;
         }
 
         internal static class ReservedPositions
         {
-            internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(new Guid("9f37fc1d-68e7-430b-9142-96ed190aaeb4"))
+            internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(SharedMappers.DomIds.SlcAsset_Management.Sections.ReservedPositions.Id.Id)
             {ModuleId = ModuleId};
-            internal static FieldDescriptorID LowerBound = new FieldDescriptorID(new Guid("d3dd4ea6-daba-40ad-b10b-f6123a81361b"));
-            internal static FieldDescriptorID UpperBound = new FieldDescriptorID(new Guid("600225bb-a5aa-4fc7-b29d-37879dbff9b6"));
+            internal static FieldDescriptorID LowerBound = SharedMappers.DomIds.SlcAsset_Management.Sections.ReservedPositions.ReservedPositionsLowerBound;
+            internal static FieldDescriptorID UpperBound = SharedMappers.DomIds.SlcAsset_Management.Sections.ReservedPositions.ReservedPositionsUpperBound;
         }
     }
 }

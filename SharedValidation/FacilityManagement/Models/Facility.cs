@@ -3,7 +3,7 @@
     using SharedMappers.DomIds;
 
     //[GenerateExposers]
-    [SdmDomStorage("(slc)facility_management")]
+    //[SdmDomStorage("(slc)facility_management")]
     public class Facility : SdmObject<Facility>
 	{
 		public string FacilityId { get; set; }

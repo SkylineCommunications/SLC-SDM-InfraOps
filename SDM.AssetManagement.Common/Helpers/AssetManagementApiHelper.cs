@@ -18,7 +18,7 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
     private readonly SdmEntityLoader _entityLoader;
     private readonly AssetValidator _assetValidator;
     private readonly AssetClassValidator _assetClassValidator;
-    private readonly DeviceTypeValidator _deviceTypeValidator;
+    //private readonly DeviceTypeValidator _deviceTypeValidator;
 
     public AssetManagementApiHelper(IConnection connection)
     {
@@ -47,9 +47,9 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
 
         _assetClassValidator = new AssetClassValidator(_entityLoader);
 
-        _deviceTypeValidator = new DeviceTypeValidator(
-            _deviceTypeRepository,
-            _assetRepository);
+        //_deviceTypeValidator = new DeviceTypeValidator(
+        //    _deviceTypeRepository,
+        //    _assetRepository);
 
         // Wrap with middleware
         //Assets = _assetRepository.WithMiddleware(
@@ -75,5 +75,5 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
 
     public AssetValidator AssetValidator => _assetValidator;
     public AssetClassValidator AssetClassValidator => _assetClassValidator;
-    public DeviceTypeValidator DeviceTypeValidator => _deviceTypeValidator;
+    //public DeviceTypeValidator DeviceTypeValidator => _deviceTypeValidator;
 }

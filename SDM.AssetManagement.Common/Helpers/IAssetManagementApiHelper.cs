@@ -20,6 +20,6 @@
 
         AssetClassValidator AssetClassValidator { get; }
 
-        DeviceTypeValidator DeviceTypeValidator { get; }
+        //DeviceTypeValidator DeviceTypeValidator { get; }
     }
 }

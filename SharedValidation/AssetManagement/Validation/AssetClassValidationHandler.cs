@@ -141,7 +141,6 @@
 
             if (!assetClass.DataPorts.Any())
             {
-                result.AddFailReason(AssetClassValidationField.DataPortNumber, $"Asset Class does not contain Data Ports.");
                 return result;
             }
 
@@ -181,8 +180,7 @@
 
             if (!assetClass.PowerPorts.Any())
             {
-                result.AddFailReason(AssetClassValidationField.PowerPortNumber, $"Asset Class does not contain Power Ports.");
-                return result;
+               return result;
             }
 
             var seenPorts = new HashSet<long>();

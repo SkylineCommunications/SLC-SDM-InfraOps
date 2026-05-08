@@ -633,35 +633,34 @@
             }
 
             var holders = asset.Holders ?? new List<AssetHolder>();
+            var seenHolders = new HashSet<(long? SlotNumber, SharedMappers.DomIds.SlcAsset_Management.Enums.HierarchyRoleEnum)>();
 
-            // Check for empty slot numbers
-            var emptySlots = holders.Where(h => h.SlotNumber == null).ToList();
-            if (emptySlots.Any())
+            foreach (var holder in holders)
             {
-                result.AddFailReason(AssetValidationField.Holder,
-                    "All Holders must have a Slot Number.");
-            }
+                // Check for empty slot number
+                if (holder.SlotNumber == null)
+                {
+                    result.AddFailReason(AssetValidationField.Holder,
+                        "All Holders must have a Slot Number.");
+                    return result;
+                }
 
-            // Check for negative slot numbers
-            var negativeSlots = holders.Where(h => h.SlotNumber != null && h.SlotNumber < 0).ToList();
-            if (negativeSlots.Any())
-            {
-                result.AddFailReason(AssetValidationField.Holder,
-                    $"Holder Slot numbers cannot be negative. Found: {string.Join(", ", negativeSlots.Select(h => h.SlotNumber))}");
-            }
+                // Check for negative slot number
+                if (holder.SlotNumber < 0)
+                {
+                    result.AddFailReason(AssetValidationField.Holder,
+                        $"Holder Slot number cannot be negative. Found: {holder.SlotNumber}");
+                    return result;
+                }
 
-            // Check for duplicate slot+role combinations
-            var duplicates = holders
-                .Where(h => h.SlotNumber != null && h.HierarchyRole != null)
-                .GroupBy(h => new { h.SlotNumber, h.HierarchyRole })
-                .Where(g => g.Count() > 1)
-                .Select(g => $"Slot {g.Key.SlotNumber}, Role {g.Key.HierarchyRole}")
-                .ToList();
-
-            if (duplicates.Any())
-            {
-                result.AddFailReason(AssetValidationField.Holder,
-                    $"Duplicate Holder combinations found: {string.Join("; ", duplicates)}");
+                // Check for duplicate slot+role combination
+                var holderKey = (holder.SlotNumber, holder.HierarchyRole);
+                if (!seenHolders.Add(holderKey))
+                {
+                    result.AddFailReason(AssetValidationField.Holder,
+                        $"Duplicate Holder found: Slot {holder.SlotNumber}, Role {holder.HierarchyRole}");
+                    return result;
+                }
             }
 
             return result;
@@ -681,27 +680,34 @@
             }
 
             var elements = asset.ElementLinks ?? new List<ElementLink>();
+            var seenElementIds = new HashSet<string>();
+            bool primaryFound = false;
 
-            // Check for multiple primary elements
-            var primaryCount = elements.Count(e => e.IsPrimary);
-            if (primaryCount > 1)
+            foreach (var element in elements)
             {
-                result.AddFailReason(AssetValidationField.Element,
-                    "Only one Element can be marked as Primary.");
-            }
+                // Check for multiple primary elements
+                if (element.IsPrimary)
+                {
+                    if (primaryFound)
+                    {
+                        result.AddFailReason(AssetValidationField.Element,
+                            "Only one Element can be marked as Primary.");
+                        return result;
+                    }
 
-            // Check for duplicate element IDs
-            var duplicates = elements
-                .Where(e => e.ElementID != null)
-                .GroupBy(e => e.ElementID)
-                .Where(g => g.Count() > 1)
-                .Select(g => g.Key)
-                .ToList();
+                    primaryFound = true;
+                }
 
-            if (duplicates.Any())
-            {
-                result.AddFailReason(AssetValidationField.Element,
-                    $"Duplicate Element IDs found: {string.Join(", ", duplicates)}");
+                // Check for duplicate element IDs
+                if (element.ElementID != null)
+                {
+                    if (!seenElementIds.Add(element.ElementID))
+                    {
+                        result.AddFailReason(AssetValidationField.Element,
+                            $"Duplicate Element ID found: {element.ElementID}");
+                        return result;
+                    }
+                }
             }
 
             return result;

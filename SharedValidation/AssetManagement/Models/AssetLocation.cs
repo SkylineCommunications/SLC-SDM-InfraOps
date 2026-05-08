@@ -88,7 +88,7 @@
             set => ContainerIdField.Value = value;
         }
 
-        public Guid RoomId
+        public SdmObjectReference<FacilityManagement.Models.Room> RoomId
         {
             get => RoomIdField.Value;
             set => RoomIdField.Value = value;
@@ -140,9 +140,9 @@
             () => new ChangeTrackingField<SdmObjectReference<FacilityManagement.Models.Facility>>(default));
 
         [JsonIgnore]
-        internal IChangeTrackingField<Guid> RoomIdField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<SdmObjectReference<FacilityManagement.Models.Room>> RoomIdField => FieldHandler.GetOrCreateField(
             nameof(RoomId),
-            () => new ChangeTrackingField<Guid>(default));
+            () => new ChangeTrackingField<SdmObjectReference<FacilityManagement.Models.Room>>(default));
 
         [JsonIgnore]
         internal IChangeTrackingField<long> PowerSupplyRackPositionField => FieldHandler.GetOrCreateField(

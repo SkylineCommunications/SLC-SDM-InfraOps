@@ -8,8 +8,10 @@
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 	using Newtonsoft.Json;
 	using SDM.AssetManagement.Tests.Setup;
-	//using Skyline.DataMiner.Analytics.GenericInterface.JoinFilter;
-	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+
+    using SharedMappers.DomIds;
+    //using Skyline.DataMiner.Analytics.GenericInterface.JoinFilter;
+    using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.SDM;
 	using Skyline.DataMiner.SDM.AssetManagement;
 	using Skyline.DataMiner.SDM.AssetManagement.Helpers;
@@ -31,8 +33,8 @@
 					Identifier = Guid.NewGuid().ToString(),
 					Name = "Test PowerPort",
 					PortNumber = 1,
-					OutputType = SlcAssetManagement.Enums.Outputtype.IO,
-					PortExposure = SlcAssetManagement.Enums.PortExposure.Front,
+					OutputType = SlcAsset_Management.Enums.Outputtype.IO,
+					PortExposure = SlcAsset_Management.Enums.PortExposureEnum.Front,
 					Label = "Power Port 1",
 				},
 				Asset = new SdmObjectReference<Asset>(Guid.NewGuid().ToString()),
@@ -72,8 +74,8 @@
 					Identifier = referencePowerPort.PowerPortInfo.Identifier,
 					Name = "Updated PowerPort Name",
 					PortNumber = 2,
-					OutputType = SlcAssetManagement.Enums.Outputtype.Out,
-					PortExposure = SlcAssetManagement.Enums.PortExposure.Back,
+					OutputType = SlcAsset_Management.Enums.Outputtype.Out,
+					PortExposure = SlcAsset_Management.Enums.PortExposureEnum.Back,
 					Label = "Power Port 2",
 				},
 				Asset = referencePowerPort.Asset,
@@ -156,11 +158,11 @@
 
 				// OutputType
 				updated.PowerPortInfo.OutputType.Should().NotBe(original.PowerPortInfo.OutputType);
-				updated.PowerPortInfo.OutputType.Should().Be(SlcAssetManagement.Enums.Outputtype.Out);
+				updated.PowerPortInfo.OutputType.Should().Be(SlcAsset_Management.Enums.Outputtype.Out);
 
 				// PortExposure
 				updated.PowerPortInfo.PortExposure.Should().NotBe(original.PowerPortInfo.PortExposure);
-				updated.PowerPortInfo.PortExposure.Should().Be(SlcAssetManagement.Enums.PortExposure.Back);
+				updated.PowerPortInfo.PortExposure.Should().Be(SlcAsset_Management.Enums.PortExposureEnum.Back);
 
 				// PortType
 				updated.PowerPortInfo.PortType.Should().Be(original.PowerPortInfo.PortType);

@@ -251,13 +251,15 @@
         #region Database Access Validation
 
         /// <summary>
-        /// Validates asset with database access (uniqueness checks, placement).
+        /// Validates asset with database access (uniqueness checks, placement, ports).
         /// Only called after no-database checks pass.
         /// Uses a pipeline pattern organized by validation concern.
         /// </summary>
         public ValidationResult ValidateWithDatabaseAccess(Asset asset, AssetValidationContext context)
         {
             var result = ValidateUniquenessChecks(asset, context);
+            // Port validation runs for both single and bulk validation
+            result = result.CombineWith(ValidatePortChecks(asset));
 
             // Only run placement checks in single validation mode (context == null)
             // Bulk validation uses optimized PlacementValidator instead
@@ -265,6 +267,30 @@
             {
                 result = result.CombineWith(ValidatePlacementChecks(asset));
             }
+
+
+            return result;
+        }
+
+        /// <summary>
+        /// Validates port data (data ports, power ports).
+        /// Runs for both single and bulk validation.
+        /// </summary>
+        private ValidationResult ValidatePortChecks(Asset asset)
+        {
+            var result = new ValidationResult();
+
+            // Data ports validation
+            //if (asset.DataPortsField.Changed)
+            //{
+            //    result.AddFailuresFrom(ValidateDataPorts(asset));
+            //}
+
+            //// Power ports validation
+            //if (asset.PowerPortsField.Changed)
+            //{
+            //    result.AddFailuresFrom(ValidatePowerPorts(asset));
+            //}
 
             return result;
         }
@@ -573,37 +599,51 @@
             {
                 var dataPorts = _entityLoader.LoadDataPorts(asset);
 
-                var negativeNumbers = dataPorts.Where(p => p.DataPortInfo.PortNumber < 0).ToList();
-                if (negativeNumbers.Any())
-                {
-                    result.AddFailReason(AssetValidationField.DataPort,
-                        $"Data Port numbers cannot be negative. Found: {string.Join(", ", negativeNumbers.Select(p => p.DataPortInfo.PortNumber))}");
-                }
+                var seenPortNumbers = new HashSet<long>();
+                int primaryIPv4Count = 0;
+                int primaryIPv6Count = 0;
 
-                var duplicates = dataPorts
-                    .GroupBy(p => p.DataPortInfo.PortNumber)
-                    .Where(g => g.Count() > 1)
-                    .Select(g => g.Key)
-                    .ToList();
-
-                if (duplicates.Any())
+                foreach (var port in dataPorts)
                 {
-                    result.AddFailReason(AssetValidationField.DataPort,
-                        $"Duplicate Data Port numbers found: {string.Join(", ", duplicates)}");
-                }
+                    // Check for negative port numbers
+                    if (port.DataPortInfo.PortNumber < 0)
+                    {
+                        result.AddFailReason(AssetValidationField.DataPort,
+                            $"Data Port number cannot be negative. Found: {port.DataPortInfo.PortNumber}");
+                        return result;
+                    }
 
-                var primaryIPv4Count = dataPorts.Count(p => p.PrimaryPortRelation.IsPrimaryIpv4);
-                if (primaryIPv4Count > 1)
-                {
-                    result.AddFailReason(AssetValidationField.DataPort,
-                        "Only one Data Port can be marked as Primary IPv4.");
-                }
+                    // Check for duplicate port numbers
+                    if (!seenPortNumbers.Add(port.DataPortInfo.PortNumber))
+                    {
+                        result.AddFailReason(AssetValidationField.DataPort,
+                            $"Duplicate Data Port number found: {port.DataPortInfo.PortNumber}");
+                        return result;
+                    }
 
-                var primaryIPv6Count = dataPorts.Count(p => p.PrimaryPortRelation.IsPrimaryIpv6);
-                if (primaryIPv6Count > 1)
-                {
-                    result.AddFailReason(AssetValidationField.DataPort,
-                        "Only one Data Port can be marked as Primary IPv6.");
+                    // Count primary IPv4 ports
+                    if (port.PrimaryPortRelation.IsPrimaryIpv4)
+                    {
+                        primaryIPv4Count++;
+                        if (primaryIPv4Count > 1)
+                        {
+                            result.AddFailReason(AssetValidationField.DataPort,
+                                "Only one Data Port can be marked as Primary IPv4.");
+                            return result;
+                        }
+                    }
+
+                    // Count primary IPv6 ports
+                    if (port.PrimaryPortRelation.IsPrimaryIpv6)
+                    {
+                        primaryIPv6Count++;
+                        if (primaryIPv6Count > 1)
+                        {
+                            result.AddFailReason(AssetValidationField.DataPort,
+                                "Only one Data Port can be marked as Primary IPv6.");
+                            return result;
+                        }
+                    }
                 }
             }
             catch (Exception ex)
@@ -629,23 +669,25 @@
             {
                 var powerPorts = _entityLoader.LoadPowerPorts(asset);
 
-                var negativeNumbers = powerPorts.Where(p => p.PowerPortInfo.PortNumber < 0).ToList();
-                if (negativeNumbers.Any())
-                {
-                    result.AddFailReason(AssetValidationField.PowerPort,
-                        $"Power Port numbers cannot be negative. Found: {string.Join(", ", negativeNumbers.Select(p => p.PowerPortInfo.PortNumber))}");
-                }
+                var seenPortNumbers = new HashSet<long>();
 
-                var duplicates = powerPorts
-                    .GroupBy(p => p.PowerPortInfo.PortNumber)
-                    .Where(g => g.Count() > 1)
-                    .Select(g => g.Key)
-                    .ToList();
-
-                if (duplicates.Any())
+                foreach (var port in powerPorts)
                 {
-                    result.AddFailReason(AssetValidationField.PowerPort,
-                        $"Duplicate Power Port numbers found: {string.Join(", ", duplicates)}");
+                    // Check for negative port numbers
+                    if (port.PowerPortInfo.PortNumber < 0)
+                    {
+                        result.AddFailReason(AssetValidationField.PowerPort,
+                            $"Power Port number cannot be negative. Found: {port.PowerPortInfo.PortNumber}");
+                        return result;
+                    }
+
+                    // Check for duplicate port numbers
+                    if (!seenPortNumbers.Add(port.PowerPortInfo.PortNumber))
+                    {
+                        result.AddFailReason(AssetValidationField.PowerPort,
+                            $"Duplicate Power Port number found: {port.PowerPortInfo.PortNumber}");
+                        return result;
+                    }
                 }
             }
             catch (Exception ex)

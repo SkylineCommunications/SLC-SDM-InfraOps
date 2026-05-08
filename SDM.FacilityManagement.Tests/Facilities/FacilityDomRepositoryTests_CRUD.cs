@@ -5,8 +5,10 @@
 	using FluentAssertions;
 	using FluentAssertions.Execution;
 	using SDM.FacilityManagement.Tests.Setup;
-	using Skyline.DataMiner.Net.Messages.SLDataGateway;
-	using Skyline.DataMiner.SDM.FacilityManagement.Enums;
+
+    using SharedMappers.DomIds;
+
+    using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.SDM.FacilityManagement.Helpers;
 	using Skyline.DataMiner.SDM.FacilityManagement.Models;
 
@@ -25,7 +27,7 @@
 				FacilityId = "DTC-A",
 				Name = "Data Center A",
 				Description = "A datacenter facility for testing.",
-				FacilityType = SlcFacilityManagement.Enums.FacilityType.Building,
+				FacilityType = SlcFacility_Management.Enums.FacilityTypeEnum.Building,
 				Address = "Ombstrat 12",
 				City = "Oslo",
 				ZipCode = "7000",
@@ -65,7 +67,7 @@
 				FacilityId = "FAC-001",
 				Name = "Updated Facility Name",
 				Description = "Updated facility description.",
-				FacilityType = SlcFacilityManagement.Enums.FacilityType.Container,
+				FacilityType = SlcFacility_Management.Enums.FacilityTypeEnum.Container,
 				Address = "456 Updated Street",
 				City = "Los Angeles",
 				ZipCode = "90001",
@@ -141,7 +143,7 @@
 				updated.Name.Should().Be("Updated Facility Name");
 				updated.Description.Should().NotBe(original.Description);
 				updated.Description.Should().Be("Updated facility description.");
-				updated.FacilityType.Should().Be(SlcFacilityManagement.Enums.FacilityType.Container);
+				updated.FacilityType.Should().Be(SlcFacility_Management.Enums.FacilityTypeEnum.Container);
 				updated.Address.Should().Be("456 Updated Street");
 				updated.City.Should().Be("Los Angeles");
 				updated.ZipCode.Should().Be("90001");
@@ -162,7 +164,7 @@
 				createdFacility.FacilityId.Should().Be("DTC-A");
 				createdFacility.Name.Should().Be("Data Center A");
 				createdFacility.Description.Should().Be("A datacenter facility for testing.");
-				createdFacility.FacilityType.Should().Be(SlcFacilityManagement.Enums.FacilityType.Building);
+				createdFacility.FacilityType.Should().Be(SlcFacility_Management.Enums.FacilityTypeEnum.Building);
 				createdFacility.Address.Should().Be("Ombstrat 12");
 				createdFacility.City.Should().Be("Oslo");
 				createdFacility.ZipCode.Should().Be("7000");

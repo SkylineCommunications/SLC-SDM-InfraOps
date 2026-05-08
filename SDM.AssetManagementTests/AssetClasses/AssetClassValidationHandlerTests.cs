@@ -7,9 +7,8 @@
     using SharedMappers.DomIds;
 
     using Skyline.DataMiner.SDM;
-    using Skyline.DataMiner.SDM.AssetManagement.Common.Validation;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
-    using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
+    using Skyline.DataMiner.SDM.AssetManagement.Validation;
 
     [TestClass]
     public class AssetClassValidationHandlerTests
@@ -253,11 +252,11 @@
             // Arrange
             var assetClass = new AssetClass
             {
-                DataPorts = new List<DataPortInfo>
+                DataPorts = new List<DataPort>
                 {
-                    new DataPortInfo { PortNumber = 1 },
-                    new DataPortInfo { PortNumber = 2 },
-                    new DataPortInfo { PortNumber = 3 }
+                    new DataPort { DataPortInfo = new DataPortInfo{ PortNumber = 1 } },
+                    new DataPort { DataPortInfo = new DataPortInfo{PortNumber = 2 } },
+                    new DataPort { DataPortInfo = new DataPortInfo{ PortNumber = 3 } },
                 }
             };
 
@@ -291,7 +290,7 @@
             // Arrange
             var assetClass = new AssetClass
             {
-                DataPorts = new List<DataPortInfo>()
+                DataPorts = new List<DataPort>(),
             };
 
             // Act
@@ -311,10 +310,10 @@
             // Arrange
             var assetClass = new AssetClass
             {
-                DataPorts = new List<DataPortInfo>
+                DataPorts = new List<DataPort>
                 {
-                    new DataPortInfo { PortNumber = 1 },
-                    new DataPortInfo { PortNumber = -5 }
+                   new DataPort{ DataPortInfo =  new DataPortInfo { PortNumber = 1 } },
+                   new DataPort{ DataPortInfo =  new DataPortInfo { PortNumber = -5 } },
                 }
             };
 
@@ -335,11 +334,11 @@
             // Arrange
             var assetClass = new AssetClass
             {
-                DataPorts = new List<DataPortInfo>
+                DataPorts = new List<DataPort>
                 {
-                    new DataPortInfo { PortNumber = 1 },
-                    new DataPortInfo { PortNumber = 2 },
-                    new DataPortInfo { PortNumber = 1 } // Duplicate
+                   new DataPort{ DataPortInfo = new DataPortInfo { PortNumber = 1 } },
+                   new DataPort{ DataPortInfo = new DataPortInfo { PortNumber = 2 } },
+                   new DataPort{ DataPortInfo = new DataPortInfo { PortNumber = 1 } } // Duplicate
                 }
             };
 
@@ -365,10 +364,10 @@
             // Arrange
             var assetClass = new AssetClass
             {
-                PowerPorts = new List<PowerPortInfo>
+                PowerPorts = new List<PowerPort>
                 {
-                    new PowerPortInfo { PortNumber = 1 },
-                    new PowerPortInfo { PortNumber = 2 }
+                   new PowerPort{ PowerPortInfo =  new PowerPortInfo { PortNumber = 1 } },
+                   new PowerPort{ PowerPortInfo =  new PowerPortInfo { PortNumber = 2 } }
                 }
             };
 
@@ -398,7 +397,7 @@
             // Arrange
             var assetClass = new AssetClass
             {
-                PowerPorts = new List<PowerPortInfo>()
+                PowerPorts = new List<PowerPort>()
             };
 
             // Act
@@ -418,12 +417,12 @@
             // Arrange
             var assetClass = new AssetClass
             {
-                PowerPorts = new List<PowerPortInfo>
+                PowerPorts = new List<PowerPort>
                 {
-                    new PowerPortInfo { PortNumber = -1 }
+                  new PowerPort{PowerPortInfo =   new PowerPortInfo { PortNumber = -1 } },
                 }
             };
-           
+
             // Act
             var result = AssetClassValidationHandler.ValidateAssetClassPowerPort(assetClass);
 
@@ -441,13 +440,13 @@
             // Arrange
             var assetClass = new AssetClass
             {
-                PowerPorts = new List<PowerPortInfo>
+                PowerPorts = new List<PowerPort>
                 {
-                    new PowerPortInfo { PortNumber = 5 },
-                    new PowerPortInfo { PortNumber = 5 }
+                    new PowerPort{PowerPortInfo = new PowerPortInfo { PortNumber = 5 } },
+                    new PowerPort{PowerPortInfo = new PowerPortInfo { PortNumber = 5 } }
                 }
             };
-           
+
             // Act
             var result = AssetClassValidationHandler.ValidateAssetClassPowerPort(assetClass);
 
@@ -483,7 +482,7 @@
                     }
                 }
             };
-         
+
             // Act
             var result = AssetClassValidationHandler.ValidateAssetClassHolders(assetClass);
 
@@ -564,7 +563,7 @@
                     }
                 }
             };
-           
+
             // Act
             var result = AssetClassValidationHandler.ValidateAssetClassHolders(assetClass);
 
@@ -596,7 +595,7 @@
                     }
                 }
             };
-         
+
             // Act
             var result = AssetClassValidationHandler.ValidateAssetClassHolders(assetClass);
 
@@ -629,7 +628,7 @@
                     }
                 }
             };
-           
+
             // Act
             var result = AssetClassValidationHandler.ValidateAssetClassHolders(assetClass);
 

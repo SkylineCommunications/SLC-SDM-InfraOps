@@ -1,19 +1,22 @@
 ﻿namespace SDM.FacilityManagement.Tests.Facilities
 {
-	using System;
-	using System.Diagnostics;
-	using System.Linq;
-	using FluentAssertions;
-	using FluentAssertions.Execution;
-	using Microsoft.VisualStudio.TestTools.UnitTesting;
-	using Newtonsoft.Json;
-	using SDM.FacilityManagement.Tests.Setup;
-	using Skyline.DataMiner.Net.Messages.SLDataGateway;
-	using Skyline.DataMiner.SDM;
-	using Skyline.DataMiner.SDM.FacilityManagement.Enums;
-	using Skyline.DataMiner.SDM.FacilityManagement.Models;
+    using System;
+    using System.Linq;
 
-	public partial class FacilityDomRepositoryTests
+    using FluentAssertions;
+    using FluentAssertions.Execution;
+
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+    using SDM.FacilityManagement.Tests.Setup;
+
+    using SharedMappers.DomIds;
+
+    using Skyline.DataMiner.Net.Messages.SLDataGateway;
+    using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.FacilityManagement.Models;
+
+    public partial class FacilityDomRepositoryTests
 	{
 		[TestMethod]
 		public void FacilityDomRepository_ReadFilter_Name_Equals()
@@ -71,8 +74,8 @@
 			var helper = RepositoryInitialize.InitializeEmptyRepositories();
 			helper.PopulateFacilities();
 
-			var typeFilter = FacilityExposers.FacilityType.UncheckedNotEqual(SlcFacilityManagement.Enums.FacilityType.Building);
-			var expected = DemoData.Facilities.Where(f => f.FacilityType != SlcFacilityManagement.Enums.FacilityType.Building).ToArray();
+			var typeFilter = FacilityExposers.FacilityType.UncheckedNotEqual(SlcFacility_Management.Enums.FacilityTypeEnum.Building);
+			var expected = DemoData.Facilities.Where(f => f.FacilityType != SlcFacility_Management.Enums.FacilityTypeEnum.Building).ToArray();
 
 			var facilitiesRetrieved = helper.Facilities.Read(typeFilter);
 

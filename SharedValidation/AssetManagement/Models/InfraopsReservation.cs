@@ -6,7 +6,7 @@
     using Skyline.DataMiner.SDM.AssetManagement.Models;
 
     //[GenerateExposers]
-    [SdmDomStorage("(slc)asset_management")]
+    //[SdmDomStorage("(slc)asset_management")]
     public class InfraopsReservation : SdmObject<InfraopsReservation>
     {
         public string Description { get; set; }

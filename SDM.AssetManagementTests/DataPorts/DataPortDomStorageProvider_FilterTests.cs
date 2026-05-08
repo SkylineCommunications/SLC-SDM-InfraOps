@@ -4,7 +4,10 @@
 	using FluentAssertions;
 	using FluentAssertions.Execution;
 	using SDM.AssetManagement.Tests.Setup;
-	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+
+    using SharedMappers.DomIds;
+
+    using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.SDM;
 	using Skyline.DataMiner.SDM.AssetManagement.Models;
 
@@ -19,8 +22,8 @@
 
 			// Link more ports to one asset.
 			var asset = DemoData.Assets[6];
-			DemoData.DataPorts[2].Asset = new SdmObjectReference<Asset>(asset.Identifier);
-			DemoData.DataPorts[5].Asset = new SdmObjectReference<Asset>(asset.Identifier);
+			DemoData.DataPorts[2].AssetFk.Asset = new SdmObjectReference<Asset>(asset.Identifier);
+			DemoData.DataPorts[5].AssetFk.Asset = new SdmObjectReference<Asset>(asset.Identifier);
 
 			helper.DataPorts.Update(DemoData.DataPorts);
 
@@ -78,7 +81,7 @@
 			var helper = RepositoryInitialize.InitializeEmptyRepositories();
 			helper.PopulateDataPorts();
 
-			var portExposure = Skyline.DataMiner.SDM.AssetManagement.SlcAssetManagement.Enums.PortExposure.Back;
+			var portExposure = SlcAsset_Management.Enums.PortExposureEnum.Back;
 			var filter = DataPortExposers.DataPortInfo.PortExposure.UncheckedEqual(portExposure);
 
 			var dataPortsRetrieved = helper.DataPorts.Read(filter);

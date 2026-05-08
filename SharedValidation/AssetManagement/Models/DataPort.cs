@@ -1,221 +1,139 @@
 ﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
-	using System;
+    using System;
+    using System.Runtime.Serialization;
 
-    using SharedMappers.DomIds;
+    using Newtonsoft.Json;
 
-    // [GenerateExposers]
-    // [SdmDomStorage("(slc)asset_management")]
+    using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
+
+    //[GenerateExposers]
+    [SdmDomStorage("(slc)asset_management")]
     public sealed class DataPort : SdmObject<DataPort>, IEquatable<DataPort>
-	{
-		public DataPortInfo DataPortInfo { get; set; } = new DataPortInfo();
+    {
+        [JsonIgnore]
+        private ChangeTrackingFieldHandler _fieldHandler;
 
-		// within AssetRelation section definition
-		public SdmObjectReference<Asset> Asset { get; set; }
+        public DataPort()
+        {
+            _fieldHandler = new ChangeTrackingFieldHandler();
+        }
 
-		public AddressInfo AddressInfo { get; set; } = new AddressInfo();
+        [JsonIgnore]
+        private ChangeTrackingFieldHandler FieldHandler
+        {
+            get
+            {
+                if (_fieldHandler == null)
+                {
+                    _fieldHandler = new ChangeTrackingFieldHandler();
+                }
+                return _fieldHandler;
+            }
+        }
 
-		public PrimaryPortRelation PrimaryPortRelation { get; set; } = new PrimaryPortRelation();
+        [OnDeserialized]
+        internal void OnDeserializedMethod(StreamingContext context)
+        {
+            ResetChangeTracking();
+        }
 
-		public bool Equals(DataPort other)
-		{
-			if (other is null)
-			{
-				return false;
-			}
+        #region Properties
 
-			if (ReferenceEquals(this, other))
-			{
-				return true;
-			}
+        public DataPortInfo DataPortInfo
+        {
+            get => DataPortInfoField.Value ?? new DataPortInfo();
+            set => DataPortInfoField.Value = value;
+        }
 
-			return
-				Equals(DataPortInfo, other.DataPortInfo) &&
-				Equals(Asset, other.Asset) &&
-				Equals(AddressInfo, other.AddressInfo) &&
-				Equals(PrimaryPortRelation, other.PrimaryPortRelation);
-		}
+        public AssetRelation AssetFk
+        {
+            get => AssetFkField.Value;
+            set => AssetFkField.Value = value;
+        }
 
-		public override bool Equals(object obj)
-		{
-			return Equals(obj as DataPort);
-		}
+        public AddressInfo AddressInfo
+        {
+            get => AddressInfoField.Value ?? new AddressInfo();
+            set => AddressInfoField.Value = value;
+        }
 
-		public override int GetHashCode()
-		{
-			unchecked
-			{
-				int hash = (2 << 12) - 1;
-				hash = (hash * 23) + (DataPortInfo != null ? DataPortInfo.GetHashCode() : 0);
-				hash = (hash * 23) + (Asset != null ? Asset.GetHashCode() : 0);
-				hash = (hash * 23) + (AddressInfo != null ? AddressInfo.GetHashCode() : 0);
-				hash = (hash * 23) + (PrimaryPortRelation != null ? PrimaryPortRelation.GetHashCode() : 0);
-				return hash;
-			}
-		}
-	}
+        public PrimaryPortRelation PrimaryPortRelation
+        {
+            get => PrimaryPortRelationField.Value ?? new PrimaryPortRelation();
+            set => PrimaryPortRelationField.Value = value;
+        }
 
-	public sealed class DataPortInfo : SdmObject<DataPortInfo>, IEquatable<DataPortInfo>
-	{
-		public string Name { get; set; }
+        #endregion
 
-		public long PortNumber { get; set; }
+        #region Change Tracking Fields
 
-		public SlcAsset_Management.Enums.Outputtype OutputType { get; set; }
+        [JsonIgnore]
+        internal IChangeTrackingField<DataPortInfo> DataPortInfoField => FieldHandler.GetOrCreateField(
+            nameof(DataPortInfo),
+            () => new ChangeTrackingField<DataPortInfo>(new DataPortInfo()));
 
-		public SlcAsset_Management.Enums.PortExposureEnum PortExposure { get; set; }
+        [JsonIgnore]
+        internal IChangeTrackingField<AssetRelation> AssetFkField => FieldHandler.GetOrCreateField(
+            nameof(AssetFk),
+            () => new ChangeTrackingField<AssetRelation>(null));
 
-		public Guid Type { get; set; } = Guid.Empty;
+        [JsonIgnore]
+        internal IChangeTrackingField<AddressInfo> AddressInfoField => FieldHandler.GetOrCreateField(
+            nameof(AddressInfo),
+            () => new ChangeTrackingField<AddressInfo>(new AddressInfo()));
 
-		public string Label { get; set; }
+        [JsonIgnore]
+        internal IChangeTrackingField<PrimaryPortRelation> PrimaryPortRelationField => FieldHandler.GetOrCreateField(
+            nameof(PrimaryPortRelation),
+            () => new ChangeTrackingField<PrimaryPortRelation>(new PrimaryPortRelation()));
 
-		public bool Equals(DataPortInfo other)
-		{
-			if (other is null)
-			{
-				return false;
-			}
+        #endregion
 
-			if (ReferenceEquals(this, other))
-			{
-				return true;
-			}
+        #region Equality
 
-			return
-				string.Equals(Name, other.Name, StringComparison.OrdinalIgnoreCase) &&
-				PortNumber == other.PortNumber &&
-				OutputType == other.OutputType &&
-				PortExposure == other.PortExposure &&
-				Type == other.Type &&
-				string.Equals(Label, other.Label, StringComparison.OrdinalIgnoreCase);
-		}
+        public bool Equals(DataPort other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
 
-		public override bool Equals(object obj)
-		{
-			return Equals(obj as DataPortInfo);
-		}
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
 
-		public override int GetHashCode()
-		{
-			unchecked
-			{
-				int hash = (2 << 12) - 1;
-				hash = (hash * 23) + (Name != null ? Name.GetHashCode() : 0);
-				hash = (hash * 23) + PortNumber.GetHashCode();
-				hash = (hash * 23) + OutputType.GetHashCode();
-				hash = (hash * 23) + PortExposure.GetHashCode();
-				hash = (hash * 23) + Type.GetHashCode();
-				hash = (hash * 23) + (Label != null ? Label.GetHashCode() : 0);
-				return hash;
-			}
-		}
-	}
+            return
+                Equals(DataPortInfo, other.DataPortInfo) &&
+                Equals(AssetFk, other.AssetFk) &&
+                Equals(AddressInfo, other.AddressInfo) &&
+                Equals(PrimaryPortRelation, other.PrimaryPortRelation);
+        }
 
-	public sealed class AddressInfo : IEquatable<AddressInfo>
-	{
-		public string Ipv4Address { get; set; }
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as DataPort);
+        }
 
-		public string Ipv6Address { get; set; }
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = (2 << 12) - 1;
+                hash = (hash * 23) + (DataPortInfo != null ? DataPortInfo.GetHashCode() : 0);
+                hash = (hash * 23) + (AssetFk != null ? AssetFk.GetHashCode() : 0);
+                hash = (hash * 23) + (AddressInfo != null ? AddressInfo.GetHashCode() : 0);
+                hash = (hash * 23) + (PrimaryPortRelation != null ? PrimaryPortRelation.GetHashCode() : 0);
+                return hash;
+            }
+        }
 
-		public string Hostname { get; set; }
+        #endregion
 
-		public bool DNS { get; set; }
-
-		public static bool operator ==(AddressInfo left, AddressInfo right)
-		{
-			if (ReferenceEquals(left, right))
-			{
-				return true;
-			}
-
-			if (left is null || right is null)
-			{
-				return false;
-			}
-
-			return left.Equals(right);
-		}
-
-		public static bool operator !=(AddressInfo left, AddressInfo right)
-		{
-			return !(left == right);
-		}
-
-		public override bool Equals(object obj)
-		{
-			return Equals(obj as AddressInfo);
-		}
-
-		public bool Equals(AddressInfo other)
-		{
-			if (other is null)
-			{
-				return false;
-			}
-
-			if (ReferenceEquals(this, other))
-			{
-				return true;
-			}
-
-			return
-				string.Equals(Ipv4Address, other.Ipv4Address, StringComparison.OrdinalIgnoreCase) &&
-				string.Equals(Ipv6Address, other.Ipv6Address, StringComparison.OrdinalIgnoreCase) &&
-				string.Equals(Hostname, other.Hostname, StringComparison.OrdinalIgnoreCase) &&
-				DNS == other.DNS;
-		}
-
-		public override int GetHashCode()
-		{
-			unchecked
-			{
-				int hash = (2 << 12) - 1;
-				hash = (hash * 23) + (Ipv4Address != null ? Ipv4Address.GetHashCode() : 0);
-				hash = (hash * 23) + (Ipv6Address != null ? Ipv6Address.GetHashCode() : 0);
-				hash = (hash * 23) + (Hostname != null ? Hostname.GetHashCode() : 0);
-				hash = (hash * 23) + DNS.GetHashCode();
-				return hash;
-			}
-		}
-	}
-
-	public sealed class PrimaryPortRelation : IEquatable<PrimaryPortRelation>
-	{
-		public bool IsPrimaryIpv6 { get; set; }
-
-		public bool IsPrimaryIpv4 { get; set; }
-
-		public override bool Equals(object obj)
-		{
-			return Equals(obj as PrimaryPortRelation);
-		}
-
-		public bool Equals(PrimaryPortRelation other)
-		{
-			if (other is null)
-			{
-				return false;
-			}
-
-			if (ReferenceEquals(this, other))
-			{
-				return true;
-			}
-
-			return
-				IsPrimaryIpv6 == other.IsPrimaryIpv6 &&
-				IsPrimaryIpv4 == other.IsPrimaryIpv4;
-		}
-
-		public override int GetHashCode()
-		{
-			unchecked
-			{
-				int hash = (2 << 12) - 1;
-				hash = (hash * 23) + IsPrimaryIpv6.GetHashCode();
-				hash = (hash * 23) + IsPrimaryIpv4.GetHashCode();
-				return hash;
-			}
-		}
-	}
+        public void ResetChangeTracking()
+        {
+            FieldHandler?.ApplyChanges();
+        }
+    }
 }

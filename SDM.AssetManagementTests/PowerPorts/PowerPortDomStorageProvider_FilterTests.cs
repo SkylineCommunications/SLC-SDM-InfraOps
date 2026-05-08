@@ -6,7 +6,10 @@
 	using FluentAssertions.Execution;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 	using SDM.AssetManagement.Tests.Setup;
-	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+
+    using SharedMappers.DomIds;
+
+    using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.SDM;
 	using Skyline.DataMiner.SDM.AssetManagement.Models;
 
@@ -72,7 +75,7 @@
 			var helper = RepositoryInitialize.InitializeEmptyRepositories();
 			helper.PopulatePowerPorts();
 
-			var portExposure = Skyline.DataMiner.SDM.AssetManagement.SlcAssetManagement.Enums.PortExposure.Back;
+			var portExposure = SlcAsset_Management.Enums.PortExposureEnum.Back;
 			var filter = PowerPortExposers.PowerPortInfo.PortExposure.UncheckedEqual(portExposure);
 
 			var powerPortsRetrieved = helper.PowerPorts.Read(filter);
@@ -93,7 +96,7 @@
 			var helper = RepositoryInitialize.InitializeEmptyRepositories();
 			helper.PopulatePowerPorts();
 
-			var outputType = Skyline.DataMiner.SDM.AssetManagement.SlcAssetManagement.Enums.Outputtype.IO;
+			var outputType = SlcAsset_Management.Enums.Outputtype.IO;
 			var filter = PowerPortExposers.PowerPortInfo.OutputType.UncheckedEqual(outputType);
 
 			var powerPortsRetrieved = helper.PowerPorts.Read(filter);

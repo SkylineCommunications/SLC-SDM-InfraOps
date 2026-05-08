@@ -1,239 +1,242 @@
 ﻿namespace SDM.AssetManagement.Tests
 {
-	using System;
-	using System.Linq;
-	using FluentAssertions;
-	using FluentAssertions.Execution;
-	using Microsoft.VisualStudio.TestTools.UnitTesting;
-	using SDM.AssetManagement.Tests.Setup;
-	//using Skyline.DataMiner.Analytics.GenericInterface.JoinFilter;
-	using Skyline.DataMiner.Net.Messages.SLDataGateway;
-	using Skyline.DataMiner.SDM;
-	using Skyline.DataMiner.SDM.AssetManagement;
-	using Skyline.DataMiner.SDM.AssetManagement.Helpers;
-	using Skyline.DataMiner.SDM.AssetManagement.Models;
+    using System;
+    using System.Linq;
 
-	[TestClass]
-	public partial class DataPortDomStorageProviderTests
-	{
-		private DataPort referenceDataPort;
+    using FluentAssertions;
+    using FluentAssertions.Execution;
 
-		[TestInitialize]
-		public void Init()
-		{
-			referenceDataPort = new DataPort
-			{
-				Identifier = Guid.NewGuid().ToString(),
-				DataPortInfo = new DataPortInfo
-				{
-					Identifier = Guid.NewGuid().ToString(),
-					Name = "Test DataPort",
-					PortNumber = 1,
-					OutputType = SlcAssetManagement.Enums.Outputtype.IO,
-					PortExposure = SlcAssetManagement.Enums.PortExposure.Front,
-					Type = Guid.NewGuid(),
-					Label = "Ethernet Port 1",
-				},
-				Asset = new SdmObjectReference<Asset>(Guid.NewGuid().ToString()),
-				AddressInfo = new AddressInfo
-				{
-					Ipv4Address = "192.168.1.100",
-					Ipv6Address = "2001:0db8:85a3:0000:0000:8a2e:0370:7334",
-					Hostname = "test-hostname",
-					DNS = true,
-				},
-				PrimaryPortRelation = new PrimaryPortRelation
-				{
-					IsPrimaryIpv4 = true,
-					IsPrimaryIpv6 = false,
-				},
-			};
-		}
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-		[TestMethod]
-		public void DataPortDomStorageProvider_EmptyDOM_Create()
-		{
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
+    using SDM.AssetManagement.Tests.Setup;
 
-			helper.DataPorts.Create(referenceDataPort);
+    using SharedMappers.DomIds;
+    //using Skyline.DataMiner.Analytics.GenericInterface.JoinFilter;
+    using Skyline.DataMiner.Net.Messages.SLDataGateway;
+    using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.AssetManagement;
+    using Skyline.DataMiner.SDM.AssetManagement.Helpers;
+    using Skyline.DataMiner.SDM.AssetManagement.Models;
 
-			AssertCreated(helper);
-		}
+    [TestClass]
+    public partial class DataPortDomStorageProviderTests
+    {
+        private DataPort referenceDataPort;
 
-		[TestMethod]
-		public void DataPortDomStorageProvider_EmptyDOM_CreateOrUpdate_Create()
-		{
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.DataPorts.CreateOrUpdate([referenceDataPort]);
+        [TestInitialize]
+        public void Init()
+        {
+            referenceDataPort = new DataPort
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                DataPortInfo = new DataPortInfo
+                {
+                    Name = "Test DataPort",
+                    PortNumber = 1,
+                    OutputType = SlcAsset_Management.Enums.Outputtype.IO,
+                    PortExposure = SlcAsset_Management.Enums.PortExposureEnum.Front,
+                    Type = new SdmObjectReference<PortType>(Convert.ToString(Guid.NewGuid())),
+                    Label = "Ethernet Port 1",
+                },
+                AssetFk = new AssetRelation { Asset = new SdmObjectReference<Asset>(Guid.NewGuid().ToString()) },
+                AddressInfo = new AddressInfo
+                {
+                    Ipv4Address = "192.168.1.100",
+                    Ipv6Address = "2001:0db8:85a3:0000:0000:8a2e:0370:7334",
+                    Hostname = "test-hostname",
+                    DNS = true,
+                },
+                PrimaryPortRelation = new PrimaryPortRelation
+                {
+                    IsPrimaryIpv4 = true,
+                    IsPrimaryIpv6 = false,
+                },
+            };
+        }
 
-			AssertCreated(helper);
-		}
+        [TestMethod]
+        public void DataPortDomStorageProvider_EmptyDOM_Create()
+        {
+            var helper = RepositoryInitialize.InitializeEmptyRepositories();
 
-		[TestMethod]
-		public void DataPortDomStorageProvider_EmptyDOM_CreateOrUpdate_Update()
-		{
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.DataPorts.Create(referenceDataPort);
+            helper.DataPorts.Create(referenceDataPort);
 
-			var updatedDataPort = new DataPort
-			{
-				Identifier = referenceDataPort.Identifier,
-				DataPortInfo = new DataPortInfo
-				{
-					Identifier = Guid.NewGuid().ToString(),
-					Name = "Updated DataPort Name",
-					PortNumber = 2,
-					OutputType = SlcAssetManagement.Enums.Outputtype.Out,
-					PortExposure = SlcAssetManagement.Enums.PortExposure.Back,
-					Label = "Fiber Port 2",
-				},
-				Asset = referenceDataPort.Asset,
-				AddressInfo = new AddressInfo
-				{
-					Ipv4Address = "10.0.0.50",
-					Ipv6Address = "",
-					Hostname = "updated-hostname",
-					DNS = false,
-				},
-				PrimaryPortRelation = new PrimaryPortRelation
-				{
-					IsPrimaryIpv4 = false,
-					IsPrimaryIpv6 = true,
-				},
-			};
+            AssertCreated(helper);
+        }
 
-			helper.DataPorts.CreateOrUpdate([updatedDataPort]);
+        [TestMethod]
+        public void DataPortDomStorageProvider_EmptyDOM_CreateOrUpdate_Create()
+        {
+            var helper = RepositoryInitialize.InitializeEmptyRepositories();
+            helper.DataPorts.CreateOrUpdate([referenceDataPort]);
 
-			AssertDataPortUpdateDifferences(referenceDataPort, updatedDataPort);
-		}
+            AssertCreated(helper);
+        }
 
-		[TestMethod]
-		public void DataPortDomStorageProvider_ReadPaged()
-		{
-			const int pageCount = 2;
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulateDataPorts();
+        [TestMethod]
+        public void DataPortDomStorageProvider_EmptyDOM_CreateOrUpdate_Update()
+        {
+            var helper = RepositoryInitialize.InitializeEmptyRepositories();
+            helper.DataPorts.Create(referenceDataPort);
 
-			FilterElement<DataPort> allFilter = new ORFilterElement<DataPort>();
-			var pagedResult = helper.DataPorts.ReadPaged(allFilter, pageCount);
-			var dataPortCount = helper.DataPorts.Count(allFilter);
+            var updatedDataPort = new DataPort
+            {
+                Identifier = referenceDataPort.Identifier,
+                DataPortInfo = new DataPortInfo
+                {
+                    Name = "Updated DataPort Name",
+                    PortNumber = 2,
+                    OutputType = SlcAsset_Management.Enums.Outputtype.Out,
+                    PortExposure = SlcAsset_Management.Enums.PortExposureEnum.Back,
+                    Label = "Fiber Port 2",
+                },
+                AssetFk = new AssetRelation { Asset = referenceDataPort.AssetFk.Asset },
+                AddressInfo = new AddressInfo
+                {
+                    Ipv4Address = "10.0.0.50",
+                    Ipv6Address = "",
+                    Hostname = "updated-hostname",
+                    DNS = false,
+                },
+                PrimaryPortRelation = new PrimaryPortRelation
+                {
+                    IsPrimaryIpv4 = false,
+                    IsPrimaryIpv6 = true,
+                },
+            };
 
-			using (new AssertionScope())
-			{
-				pagedResult.Should().NotBeNull();
-				pagedResult.Should().HaveCount((int)(dataPortCount / pageCount));
-				pagedResult.Should().AllSatisfy(page => page.Should().HaveCount(pageCount));
-			}
-		}
+            helper.DataPorts.CreateOrUpdate([updatedDataPort]);
 
-		[TestMethod]
-		public void DataPortDomStorageProvider_DeleteBulk()
-		{
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulateDataPorts();
+            AssertDataPortUpdateDifferences(referenceDataPort, updatedDataPort);
+        }
 
-			var filter = new ORFilterElement<DataPort>(
-				DataPortExposers.DataPortInfo.Name.Equal("Data Port 3"),
-				DataPortExposers.DataPortInfo.Label.Equal("Data Port Label 7"));
-			var dataPortsToDelete = helper.DataPorts.Read(filter);
+        [TestMethod]
+        public void DataPortDomStorageProvider_ReadPaged()
+        {
+            const int pageCount = 2;
+            var helper = RepositoryInitialize.InitializeEmptyRepositories();
+            helper.PopulateDataPorts();
 
-			helper.DataPorts.Delete(dataPortsToDelete);
+            FilterElement<DataPort> allFilter = new ORFilterElement<DataPort>();
+            var pagedResult = helper.DataPorts.ReadPaged(allFilter, pageCount);
+            var dataPortCount = helper.DataPorts.Count(allFilter);
 
-			using (new AssertionScope())
-			{
-				helper.DataPorts.Count(new TRUEFilterElement<DataPort>()).Should().Be(DemoData.DataPorts.Count - 2);
-				helper.DataPorts.Count(DataPortExposers.DataPortInfo.Name.Equal("Data Port 3")).Should().Be(0);
-				helper.DataPorts.Count(DataPortExposers.DataPortInfo.Label.Equal("Data Port Label 7")).Should().Be(0);
-			}
-		}
+            using (new AssertionScope())
+            {
+                pagedResult.Should().NotBeNull();
+                pagedResult.Should().HaveCount((int)(dataPortCount / pageCount));
+                pagedResult.Should().AllSatisfy(page => page.Should().HaveCount(pageCount));
+            }
+        }
 
-		[TestMethod]
-		public void DataPortDomStorageProvider_EmptyDOM_DeleteSingle()
-		{
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulateDataPorts();
+        [TestMethod]
+        public void DataPortDomStorageProvider_DeleteBulk()
+        {
+            var helper = RepositoryInitialize.InitializeEmptyRepositories();
+            helper.PopulateDataPorts();
 
-			var dataPortToDelete = helper.DataPorts.Read(DataPortExposers.DataPortInfo.Name.Equal("Data Port 3")).First();
+            var filter = new ORFilterElement<DataPort>(
+                DataPortExposers.DataPortInfo.Name.Equal("Data Port 3"),
+                DataPortExposers.DataPortInfo.Label.Equal("Data Port Label 7"));
+            var dataPortsToDelete = helper.DataPorts.Read(filter);
 
-			helper.DataPorts.Delete(dataPortToDelete);
+            helper.DataPorts.Delete(dataPortsToDelete);
 
-			helper.DataPorts.Count(new TRUEFilterElement<DataPort>()).Should().Be(DemoData.DataPorts.Count - 1);
-			helper.DataPorts.Count(DataPortExposers.Identifier.Equal(dataPortToDelete.Identifier)).Should().Be(0);
-		}
+            using (new AssertionScope())
+            {
+                helper.DataPorts.Count(new TRUEFilterElement<DataPort>()).Should().Be(DemoData.DataPorts.Count - 2);
+                helper.DataPorts.Count(DataPortExposers.DataPortInfo.Name.Equal("Data Port 3")).Should().Be(0);
+                helper.DataPorts.Count(DataPortExposers.DataPortInfo.Label.Equal("Data Port Label 7")).Should().Be(0);
+            }
+        }
 
-		private static void AssertDataPortUpdateDifferences(DataPort original, DataPort updated)
-		{
-			using (new AssertionScope())
-			{
-				updated.Identifier.Should().Be(original.Identifier);
+        [TestMethod]
+        public void DataPortDomStorageProvider_EmptyDOM_DeleteSingle()
+        {
+            var helper = RepositoryInitialize.InitializeEmptyRepositories();
+            helper.PopulateDataPorts();
 
-				// Name
-				updated.DataPortInfo.Name.Should().NotBe(original.DataPortInfo.Name);
-				updated.DataPortInfo.Name.Should().Be("Updated DataPort Name");
+            var dataPortToDelete = helper.DataPorts.Read(DataPortExposers.DataPortInfo.Name.Equal("Data Port 3")).First();
 
-				// PortNumber
-				updated.DataPortInfo.PortNumber.Should().NotBe(original.DataPortInfo.PortNumber);
-				updated.DataPortInfo.PortNumber.Should().Be(2);
+            helper.DataPorts.Delete(dataPortToDelete);
 
-				// OutputType
-				updated.DataPortInfo.OutputType.Should().NotBe(original.DataPortInfo.OutputType);
-				updated.DataPortInfo.OutputType.Should().Be(SlcAssetManagement.Enums.Outputtype.Out);
+            helper.DataPorts.Count(new TRUEFilterElement<DataPort>()).Should().Be(DemoData.DataPorts.Count - 1);
+            helper.DataPorts.Count(DataPortExposers.Identifier.Equal(dataPortToDelete.Identifier)).Should().Be(0);
+        }
 
-				// PortExposure
-				updated.DataPortInfo.PortExposure.Should().NotBe(original.DataPortInfo.PortExposure);
-				updated.DataPortInfo.PortExposure.Should().Be(SlcAssetManagement.Enums.PortExposure.Back);
+        private static void AssertDataPortUpdateDifferences(DataPort original, DataPort updated)
+        {
+            using (new AssertionScope())
+            {
+                updated.Identifier.Should().Be(original.Identifier);
 
-				// PortType
-				updated.DataPortInfo.Type.Should().NotBe(original.DataPortInfo.Type);
+                // Name
+                updated.DataPortInfo.Name.Should().NotBe(original.DataPortInfo.Name);
+                updated.DataPortInfo.Name.Should().Be("Updated DataPort Name");
 
-				// Label
-				updated.DataPortInfo.Label.Should().NotBe(original.DataPortInfo.Label);
-				updated.DataPortInfo.Label.Should().Be("Fiber Port 2");
+                // PortNumber
+                updated.DataPortInfo.PortNumber.Should().NotBe(original.DataPortInfo.PortNumber);
+                updated.DataPortInfo.PortNumber.Should().Be(2);
 
-				// Asset
-				updated.Asset.Should().Be(original.Asset);
+                // OutputType
+                updated.DataPortInfo.OutputType.Should().NotBe(original.DataPortInfo.OutputType);
+                updated.DataPortInfo.OutputType.Should().Be(SlcAsset_Management.Enums.Outputtype.Out);
 
-				// AddressInfo
-				updated.AddressInfo.Should().NotBeNull();
-				updated.AddressInfo.Ipv4Address.Should().Be("10.0.0.50");
-				updated.AddressInfo.Ipv6Address.Should().BeNullOrEmpty();
-				updated.AddressInfo.Hostname.Should().Be("updated-hostname");
-				updated.AddressInfo.DNS.Should().BeFalse();
+                // PortExposure
+                updated.DataPortInfo.PortExposure.Should().NotBe(original.DataPortInfo.PortExposure);
+                updated.DataPortInfo.PortExposure.Should().Be(SlcAsset_Management.Enums.PortExposureEnum.Back);
 
-				// PrimaryPortRelation
-				updated.PrimaryPortRelation.Should().NotBeNull();
-				updated.PrimaryPortRelation.IsPrimaryIpv4.Should().BeFalse();
-				updated.PrimaryPortRelation.IsPrimaryIpv6.Should().BeTrue();
-			}
-		}
+                // PortType
+                updated.DataPortInfo.Type.Should().NotBe(original.DataPortInfo.Type);
 
-		private void AssertCreated(IAssetManagementApiHelper helper)
-		{
-			using (new AssertionScope())
-			{
-				helper.DataPorts.Count(new TRUEFilterElement<DataPort>()).Should().Be(1);
+                // Label
+                updated.DataPortInfo.Label.Should().NotBe(original.DataPortInfo.Label);
+                updated.DataPortInfo.Label.Should().Be("Fiber Port 2");
 
-				var createdDataPort = helper.DataPorts.Read(new TRUEFilterElement<DataPort>()).First();
-				createdDataPort.Should().NotBeNull();
-				createdDataPort.DataPortInfo.Name.Should().Be("Test DataPort");
-				createdDataPort.DataPortInfo.PortNumber.Should().Be(1);
-				createdDataPort.DataPortInfo.OutputType.Should().Be(SlcAssetManagement.Enums.Outputtype.IO);
-				createdDataPort.DataPortInfo.PortExposure.Should().Be(SlcAssetManagement.Enums.PortExposure.Front);
-				createdDataPort.DataPortInfo.Label.Should().Be("Ethernet Port 1");
+                // Asset
+                updated.AssetFk.Asset.Should().Be(original.AssetFk.Asset);
 
-				createdDataPort.Asset.Should().NotBeNull();
-				createdDataPort.Asset.Should().BeAssignableTo<SdmObjectReference<Asset>>();
+                // AddressInfo
+                updated.AddressInfo.Should().NotBeNull();
+                updated.AddressInfo.Ipv4Address.Should().Be("10.0.0.50");
+                updated.AddressInfo.Ipv6Address.Should().BeNullOrEmpty();
+                updated.AddressInfo.Hostname.Should().Be("updated-hostname");
+                updated.AddressInfo.DNS.Should().BeFalse();
 
-				createdDataPort.AddressInfo.Should().NotBeNull();
-				createdDataPort.AddressInfo.Ipv4Address.Should().Be("192.168.1.100");
-				createdDataPort.AddressInfo.Ipv6Address.Should().Be("2001:0db8:85a3:0000:0000:8a2e:0370:7334");
-				createdDataPort.AddressInfo.Hostname.Should().Be("test-hostname");
-				createdDataPort.AddressInfo.DNS.Should().BeTrue();
+                // PrimaryPortRelation
+                updated.PrimaryPortRelation.Should().NotBeNull();
+                updated.PrimaryPortRelation.IsPrimaryIpv4.Should().BeFalse();
+                updated.PrimaryPortRelation.IsPrimaryIpv6.Should().BeTrue();
+            }
+        }
 
-				createdDataPort.PrimaryPortRelation.Should().NotBeNull();
-				createdDataPort.PrimaryPortRelation.IsPrimaryIpv4.Should().BeTrue();
-				createdDataPort.PrimaryPortRelation.IsPrimaryIpv6.Should().BeFalse();
-			}
-		}
-	}
+        private void AssertCreated(IAssetManagementApiHelper helper)
+        {
+            using (new AssertionScope())
+            {
+                helper.DataPorts.Count(new TRUEFilterElement<DataPort>()).Should().Be(1);
+
+                var createdDataPort = helper.DataPorts.Read(new TRUEFilterElement<DataPort>()).First();
+                createdDataPort.Should().NotBeNull();
+                createdDataPort.DataPortInfo.Name.Should().Be("Test DataPort");
+                createdDataPort.DataPortInfo.PortNumber.Should().Be(1);
+                createdDataPort.DataPortInfo.OutputType.Should().Be(SlcAsset_Management.Enums.Outputtype.IO);
+                createdDataPort.DataPortInfo.PortExposure.Should().Be(SlcAsset_Management.Enums.PortExposureEnum.Front);
+                createdDataPort.DataPortInfo.Label.Should().Be("Ethernet Port 1");
+
+                createdDataPort.AssetFk.Asset.Should().NotBeNull();
+                createdDataPort.AssetFk.Asset.Should().BeAssignableTo<SdmObjectReference<Asset>>();
+
+                createdDataPort.AddressInfo.Should().NotBeNull();
+                createdDataPort.AddressInfo.Ipv4Address.Should().Be("192.168.1.100");
+                createdDataPort.AddressInfo.Ipv6Address.Should().Be("2001:0db8:85a3:0000:0000:8a2e:0370:7334");
+                createdDataPort.AddressInfo.Hostname.Should().Be("test-hostname");
+                createdDataPort.AddressInfo.DNS.Should().BeTrue();
+
+                createdDataPort.PrimaryPortRelation.Should().NotBeNull();
+                createdDataPort.PrimaryPortRelation.IsPrimaryIpv4.Should().BeTrue();
+                createdDataPort.PrimaryPortRelation.IsPrimaryIpv6.Should().BeFalse();
+            }
+        }
+    }
 }

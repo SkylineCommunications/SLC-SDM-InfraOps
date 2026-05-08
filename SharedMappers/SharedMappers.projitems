@@ -11,8 +11,10 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Asset Management\Mappers\AssetClassDomMapper.g.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Asset Management\Mappers\AssetDomMapper.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Asset Management\Mappers\CableTypeDomMapper.g.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Asset Management\Mappers\DataPortDomMapper.g.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Asset Management\Mappers\DeviceTypeDomMapper.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Asset Management\Mappers\PortTypeDomMapper.g.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Asset Management\Mappers\PowerPortDomMapper.g.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Asset Management\Mappers\ReservationDomMapper.g.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DomIds.cs" />

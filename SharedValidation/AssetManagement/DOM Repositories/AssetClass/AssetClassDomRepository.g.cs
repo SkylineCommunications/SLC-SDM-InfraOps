@@ -659,10 +659,10 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 					dataports.DataPortInfo.PortExposure = (SharedMappers.DomIds.SlcAsset_Management.Enums.PortExposureEnum)_dataportsportexposure.Value;
 				}
 
-				var _dataportstype = _dataportsSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.DataPorts.Type);
+				var _dataportstype = _dataportsSection.GetValue<Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.DataPorts.Type);
 				if (_dataportstype != null)
 				{
-					dataports.DataPortInfo.Type = System.Guid.Parse(Convert.ToString(_dataportstype.Value));
+                    dataports.DataPortInfo.Type = new SdmObjectReference<PortType>(Convert.ToString(_dataportstype.Value));
 				}
 
 				var _dataportslabel = _dataportsSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.DataPorts.Label);
@@ -725,10 +725,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			var _holdersList = new System.Collections.Generic.List<Skyline.DataMiner.SDM.AssetManagement.Models.AssetHolder>();
 			foreach (var _holdersSection in instance.Sections.Where(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.Holders.SectionDefinitionId)))
 			{
-				var holders = new Skyline.DataMiner.SDM.AssetManagement.Models.AssetHolder()
-				{
-					Identifier = _holdersSection.ID.Id.ToString()
-				};
+                var holders = new Skyline.DataMiner.SDM.AssetManagement.Models.AssetHolder();
 				var _holdersslotnumber = _holdersSection.GetValue<long>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.Holders.SlotNumber);
 				if (_holdersslotnumber != null)
 				{
@@ -928,10 +925,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
 			foreach (var holders in obj.Holders)
 			{
-				var _holdersSection = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.Holders.SectionDefinitionId)
-				{
-					ID = new SectionID(System.Guid.Parse(holders.Identifier))
-				};
+                var _holdersSection = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.Holders.SectionDefinitionId);
+
 				if (holders.SlotNumber != default)
 				{
 					_holdersSection.AddOrUpdateValue<long>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.Holders.SlotNumber, (long)holders.SlotNumber);

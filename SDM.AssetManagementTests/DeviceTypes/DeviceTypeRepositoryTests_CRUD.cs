@@ -6,7 +6,10 @@
 	using FluentAssertions.Execution;
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 	using SDM.AssetManagement.Tests.Setup;
-	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+
+    using SharedMappers.DomIds;
+
+    using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.Net.Sections;
 	using Skyline.DataMiner.SDM;
 	using Skyline.DataMiner.SDM.AssetManagement;
@@ -29,12 +32,12 @@
 				TagsInfo = new TagsInfo
 				{
 					Identifier = Guid.NewGuid().ToString(),
-					Tags = [SlcAssetManagement.Enums.TagOption.PowerProvider, SlcAssetManagement.Enums.TagOption.RackUnitConsumer],
+					Tags = [SlcAsset_Management.Enums.TagOption.PowerProvider, SlcAsset_Management.Enums.TagOption.RackUnitConsumer],
 				},
 				HierarchyInfo = new HierarchyInfo
 				{
 					Identifier = Guid.NewGuid().ToString(),
-					HierarchyRole = SlcAssetManagement.Enums.HierarchyRole.SubCard,
+					HierarchyRole = SlcAsset_Management.Enums.HierarchyRoleEnum.SubCard,
 				},
 			};
 		}
@@ -72,12 +75,12 @@
 				TagsInfo = new TagsInfo
 				{
 					Identifier = referenceDeviceType.TagsInfo.Identifier,
-					Tags = new List<SlcAssetManagement.Enums.TagOption> { SlcAssetManagement.Enums.TagOption.RackUnitConsumer },
+					Tags = new List<SlcAsset_Management.Enums.TagOption> { SlcAsset_Management.Enums.TagOption.RackUnitConsumer },
 				},
 				HierarchyInfo = new HierarchyInfo
 				{
 					Identifier = referenceDeviceType.HierarchyInfo.Identifier,
-					HierarchyRole = SlcAssetManagement.Enums.HierarchyRole.Chassis,
+					HierarchyRole = SlcAsset_Management.Enums.HierarchyRoleEnum.Chassis,
 				},
 			};
 
@@ -113,7 +116,7 @@
 
 			var filter = new ORFilterElement<DeviceType>(
 				DeviceTypeExposers.Name.Equal("Decoder"),
-				DeviceTypeExposers.TagsInfo.Tags.Contains(SlcAssetManagement.Enums.TagOption.PowerProvider));
+				DeviceTypeExposers.TagsInfo.Tags.Contains(SlcAsset_Management.Enums.TagOption.PowerProvider));
 
 			var deviceTypesToDelete = helper.DeviceTypes.Read(filter);
 
@@ -156,11 +159,11 @@
 
 				// TagsInfo.Tag
 				updated.TagsInfo.Tags.Should().NotBeEquivalentTo(original.TagsInfo.Tags);
-				updated.TagsInfo.Tags.Should().BeEquivalentTo([SlcAssetManagement.Enums.TagOption.RackUnitConsumer]);
+				updated.TagsInfo.Tags.Should().BeEquivalentTo([SlcAsset_Management.Enums.TagOption.RackUnitConsumer]);
 
 				// HierarchyInfo.HierarchyRole
 				updated.HierarchyInfo.HierarchyRole.Should().NotBe(original.HierarchyInfo.HierarchyRole);
-				updated.HierarchyInfo.HierarchyRole.Should().Be(SlcAssetManagement.Enums.HierarchyRole.Chassis);
+				updated.HierarchyInfo.HierarchyRole.Should().Be(SlcAsset_Management.Enums.HierarchyRoleEnum.Chassis);
 			}
 		}
 
