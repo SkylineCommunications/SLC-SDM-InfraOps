@@ -7,6 +7,7 @@
     using Skyline.DataMiner.SDM.AssetManagement.Common.Validation;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.Common.Services;
+    using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Exceptions;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
@@ -108,17 +109,18 @@
             // PHASE 3: ASSET CONTEXT VALIDATION (OPTIMIZED BY ASSET)
             // ============================================================
             var portsByAsset = dataPorts
-                .Where(p => p.AssetId != null && p.AssetId.HasValue() && results[p.Identifier].IsValid)
-                .GroupBy(p => p.AssetId.Identifier);
+                .Where(p => p.AssetFk?.Asset != null && p.AssetFk.Asset.HasValue() && results[p.Identifier].IsValid)
+                .GroupBy(p => p.AssetFk.Asset.Identifier);
 
             foreach (var group in portsByAsset)
             {
                 var assetId = group.Key;
+                var assetFk = group.First().AssetFk.Asset;
                 var portsForAsset = group.ToList();
 
                 try
                 {
-                    var asset = _entityLoader.LoadAsset(assetId);
+                    var asset = _entityLoader.LoadAsset(assetFk);
                     if (asset == null)
                     {
                         foreach (var port in portsForAsset)

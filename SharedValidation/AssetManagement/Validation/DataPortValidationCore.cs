@@ -131,11 +131,11 @@
 
             try
             {
-                var asset = _entityLoader.LoadAsset(dataPort.AssetId);
+                var asset = _entityLoader.LoadAsset(dataPort.AssetFk.Asset);
                 if (asset == null)
                 {
                     result.AddFailReason(DataPortValidationField.Asset,
-                        $"Parent Asset '{dataPort.AssetId.Identifier}' not found.");
+                        $"Parent Asset '{dataPort.AssetFk.Asset.Identifier}' not found.");
                     return result;
                 }
 
@@ -164,10 +164,31 @@
 
         /// <summary>
         /// Validates collection of DataPorts (fail-fast).
+        /// All ports must belong to the same asset.
         /// Checks: negative numbers, duplicates, primary ports.
         /// </summary>
+        /// <exception cref="ArgumentException">Thrown when ports belong to different assets.</exception>
         public ValidationResult ValidateDataPortCollection(List<DataPort> dataPorts)
         {
+            if (dataPorts == null || !dataPorts.Any())
+            {
+                return new ValidationResult();
+            }
+
+            // ✅ DEFENSIVE CHECK: Ensure all ports belong to the same asset
+            var distinctAssets = dataPorts
+                .Select(p => p.AssetFk?.Asset.Identifier)
+                .Where(id => id != null)
+                .Distinct()
+                .ToList();
+
+            if (distinctAssets.Count > 1)
+            {
+                throw new ArgumentException(
+                    $"All DataPorts must belong to the same Asset. Found ports from {distinctAssets.Count} different assets.",
+                    nameof(dataPorts));
+            }
+
             var result = new ValidationResult();
 
             var seenPortNumbers = new HashSet<long>();
@@ -226,10 +247,34 @@
 
         /// <summary>
         /// Validates multiple DataPorts for a single Asset (bulk optimization).
+        /// All ports must belong to the specified asset.
         /// </summary>
+        /// <exception cref="ArgumentException">Thrown when ports don't belong to the asset.</exception>
         public Dictionary<string, ValidationResult> ValidateDataPortsForAsset(
             List<DataPort> portsToValidate, Asset asset)
         {
+            if (asset == null)
+            {
+                throw new ArgumentNullException(nameof(asset));
+            }
+
+            if (portsToValidate == null || !portsToValidate.Any())
+            {
+                return new Dictionary<string, ValidationResult>();
+            }
+
+            // ✅ DEFENSIVE CHECK: Ensure all ports belong to this asset
+            var mismatchedPorts = portsToValidate
+                .Where(p => p.AssetFk?.Asset.Identifier != asset.Identifier)
+                .ToList();
+
+            if (mismatchedPorts.Any())
+            {
+                throw new ArgumentException(
+                    $"All DataPorts must belong to Asset '{asset.Identifier}'. Found {mismatchedPorts.Count} port(s) belonging to different assets. ",
+                    nameof(portsToValidate));
+            }
+
             var results = portsToValidate.ToDictionary(p => p.Identifier, p => new ValidationResult());
 
             var validatedIds = portsToValidate.Select(p => p.Identifier).ToList();
