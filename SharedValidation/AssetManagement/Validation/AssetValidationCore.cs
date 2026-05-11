@@ -129,39 +129,48 @@
 
         /// <summary>
         /// Validates destination location business rules (no database access).
+        /// Checks state-based requirements and permissions.
         /// </summary>
         private ValidationResult ValidateDestinationLocationBusinessRules(Asset asset)
         {
             var result = new ValidationResult();
 
+            // ✅ State-based Destination Location validation (includes warnings)
+            if (asset.DestinationLocationField.Changed || asset.StateField.Changed)
+            {
+                var destinationLocationResult = AssetValidationHandler.ValidateDestinationLocation(asset);
+                result.AddFrom(destinationLocationResult);
+            }
+
             // State permission check
             if (!AssetValidationHandler.IsDestinationLocationChangeAllowed(asset, out var permissionResult))
             {
-                result.AddFailuresFrom(permissionResult);
+                result.AddFrom(permissionResult);
+                return result;
+            }
+
+            if(asset.State != SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit)
+            {
                 return result;
             }
 
             // Single destination location type
             if (!AssetValidationHandler.HasSingleDestinationLocation(asset, out var singleLocationResult))
             {
-                result.AddFailuresFrom(singleLocationResult);
+                result.AddFrom(singleLocationResult);
             }
 
             // Destination parent asset holder - basic logic validation only
-            if ((asset.DestinationLocation.ParentAssetField.Changed ||
-                 asset.DestinationLocation.HolderNumberField.Changed)
+            if ((asset.DestinationLocation.ParentAssetField.Changed || asset.DestinationLocation.HolderNumberField.Changed)
                 && asset.AssetClassId.HasValue())
             {
-                var assetClass = _entityLoader.LoadAssetClass(asset.AssetClassId);
-                if (assetClass != null)
+                if (!AssetValidationHandler.IsDestinationParentAssetHolderValid(asset, out var parentResult))
                 {
-                    if (!AssetValidationHandler.IsDestinationParentAssetHolderValid(
-                        asset, assetClass, out var parentResult))
-                    {
-                        result.AddFailuresFrom(parentResult);
-                    }
+                    result.AddFrom(parentResult);
                 }
             }
+
+            var assetClass = _entityLoader.LoadAssetClass(asset.AssetClassId);
 
             // Destination rack position - basic logic validation only
             if ((asset.DestinationLocation.RackIdField.Changed ||
@@ -169,14 +178,9 @@
                  asset.DestinationLocation.SideField.Changed)
                 && asset.AssetClassId.HasValue())
             {
-                var assetClass = _entityLoader.LoadAssetClass(asset.AssetClassId);
-                if (assetClass != null)
+                if (!AssetValidationHandler.IsDestinationRackPositionValid(asset, assetClass, out var rackResult))
                 {
-                    if (!AssetValidationHandler.IsDestinationRackPositionValid(
-                        asset, assetClass, out var rackResult))
-                    {
-                        result.AddFailuresFrom(rackResult);
-                    }
+                    result.AddFrom(rackResult);
                 }
             }
 

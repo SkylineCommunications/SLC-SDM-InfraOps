@@ -1,0 +1,249 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+
+using SharedMappers.DomIds;
+
+namespace SharedCommonLibrary.AssetManagement.State_Management
+{
+    internal class StateMachine
+    {
+        
+        private static readonly IDictionary<(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum startStatus, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum endStatus), List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum>> AssetStatusToStatusTransitions = new Dictionary<(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum startStatus, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum endStatus), List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum>>
+        {
+            #region NotAvailable To
+
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum> { SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Not_Available_To_Available },
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.BuildPlanReady)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum>
+            {
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Notavailable_To_Available,
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Available_To_Inplanning,
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Inplanning_To_Buildplanready,
+            },
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Installed)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum>
+            {
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Notavailable_To_Available,
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Available_To_Inplanning,
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Inplanning_To_Buildplanready,
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Buildplanready_To_Installed,
+
+            },
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InService)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum>
+            {
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Notavailable_To_Available,
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Available_To_Inplanning,
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Inplanning_To_Buildplanready,
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Buildplanready_To_Installed,
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Installed_To_Inservice,
+            },
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Disposed)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum> { SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Notavailable_To_Disposed },
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InPlanning)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum>
+            {
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Notavailable_To_Available,
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Available_To_Inplanning,
+            },
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum> { SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Notavailable_To_Intransit },
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InRepair)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum> { SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Notavailable_To_Inrepair },
+
+            #endregion
+
+            #region Available To
+
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum> { SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Available_To_Not_Available },
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.BuildPlanReady)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum>
+            {
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Available_To_Inplanning,
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Inplanning_To_Buildplanready,
+
+            },
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Installed)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum>
+            {
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Available_To_Inplanning,
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Inplanning_To_Buildplanready,
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Buildplanready_To_Installed,
+
+            },
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InService)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum>
+            {
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Available_To_Inplanning,
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Inplanning_To_Buildplanready,
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Buildplanready_To_Installed,
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Installed_To_Inservice,
+            },
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Disposed)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum>
+            {
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Available_To_Notavailable,
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Notavailable_To_Disposed,
+            },
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InPlanning)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum> { SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Available_To_Inplanning },
+
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum> { SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Available_To_Intransit },
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InRepair)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum> { SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Available_To_Inrepair },
+
+            #endregion
+
+            #region BuildPlanReady To
+
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.BuildPlanReady, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum>
+            {
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Buildplanready_To_Installed,
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Installed_To_Inservice,
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Inservice_To_Notavailable,
+            },
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.BuildPlanReady, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum>
+            {
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Buildplanready_To_Installed,
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Installed_To_Inservice,
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Inservice_To_Notavailable,
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Notavailable_To_Available,
+
+            },
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.BuildPlanReady, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Installed)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum> { SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Buildplanready_To_Installed },
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.BuildPlanReady, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InService)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum>
+            {
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Buildplanready_To_Installed,
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Installed_To_Inservice,
+            },
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.BuildPlanReady, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Disposed)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum>
+            {
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Buildplanready_To_Installed,
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Installed_To_Inservice,
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Inservice_To_Notavailable,
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Notavailable_To_Disposed,
+            },
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.BuildPlanReady, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InPlanning)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum>
+            {
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Buildplanready_To_Installed,
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Installed_To_Inservice,
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Inservice_To_Inplanning,
+            },
+
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.BuildPlanReady, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum> { SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Buildplanready_To_Intransit },
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.BuildPlanReady, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InRepair)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum> { SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Buildplanready_To_Inrepair },
+
+            #endregion
+
+            #region Installed To
+
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Installed, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum>
+            {
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Installed_To_Inservice,
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Inservice_To_Notavailable,
+            },
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Installed, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum>
+            {
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Installed_To_Inservice,
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Inservice_To_Notavailable,
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Notavailable_To_Available,
+
+            },
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Installed, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.BuildPlanReady)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum>
+            {
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Installed_To_Inservice,
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Inservice_To_Buildplanready,
+            },
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Installed, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InService)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum> { SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Installed_To_In_Service },
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Installed, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Disposed)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum>
+            {
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Installed_To_Inservice,
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Inservice_To_Notavailable,
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Notavailable_To_Disposed,
+            },
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Installed, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InPlanning)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum>
+            {
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Installed_To_Inservice,
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Inservice_To_Inplanning,
+            },
+
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Installed, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum> { SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Installed_To_Intransit },
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Installed, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InRepair)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum> { SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Installed_To_Inrepair },
+
+            #endregion
+
+            #region InService To
+
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InService, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum> { SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.In_Service_To_Not_Available },
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InService, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum>
+            {
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.In_Service_To_Not_Available,
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Not_Available_To_Available,
+            },
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InService, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.BuildPlanReady)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum> { SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.In_Service_To_Build_Plan_Ready },
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InService, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Installed)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum> { SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.In_Service_To_Installed },
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InService, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Disposed)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum>
+            {
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.In_Service_To_Not_Available,
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Not_Available_To_Disposed,
+            },
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InService, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InPlanning)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum> { SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.In_Service_To_In_Planning },
+
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InService, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum> { SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Inservice_To_Intransit },
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InService, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InRepair)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum> { SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Inservice_To_Inrepair },
+
+            #endregion
+
+            #region Disposed To
+
+            // Dispose cannot transition.
+
+            #endregion
+
+            #region InPlanning To
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InPlanning, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum>
+            {
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.In_Planning_To_Available,
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Available_To_Not_Available,
+            },
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InPlanning, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum> { SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.In_Planning_To_Available },
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InPlanning, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.BuildPlanReady)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum> { SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.In_Planning_To_Build_Plan_Ready },
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InPlanning, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InService)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum>
+            {
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.In_Planning_To_Build_Plan_Ready,
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Build_Plan_Ready_To_Installed,
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Installed_To_In_Service,
+            },
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InPlanning, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Disposed)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum>
+            {
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.In_Planning_To_Available,
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Available_To_Not_Available,
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Not_Available_To_Disposed,
+            },
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InPlanning, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Installed)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum>
+            {
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.In_Planning_To_Build_Plan_Ready,
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Build_Plan_Ready_To_Installed,
+            },
+
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InPlanning, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum> { SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Inplanning_To_Intransit },
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InPlanning, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InRepair)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum> { SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Inplanning_To_Inrepair },
+
+            #endregion
+
+            #region InTransit To
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum> { SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Intransit_To_Notavailable },
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum> { SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Intransit_To_Available },
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.BuildPlanReady)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum> { SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Intransit_To_Buildplanready },
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Installed)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum> { SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Intransit_To_Installed },
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Disposed)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum> { SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Intransit_To_Disposed },
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InPlanning)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum> { SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Intransit_To_Inplanning },
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InService)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum> { SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Intransit_To_Inservice },
+
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InService, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InRepair)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum> { SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Intransit_To_Inrepair },
+
+            #endregion
+
+            #region InRepair To
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InRepair, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum> { SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Inrepair_To_Notavailable },
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InRepair, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum> { SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Inrepair_To_Available },
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InRepair, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.BuildPlanReady)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum> { SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Inrepair_To_Buildplanready },
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InRepair, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Installed)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum> { SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Inrepair_To_Installed },
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InRepair, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Disposed)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum> { SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Inrepair_To_Disposed },
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InRepair, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InPlanning)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum> { SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Inrepair_To_Inplanning },
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InRepair, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InService)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum> { SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Inrepair_To_Inservice },
+
+            [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InRepair, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum> { SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Inrepair_To_Intransit },
+
+            #endregion
+        };
+    }
+}

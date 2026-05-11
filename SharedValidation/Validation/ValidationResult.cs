@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
 
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Exceptions;
 
@@ -9,6 +10,8 @@
     {
         private readonly Dictionary<string, string> _failReasons;
         private readonly Dictionary<string, string> _displayKey;
+        private readonly Dictionary<string, string> _warnings; // ✅ Add warnings
+        private readonly Dictionary<string, string> _warningsDisplayKey; // ✅ Add warnings display keys
 
         private bool _isValid;
 
@@ -19,6 +22,8 @@
         {
             _failReasons = new Dictionary<string, string>();
             _displayKey = new Dictionary<string, string>();
+            _warnings = new Dictionary<string, string>(); // ✅ Initialize
+            _warningsDisplayKey = new Dictionary<string, string>(); // ✅ Initialize
             _isValid = true;
         }
 
@@ -31,6 +36,16 @@
         }
 
         public IReadOnlyDictionary<string, string> FailureReasons => _failReasons;
+
+        /// <summary>
+        /// Gets the collection of warnings (non-blocking validation notices).
+        /// </summary>
+        public IReadOnlyDictionary<string, string> Warnings => _warnings;
+
+        /// <summary>
+        /// Indicates whether the result has any warnings.
+        /// </summary>
+        public bool HasWarnings => _warnings.Any();
 
         public bool TryGetFailReason<T>(T field, out string reason) where T : Enum
         {
@@ -65,6 +80,54 @@
         }
 
         /// <summary>
+        /// Adds a warning to the validation result.
+        /// Warnings don't affect IsValid, but provide notices to the user.
+        /// </summary>
+        public void AddWarning<T>(T field, string reason) where T : Enum
+        {
+            AddWarning(GetFieldToId(field), Convert.ToString(field), reason);
+        }
+
+        /// <summary>
+        /// Adds a warning to the validation result.
+        /// </summary>
+        public void AddWarning(string field, string displayFieldName, string reason)
+        {
+            if (_warnings.ContainsKey(field))
+            {
+                // For warnings, we can append instead of throwing
+                _warnings[field] = _warnings[field] + "; " + reason;
+            }
+            else
+            {
+                _warnings[field] = reason;
+                _warningsDisplayKey[field] = displayFieldName;
+            }
+        }
+
+        /// <summary>
+        /// Gets a warning message for a specific field.
+        /// </summary>
+        public bool TryGetWarning<T>(T field, out string warning) where T : Enum
+        {
+            return _warnings.TryGetValue(GetFieldToId(field), out warning);
+        }
+
+        /// <summary>
+        /// Gets the combined warning messages.
+        /// </summary>
+        public string GetCombinedWarnings(string separator)
+        {
+            List<string> warnings = new List<string>();
+            foreach (var entry in _warnings)
+            {
+                warnings.Add($"{_warningsDisplayKey[entry.Key]}: {entry.Value}");
+            }
+
+            return string.Join(separator, warnings);
+        }
+
+        /// <summary>
         /// Adds all failures from another ValidationResult into this instance.
         /// Skips duplicate fields to prevent exceptions.
         /// </summary>
@@ -85,6 +148,40 @@
                 }
             }
 
+            return this;
+        }
+
+        /// <summary>
+        /// Adds all warnings from another ValidationResult into this instance.
+        /// </summary>
+        public ValidationResult AddWarningsFrom(ValidationResult otherResult)
+        {
+            if (otherResult == null)
+            {
+                return this;
+            }
+
+            foreach (var entry in otherResult.Warnings)
+            {
+                if (!_warnings.ContainsKey(entry.Key))
+                {
+                    AddWarning(entry.Key, otherResult._warningsDisplayKey[entry.Key], entry.Value);
+                }
+            }
+
+            return this;
+        }
+
+        /// <summary>
+        /// Adds all failures and warnings from another ValidationResult into this instance.
+        /// Convenience method for merging both failures and warnings in one call.
+        /// </summary>
+        /// <param name="otherResult">The validation result to merge.</param>
+        /// <returns>This instance for fluent chaining.</returns>
+        public ValidationResult AddFrom(ValidationResult otherResult)
+        {
+            AddFailuresFrom(otherResult);
+            AddWarningsFrom(otherResult);
             return this;
         }
 
@@ -122,6 +219,7 @@
                 if (result != null)
                 {
                     combined.AddFailuresFrom(result);
+                    combined.AddWarningsFrom(result); // ✅ Add warnings
                 }
             }
 
@@ -178,11 +276,29 @@
             }
 
             /// <summary>
+            /// Adds a warning for a specific field.
+            /// </summary>
+            public Builder AddWarning<T>(T field, string reason) where T : Enum
+            {
+                _result.AddWarning(field, reason);
+                return this;
+            }
+
+            /// <summary>
             /// Merges failures from another ValidationResult.
             /// </summary>
             public Builder AddFailuresFrom(ValidationResult otherResult)
             {
                 _result.AddFailuresFrom(otherResult);
+                return this;
+            }
+
+            /// <summary>
+            /// Merges warnings from another ValidationResult.
+            /// </summary>
+            public Builder AddWarningsFrom(ValidationResult otherResult)
+            {
+                _result.AddWarningsFrom(otherResult);
                 return this;
             }
 
@@ -209,13 +325,14 @@
     {
         /// <summary>
         /// Combines two validation results into one.
+        /// Creates a new ValidationResult with failures and warnings from both.
         /// Used for pipeline-style validation composition.
         /// </summary>
         public static ValidationResult CombineWith(this ValidationResult first, ValidationResult second)
         {
             var combined = new ValidationResult();
-            combined.AddFailuresFrom(first);
-            combined.AddFailuresFrom(second);
+            combined.AddFrom(first);
+            combined.AddFrom(second);
             return combined;
         }
     }

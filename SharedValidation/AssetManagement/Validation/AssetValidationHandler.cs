@@ -3,6 +3,8 @@
     using System.Collections.Generic;
     using System.Linq;
 
+    using SharedMappers.DomIds;
+
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
@@ -38,6 +40,7 @@
             ContainerId,
             RoomId,
             PowerSupplyRackPosition,
+            DestinationLocation,
 
             // Destination Location
             DestinationParentAsset,
@@ -316,19 +319,13 @@
         /// <summary>
         /// Validates destination parent asset holder relationship (pure logic, no data access).
         /// </summary>
-        public static bool IsDestinationParentAssetHolderValid(Asset asset, AssetClass assetClass, out ValidationResult result)
+        public static bool IsDestinationParentAssetHolderValid(Asset asset, out ValidationResult result)
         {
             result = new ValidationResult();
 
             if (asset == null)
             {
                 result.AddFailReason(AssetValidationField.Asset, "Asset cannot be null.");
-                return result.IsValid;
-            }
-
-            if (assetClass == null)
-            {
-                result.AddFailReason(AssetValidationField.AssetClass, "Asset Class cannot be null.");
                 return result.IsValid;
             }
 
@@ -745,12 +742,74 @@
                 return false;
             }
 
-            return asset.State == SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available
-                || asset.State == SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InPlanning
-                || asset.State == SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.BuildPlanReady
-                || asset.State == SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InRepair
-                || asset.State == SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Disposed
-                || asset.State == SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit;
+            return asset.State == SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit;
+        }
+
+        #endregion
+
+        #region Destination Location Validation
+
+        /// <summary>
+        /// Validates Destination Location based on Asset state.
+        /// Rules:
+        /// - Destination Location is ONLY allowed when state is "In Transit"
+        /// - If defined in other states: WARNING (value will be discarded)
+        /// - If NOT defined in "In Transit" state: ERROR (mandatory)
+        /// </summary>
+        public static ValidationResult ValidateDestinationLocation(Asset asset)
+        {
+            var result = new ValidationResult();
+
+            if (asset == null)
+            {
+                result.AddFailReason(AssetValidationField.Asset, "Asset cannot be null.");
+                return result;
+            }
+
+            var state = asset.State;
+            var hasDestinationLocation = HasDestinationLocation(asset);
+
+            // Check if in "In Transit" state
+            bool isInTransit = state == SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit;
+
+            if (isInTransit)
+            {
+                // Rule: Destination Location is MANDATORY when In Transit
+                if (!hasDestinationLocation)
+                {
+                    result.AddFailReason(AssetValidationField.DestinationLocation,
+                        "Destination Location is mandatory when Asset is in 'In Transit' state.");
+                }
+            }
+            else
+            {
+                // Rule: Destination Location NOT allowed in other states
+                if (hasDestinationLocation)
+                {
+                    result.AddWarning(AssetValidationField.DestinationLocation,
+                        $"Destination Location is only applicable when Asset is in 'In Transit' state. Current state: '{state}'. The Destination Location value will be discarded.");
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Checks if the Asset has any Destination Location defined.
+        /// </summary>
+        private static bool HasDestinationLocation(Asset asset)
+        {
+            if (asset.DestinationLocation == null)
+            {
+                return false;
+            }
+
+            // Check if any destination location field is populated
+            return asset.DestinationLocation.ParentAsset.HasValue()  ||
+                   asset.DestinationLocation.RackId.HasValue()  ||
+                   asset.DestinationLocation.DeskId != default ||
+                   asset.DestinationLocation.ContainerId.HasValue() ||
+                   asset.DestinationLocation.RoomId.HasValue();
         }
 
         #endregion

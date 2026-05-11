@@ -71,6 +71,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\Models\PowerPort.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\Models\PrimaryPortRelation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\Models\RackRelation.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\State Management\StateMachine.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\Validation\AssetValidationCore.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\Validation\DataPortValidationCore.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\Validation\DataPortValidationHandler.cs" />
@@ -164,5 +165,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="$(MSBuildThisFileDirectory)SDM\Common\" />
+    <Folder Include="$(MSBuildThisFileDirectory)Validations\" />
   </ItemGroup>
 </Project>
