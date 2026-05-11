@@ -4,14 +4,16 @@
     using System.Collections.Generic;
     using System.Linq;
 
+    using SharedCommonLibrary.AssetManagement.State_Management;
+
     using SharedMappers.DomIds;
 
     using Skyline.DataMiner.SDM.AssetManagement.Common.Validation;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.Common.Services;
     using Skyline.DataMiner.SDM.Extensions;
-    using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
     using Skyline.DataMiner.SDM.FacilityManagement.Validation;
+    using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
     using static Skyline.DataMiner.SDM.AssetManagement.Common.Validation.AssetValidationHandler;
 
@@ -54,13 +56,22 @@
 
             // Business rules - collect all errors
             var businessRules = Validator<Asset>
-                .Create(ValidateLocationBusinessRules)
+                .Create(ValidateStateTransition)
+                .AndThen(ValidateLocationBusinessRules)
                 .AndThen(ValidateDestinationLocationBusinessRules)
                 .AndThen(ValidateLifecycle)
                 .AndThen(ValidateOwnership)
                 .AndThen(ValidateCollections);
 
             return assetClassValidation.AndThen(businessRules);
+        }
+
+        /// <summary>
+        /// Validates state transition using AssetValidationHandler.
+        /// </summary>
+        private ValidationResult ValidateStateTransition(Asset asset)
+        {
+            return AssetValidationHandler.ValidateStateTransition(asset);
         }
 
         /// <summary>

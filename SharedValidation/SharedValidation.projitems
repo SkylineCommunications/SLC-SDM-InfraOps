@@ -78,6 +78,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\Validation\DataPortValidator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\Validation\PlacementValidator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\PortTypeExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)validation\BulkValidationException.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)validation\ValidationResultExtensions.cs" />
     <Compile Include="..\SharedValidation\AssetManagement\Models\InfraopsReservation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\Models\InfraopsReservationBounderies.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AssetManagement\Models\TagsInfo.cs" />

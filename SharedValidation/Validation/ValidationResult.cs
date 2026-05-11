@@ -10,8 +10,8 @@
     {
         private readonly Dictionary<string, string> _failReasons;
         private readonly Dictionary<string, string> _displayKey;
-        private readonly Dictionary<string, string> _warnings; // ✅ Add warnings
-        private readonly Dictionary<string, string> _warningsDisplayKey; // ✅ Add warnings display keys
+        private readonly Dictionary<string, string> _warnings;
+        private readonly Dictionary<string, string> _warningsDisplayKey;
 
         private bool _isValid;
 
@@ -22,8 +22,8 @@
         {
             _failReasons = new Dictionary<string, string>();
             _displayKey = new Dictionary<string, string>();
-            _warnings = new Dictionary<string, string>(); // ✅ Initialize
-            _warningsDisplayKey = new Dictionary<string, string>(); // ✅ Initialize
+            _warnings = new Dictionary<string, string>(); 
+            _warningsDisplayKey = new Dictionary<string, string>();
             _isValid = true;
         }
 
@@ -219,7 +219,7 @@
                 if (result != null)
                 {
                     combined.AddFailuresFrom(result);
-                    combined.AddWarningsFrom(result); // ✅ Add warnings
+                    combined.AddWarningsFrom(result);
                 }
             }
 
@@ -318,22 +318,6 @@
             {
                 return _result;
             }
-        }
-    }
-
-    public static class ValidationResultExtensions
-    {
-        /// <summary>
-        /// Combines two validation results into one.
-        /// Creates a new ValidationResult with failures and warnings from both.
-        /// Used for pipeline-style validation composition.
-        /// </summary>
-        public static ValidationResult CombineWith(this ValidationResult first, ValidationResult second)
-        {
-            var combined = new ValidationResult();
-            combined.AddFrom(first);
-            combined.AddFrom(second);
-            return combined;
         }
     }
 }

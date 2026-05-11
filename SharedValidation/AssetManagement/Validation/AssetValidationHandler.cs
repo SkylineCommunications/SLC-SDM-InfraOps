@@ -3,9 +3,12 @@
     using System.Collections.Generic;
     using System.Linq;
 
+    using SharedCommonLibrary.AssetManagement.State_Management;
+
     using SharedMappers.DomIds;
 
     using Skyline.DataMiner.SDM.AssetManagement.Models;
+    using Skyline.DataMiner.SDM.AssetManagement.Validation;
     using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
@@ -789,6 +792,43 @@
                     result.AddWarning(AssetValidationField.DestinationLocation,
                         $"Destination Location is only applicable when Asset is in 'In Transit' state. Current state: '{state}'. The Destination Location value will be discarded.");
                 }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Validates if the state transition is allowed by the state machine.
+        /// </summary>
+        public static ValidationResult ValidateStateTransition(Asset asset)
+        {
+            var result = new ValidationResult();
+
+            // For new assets (not yet persisted), state transition validation doesn't apply
+            if (string.IsNullOrEmpty(asset.Identifier))
+            {
+                return result;
+            }
+
+            // If state hasn't changed, no transition to validate
+            if (!asset.StateField.Changed)
+            {
+                return result;
+            }
+
+            var fromState = asset.StateField.OriginalValue;
+            var toState = asset.StateField.Value;
+
+            if (fromState == toState)
+            {
+                return result;
+            }
+
+            if (!StateMachine.IsTransitionAllowed(fromState, toState))
+            {
+                result.AddFailReason(
+                    AssetClassValidationHandler.AssetClassValidationField.State,
+                    $"Invalid state transition: Cannot transition from '{fromState}' to '{toState}'. This transition is not allowed by the state machine.");
             }
 
             return result;

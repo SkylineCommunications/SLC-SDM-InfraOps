@@ -52,8 +52,9 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
         //    _assetRepository);
 
         // Wrap with middleware
-        Assets = _assetRepository.WithMiddleware(
-            new AssetValidationMiddleware(_assetValidator));
+        Assets = _assetRepository
+            .WithMiddleware(new AssetValidationMiddleware(_assetValidator))
+            .WithMiddleware(new AssetUpdateStateTransitionMiddleware(connection));
 
         AssetClasses = _assetClassRepository.WithMiddleware(
             new AssetClassValidationMiddleware(_assetClassValidator));

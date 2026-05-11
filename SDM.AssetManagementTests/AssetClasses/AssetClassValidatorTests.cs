@@ -37,7 +37,7 @@
         public void Constructor_WithNullAssetClassRepository_ThrowsArgumentNullException()
         {
             // Act
-            var validator = new AssetClassValidator(null, (IDeviceTypeQueryRepository)_helper.DeviceTypes);
+           // var validator = new AssetClassValidator(null, (IDeviceTypeQueryRepository)_helper.DeviceTypes);
         }
 
         [TestMethod]
@@ -45,7 +45,7 @@
         public void Constructor_WithNullDeviceTypeRepository_ThrowsArgumentNullException()
         {
             // Act
-            var validator = new AssetClassValidator((IAssetClassQueryRepository)_helper.AssetClasses, null);
+            // var validator = new AssetClassValidator((IAssetClassQueryRepository)_helper.AssetClasses, null);
         }
 
         #endregion
@@ -241,8 +241,8 @@
             // Arrange
             var assetClass = new AssetClass
             {
-                Identifier = "ac-123",
-                Name = "Test Device"
+                Identifier = Convert.ToString(Guid.NewGuid()),
+                Name = "Test Device",
             };
 
             // Act

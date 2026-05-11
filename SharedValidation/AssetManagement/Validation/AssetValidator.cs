@@ -4,6 +4,11 @@
     using System.Collections.Generic;
     using System.Linq;
 
+    using SharedCommonLibrary.AssetManagement.State_Management;
+
+    using SharedMappers.DomIds;
+
+    using Skyline.DataMiner.Net.Apps.DataMinerObjectModel.Status;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.AssetManagement.Repositories;
     using Skyline.DataMiner.SDM.Common.Services;

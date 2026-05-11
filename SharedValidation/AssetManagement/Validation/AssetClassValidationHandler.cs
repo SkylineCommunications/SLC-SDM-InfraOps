@@ -15,6 +15,7 @@
     {
         public enum AssetClassValidationField
         {
+            State,
             Name,
             AssetClass,
             DeviceTypeId,

@@ -10,6 +10,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     using System.Collections.Generic;
     using System.Linq;
 
+    using SharedCommonLibrary.AssetManagement.State_Management;
+
     using SharedMappers.DomIds;
 
     using Skyline.DataMiner.Net;
@@ -786,7 +788,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
         private DomInstance ToInstance(Asset obj)
         {
+            bool isNew = false;
             Guid id = default(Guid);
+
             if (!String.IsNullOrEmpty(obj.Identifier))
             {
                 id = Guid.Parse(obj.Identifier);
@@ -794,6 +798,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             else
             {
                 id = Guid.NewGuid();
+                isNew = true;
             }
 
             var instance = new DomInstance
@@ -804,6 +809,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     ModuleId = Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.ModuleId
                 }
             };
+
+            if (isNew)
+            {
+                instance.StatusId = SlcAsset_Management.Behaviors.Asset_Behavior.Statuses.ToValue(obj.State);
+            }
+
             var _assetproperties = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.SectionDefinitionId);
             if (obj.AssetID != default)
             {
