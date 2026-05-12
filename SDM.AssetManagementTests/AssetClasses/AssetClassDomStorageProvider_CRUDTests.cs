@@ -28,8 +28,7 @@
             referenceAssetClass = new AssetClass
             {
                 Identifier = id.ToString(),
-                Id = id,
-                Name = "Reference Class",
+               Name = "Reference Class",
                 DeviceTypeId = new SdmObjectReference<DeviceType>(Guid.NewGuid().ToString()),
                 Manufacturer = Guid.NewGuid(),
                 Lifecycle = new AssetClassLifecycle
@@ -130,7 +129,6 @@
             var updatedAssetClass = new AssetClass
             {
                 Identifier = referenceAssetClass.Identifier,
-                Id = referenceAssetClass.Id,
                 Name = "Updated Class Name",
                 DeviceTypeId = new SdmObjectReference<DeviceType>(Guid.NewGuid().ToString()),
                 Manufacturer = Guid.NewGuid(),
@@ -223,14 +221,13 @@
             helper.AssetClasses.Delete(assetClassToDelete);
 
             helper.AssetClasses.Count(new TRUEFilterElement<AssetClass>()).Should().Be(DemoData.AssetClasses.Count - 1);
-            helper.AssetClasses.Count(AssetClassExposers.Identifier.Equal(assetClassToDelete.Id.ToString())).Should().Be(0);
+            helper.AssetClasses.Count(AssetClassExposers.Identifier.Equal(assetClassToDelete.Identifier)).Should().Be(0);
         }
 
         private static void AssertAssetClassUpdateDifferences(AssetClass original, AssetClass updated)
         {
             using (new AssertionScope())
             {
-                updated.Id.Should().Be(original.Id);
                 updated.Name.Should().NotBe(original.Name);
                 updated.Name.Should().Be("Updated Class Name");
                 updated.Description.Should().NotBe(original.Description);

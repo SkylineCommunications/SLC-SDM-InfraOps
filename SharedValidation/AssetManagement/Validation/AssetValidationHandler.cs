@@ -132,10 +132,10 @@
             bool[] locationExists = new bool[]
             {
                 asset.Location?.ParentAsset != null && asset.Location.ParentAsset.HasValue(),
-                asset.Location?.RackId != default,
-                asset.Location?.DeskId != default,
+                asset.Location?.RackId != default && asset.Location.RackId.HasValue(),
+                 asset.Location?.DeskId != null && asset.Location.DeskId != default && asset.Location.DeskId != System.Guid.Empty,
                 asset.Location?.ContainerId != null && asset.Location.ContainerId.HasValue(),
-                asset.Location?.RoomId != default,
+                asset.Location?.RoomId != default && asset.Location.RoomId.HasValue(),
             };
 
             if (locationExists.Count(entry => entry) > 1)

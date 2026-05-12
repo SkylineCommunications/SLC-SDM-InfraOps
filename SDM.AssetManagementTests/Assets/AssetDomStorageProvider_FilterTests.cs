@@ -74,7 +74,7 @@
 			var randomIndex = random.Next(0, 9);
 
 			var assetClass = DemoData.AssetClasses[randomIndex];
-			referenceAsset.AssetClassId = new SdmObjectReference<AssetClass>(assetClass.Id.ToString());
+			referenceAsset.AssetClassId = new SdmObjectReference<AssetClass>(assetClass.Identifier);
 
 			helper.PopulateAssets([referenceAsset]);
 			Debug.WriteLine(helper.Assets.Count(new TRUEFilterElement<Asset>()));
@@ -91,7 +91,7 @@
 				asset.Name.Should().Be(referenceAsset.Name);
 				asset.AssetID.Should().Be(referenceAsset.AssetID);
 				asset.AssetClassId.Identifier.Should().NotBe(Guid.Empty.ToString());
-				asset.AssetClassId.Identifier.Should().Be(assetClass.Id.ToString());
+				asset.AssetClassId.Identifier.Should().Be(assetClass.Identifier);
 			}
 		}
 

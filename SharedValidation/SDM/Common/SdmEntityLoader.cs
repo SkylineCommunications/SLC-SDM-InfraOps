@@ -272,13 +272,19 @@ namespace Skyline.DataMiner.SDM.Common.Services
 
             FilterElement<Asset> filter = AssetExposers.AssetName.Equal(name);
 
+            // Filter out null/empty identifiers (happens with new, unsaved entities)
             if (exceptIdentifiers != null && exceptIdentifiers.Any())
             {
-                var clauses = exceptIdentifiers
-                    .Select(id => AssetExposers.Identifier.NotEqual(id))
-                    .Cast<FilterElement<Asset>>()
-                    .ToArray();
-                filter = filter.AND(new ANDFilterElement<Asset>(clauses));
+                var validIdentifiers = exceptIdentifiers.Where(id => !string.IsNullOrWhiteSpace(id)).ToList();
+                
+                if (validIdentifiers.Any())
+                {
+                    var clauses = validIdentifiers
+                        .Select(id => AssetExposers.Identifier.NotEqual(id))
+                        .Cast<FilterElement<Asset>>()
+                        .ToArray();
+                    filter = filter.AND(new ANDFilterElement<Asset>(clauses));
+                }
             }
 
             return _assetRepository.Count(filter);
@@ -296,13 +302,19 @@ namespace Skyline.DataMiner.SDM.Common.Services
 
             FilterElement<Asset> filter = AssetExposers.AssetId.Equal(assetId);
 
+            // Filter out null/empty identifiers (happens with new, unsaved entities)
             if (exceptIdentifiers != null && exceptIdentifiers.Any())
             {
-                var clauses = exceptIdentifiers
-                    .Select(id => AssetExposers.Identifier.NotEqual(id))
-                    .Cast<FilterElement<Asset>>()
-                    .ToArray();
-                filter = filter.AND(new ANDFilterElement<Asset>(clauses));
+                var validIdentifiers = exceptIdentifiers.Where(id => !string.IsNullOrWhiteSpace(id)).ToList();
+                
+                if (validIdentifiers.Any())
+                {
+                    var clauses = validIdentifiers
+                        .Select(id => AssetExposers.Identifier.NotEqual(id))
+                        .Cast<FilterElement<Asset>>()
+                        .ToArray();
+                    filter = filter.AND(new ANDFilterElement<Asset>(clauses));
+                }
             }
 
             return _assetRepository.Count(filter);
@@ -327,17 +339,54 @@ namespace Skyline.DataMiner.SDM.Common.Services
             FilterElement<Asset> filter = AssetExposers.SerialNumber.Equal(serialNumber)
                 .AND(AssetExposers.AssetClass.Equal(assetClassId));
 
+            // Filter out null/empty identifiers (happens with new, unsaved entities)
             if (exceptIdentifiers != null && exceptIdentifiers.Any())
             {
-                var clauses = exceptIdentifiers
-                    .Select(id => AssetExposers.Identifier.NotEqual(id))
-                    .Cast<FilterElement<Asset>>()
-                    .ToArray();
-                filter = filter.AND(new ANDFilterElement<Asset>(clauses));
+                var validIdentifiers = exceptIdentifiers.Where(id => !string.IsNullOrWhiteSpace(id)).ToList();
+                
+                if (validIdentifiers.Any())
+                {
+                    var clauses = validIdentifiers
+                        .Select(id => AssetExposers.Identifier.NotEqual(id))
+                        .Cast<FilterElement<Asset>>()
+                        .ToArray();
+                    filter = filter.AND(new ANDFilterElement<Asset>(clauses));
+                }
             }
 
             return _assetRepository.Count(filter);
         }
+
+        /// <summary>
+        /// Counts AssetClasses with the specified name, excluding given identifiers.
+        /// </summary>
+        public long CountAssetClassesByName(string name, List<string> exceptIdentifiers = null)
+        {
+            if (_assetClassRepository == null || string.IsNullOrWhiteSpace(name))
+            {
+                return 0;
+            }
+
+            FilterElement<AssetClass> filter = AssetClassExposers.DeviceName.Equal(name);
+
+            // Filter out null/empty identifiers (happens with new, unsaved entities)
+            if (exceptIdentifiers != null && exceptIdentifiers.Any())
+            {
+                var validIdentifiers = exceptIdentifiers.Where(id => !string.IsNullOrWhiteSpace(id)).ToList();
+                
+                if (validIdentifiers.Any())
+                {
+                    var clauses = validIdentifiers
+                        .Select(id => AssetClassExposers.Identifier.NotEqual(id))
+                        .Cast<FilterElement<AssetClass>>()
+                        .ToArray();
+                    filter = filter.AND(new ANDFilterElement<AssetClass>(clauses));
+                }
+            }
+
+            return _assetClassRepository.Count(filter);
+        }
+
 
         /// <summary>
         /// Finds assets in a specific rack, excluding specified asset identifiers.
@@ -412,31 +461,6 @@ namespace Skyline.DataMiner.SDM.Common.Services
                 throw new InvalidOperationException($"Failed to find child assets: {ex.Message}", ex);
             }
         }
-
-        /// <summary>
-        /// Counts AssetClasses with the specified name, excluding given identifiers.
-        /// </summary>
-        public long CountAssetClassesByName(string name, List<string> exceptIdentifiers = null)
-        {
-            if (_assetClassRepository == null || string.IsNullOrWhiteSpace(name))
-            {
-                return 0;
-            }
-
-            FilterElement<AssetClass> filter = AssetClassExposers.DeviceName.Equal(name);
-
-            if (exceptIdentifiers != null && exceptIdentifiers.Any())
-            {
-                var clauses = exceptIdentifiers
-                    .Select(id => AssetClassExposers.Identifier.NotEqual(id))
-                    .Cast<FilterElement<AssetClass>>()
-                    .ToArray();
-                filter = filter.AND(new ANDFilterElement<AssetClass>(clauses));
-            }
-
-            return _assetClassRepository.Count(filter);
-        }
-
 
         /// <summary>
         /// Finds reservations for a specific rack.

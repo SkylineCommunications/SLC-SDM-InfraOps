@@ -89,7 +89,7 @@
                 AssetsBeingValidated = assets
             };
 
-            var assetIds = assets.Select(a => a.Identifier).ToList();
+            var assetIds = assets.Where(a => !String.IsNullOrWhiteSpace(a.Identifier)).Select(a => a.Identifier).ToList();
 
             // Collect all unique parent asset IDs
             var parentAssetIds = new HashSet<SdmObjectReference<Asset>>();
@@ -99,8 +99,6 @@
                 {
                     parentAssetIds.Add(asset.Location.ParentAsset);
                 }
-
-                //todo handle destination parent assets when validating 
             }
 
             // Load all parent assets
@@ -123,12 +121,7 @@
             {
                 if (asset.Location?.RackId != default)
                 {
-                    rackIds.Add(asset.Location.RackId.ToString());
-                }
-
-                if (asset.DestinationLocation?.RackId != default)
-                {
-                    rackIds.Add(asset.DestinationLocation.RackId.ToString());
+                    rackIds.Add(asset.Location.RackId.Identifier);
                 }
             }
 
@@ -143,6 +136,10 @@
                     // Load existing assets in rack (excluding batch)
                     var assetsInRack = _entityLoader.FindAssetsInRack(rackId, assetIds);
                     context.ExistingAssetsInRacks[rackId] = assetsInRack;
+                }
+                else
+                {
+                    throw new Exception($"Rack with ID '{rackId}' not found during context building.");
                 }
             }
 

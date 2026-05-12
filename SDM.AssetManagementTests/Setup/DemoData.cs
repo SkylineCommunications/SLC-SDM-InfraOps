@@ -88,6 +88,14 @@
             CreatePowerPort(9),
         ];
 
+        // Facilities (Racks, in this case) - no direct references in Assets or AssetClasses yet
+        public static readonly List<Rack> Racks =
+        [
+            CreateRack("RACK-001", "Main Server Rack", 42),
+            CreateRack("RACK-002", "Network Equipment Rack", 42),
+            CreateRack("RACK-003", "Storage Rack", 42),
+        ];
+
         #region Asset Port Instances (DataPort, PowerPort)
 
         private static PowerPort CreatePowerPort(int i)
@@ -202,6 +210,11 @@
             string macAddress)
         {
             var assetId = Guid.NewGuid();
+            
+            // Use one of the defined racks (cycle through them)
+            var rackIndex = (orderNo - 1) % Racks.Count;
+            var selectedRack = Racks[rackIndex];
+            
             return new Asset
             {
                 State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available,
@@ -215,12 +228,8 @@
                 MacAddress = macAddress,
                 Location = new AssetLocation
                 {
-                    ParentAsset = new SdmObjectReference<Asset>(assetId.ToString()),
-                    RoomId = new SdmObjectReference<Room>(Convert.ToString(Guid.NewGuid())),
-                    RackId = new SdmObjectReference<Rack>(Convert.ToString(Guid.NewGuid())),
+                    RackId = new SdmObjectReference<Rack>(selectedRack.Identifier),
                     RackPosition = orderNo,
-                    ContainerId = new SdmObjectReference<Facility>(Convert.ToString(Guid.NewGuid())),
-                    DeskId = Guid.NewGuid(),
                     Side = SlcAsset_Management.Enums.SideEnum.Back,
                 },
                 PurchaseDate = DateTime.UtcNow.AddYears(-orderNo),
@@ -275,11 +284,8 @@
             double typicalPowerConsumption,
             double maximumPowerConsumption)
         {
-            var newId = Guid.NewGuid();
             return new AssetClass
             {
-                Identifier = newId.ToString(),
-                Id = newId,
                 Name = deviceName,
                 DeviceTypeId = new SdmObjectReference<DeviceType>(deviceTypeIdentifier),
                 Description = deviceDescription,
@@ -330,6 +336,20 @@
                 {
                     Identifier = Guid.NewGuid().ToString(),
                     Tags = tagsList,
+                },
+            };
+        }
+
+        private static Rack CreateRack(string rackId, string name, int heightu)
+        {
+            return new Rack
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                RackId = rackId,
+                Name = name,
+                Capacity = new RackCapacity
+                {
+                     MaximumRackCapacity = heightu,
                 },
             };
         }

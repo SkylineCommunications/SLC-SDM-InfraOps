@@ -48,9 +48,6 @@
             ResetChangeTracking();
         }
 
-        [JsonIgnore]
-        public Guid Id { get; set; }
-
         // PUBLIC API: Simple types (consumers see these)
         public string Name
         {
@@ -165,6 +162,12 @@
             get => HoldersField.Value ?? new List<AssetHolder>();
             set => HoldersField.Value = value;
         }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the entity has not yet been persisted or saved.
+        /// </summary>
+        [JsonIgnore]
+        public bool IsNew { get; set; } = true;
 
         // INTERNAL: Change tracking fields (validation handler uses these)
         [JsonIgnore]

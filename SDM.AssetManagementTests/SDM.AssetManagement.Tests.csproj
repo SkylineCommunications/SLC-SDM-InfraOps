@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SDM.AssetManagement.Common\SDM.AssetManagement.Common.csproj" />
+    <ProjectReference Include="..\SDM.FacilityManagement.Common\SDM.FacilityManagement.Common.csproj" />
   </ItemGroup>
 
   <ItemGroup>

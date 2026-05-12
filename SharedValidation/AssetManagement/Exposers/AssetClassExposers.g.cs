@@ -22,10 +22,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 	public static partial class AssetClassExposers
 	{
 		public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, string> Identifier = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, string>((obj) => obj.Identifier, "Identifier");
-		public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, System.Guid> Id = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, System.Guid>((obj) => obj.Id, "Id");
-		public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, string> DeviceName = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, string>((obj) => obj.Name, "DeviceName");
+		public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, string> DeviceName = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, string>((obj) => obj.Name, "Name");
 		public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType>> DeviceTypeId = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType>>((obj) => obj.DeviceTypeId, "DeviceTypeId");
-		public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, string> DeviceDescription = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, string>((obj) => obj.Description, "DeviceDescription");
+		public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, string> DeviceDescription = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, string>((obj) => obj.Description, "Description");
 		public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, System.Guid> ManufacturerId = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, System.Guid>((obj) => obj.Manufacturer, "Manufacturer");
 		public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, double> Depth = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, double>((obj) => obj.Depth, "Depth");
 		public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, double> Height = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, double>((obj) => obj.Height, "Height");

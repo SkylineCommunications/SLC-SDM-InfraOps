@@ -9,10 +9,13 @@
 		{
 			Connection = connection;
 			Facilities = new FacilityDomRepository(connection);
+            Racks = new RackDomRepository(connection);
 		}
 
 		public IConnection Connection { get; }
 
 		public IBulkRepository<Facility> Facilities { get; }
-	}
+
+        public IBulkRepository<Rack> Racks { get; }
+    }
 }

@@ -414,13 +414,15 @@
 
             // Act - Populate in dependency order
             helper
+                .PopulateRacks()            // NEW: Must be before Assets
                 .PopulateDeviceTypes()      // Must be first (no dependencies)
                 .PopulateAssetClasses()     // Depends on DeviceTypes
-                .PopulateAssets()           // Depends on AssetClasses
+                .PopulateAssets()           // Depends on AssetClasses AND Racks
                 .PopulateDataPorts()        // Depends on Assets
                 .PopulatePowerPorts();      // Depends on Assets
 
             // Assert
+            Assert.IsTrue(helper.DeviceTypes.Count(new TRUEFilterElement<DeviceType>()) > 0);
             Assert.IsTrue(helper.DeviceTypes.Count(new TRUEFilterElement<DeviceType>()) > 0);
             Assert.IsTrue(helper.AssetClasses.Count(new TRUEFilterElement<AssetClass>()) > 0);
             Assert.IsTrue(helper.Assets.Count(new TRUEFilterElement<Asset>()) > 0);
