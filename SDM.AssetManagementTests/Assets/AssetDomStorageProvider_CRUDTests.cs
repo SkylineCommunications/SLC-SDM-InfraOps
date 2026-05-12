@@ -8,10 +8,9 @@
     using SDM.AssetManagement.Tests.Setup;
 
     using SharedMappers.DomIds;
-    //using Skyline.DataMiner.Analytics.GenericInterface.JoinFilter;
+
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
-    using Skyline.DataMiner.SDM.AssetManagement;
     using Skyline.DataMiner.SDM.AssetManagement.Helpers;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;

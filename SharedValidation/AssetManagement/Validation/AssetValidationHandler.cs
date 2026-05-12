@@ -278,7 +278,7 @@
                     asset.Location.RoomIdField.Changed ||
                     asset.Location.PowerSupplyRackPositionField.Changed)
                 {
-                    result.AddFailReason(AssetValidationField.Asset, "Cannot change Location in current State.");
+                    result.AddFailReason(AssetValidationField.Asset, $"Cannot change Location in current State '{asset.StateField.OriginalValue}'.");
                 }
             }
 
@@ -727,12 +727,17 @@
                 return false;
             }
 
-            return asset.State == SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available
-                || asset.State == SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InPlanning
-                || asset.State == SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.BuildPlanReady
-                || asset.State == SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InRepair
-                || asset.State == SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Disposed
-                || asset.State == SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit;
+            if (asset.IsNew)
+            {
+                return true;
+            }
+
+            return asset.StateField.OriginalValue == SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available
+                || asset.StateField.OriginalValue == SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InPlanning
+                || asset.StateField.OriginalValue == SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.BuildPlanReady
+                || asset.StateField.OriginalValue == SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InRepair
+                || asset.StateField.OriginalValue == SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Disposed
+                || asset.StateField.OriginalValue == SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit;
         }
 
         /// <summary>

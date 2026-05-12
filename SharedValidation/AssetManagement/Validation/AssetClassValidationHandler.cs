@@ -105,27 +105,6 @@
                 AssetClassValidationField.MaxPowerConsumption,
                 out result);
         }
-
-        //public static bool IsRackAttachable(AssetClass assetClass, out ValidationResult result)
-        //{
-        //    result = new ValidationResult();
-
-        //    if (assetClass == null)
-        //    {
-        //        result.AddFailReason(AssetClassValidationField.AssetClass, "Asset Class must be provided.");
-        //        return result.IsValid;
-        //    }
-
-        //    if (assetClass.Height <= 0)
-        //    {
-        //        result.AddFailReason(AssetClassValidationField.AssetClass, "Asset Class must have a defined height higher than 0.");
-        //        return result.IsValid;
-        //    }
-
-        //    result.AddFailuresFrom(DeviceTypeValidationHandler.IsRackAttacheable(assetClass.DeviceType));
-        //    return result.IsValid;
-        //}
-
         #endregion
 
         #region Data Ports
@@ -149,15 +128,15 @@
 
             foreach (var port in assetClass.DataPorts)
             {
-                if (port.DataPortInfo.PortNumber < 0)
+                if (port.PortNumber < 0)
                 {
                     result.AddFailReason(AssetClassValidationField.DataPortNumber, "Data Port Number cannot be negative.");
                     return result;
                 }
 
-                if (!seenPorts.Add(port.DataPortInfo.PortNumber))
+                if (!seenPorts.Add(port.PortNumber))
                 {
-                    result.AddFailReason(AssetClassValidationField.DataPortNumber, $"Multiple Data Ports have the same Port Number '{port.DataPortInfo.PortNumber}'.");
+                    result.AddFailReason(AssetClassValidationField.DataPortNumber, $"Multiple Data Ports have the same Port Number '{port.PortNumber}'.");
                     return result;
                 }
             }
@@ -188,15 +167,15 @@
 
             foreach (var port in assetClass.PowerPorts)
             {
-                if (port.PowerPortInfo.PortNumber < 0)
+                if (port.PortNumber < 0)
                 {
                     result.AddFailReason(AssetClassValidationField.PowerPortNumber, "Power Port Number cannot be negative.");
                     return result;
                 }
 
-                if (!seenPorts.Add(port.PowerPortInfo.PortNumber))
+                if (!seenPorts.Add(port.PortNumber))
                 {
-                    result.AddFailReason(AssetClassValidationField.PowerPortNumber, $"Multiple Power Ports have the same Port Number '{port.PowerPortInfo.PortNumber}'.");
+                    result.AddFailReason(AssetClassValidationField.PowerPortNumber, $"Multiple Power Ports have the same Port Number '{port.PortNumber}'.");
                     return result;
                 }
             }

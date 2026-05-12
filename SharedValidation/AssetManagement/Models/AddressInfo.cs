@@ -1,15 +1,56 @@
 ﻿using System;
+
+using Newtonsoft.Json;
+
+using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
+
 namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
-    public class AddressInfo : IEquatable<AddressInfo>
+    public class AddressInfo : ChangeTrackingBase, IEquatable<AddressInfo>
     {
-        public string Ipv4Address { get; set; }
+        public string Ipv4Address
+        {
+            get => Ipv4AddressField.Value;
+            set => Ipv4AddressField.Value = value;
+        }
 
-        public string Ipv6Address { get; set; }
+        public string Ipv6Address
+        {
+            get => Ipv6AddressField.Value;
+            set => Ipv6AddressField.Value = value;
+        }
 
-        public string Hostname { get; set; }
+        public string Hostname
+        {
+            get => HostnameField.Value;
+            set => HostnameField.Value = value;
+        }
 
-        public bool DNS { get; set; }
+        public bool DNS
+        {
+            get => DNSField.Value;
+            set => DNSField.Value = value;
+        }
+
+        [JsonIgnore]
+        internal IChangeTrackingField<string> Ipv4AddressField => FieldHandler.GetOrCreateField(
+            nameof(Ipv4Address),
+            () => new ChangeTrackingStringField(null));
+
+        [JsonIgnore]
+        internal IChangeTrackingField<string> Ipv6AddressField => FieldHandler.GetOrCreateField(
+            nameof(Ipv6Address),
+            () => new ChangeTrackingStringField(null));
+
+        [JsonIgnore]
+        internal IChangeTrackingField<string> HostnameField => FieldHandler.GetOrCreateField(
+            nameof(Hostname),
+            () => new ChangeTrackingStringField(null));
+
+        [JsonIgnore]
+        internal IChangeTrackingField<bool> DNSField => FieldHandler.GetOrCreateField(
+            nameof(DNS),
+            () => new ChangeTrackingField<bool>(false));
 
         public static bool operator ==(AddressInfo left, AddressInfo right)
         {

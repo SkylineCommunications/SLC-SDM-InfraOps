@@ -2,19 +2,25 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Runtime.Serialization;
-
     using Newtonsoft.Json;
-
     using SharedMappers.DomIds;
-
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
-    public class Asset : SdmObject<Asset>
+    public class Asset : SdmObject<Asset>, IChangeTracking
     {
         [JsonIgnore]
         private ChangeTrackingFieldHandler _fieldHandler;
+        [JsonIgnore]
+        private AssetLocation _location;
+        [JsonIgnore]
+        private AssetLocation _destinationLocation;
+        [JsonIgnore]
+        private AssetOwnership _ownership;
+        [JsonIgnore]
+        private AssetCustody _custody;
 
         public Asset()
         {
@@ -42,6 +48,22 @@
 
         [JsonIgnore]
         public Guid Id { get; set; }
+
+        [JsonIgnore]
+        public bool Changed =>
+            FieldHandler.HasChanges ||
+            _location?.Changed == true ||
+            _destinationLocation?.Changed == true ||
+            _ownership?.Changed == true ||
+            _custody?.Changed == true ||
+            HoldersField?.Changed == true ||
+            ElementsField?.Changed == true;
+
+        /// <summary>
+        /// Gets a value indicating whether the current object has not been assigned an identifier.
+        /// </summary>
+        [JsonIgnore]
+        public bool IsNew => String.IsNullOrWhiteSpace(Identifier);
 
         public SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum State
         {
@@ -81,7 +103,6 @@
             set => DescriptionField.Value = value;
         }
 
-
         public string FW_OS
         {
             get => FwOSField.Value;
@@ -113,9 +134,19 @@
         #endregion
 
         #region Location Properties
-        public AssetLocation Location { get; set; } = new AssetLocation();
 
-        public AssetLocation DestinationLocation { get; set; } = new AssetLocation();
+        public AssetLocation Location
+        {
+            get => _location ?? (_location = new AssetLocation());
+            set => _location = value ?? new AssetLocation();
+        }
+
+        public AssetLocation DestinationLocation
+        {
+            get => _destinationLocation ?? (_destinationLocation = new AssetLocation());
+            set => _destinationLocation = value ?? new AssetLocation();
+        }
+
         #endregion
 
         #region Lifecycle Properties
@@ -172,9 +203,17 @@
 
         #region Ownership Properties
 
-        public AssetOwnership Ownership { get; set; } = new AssetOwnership();
+        public AssetOwnership Ownership
+        {
+            get => _ownership ?? (_ownership = new AssetOwnership());
+            set => _ownership = value ?? new AssetOwnership();
+        }
 
-        public AssetCustody Custody { get; set; } = new AssetCustody();
+        public AssetCustody Custody
+        {
+            get => _custody ?? (_custody = new AssetCustody());
+            set => _custody = value ?? new AssetCustody();
+        }
 
         #endregion
 
@@ -233,8 +272,8 @@
 
         [JsonIgnore]
         internal IChangeTrackingField<long> OperationalFlagsField => FieldHandler.GetOrCreateField(
-        nameof(OperationalFlags),
-        () => new ChangeTrackingField<long>(0));
+            nameof(OperationalFlags),
+            () => new ChangeTrackingField<long>(0));
 
         #endregion
 
@@ -244,20 +283,6 @@
         internal IChangeTrackingField<string> MacAddressField => FieldHandler.GetOrCreateField(
             nameof(MacAddress),
             () => new ChangeTrackingStringField(null));
-
-        #endregion
-
-        #region Location Tracking Fields
-
-        [JsonIgnore]
-        internal IChangeTrackingField<AssetLocation> LocationField => FieldHandler.GetOrCreateField(
-            nameof(Location),
-            () => new ChangeTrackingField<AssetLocation>(new AssetLocation()));
-
-        [JsonIgnore]
-        internal IChangeTrackingField<AssetLocation> DestinationLocationField => FieldHandler.GetOrCreateField(
-            nameof(DestinationLocation),
-            () => new ChangeTrackingField<AssetLocation>(new AssetLocation()));
 
         #endregion
 
@@ -305,8 +330,8 @@
 
         [JsonIgnore]
         internal IChangeTrackingField<SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum> StateField => FieldHandler.GetOrCreateField(
-            nameof(State),      
-            () => new ChangeTrackingField<SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum>(default));
+            nameof(State),
+            () => new ChangeTrackingField<SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum>(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable));
 
         #endregion
 
@@ -327,6 +352,27 @@
         public void ResetChangeTracking()
         {
             FieldHandler?.ApplyChanges();
+            _location?.ResetChangeTracking();
+            _destinationLocation?.ResetChangeTracking();
+            _ownership?.ResetChangeTracking();
+            _custody?.ResetChangeTracking();
+
+            // Cascade to list items if they implement IChangeTracking
+            if (Holders != null)
+            {
+                foreach (var holder in Holders.OfType<IChangeTracking>())
+                {
+                    holder?.ResetChangeTracking();
+                }
+            }
+
+            if (ElementLinks != null)
+            {
+                foreach (var link in ElementLinks.OfType<IChangeTracking>())
+                {
+                    link?.ResetChangeTracking();
+                }
+            }
         }
     }
 }

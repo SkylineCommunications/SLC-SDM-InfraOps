@@ -534,10 +534,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			var _tagsinfoSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.TagsInfo.SectionDefinitionId));
 			if (_tagsinfoSection != default)
 			{
-				obj.TagsInfo = new Skyline.DataMiner.SDM.AssetManagement.Models.TagsInfo()
-				{
-					Identifier = _tagsinfoSection.ID.Id.ToString()
-				};
+                obj.TagsInfo = new Skyline.DataMiner.SDM.AssetManagement.Models.TagsInfo();
 
 				var _tags = _tagsinfoSection.GetListValue<int>(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.TagsInfo.Tags);
 				if (_tags != null)
@@ -549,10 +546,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			var _hierarchyinfoSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.HierarchyInfo.SectionDefinitionId));
 			if (_hierarchyinfoSection != default)
 			{
-				obj.HierarchyInfo = new Skyline.DataMiner.SDM.AssetManagement.Models.HierarchyInfo()
-				{
-					Identifier = _hierarchyinfoSection.ID.Id.ToString()
-				};
+                obj.HierarchyInfo = new Skyline.DataMiner.SDM.AssetManagement.Models.HierarchyInfo();
+
 				var _hierarchyinfohierarchyrole = _hierarchyinfoSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.HierarchyInfo.HierarchyRole);
 				if (_hierarchyinfohierarchyrole != null)
 				{
@@ -629,10 +624,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
 			if (obj.HierarchyInfo != null)
 			{
-				var _hierarchyinfo = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.HierarchyInfo.SectionDefinitionId)
-				{
-					ID = new SectionID(System.Guid.Parse(obj.HierarchyInfo.Identifier))
-				};
+                var _hierarchyinfo = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.HierarchyInfo.SectionDefinitionId);
+
 				_hierarchyinfo.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.HierarchyInfo.HierarchyRole, ToDomHierarchyRole(obj.HierarchyInfo.HierarchyRole));
 				instance.Sections.Add(_hierarchyinfo);
 			}

@@ -36,7 +36,6 @@
 				},
 				HierarchyInfo = new HierarchyInfo
 				{
-					Identifier = Guid.NewGuid().ToString(),
 					HierarchyRole = SlcAsset_Management.Enums.HierarchyRoleEnum.SubCard,
 				},
 			};
@@ -79,7 +78,6 @@
 				},
 				HierarchyInfo = new HierarchyInfo
 				{
-					Identifier = referenceDeviceType.HierarchyInfo.Identifier,
 					HierarchyRole = SlcAsset_Management.Enums.HierarchyRoleEnum.Chassis,
 				},
 			};

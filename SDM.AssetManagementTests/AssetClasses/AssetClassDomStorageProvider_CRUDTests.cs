@@ -14,6 +14,7 @@
     using Skyline.DataMiner.SDM.AssetManagement;
     using Skyline.DataMiner.SDM.AssetManagement.Helpers;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
+    using Skyline.DataMiner.SDM.AssetManagement.Repositories;
 
     [TestClass]
     public partial class AssetClassDomStorageProvider
@@ -48,25 +49,19 @@
                 MaximumPowerConsumption = 100.0,
                 TypicalPowerConsumption = 80.0,
                 PowerSupply = SlcAsset_Management.Enums.PowerSupplyEnum.AC,
-                DataPorts = new List<DataPort>
+                DataPorts = new List<DataPortInfo>
                 {
-                    new DataPort{
-
-                       DataPortInfo = new DataPortInfo
+                    new DataPortInfo
                     {
                         PortNumber = 1,
                         Name = "Port1",
                         PortExposure = SlcAsset_Management.Enums.PortExposureEnum.Front,
                         OutputType = SlcAsset_Management.Enums.Outputtype.Out,
                         Label = "Label1",
-                    }},
+                    },
                 },
-                PowerPorts = new List<PowerPort>
+                PowerPorts = new List<PowerPortInfo>
                 {
-                    new PowerPort
-                    {
-                        PowerPortInfo =
-
                     new PowerPortInfo
                     {
                         Identifier = Guid.NewGuid().ToString(),
@@ -75,10 +70,8 @@
                         OutputType = SlcAsset_Management.Enums.Outputtype.Out,
                         PortExposure = SlcAsset_Management.Enums.PortExposureEnum.Front,
                         Label = "Primary Power Port",
-                    }},
-                   new PowerPort
-                    {
-                        PowerPortInfo =  new PowerPortInfo
+                    },
+                   new PowerPortInfo
                     {
                         Identifier = Guid.NewGuid().ToString(),
                         Name = "Power Port 2",
@@ -86,7 +79,7 @@
                         OutputType = SlcAsset_Management.Enums.Outputtype.In,
                         PortExposure = SlcAsset_Management.Enums.PortExposureEnum.Back,
                         Label = "Backup Power Port",
-                    } },
+                    } ,
                 },
                 Holders = new List<AssetHolder>
                 {
@@ -158,11 +151,8 @@
                 MaximumPowerConsumption = 200.0,
                 TypicalPowerConsumption = 150.0,
                 PowerSupply = SlcAsset_Management.Enums.PowerSupplyEnum.DC,
-                DataPorts = new List<DataPort>
+                DataPorts = new List<DataPortInfo>
                 {
-                    new DataPort{
-                        DataPortInfo =
-
                     new DataPortInfo
                     {
                         PortNumber = 2,
@@ -170,9 +160,9 @@
                         PortExposure = SlcAsset_Management.Enums.PortExposureEnum.Back,
                         OutputType = SlcAsset_Management.Enums.Outputtype.In,
                         Label = "Label2",
-                    } },
+                    } ,
                 },
-                PowerPorts = new List<PowerPort>(),
+                PowerPorts = new List<PowerPortInfo>(),
                 Holders = new List<AssetHolder>(),
             };
 
@@ -261,12 +251,12 @@
                 updated.Lifecycle.EndOfService.Should().BeAfter(original.Lifecycle.EndOfService);
                 updated.Lifecycle.NominalLifetime.Should().BeGreaterThan(original.Lifecycle.NominalLifetime);
                 updated.DataPorts.Should().HaveCount(1);
-                updated.DataPorts[0].DataPortInfo.PortNumber.Should().Be(2);
-                updated.DataPorts[0].DataPortInfo.Name.Should().Be("Port2");
-                updated.DataPorts[0].DataPortInfo.Label.Should().Be("Label2");
-                updated.DataPorts[0].DataPortInfo.Type.Should().Be(default);
-                updated.DataPorts[0].DataPortInfo.PortExposure.Should().Be(SlcAsset_Management.Enums.PortExposureEnum.Back);
-                updated.DataPorts[0].DataPortInfo.OutputType.Should().Be(SlcAsset_Management.Enums.Outputtype.In);
+                updated.DataPorts[0].PortNumber.Should().Be(2);
+                updated.DataPorts[0].Name.Should().Be("Port2");
+                updated.DataPorts[0].Label.Should().Be("Label2");
+                updated.DataPorts[0].Type.Should().Be(default);
+                updated.DataPorts[0].PortExposure.Should().Be(SlcAsset_Management.Enums.PortExposureEnum.Back);
+                updated.DataPorts[0].OutputType.Should().Be(SlcAsset_Management.Enums.Outputtype.In);
                 updated.PowerPorts.Should().BeEmpty();
                 updated.Holders.Should().BeEmpty();
             }
@@ -298,19 +288,19 @@
                 createdClass.Lifecycle.EndOfService.Should().BeAfter(DateTime.UtcNow);
                 createdClass.Lifecycle.NominalLifetime.Should().Be(TimeSpan.FromDays(365 * 7));
                 createdClass.DataPorts.Should().HaveCount(1);
-                createdClass.DataPorts[0].DataPortInfo.PortNumber.Should().Be(1);
-                createdClass.DataPorts[0].DataPortInfo.Name.Should().Be("Port1");
-                createdClass.DataPorts[0].DataPortInfo.Type.Should().Be(default);
-                createdClass.DataPorts[0].DataPortInfo.Label.Should().Be("Label1");
-                createdClass.DataPorts[0].DataPortInfo.PortExposure.Should().Be(SlcAsset_Management.Enums.PortExposureEnum.Front);
-                createdClass.DataPorts[0].DataPortInfo.OutputType.Should().Be(SlcAsset_Management.Enums.Outputtype.Out);
+                createdClass.DataPorts[0].PortNumber.Should().Be(1);
+                createdClass.DataPorts[0].Name.Should().Be("Port1");
+                createdClass.DataPorts[0].Type.Should().Be(default);
+                createdClass.DataPorts[0].Label.Should().Be("Label1");
+                createdClass.DataPorts[0].PortExposure.Should().Be(SlcAsset_Management.Enums.PortExposureEnum.Front);
+                createdClass.DataPorts[0].OutputType.Should().Be(SlcAsset_Management.Enums.Outputtype.Out);
                 createdClass.PowerPorts.Should().HaveCount(2);
-                createdClass.PowerPorts[0].PowerPortInfo.PortNumber.Should().Be(1);
-                createdClass.PowerPorts[0].PowerPortInfo.PortExposure.Should().Be(SlcAsset_Management.Enums.PortExposureEnum.Front);
-                createdClass.PowerPorts[0].PowerPortInfo.OutputType.Should().Be(SlcAsset_Management.Enums.Outputtype.Out);
-                createdClass.PowerPorts[1].PowerPortInfo.PortNumber.Should().Be(2);
-                createdClass.PowerPorts[1].PowerPortInfo.PortExposure.Should().Be(SlcAsset_Management.Enums.PortExposureEnum.Back);
-                createdClass.PowerPorts[1].PowerPortInfo.OutputType.Should().Be(SlcAsset_Management.Enums.Outputtype.In);
+                createdClass.PowerPorts[0].PortNumber.Should().Be(1);
+                createdClass.PowerPorts[0].PortExposure.Should().Be(SlcAsset_Management.Enums.PortExposureEnum.Front);
+                createdClass.PowerPorts[0].OutputType.Should().Be(SlcAsset_Management.Enums.Outputtype.Out);
+                createdClass.PowerPorts[1].PortNumber.Should().Be(2);
+                createdClass.PowerPorts[1].PortExposure.Should().Be(SlcAsset_Management.Enums.PortExposureEnum.Back);
+                createdClass.PowerPorts[1].OutputType.Should().Be(SlcAsset_Management.Enums.Outputtype.In);
                 createdClass.Holders.Should().HaveCount(3);
                 createdClass.Holders[0].HierarchyRole.Should().Be(SlcAsset_Management.Enums.HierarchyRoleEnum.Card);
                 createdClass.Holders[0].SlotNumber.Should().Be(1);

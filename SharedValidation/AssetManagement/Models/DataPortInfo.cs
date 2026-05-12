@@ -1,23 +1,82 @@
 ﻿using System;
+using System.Runtime.Serialization;
+using Newtonsoft.Json;
+using SharedMappers.DomIds;
+using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
+
 namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
-    using SharedMappers.DomIds;
-
-    using Skyline.DataMiner.SDM;
-
-    public class DataPortInfo : IEquatable<DataPortInfo>
+    public class DataPortInfo : ChangeTrackingBase, IEquatable<DataPortInfo>
     {
-        public string Name { get; set; }
+        public DataPortInfo() : base()
+        {
+        }
 
-        public long PortNumber { get; set; }
+        public string Name
+        {
+            get => NameField.Value;
+            set => NameField.Value = value;
+        }
 
-        public SlcAsset_Management.Enums.Outputtype OutputType { get; set; }
+        public long PortNumber
+        {
+            get => PortNumberField.Value;
+            set => PortNumberField.Value = value;
+        }
 
-        public SlcAsset_Management.Enums.PortExposureEnum PortExposure { get; set; }
+        public SlcAsset_Management.Enums.Outputtype OutputType
+        {
+            get => OutputTypeField.Value;
+            set => OutputTypeField.Value = value;
+        }
 
-        public SdmObjectReference<PortType> Type { get; set; }
+        public SlcAsset_Management.Enums.PortExposureEnum PortExposure
+        {
+            get => PortExposureField.Value;
+            set => PortExposureField.Value = value;
+        }
 
-        public string Label { get; set; }
+        public SdmObjectReference<PortType> Type
+        {
+            get => TypeField.Value;
+            set => TypeField.Value = value;
+        }
+
+        public string Label
+        {
+            get => LabelField.Value;
+            set => LabelField.Value = value;
+        }
+
+        [JsonIgnore]
+        internal IChangeTrackingField<string> NameField => FieldHandler.GetOrCreateField(
+            nameof(Name),
+            () => new ChangeTrackingStringField(null));
+
+        [JsonIgnore]
+        internal IChangeTrackingField<long> PortNumberField => FieldHandler.GetOrCreateField(
+            nameof(PortNumber),
+            () => new ChangeTrackingField<long>(0));
+
+        [JsonIgnore]
+        internal IChangeTrackingField<SlcAsset_Management.Enums.Outputtype> OutputTypeField => FieldHandler.GetOrCreateField(
+            nameof(OutputType),
+            () => new ChangeTrackingField<SlcAsset_Management.Enums.Outputtype>(default));
+
+        [JsonIgnore]
+        internal IChangeTrackingField<SlcAsset_Management.Enums.PortExposureEnum> PortExposureField => FieldHandler.GetOrCreateField(
+            nameof(PortExposure),
+            () => new ChangeTrackingField<SlcAsset_Management.Enums.PortExposureEnum>(default));
+
+        [JsonIgnore]
+        internal IChangeTrackingField<SdmObjectReference<PortType>> TypeField => FieldHandler.GetOrCreateField(
+            nameof(Type),
+            () => new ChangeTrackingField<SdmObjectReference<PortType>>(default));
+
+        [JsonIgnore]
+        internal IChangeTrackingField<string> LabelField => FieldHandler.GetOrCreateField(
+            nameof(Label),
+            () => new ChangeTrackingStringField(null));
 
         public bool Equals(DataPortInfo other)
         {

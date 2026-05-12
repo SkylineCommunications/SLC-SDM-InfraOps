@@ -31,35 +31,36 @@
         /// <summary>
         /// Validates physical placement for multiple assets in bulk.
         /// Handles BOTH rack positions AND parent asset holder placements.
+        /// Returns validation results in the same order as the input assets.
+        /// Result at index i corresponds to asset at index i.
         /// </summary>
-        public Dictionary<string, ValidationResult> ValidateBulkPlacements(List<Asset> assets)
+        public List<ValidationResult> ValidateBulkPlacements(List<Asset> assets)
         {
-            var results = new Dictionary<string, ValidationResult>();
-
             if (assets == null || !assets.Any())
             {
-                return results;
+                return new List<ValidationResult>();
             }
+
+            // Initialize results - same order as input
+            var results = assets.Select(a => new ValidationResult()).ToList();
 
             try
             {
                 // Build context with all parent assets and racks
                 var context = BuildPlacementContext(assets);
 
-                // Validate each asset
-                foreach (var asset in assets)
+                // Validate each asset by index
+                for (int i = 0; i < assets.Count; i++)
                 {
-                    var result = new ValidationResult();
+                    var asset = assets[i];
 
                     // Validate parent asset holder placement
-                    result.AddFailuresFrom(ValidateParentHolderPlacement(asset, context));
+                    results[i].AddFailuresFrom(ValidateParentHolderPlacement(asset, i, context));
 
                     // Validate rack placement
-                    result.AddFailuresFrom(ValidateRackPlacement(asset, context));
+                    results[i].AddFailuresFrom(ValidateRackPlacement(asset, i, context));
 
                     // todo Validate destination parent holder placement
-
-                    results[asset.Identifier] = result;
                 }
             }
             catch (Exception ex)
@@ -68,9 +69,10 @@
                 globalError.AddFailReason(AssetValidationField.Asset,
                     $"Error validating placements: {ex.Message}");
 
-                foreach (var asset in assets)
+                // Add error to all results
+                for (int i = 0; i < results.Count; i++)
                 {
-                    results[asset.Identifier] = globalError;
+                    results[i].AddFailuresFrom(globalError);
                 }
             }
 
@@ -150,7 +152,7 @@
         /// <summary>
         /// Validates parent asset holder placement using pre-loaded context.
         /// </summary>
-        private ValidationResult ValidateParentHolderPlacement(Asset asset, PlacementValidationContext context)
+        private ValidationResult ValidateParentHolderPlacement(Asset asset, int assetIndex, PlacementValidationContext context)
         {
             var result = new ValidationResult();
 
@@ -203,6 +205,22 @@
                 {
                     result.AddFailReason(AssetValidationField.HolderNumber,
                         $"Holder Number '{holderNumber}' is already occupied on the Parent Asset by another asset.");
+                    return result;
+                }
+            }
+
+            // Check for conflicts within the batch
+            for (int i = 0; i < context.AssetsBeingValidated.Count; i++)
+            {
+                if (i == assetIndex) continue; // Skip self
+
+                var other = context.AssetsBeingValidated[i];
+                if (other.Location?.ParentAsset.Identifier == parentId &&
+                    other.Location?.HolderNumber == holderNumber)
+                {
+                    result.AddFailReason(AssetValidationField.HolderNumber,
+                        $"Holder Number '{holderNumber}' conflicts with another asset in the same batch.");
+                    break;
                 }
             }
 
@@ -212,7 +230,7 @@
         /// <summary>
         /// Validates rack placement using pre-loaded context.
         /// </summary>
-        private ValidationResult ValidateRackPlacement(Asset asset, PlacementValidationContext context)
+        private ValidationResult ValidateRackPlacement(Asset asset, int assetIndex, PlacementValidationContext context)
         {
             var result = new ValidationResult();
 
@@ -234,7 +252,7 @@
             var rackValidator = new RackValidator(_entityLoader);
 
             // Build occupation list (existing assets + batch assets)
-            var occupiedAssets = BuildRackOccupationList(rackId, asset, context, isDestination: false);
+            var occupiedAssets = BuildRackOccupationList(rackId, assetIndex, context, isDestination: false);
 
             // Validate using RackValidationHandler
             var assetClass = _entityLoader.LoadAssetClass(asset.AssetClassId);
@@ -258,11 +276,13 @@
             return result;
         }
 
-        // Similar methods for ValidateDestinationParentHolderPlacement and ValidateDestinationRackPlacement...
-
+        /// <summary>
+        /// Builds rack occupation list for validation.
+        /// Uses index instead of identifier to avoid null/empty identifier issues.
+        /// </summary>
         private List<(Asset, int, int)> BuildRackOccupationList(
             string rackId,
-            Asset currentAsset,
+            int currentAssetIndex,
             PlacementValidationContext context,
             bool isDestination)
         {
@@ -285,11 +305,12 @@
                 }
             }
 
-            // Add other assets from batch (exclude current)
-            foreach (var other in context.AssetsBeingValidated)
+            // Add other assets from batch (exclude current by index)
+            for (int i = 0; i < context.AssetsBeingValidated.Count; i++)
             {
-                if (other.Identifier == currentAsset.Identifier) continue;
+                if (i == currentAssetIndex) continue; // Use index comparison instead of identifier
 
+                var other = context.AssetsBeingValidated[i];
                 var otherRackId = isDestination ? other.DestinationLocation?.RackId : other.Location?.RackId;
                 var pos = isDestination ? other.DestinationLocation?.RackPosition : other.Location?.RackPosition;
 

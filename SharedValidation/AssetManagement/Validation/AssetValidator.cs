@@ -26,9 +26,8 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="AssetValidator"/> class.
         /// </summary>
-        /// <param name="assetRepository">Repository for querying assets.</param>
         /// <param name="entityLoader">Shared entity loader service.</param>
-        public AssetValidator(IAssetQueryRepository assetRepository, SdmEntityLoader entityLoader)
+        public AssetValidator(SdmEntityLoader entityLoader)
         {
             _entityLoader = entityLoader ?? throw new ArgumentNullException(nameof(entityLoader));
             _validationCore = new AssetValidationCore(_entityLoader);
@@ -111,12 +110,14 @@
 
         /// <summary>
         /// Validates multiple assets in bulk with optimized performance.
+        /// Returns validation results in the same order as the input assets.
+        /// Result at index i corresponds to asset at index i.
         /// </summary>
-        public Dictionary<string, ValidationResult> ValidateBulk(List<Asset> assets)
+        public List<ValidationResult> ValidateBulk(List<Asset> assets)
         {
             if (assets == null || !assets.Any())
             {
-                return new Dictionary<string, ValidationResult>();
+                return new List<ValidationResult>();
             }
 
             var context = new AssetValidationContext
@@ -124,20 +125,20 @@
                 AssetsBeingValidated = assets
             };
 
-            // Initialize results dictionary
-            var results = assets.ToDictionary(a => a.Identifier, a => new ValidationResult());
+            // Initialize results - same order as input
+            var results = assets.Select(a => new ValidationResult()).ToList();
 
             // ============================================================
             // PHASE 1: NO DATABASE ACCESS CHECKS (BUSINESS RULES)
             // ============================================================
-            foreach (var asset in assets)
+            for (int i = 0; i < assets.Count; i++)
             {
-                results[asset.Identifier].AddFailuresFrom(
-                    _validationCore.ValidateWithoutDatabaseAccess(asset));
+                results[i].AddFailuresFrom(
+                    _validationCore.ValidateWithoutDatabaseAccess(assets[i]));
             }
 
-            // Fast-fail if business rules fail (including critical asset class validation)
-            if (results.Any(r => !r.Value.IsValid))
+            // Fast-fail if business rules fail
+            if (results.AnyInvalid())
             {
                 return results;
             }
@@ -146,15 +147,10 @@
             // PHASE 2: IN-MEMORY BATCH CONFLICT DETECTION (NO DATABASE)
             // ============================================================
             var batchConflicts = _validationCore.ValidateBatchConflicts(assets);
-
-            // Merge batch conflict results
-            foreach (var kvp in batchConflicts)
-            {
-                results[kvp.Key].AddFailuresFrom(kvp.Value);
-            }
+            results.MergeFrom(batchConflicts);
 
             // Fast-fail if batch conflicts exist
-            if (results.Any(r => !r.Value.IsValid))
+            if (results.AnyInvalid())
             {
                 return results;
             }
@@ -162,10 +158,10 @@
             // ============================================================
             // PHASE 3: DATABASE ACCESS CHECKS (UNIQUENESS)
             // ============================================================
-            foreach (var asset in assets)
+            for (int i = 0; i < assets.Count; i++)
             {
-                results[asset.Identifier].AddFailuresFrom(
-                    _validationCore.ValidateWithDatabaseAccess(asset, context));
+                results[i].AddFailuresFrom(
+                    _validationCore.ValidateWithDatabaseAccess(assets[i], context));
             }
 
             // ============================================================
@@ -173,14 +169,7 @@
             // ============================================================
             var placementValidator = new PlacementValidator(_entityLoader);
             var placementResults = placementValidator.ValidateBulkPlacements(assets);
-
-            foreach (var kvp in placementResults)
-            {
-                if (results.ContainsKey(kvp.Key))
-                {
-                    results[kvp.Key].AddFailuresFrom(kvp.Value);
-                }
-            }
+            results.MergeFrom(placementResults);
 
             return results;
         }

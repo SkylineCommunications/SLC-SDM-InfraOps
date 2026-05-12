@@ -2,42 +2,11 @@
 {
     using System;
     using System.Runtime.Serialization;
-
     using Newtonsoft.Json;
-
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
-    public class AssetCustody
+    public class AssetCustody : ChangeTrackingBase
     {
-        [JsonIgnore]
-        private ChangeTrackingFieldHandler _fieldHandler;
-
-        public AssetCustody()
-        {
-            _fieldHandler = new ChangeTrackingFieldHandler();
-        }
-
-        [JsonIgnore]
-        private ChangeTrackingFieldHandler FieldHandler
-        {
-            get
-            {
-                if (_fieldHandler == null)
-                {
-                    _fieldHandler = new ChangeTrackingFieldHandler();
-                }
-                return _fieldHandler;
-            }
-        }
-
-        [OnDeserialized]
-        internal void OnDeserializedMethod(StreamingContext context)
-        {
-            ResetChangeTracking();
-        }
-
-        #region Public Properties
-
         public DateTime? From
         {
             get => FromField.Value;
@@ -74,10 +43,6 @@
             set => ContactPersonRoleField.Value = value;
         }
 
-        #endregion
-
-        #region Internal Tracking Fields
-
         [JsonIgnore]
         internal IChangeTrackingField<DateTime?> FromField => FieldHandler.GetOrCreateField(
             nameof(From),
@@ -107,12 +72,5 @@
         internal IChangeTrackingField<Guid> ContactPersonRoleField => FieldHandler.GetOrCreateField(
             nameof(ContactPersonRole),
             () => new ChangeTrackingField<Guid>(default));
-
-        #endregion
-
-        public void ResetChangeTracking()
-        {
-            FieldHandler?.ApplyChanges();
-        }
     }
 }

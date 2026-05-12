@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Runtime.Serialization;
 
     using Newtonsoft.Json;
@@ -13,10 +14,12 @@
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)asset_management")]
-    public class AssetClass : SdmObject<AssetClass>
+    public class AssetClass : SdmObject<AssetClass>, IChangeTracking
     {
         [JsonIgnore]
         private ChangeTrackingFieldHandler _fieldHandler;
+        [JsonIgnore]
+        private AssetClassLifecycle _lifecycle;
 
         public AssetClass()
         {
@@ -141,19 +144,19 @@
 
         public AssetClassLifecycle Lifecycle
         {
-            get => LifecycleField.Value ?? new AssetClassLifecycle();
-            set => LifecycleField.Value = value;
+            get => _lifecycle ?? (_lifecycle = new AssetClassLifecycle());
+            set => _lifecycle = value ?? new AssetClassLifecycle();
         }
 
-        public List<DataPort> DataPorts
+        public List<DataPortInfo> DataPorts
         {
-            get => DataPortsField.Value ?? new List<DataPort>();
+            get => DataPortsField.Value ?? new List<DataPortInfo>();
             set => DataPortsField.Value = value;
         }
 
-        public List<PowerPort> PowerPorts
+        public List<PowerPortInfo> PowerPorts
         {
-            get => PowerPortsField.Value ?? new List<PowerPort>();
+            get => PowerPortsField.Value ?? new List<PowerPortInfo>();
             set => PowerPortsField.Value = value;
         }
 
@@ -211,7 +214,7 @@
 
         [JsonIgnore]
         internal IChangeTrackingField<string> PlanField => FieldHandler.GetOrCreateField(
-           nameof(FrontImage),
+           nameof(Plan),
            () => new ChangeTrackingStringField(null));
 
         [JsonIgnore]
@@ -240,28 +243,37 @@
             () => new ChangeTrackingField<SlcAsset_Management.Enums.PowerSupplyEnum>(default));
 
         [JsonIgnore]
-        internal IChangeTrackingField<AssetClassLifecycle> LifecycleField => FieldHandler.GetOrCreateField(
-            nameof(Lifecycle),
-            () => new ChangeTrackingField<AssetClassLifecycle>(new AssetClassLifecycle()));
-
-        [JsonIgnore]
-        internal ChangeTrackingArrayField<DataPort> DataPortsField => FieldHandler.GetOrCreateArrayField(
+        internal ChangeTrackingArrayField<DataPortInfo> DataPortsField => FieldHandler.GetOrCreateArrayField(
             nameof(DataPorts),
-            () => new ChangeTrackingArrayField<DataPort>(new List<DataPort>()));
+            () => new ChangeTrackingArrayField<DataPortInfo>(new List<DataPortInfo>()));
 
         [JsonIgnore]
-        internal ChangeTrackingArrayField<PowerPort> PowerPortsField => FieldHandler.GetOrCreateArrayField(
+        internal ChangeTrackingArrayField<PowerPortInfo> PowerPortsField => FieldHandler.GetOrCreateArrayField(
             nameof(PowerPorts),
-            () => new ChangeTrackingArrayField<PowerPort>(new List<PowerPort>()));
+            () => new ChangeTrackingArrayField<PowerPortInfo>(new List<PowerPortInfo>()));
 
         [JsonIgnore]
         internal ChangeTrackingArrayField<AssetHolder> HoldersField => FieldHandler.GetOrCreateArrayField(
             nameof(Holders),
             () => new ChangeTrackingArrayField<AssetHolder>(new List<AssetHolder>()));
 
+        public bool Changed => FieldHandler.HasChanges ||
+            _lifecycle?.Changed == true ||
+            (DataPorts?.Any(p => p?.Changed == true) == true);
+
         public void ResetChangeTracking()
         {
             FieldHandler?.ApplyChanges();
+            _lifecycle?.ResetChangeTracking();
+
+            // Cascade to list items
+            if (DataPorts != null)
+            {
+                foreach (var port in DataPorts)
+                {
+                    port?.ResetChangeTracking();
+                }
+            }
         }
     }
 }

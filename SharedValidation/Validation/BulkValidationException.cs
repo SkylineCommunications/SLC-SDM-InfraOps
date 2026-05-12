@@ -9,62 +9,114 @@
 
     /// <summary>
     /// Exception thrown when bulk validation fails.
-    /// Contains validation results for all failed entities.
+    /// Contains validation results for all failed entities with their corresponding entities.
     /// </summary>
-    public class BulkValidationException : InfraOpsException
+    /// <typeparam name="T">The type of entity being validated.</typeparam>
+    public class BulkValidationException<T> : InfraOpsException
     {
         /// <summary>
-        /// Gets the validation results for all failed entities.
-        /// Key: Entity identifier, Value: ValidationResult with errors.
+        /// Gets the list of failed entities with their validation results.
         /// </summary>
-        public Dictionary<string, ValidationResult> FailedResults { get; }
+        public List<(T Entity, ValidationResult Result)> FailedItems { get; }
 
         /// <summary>
         /// Gets the total number of entities that failed validation.
         /// </summary>
-        public int FailedCount => FailedResults.Count;
+        public int FailedCount => FailedItems.Count;
 
-       /// <summary>
-       /// Initializes a new instance of the BulkValidationException class with the specified validation results.   
-       /// </summary>
-       /// <remarks>Use this constructor to create an exception that aggregates multiple validation
-       /// failures, allowing callers to inspect all failed results in detail.</remarks>
-       /// <param name="results">A dictionary containing the validation results for each failed field or property. The key is the field or
-       /// property name, and the value is the corresponding ValidationResult. Cannot be null.</param>
-        public BulkValidationException(Dictionary<string, ValidationResult> results)
-            : base(BuildErrorMessage(results))
+        /// <summary>
+        /// Initializes a new instance of the BulkValidationException class with the specified entities and validation results.
+        /// </summary>
+        /// <param name="entities">The list of entities that were validated.</param>
+        /// <param name="results">The validation results corresponding to each entity (same order and count).</param>
+        /// <param name="getDisplayName">Optional function to extract a display name from an entity. If null, uses index-based naming.</param>
+        public BulkValidationException(
+            List<T> entities, 
+            List<ValidationResult> results, 
+            Func<T, string> getDisplayName = null)
+            : base(BuildErrorMessage(entities, results, getDisplayName))
         {
-            FailedResults = results ?? new Dictionary<string, ValidationResult>();
+            if (entities == null) throw new ArgumentNullException(nameof(entities));
+            if (results == null) throw new ArgumentNullException(nameof(results));
+            if (entities.Count != results.Count)
+            {
+                throw new ArgumentException("Entities and results lists must have the same count.");
+            }
+
+            FailedItems = BuildFailedItems(entities, results);
         }
 
-        private static string BuildErrorMessage(Dictionary<string, ValidationResult> failedResults)
+        private static List<(T Entity, ValidationResult Result)> BuildFailedItems(
+            List<T> entities, 
+            List<ValidationResult> results)
         {
-            if (failedResults == null || !failedResults.Any())
+            var failed = new List<(T Entity, ValidationResult Result)>();
+            
+            for (int i = 0; i < entities.Count; i++)
+            {
+                if (!results[i].IsValid)
+                {
+                    failed.Add((entities[i], results[i]));
+                }
+            }
+
+            return failed;
+        }
+
+        private static string BuildErrorMessage(
+            List<T> entities, 
+            List<ValidationResult> results, 
+            Func<T, string> getDisplayName)
+        {
+            if (entities == null || results == null || entities.Count == 0)
             {
                 return "Bulk validation failed.";
             }
 
+            var failedCount = 0;
             var sb = new StringBuilder();
-            sb.AppendLine($"Bulk validation failed for {failedResults.Count} item(s):");
-            sb.AppendLine();
-
-            foreach (var kvp in failedResults.Take(5)) // Show first 5 failures
+            
+            // Count failures first
+            for (int i = 0; i < results.Count; i++)
             {
-                sb.AppendLine($"Entity '{kvp.Key}':");
-                foreach (var error in kvp.Value.FailureReasons.Take(3)) // Show first 3 errors per entity
+                if (!results[i].IsValid)
                 {
-                    sb.AppendLine($"  - [{error.Key}] {error.Value}");
+                    failedCount++;
                 }
-                if (kvp.Value.FailureReasons.Count > 3)
-                {
-                    sb.AppendLine($"  ... and {kvp.Value.FailureReasons.Count - 3} more error(s)");
-                }
-                sb.AppendLine();
             }
 
-            if (failedResults.Count > 5)
+            sb.AppendLine($"Bulk validation failed for {failedCount} item(s):");
+            sb.AppendLine();
+
+            var displayedCount = 0;
+            for (int i = 0; i < entities.Count && displayedCount < 5; i++)
             {
-                sb.AppendLine($"... and {failedResults.Count - 5} more failed item(s)");
+                if (!results[i].IsValid)
+                {
+                    displayedCount++;
+                    var entityName = getDisplayName?.Invoke(entities[i]) ?? $"Item at index {i}";
+                    
+                    sb.AppendLine($"{entityName}:");
+                    
+                    var errorCount = 0;
+                    foreach (var error in results[i].FailureReasons)
+                    {
+                        if (errorCount++ >= 3) break; // Show max 3 errors per entity
+                        sb.AppendLine($"  - [{error.Key}] {error.Value}");
+                    }
+                    
+                    if (results[i].FailureReasons.Count > 3)
+                    {
+                        sb.AppendLine($"  ... and {results[i].FailureReasons.Count - 3} more error(s)");
+                    }
+                    
+                    sb.AppendLine();
+                }
+            }
+
+            if (failedCount > 5)
+            {
+                sb.AppendLine($"... and {failedCount - 5} more failed item(s)");
             }
 
             return sb.ToString();
@@ -73,16 +125,20 @@
         /// <summary>
         /// Gets a summary of all validation errors.
         /// </summary>
-        public string GetDetailedErrorSummary()
+        /// <param name="getDisplayName">Optional function to extract a display name from an entity.</param>
+        public string GetDetailedErrorSummary(Func<T, string> getDisplayName = null)
         {
             var sb = new StringBuilder();
             sb.AppendLine($"Bulk Validation Failed - {FailedCount} item(s) with errors:");
             sb.AppendLine();
 
-            foreach (var kvp in FailedResults)
+            for (int i = 0; i < FailedItems.Count; i++)
             {
-                sb.AppendLine($"Entity '{kvp.Key}':");
-                foreach (var error in kvp.Value.FailureReasons)
+                var item = FailedItems[i];
+                var entityName = getDisplayName?.Invoke(item.Entity) ?? $"Item {i}";
+                
+                sb.AppendLine($"{entityName}:");
+                foreach (var error in item.Result.FailureReasons)
                 {
                     sb.AppendLine($"  - [{error.Key}] {error.Value}");
                 }

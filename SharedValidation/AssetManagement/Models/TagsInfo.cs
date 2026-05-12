@@ -1,16 +1,12 @@
 ﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
     using System.Collections.Generic;
-    using System.Runtime.Serialization;
-
     using Newtonsoft.Json;
-
     using SharedMappers.DomIds;
-
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
-    public class TagsInfo : SdmObject<TagsInfo>
+    public class TagsInfo : SdmObject<TagsInfo>, IChangeTracking
     {
         [JsonIgnore]
         private ChangeTrackingFieldHandler _fieldHandler;
@@ -33,11 +29,8 @@
             }
         }
 
-        [OnDeserialized]
-        internal void OnDeserializedMethod(StreamingContext context)
-        {
-            ResetChangeTracking();
-        }
+        [JsonIgnore]
+        public bool Changed => FieldHandler.HasChanges;
 
         public List<SlcAsset_Management.Enums.TagOption> Tags
         {
@@ -52,7 +45,7 @@
 
         public void ResetChangeTracking()
         {
-            _fieldHandler?.ApplyChanges();
+            FieldHandler?.ApplyChanges();
         }
     }
 }

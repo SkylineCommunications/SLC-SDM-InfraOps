@@ -9,27 +9,19 @@
 
     //[GenerateExposers]
     [SdmDomStorage("(slc)asset_management")]
-    public sealed class DataPort : SdmObject<DataPort>, IEquatable<DataPort>
+    public sealed class DataPort : SdmObject<DataPort>, IEquatable<DataPort>, IChangeTracking
     {
         [JsonIgnore]
-        private ChangeTrackingFieldHandler _fieldHandler;
+        private DataPortInfo _dataPortInfo;
+        [JsonIgnore]
+        private AssetRelation _assetFk;
+        [JsonIgnore]
+        private AddressInfo _addressInfo;
+        [JsonIgnore]
+        private PrimaryPortRelation _primaryPortRelation;
 
         public DataPort()
         {
-            _fieldHandler = new ChangeTrackingFieldHandler();
-        }
-
-        [JsonIgnore]
-        private ChangeTrackingFieldHandler FieldHandler
-        {
-            get
-            {
-                if (_fieldHandler == null)
-                {
-                    _fieldHandler = new ChangeTrackingFieldHandler();
-                }
-                return _fieldHandler;
-            }
         }
 
         [OnDeserialized]
@@ -42,51 +34,32 @@
 
         public DataPortInfo DataPortInfo
         {
-            get => DataPortInfoField.Value ?? new DataPortInfo();
-            set => DataPortInfoField.Value = value;
+            get => _dataPortInfo ?? (_dataPortInfo = new DataPortInfo());
+            set => _dataPortInfo = value ?? new DataPortInfo();
         }
 
         public AssetRelation AssetFk
         {
-            get => AssetFkField.Value;
-            set => AssetFkField.Value = value;
+            get => _assetFk;
+            set => _assetFk = value;
         }
 
         public AddressInfo AddressInfo
         {
-            get => AddressInfoField.Value ?? new AddressInfo();
-            set => AddressInfoField.Value = value;
+            get => _addressInfo ?? (_addressInfo = new AddressInfo());
+            set => _addressInfo = value ?? new AddressInfo();
         }
 
         public PrimaryPortRelation PrimaryPortRelation
         {
-            get => PrimaryPortRelationField.Value ?? new PrimaryPortRelation();
-            set => PrimaryPortRelationField.Value = value;
+            get => _primaryPortRelation ?? (_primaryPortRelation = new PrimaryPortRelation());
+            set => _primaryPortRelation = value ?? new PrimaryPortRelation();
         }
 
-        #endregion
-
-        #region Change Tracking Fields
-
-        [JsonIgnore]
-        internal IChangeTrackingField<DataPortInfo> DataPortInfoField => FieldHandler.GetOrCreateField(
-            nameof(DataPortInfo),
-            () => new ChangeTrackingField<DataPortInfo>(new DataPortInfo()));
-
-        [JsonIgnore]
-        internal IChangeTrackingField<AssetRelation> AssetFkField => FieldHandler.GetOrCreateField(
-            nameof(AssetFk),
-            () => new ChangeTrackingField<AssetRelation>(null));
-
-        [JsonIgnore]
-        internal IChangeTrackingField<AddressInfo> AddressInfoField => FieldHandler.GetOrCreateField(
-            nameof(AddressInfo),
-            () => new ChangeTrackingField<AddressInfo>(new AddressInfo()));
-
-        [JsonIgnore]
-        internal IChangeTrackingField<PrimaryPortRelation> PrimaryPortRelationField => FieldHandler.GetOrCreateField(
-            nameof(PrimaryPortRelation),
-            () => new ChangeTrackingField<PrimaryPortRelation>(new PrimaryPortRelation()));
+        public bool Changed => _dataPortInfo?.Changed == true ||
+        _addressInfo?.Changed == true ||
+        _primaryPortRelation?.Changed == true ||
+        _assetFk?.Changed == true;
 
         #endregion
 
@@ -131,9 +104,19 @@
 
         #endregion
 
+        /// <summary>
+        /// Resets the change tracking state for all related properties to indicate that no changes have been made since
+        /// the last reset.
+        /// </summary>
+        /// <remarks>Call this method after persisting or discarding changes to clear the modified state
+        /// of the object and its tracked properties. This is typically used in scenarios where change tracking is
+        /// required to detect modifications for persistence or synchronization purposes.</remarks>
         public void ResetChangeTracking()
         {
-            FieldHandler?.ApplyChanges();
+            _dataPortInfo?.ResetChangeTracking();
+            _assetFk?.ResetChangeTracking();
+            _addressInfo?.ResetChangeTracking();
+            _primaryPortRelation?.ResetChangeTracking();
         }
     }
 }

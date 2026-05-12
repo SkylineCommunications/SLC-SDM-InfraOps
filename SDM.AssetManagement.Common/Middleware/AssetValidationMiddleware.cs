@@ -42,11 +42,12 @@
 
         public IReadOnlyCollection<Asset> OnCreate(IEnumerable<Asset> oToCreate, Func<IEnumerable<Asset>, IReadOnlyCollection<Asset>> next)
         {
-            var result = Validate(oToCreate);
+            var assets = oToCreate.ToList();
+            var results = ValidateBulk(assets);
 
-            if(result.Any(r => !r.Value.IsValid))
+            if (results.AnyInvalid())
             {
-                throw result.ToException();
+                throw BuildBulkValidationException(assets, results);
             }
 
             return next(oToCreate);
@@ -65,11 +66,12 @@
 
         public IReadOnlyCollection<Asset> OnCreateOrUpdate(IEnumerable<Asset> oToCreateOrUpdate, Func<IEnumerable<Asset>, IReadOnlyCollection<Asset>> next)
         {
-            var result = Validate(oToCreateOrUpdate);
+            var assets = oToCreateOrUpdate.ToList();
+            var results = ValidateBulk(assets);
 
-            if (result.Any(r => !r.Value.IsValid))
+            if (results.AnyInvalid())
             {
-                throw result.ToException();
+                throw BuildBulkValidationException(assets, results);
             }
 
             return next(oToCreateOrUpdate);
@@ -167,11 +169,12 @@
 
         public IReadOnlyCollection<Asset> OnUpdate(IEnumerable<Asset> oToUpdate, Func<IEnumerable<Asset>, IReadOnlyCollection<Asset>> next)
         {
-            var result = Validate(oToUpdate);
+            var assets = oToUpdate.ToList();
+            var results = ValidateBulk(assets);
 
-            if (result.Any(r => !r.Value.IsValid))
+            if (results.AnyInvalid())
             {
-                throw result.ToException();
+                throw BuildBulkValidationException(assets, results);
             }
 
             return next(oToUpdate);
@@ -194,9 +197,23 @@
             return _validator.Validate(asset);
         }
 
-        private Dictionary<string,ValidationResult> Validate(IEnumerable<Asset> assets)
+        private List<ValidationResult> ValidateBulk(List<Asset> assets)
         {
-            return _validator.ValidateBulk(assets.ToList());
+            return _validator.ValidateBulk(assets);
+        }
+
+        /// <summary>
+        /// Builds a comprehensive exception from bulk validation results.
+        /// Uses the generic BulkValidationException with entity references.
+        /// </summary>
+        private Exception BuildBulkValidationException(List<Asset> assets, List<ValidationResult> results)
+        {
+            return new BulkValidationException<Asset>(
+                assets, 
+                results, 
+                asset => string.IsNullOrEmpty(asset.Name) 
+                    ? $"Asset with ID '{asset.AssetID}'" 
+                    : $"Asset '{asset.Name}'");
         }
     }
 }

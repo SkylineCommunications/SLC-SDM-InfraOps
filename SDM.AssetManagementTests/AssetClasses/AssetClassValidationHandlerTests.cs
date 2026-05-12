@@ -252,11 +252,11 @@
             // Arrange
             var assetClass = new AssetClass
             {
-                DataPorts = new List<DataPort>
+                DataPorts = new List<DataPortInfo>
                 {
-                    new DataPort { DataPortInfo = new DataPortInfo{ PortNumber = 1 } },
-                    new DataPort { DataPortInfo = new DataPortInfo{PortNumber = 2 } },
-                    new DataPort { DataPortInfo = new DataPortInfo{ PortNumber = 3 } },
+                    new DataPortInfo{ PortNumber = 1 } ,
+                    new DataPortInfo{PortNumber = 2 } ,
+                    new DataPortInfo{ PortNumber = 3 } ,
                 }
             };
 
@@ -290,7 +290,7 @@
             // Arrange
             var assetClass = new AssetClass
             {
-                DataPorts = new List<DataPort>(),
+                DataPorts = new List<DataPortInfo>(),
             };
 
             // Act
@@ -310,10 +310,10 @@
             // Arrange
             var assetClass = new AssetClass
             {
-                DataPorts = new List<DataPort>
+                DataPorts = new List<DataPortInfo>
                 {
-                   new DataPort{ DataPortInfo =  new DataPortInfo { PortNumber = 1 } },
-                   new DataPort{ DataPortInfo =  new DataPortInfo { PortNumber = -5 } },
+                   new DataPortInfo { PortNumber = 1 } ,
+                   new DataPortInfo { PortNumber = -5 } ,
                 }
             };
 
@@ -334,11 +334,11 @@
             // Arrange
             var assetClass = new AssetClass
             {
-                DataPorts = new List<DataPort>
+                DataPorts = new List<DataPortInfo>
                 {
-                   new DataPort{ DataPortInfo = new DataPortInfo { PortNumber = 1 } },
-                   new DataPort{ DataPortInfo = new DataPortInfo { PortNumber = 2 } },
-                   new DataPort{ DataPortInfo = new DataPortInfo { PortNumber = 1 } } // Duplicate
+                   new DataPortInfo { PortNumber = 1 },
+                   new DataPortInfo { PortNumber = 2 },
+                   new DataPortInfo { PortNumber = 1 } // Duplicate
                 }
             };
 
@@ -364,10 +364,10 @@
             // Arrange
             var assetClass = new AssetClass
             {
-                PowerPorts = new List<PowerPort>
+                PowerPorts = new List<PowerPortInfo>
                 {
-                   new PowerPort{ PowerPortInfo =  new PowerPortInfo { PortNumber = 1 } },
-                   new PowerPort{ PowerPortInfo =  new PowerPortInfo { PortNumber = 2 } }
+                   new PowerPortInfo { PortNumber = 1 },
+                   new PowerPortInfo { PortNumber = 2 },
                 }
             };
 
@@ -397,7 +397,7 @@
             // Arrange
             var assetClass = new AssetClass
             {
-                PowerPorts = new List<PowerPort>()
+                PowerPorts = new List<PowerPortInfo>()
             };
 
             // Act
@@ -417,9 +417,9 @@
             // Arrange
             var assetClass = new AssetClass
             {
-                PowerPorts = new List<PowerPort>
+                PowerPorts = new List<PowerPortInfo>
                 {
-                  new PowerPort{PowerPortInfo =   new PowerPortInfo { PortNumber = -1 } },
+                  new PowerPortInfo { PortNumber = -1 },
                 }
             };
 
@@ -440,10 +440,10 @@
             // Arrange
             var assetClass = new AssetClass
             {
-                PowerPorts = new List<PowerPort>
+                PowerPorts = new List<PowerPortInfo>
                 {
-                    new PowerPort{PowerPortInfo = new PowerPortInfo { PortNumber = 5 } },
-                    new PowerPort{PowerPortInfo = new PowerPortInfo { PortNumber = 5 } }
+                    new PowerPortInfo { PortNumber = 5 },
+                    new PowerPortInfo { PortNumber = 5 },
                 }
             };
 

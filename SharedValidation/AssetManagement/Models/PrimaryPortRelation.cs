@@ -1,12 +1,32 @@
 ﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
     using System;
+    using Newtonsoft.Json;
+    using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
-    public class PrimaryPortRelation : IEquatable<PrimaryPortRelation>
+    public class PrimaryPortRelation : ChangeTrackingBase, IEquatable<PrimaryPortRelation>
     {
-        public bool IsPrimaryIpv6 { get; set; }
+        public bool IsPrimaryIpv6
+        {
+            get => IsPrimaryIpv6Field.Value;
+            set => IsPrimaryIpv6Field.Value = value;
+        }
 
-        public bool IsPrimaryIpv4 { get; set; }
+        public bool IsPrimaryIpv4
+        {
+            get => IsPrimaryIpv4Field.Value;
+            set => IsPrimaryIpv4Field.Value = value;
+        }
+
+        [JsonIgnore]
+        internal IChangeTrackingField<bool> IsPrimaryIpv6Field => FieldHandler.GetOrCreateField(
+            nameof(IsPrimaryIpv6),
+            () => new ChangeTrackingField<bool>(false));
+
+        [JsonIgnore]
+        internal IChangeTrackingField<bool> IsPrimaryIpv4Field => FieldHandler.GetOrCreateField(
+            nameof(IsPrimaryIpv4),
+            () => new ChangeTrackingField<bool>(false));
 
         public override bool Equals(object obj)
         {

@@ -41,9 +41,7 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
            powerPortRepository: _powerPortRepository);
 
         // Initialize validators
-        _assetValidator = new AssetValidator(
-            _assetRepository,
-            _entityLoader);
+        _assetValidator = new AssetValidator(_entityLoader);
 
         _assetClassValidator = new AssetClassValidator(_entityLoader);
 
@@ -65,6 +63,7 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
         // Expose repositories directly (or wrap with middleware later)
         PowerPorts = _powerPortRepository;
         DataPorts = _dataPortRepository;
+        DeviceTypes = _deviceTypeRepository;
     }
 
     public IConnection Connection { get; }

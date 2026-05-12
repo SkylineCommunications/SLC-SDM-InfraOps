@@ -13,35 +13,53 @@
     {
         private static readonly Random _random = new Random();
 
-        public static readonly List<Asset> Assets =
+        // DeviceTypes must be defined first since they have no dependencies
+        public static readonly List<DeviceType> DeviceTypes =
         [
-			// Assets get the name "Test Asset {i}"
-			CreateAsset(1, "SN123456", "00-14-22-01-23-41"),
-            CreateAsset(2, "SN123457", "00-14-22-01-23-42"),
-            CreateAsset(3, "SN123458", "00-14-22-01-23-43"),
-            CreateAsset(4, "SN123459", "00-14-22-01-23-44"),
-            CreateAsset(5, "SN123460", "00-14-22-01-23-45"),
-            CreateAsset(6, "SN123461", "00-14-22-01-23-46"),
-            CreateAsset(7, "SN123462", "00-14-22-01-23-47"),
-            CreateAsset(8, "SN123463", "00-14-22-01-23-48"),
-            CreateAsset(9, "SN123464", "00-14-22-01-23-49"),
-            CreateAsset(10, "SN123465", "00-14-22-01-23-50"),
+            CreateDeviceType("Decoder",  SlcAsset_Management.Enums.HierarchyRoleEnum.Chassis, SlcAsset_Management.Enums.TagOption.AcceptsDataConnection),
+            CreateDeviceType("Encoder", SlcAsset_Management.Enums.HierarchyRoleEnum.Chassis, SlcAsset_Management.Enums.TagOption.AcceptsDataConnection),
+            CreateDeviceType("Network Interface Card", SlcAsset_Management.Enums.HierarchyRoleEnum.Card, SlcAsset_Management.Enums.TagOption.AcceptsDataConnection, SlcAsset_Management.Enums.TagOption.RackUnitConsumer),
+            CreateDeviceType("Software", SlcAsset_Management.Enums.HierarchyRoleEnum.None),
+            CreateDeviceType("Firewall", SlcAsset_Management.Enums.HierarchyRoleEnum.Module, SlcAsset_Management.Enums.TagOption.AcceptsDataConnection),
+            CreateDeviceType("PSU", SlcAsset_Management.Enums.HierarchyRoleEnum.PowerSupply, SlcAsset_Management.Enums.TagOption.PowerProvider),
+            CreateDeviceType("Optics Module", SlcAsset_Management.Enums.HierarchyRoleEnum.PowerSupply, SlcAsset_Management.Enums.TagOption.PowerProvider),
+            CreateDeviceType("Cooling Fan", SlcAsset_Management.Enums.HierarchyRoleEnum.Fan),
+            CreateDeviceType("UPS System", SlcAsset_Management.Enums.HierarchyRoleEnum.Chassis, SlcAsset_Management.Enums.TagOption.PowerProvider, SlcAsset_Management.Enums.TagOption.RackUnitConsumer),
+            CreateDeviceType("Enterprise Storage Drive", SlcAsset_Management.Enums.HierarchyRoleEnum.Module, SlcAsset_Management.Enums.TagOption.AcceptsDataConnection),
         ];
 
+        // AssetClasses reference DeviceTypes
         public static readonly List<AssetClass> AssetClasses =
         [
-            CreateAssetClass(1, "Router", "High performance router", 44.5, 4.4, 43.9, 1, 12.5, "router-front.png", "router-back.jpg", 120, 200),
-            CreateAssetClass(2, "Switch", "Layer 2 switch", 30.0, 8.9, 44.0, 2, 3.5, "switch-front.png", "switch-back.png", 40, 60),
-            CreateAssetClass(3, "Firewall", "Enterprise firewall", 20.0, 13.3, 20.0, 3, 2.0, "fw-front.png", "fw-back.jpg", 30, 50),
-            CreateAssetClass(4, "Server", "Rack server", 70.0, 8.9, 44.0, 2, 25.0, "server-front.png", "server-back.png", 350, 500),
-            CreateAssetClass(5, "Storage", "NAS storage", 60.0, 8.9, 44.0, 2, 20.0, "nas-front.png", "nas-back.png", 250, 400),
-            CreateAssetClass(6, "UPS", "Uninterruptible Power Supply", 40.0, 8.9, 17.0, 2, 28.0, "ups-front.png", "ups-back.jpg", 120, 180),
-            CreateAssetClass(7, "KVM Switch", "Keyboard Video Mouse Switch", 16.0, 31.1, 44.0, 7, 2.2, "kvm-front.png", "kvm-back.png", 15, 25),
-            CreateAssetClass(8, "Patch Panel", "24-port Patch Panel", 10.0, 4.4, 48.0, 1, 1.5, "patchpanel-front.png", "patchpanel-back.png", 5, 10),
-            CreateAssetClass(9, "Wireless Access Point", "Dual-band WiFi 6 AP", 20.0, 4.4, 20.0, 1, 0.8, "ap-front.png", "ap-back.jpeg", 12, 18),
-            CreateAssetClass(10, "Media Converter", "Fiber to Ethernet Converter", 9.4, 4.4, 7.0, 1, 0.3, "mediaconv-front.png", "mediaconv-back.png", 3, 5),
+            CreateAssetClass(1, "Router", "High performance router", DeviceTypes[0].Identifier, 44.5, 4.4, 43.9, 1, 12.5, "router-front.png", "router-back.jpg", 120, 200),
+            CreateAssetClass(2, "Switch", "Layer 2 switch", DeviceTypes[1].Identifier, 30.0, 8.9, 44.0, 2, 3.5, "switch-front.png", "switch-back.png", 40, 60),
+            CreateAssetClass(3, "Firewall", "Enterprise firewall", DeviceTypes[4].Identifier, 20.0, 13.3, 20.0, 3, 2.0, "fw-front.png", "fw-back.jpg", 30, 50),
+            CreateAssetClass(4, "Server", "Rack server", DeviceTypes[0].Identifier, 70.0, 8.9, 44.0, 2, 25.0, "server-front.png", "server-back.png", 350, 500),
+            CreateAssetClass(5, "Storage", "NAS storage", DeviceTypes[9].Identifier, 60.0, 8.9, 44.0, 2, 20.0, "nas-front.png", "nas-back.png", 250, 400),
+            CreateAssetClass(6, "UPS", "Uninterruptible Power Supply", DeviceTypes[8].Identifier, 40.0, 8.9, 17.0, 2, 28.0, "ups-front.png", "ups-back.jpg", 120, 180),
+            CreateAssetClass(7, "KVM Switch", "Keyboard Video Mouse Switch", DeviceTypes[3].Identifier, 16.0, 31.1, 44.0, 7, 2.2, "kvm-front.png", "kvm-back.png", 15, 25),
+            CreateAssetClass(8, "Patch Panel", "24-port Patch Panel", DeviceTypes[2].Identifier, 10.0, 4.4, 48.0, 1, 1.5, "patchpanel-front.png", "patchpanel-back.png", 5, 10),
+            CreateAssetClass(9, "Wireless Access Point", "Dual-band WiFi 6 AP", DeviceTypes[2].Identifier, 20.0, 4.4, 20.0, 1, 0.8, "ap-front.png", "ap-back.jpeg", 12, 18),
+            CreateAssetClass(10, "Media Converter", "Fiber to Ethernet Converter", DeviceTypes[6].Identifier, 9.4, 4.4, 7.0, 1, 0.3, "mediaconv-front.png", "mediaconv-back.png", 3, 5),
         ];
 
+        // Assets reference AssetClasses
+        public static readonly List<Asset> Assets =
+        [
+            // Assets get the name "Test Asset {i}"
+            CreateAsset(1, AssetClasses[0].Identifier, "SN123456", "00-14-22-01-23-41"),
+            CreateAsset(2, AssetClasses[1].Identifier, "SN123457", "00-14-22-01-23-42"),
+            CreateAsset(3, AssetClasses[2].Identifier, "SN123458", "00-14-22-01-23-43"),
+            CreateAsset(4, AssetClasses[3].Identifier, "SN123459", "00-14-22-01-23-44"),
+            CreateAsset(5, AssetClasses[4].Identifier, "SN123460", "00-14-22-01-23-45"),
+            CreateAsset(6, AssetClasses[5].Identifier, "SN123461", "00-14-22-01-23-46"),
+            CreateAsset(7, AssetClasses[6].Identifier, "SN123462", "00-14-22-01-23-47"),
+            CreateAsset(8, AssetClasses[7].Identifier, "SN123463", "00-14-22-01-23-48"),
+            CreateAsset(9, AssetClasses[8].Identifier, "SN123464", "00-14-22-01-23-49"),
+            CreateAsset(10, AssetClasses[9].Identifier, "SN123465", "00-14-22-01-23-50"),
+        ];
+
+        // Ports reference Assets (actual port instances)
         public static readonly List<DataPort> DataPorts =
         [
             CreateDataPort(0),
@@ -70,19 +88,7 @@
             CreatePowerPort(9),
         ];
 
-        public static readonly List<DeviceType> DeviceTypes =
-        [
-            CreateDeviceType("Decoder",  SlcAsset_Management.Enums.HierarchyRoleEnum.Chassis, SlcAsset_Management.Enums.TagOption.AcceptsDataConnection),
-            CreateDeviceType("Encoder", SlcAsset_Management.Enums.HierarchyRoleEnum.Chassis, SlcAsset_Management.Enums.TagOption.AcceptsDataConnection),
-            CreateDeviceType("Network Interface Card", SlcAsset_Management.Enums.HierarchyRoleEnum.Card, SlcAsset_Management.Enums.TagOption.AcceptsDataConnection, SlcAsset_Management.Enums.TagOption.RackUnitConsumer),
-            CreateDeviceType("Software", SlcAsset_Management.Enums.HierarchyRoleEnum.None),
-            CreateDeviceType("Firewall", SlcAsset_Management.Enums.HierarchyRoleEnum.Module, SlcAsset_Management.Enums.TagOption.AcceptsDataConnection),
-            CreateDeviceType("PSU", SlcAsset_Management.Enums.HierarchyRoleEnum.PowerSupply, SlcAsset_Management.Enums.TagOption.PowerProvider),
-            CreateDeviceType("Optics Module", SlcAsset_Management.Enums.HierarchyRoleEnum.PowerSupply, SlcAsset_Management.Enums.TagOption.PowerProvider),
-            CreateDeviceType("Cooling Fan", SlcAsset_Management.Enums.HierarchyRoleEnum.Fan),
-            CreateDeviceType("UPS System", SlcAsset_Management.Enums.HierarchyRoleEnum.Chassis, SlcAsset_Management.Enums.TagOption.PowerProvider, SlcAsset_Management.Enums.TagOption.RackUnitConsumer),
-            CreateDeviceType("Enterprise Storage Drive", SlcAsset_Management.Enums.HierarchyRoleEnum.Module, SlcAsset_Management.Enums.TagOption.AcceptsDataConnection),
-        ];
+        #region Asset Port Instances (DataPort, PowerPort)
 
         private static PowerPort CreatePowerPort(int i)
         {
@@ -134,42 +140,74 @@
             };
         }
 
-        private static List<DataPort> GenerateRandomDataPorts()
+        #endregion
+
+        #region AssetClass Port Templates (DataPortInfo, PowerPortInfo)
+
+        /// <summary>
+        /// Generates random DataPortInfo templates for AssetClass.
+        /// These are specifications/templates, not actual port instances.
+        /// </summary>
+        private static List<DataPortInfo> GenerateRandomDataPortInfos()
         {
-            int portCount = _random.Next(0, 6); // 0 to 5 ports
-            var ports = new List<DataPort>();
+            int portCount = _random.Next(1, 6); // 1 to 5 port templates
+            var portInfos = new List<DataPortInfo>();
+            
             for (int i = 1; i <= portCount; i++)
             {
-                ports.Add(CreateDataPort(i));
+                portInfos.Add(new DataPortInfo
+                {
+                    Name = $"Port {i}",
+                    PortNumber = i,
+                    OutputType = (SlcAsset_Management.Enums.Outputtype)(i % 3),
+                    PortExposure = (SlcAsset_Management.Enums.PortExposureEnum)(i % 2),
+                    Label = $"ETH{i}",
+                });
             }
 
-            return ports;
+            return portInfos;
         }
 
-        private static List<PowerPort> GenerateRandomPowerPorts()
+        /// <summary>
+        /// Generates random PowerPortInfo templates for AssetClass.
+        /// These are specifications/templates, not actual port instances.
+        /// </summary>
+        private static List<PowerPortInfo> GenerateRandomPowerPortInfos()
         {
-            int portCount = _random.Next(0, 6); // 0 to 5 ports
-            var ports = new List<PowerPort>();
+            int portCount = _random.Next(1, 4); // 1 to 3 power port templates
+            var portInfos = new List<PowerPortInfo>();
+            
             for (int i = 1; i <= portCount; i++)
             {
-                ports.Add(CreatePowerPort(i));
+                portInfos.Add(new PowerPortInfo
+                {
+                    Identifier = Guid.NewGuid().ToString(),
+                    Name = $"PWR {i}",
+                    PortNumber = i,
+                    PortExposure = (SlcAsset_Management.Enums.PortExposureEnum)(i % 2),
+                    OutputType = (SlcAsset_Management.Enums.Outputtype)(i % 3),
+                    Label = $"PWR-{i}",
+                });
             }
 
-            return ports;
+            return portInfos;
         }
+
+        #endregion
 
         private static Asset CreateAsset(
             int orderNo,
+            string assetClassIdentifier,
             string serialNumber,
             string macAddress)
         {
             var assetId = Guid.NewGuid();
             return new Asset
             {
-                Identifier = assetId.ToString(),
+                State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available,
                 AssetID = assetId.ToString(),
                 Name = $"Test Asset {orderNo}",
-                AssetClassId = null,
+                AssetClassId = new SdmObjectReference<AssetClass>(assetClassIdentifier),
                 Description = $"Sample asset {orderNo}",
                 FW_OS = $"FW1.{orderNo}",
                 SerialNumber = serialNumber,
@@ -223,18 +261,19 @@
         }
 
         private static AssetClass CreateAssetClass(
-        int orderNo,
-        string deviceName,
-        string deviceDescription,
-        double depth,
-        double height,
-        double width,
-        double heightU,
-        double weight,
-        string frontImage,
-        string backImage,
-        double typicalPowerConsumption,
-        double maximumPowerConsumption)
+            int orderNo,
+            string deviceName,
+            string deviceDescription,
+            string deviceTypeIdentifier,
+            double depth,
+            double height,
+            double width,
+            double heightU,
+            double weight,
+            string frontImage,
+            string backImage,
+            double typicalPowerConsumption,
+            double maximumPowerConsumption)
         {
             var newId = Guid.NewGuid();
             return new AssetClass
@@ -242,7 +281,7 @@
                 Identifier = newId.ToString(),
                 Id = newId,
                 Name = deviceName,
-                DeviceTypeId = new SdmObjectReference<DeviceType>(Guid.NewGuid().ToString()),
+                DeviceTypeId = new SdmObjectReference<DeviceType>(deviceTypeIdentifier),
                 Description = deviceDescription,
                 Manufacturer = Guid.NewGuid(),
                 Depth = depth,
@@ -261,8 +300,9 @@
                     EndOfService = DateTime.UtcNow.AddYears(7),
                     NominalLifetime = TimeSpan.FromDays(365 * 7),
                 },
-                DataPorts = GenerateRandomDataPorts(),
-                PowerPorts = GenerateRandomPowerPorts(),
+                // Port templates (specifications) - NOT actual instances
+                DataPorts = GenerateRandomDataPortInfos(),
+                PowerPorts = GenerateRandomPowerPortInfos(),
                 Holders = new List<AssetHolder>
                 {
                     new AssetHolder
@@ -284,7 +324,6 @@
                 Name = name,
                 HierarchyInfo = new HierarchyInfo
                 {
-                    Identifier = Guid.NewGuid().ToString(),
                     HierarchyRole = role,
                 },
                 TagsInfo = new TagsInfo

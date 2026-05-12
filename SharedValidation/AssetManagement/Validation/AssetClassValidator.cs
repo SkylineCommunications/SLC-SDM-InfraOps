@@ -195,80 +195,80 @@
 
         private ValidationResult ValidateDimensions(AssetClass assetClass)
         {
-            var result = new ValidationResult();
+            var validations = new List<ValidationResult>();
 
             if (assetClass.DepthField.Changed
                 && !AssetClassValidationHandler.IsDepthValid(assetClass, out var depthResult))
             {
-                result.AddFailuresFrom(depthResult);
+                validations.Add(depthResult);
             }
 
             if (assetClass.WidthField.Changed
                 && !AssetClassValidationHandler.IsWidthValid(assetClass, out var widthResult))
             {
-                result.AddFailuresFrom(widthResult);
+                validations.Add(widthResult);
             }
 
             if (assetClass.HeightField.Changed
                 && !AssetClassValidationHandler.IsHeightValid(assetClass, out var heightResult))
             {
-                result.AddFailuresFrom(heightResult);
+                validations.Add(heightResult);
             }
 
             if (assetClass.HeightUField.Changed
                 && !AssetClassValidationHandler.IsHeightUnitValid(assetClass, out var heightUResult))
             {
-                result.AddFailuresFrom(heightUResult);
+                validations.Add(heightUResult);
             }
 
             if (assetClass.WeightField.Changed
                 && !AssetClassValidationHandler.IsWeightValid(assetClass, out var weightResult))
             {
-                result.AddFailuresFrom(weightResult);
+                validations.Add(weightResult);
             }
 
-            return result;
+            return validations.MergeAll();
         }
 
         private ValidationResult ValidatePowerConsumption(AssetClass assetClass)
         {
-            var result = new ValidationResult();
+            var validations = new List<ValidationResult>();
 
             if (assetClass.TypicalPowerConsumptionField.Changed
                 && !AssetClassValidationHandler.IsTypicalPowerConsumptionValid(assetClass, out var typicalResult))
             {
-                result.AddFailuresFrom(typicalResult);
+                validations.Add(typicalResult);
             }
 
             if (assetClass.MaximumPowerConsumptionField.Changed
                 && !AssetClassValidationHandler.IsMaxPowerConsumptionValid(assetClass, out var maxResult))
             {
-                result.AddFailuresFrom(maxResult);
+                validations.Add(maxResult);
             }
 
-            return result;
+            return validations.MergeAll();
         }
 
         private ValidationResult ValidateCollections(AssetClass assetClass)
         {
-            var result = new ValidationResult();
+            var validations = new List<ValidationResult>();
 
             if (assetClass.DataPortsField.Changed)
             {
-                result.AddFailuresFrom(AssetClassValidationHandler.ValidateAssetClassDataPort(assetClass));
+                validations.Add(AssetClassValidationHandler.ValidateAssetClassDataPort(assetClass));
             }
 
             if (assetClass.PowerPortsField.Changed)
             {
-                result.AddFailuresFrom(AssetClassValidationHandler.ValidateAssetClassPowerPort(assetClass));
+                validations.Add(AssetClassValidationHandler.ValidateAssetClassPowerPort(assetClass));
             }
 
             if (assetClass.HoldersField.Changed)
             {
-                result.AddFailuresFrom(AssetClassValidationHandler.ValidateAssetClassHolders(assetClass));
+                validations.Add(AssetClassValidationHandler.ValidateAssetClassHolders(assetClass));
             }
 
-            return result;
+            return validations.MergeAll();
         }
 
         #endregion

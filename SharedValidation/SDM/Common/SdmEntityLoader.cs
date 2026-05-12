@@ -8,37 +8,40 @@ namespace Skyline.DataMiner.SDM.Common.Services
 
     using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
+    using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
-    using Skyline.DataMiner.SDM.AssetManagement.Repositories;
     using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
-    using Skyline.DataMiner.SDM.FacilityManagement.Repositories;
 
     /// <summary>
     /// Shared service for loading and querying SDM entities across domains.
     /// Centralizes all data access logic to avoid duplication.
     /// Acts as a facade for all repository operations.
+    /// <para>
+    /// Note: This class only performs read operations (Count, Read) on the repositories.
+    /// While IBulkRepository provides CRUD operations, this loader is designed for queries only.
+    /// </para>
     /// </summary>
     public class SdmEntityLoader
     {
-        private readonly IAssetQueryRepository _assetRepository;
-        private readonly IAssetClassQueryRepository _assetClassRepository;
-        private readonly IDeviceTypeQueryRepository _deviceTypeRepository;
-        private readonly IRackQueryRepository _rackRepository;
-        private readonly IDataPortQueryRepository _dataPortRepository;
-        private readonly IPowerPortQueryRepository _powerPortRepository;
-        private readonly IInfraopsReservationQueryRepository _reservationRepository;
-        private readonly IPortTypeQueryRepository _portTypeRepository;
+        private readonly IBulkRepository<Asset> _assetRepository;
+        private readonly IBulkRepository<AssetClass> _assetClassRepository;
+        private readonly IBulkRepository<DeviceType> _deviceTypeRepository;
+        private readonly IBulkRepository<Rack> _rackRepository;
+        private readonly IBulkRepository<DataPort> _dataPortRepository;
+        private readonly IBulkRepository<PowerPort> _powerPortRepository;
+        private readonly IBulkRepository<InfraopsReservation> _reservationRepository;
+        private readonly IBulkRepository<PortType> _portTypeRepository;
 
         public SdmEntityLoader(
-            IAssetQueryRepository assetRepository = null,
-            IAssetClassQueryRepository assetClassRepository = null,
-            IDeviceTypeQueryRepository deviceTypeRepository = null,
-            IRackQueryRepository rackRepository = null,
-            IDataPortQueryRepository dataPortRepository = null,
-            IPowerPortQueryRepository powerPortRepository = null,
-            IInfraopsReservationQueryRepository reservationRepository = null,
-            IPortTypeQueryRepository portTypeRepository = null)
+            IBulkRepository<Asset> assetRepository = null,
+            IBulkRepository<AssetClass> assetClassRepository = null,
+            IBulkRepository<DeviceType> deviceTypeRepository = null,
+            IBulkRepository<Rack> rackRepository = null,
+            IBulkRepository<DataPort> dataPortRepository = null,
+            IBulkRepository<PowerPort> powerPortRepository = null,
+            IBulkRepository<InfraopsReservation> reservationRepository = null,
+            IBulkRepository<PortType> portTypeRepository = null)
         {
             _assetRepository = assetRepository;
             _assetClassRepository = assetClassRepository;
@@ -143,8 +146,8 @@ namespace Skyline.DataMiner.SDM.Common.Services
 
             try
             {
-                //var filter = DataPortExposers.AssetFk.Asset.Equal(asset);
-                return _dataPortRepository.Read(null).ToList();
+                var filter = DataPortExposers.Asset.Equal(asset);
+                return _dataPortRepository.Read(filter).ToList();
             }
             catch (Exception ex)
             {

@@ -268,7 +268,7 @@
 			var filter = AssetClassExposers.DataPorts.PortNumber.Equal(4);
 			var classesRetrieved = helper.AssetClasses.Read(filter);
 
-			var expected = DemoData.AssetClasses.Where(ac => ac.DataPorts.Any(port => port.DataPortInfo.PortNumber == 4)).ToArray();
+			var expected = DemoData.AssetClasses.Where(ac => ac.DataPorts.Any(port => port.PortNumber == 4)).ToArray();
 
 			using (new AssertionScope())
 			{

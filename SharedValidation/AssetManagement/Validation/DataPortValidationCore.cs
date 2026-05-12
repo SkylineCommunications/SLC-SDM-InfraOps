@@ -36,7 +36,7 @@
             var result = new ValidationResult();
 
             // Mandatory fields
-            if (dataPort.DataPortInfoField.Changed)
+            if (dataPort.DataPortInfo.Changed)
             {
                 if (!DataPortValidationHandler.AreMandatoryFieldsValid(dataPort, out var mandatoryResult))
                 {
@@ -46,7 +46,7 @@
             }
 
             // Asset link
-            if (dataPort.AssetFkField.Changed)
+            if (dataPort.AssetFk.Changed)
             {
                 if (!DataPortValidationHandler.IsAssetLinkValid(dataPort, out var assetLinkResult))
                 {
@@ -54,7 +54,7 @@
                 }
             }
 
-            if (dataPort.AddressInfoField.Changed || dataPort.PrimaryPortRelationField.Changed)
+            if (dataPort.AddressInfo.Changed || dataPort.PrimaryPortRelation.Changed)
             {
                 if (!DataPortValidationHandler.IsAddressInfoValid(dataPort, out var addressResult))
                 {
