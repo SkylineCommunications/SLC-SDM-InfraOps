@@ -37,7 +37,7 @@
 		<PackageReference Include="Skyline.DataMiner.SDM.Linq" />
 		<!-- SDM source generator is intentionally disabled. The *.g.cs output files are committed to source control.
 		     Re-enabling this package will trigger automatic regeneration on build. See the README for context. -->
-		<!--<PackageReference Include="Skyline.DataMiner.SDM.SourceGenerator" Version="0.3.1" OutputItemType="Analyzer" ReferenceoutputAssembly="false" />-->
+		<!--<PackageReference Include="Skyline.DataMiner.SDM.SourceGenerator" Version="0.3.1" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />-->
 		<PackageReference Include="Skyline.DataMiner.Utils.DOM" />
 		<PackageReference Include="Skyline.DataMiner.Utils.PerformanceAnalyzer" />
 		<PackageReference Include="Skyline.DataMiner.Utils.SecureCoding" />
