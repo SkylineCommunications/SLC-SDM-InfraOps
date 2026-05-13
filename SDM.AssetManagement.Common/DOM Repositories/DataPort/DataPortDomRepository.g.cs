@@ -58,13 +58,13 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             var existing = new HashSet<string>();
             foreach (var batch in createObjects.Batch(500))
             {
-                existing.UnionWith(Read(new ORFilterElement<DataPort>(batch.Select(obj => DataPortExposers.Identifier.Equal(obj.Identifier)).ToArray())).Select(obj => obj.Identifier));
+                existing.UnionWith(Read(new ORFilterElement<DataPort>(batch.Where(obj => !String.IsNullOrWhiteSpace(obj.Identifier)).Select(obj => DataPortExposers.Identifier.Equal(obj.Identifier)).ToArray())).Select(obj => obj.Identifier));
             }
 
             // Create the remainder
             var SuccessfulItems = new List<DataPort>();
             var failures = new Dictionary<string, Exception>();
-            var objects = createObjects.Where(obj => !existing.Contains(obj.Identifier)).ToDictionary(obj => obj.Identifier);
+           
             foreach (var batch in createObjects.Select(ToInstance).Batch(helper.DomInstances.MaxAmountBulkOperation))
             {
                 helper.DomInstances.TryCreateOrUpdate(batch.ToList(), out var result);
@@ -721,6 +721,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         {
             switch (fieldName)
             {
+                case "Identifier":
+                    return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.Id, comparer, Guid.Parse((string)value));
                 case "DataPortInfo.Name":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.Name), comparer, (string)value);
                 case "DataPortInfo.PortNumber":
@@ -756,6 +758,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         {
             switch (fieldName)
             {
+                case "Identifier":
+                    return OrderByElementFactory.Create(DomInstanceExposers.Id, sortOrder, naturalSort);
                 case "DataPortInfo.Name":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.Name), sortOrder, naturalSort);
                 case "DataPortInfo.PortNumber":

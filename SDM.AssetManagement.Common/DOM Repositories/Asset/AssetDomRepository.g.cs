@@ -29,7 +29,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     using SLDataGateway.API.Querying;
     using SLDataGateway.API.Types.Querying;
 
-    using static Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper;
+    //using static Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper;
 
     internal partial class AssetDomRepository : IBulkRepository<Asset>, IAssetQueryRepository
     {
@@ -65,14 +65,13 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             var existing = new HashSet<string>();
             foreach (var batch in createObjects.Batch(500))
             {
-                existing.UnionWith(Read(new ORFilterElement<Asset>(batch.Select(obj => AssetExposers.Identifier.Equal(obj.Identifier)).ToArray())).Select(obj => obj.Identifier));
+                existing.UnionWith(Read(new ORFilterElement<Asset>(batch.Where(obj => !String.IsNullOrWhiteSpace(obj.Identifier)).Select(obj => AssetExposers.Identifier.Equal(obj.Identifier)).ToArray())).Select(obj => obj.Identifier));
             }
 
             // Create the remainder
             var SuccessfulItems = new List<Asset>();
             var failures = new Dictionary<string, Exception>();
-            var objects = createObjects.Where(obj => !existing.Contains(obj.Identifier)).ToDictionary(obj => obj.Identifier);
-
+            
             foreach (var batch in createObjects.Select(ToInstance).Batch(helper.DomInstances.MaxAmountBulkOperation))
             {
                 helper.DomInstances.TryCreateOrUpdate(batch.ToList(), out var result);
@@ -1059,11 +1058,11 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 case "Location.Side":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Side), comparer, (int)(SlcAsset_Management.Enums.SideEnum)value);
                 case "Location.RackId":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Rack), comparer, Guid.Parse((string)value));
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Rack), comparer, System.Guid.Parse(Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.FacilityManagement.Models.Rack>.Convert(value).Identifier));
                 case "Location.DeskId":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Desk), comparer, Guid.Parse((string)value));
                 case "Location.Container":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Container), comparer, Guid.Parse((string)value));
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Container), comparer, System.Guid.Parse(Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.FacilityManagement.Models.Facility>.Convert(value).Identifier));
                 case "Location.RoomId":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Room), comparer, Guid.Parse((string)value));
                 case "Lifecycle.PurchaseDate":

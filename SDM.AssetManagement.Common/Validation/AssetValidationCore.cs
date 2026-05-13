@@ -64,7 +64,7 @@
                 .AndThen(ValidateLocationBusinessRules)
                 .AndThen(ValidateDestinationLocationBusinessRules)
                 .AndThen(ValidateLifecycle)
-                .AndThen(ValidateOwnership)
+                .AndThen(ValidateOwnershipAndCustody)
                 .AndThen(ValidateCollections);
 
             return assetClassValidation.AndThen(businessRules);
@@ -85,7 +85,7 @@
         {
             var result = new ValidationResult();
 
-            if (asset.AssetClassIdField.Changed)
+            if (asset.IsNew || asset.AssetClassIdField.Changed)
             {
                 if (!AssetValidationHandler.IsAssetClassValid(asset, out var assetClassResult))
                 {
@@ -229,7 +229,7 @@
             return validations.MergeAll();
         }
 
-        private ValidationResult ValidateOwnership(Asset asset)
+        private ValidationResult ValidateOwnershipAndCustody(Asset asset)
         {
             var validations = new List<ValidationResult>();
 
@@ -329,13 +329,13 @@
             var exceptIds = GetExceptIdentifiers(asset, context);
 
             // Name uniqueness
-            if (asset.NameField.Changed)
+            if (asset.IsNew || asset.NameField.Changed)
             {
                 validations.Add(ValidateNameUniqueness(asset.Name, exceptIds));
             }
 
             // Asset ID uniqueness
-            if (asset.AssetIDField.Changed)
+            if (asset.IsNew || asset.AssetIDField.Changed)
             {
                 validations.Add(ValidateAssetIdUniqueness(asset.AssetID, exceptIds));
             }

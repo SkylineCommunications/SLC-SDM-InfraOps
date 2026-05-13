@@ -32,10 +32,12 @@
 			return connectionMock.Object;
 		}
 
-		internal static IAssetManagementApiHelper GetMockedAssetManagementHelper(this IConnection connection)
+		internal static IAssetManagementApiHelper GetMockedAssetManagementHelper(
+            this IConnection connection, 
+            IFacilityManagementApiHelper facilityManagementHelper)
 		{
-			return new AssetManagementApiHelper(connection);
-		}
+            return new AssetManagementApiHelper(connection, facilityManagementHelper);
+        }
 
         internal static IFacilityManagementApiHelper GetMockedFacilityManagementHelper(this IConnection connection)
         {

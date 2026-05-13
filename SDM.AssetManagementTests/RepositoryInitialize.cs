@@ -1,7 +1,15 @@
 ﻿namespace SDM.AssetManagement.Tests
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+
     using SDM.AssetManagement.Tests.Setup;
 
+    using SharedMappers.DomIds;
+
+    using Skyline.DataMiner.Net.Messages.SLDataGateway;
+    using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Helpers;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
@@ -11,172 +19,340 @@
         public static ITestApiHelper InitializeEmptyRepositories()
         {
             var connection = ConnectionHelper.CreateConnection();
-            var assetHelper = connection.GetMockedAssetManagementHelper();
             var facilityHelper = connection.GetMockedFacilityManagementHelper();
-            
+            var assetHelper = connection.GetMockedAssetManagementHelper(facilityHelper);
+
             return new TestApiHelper(assetHelper, facilityHelper);
         }
 
-        /// <summary>
-        /// Populates the Assets repository with the provided <paramref name="assets"/> test data.
-        /// </summary>
-        /// <param name="helper">Composite test helper.</param>
-        /// <param name="assets">Predefined collection of <see cref="Asset"/>s to create.</param>
-        /// <returns><see cref="ITestApiHelper"/> with populated data.</returns>
+        #region Assets
+
         public static ITestApiHelper PopulateAssets(this ITestApiHelper helper, IEnumerable<Asset> assets)
         {
-            if (assets is null || !assets.Any())
+            if (assets == null)
             {
-                return helper.PopulateAssets();
+                throw new ArgumentNullException(nameof(assets));
             }
 
             helper.AssetManagement.Assets.Create(assets);
-
             return helper;
         }
 
-        /// <summary>
-        /// Populates the Assets repository with default <seealso cref="Asset"/> test data.
-        /// </summary>
-        /// <param name="helper">Composite test helper.</param>
-        /// <returns><see cref="ITestApiHelper"/> with populated data.</returns>
         public static ITestApiHelper PopulateAssets(this ITestApiHelper helper)
         {
-            helper.AssetManagement.Assets.Create(DemoData.Assets);
+            var persistedAssetClasses = helper.AssetManagement.AssetClasses
+                .Read(new TRUEFilterElement<AssetClass>()).ToList();
 
+            var persistedRacks = helper.FacilityManagement.Racks
+                .Read(new TRUEFilterElement<Rack>()).ToList();
+
+            var assets = new List<Asset>();
+            for (int i = 0; i < DemoData.BaseAssets.Count; i++)
+            {
+                var baseAsset = DemoData.BaseAssets[i];
+
+                // Clone the object and set references
+                var assetClassIndex = i % persistedAssetClasses.Count;
+                var rackIndex = i % persistedRacks.Count;
+
+                var asset = CloneAsset(baseAsset);
+                asset.AssetClassId = new SdmObjectReference<AssetClass>(persistedAssetClasses[assetClassIndex].Identifier);
+                asset.Location.RackId = new SdmObjectReference<Rack>(persistedRacks[rackIndex].Identifier);
+
+                assets.Add(asset);
+            }
+
+            helper.AssetManagement.Assets.Create(assets);
             return helper;
         }
 
-        /// <summary>
-        /// Populates the AssetClasses repository with the provided <paramref name="assetClasses"/> test data.
-        /// </summary>
-        /// <param name="helper">Composite test helper.</param>
-        /// <param name="assetClasses">Predefined collection of <see cref="AssetClass"/>es to create.</param>
-        /// <returns><see cref="ITestApiHelper"/> with populated data.</returns>
+        #endregion
+
+        #region AssetClasses
+
         public static ITestApiHelper PopulateAssetClasses(this ITestApiHelper helper, IEnumerable<AssetClass> assetClasses)
         {
-            if (assetClasses is null || !assetClasses.Any())
+            if (assetClasses == null)
             {
-                return helper.PopulateAssetClasses();
+                throw new ArgumentNullException(nameof(assetClasses));
             }
 
             helper.AssetManagement.AssetClasses.Create(assetClasses);
-
             return helper;
         }
 
-        /// <summary>
-        /// Populates the AssetClasses repository with default <seealso cref="AssetClass"/> test data.
-        /// </summary>
-        /// <param name="helper">Composite test helper.</param>
-        /// <returns><see cref="ITestApiHelper"/> with populated data.</returns>
         public static ITestApiHelper PopulateAssetClasses(this ITestApiHelper helper)
         {
-            helper.AssetManagement.AssetClasses.Create(DemoData.AssetClasses);
+            var persistedDeviceTypes = helper.AssetManagement.DeviceTypes
+                .Read(new TRUEFilterElement<DeviceType>()).ToList();
 
+            var assetClasses = new List<AssetClass>();
+            for (int i = 0; i < DemoData.BaseAssetClasses.Count; i++)
+            {
+                var baseClass = DemoData.BaseAssetClasses[i];
+
+                // Clone the object and set reference
+                var deviceTypeIndex = i % persistedDeviceTypes.Count;
+
+                var assetClass = CloneAssetClass(baseClass);
+                assetClass.DeviceTypeId = new SdmObjectReference<DeviceType>(persistedDeviceTypes[deviceTypeIndex].Identifier);
+
+                assetClasses.Add(assetClass);
+            }
+
+            helper.AssetManagement.AssetClasses.Create(assetClasses);
             return helper;
         }
 
-        /// <summary>
-        /// Populates the DataPorts repository with default <seealso cref="DataPort"/> test data.
-        /// </summary>
-        /// <param name="helper">Composite test helper.</param>
-        /// <returns><see cref="ITestApiHelper"/> with populated data.</returns>
-        public static ITestApiHelper PopulateDataPorts(this ITestApiHelper helper)
-        {
-            helper.AssetManagement.DataPorts.Create(DemoData.DataPorts);
+        #endregion
 
-            return helper;
-        }
+        #region DataPorts
 
-        /// <summary>
-        /// Populates the DataPorts repository with the provided <paramref name="dataPorts"/> test data.
-        /// </summary>
-        /// <param name="helper">Composite test helper.</param>
-        /// <param name="dataPorts">Predefined collection of <see cref="DataPort"/>s to create.</param>
-        /// <returns><see cref="ITestApiHelper"/> with populated data.</returns>
         public static ITestApiHelper PopulateDataPorts(this ITestApiHelper helper, IEnumerable<DataPort> dataPorts)
         {
-            if (dataPorts is null || !dataPorts.Any())
+            if (dataPorts == null)
             {
-                return helper.PopulateDataPorts();
+                throw new ArgumentNullException(nameof(dataPorts));
             }
 
             helper.AssetManagement.DataPorts.Create(dataPorts);
-
             return helper;
         }
 
-        /// <summary>
-        /// Populates the PowerPorts repository with default <seealso cref="PowerPort"/> test data.
-        /// </summary>
-        /// <param name="helper">Composite test helper.</param>
-        /// <returns><see cref="ITestApiHelper"/> with populated data.</returns>
+        public static ITestApiHelper PopulateDataPorts(this ITestApiHelper helper)
+        {
+            var persistedAssets = helper.AssetManagement.Assets
+                .Read(new TRUEFilterElement<Asset>()).ToList();
+
+            var dataPorts = new List<DataPort>();
+            for (int i = 0; i < DemoData.BaseDataPorts.Count; i++)
+            {
+                var basePort = DemoData.BaseDataPorts[i];
+
+                // Clone the object and set reference
+                var assetIndex = i % persistedAssets.Count;
+
+                var dataPort = CloneDataPort(basePort);
+                dataPort.AssetFk = new AssetRelation
+                {
+                    Asset = new SdmObjectReference<Asset>(persistedAssets[assetIndex].Identifier),
+                };
+
+                dataPorts.Add(dataPort);
+            }
+
+            helper.AssetManagement.DataPorts.Create(dataPorts);
+            return helper;
+        }
+
+        #endregion
+
+        #region PowerPorts
+
+        public static ITestApiHelper PopulatePowerPorts(this ITestApiHelper helper, IEnumerable<PowerPort> powerPorts)
+        {
+            if (powerPorts == null)
+            {
+                throw new ArgumentNullException(nameof(powerPorts));
+            }
+
+            helper.AssetManagement.PowerPorts.Create(powerPorts);
+            return helper;
+        }
+
         public static ITestApiHelper PopulatePowerPorts(this ITestApiHelper helper)
         {
-            helper.AssetManagement.PowerPorts.Create(DemoData.PowerPorts);
+            var persistedAssets = helper.AssetManagement.Assets
+                .Read(new TRUEFilterElement<Asset>()).ToList();
 
+            var powerPorts = new List<PowerPort>();
+            for (int i = 0; i < DemoData.BasePowerPorts.Count; i++)
+            {
+                var basePort = DemoData.BasePowerPorts[i];
+
+                // Clone the object and set reference
+                var assetIndex = i % persistedAssets.Count;
+
+                var powerPort = ClonePowerPort(basePort);
+                powerPort.Asset = new SdmObjectReference<Asset>(persistedAssets[assetIndex].Identifier);
+
+                powerPorts.Add(powerPort);
+            }
+
+            helper.AssetManagement.PowerPorts.Create(powerPorts);
             return helper;
         }
 
-        /// <summary>
-        /// Populates the DeviceType repository with default <seealso cref="DeviceType"/> test data.
-        /// </summary>
-        /// <param name="helper">Composite test helper.</param>
-        /// <returns><see cref="ITestApiHelper"/> with populated data.</returns>
-        public static ITestApiHelper PopulateDeviceTypes(this ITestApiHelper helper)
-        {
-            helper.AssetManagement.DeviceTypes.Create(DemoData.DeviceTypes);
+        #endregion
 
-            return helper;
-        }
+        #region DeviceTypes
 
-        /// <summary>
-        /// Populates the DeviceType repository with the provided <paramref name="deviceTypes"/> test data.
-        /// </summary>
-        /// <param name="helper">Composite test helper.</param>
-        /// <param name="deviceTypes">Predefined collection of <see cref="DeviceType"/>s to create.</param>
-        /// <returns><see cref="ITestApiHelper"/> with populated data.</returns>
         public static ITestApiHelper PopulateDeviceTypes(this ITestApiHelper helper, IEnumerable<DeviceType> deviceTypes)
         {
-            if (deviceTypes is null || !deviceTypes.Any())
+            if (deviceTypes == null)
             {
-                return helper.PopulateDeviceTypes();
+                throw new ArgumentNullException(nameof(deviceTypes));
             }
 
             helper.AssetManagement.DeviceTypes.Create(deviceTypes);
-
             return helper;
         }
 
-        /// <summary>
-        /// Populates the Racks repository with default <seealso cref="Rack"/> test data.
-        /// </summary>
-        /// <param name="helper">Composite test helper.</param>
-        /// <returns><see cref="ITestApiHelper"/> with populated data.</returns>
-        public static ITestApiHelper PopulateRacks(this ITestApiHelper helper)
+        public static ITestApiHelper PopulateDeviceTypes(this ITestApiHelper helper)
         {
-            helper.FacilityManagement.Racks.Create(DemoData.Racks);
-            
+            // DeviceTypes have no dependencies, so we can use them directly
+            helper.AssetManagement.DeviceTypes.Create(DemoData.DeviceTypes);
             return helper;
         }
 
-        /// <summary>
-        /// Populates the Racks repository with the provided <paramref name="racks"/> test data.
-        /// </summary>
-        /// <param name="helper">Composite test helper.</param>
-        /// <param name="racks">Predefined collection of <see cref="Rack"/>s to create.</param>
-        /// <returns><see cref="ITestApiHelper"/> with populated data.</returns>
+        #endregion
+
+        #region Racks
+
         public static ITestApiHelper PopulateRacks(this ITestApiHelper helper, IEnumerable<Rack> racks)
         {
-            if (racks is null || !racks.Any())
+            if (racks == null)
             {
-                return helper.PopulateRacks();
+                throw new ArgumentNullException(nameof(racks));
             }
 
             helper.FacilityManagement.Racks.Create(racks);
-
             return helper;
         }
+
+        public static ITestApiHelper PopulateRacks(this ITestApiHelper helper)
+        {
+            // Racks have no dependencies, so we can use them directly
+            helper.FacilityManagement.Racks.Create(DemoData.Racks);
+            return helper;
+        }
+
+        #endregion
+
+        #region Cloning Methods
+
+        private static AssetClass CloneAssetClass(AssetClass source)
+        {
+            return new AssetClass
+            {
+                Name = source.Name,
+                Description = source.Description,
+                Manufacturer = source.Manufacturer,
+                Depth = source.Depth,
+                Height = source.Height,
+                Width = source.Width,
+                HeightU = source.HeightU,
+                Weight = source.Weight,
+                FrontImage = source.FrontImage,
+                BackImage = source.BackImage,
+                TypicalPowerConsumption = source.TypicalPowerConsumption,
+                MaximumPowerConsumption = source.MaximumPowerConsumption,
+                PowerSupply = source.PowerSupply,
+                Lifecycle = source.Lifecycle != null ? new AssetClassLifecycle
+                {
+                    EndOfLife = source.Lifecycle.EndOfLife,
+                    EndOfService = source.Lifecycle.EndOfService,
+                    NominalLifetime = source.Lifecycle.NominalLifetime,
+                } : null,
+                DataPorts = source.DataPorts != null ? new List<DataPortInfo>(source.DataPorts) : new List<DataPortInfo>(),
+                PowerPorts = source.PowerPorts != null ? new List<PowerPortInfo>(source.PowerPorts) : new List<PowerPortInfo>(),
+                Holders = source.Holders != null ? new List<AssetHolder>(source.Holders) : new List<AssetHolder>(),
+                // DeviceTypeId will be set by caller
+            };
+        }
+
+        private static Asset CloneAsset(Asset source)
+        {
+            return new Asset
+            {
+                State = source.State,
+                AssetID = source.AssetID,
+                Name = source.Name,
+                Description = source.Description,
+                FW_OS = source.FW_OS,
+                SerialNumber = source.SerialNumber,
+                HardwareVersion = source.HardwareVersion,
+                MacAddress = source.MacAddress,
+                Location = source.Location != null ? new AssetLocation
+                {
+                    RackPosition = source.Location.RackPosition,
+                    Side = source.Location.Side,
+                    // RackId will be set by caller
+                } : new AssetLocation(),
+                PurchaseDate = source.PurchaseDate,
+                FirstUseDate = source.FirstUseDate,
+                EndOfWarrantyDate = source.EndOfWarrantyDate,
+                InstallationDate = source.InstallationDate,
+                InstallationUserId = source.InstallationUserId,
+                ModificationDate = source.ModificationDate,
+                ModificationUserId = source.ModificationUserId,
+                EndOfLifeDate = source.EndOfLifeDate,
+                Ownership = source.Ownership != null ? new AssetOwnership
+                {
+                    Organization = source.Ownership.Organization,
+                    ContactPerson = source.Ownership.ContactPerson,
+                    ContactPersonRole = source.Ownership.ContactPersonRole,
+                    Team = source.Ownership.Team,
+                } : null,
+                Custody = source.Custody != null ? new AssetCustody
+                {
+                    From = source.Custody.From,
+                    Till = source.Custody.Till,
+                    ContactPerson = source.Custody.ContactPerson,
+                    Team = source.Custody.Team,
+                    Organization = source.Custody.Organization,
+                    ContactPersonRole = source.Custody.ContactPersonRole,
+                } : null,
+                Holders = source.Holders != null ? new List<AssetHolder>(source.Holders) : new List<AssetHolder>(),
+                ElementLinks = source.ElementLinks != null ? new List<ElementLink>(source.ElementLinks) : new List<ElementLink>(),
+                // AssetClassId will be set by caller
+            };
+        }
+
+        private static DataPort CloneDataPort(DataPort source)
+        {
+            return new DataPort
+            {
+                DataPortInfo = source.DataPortInfo != null ? new DataPortInfo
+                {
+                    Name = source.DataPortInfo.Name,
+                    PortNumber = source.DataPortInfo.PortNumber,
+                    OutputType = source.DataPortInfo.OutputType,
+                    PortExposure = source.DataPortInfo.PortExposure,
+                    Label = source.DataPortInfo.Label,
+                } : new DataPortInfo(),
+                AddressInfo = source.AddressInfo != null ? new AddressInfo
+                {
+                    Ipv4Address = source.AddressInfo.Ipv4Address,
+                    Ipv6Address = source.AddressInfo.Ipv6Address,
+                    Hostname = source.AddressInfo.Hostname,
+                    DNS = source.AddressInfo.DNS,
+                } : null,
+                PrimaryPortRelation = source.PrimaryPortRelation != null ? new PrimaryPortRelation
+                {
+                    IsPrimaryIpv4 = source.PrimaryPortRelation.IsPrimaryIpv4,
+                    IsPrimaryIpv6 = source.PrimaryPortRelation.IsPrimaryIpv6,
+                } : null,
+                // AssetFk will be set by caller
+            };
+        }
+
+        private static PowerPort ClonePowerPort(PowerPort source)
+        {
+            return new PowerPort
+            {
+                PowerPortInfo = source.PowerPortInfo != null ? new PowerPortInfo
+                {
+                    Name = source.PowerPortInfo.Name,
+                    PortNumber = source.PowerPortInfo.PortNumber,
+                    PortExposure = source.PowerPortInfo.PortExposure,
+                    OutputType = source.PowerPortInfo.OutputType,
+                    Label = source.PowerPortInfo.Label,
+                } : new PowerPortInfo(),
+                // Asset will be set by caller
+            };
+        }
+
+        #endregion
     }
 }

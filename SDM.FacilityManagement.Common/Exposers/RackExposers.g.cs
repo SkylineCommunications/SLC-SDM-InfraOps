@@ -19,7 +19,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
     using SLDataGateway.API.Querying;
     using SLDataGateway.API.Types.Querying;
 
-    static partial class RackExposers
+    public static partial class RackExposers
     {
         public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Rack, string> Identifier = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Rack, string>((obj) => obj.Identifier, "Identifier");
         static RackExposers()

@@ -109,25 +109,25 @@
         {
             var helper = RepositoryInitialize.InitializeEmptyRepositories();
 
-            helper.Assets.Create(referenceAsset);
+            helper.AssetManagement.Assets.Create(referenceAsset);
 
-            AssertCreated(helper);
+            AssertCreated(helper.AssetManagement);
         }
 
         [TestMethod]
         public void AssetDomStorageProvider_EmptyDOM_CreateOrUpdate_Create()
         {
             var helper = RepositoryInitialize.InitializeEmptyRepositories();
-            helper.Assets.CreateOrUpdate([referenceAsset]);
+            helper.AssetManagement.Assets.CreateOrUpdate([referenceAsset]);
 
-            AssertCreated(helper);
+            AssertCreated(helper.AssetManagement);
         }
 
         [TestMethod]
         public void AssetDomStorageProvider_EmptyDOM_CreateOrUpdate_Update()
         {
             var helper = RepositoryInitialize.InitializeEmptyRepositories();
-            helper.Assets.Create(referenceAsset);
+            helper.AssetManagement.Assets.Create(referenceAsset);
 
             var updatedAsset = new Asset
             {
@@ -181,7 +181,7 @@
                 ],
             };
 
-            helper.Assets.CreateOrUpdate([updatedAsset]);
+            helper.AssetManagement.Assets.CreateOrUpdate([updatedAsset]);
 
             AssertAssetUpdateDifferences(referenceAsset, updatedAsset);
         }
@@ -194,8 +194,8 @@
             helper.PopulateAssets();
 
             FilterElement<Asset> allFilter = new TRUEFilterElement<Asset>();
-            var pagedResult = helper.Assets.ReadPaged(allFilter, pageCount);
-            var assetCount = helper.Assets.Count(allFilter);
+            var pagedResult = helper.AssetManagement.Assets.ReadPaged(allFilter, pageCount);
+            var assetCount = helper.AssetManagement.Assets.Count(allFilter);
 
             using (new AssertionScope())
             {
@@ -214,15 +214,15 @@
             var filter = new ORFilterElement<Asset>(
                 AssetExposers.AssetName.Equal("Test Asset 3"),
                 AssetExposers.AssetDescription.Equal("Sample asset 7"));
-            var assetToDelete = helper.Assets.Read(filter);
+            var assetToDelete = helper.AssetManagement.Assets.Read(filter);
 
-            helper.Assets.Delete(assetToDelete);
+            helper.AssetManagement.Assets.Delete(assetToDelete);
 
             using (new AssertionScope())
             {
-                helper.Assets.Count(new TRUEFilterElement<Asset>()).Should().Be(DemoData.Assets.Count - 2); // 8 records
-                helper.Assets.Count(AssetExposers.AssetName.Equal("Test Asset 3")).Should().Be(0);
-                helper.Assets.Count(AssetExposers.AssetDescription.Equal("Sample asset 7")).Should().Be(0);
+                helper.AssetManagement.Assets.Count(new TRUEFilterElement<Asset>()).Should().Be(DemoData.Assets.Count - 2); // 8 records
+                helper.AssetManagement.Assets.Count(AssetExposers.AssetName.Equal("Test Asset 3")).Should().Be(0);
+                helper.AssetManagement.Assets.Count(AssetExposers.AssetDescription.Equal("Sample asset 7")).Should().Be(0);
             }
         }
 
@@ -232,12 +232,12 @@
             var helper = RepositoryInitialize.InitializeEmptyRepositories();
             helper.PopulateAssets();
 
-            var assetToDelete = helper.Assets.Read(AssetExposers.AssetName.Equal("Test Asset 3")).First();
+            var assetToDelete = helper.AssetManagement.Assets.Read(AssetExposers.AssetName.Equal("Test Asset 3")).First();
 
-            helper.Assets.Delete(assetToDelete);
+            helper.AssetManagement.Assets.Delete(assetToDelete);
 
-            helper.Assets.Count(new TRUEFilterElement<Asset>()).Should().Be(DemoData.Assets.Count - 1);
-            helper.Assets.Count(AssetExposers.AssetId.Equal(assetToDelete.AssetID)).Should().Be(0);
+            helper.AssetManagement.Assets.Count(new TRUEFilterElement<Asset>()).Should().Be(DemoData.Assets.Count - 1);
+            helper.AssetManagement.Assets.Count(AssetExposers.AssetId.Equal(assetToDelete.AssetID)).Should().Be(0);
         }
 
         private static void AssertAssetUpdateDifferences(Asset original, Asset updated)

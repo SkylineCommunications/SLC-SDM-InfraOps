@@ -6,7 +6,7 @@
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
-    public class TagsInfo : SdmObject<TagsInfo>, IChangeTracking
+    public class TagsInfo : IChangeTracking
     {
         [JsonIgnore]
         private ChangeTrackingFieldHandler _fieldHandler;

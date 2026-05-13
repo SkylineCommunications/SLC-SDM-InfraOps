@@ -34,11 +34,11 @@
 
             // Create entity loader - now works directly!
             var entityLoader = new SdmEntityLoader(
-                assetRepository: helper.Assets,
-                assetClassRepository: helper.AssetClasses,
-                deviceTypeRepository: helper.DeviceTypes,
-                dataPortRepository: helper.DataPorts,
-                powerPortRepository: helper.PowerPorts,
+                assetRepository: helper.AssetManagement.Assets,
+                assetClassRepository: helper.AssetManagement.AssetClasses,
+                deviceTypeRepository: helper.AssetManagement.DeviceTypes,
+                dataPortRepository: helper.AssetManagement.DataPorts,
+                powerPortRepository: helper.AssetManagement.PowerPorts,
                 rackRepository: null,  // Add if needed
                 reservationRepository: null,  // Add if needed
                 portTypeRepository: null  // Add if needed

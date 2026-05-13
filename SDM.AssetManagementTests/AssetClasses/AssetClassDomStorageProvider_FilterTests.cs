@@ -21,7 +21,7 @@
 			var nameFilter = AssetClassExposers.DeviceName.Equal(deviceName);
 			var expected = DemoData.AssetClasses.Single(asset => asset.Name.Equals(deviceName));
 
-			var classesRetrieved = helper.AssetClasses.Read(nameFilter);
+			var classesRetrieved = helper.AssetManagement.AssetClasses.Read(nameFilter);
 
 			using (new AssertionScope())
 			{
@@ -59,7 +59,7 @@
 			var descriptionFilter = AssetClassExposers.DeviceDescription.Contains("Panel", StringComparison.OrdinalIgnoreCase); // DemoData.AssetClasses[7]
 			var expected = DemoData.AssetClasses[7];
 
-			var classesRetrieved = helper.AssetClasses.Read(descriptionFilter);
+			var classesRetrieved = helper.AssetManagement.AssetClasses.Read(descriptionFilter);
 
 			using (new AssertionScope())
 			{
@@ -116,7 +116,7 @@
 			var width = DemoData.AssetClasses[0].Width;
 			var widthFilter = AssetClassExposers.Width.Equal(width);
 
-			var classesRetrieved = helper.AssetClasses.Read(widthFilter);
+			var classesRetrieved = helper.AssetManagement.AssetClasses.Read(widthFilter);
 			var expected = DemoData.AssetClasses[0];
 
 			using (new AssertionScope())
@@ -139,7 +139,7 @@
 			double powerConsumptionThreshold = 200;
 			var maxPowerConsumptionFilter = AssetClassExposers.MaximumPowerConsumption.GreaterThanOrEqual(powerConsumptionThreshold);
 
-			var classesRetrieved = helper.AssetClasses.Read(maxPowerConsumptionFilter);
+			var classesRetrieved = helper.AssetManagement.AssetClasses.Read(maxPowerConsumptionFilter);
 			var actualArray = DemoData.AssetClasses.Where(assetClass => assetClass.MaximumPowerConsumption >= powerConsumptionThreshold).ToArray();
 
 			using (new AssertionScope())
@@ -164,7 +164,7 @@
 			var volumeFilter = AssetClassExposers.Height.LessThanOrEqual(heightThreshold)
 				.AND(AssetClassExposers.Width.LessThanOrEqual(widthThreshold))
 				.AND(AssetClassExposers.Depth.LessThanOrEqual(depthThreshold));
-			var classesRetrieved = helper.AssetClasses.Read(volumeFilter);
+			var classesRetrieved = helper.AssetManagement.AssetClasses.Read(volumeFilter);
 
 			var expected = DemoData.AssetClasses.Where(ac => ac.Height <= heightThreshold && ac.Width <= widthThreshold && ac.Depth <= depthThreshold).ToArray();
 			using (new AssertionScope())
@@ -183,7 +183,7 @@
 
 			var frontImageName = "fw-front.png";
 			var frontImageFilter = AssetClassExposers.FrontImage.Equal(frontImageName);
-			var classesRetrieved = helper.AssetClasses.Read(frontImageFilter);
+			var classesRetrieved = helper.AssetManagement.AssetClasses.Read(frontImageFilter);
 
 			using (new AssertionScope())
 			{
@@ -227,7 +227,7 @@
 			helper.PopulateAssetClasses();
 
 			var backImageFilter = AssetClassExposers.BackImage.NotContains(".png");
-			var classesRetrieved = helper.AssetClasses.Read(backImageFilter);
+			var classesRetrieved = helper.AssetManagement.AssetClasses.Read(backImageFilter);
 
 			var expected = DemoData.AssetClasses.Where(backImageFilter.getLambda()).ToArray();
 
@@ -248,7 +248,7 @@
 			double typicalPowerThreshold = 100.0;
 			var typicalPowerFilter = AssetClassExposers.TypicalPowerConsumption.LessThanOrEqual(typicalPowerThreshold);
 
-			var classesRetrieved = helper.AssetClasses.Read(typicalPowerFilter);
+			var classesRetrieved = helper.AssetManagement.AssetClasses.Read(typicalPowerFilter);
 			var expected = DemoData.AssetClasses.Where(ac => ac.TypicalPowerConsumption <= typicalPowerThreshold).ToArray();
 
 			using (new AssertionScope())
@@ -266,7 +266,7 @@
 			helper.PopulateAssetClasses();
 
 			var filter = AssetClassExposers.DataPorts.PortNumber.Equal(4);
-			var classesRetrieved = helper.AssetClasses.Read(filter);
+			var classesRetrieved = helper.AssetManagement.AssetClasses.Read(filter);
 
 			var expected = DemoData.AssetClasses.Where(ac => ac.DataPorts.Any(port => port.PortNumber == 4)).ToArray();
 
@@ -285,7 +285,7 @@
 			helper.PopulateAssetClasses();
 
 			var filter = AssetClassExposers.Holders.SlotNumber.Equal(6); // Should be DemoData.AssetClasses[5]
-			var classesRetrieved = helper.AssetClasses.Read(filter);
+			var classesRetrieved = helper.AssetManagement.AssetClasses.Read(filter);
 
 			var expected = DemoData.AssetClasses.First(ac => ac.Holders.Any(holder => holder.SlotNumber == 6));
 

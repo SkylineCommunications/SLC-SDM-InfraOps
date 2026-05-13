@@ -63,7 +63,6 @@
                 {
                     new PowerPortInfo
                     {
-                        Identifier = Guid.NewGuid().ToString(),
                         Name = "Power Port 1",
                         PortNumber = 1,
                         OutputType = SlcAsset_Management.Enums.Outputtype.Out,
@@ -72,7 +71,6 @@
                     },
                    new PowerPortInfo
                     {
-                        Identifier = Guid.NewGuid().ToString(),
                         Name = "Power Port 2",
                         PortNumber = 2,
                         OutputType = SlcAsset_Management.Enums.Outputtype.In,
@@ -105,25 +103,25 @@
         public void AssetClassDomStorageProvider_EmptyDOM_Create()
         {
             var helper = RepositoryInitialize.InitializeEmptyRepositories();
-            helper.AssetClasses.Create(referenceAssetClass);
+            helper.AssetManagement.AssetClasses.Create(referenceAssetClass);
 
-            AssertCreated(helper);
+            AssertCreated(helper.AssetManagement);
         }
 
         [TestMethod]
         public void AssetClassDomStorageProvider_EmptyDOM_CreateOrUpdate_Create()
         {
             var helper = RepositoryInitialize.InitializeEmptyRepositories();
-            helper.AssetClasses.CreateOrUpdate([referenceAssetClass]);
+            helper.AssetManagement.AssetClasses.CreateOrUpdate([referenceAssetClass]);
 
-            AssertCreated(helper);
+            AssertCreated(helper.AssetManagement);
         }
 
         [TestMethod]
         public void AssetClassDomStorageProvider_EmptyDOM_CreateOrUpdate_Update()
         {
             var helper = RepositoryInitialize.InitializeEmptyRepositories();
-            helper.AssetClasses.Create(referenceAssetClass);
+            helper.AssetManagement.AssetClasses.Create(referenceAssetClass);
 
             // Change more things here
             var updatedAssetClass = new AssetClass
@@ -164,7 +162,7 @@
                 Holders = new List<AssetHolder>(),
             };
 
-            helper.AssetClasses.CreateOrUpdate([updatedAssetClass]);
+            helper.AssetManagement.AssetClasses.CreateOrUpdate([updatedAssetClass]);
             AssertAssetClassUpdateDifferences(referenceAssetClass, updatedAssetClass);
         }
 
@@ -176,8 +174,8 @@
             helper.PopulateAssetClasses();
 
             FilterElement<AssetClass> allFilter = new TRUEFilterElement<AssetClass>();
-            var pagedResult = helper.AssetClasses.ReadPaged(allFilter, pageCount);
-            var assetClassCount = helper.AssetClasses.Count(allFilter);
+            var pagedResult = helper.AssetManagement.AssetClasses.ReadPaged(allFilter, pageCount);
+            var assetClassCount = helper.AssetManagement.AssetClasses.Count(allFilter);
 
             using (new AssertionScope())
             {
@@ -197,16 +195,16 @@
                 AssetClassExposers.DeviceName.Equal("UPS"),
                 AssetClassExposers.DeviceName.Equal("Firewall"),
                 AssetClassExposers.DeviceDescription.Contains("Ethernet", StringComparison.OrdinalIgnoreCase));
-            var assetClassesToDelete = helper.AssetClasses.Read(filter);
+            var assetClassesToDelete = helper.AssetManagement.AssetClasses.Read(filter);
 
-            helper.AssetClasses.Delete(assetClassesToDelete);
+            helper.AssetManagement.AssetClasses.Delete(assetClassesToDelete);
 
             using (new AssertionScope())
             {
-                helper.AssetClasses.Count(new TRUEFilterElement<AssetClass>()).Should().Be(DemoData.AssetClasses.Count - 3);
-                helper.AssetClasses.Count(AssetClassExposers.DeviceName.Equal("UPS")).Should().Be(0);
-                helper.AssetClasses.Count(AssetClassExposers.DeviceName.Equal("Firewall")).Should().Be(0);
-                helper.AssetClasses.Count(AssetClassExposers.DeviceDescription.Contains("Fiber")).Should().Be(0);
+                helper.AssetManagement.AssetClasses.Count(new TRUEFilterElement<AssetClass>()).Should().Be(DemoData.AssetClasses.Count - 3);
+                helper.AssetManagement.AssetClasses.Count(AssetClassExposers.DeviceName.Equal("UPS")).Should().Be(0);
+                helper.AssetManagement.AssetClasses.Count(AssetClassExposers.DeviceName.Equal("Firewall")).Should().Be(0);
+                helper.AssetManagement.AssetClasses.Count(AssetClassExposers.DeviceDescription.Contains("Fiber")).Should().Be(0);
             }
         }
 
@@ -216,12 +214,12 @@
             var helper = RepositoryInitialize.InitializeEmptyRepositories();
             helper.PopulateAssetClasses();
 
-            var assetClassToDelete = helper.AssetClasses.Read(AssetClassExposers.DeviceName.Equal("Router")).First();
+            var assetClassToDelete = helper.AssetManagement.AssetClasses.Read(AssetClassExposers.DeviceName.Equal("Router")).First();
 
-            helper.AssetClasses.Delete(assetClassToDelete);
+            helper.AssetManagement.AssetClasses.Delete(assetClassToDelete);
 
-            helper.AssetClasses.Count(new TRUEFilterElement<AssetClass>()).Should().Be(DemoData.AssetClasses.Count - 1);
-            helper.AssetClasses.Count(AssetClassExposers.Identifier.Equal(assetClassToDelete.Identifier)).Should().Be(0);
+            helper.AssetManagement.AssetClasses.Count(new TRUEFilterElement<AssetClass>()).Should().Be(DemoData.AssetClasses.Count - 1);
+            helper.AssetManagement.AssetClasses.Count(AssetClassExposers.Identifier.Equal(assetClassToDelete.Identifier)).Should().Be(0);
         }
 
         private static void AssertAssetClassUpdateDifferences(AssetClass original, AssetClass updated)

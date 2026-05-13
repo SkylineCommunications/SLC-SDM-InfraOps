@@ -1,11 +1,5 @@
 ﻿namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
 {
-    using System.Collections.Generic;
-    using System.Linq;
-
-    using SharedCommonLibrary.AssetManagement.Models;
-
-    using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 

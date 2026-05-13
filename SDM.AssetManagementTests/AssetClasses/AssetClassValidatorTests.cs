@@ -20,14 +20,14 @@
     [TestClass]
     public class AssetClassValidatorTests
     {
-        private IAssetManagementApiHelper _helper;
+        private ITestApiHelper _helper;
         private AssetClassValidator _validator;
 
         [TestInitialize]
         public void Setup()
         {
             _helper = RepositoryInitialize.InitializeEmptyRepositories();
-            _validator = _helper.AssetClassValidator;
+            _validator = _helper.AssetManagement.AssetClassValidator;
         }
 
         #region Constructor Tests
@@ -45,7 +45,7 @@
         public void Constructor_WithNullDeviceTypeRepository_ThrowsArgumentNullException()
         {
             // Act
-            // var validator = new AssetClassValidator((IAssetClassQueryRepository)_helper.AssetClasses, null);
+            // var validator = new AssetClassValidator((IAssetClassQueryRepository)_helper.AssetManagement.AssetClasses, null);
         }
 
         #endregion

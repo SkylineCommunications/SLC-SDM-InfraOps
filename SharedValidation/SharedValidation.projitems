@@ -9,34 +9,13 @@
     <Import_RootNamespace>SharedCommonLibrary</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\Validation\RackValidator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)validation\BulkValidationException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)validation\ChangeTrackingBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)validation\IChangeTracking.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)validation\ValidationResultExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DomInstanceField\DomInstanceArrayField.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\SDMObjectReferenceExtensions.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\DOM Repositories\Facility\FacilityDomRepository.g.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\DOM Repositories\Facility\FacilityDomRepository_Extensions.g.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\DOM Repositories\Facility\FacilityDomRepository_Middleware.g.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\DOM Repositories\Floor\FloorDomRepository.g.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\DOM Repositories\Floor\FloorDomRepository_Extensions.g.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\DOM Repositories\Floor\FloorDomRepository_Middleware.g.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\DOM Repositories\Rack\IRackQueryRepository.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\DOM Repositories\Rack\RackDomRepository.g.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\DOM Repositories\Rack\RackDomRepository_Extensions.g.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\DOM Repositories\Rack\RackDomRepository_Middleware.g.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\DOM Repositories\Room\RoomDomRepository.g.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\DOM Repositories\Room\RoomDomRepository_Extensions.g.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\DOM Repositories\Room\RoomDomRepository_Middleware.g.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\DOM Repositories\Row\RowDomRepository.g.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\DOM Repositories\Row\RowDomRepository_Extensions.g.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\DOM Repositories\Row\RowDomRepository_Middleware.g.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\DOM Repositories\Site\SiteDomRepository.g.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\DOM Repositories\Site\SiteDomRepository_Extensions.g.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\DOM Repositories\Site\SiteDomRepository_Middleware.g.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\DOM Repositories\Zone\ZoneDomRepository.g.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\DOM Repositories\Zone\ZoneDomRepository_Extensions.g.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\DOM Repositories\Zone\ZoneDomRepository_Middleware.g.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)validation\InfraOpsException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)validation\NumericValidator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)validation\ValidationException.cs" />

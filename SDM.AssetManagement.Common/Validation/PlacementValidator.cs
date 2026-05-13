@@ -237,7 +237,7 @@
                 return result;
             }
 
-            var rackId = asset.Location.RackId.ToString();
+            var rackId = asset.Location.RackId.Identifier.ToString();
 
             // Get rack from context
             if (!context.LoadedRacks.TryGetValue(rackId, out var rack))

@@ -55,7 +55,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
 		public static partial class PowerPorts
 		{
-			public static readonly CollectionExposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, string> Identifier = new CollectionExposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, string>((obj) => obj.PowerPorts.Where(x => x != null).Select(x => x.Identifier).Where(x => x != null), "PowerPorts.Identifier");
 			public static readonly CollectionExposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, string> Name = new CollectionExposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, string>((obj) => obj.PowerPorts.Where(x => x != null).Select(x => x.Name).Where(x => x != null), "PowerPorts.Name");
 			public static readonly CollectionExposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, long> PortNumber = new CollectionExposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, long>((obj) => obj.PowerPorts.Where(x => x != null).Select(x => x.PortNumber), "PowerPorts.PortNumber");
 			public static readonly CollectionExposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, SlcAsset_Management.Enums.Outputtype> OutputType = new CollectionExposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, SlcAsset_Management.Enums.Outputtype>((obj) => obj.PowerPorts.Where(x => x != null).Select(x => x.OutputType), "PowerPorts.OutputType");

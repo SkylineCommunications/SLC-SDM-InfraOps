@@ -25,7 +25,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 		public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.Asset>> Asset = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.Asset>>((obj) => obj.Asset, "Asset");
 		public static partial class PowerPortInfo
 		{
-			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort, string> Identifier = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort, string>((obj) => obj.PowerPortInfo.Identifier, "PowerPortInfo.Identifier");
 			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort, string> Name = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort, string>((obj) => obj.PowerPortInfo.Name, "PowerPortInfo.Name");
 			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort, long> PortNumber = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort, long>((obj) => obj.PowerPortInfo.PortNumber, "PowerPortInfo.PortNumber");
 			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort, SlcAsset_Management.Enums.Outputtype> OutputType = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort, SlcAsset_Management.Enums.Outputtype>((obj) => obj.PowerPortInfo.OutputType, "PowerPortInfo.OutputType");

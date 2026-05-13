@@ -127,13 +127,13 @@
             var result = new ValidationResult();
 
             // Name is critical - must be valid before other checks
-            if (assetClass.NameField.Changed)
+            if (assetClass.IsNew || assetClass.NameField.Changed)
             {
                 result.AddFailuresFrom(IsAssetClassNameValid(assetClass));
             }
 
             // Device Type is critical
-            if (assetClass.DeviceTypeIdField.Changed)
+            if (assetClass.IsNew || assetClass.DeviceTypeIdField.Changed)
             {
                 if (!AssetClassValidationHandler.IsAssetClassDeviceTypeValid(assetClass, out var deviceTypeResult))
                 {

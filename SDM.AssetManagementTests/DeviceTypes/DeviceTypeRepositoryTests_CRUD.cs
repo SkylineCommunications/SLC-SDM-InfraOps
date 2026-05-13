@@ -31,7 +31,6 @@
 				Description = "Test Description",
 				TagsInfo = new TagsInfo
 				{
-					Identifier = Guid.NewGuid().ToString(),
 					Tags = [SlcAsset_Management.Enums.TagOption.PowerProvider, SlcAsset_Management.Enums.TagOption.RackUnitConsumer],
 				},
 				HierarchyInfo = new HierarchyInfo
@@ -46,25 +45,25 @@
 		{
 			var helper = RepositoryInitialize.InitializeEmptyRepositories();
 
-			helper.DeviceTypes.Create(referenceDeviceType);
+			helper.AssetManagement.DeviceTypes.Create(referenceDeviceType);
 
-			AssertCreated(helper);
+			AssertCreated(helper.AssetManagement);
 		}
 
 		[TestMethod]
 		public void DeviceTypeRepository_EmptyDOM_CreateOrUpdate_Create()
 		{
 			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.DeviceTypes.CreateOrUpdate([referenceDeviceType]);
+			helper.AssetManagement.DeviceTypes.CreateOrUpdate([referenceDeviceType]);
 
-			AssertCreated(helper);
+			AssertCreated(helper.AssetManagement);
 		}
 
 		[TestMethod]
 		public void DeviceTypeRepository_EmptyDOM_CreateOrUpdate_Update()
 		{
 			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.DeviceTypes.Create(referenceDeviceType);
+			helper.AssetManagement.DeviceTypes.Create(referenceDeviceType);
 
 			var updatedDeviceType = new DeviceType
 			{
@@ -73,7 +72,6 @@
 				Description = "Updated Description",
 				TagsInfo = new TagsInfo
 				{
-					Identifier = referenceDeviceType.TagsInfo.Identifier,
 					Tags = new List<SlcAsset_Management.Enums.TagOption> { SlcAsset_Management.Enums.TagOption.RackUnitConsumer },
 				},
 				HierarchyInfo = new HierarchyInfo
@@ -82,7 +80,7 @@
 				},
 			};
 
-			helper.DeviceTypes.CreateOrUpdate([updatedDeviceType]);
+			helper.AssetManagement.DeviceTypes.CreateOrUpdate([updatedDeviceType]);
 
 			AssertDeviceTypeUpdateDifferences(referenceDeviceType, updatedDeviceType);
 		}
@@ -95,8 +93,8 @@
 			helper.PopulateDeviceTypes();
 
 			FilterElement<DeviceType> allFilter = new TRUEFilterElement<DeviceType>();
-			var pagedResult = helper.DeviceTypes.ReadPaged(allFilter, pageCount);
-			var deviceTypeCount = helper.DeviceTypes.Count(allFilter);
+			var pagedResult = helper.AssetManagement.DeviceTypes.ReadPaged(allFilter, pageCount);
+			var deviceTypeCount = helper.AssetManagement.DeviceTypes.Count(allFilter);
 
 			using (new AssertionScope())
 			{
@@ -116,14 +114,14 @@
 				DeviceTypeExposers.Name.Equal("Decoder"),
 				DeviceTypeExposers.TagsInfo.Tags.Contains(SlcAsset_Management.Enums.TagOption.PowerProvider));
 
-			var deviceTypesToDelete = helper.DeviceTypes.Read(filter);
+			var deviceTypesToDelete = helper.AssetManagement.DeviceTypes.Read(filter);
 
-			helper.DeviceTypes.Delete(deviceTypesToDelete);
+			helper.AssetManagement.DeviceTypes.Delete(deviceTypesToDelete);
 
 			using (new AssertionScope())
 			{
-				helper.DeviceTypes.Count(new TRUEFilterElement<DeviceType>()).Should().Be(DemoData.DeviceTypes.Count - deviceTypesToDelete.Count());
-				helper.DeviceTypes.Count(DeviceTypeExposers.Name.Equal("Decoder")).Should().Be(0);
+				helper.AssetManagement.DeviceTypes.Count(new TRUEFilterElement<DeviceType>()).Should().Be(DemoData.DeviceTypes.Count - deviceTypesToDelete.Count());
+				helper.AssetManagement.DeviceTypes.Count(DeviceTypeExposers.Name.Equal("Decoder")).Should().Be(0);
 			}
 		}
 
@@ -133,12 +131,12 @@
 			var helper = RepositoryInitialize.InitializeEmptyRepositories();
 			helper.PopulateDeviceTypes();
 
-			var deviceTypeToDelete = helper.DeviceTypes.Read(DeviceTypeExposers.Name.Equal("Optics Module")).First();
+			var deviceTypeToDelete = helper.AssetManagement.DeviceTypes.Read(DeviceTypeExposers.Name.Equal("Optics Module")).First();
 
-			helper.DeviceTypes.Delete(deviceTypeToDelete);
+			helper.AssetManagement.DeviceTypes.Delete(deviceTypeToDelete);
 
-			helper.DeviceTypes.Count(new TRUEFilterElement<DeviceType>()).Should().Be(DemoData.DeviceTypes.Count - 1);
-			helper.DeviceTypes.Count(DeviceTypeExposers.Identifier.Equal(deviceTypeToDelete.Identifier)).Should().Be(0);
+			helper.AssetManagement.DeviceTypes.Count(new TRUEFilterElement<DeviceType>()).Should().Be(DemoData.DeviceTypes.Count - 1);
+			helper.AssetManagement.DeviceTypes.Count(DeviceTypeExposers.Identifier.Equal(deviceTypeToDelete.Identifier)).Should().Be(0);
 		}
 
 		private static void AssertDeviceTypeUpdateDifferences(DeviceType original, DeviceType updated)

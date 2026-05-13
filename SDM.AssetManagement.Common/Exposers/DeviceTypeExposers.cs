@@ -27,7 +27,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
 		public static partial class TagsInfo
 		{
-			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType, string> Identifier = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType, string>((obj) => obj.TagsInfo.Identifier, "TagsInfo.Identifier");
 			public static readonly CollectionExposer<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType, SlcAsset_Management.Enums.TagOption> Tags = new CollectionExposer<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType, SlcAsset_Management.Enums.TagOption>((obj) => obj.TagsInfo.Tags, "TagsInfo.Tags");
 		}
 

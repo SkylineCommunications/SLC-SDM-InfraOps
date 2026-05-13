@@ -4,7 +4,7 @@
 
     using SharedMappers.DomIds;
 
-    public sealed class PowerPortInfo : SdmObject<PowerPortInfo>, IEquatable<PowerPortInfo>
+    public sealed class PowerPortInfo : IEquatable<PowerPortInfo>
 	{
 		public string Name { get; set; }
 

@@ -30,7 +30,6 @@
 				Identifier = Guid.NewGuid().ToString(),
 				PowerPortInfo = new PowerPortInfo
 				{
-					Identifier = Guid.NewGuid().ToString(),
 					Name = "Test PowerPort",
 					PortNumber = 1,
 					OutputType = SlcAsset_Management.Enums.Outputtype.IO,
@@ -46,32 +45,31 @@
 		{
 			var helper = RepositoryInitialize.InitializeEmptyRepositories();
 
-			helper.PowerPorts.Create(referencePowerPort);
+			helper.AssetManagement.PowerPorts.Create(referencePowerPort);
 
-			AssertCreated(helper);
+			AssertCreated(helper.AssetManagement);
 		}
 
 		[TestMethod]
 		public void PowerPortDomStorageProvider_EmptyDOM_CreateOrUpdate_Create()
 		{
 			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PowerPorts.CreateOrUpdate([referencePowerPort]);
+			helper.AssetManagement.PowerPorts.CreateOrUpdate([referencePowerPort]);
 
-			AssertCreated(helper);
+			AssertCreated(helper.AssetManagement);
 		}
 
 		[TestMethod]
 		public void PowerPortDomStorageProvider_EmptyDOM_CreateOrUpdate_Update()
 		{
 			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PowerPorts.Create(referencePowerPort);
+			helper.AssetManagement.PowerPorts.Create(referencePowerPort);
 
 			var updatedPowerPort = new PowerPort
 			{
 				Identifier = referencePowerPort.Identifier,
 				PowerPortInfo = new PowerPortInfo
 				{
-					Identifier = referencePowerPort.PowerPortInfo.Identifier,
 					Name = "Updated PowerPort Name",
 					PortNumber = 2,
 					OutputType = SlcAsset_Management.Enums.Outputtype.Out,
@@ -81,7 +79,7 @@
 				Asset = referencePowerPort.Asset,
 			};
 
-			helper.PowerPorts.CreateOrUpdate([updatedPowerPort]);
+			helper.AssetManagement.PowerPorts.CreateOrUpdate([updatedPowerPort]);
 
 			AssertPowerPortUpdateDifferences(referencePowerPort, updatedPowerPort);
 		}
@@ -94,8 +92,8 @@
 			helper.PopulatePowerPorts();
 
 			FilterElement<PowerPort> allFilter = new TRUEFilterElement<PowerPort>();
-			var pagedResult = helper.PowerPorts.ReadPaged(allFilter, pageCount);
-			var powerPortCount = helper.PowerPorts.Count(allFilter);
+			var pagedResult = helper.AssetManagement.PowerPorts.ReadPaged(allFilter, pageCount);
+			var powerPortCount = helper.AssetManagement.PowerPorts.Count(allFilter);
 
 			using (new AssertionScope())
 			{
@@ -116,15 +114,15 @@
 				PowerPortExposers.PowerPortInfo.Label.Equal("Power Port Label 7"),
 				PowerPortExposers.Asset.UncheckedEqual(DemoData.Assets[9]));
 
-			var powerPortsToDelete = helper.PowerPorts.Read(filter);
+			var powerPortsToDelete = helper.AssetManagement.PowerPorts.Read(filter);
 
-			helper.PowerPorts.Delete(powerPortsToDelete);
+			helper.AssetManagement.PowerPorts.Delete(powerPortsToDelete);
 
 			using (new AssertionScope())
 			{
-				helper.PowerPorts.Count(new TRUEFilterElement<PowerPort>()).Should().Be(DemoData.PowerPorts.Count - powerPortsToDelete.Count());
-				helper.PowerPorts.Count(PowerPortExposers.PowerPortInfo.Name.Equal("Power Port 3")).Should().Be(0);
-				helper.PowerPorts.Count(PowerPortExposers.PowerPortInfo.Label.Equal("Power Port Label 7")).Should().Be(0);
+				helper.AssetManagement.PowerPorts.Count(new TRUEFilterElement<PowerPort>()).Should().Be(DemoData.PowerPorts.Count - powerPortsToDelete.Count());
+				helper.AssetManagement.PowerPorts.Count(PowerPortExposers.PowerPortInfo.Name.Equal("Power Port 3")).Should().Be(0);
+				helper.AssetManagement.PowerPorts.Count(PowerPortExposers.PowerPortInfo.Label.Equal("Power Port Label 7")).Should().Be(0);
 			}
 		}
 
@@ -134,12 +132,12 @@
 			var helper = RepositoryInitialize.InitializeEmptyRepositories();
 			helper.PopulatePowerPorts();
 
-			var powerPortToDelete = helper.PowerPorts.Read(PowerPortExposers.PowerPortInfo.Name.Equal("Power Port 3")).First();
+			var powerPortToDelete = helper.AssetManagement.PowerPorts.Read(PowerPortExposers.PowerPortInfo.Name.Equal("Power Port 3")).First();
 
-			helper.PowerPorts.Delete(powerPortToDelete);
+			helper.AssetManagement.PowerPorts.Delete(powerPortToDelete);
 
-			helper.PowerPorts.Count(new TRUEFilterElement<PowerPort>()).Should().Be(DemoData.PowerPorts.Count - 1);
-			helper.PowerPorts.Count(PowerPortExposers.Identifier.Equal(powerPortToDelete.Identifier)).Should().Be(0);
+			helper.AssetManagement.PowerPorts.Count(new TRUEFilterElement<PowerPort>()).Should().Be(DemoData.PowerPorts.Count - 1);
+			helper.AssetManagement.PowerPorts.Count(PowerPortExposers.Identifier.Equal(powerPortToDelete.Identifier)).Should().Be(0);
 		}
 
 		private static void AssertPowerPortUpdateDifferences(PowerPort original, PowerPort updated)

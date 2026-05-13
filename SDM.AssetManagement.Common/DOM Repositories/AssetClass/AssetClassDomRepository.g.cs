@@ -941,10 +941,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
 			foreach (var powerports in obj.PowerPorts)
 			{
-				var _powerportsSection = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.PowerPorts.SectionDefinitionId)
-				{
-					ID = new SectionID(System.Guid.Parse(powerports.Identifier))
-				};
+				var _powerportsSection = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.PowerPorts.SectionDefinitionId);
+
 				if (powerports.Name != default)
 				{
 					_powerportsSection.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.PowerPorts.Name, Convert.ToString(powerports.Name));

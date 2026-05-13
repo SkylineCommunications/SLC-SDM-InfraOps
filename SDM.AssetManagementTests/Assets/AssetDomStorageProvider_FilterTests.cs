@@ -18,12 +18,12 @@
 		{
 			// 11 assets
 			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.Assets.CreateOrUpdate([referenceAsset]);
+			helper.AssetManagement.Assets.CreateOrUpdate([referenceAsset]);
 			helper.PopulateAssets();
 
 			var nameFilter = AssetExposers.AssetName.Equal(referenceAsset.Name);
 
-			var assetsRetrieved = helper.Assets.Read(nameFilter);
+			var assetsRetrieved = helper.AssetManagement.Assets.Read(nameFilter);
 
 			using (new AssertionScope())
 			{
@@ -44,12 +44,12 @@
 		{
 			// 11 assets
 			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.Assets.CreateOrUpdate([referenceAsset]);
+			helper.AssetManagement.Assets.CreateOrUpdate([referenceAsset]);
 			helper.PopulateAssets();
 
 			var descriptionFilter = AssetExposers.AssetDescription.Equal(DemoData.Assets[3].Description);
 
-			var assetsRetrieved = helper.Assets.Read(descriptionFilter);
+			var assetsRetrieved = helper.AssetManagement.Assets.Read(descriptionFilter);
 
 			using (new AssertionScope())
 			{
@@ -77,10 +77,10 @@
 			referenceAsset.AssetClassId = new SdmObjectReference<AssetClass>(assetClass.Identifier);
 
 			helper.PopulateAssets([referenceAsset]);
-			Debug.WriteLine(helper.Assets.Count(new TRUEFilterElement<Asset>()));
+			Debug.WriteLine(helper.AssetManagement.Assets.Count(new TRUEFilterElement<Asset>()));
 
 			var filter = AssetExposers.AssetClass.Equal(new SdmObjectReference<AssetClass>(assetClass.Identifier));
-			var assetsRetrieved = helper.Assets.Read(filter);
+			var assetsRetrieved = helper.AssetManagement.Assets.Read(filter);
 
 			using (new AssertionScope())
 			{
@@ -100,12 +100,12 @@
 		{
 			// 11 assets
 			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.Assets.CreateOrUpdate([referenceAsset]);
+			helper.AssetManagement.Assets.CreateOrUpdate([referenceAsset]);
 			helper.PopulateAssets();
 
 			var firmwareFilter = AssetExposers.FwOs.Equal(DemoData.Assets[1].FW_OS);
 
-			var assetsRetrieved = helper.Assets.Read(firmwareFilter);
+			var assetsRetrieved = helper.AssetManagement.Assets.Read(firmwareFilter);
 
 			using (new AssertionScope())
 			{
@@ -127,12 +127,12 @@
 		{
 			// 11 assets
 			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.Assets.CreateOrUpdate([referenceAsset]);
+			helper.AssetManagement.Assets.CreateOrUpdate([referenceAsset]);
 			helper.PopulateAssets();
 
 			var firmwareFilter = AssetExposers.SerialNumber.Equal(DemoData.Assets[9].SerialNumber);
 
-			var assetsRetrieved = helper.Assets.Read(firmwareFilter);
+			var assetsRetrieved = helper.AssetManagement.Assets.Read(firmwareFilter);
 
 			using (new AssertionScope())
 			{
@@ -155,12 +155,12 @@
 		{
 			// 11 assets
 			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.Assets.CreateOrUpdate([referenceAsset]);
+			helper.AssetManagement.Assets.CreateOrUpdate([referenceAsset]);
 			helper.PopulateAssets();
 
 			var firmwareFilter = AssetExposers.HardwareVersion.Equal(DemoData.Assets[4].HardwareVersion);
 
-			var assetsRetrieved = helper.Assets.Read(firmwareFilter);
+			var assetsRetrieved = helper.AssetManagement.Assets.Read(firmwareFilter);
 
 			using (new AssertionScope())
 			{
@@ -181,13 +181,13 @@
 		{
 			// 11 assets
 			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.Assets.CreateOrUpdate([referenceAsset]);
+			helper.AssetManagement.Assets.CreateOrUpdate([referenceAsset]);
 			helper.PopulateAssets();
 
 			var macAddress = DemoData.Assets[5].MacAddress;
 			var macFilter = AssetExposers.NetworkDetails.MACAddress.Equal(macAddress);
 
-			var assetsRetrieved = helper.Assets.Read(macFilter);
+			var assetsRetrieved = helper.AssetManagement.Assets.Read(macFilter);
 
 			using (new AssertionScope())
 			{
@@ -215,7 +215,7 @@
 			var firstUseDate = DateTime.UtcNow.AddYears(-5);
 			var filter = AssetExposers.Lifecycle.FirstUseDate.LessThanOrEqual(firstUseDate);
 
-			var assetsRetrieved = helper.Assets.Read(filter);
+			var assetsRetrieved = helper.AssetManagement.Assets.Read(filter);
 			var expected = DemoData.Assets.Where(asset => asset.FirstUseDate <= firstUseDate).ToList();
 
 			using (new AssertionScope())
@@ -235,7 +235,7 @@
 			var endOfWarrantyDate = DateTime.UtcNow.AddYears(5);
 			var filter = AssetExposers.Lifecycle.EndOfWarrantyDate.LessThan(endOfWarrantyDate);
 
-			var assetsRetrieved = helper.Assets.Read(filter);
+			var assetsRetrieved = helper.AssetManagement.Assets.Read(filter);
 			var expected = DemoData.Assets.Where(asset => asset.EndOfWarrantyDate < endOfWarrantyDate).ToList();
 
 			using (new AssertionScope())
@@ -258,7 +258,7 @@
 			var filter = AssetExposers.Lifecycle.InstallationDate.LessThan(installationDateEnd)
 				.AND(AssetExposers.Lifecycle.InstallationDate.GreaterThan(installationDateStart));
 
-			var assetsRetrieved = helper.Assets.Read(filter);
+			var assetsRetrieved = helper.AssetManagement.Assets.Read(filter);
 			var expected = DemoData.Assets
 				.Where(asset =>
 					asset.InstallationDate > installationDateStart
@@ -281,7 +281,7 @@
 
 			var filter = AssetExposers.Location.RackPosition.NotEqual(7);
 
-			var assetsRetrieved = helper.Assets.Read(filter);
+			var assetsRetrieved = helper.AssetManagement.Assets.Read(filter);
 			var expected = DemoData.Assets.Where(asset => asset.Location.RackPosition != 7);
 
 			using (new AssertionScope())
@@ -304,7 +304,7 @@
 			string elementId = "101/4";
 			var filter = AssetExposers.ElementLinks.ElementID.Equal(elementId);
 
-			var assetsRetrieved = helper.Assets.Read(filter);
+			var assetsRetrieved = helper.AssetManagement.Assets.Read(filter);
 			var expected = DemoData.Assets.Where(filter.getLambda());
 
 			using (new AssertionScope())

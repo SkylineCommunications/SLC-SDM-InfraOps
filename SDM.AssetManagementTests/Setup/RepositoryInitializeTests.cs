@@ -12,6 +12,7 @@
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Helpers;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
+    using Skyline.DataMiner.SDM.FacilityManagement.Models;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
     [TestClass]
@@ -27,11 +28,11 @@
 
             // Assert
             Assert.IsNotNull(helper);
-            Assert.IsNotNull(helper.Assets);
-            Assert.IsNotNull(helper.AssetClasses);
-            Assert.IsNotNull(helper.DeviceTypes);
-            Assert.IsNotNull(helper.DataPorts);
-            Assert.IsNotNull(helper.PowerPorts);
+            Assert.IsNotNull(helper.AssetManagement.Assets);
+            Assert.IsNotNull(helper.AssetManagement.AssetClasses);
+            Assert.IsNotNull(helper.AssetManagement.DeviceTypes);
+            Assert.IsNotNull(helper.AssetManagement.DataPorts);
+            Assert.IsNotNull(helper.AssetManagement.PowerPorts);
         }
 
         [TestMethod]
@@ -41,11 +42,11 @@
             var helper = RepositoryInitialize.InitializeEmptyRepositories();
 
             // Assert
-            Assert.AreEqual(0, helper.Assets.Count(new TRUEFilterElement<Asset>()));
-            Assert.AreEqual(0, helper.AssetClasses.Count(new TRUEFilterElement<AssetClass>()));
-            Assert.AreEqual(0, helper.DeviceTypes.Count(new TRUEFilterElement<DeviceType>()));
-            Assert.AreEqual(0, helper.DataPorts.Count(new TRUEFilterElement<DataPort>()));
-            Assert.AreEqual(0, helper.PowerPorts.Count(new TRUEFilterElement<PowerPort>()));
+            Assert.AreEqual(0, helper.AssetManagement.Assets.Count(new TRUEFilterElement<Asset>()));
+            Assert.AreEqual(0, helper.AssetManagement.AssetClasses.Count(new TRUEFilterElement<AssetClass>()));
+            Assert.AreEqual(0, helper.AssetManagement.DeviceTypes.Count(new TRUEFilterElement<DeviceType>()));
+            Assert.AreEqual(0, helper.AssetManagement.DataPorts.Count(new TRUEFilterElement<DataPort>()));
+            Assert.AreEqual(0, helper.AssetManagement.PowerPorts.Count(new TRUEFilterElement<PowerPort>()));
         }
 
         #endregion
@@ -64,7 +65,7 @@
             helper.PopulateAssets();
 
             // Assert
-            Assert.IsTrue(helper.Assets.Count(new TRUEFilterElement<Asset>()) > 0, "Should populate with default demo data");
+            Assert.IsTrue(helper.AssetManagement.Assets.Count(new TRUEFilterElement<Asset>()) > 0, "Should populate with default demo data");
         }
 
         [TestMethod]
@@ -75,7 +76,7 @@
                 .PopulateDeviceTypes()
                 .PopulateAssetClasses();
 
-            var assetClass = helper.AssetClasses.Read(new TRUEFilterElement<AssetClass>()).First();
+            var assetClass = helper.AssetManagement.AssetClasses.Read(new TRUEFilterElement<AssetClass>()).First();
             var customAssets = new List<Asset>
             {
                 CreateValidAsset("Test Asset 1", "TA-001", assetClass.Identifier),
@@ -86,7 +87,7 @@
             helper.PopulateAssets(customAssets);
 
             // Assert
-            var assets = helper.Assets.Read(new TRUEFilterElement<Asset>()).ToList();
+            var assets = helper.AssetManagement.Assets.Read(new TRUEFilterElement<Asset>()).ToList();
             Assert.IsTrue(assets.Count >= 2);
             Assert.IsTrue(assets.Any(a => a.Name == "Test Asset 1"));
             Assert.IsTrue(assets.Any(a => a.Name == "Test Asset 2"));
@@ -104,7 +105,7 @@
             helper.PopulateAssets((IEnumerable<Asset>)null);
 
             // Assert
-            Assert.IsTrue(helper.Assets.Count(new TRUEFilterElement<Asset>()) > 0, "Should populate with default demo data when null is passed");
+            Assert.IsTrue(helper.AssetManagement.Assets.Count(new TRUEFilterElement<Asset>()) > 0, "Should populate with default demo data when null is passed");
         }
 
         [TestMethod]
@@ -119,7 +120,7 @@
             helper.PopulateAssets(new List<Asset>());
 
             // Assert
-            Assert.IsTrue(helper.Assets.Count(new TRUEFilterElement<Asset>()) > 0, "Should populate with default demo data when empty collection is passed");
+            Assert.IsTrue(helper.AssetManagement.Assets.Count(new TRUEFilterElement<Asset>()) > 0, "Should populate with default demo data when empty collection is passed");
         }
 
         [TestMethod]
@@ -173,7 +174,7 @@
             helper.PopulateAssetClasses();
 
             // Assert
-            Assert.IsTrue(helper.AssetClasses.Count(new TRUEFilterElement<AssetClass>()) > 0, "Should populate with default demo data");
+            Assert.IsTrue(helper.AssetManagement.AssetClasses.Count(new TRUEFilterElement<AssetClass>()) > 0, "Should populate with default demo data");
         }
 
         [TestMethod]
@@ -183,7 +184,7 @@
             var helper = RepositoryInitialize.InitializeEmptyRepositories()
                 .PopulateDeviceTypes();
 
-            var deviceType = helper.DeviceTypes.Read(new TRUEFilterElement<DeviceType>()).First();
+            var deviceType = helper.AssetManagement.DeviceTypes.Read(new TRUEFilterElement<DeviceType>()).First();
             var customAssetClasses = new List<AssetClass>
             {
                 CreateValidAssetClass("Test Class 1", deviceType.Identifier),
@@ -194,7 +195,7 @@
             helper.PopulateAssetClasses(customAssetClasses);
 
             // Assert
-            var assetClasses = helper.AssetClasses.Read(new TRUEFilterElement<AssetClass>()).ToList();
+            var assetClasses = helper.AssetManagement.AssetClasses.Read(new TRUEFilterElement<AssetClass>()).ToList();
             Assert.IsTrue(assetClasses.Count >= 2);
             Assert.IsTrue(assetClasses.Any(ac => ac.Name == "Test Class 1"));
             Assert.IsTrue(assetClasses.Any(ac => ac.Name == "Test Class 2"));
@@ -211,7 +212,7 @@
             helper.PopulateAssetClasses((IEnumerable<AssetClass>)null);
 
             // Assert
-            Assert.IsTrue(helper.AssetClasses.Count(new TRUEFilterElement<AssetClass>()) > 0, "Should populate with default demo data");
+            Assert.IsTrue(helper.AssetManagement.AssetClasses.Count(new TRUEFilterElement<AssetClass>()) > 0, "Should populate with default demo data");
         }
 
         [TestMethod]
@@ -225,7 +226,7 @@
             helper.PopulateAssetClasses(new List<AssetClass>());
 
             // Assert
-            Assert.IsTrue(helper.AssetClasses.Count(new TRUEFilterElement<AssetClass>()) > 0, "Should populate with default demo data");
+            Assert.IsTrue(helper.AssetManagement.AssetClasses.Count(new TRUEFilterElement<AssetClass>()) > 0, "Should populate with default demo data");
         }
 
         [TestMethod]
@@ -260,7 +261,7 @@
             helper.PopulateDeviceTypes();
 
             // Assert
-            Assert.IsTrue(helper.DeviceTypes.Count(new TRUEFilterElement<DeviceType>()) > 0, "Should populate with default demo data");
+            Assert.IsTrue(helper.AssetManagement.DeviceTypes.Count(new TRUEFilterElement<DeviceType>()) > 0, "Should populate with default demo data");
         }
 
         [TestMethod]
@@ -278,7 +279,7 @@
             helper.PopulateDeviceTypes(customDeviceTypes);
 
             // Assert
-            Assert.AreEqual(2, helper.DeviceTypes.Count(new TRUEFilterElement<DeviceType>()), "Should have exactly 2 device types");
+            Assert.AreEqual(2, helper.AssetManagement.DeviceTypes.Count(new TRUEFilterElement<DeviceType>()), "Should have exactly 2 device types");
         }
 
         [TestMethod]
@@ -291,7 +292,7 @@
             helper.PopulateDeviceTypes((IEnumerable<DeviceType>)null);
 
             // Assert
-            Assert.IsTrue(helper.DeviceTypes.Count(new TRUEFilterElement<DeviceType>()) > 0, "Should populate with default demo data");
+            Assert.IsTrue(helper.AssetManagement.DeviceTypes.Count(new TRUEFilterElement<DeviceType>()) > 0, "Should populate with default demo data");
         }
 
         [TestMethod]
@@ -304,7 +305,7 @@
             helper.PopulateDeviceTypes(new List<DeviceType>());
 
             // Assert
-            Assert.IsTrue(helper.DeviceTypes.Count(new TRUEFilterElement<DeviceType>()) > 0, "Should populate with default demo data");
+            Assert.IsTrue(helper.AssetManagement.DeviceTypes.Count(new TRUEFilterElement<DeviceType>()) > 0, "Should populate with default demo data");
         }
 
         #endregion
@@ -324,7 +325,7 @@
             helper.PopulateDataPorts();
 
             // Assert
-            Assert.IsTrue(helper.DataPorts.Count(new TRUEFilterElement<DataPort>()) > 0, "Should populate with default demo data");
+            Assert.IsTrue(helper.AssetManagement.DataPorts.Count(new TRUEFilterElement<DataPort>()) > 0, "Should populate with default demo data");
         }
 
         [TestMethod]
@@ -336,7 +337,7 @@
                 .PopulateAssetClasses()
                 .PopulateAssets();
 
-            var asset = helper.Assets.Read(new TRUEFilterElement<Asset>()).First();
+            var asset = helper.AssetManagement.Assets.Read(new TRUEFilterElement<Asset>()).First();
             var customDataPorts = new List<DataPort>
             {
                 CreateValidDataPort(asset.Identifier, 1),
@@ -347,7 +348,7 @@
             helper.PopulateDataPorts(customDataPorts);
 
             // Assert
-            Assert.IsTrue(helper.DataPorts.Count(new TRUEFilterElement<DataPort>()) >= 2, "Should have at least 2 data ports");
+            Assert.IsTrue(helper.AssetManagement.DataPorts.Count(new TRUEFilterElement<DataPort>()) >= 2, "Should have at least 2 data ports");
         }
 
         [TestMethod]
@@ -360,10 +361,10 @@
                 .PopulateAssets();
 
             // Act
-            helper.PopulateDataPorts((IEnumerable<DataPort>)null);
+            helper.PopulateDataPorts();
 
             // Assert
-            Assert.IsTrue(helper.DataPorts.Count(new TRUEFilterElement<DataPort>()) > 0, "Should populate with default demo data");
+            Assert.IsTrue(helper.AssetManagement.DataPorts.Count(new TRUEFilterElement<DataPort>()) > 0, "Should populate with default demo data");
         }
 
         [TestMethod]
@@ -379,7 +380,7 @@
             helper.PopulateDataPorts(new List<DataPort>());
 
             // Assert
-            Assert.IsTrue(helper.DataPorts.Count(new TRUEFilterElement<DataPort>()) > 0, "Should populate with default demo data");
+            Assert.IsTrue(helper.AssetManagement.DataPorts.Count(new TRUEFilterElement<DataPort>()) > 0, "Should populate with default demo data");
         }
 
         #endregion
@@ -399,7 +400,7 @@
             helper.PopulatePowerPorts();
 
             // Assert
-            Assert.IsTrue(helper.PowerPorts.Count(new TRUEFilterElement<PowerPort>()) > 0, "Should populate with default demo data");
+            Assert.IsTrue(helper.AssetManagement.PowerPorts.Count(new TRUEFilterElement<PowerPort>()) > 0, "Should populate with default demo data");
         }
 
         #endregion
@@ -413,21 +414,19 @@
             var helper = RepositoryInitialize.InitializeEmptyRepositories();
 
             // Act - Populate in dependency order
-            helper
-                .PopulateRacks()            // NEW: Must be before Assets
-                .PopulateDeviceTypes()      // Must be first (no dependencies)
-                .PopulateAssetClasses()     // Depends on DeviceTypes
-                .PopulateAssets()           // Depends on AssetClasses AND Racks
-                .PopulateDataPorts()        // Depends on Assets
-                .PopulatePowerPorts();      // Depends on Assets
+            helper.PopulateRacks()
+                .PopulateDeviceTypes()
+                .PopulateAssetClasses()
+                .PopulateAssets()
+                .PopulateDataPorts()
+                .PopulatePowerPorts();
 
             // Assert
-            Assert.IsTrue(helper.DeviceTypes.Count(new TRUEFilterElement<DeviceType>()) > 0);
-            Assert.IsTrue(helper.DeviceTypes.Count(new TRUEFilterElement<DeviceType>()) > 0);
-            Assert.IsTrue(helper.AssetClasses.Count(new TRUEFilterElement<AssetClass>()) > 0);
-            Assert.IsTrue(helper.Assets.Count(new TRUEFilterElement<Asset>()) > 0);
-            Assert.IsTrue(helper.DataPorts.Count(new TRUEFilterElement<DataPort>()) > 0);
-            Assert.IsTrue(helper.PowerPorts.Count(new TRUEFilterElement<PowerPort>()) > 0);
+            Assert.IsTrue(helper.AssetManagement.DeviceTypes.Count(new TRUEFilterElement<DeviceType>()) > 0);
+            Assert.IsTrue(helper.AssetManagement.AssetClasses.Count(new TRUEFilterElement<AssetClass>()) > 0);
+            Assert.IsTrue(helper.AssetManagement.Assets.Count(new TRUEFilterElement<Asset>()) > 0);
+            Assert.IsTrue(helper.AssetManagement.DataPorts.Count(new TRUEFilterElement<DataPort>()) > 0);
+            Assert.IsTrue(helper.AssetManagement.PowerPorts.Count(new TRUEFilterElement<PowerPort>()) > 0);
         }
 
         #endregion

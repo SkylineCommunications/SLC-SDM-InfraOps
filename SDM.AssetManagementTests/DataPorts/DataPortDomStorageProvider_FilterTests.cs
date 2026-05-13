@@ -25,11 +25,11 @@
 			DemoData.DataPorts[2].AssetFk.Asset = new SdmObjectReference<Asset>(asset.Identifier);
 			DemoData.DataPorts[5].AssetFk.Asset = new SdmObjectReference<Asset>(asset.Identifier);
 
-			helper.DataPorts.Update(DemoData.DataPorts);
+			helper.AssetManagement.DataPorts.Update(DemoData.DataPorts);
 
 			var filter = DataPortExposers.Asset.Equal(new SdmObjectReference<Asset>(asset.Identifier));
 
-			var dataPortsRetrieved = helper.DataPorts.Read(filter);
+			var dataPortsRetrieved = helper.AssetManagement.DataPorts.Read(filter);
 			var expected = DemoData.DataPorts.Where(filter.getLambda());
 
 			using (new AssertionScope())
@@ -51,7 +51,7 @@
 			var portName = DemoData.DataPorts[3].DataPortInfo.Name;
 			var filter = DataPortExposers.DataPortInfo.Name.Equal(portName);
 
-			var dataPortsRetrieved = helper.DataPorts.Read(filter);
+			var dataPortsRetrieved = helper.AssetManagement.DataPorts.Read(filter);
 
 			using (new AssertionScope())
 			{
@@ -84,7 +84,7 @@
 			var portExposure = SlcAsset_Management.Enums.PortExposureEnum.Back;
 			var filter = DataPortExposers.DataPortInfo.PortExposure.UncheckedEqual(portExposure);
 
-			var dataPortsRetrieved = helper.DataPorts.Read(filter);
+			var dataPortsRetrieved = helper.AssetManagement.DataPorts.Read(filter);
 			var expected = DemoData.DataPorts.Where(filter.getLambda());
 
 			using (new AssertionScope())
@@ -104,7 +104,7 @@
 
 			var filter = DataPortExposers.PrimaryPortRelation.IsPrimaryIpv4.Equal(true);
 
-			var dataPortsRetrieved = helper.DataPorts.Read(filter);
+			var dataPortsRetrieved = helper.AssetManagement.DataPorts.Read(filter);
 			var expected = DemoData.DataPorts.Where(filter.getLambda());
 
 			using (new AssertionScope())
@@ -124,7 +124,7 @@
 
 			var filter = DataPortExposers.AddressInfo.Hostname.Equal("device4.example.com");
 
-			var dataPortsRetrieved = helper.DataPorts.Read(filter);
+			var dataPortsRetrieved = helper.AssetManagement.DataPorts.Read(filter);
 
 			using (new AssertionScope())
 			{
@@ -147,7 +147,7 @@
 			// Match the last two octets of the IPv4 address of data port 9:
 			var filter = DataPortExposers.AddressInfo.Ipv4Address.Contains("1.9");
 
-			var dataPortsRetrieved = helper.DataPorts.Read(filter);
+			var dataPortsRetrieved = helper.AssetManagement.DataPorts.Read(filter);
 
 			using (new AssertionScope())
 			{
@@ -170,7 +170,7 @@
 			var portNumber = DemoData.DataPorts[8].DataPortInfo.PortNumber;
 			var filter = DataPortExposers.DataPortInfo.PortNumber.Equal(portNumber);
 
-			var dataPortsRetrieved = helper.DataPorts.Read(filter);
+			var dataPortsRetrieved = helper.AssetManagement.DataPorts.Read(filter);
 			var expected = DemoData.DataPorts.Where(filter.getLambda());
 
 			using (new AssertionScope())
@@ -193,7 +193,7 @@
 			var label = DemoData.DataPorts[5].DataPortInfo.Label;
 			var filter = DataPortExposers.DataPortInfo.Label.Equal(label);
 
-			var dataPortsRetrieved = helper.DataPorts.Read(filter);
+			var dataPortsRetrieved = helper.AssetManagement.DataPorts.Read(filter);
 			var expected = DemoData.DataPorts.Where(filter.getLambda());
 
 			using (new AssertionScope())

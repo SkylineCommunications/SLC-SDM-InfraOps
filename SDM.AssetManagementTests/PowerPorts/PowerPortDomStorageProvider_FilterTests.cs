@@ -27,11 +27,11 @@
 			DemoData.PowerPorts[2].Asset = new SdmObjectReference<Asset>(asset.Identifier);
 			DemoData.PowerPorts[5].Asset = new SdmObjectReference<Asset>(asset.Identifier);
 
-			helper.PowerPorts.Update(DemoData.PowerPorts);
+			helper.AssetManagement.PowerPorts.Update(DemoData.PowerPorts);
 
 			var filter = PowerPortExposers.Asset.Equal(new SdmObjectReference<Asset>(asset.Identifier));
 
-			var powerPortsRetrieved = helper.PowerPorts.Read(filter);
+			var powerPortsRetrieved = helper.AssetManagement.PowerPorts.Read(filter);
 			var expected = DemoData.PowerPorts.Where(filter.getLambda());
 
 			using (new AssertionScope())
@@ -53,7 +53,7 @@
 			var portName = DemoData.PowerPorts[3].PowerPortInfo.Name;
 			var filter = PowerPortExposers.PowerPortInfo.Name.Equal(portName);
 
-			var powerPortsRetrieved = helper.PowerPorts.Read(filter);
+			var powerPortsRetrieved = helper.AssetManagement.PowerPorts.Read(filter);
 
 			using (new AssertionScope())
 			{
@@ -78,7 +78,7 @@
 			var portExposure = SlcAsset_Management.Enums.PortExposureEnum.Back;
 			var filter = PowerPortExposers.PowerPortInfo.PortExposure.UncheckedEqual(portExposure);
 
-			var powerPortsRetrieved = helper.PowerPorts.Read(filter);
+			var powerPortsRetrieved = helper.AssetManagement.PowerPorts.Read(filter);
 			var expected = DemoData.PowerPorts.Where(filter.getLambda());
 
 			using (new AssertionScope())
@@ -99,7 +99,7 @@
 			var outputType = SlcAsset_Management.Enums.Outputtype.IO;
 			var filter = PowerPortExposers.PowerPortInfo.OutputType.UncheckedEqual(outputType);
 
-			var powerPortsRetrieved = helper.PowerPorts.Read(filter);
+			var powerPortsRetrieved = helper.AssetManagement.PowerPorts.Read(filter);
 			var expected = DemoData.PowerPorts.Where(filter.getLambda());
 
 			using (new AssertionScope())
@@ -120,7 +120,7 @@
 			var portNumber = DemoData.PowerPorts[7].PowerPortInfo.PortNumber;
 			var filter = PowerPortExposers.PowerPortInfo.PortNumber.Equal(portNumber);
 
-			var powerPortsRetrieved = helper.PowerPorts.Read(filter);
+			var powerPortsRetrieved = helper.AssetManagement.PowerPorts.Read(filter);
 
 			using (new AssertionScope())
 			{
@@ -142,7 +142,7 @@
 
 			var filter = PowerPortExposers.PowerPortInfo.Label.Contains("Power");
 
-			var powerPortsRetrieved = helper.PowerPorts.Read(filter);
+			var powerPortsRetrieved = helper.AssetManagement.PowerPorts.Read(filter);
 			var expected = DemoData.PowerPorts.Where(filter.getLambda());
 
 			using (new AssertionScope())

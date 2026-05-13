@@ -60,14 +60,14 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			var existing = new HashSet<string>();
 			foreach (var batch in createObjects.Batch(500))
 			{
-				existing.UnionWith(Read(new ORFilterElement<DeviceType>(batch.Select(obj => DeviceTypeExposers.Identifier.Equal(obj.Identifier)).ToArray())).Select(obj => obj.Identifier));
+				existing.UnionWith(Read(new ORFilterElement<DeviceType>(batch.Where(obj => !String.IsNullOrWhiteSpace(obj.Identifier)).Select(obj => DeviceTypeExposers.Identifier.Equal(obj.Identifier)).ToArray())).Select(obj => obj.Identifier));
 			}
 
 			// Create the remainder
 			var SuccessfulItems = new List<DeviceType>();
 			var failures = new Dictionary<string, Exception>();
-			var objects = createObjects.Where(obj => !existing.Contains(obj.Identifier)).ToDictionary(obj => obj.Identifier);
-			foreach (var batch in createObjects.Select(ToInstance).Batch(helper.DomInstances.MaxAmountBulkOperation))
+
+            foreach (var batch in createObjects.Select(ToInstance).Batch(helper.DomInstances.MaxAmountBulkOperation))
 			{
 				helper.DomInstances.TryCreateOrUpdate(batch.ToList(), out var result);
 				foreach (var failure in result.UnsuccessfulIds)
@@ -609,10 +609,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			instance.Sections.Add(_devicetypeproperties);
 			if (obj.TagsInfo != null)
 			{
-				var _tagsinfo = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.TagsInfo.SectionDefinitionId)
-				{
-					ID = new SectionID(System.Guid.Parse(obj.TagsInfo.Identifier))
-				};
+                var _tagsinfo = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.TagsInfo.SectionDefinitionId);
 
 				if (obj.TagsInfo.Tags != null)
 				{

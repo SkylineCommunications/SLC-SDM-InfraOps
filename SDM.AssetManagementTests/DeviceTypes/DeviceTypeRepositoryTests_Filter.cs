@@ -25,7 +25,7 @@
 			var filter = DeviceTypeExposers.Name.Equal(refDeviceType.Name);
 
 			// Act
-			var deviceTypesRetrieved = helper.DeviceTypes.Read(filter);
+			var deviceTypesRetrieved = helper.AssetManagement.DeviceTypes.Read(filter);
 
 			// Assert
 			using (new AssertionScope())
@@ -52,7 +52,7 @@
 			var filter = DeviceTypeExposers.Name.Contains("coder");
 
 			// Act
-			var deviceTypesRetrieved = helper.DeviceTypes.Read(filter);
+			var deviceTypesRetrieved = helper.AssetManagement.DeviceTypes.Read(filter);
 			var expected = DemoData.DeviceTypes.Where(filter.getLambda());
 
 			// Assert
@@ -74,7 +74,7 @@
 			var filter = DeviceTypeExposers.Description.Contains("UPS");
 
 			// Act
-			var deviceTypesRetrieved = helper.DeviceTypes.Read(filter);
+			var deviceTypesRetrieved = helper.AssetManagement.DeviceTypes.Read(filter);
 			var expected = DemoData.DeviceTypes.Where(filter.getLambda());
 
 			// Assert
@@ -97,7 +97,7 @@
 			var filter = DeviceTypeExposers.HierarchyInfo.HierarchyRole.Equal(hierarchyRole);
 
 			// Act
-			var deviceTypesRetrieved = helper.DeviceTypes.Read(filter);
+			var deviceTypesRetrieved = helper.AssetManagement.DeviceTypes.Read(filter);
 			var expected = DemoData.DeviceTypes.Where(filter.getLambda());
 
 			// Assert
@@ -120,7 +120,7 @@
 			var filter = DeviceTypeExposers.TagsInfo.Tags.NotContains(tag);
 
 			// Act
-			var deviceTypesRetrieved = helper.DeviceTypes.Read(filter);
+			var deviceTypesRetrieved = helper.AssetManagement.DeviceTypes.Read(filter);
 			var expected = DemoData.DeviceTypes.Where(filter.getLambda());
 
 			// Assert

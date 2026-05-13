@@ -63,7 +63,7 @@
         /// Gets a value indicating whether the current object has not been assigned an identifier.
         /// </summary>
         [JsonIgnore]
-        public bool IsNew => String.IsNullOrWhiteSpace(Identifier);
+        public bool IsNew => true;
 
         public SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum State
         {

@@ -137,7 +137,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
         public ResourceLink Resource { get; set; }
 
-        public List<ImageInfo> ImageDetails { get; set; }
+        public List<ImageInfo> ImageDetails { get; set; } = new List<ImageInfo>();
 
         // INTERNAL: Change tracking fields (validation handler uses these)
         [JsonIgnore]

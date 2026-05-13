@@ -59,25 +59,25 @@
         {
             var helper = RepositoryInitialize.InitializeEmptyRepositories();
 
-            helper.DataPorts.Create(referenceDataPort);
+            helper.AssetManagement.DataPorts.Create(referenceDataPort);
 
-            AssertCreated(helper);
+            AssertCreated(helper.AssetManagement);
         }
 
         [TestMethod]
         public void DataPortDomStorageProvider_EmptyDOM_CreateOrUpdate_Create()
         {
             var helper = RepositoryInitialize.InitializeEmptyRepositories();
-            helper.DataPorts.CreateOrUpdate([referenceDataPort]);
+            helper.AssetManagement.DataPorts.CreateOrUpdate([referenceDataPort]);
 
-            AssertCreated(helper);
+            AssertCreated(helper.AssetManagement);
         }
 
         [TestMethod]
         public void DataPortDomStorageProvider_EmptyDOM_CreateOrUpdate_Update()
         {
             var helper = RepositoryInitialize.InitializeEmptyRepositories();
-            helper.DataPorts.Create(referenceDataPort);
+            helper.AssetManagement.DataPorts.Create(referenceDataPort);
 
             var updatedDataPort = new DataPort
             {
@@ -105,7 +105,7 @@
                 },
             };
 
-            helper.DataPorts.CreateOrUpdate([updatedDataPort]);
+            helper.AssetManagement.DataPorts.CreateOrUpdate([updatedDataPort]);
 
             AssertDataPortUpdateDifferences(referenceDataPort, updatedDataPort);
         }
@@ -118,8 +118,8 @@
             helper.PopulateDataPorts();
 
             FilterElement<DataPort> allFilter = new ORFilterElement<DataPort>();
-            var pagedResult = helper.DataPorts.ReadPaged(allFilter, pageCount);
-            var dataPortCount = helper.DataPorts.Count(allFilter);
+            var pagedResult = helper.AssetManagement.DataPorts.ReadPaged(allFilter, pageCount);
+            var dataPortCount = helper.AssetManagement.DataPorts.Count(allFilter);
 
             using (new AssertionScope())
             {
@@ -138,15 +138,15 @@
             var filter = new ORFilterElement<DataPort>(
                 DataPortExposers.DataPortInfo.Name.Equal("Data Port 3"),
                 DataPortExposers.DataPortInfo.Label.Equal("Data Port Label 7"));
-            var dataPortsToDelete = helper.DataPorts.Read(filter);
+            var dataPortsToDelete = helper.AssetManagement.DataPorts.Read(filter);
 
-            helper.DataPorts.Delete(dataPortsToDelete);
+            helper.AssetManagement.DataPorts.Delete(dataPortsToDelete);
 
             using (new AssertionScope())
             {
-                helper.DataPorts.Count(new TRUEFilterElement<DataPort>()).Should().Be(DemoData.DataPorts.Count - 2);
-                helper.DataPorts.Count(DataPortExposers.DataPortInfo.Name.Equal("Data Port 3")).Should().Be(0);
-                helper.DataPorts.Count(DataPortExposers.DataPortInfo.Label.Equal("Data Port Label 7")).Should().Be(0);
+                helper.AssetManagement.DataPorts.Count(new TRUEFilterElement<DataPort>()).Should().Be(DemoData.DataPorts.Count - 2);
+                helper.AssetManagement.DataPorts.Count(DataPortExposers.DataPortInfo.Name.Equal("Data Port 3")).Should().Be(0);
+                helper.AssetManagement.DataPorts.Count(DataPortExposers.DataPortInfo.Label.Equal("Data Port Label 7")).Should().Be(0);
             }
         }
 
@@ -156,12 +156,12 @@
             var helper = RepositoryInitialize.InitializeEmptyRepositories();
             helper.PopulateDataPorts();
 
-            var dataPortToDelete = helper.DataPorts.Read(DataPortExposers.DataPortInfo.Name.Equal("Data Port 3")).First();
+            var dataPortToDelete = helper.AssetManagement.DataPorts.Read(DataPortExposers.DataPortInfo.Name.Equal("Data Port 3")).First();
 
-            helper.DataPorts.Delete(dataPortToDelete);
+            helper.AssetManagement.DataPorts.Delete(dataPortToDelete);
 
-            helper.DataPorts.Count(new TRUEFilterElement<DataPort>()).Should().Be(DemoData.DataPorts.Count - 1);
-            helper.DataPorts.Count(DataPortExposers.Identifier.Equal(dataPortToDelete.Identifier)).Should().Be(0);
+            helper.AssetManagement.DataPorts.Count(new TRUEFilterElement<DataPort>()).Should().Be(DemoData.DataPorts.Count - 1);
+            helper.AssetManagement.DataPorts.Count(DataPortExposers.Identifier.Equal(dataPortToDelete.Identifier)).Should().Be(0);
         }
 
         private static void AssertDataPortUpdateDifferences(DataPort original, DataPort updated)

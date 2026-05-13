@@ -62,13 +62,13 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			var existing = new HashSet<string>();
 			foreach (var batch in createObjects.Batch(500))
 			{
-				existing.UnionWith(Read(new ORFilterElement<PowerPort>(batch.Select(obj => PowerPortExposers.Identifier.Equal(obj.Identifier)).ToArray())).Select(obj => obj.Identifier));
+				existing.UnionWith(Read(new ORFilterElement<PowerPort>(batch.Where(obj => !String.IsNullOrWhiteSpace(obj.Identifier)).Select(obj => PowerPortExposers.Identifier.Equal(obj.Identifier)).ToArray())).Select(obj => obj.Identifier));
 			}
 
 			// Create the remainder
 			var SuccessfulItems = new List<PowerPort>();
 			var failures = new Dictionary<string, Exception>();
-			var objects = createObjects.Where(obj => !existing.Contains(obj.Identifier)).ToDictionary(obj => obj.Identifier);
+			
 			foreach (var batch in createObjects.Select(ToInstance).Batch(helper.DomInstances.MaxAmountBulkOperation))
 			{
 				helper.DomInstances.TryCreateOrUpdate(batch.ToList(), out var result);
@@ -520,10 +520,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			var _powerportinfoSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.SectionDefinitionId));
 			if (_powerportinfoSection != default)
 			{
-				obj.PowerPortInfo = new Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortInfo()
-				{
-					Identifier = _powerportinfoSection.ID.Id.ToString()
-				};
+				obj.PowerPortInfo = new Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortInfo();
+
 				var _powerportinfoname = _powerportinfoSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.Name);
 				if (_powerportinfoname != null)
 				{
@@ -597,10 +595,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			};
 			if (obj.PowerPortInfo != null)
 			{
-				var _powerportinfo = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.SectionDefinitionId)
-				{
-					ID = new SectionID(System.Guid.Parse(obj.PowerPortInfo.Identifier))
-				};
+				var _powerportinfo = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.SectionDefinitionId);
+
 				if (obj.PowerPortInfo.Name != default)
 				{
 					_powerportinfo.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.Name, Convert.ToString(obj.PowerPortInfo.Name));

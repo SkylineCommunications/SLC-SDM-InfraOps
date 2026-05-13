@@ -1,11 +1,13 @@
-﻿using Skyline.DataMiner.Net;
+﻿using System;
+
+using Skyline.DataMiner.Net;
 using Skyline.DataMiner.SDM;
 using Skyline.DataMiner.SDM.AssetManagement.Common.Middleware;
 using Skyline.DataMiner.SDM.AssetManagement.Helpers;
 using Skyline.DataMiner.SDM.AssetManagement.Models;
 using Skyline.DataMiner.SDM.AssetManagement.Validation;
 using Skyline.DataMiner.SDM.Common.Services;
-using Skyline.DataMiner.SDM.FacilityManagement.Models;
+using Skyline.DataMiner.SDM.FacilityManagement.Helpers;
 
 public class AssetManagementApiHelper : IAssetManagementApiHelper
 {
@@ -14,15 +16,27 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
     private readonly DeviceTypeDomRepository _deviceTypeRepository;
     private readonly DataPortDomRepository _dataPortRepository;
     private readonly PowerPortDomRepository _powerPortRepository;
-    private readonly RackDomRepository _rackRepository;
     private readonly SdmEntityLoader _entityLoader;
     private readonly AssetValidator _assetValidator;
     private readonly AssetClassValidator _assetClassValidator;
     //private readonly DeviceTypeValidator _deviceTypeValidator;
 
+    // Public constructor for production use - creates its own FacilityManagementHelper
     public AssetManagementApiHelper(IConnection connection)
+        : this(connection, new FacilityManagementApiHelper(connection))
+    {
+    }
+
+    // Internal constructor for testing - allows injection of shared FacilityManagementHelper
+    internal AssetManagementApiHelper(IConnection connection, IFacilityManagementApiHelper facilityManagementHelper)
     {
         Connection = connection;
+
+        // DEBUG: Verify this constructor is being called
+        if (facilityManagementHelper == null)
+        {
+            throw new InvalidOperationException("INTERNAL CONSTRUCTOR CALLED BUT facilityManagementHelper IS NULL!");
+        }
 
         // Initialize repositories
         _assetRepository = new AssetDomRepository(connection);
@@ -30,13 +44,12 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
         _deviceTypeRepository = new DeviceTypeDomRepository(connection);
         _dataPortRepository = new DataPortDomRepository(connection);
         _powerPortRepository = new PowerPortDomRepository(connection);
-        _rackRepository = new RackDomRepository(connection);
 
         _entityLoader = new SdmEntityLoader(
            assetRepository: _assetRepository,
            assetClassRepository: _assetClassRepository,
            deviceTypeRepository: _deviceTypeRepository,
-           rackRepository: _rackRepository,
+           rackRepository: facilityManagementHelper?.Racks,
            dataPortRepository: _dataPortRepository,
            powerPortRepository: _powerPortRepository);
 
