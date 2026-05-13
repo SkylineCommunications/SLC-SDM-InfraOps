@@ -42,10 +42,6 @@
   </ItemGroup>
   
   <ItemGroup>
-    <Folder Include="Enums\" />
+    <ProjectReference Include="..\SDM.FacilityManagement.Common\SDM.FacilityManagement.Common.csproj" />
   </ItemGroup>
-  
-  <Import Project="..\SharedMappers\SharedMappers.projitems" Label="Shared" />
-  
-  <Import Project="..\SharedValidation\SharedValidation.projitems" Label="Shared" />
 </Project>

@@ -20,10 +20,6 @@
     <Company>Skyline Communications</Company>
     <Description>Standard API for Facility Management operations in DataMiner</Description>
   </PropertyGroup>
-  <ItemGroup>
-    <Compile Include="..\SharedValidation\AssetManagement\Models\PowerPortInfo.cs" Link="PowerPortInfo.cs" />
-    <Compile Include="..\SharedValidation\facilitymanagement\models\RackCapacity.cs" Link="RackCapacity.cs" />
-  </ItemGroup>
 
   <ItemGroup>
     <None Include="README.md" Pack="true" PackagePath="" />
