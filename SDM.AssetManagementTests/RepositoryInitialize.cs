@@ -10,8 +10,8 @@
 
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
-    using Skyline.DataMiner.SDM.AssetManagement.Helpers;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
+    using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
 
     public static partial class RepositoryInitialize
@@ -43,21 +43,41 @@
             var persistedAssetClasses = helper.AssetManagement.AssetClasses
                 .Read(new TRUEFilterElement<AssetClass>()).ToList();
 
+            // Validate prerequisites - AssetClasses are required
+            if (persistedAssetClasses.Count == 0)
+            {
+                throw new InvalidOperationException(
+                    "Cannot populate assets: No AssetClasses found. Call PopulateAssetClasses() first.");
+            }
+
+            // Racks are optional - check if any exist
             var persistedRacks = helper.FacilityManagement.Racks
                 .Read(new TRUEFilterElement<Rack>()).ToList();
+            bool hasRacks = persistedRacks.Count > 0;
 
             var assets = new List<Asset>();
             for (int i = 0; i < DemoData.BaseAssets.Count; i++)
             {
                 var baseAsset = DemoData.BaseAssets[i];
-
-                // Clone the object and set references
                 var assetClassIndex = i % persistedAssetClasses.Count;
-                var rackIndex = i % persistedRacks.Count;
+                var assetClass = persistedAssetClasses[assetClassIndex];
 
                 var asset = CloneAsset(baseAsset);
-                asset.AssetClassId = new SdmObjectReference<AssetClass>(persistedAssetClasses[assetClassIndex].Identifier);
-                asset.Location.RackId = new SdmObjectReference<Rack>(persistedRacks[rackIndex].Identifier);
+                asset.AssetClassId = new SdmObjectReference<AssetClass>(assetClass.Identifier);
+
+                // Only assign rack if racks are available
+                if (hasRacks)
+                {
+                    var rackIndex = i % persistedRacks.Count;
+                    var rack = persistedRacks[rackIndex];
+                    asset.Location.RackId = new SdmObjectReference<Rack>(rack.Identifier);
+                    // RackPosition is already set in CloneAsset from DemoData
+                }
+                else
+                {
+                    // Clear rack-related location data if no racks available
+                    asset.Location = null;
+                }
 
                 assets.Add(asset);
             }
@@ -85,6 +105,13 @@
         {
             var persistedDeviceTypes = helper.AssetManagement.DeviceTypes
                 .Read(new TRUEFilterElement<DeviceType>()).ToList();
+
+            // Validate prerequisites - DeviceTypes are required
+            if (persistedDeviceTypes.Count == 0)
+            {
+                throw new InvalidOperationException(
+                    "Cannot populate asset classes: No DeviceTypes found. Call PopulateDeviceTypes() first.");
+            }
 
             var assetClasses = new List<AssetClass>();
             for (int i = 0; i < DemoData.BaseAssetClasses.Count; i++)
@@ -123,6 +150,13 @@
         {
             var persistedAssets = helper.AssetManagement.Assets
                 .Read(new TRUEFilterElement<Asset>()).ToList();
+
+            // Validate prerequisites - Assets are required
+            if (persistedAssets.Count == 0)
+            {
+                throw new InvalidOperationException(
+                    "Cannot populate data ports: No Assets found. Call PopulateAssets() first.");
+            }
 
             var dataPorts = new List<DataPort>();
             for (int i = 0; i < DemoData.BaseDataPorts.Count; i++)
@@ -164,6 +198,13 @@
         {
             var persistedAssets = helper.AssetManagement.Assets
                 .Read(new TRUEFilterElement<Asset>()).ToList();
+
+            // Validate prerequisites - Assets are required
+            if (persistedAssets.Count == 0)
+            {
+                throw new InvalidOperationException(
+                    "Cannot populate power ports: No Assets found. Call PopulateAssets() first.");
+            }
 
             var powerPorts = new List<PowerPort>();
             for (int i = 0; i < DemoData.BasePowerPorts.Count; i++)

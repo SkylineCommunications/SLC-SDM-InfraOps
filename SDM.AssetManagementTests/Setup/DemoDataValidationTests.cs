@@ -8,9 +8,8 @@
 
     using SharedMappers.DomIds;
 
+    using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
-    using Skyline.DataMiner.SDM.AssetManagement.Validation;
-    using Skyline.DataMiner.SDM.Common.Services;
     using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
@@ -21,42 +20,27 @@
     [TestClass]
     public class DemoDataValidationTests
     {
-        private AssetValidator _assetValidator;
-        private AssetClassValidator _assetClassValidator;
-
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            var helper = RepositoryInitialize.InitializeEmptyRepositories();
-            
-            // Populate DeviceTypes first as they're needed by validators
-            helper.PopulateDeviceTypes();
-
-            // Create entity loader - now works directly!
-            var entityLoader = new SdmEntityLoader(
-                assetRepository: helper.AssetManagement.Assets,
-                assetClassRepository: helper.AssetManagement.AssetClasses,
-                deviceTypeRepository: helper.AssetManagement.DeviceTypes,
-                dataPortRepository: helper.AssetManagement.DataPorts,
-                powerPortRepository: helper.AssetManagement.PowerPorts,
-                rackRepository: null,  // Add if needed
-                reservationRepository: null,  // Add if needed
-                portTypeRepository: null  // Add if needed
-            );
-
-            _assetValidator = new AssetValidator(entityLoader);
-            _assetClassValidator = new AssetClassValidator(entityLoader);
-        }
-
         [TestMethod]
         public void DemoData_Assets_ShouldIdentifyValidationIssues()
         {
-            // Arrange
-            var assets = DemoData.Assets.ToList();
-            
+            // Arrange - Need full population chain
+            var helper = RepositoryInitialize.InitializeEmptyRepositories();
+            helper.PopulateRacks()
+                .PopulateDeviceTypes()
+                .PopulateAssetClasses()
+                .PopulateAssets();
+
+            // Create validator from helper
+            var assetValidator = helper.CreateAssetValidator();
+
+            // Now get the PERSISTED assets (not templates)
+            var assets = helper.AssetManagement.Assets
+                .Read(new TRUEFilterElement<Asset>())
+                .ToList();
+
             if (!assets.Any())
             {
-                Assert.Inconclusive("No assets in DemoData to validate");
+                Assert.Inconclusive("No assets were populated");
                 return;
             }
 
@@ -68,7 +52,7 @@
                 try
                 {
                     var asset = assets[i];
-                    var result = _assetValidator.Validate(asset);
+                    var result = assetValidator.Validate(asset);
 
                     if (!result.IsValid)
                     {
@@ -93,7 +77,7 @@
             // Assert
             if (failedAssets.Any())
             {
-                Assert.Fail($"{failedAssets.Count} out of {assets.Count} demo assets failed validation. See test output for details.");
+                Assert.Fail($"{failedAssets.Count} out of {assets.Count} populated assets failed validation. See test output for details.");
             }
         }
 
@@ -101,63 +85,99 @@
         public void DemoData_Assets_BulkValidation_ShouldIdentifyIssues()
         {
             // Arrange
-            var assets = DemoData.Assets.ToList();
-            
+            var helper = RepositoryInitialize.InitializeEmptyRepositories();
+
+            helper.PopulateRacks()
+                .PopulateDeviceTypes()
+                .PopulateAssetClasses()
+                .PopulateAssets();
+
+            var validator = helper.CreateAssetValidator();
+
+            var assets = helper.AssetManagement.Assets
+                .Read(new TRUEFilterElement<Asset>())
+                .ToList();
+
             if (!assets.Any())
             {
-                Assert.Inconclusive("No assets in DemoData to validate");
+                Assert.Inconclusive("No assets were populated");
                 return;
             }
 
             List<ValidationResult> results;
-            
+
             // Act
             try
             {
-                results = _assetValidator.ValidateBulk(assets);
+                results = validator.ValidateBulk(assets);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Exception: {ex.Message}");
-                Console.WriteLine($"Stack trace: {ex.StackTrace}");
-                Assert.Fail($"Bulk validation threw exception: {ex.Message}");
+                Assert.Fail($"Bulk validation threw exception: {ex.Message}\n{ex.StackTrace}");
                 return;
             }
 
             // Assert
+            var validCount = results.Count(r => r.IsValid);
             var invalidCount = results.Count(r => !r.IsValid);
 
             if (invalidCount > 0)
             {
-                Console.WriteLine($"Bulk validation found {invalidCount} invalid assets:");
-                Console.WriteLine();
+                // Group errors by field for summary
+                var failuresByField = new Dictionary<string, List<string>>();
 
                 for (int i = 0; i < assets.Count; i++)
                 {
                     if (!results[i].IsValid)
                     {
-                        Console.WriteLine($"Asset {i} '{assets[i].Name}' (ID: '{assets[i].AssetID}'):");
+                        var asset = assets[i];
+
                         foreach (var error in results[i].FailureReasons)
                         {
-                            Console.WriteLine($"  - [{error.Key}] {error.Value}");
+                            if (!failuresByField.ContainsKey(error.Key))
+                            {
+                                failuresByField[error.Key] = new List<string>();
+                            }
+
+                            failuresByField[error.Key].Add($"{asset.Name}: {error.Value}");
                         }
-                        Console.WriteLine();
                     }
                 }
 
-                Assert.Fail($"{invalidCount} assets failed bulk validation.");
+                // Build concise failure message
+                var errorSummary = string.Join("\n",
+                    failuresByField.OrderByDescending(x => x.Value.Count)
+                    .Select(kvp => $"\n[{kvp.Key}] - {kvp.Value.Count} failure(s):\n  " +
+                                    string.Join("\n  ", kvp.Value.Take(3)) +
+                                    (kvp.Value.Count > 3 ? $"\n  ... and {kvp.Value.Count - 3} more" : "")));
+
+                Assert.Fail($@"Bulk Validation Failed: {invalidCount}/{assets.Count} assets invalid {errorSummary}");
+            }
+            else
+            {
+                Console.WriteLine("✅ All assets passed bulk validation successfully!");
             }
         }
 
         [TestMethod]
         public void DemoData_AssetClasses_ShouldIdentifyValidationIssues()
         {
-            // Arrange
-            var assetClasses = DemoData.AssetClasses.ToList();
-            
+            // Arrange - Need to populate DeviceTypes first, then AssetClasses
+            var helper = RepositoryInitialize.InitializeEmptyRepositories();
+            helper.PopulateDeviceTypes()
+                .PopulateAssetClasses();
+
+            // Create validator from helper
+            var assetClassValidator = helper.CreateAssetClassValidator();
+
+            // Now get the PERSISTED asset classes (not templates)
+            var assetClasses = helper.AssetManagement.AssetClasses
+                .Read(new TRUEFilterElement<AssetClass>())
+                .ToList();
+
             if (!assetClasses.Any())
             {
-                Assert.Inconclusive("No asset classes in DemoData to validate");
+                Assert.Inconclusive("No asset classes were populated");
                 return;
             }
 
@@ -169,7 +189,7 @@
                 try
                 {
                     var assetClass = assetClasses[i];
-                    var result = _assetClassValidator.Validate(assetClass);
+                    var result = assetClassValidator.Validate(assetClass);
 
                     if (!result.IsValid)
                     {
@@ -194,7 +214,7 @@
             // Assert
             if (failedAssetClasses.Any())
             {
-                Assert.Fail($"{failedAssetClasses.Count} out of {assetClasses.Count} demo asset classes failed validation. See test output for details.");
+                Assert.Fail($"{failedAssetClasses.Count} out of {assetClasses.Count} populated asset classes failed validation. See test output for details.");
             }
         }
 
@@ -203,7 +223,7 @@
         {
             // Arrange
             var deviceTypes = DemoData.DeviceTypes.ToList();
-            
+
             if (!deviceTypes.Any())
             {
                 Assert.Inconclusive("No device types in DemoData to validate");
@@ -225,7 +245,7 @@
             // This test checks if demo data has proper change tracking set up
             // Arrange
             var assets = DemoData.Assets.ToList();
-            
+
             if (!assets.Any())
             {
                 Assert.Inconclusive("No assets in DemoData to check");
@@ -274,7 +294,7 @@
             // Check for duplicate names that would fail uniqueness validation
             // Arrange
             var assets = DemoData.Assets.ToList();
-            
+
             if (!assets.Any())
             {
                 Assert.Inconclusive("No assets in DemoData to check");
@@ -307,7 +327,7 @@
             // Check for duplicate Asset IDs
             // Arrange
             var assets = DemoData.Assets.ToList();
-            
+
             if (!assets.Any())
             {
                 Assert.Inconclusive("No assets in DemoData to check");
@@ -341,7 +361,7 @@
             // Arrange
             var assets = DemoData.Assets.ToList();
             var assetClasses = DemoData.AssetClasses.ToList();
-            
+
             if (!assets.Any())
             {
                 Assert.Inconclusive("No assets in DemoData to check");
@@ -383,7 +403,7 @@
             // Arrange
             var assetClasses = DemoData.AssetClasses.ToList();
             var deviceTypes = DemoData.DeviceTypes.ToList();
-            
+
             if (!assetClasses.Any())
             {
                 Assert.Inconclusive("No asset classes in DemoData to check");

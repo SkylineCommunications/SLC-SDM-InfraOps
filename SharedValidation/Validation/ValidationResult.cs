@@ -72,7 +72,7 @@
             _isValid = false;
             if (_failReasons.ContainsKey(field))
             {
-                throw new InvalidOperationException($"Fail Reason for field '{field}' already exists. Cannot add multiple reasons for the same field.");
+                return; // ignore - field already has an error
             }
 
             _failReasons[field] = reason;

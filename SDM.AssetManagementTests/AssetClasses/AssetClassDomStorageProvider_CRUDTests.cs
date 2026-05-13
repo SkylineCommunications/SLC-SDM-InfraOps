@@ -11,10 +11,9 @@
 
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
-    using Skyline.DataMiner.SDM.AssetManagement;
     using Skyline.DataMiner.SDM.AssetManagement.Helpers;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
-    using Skyline.DataMiner.SDM.AssetManagement.Repositories;
+    using Skyline.DataMiner.SDM.Extensions;
 
     [TestClass]
     public partial class AssetClassDomStorageProvider
@@ -102,9 +101,22 @@
         [TestMethod]
         public void AssetClassDomStorageProvider_EmptyDOM_Create()
         {
+            // Arrange - Create a valid DeviceType first
             var helper = RepositoryInitialize.InitializeEmptyRepositories();
+            helper.PopulateDeviceTypes();
+            
+            // Get a real DeviceType from the repository
+            var deviceType = helper.AssetManagement.DeviceTypes
+                .Read(new TRUEFilterElement<DeviceType>())
+                .First();
+            
+            // Update referenceAssetClass to use the real DeviceType
+            referenceAssetClass.DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier);
+
+            // Act
             helper.AssetManagement.AssetClasses.Create(referenceAssetClass);
 
+            // Assert
             AssertCreated(helper.AssetManagement);
         }
 
@@ -112,6 +124,16 @@
         public void AssetClassDomStorageProvider_EmptyDOM_CreateOrUpdate_Create()
         {
             var helper = RepositoryInitialize.InitializeEmptyRepositories();
+            helper.PopulateDeviceTypes();
+
+            // Get a real DeviceType from the repository
+            var deviceType = helper.AssetManagement.DeviceTypes
+                .Read(new TRUEFilterElement<DeviceType>())
+                .First();
+
+            // Update referenceAssetClass to use the real DeviceType
+            referenceAssetClass.DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier);
+
             helper.AssetManagement.AssetClasses.CreateOrUpdate([referenceAssetClass]);
 
             AssertCreated(helper.AssetManagement);
@@ -121,6 +143,15 @@
         public void AssetClassDomStorageProvider_EmptyDOM_CreateOrUpdate_Update()
         {
             var helper = RepositoryInitialize.InitializeEmptyRepositories();
+
+            // Get a real DeviceType from the repository
+            var deviceType = helper.AssetManagement.DeviceTypes
+                .Read(new TRUEFilterElement<DeviceType>())
+                .First();
+
+            // Update referenceAssetClass to use the real DeviceType
+            referenceAssetClass.DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier);
+
             helper.AssetManagement.AssetClasses.Create(referenceAssetClass);
 
             // Change more things here
@@ -171,7 +202,8 @@
         {
             const int pageCount = 2;
             var helper = RepositoryInitialize.InitializeEmptyRepositories();
-            helper.PopulateAssetClasses();
+            helper.PopulateDeviceTypes()
+                .PopulateAssetClasses();
 
             FilterElement<AssetClass> allFilter = new TRUEFilterElement<AssetClass>();
             var pagedResult = helper.AssetManagement.AssetClasses.ReadPaged(allFilter, pageCount);
@@ -189,7 +221,8 @@
         public void AssetClassDomStorageProvider_DeleteBulk()
         {
             var helper = RepositoryInitialize.InitializeEmptyRepositories();
-            helper.PopulateAssetClasses();
+            helper.PopulateDeviceTypes()
+                .PopulateAssetClasses();
 
             var filter = new ORFilterElement<AssetClass>(
                 AssetClassExposers.DeviceName.Equal("UPS"),
@@ -212,7 +245,8 @@
         public void AssetClassDomStorageProvider_EmptyDOM_DeleteSingle()
         {
             var helper = RepositoryInitialize.InitializeEmptyRepositories();
-            helper.PopulateAssetClasses();
+            helper.PopulateDeviceTypes()
+                .PopulateAssetClasses();
 
             var assetClassToDelete = helper.AssetManagement.AssetClasses.Read(AssetClassExposers.DeviceName.Equal("Router")).First();
 
@@ -285,8 +319,11 @@
                 createdClass.DataPorts.Should().HaveCount(1);
                 createdClass.DataPorts[0].PortNumber.Should().Be(1);
                 createdClass.DataPorts[0].Name.Should().Be("Port1");
-                createdClass.DataPorts[0].Type.Should().Be(default);
                 createdClass.DataPorts[0].Label.Should().Be("Label1");
+               
+                createdClass.DataPorts[0].Type.Should().NotBeNull();
+                createdClass.DataPorts[0].Type.HasValue().Should().BeFalse();
+                
                 createdClass.DataPorts[0].PortExposure.Should().Be(SlcAsset_Management.Enums.PortExposureEnum.Front);
                 createdClass.DataPorts[0].OutputType.Should().Be(SlcAsset_Management.Enums.Outputtype.Out);
                 createdClass.PowerPorts.Should().HaveCount(2);

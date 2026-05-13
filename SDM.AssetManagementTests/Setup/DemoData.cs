@@ -45,7 +45,7 @@
             CreateBaseAssetClass(4, "Server", "Rack server", 70.0, 8.9, 44.0, 2, 25.0, "server-front.png", "server-back.png", 350, 500),
             CreateBaseAssetClass(5, "Storage", "NAS storage", 60.0, 8.9, 44.0, 2, 20.0, "nas-front.png", "nas-back.png", 250, 400),
             CreateBaseAssetClass(6, "UPS", "Uninterruptible Power Supply", 40.0, 8.9, 17.0, 2, 28.0, "ups-front.png", "ups-back.jpg", 120, 180),
-            CreateBaseAssetClass(7, "KVM Switch", "Keyboard Video Mouse Switch", 16.0, 31.1, 44.0, 7, 2.2, "kvm-front.png", "kvm-back.png", 15, 25),
+            CreateBaseAssetClass(7, "KVM Switch", "Keyboard Video Mouse Switch", 16.0, 31.1, 44.0,7, 2.2, "kvm-front.png", "kvm-back.png", 15, 25),
             CreateBaseAssetClass(8, "Patch Panel", "24-port Patch Panel", 10.0, 4.4, 48.0, 1, 1.5, "patchpanel-front.png", "patchpanel-back.png", 5, 10),
             CreateBaseAssetClass(9, "Wireless Access Point", "Dual-band WiFi 6 AP", 20.0, 4.4, 20.0, 1, 0.8, "ap-front.png", "ap-back.jpeg", 12, 18),
             CreateBaseAssetClass(10, "Media Converter", "Fiber to Ethernet Converter", 9.4, 4.4, 7.0, 1, 0.3, "mediaconv-front.png", "mediaconv-back.png", 3, 5),
@@ -54,16 +54,16 @@
         // Base Assets - will update AssetClassId and RackId at runtime
         public static readonly List<Asset> BaseAssets =
         [
-            CreateBaseAsset(1, "SN123456", "00-14-22-01-23-41"),
-            CreateBaseAsset(2, "SN123457", "00-14-22-01-23-42"),
-            CreateBaseAsset(3, "SN123458", "00-14-22-01-23-43"),
-            CreateBaseAsset(4, "SN123459", "00-14-22-01-23-44"),
-            CreateBaseAsset(5, "SN123460", "00-14-22-01-23-45"),
-            CreateBaseAsset(6, "SN123461", "00-14-22-01-23-46"),
-            CreateBaseAsset(7, "SN123462", "00-14-22-01-23-47"),
-            CreateBaseAsset(8, "SN123463", "00-14-22-01-23-48"),
-            CreateBaseAsset(9, "SN123464", "00-14-22-01-23-49"),
-            CreateBaseAsset(10, "SN123465", "00-14-22-01-23-50"),
+            CreateBaseAssetWithRackInfo(1, "SN123456", "00-14-22-01-23-41", rackPosition: 1),   // Router (1U)
+            CreateBaseAssetWithRackInfo(2, "SN123457", "00-14-22-01-23-42", rackPosition: 2),   // Switch (2U)
+            CreateBaseAssetWithRackInfo(3, "SN123458", "00-14-22-01-23-43", rackPosition: 4),   // Firewall (3U)
+            CreateBaseAssetWithRackInfo(4, "SN123459", "00-14-22-01-23-44", rackPosition: 7),   // Server (2U)
+            CreateBaseAssetWithRackInfo(5, "SN123460", "00-14-22-01-23-45", rackPosition: 9),   // Storage (2U)
+            CreateBaseAssetWithRackInfo(6, "SN123461", "00-14-22-01-23-46", rackPosition: 11),  // UPS (2U)
+            CreateBaseAssetWithRackInfo(7, "SN123462", "00-14-22-01-23-47", rackPosition: 13),  // KVM (7U)
+            CreateBaseAssetWithRackInfo(8, "SN123463", "00-14-22-01-23-48", rackPosition: 20),  // Patch Panel (1U)
+            CreateBaseAssetWithRackInfo(9, "SN123464", "00-14-22-01-23-49", rackPosition: 21),  // AP (1U)
+            CreateBaseAssetWithRackInfo(10, "SN123465", "00-14-22-01-23-50", rackPosition: 22), // Media Converter (1U)
         ];
 
         // Base DataPorts - will update Asset reference at runtime
@@ -479,6 +479,66 @@
                     MaximumRackCapacity = heightu,
                 },
 
+            };
+        }
+
+        private static Asset CreateBaseAssetWithRackInfo(
+            int orderNo,
+            string serialNumber,
+            string macAddress,
+            int rackPosition)
+        {
+            var assetId = Guid.NewGuid();
+
+            return new Asset
+            {
+                State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available,
+                AssetID = assetId.ToString(),
+                Name = $"Test Asset {orderNo}",
+                Description = $"Sample asset {orderNo}",
+                FW_OS = $"FW1.{orderNo}",
+                SerialNumber = serialNumber,
+                HardwareVersion = $"HW1.{orderNo}",
+                MacAddress = macAddress,
+                Location = new AssetLocation
+                {
+                    RackPosition = rackPosition,
+                    Side = SlcAsset_Management.Enums.SideEnum.Back,
+                    // RackId will be assigned by RepositoryInitialize based on round-robin distribution
+                },
+                PurchaseDate = DateTime.UtcNow.AddYears(-orderNo),
+                FirstUseDate = DateTime.UtcNow.AddYears(-orderNo).AddMonths(2),
+                EndOfWarrantyDate = DateTime.UtcNow.AddYears(-orderNo + 10),
+                InstallationDate = DateTime.UtcNow.AddYears(-orderNo).AddMonths(1),
+                InstallationUserId = Guid.NewGuid(),
+                ModificationDate = DateTime.UtcNow,
+                ModificationUserId = Guid.NewGuid(),
+                EndOfLifeDate = DateTime.UtcNow.AddYears(-orderNo + 15),
+                Ownership = new AssetOwnership
+                {
+                    Organization = Guid.NewGuid(),
+                    ContactPerson = Guid.NewGuid(),
+                    ContactPersonRole = Guid.NewGuid(),
+                    Team = Guid.NewGuid(),
+                },
+                Custody = new AssetCustody
+                {
+                    From = DateTime.UtcNow.AddMonths(-6),
+                    Till = DateTime.UtcNow.AddMonths(6),
+                    ContactPerson = Guid.NewGuid(),
+                    Team = Guid.NewGuid(),
+                    Organization = Guid.NewGuid(),
+                    ContactPersonRole = Guid.NewGuid(),
+                },
+                Holders = new List<AssetHolder>(),
+                ElementLinks = new List<ElementLink>
+                {
+                    new ElementLink
+                    {
+                        IsPrimary = true,
+                        ElementID = $"101/{orderNo}",
+                    },
+                },
             };
         }
     }

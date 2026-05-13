@@ -555,7 +555,7 @@
 
             var rackGroups = assets
                 .Select((asset, index) => new { asset, index })
-                .Where(x => x.asset.Location?.RackId != default && x.asset.Location?.RackPosition != null)
+                .Where(x => x.asset.Location != null && x.asset.Location.RackId.HasValue() && x.asset.Location.RackPosition > 0)
                 .GroupBy(x => x.asset.Location.RackId);
 
             foreach (var rackGroup in rackGroups)

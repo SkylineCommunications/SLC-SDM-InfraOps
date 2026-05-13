@@ -29,7 +29,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     using SLDataGateway.API.Querying;
     using SLDataGateway.API.Types.Querying;
 
-    //using static Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper;
 
     internal partial class AssetDomRepository : IBulkRepository<Asset>, IAssetQueryRepository
     {
@@ -652,10 +651,22 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     obj.EndOfWarrantyDate = (DateTime)_lifecycleendofwarrantydate.Value;
                 }
 
+                var _lifecycleinstallationuser = _lifecycleSection.GetValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.InstallationUser);
+                if (_lifecycleinstallationuser != null)
+                {
+                    obj.InstallationUserId = (Guid)_lifecycleinstallationuser.Value;
+                }
+
                 var _lifecycleinstallationdate = _lifecycleSection.GetValue<DateTime>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.InstallationDate);
                 if (_lifecycleinstallationdate != null)
                 {
                     obj.InstallationDate = (DateTime)_lifecycleinstallationdate.Value;
+                }
+
+                var _lifecyclemodificationuser = _lifecycleSection.GetValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.ModificationUser);
+                if (_lifecyclemodificationuser != null)
+                {
+                    obj.ModificationUserId = (Guid)_lifecyclemodificationuser.Value;
                 }
 
                 var _lifecyclemodificationdate = _lifecycleSection.GetValue<DateTime>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.ModificationDate);
@@ -925,9 +936,19 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 _lifecycle.AddOrUpdateValue<DateTime>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.EndOfWarrantyDate, (DateTime)obj.EndOfWarrantyDate);
             }
 
+            if (obj.InstallationUserId != default)
+            {
+                _lifecycle.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.InstallationUser, obj.InstallationUserId);
+            }
+
             if (obj.InstallationDate != default)
             {
                 _lifecycle.AddOrUpdateValue<DateTime>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.InstallationDate, (DateTime)obj.InstallationDate);
+            }
+
+            if (obj.ModificationUserId != default)
+            {
+                _lifecycle.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.ModificationUser, obj.ModificationUserId);
             }
 
             if (obj.ModificationDate != default)
@@ -1071,8 +1092,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.FirstUseDate), comparer, (DateTime)(DateTime)value);
                 case "Lifecycle.EndOfWarrantyDate":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.EndOfWarrantyDate), comparer, (DateTime)(DateTime)value);
+                case "Lifecycle.InstallationUserId":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.InstallationUser), comparer, Guid.Parse((string)value));
                 case "Lifecycle.InstallationDate":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.InstallationDate), comparer, (DateTime)(DateTime)value);
+                case "Lifecycle.ModificationUserId":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.ModificationUser), comparer, Guid.Parse((string)value));
                 case "Lifecycle.ModificationDate":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.ModificationDate), comparer, (DateTime)(DateTime)value);
                 case "Lifecycle.EndOfLife":
@@ -1156,8 +1181,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.FirstUseDate), sortOrder, naturalSort);
                 case "Lifecycle.EndOfWarrantyDate":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.EndOfWarrantyDate), sortOrder, naturalSort);
+                case "Lifecycle.InstallationUserId":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.InstallationUser), sortOrder, naturalSort);
                 case "Lifecycle.InstallationDate":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.InstallationDate), sortOrder, naturalSort);
+                case "Lifecycle.ModificationUserId":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.ModificationUser), sortOrder, naturalSort);
                 case "Lifecycle.ModificationDate":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.ModificationDate), sortOrder, naturalSort);
                 case "Lifecycle.EndOfLife":

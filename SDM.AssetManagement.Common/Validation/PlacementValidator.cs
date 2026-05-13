@@ -96,7 +96,8 @@
             var parentAssetIds = new HashSet<SdmObjectReference<Asset>>();
             foreach (var asset in assets)
             {
-                if (asset.Location?.ParentAsset.HasValue() == true)
+                // Explicit null check for Location
+                if (asset.Location != null && asset.Location.ParentAsset.HasValue())
                 {
                     parentAssetIds.Add(asset.Location.ParentAsset);
                 }
@@ -120,7 +121,8 @@
             var rackIds = new HashSet<string>();
             foreach (var asset in assets)
             {
-                if (asset.Location?.RackId != default)
+                // Explicit null check for Location
+                if (asset.Location != null && asset.Location.RackId != default && asset.Location.RackId.HasValue())
                 {
                     rackIds.Add(asset.Location.RackId.Identifier);
                 }
@@ -154,7 +156,7 @@
         {
             var result = new ValidationResult();
 
-            if (!asset.Location?.ParentAsset.HasValue() == true || asset.Location?.HolderNumber == null)
+            if (asset.Location == null || !asset.Location.ParentAsset.HasValue())
             {
                 return result;
             }
@@ -232,7 +234,7 @@
         {
             var result = new ValidationResult();
 
-            if (asset.Location?.RackId == default || asset.Location?.RackPosition == null)
+            if (asset.Location == null || asset.Location.RackId == default)
             {
                 return result;
             }

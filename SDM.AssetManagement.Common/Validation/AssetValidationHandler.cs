@@ -205,7 +205,8 @@
             }
 
             var hasRack = asset.Location?.RackId != null && asset.Location.RackId != default;
-            var hasPosition = asset.Location?.RackPosition != null;
+            //TODO SDM-1234: Change rack check to only check for HasValue() once all code is updated to use nullable DomIds
+            var hasPosition = asset.Location?.RackPosition != null && asset.Location.RackPosition > 0;
             var hasSide = asset.Location?.Side != null;
 
             // If no rack, position and side must not be set
