@@ -12,6 +12,8 @@
     public sealed class DataPort : SdmObject<DataPort>, IEquatable<DataPort>, IChangeTracking
     {
         [JsonIgnore]
+        private ChangeTrackingFieldHandler _fieldHandler;
+        [JsonIgnore]
         private DataPortInfo _dataPortInfo;
         [JsonIgnore]
         private AssetRelation _assetFk;
@@ -22,6 +24,20 @@
 
         public DataPort()
         {
+            _fieldHandler = new ChangeTrackingFieldHandler();
+        }
+
+        [JsonIgnore]
+        private ChangeTrackingFieldHandler FieldHandler
+        {
+            get
+            {
+                if (_fieldHandler == null)
+                {
+                    _fieldHandler = new ChangeTrackingFieldHandler();
+                }
+                return _fieldHandler;
+            }
         }
 
         [OnDeserialized]
@@ -38,11 +54,7 @@
             set => _dataPortInfo = value ?? new DataPortInfo();
         }
 
-        public AssetRelation AssetFk
-        {
-            get => _assetFk;
-            set => _assetFk = value;
-        }
+        public SdmObjectReference<Asset> Asset { get; set; }
 
         public AddressInfo AddressInfo
         {
@@ -60,6 +72,11 @@
         _addressInfo?.Changed == true ||
         _primaryPortRelation?.Changed == true ||
         _assetFk?.Changed == true;
+
+        [JsonIgnore]
+        internal IChangeTrackingField<SdmObjectReference<Asset>> AssetField => FieldHandler.GetOrCreateField(
+            nameof(Asset),
+            () => new ChangeTrackingField<SdmObjectReference<Asset>>(default));
 
         #endregion
 
@@ -79,7 +96,7 @@
 
             return
                 Equals(DataPortInfo, other.DataPortInfo) &&
-                Equals(AssetFk, other.AssetFk) &&
+                Equals(Asset, other.Asset) &&
                 Equals(AddressInfo, other.AddressInfo) &&
                 Equals(PrimaryPortRelation, other.PrimaryPortRelation);
         }
@@ -95,7 +112,7 @@
             {
                 int hash = (2 << 12) - 1;
                 hash = (hash * 23) + (DataPortInfo != null ? DataPortInfo.GetHashCode() : 0);
-                hash = (hash * 23) + (AssetFk != null ? AssetFk.GetHashCode() : 0);
+                hash = (hash * 23) + (Asset != null ? Asset.GetHashCode() : 0);
                 hash = (hash * 23) + (AddressInfo != null ? AddressInfo.GetHashCode() : 0);
                 hash = (hash * 23) + (PrimaryPortRelation != null ? PrimaryPortRelation.GetHashCode() : 0);
                 return hash;

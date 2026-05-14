@@ -21,6 +21,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     using Skyline.DataMiner.Net.SubscriptionFilters;
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Repositories;
+    using Skyline.DataMiner.SDM.Extensions;
 
     using SLDataGateway.API.Querying;
     using SLDataGateway.API.Types.Querying;
@@ -511,7 +512,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         {
             var obj = new DataPort
             {
+                Identifier = instance.ID.Id.ToString(),
             };
+
             var _dataportinfoSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.SectionDefinitionId));
             if (_dataportinfoSection != default)
             {
@@ -556,11 +559,11 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             var _assetfkSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.AssetFk.SectionDefinitionId));
             if (_assetfkSection != default)
             {
-                obj.AssetFk = new Skyline.DataMiner.SDM.AssetManagement.Models.AssetRelation();
+                obj.Asset = new Skyline.DataMiner.SDM.AssetManagement.Models.Asset();
                 var _assetfkasset = _assetfkSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.AssetFk.Asset);
                 if (_assetfkasset != null)
                 {
-                    obj.AssetFk.Asset = new Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.Asset>(Convert.ToString(_assetfkasset.Value));
+                    obj.Asset = new Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.Asset>(Convert.ToString(_assetfkasset.Value));
                 }
             }
 
@@ -661,12 +664,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 instance.Sections.Add(_dataportinfo);
             }
 
-            if (obj.AssetFk != null)
+            if (obj.Asset != null)
             {
                 var _assetfk = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.AssetFk.SectionDefinitionId);
-                if (obj.AssetFk.Asset != default)
+                if (obj.Asset != default)
                 {
-                    _assetfk.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.AssetFk.Asset, obj.AssetFk.Asset.Identifier);
+                    _assetfk.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.AssetFk.Asset, System.Guid.Parse(obj.Asset.Identifier));
                 }
 
                 instance.Sections.Add(_assetfk);
@@ -735,8 +738,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.Type), comparer, System.Guid.Parse(Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.PortType>.Convert(value).Identifier));
                 case "DataPortInfo.Label":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.Label), comparer, (string)value);
-                case "AssetFk.Asset":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.AssetFk.Asset), comparer, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.Asset>.Convert(value).Identifier);
+                case "Asset":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.AssetFk.Asset), comparer, System.Guid.Parse(Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.Asset>.Convert(value).Identifier));
                 case "AddressInfo.Ipv4Address":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.AddressInfo.Ipv4Address), comparer, (string)value);
                 case "AddressInfo.Ipv6Address":
@@ -772,7 +775,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.Type), sortOrder, naturalSort);
                 case "DataPortInfo.Label":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.Label), sortOrder, naturalSort);
-                case "AssetFk.Asset":
+                case "Asset":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.AssetFk.Asset), sortOrder, naturalSort);
                 case "AddressInfo.Ipv4Address":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.AddressInfo.Ipv4Address), sortOrder, naturalSort);

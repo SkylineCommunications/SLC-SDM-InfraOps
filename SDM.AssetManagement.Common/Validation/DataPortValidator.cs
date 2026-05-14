@@ -105,13 +105,13 @@
             // PHASE 3: ASSET CONTEXT VALIDATION (OPTIMIZED BY ASSET)
             // ============================================================
             var portsByAsset = dataPorts
-                .Where(p => p.AssetFk?.Asset != null && p.AssetFk.Asset.HasValue() && results[p.Identifier].IsValid)
-                .GroupBy(p => p.AssetFk.Asset.Identifier);
+                .Where(p => p.Asset != null && p.Asset.HasValue() && results[p.Identifier].IsValid)
+                .GroupBy(p => p.Asset.Identifier);
 
             foreach (var group in portsByAsset)
             {
                 var assetId = group.Key;
-                var assetFk = group.First().AssetFk.Asset;
+                var assetFk = group.First().Asset;
                 var portsForAsset = group.ToList();
 
                 try

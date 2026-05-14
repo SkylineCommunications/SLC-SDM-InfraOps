@@ -46,7 +46,7 @@
             }
 
             // Asset link
-            if (dataPort.AssetFk.Changed)
+            if (dataPort.AssetField.Changed)
             {
                 if (!DataPortValidationHandler.IsAssetLinkValid(dataPort, out var assetLinkResult))
                 {
@@ -83,7 +83,7 @@
 
 
             // Asset context validation (port number uniqueness, primary ports)
-            if (dataPort.AssetFk.Asset.HasValue())
+            if (dataPort.Asset.HasValue())
             {
                 result.AddFailuresFrom(ValidateAssetContext(dataPort));
             }
@@ -140,11 +140,11 @@
 
             try
             {
-                var asset = _entityLoader.LoadAsset(dataPort.AssetFk.Asset);
+                var asset = _entityLoader.LoadAsset(dataPort.Asset);
                 if (asset == null)
                 {
                     result.AddFailReason(DataPortValidationField.Asset,
-                        $"Parent Asset '{dataPort.AssetFk.Asset.Identifier}' not found.");
+                        $"Parent Asset '{dataPort.Asset.Identifier}' not found.");
                     return result;
                 }
 
@@ -186,7 +186,7 @@
 
             // ✅ DEFENSIVE CHECK: Ensure all ports belong to the same asset
             var distinctAssets = dataPorts
-                .Select(p => p.AssetFk?.Asset.Identifier)
+                .Select(p => p.Asset.Identifier)
                 .Where(id => id != null)
                 .Distinct()
                 .ToList();
@@ -272,9 +272,9 @@
                 return new Dictionary<string, ValidationResult>();
             }
 
-            // ✅ DEFENSIVE CHECK: Ensure all ports belong to this asset
+            // DEFENSIVE CHECK: Ensure all ports belong to this asset
             var mismatchedPorts = portsToValidate
-                .Where(p => p.AssetFk?.Asset.Identifier != asset.Identifier)
+                .Where(p => p.Asset.Identifier != asset.Identifier)
                 .ToList();
 
             if (mismatchedPorts.Any())

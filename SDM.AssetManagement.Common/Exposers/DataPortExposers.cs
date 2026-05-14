@@ -22,7 +22,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 	public static partial class DataPortExposers
 	{
 		public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort, string> Identifier = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort, string>((obj) => obj.Identifier, "Identifier");
-		public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.Asset>> Asset = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.Asset>>((obj) => obj.AssetFk.Asset, "Asset");
+		public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.Asset>> Asset = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.Asset>>((obj) => obj.Asset, "Asset");
 		public static partial class DataPortInfo
 		{
 			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort, string> Name = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort, string>((obj) => obj.DataPortInfo.Name, "DataPortInfo.Name");

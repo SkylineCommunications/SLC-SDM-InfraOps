@@ -40,7 +40,7 @@
                     Type = new SdmObjectReference<PortType>(Guid.NewGuid().ToString()),
                     Label = "Ethernet Port 1",
                 },
-                AssetFk = new AssetRelation { Asset = new SdmObjectReference<Asset>(Guid.NewGuid().ToString()) },
+                Asset = new SdmObjectReference<Asset>(Guid.NewGuid().ToString()),
                 AddressInfo = new AddressInfo
                 {
                     Ipv4Address = "192.168.1.100",
@@ -84,11 +84,11 @@
         public void CreateOrUpdate_WithExistingDataPort_ShouldUpdate()
         {
             // Arrange
-            Helper.AssetManagement.DataPorts.Create(referenceDataPort);
+            var created = Helper.AssetManagement.DataPorts.Create(referenceDataPort);
 
             var updatedDataPort = new DataPort
             {
-                Identifier = referenceDataPort.Identifier,
+                Identifier = created.Identifier,
                 DataPortInfo = new DataPortInfo
                 {
                     Name = "Updated DataPort Name",
@@ -97,7 +97,7 @@
                     PortExposure = SlcAsset_Management.Enums.PortExposureEnum.Back,
                     Label = "Fiber Port 2",
                 },
-                AssetFk = new AssetRelation { Asset = referenceDataPort.AssetFk.Asset },
+                Asset = created.Asset ,
                 AddressInfo = new AddressInfo
                 {
                     Ipv4Address = "10.0.0.50",
@@ -227,7 +227,7 @@
                 updated.DataPortInfo.Type.Should().NotBe(original.DataPortInfo.Type);
 
                 // Asset reference remains the same
-                updated.AssetFk.Asset.Should().Be(original.AssetFk.Asset);
+                updated.Asset.Should().Be(original.Asset);
 
                 // AddressInfo changes
                 updated.AddressInfo.Should().NotBeNull();
@@ -260,8 +260,8 @@
                 created.DataPortInfo.Label.Should().Be("Ethernet Port 1");
 
                 // Asset reference
-                created.AssetFk.Asset.Should().NotBeNull();
-                created.AssetFk.Asset.Should().BeAssignableTo<SdmObjectReference<Asset>>();
+                created.Asset.Should().NotBeNull();
+                created.Asset.Should().BeAssignableTo<SdmObjectReference<Asset>>();
 
                 // AddressInfo
                 created.AddressInfo.Should().NotBeNull();

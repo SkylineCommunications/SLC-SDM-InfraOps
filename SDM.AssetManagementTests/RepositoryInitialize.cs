@@ -338,10 +338,7 @@
                 var assetIndex = i % persistedAssets.Count;
 
                 var dataPort = CloneDataPort(basePort);
-                dataPort.AssetFk = new AssetRelation
-                {
-                    Asset = new SdmObjectReference<Asset>(persistedAssets[assetIndex].Identifier),
-                };
+                dataPort.Asset = new SdmObjectReference<Asset>(persistedAssets[assetIndex].Identifier);
 
                 dataPorts.Add(dataPort);
             }

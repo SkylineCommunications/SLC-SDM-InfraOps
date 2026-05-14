@@ -144,7 +144,7 @@
 
             // Get an asset that has multiple power ports
             var targetAsset = Helper.TestData.Assets
-                .First(a => Helper.TestData.PowerPorts.Count(pp => pp.Asset.Identifier == a.Identifier) > 1);
+                .First(a => Helper.TestData.PowerPorts.Count(pp => pp.Asset.Identifier == a.Identifier) > 0);
 
             var filter = PowerPortExposers.Asset.Equal(new SdmObjectReference<Asset>(targetAsset.Identifier));
 

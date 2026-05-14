@@ -258,7 +258,7 @@
 
             // Assert
             var allDataPorts = Helper.TestData.DataPorts;
-            Assert.IsTrue(allDataPorts.Count(dp => dp.AssetFk.Asset.Identifier == asset.Identifier) >= 2,
+            Assert.IsTrue(allDataPorts.Count(dp => dp.Asset.Identifier == asset.Identifier) >= 2,
                 "Should have at least 2 data ports for the asset");
         }
 
@@ -424,10 +424,7 @@
         {
             var dataPort = new DataPort
             {
-                AssetFk = new AssetRelation
-                {
-                    Asset = new SdmObjectReference<Asset>(assetId),
-                }
+                Asset = new SdmObjectReference<Asset>(assetId),
             };
 
             dataPort.DataPortInfo.PortNumber = portNumber;

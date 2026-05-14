@@ -141,27 +141,22 @@
             PrepareReferenceAssetWithAssetClass();
             var created = Helper.AssetManagement.Assets.Create(referenceAsset);
 
-            //created.Name = "Updated Asset Name";
-            //created.Description = "Updated description";
-            //created.HardwareVersion = "HW2.0";
-            //created.MacAddress = null;
-
             var updatedAsset = new Asset
             {
-                Identifier = referenceAsset.Identifier,
-                AssetID = referenceAsset.AssetID,
+                Identifier = created.Identifier,
+                AssetID = created.AssetID,
                 Name = "Updated Asset Name",
                 Description = "Updated description",
                 HardwareVersion = "HW2.0",
                 MacAddress = null, // MAC Address removed
                 Location = new AssetLocation
                 {
-                    ParentAsset = referenceAsset.Location.ParentAsset,
-                    RoomId = referenceAsset.Location.RoomId,
-                    RackId = referenceAsset.Location.RackId,
+                    ParentAsset = created.Location.ParentAsset,
+                    RoomId = created.Location.RoomId,
+                    RackId = created.Location.RackId,
                     RackPosition = 12,
-                    ContainerId = referenceAsset.Location.ContainerId,
-                    DeskId = referenceAsset.Location.DeskId,
+                    ContainerId = created.Location.ContainerId,
+                    DeskId = created.Location.DeskId,
                     Side = SlcAsset_Management.Enums.SideEnum.Front,
                 },
                 PurchaseDate = DateTime.UtcNow.AddYears(-1),

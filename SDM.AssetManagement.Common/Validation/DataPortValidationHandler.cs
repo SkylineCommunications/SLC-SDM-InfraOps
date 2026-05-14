@@ -93,7 +93,7 @@
                 return result.IsValid;
             }
 
-            if (dataPort.AssetFk?.Asset == null || !dataPort.AssetFk.Asset.HasValue())
+            if (dataPort.Asset == null || !dataPort.Asset.HasValue())
             {
                 result.AddFailReason(DataPortValidationField.Asset,
                     "DataPort must be linked to an Asset.");

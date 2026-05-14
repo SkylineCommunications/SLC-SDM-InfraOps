@@ -187,12 +187,11 @@
         public void ReadFilter_LinkedAsset_Equal_ShouldReturnDataPortsForAsset()
         {
             // Arrange
-            
             Helper.PopulateWithDemoData(upTo: DemoDataLayer.DataPorts);
 
-            // Get an asset that has multiple data ports
+            // Get an asset that has data ports in the cached test data
             var targetAsset = Helper.TestData.Assets
-                .First(a => Helper.TestData.DataPorts.Count(dp => dp.AssetFk.Asset.Identifier == a.Identifier) > 1);
+                .First(a => Helper.TestData.DataPorts.Count(dp => dp.Asset.Identifier == a.Identifier) > 0);
 
             var filter = DataPortExposers.Asset.Equal(new SdmObjectReference<Asset>(targetAsset.Identifier));
 
@@ -203,7 +202,7 @@
             using (new AssertionScope())
             {
                 results.Should().NotBeEmpty($"should find data ports linked to asset '{targetAsset.Name}'");
-                results.Should().OnlyContain(dp => dp.AssetFk.Asset.Identifier == targetAsset.Identifier);
+                results.Should().OnlyContain(dp => dp.Asset.Identifier == targetAsset.Identifier);
             }
         }
 

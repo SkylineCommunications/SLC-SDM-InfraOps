@@ -89,7 +89,7 @@
 
 			FilterElement<Facility> allFilter = new TRUEFilterElement<Facility>();
 			var pagedResult = helper.Facilities.ReadPaged(allFilter, pageCount);
-			var facilityCount = helper.Facilities.Count(allFilter);
+            var facilityCount = helper.Facilities.Count(allFilter);
 
 			using (new AssertionScope())
 			{
