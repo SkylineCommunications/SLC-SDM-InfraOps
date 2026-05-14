@@ -587,6 +587,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				id = Guid.NewGuid();
 			}
 
+            Asset a = new Asset
+            {
+                Identifier = Guid.NewGuid().ToString(),
+
+            };
+
 			var instance = new DomInstance
 			{
 				DomDefinitionId = Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.DomDefinitionId,

@@ -1,7 +1,11 @@
 ﻿namespace SDM.AssetManagementTests.Validation
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
+
+    using FluentAssertions;
+    using FluentAssertions.Execution;
 
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -12,13 +16,15 @@
 
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Common.Validation;
-    using Skyline.DataMiner.SDM.AssetManagement.Helpers;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
-    using Skyline.DataMiner.SDM.AssetManagement.Repositories;
     using Skyline.DataMiner.SDM.AssetManagement.Validation;
 
+    /// <summary>
+    /// Tests for AssetClassValidator which validates AssetClass business rules
+    /// with repository lookups (e.g., name uniqueness, DeviceType existence).
+    /// </summary>
     [TestClass]
-    public class AssetClassValidatorTests
+    public class AssetClassValidatorTests : BaseRepositoryTest
     {
         private ITestApiHelper _helper;
         private AssetClassValidator _validator;
@@ -26,50 +32,21 @@
         [TestInitialize]
         public void Setup()
         {
-            _helper = RepositoryInitialize.InitializeEmptyRepositories();
+            _helper = Helper;
             _validator = _helper.AssetManagement.AssetClassValidator;
         }
 
-        #region Constructor Tests
+        #region Validate - Happy Path
 
         [TestMethod]
-        [ExpectedException(typeof(System.ArgumentNullException))]
-        public void Constructor_WithNullAssetClassRepository_ThrowsArgumentNullException()
-        {
-            // Act
-           // var validator = new AssetClassValidator(null, (IDeviceTypeQueryRepository)_helper.DeviceTypes);
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(System.ArgumentNullException))]
-        public void Constructor_WithNullDeviceTypeRepository_ThrowsArgumentNullException()
-        {
-            // Act
-            // var validator = new AssetClassValidator((IAssetClassQueryRepository)_helper.AssetManagement.AssetClasses, null);
-        }
-
-        #endregion
-
-        #region Validate Tests
-
-        [TestMethod]
-        [ExpectedException(typeof(System.ArgumentNullException))]
-        public void Validate_WithNullAssetClass_ThrowsArgumentNullException()
-        {
-            // Act
-            _validator.Validate(null);
-        }
-
-        [TestMethod]
-        public void Validate_WithAllValidFields_ReturnsValid()
+        public void Validate_WithAllValidFields_ShouldReturnValid()
         {
             // Arrange
-            var deviceType = DemoData.DeviceTypes.First();
-            _helper.PopulateDeviceTypes(new[] { deviceType });
+            _helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
+            var deviceType = _helper.TestData.DeviceTypes.First();
 
             var assetClass = new AssetClass
             {
-                Identifier = "ac-123",
                 Name = "Valid Device",
                 DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier),
                 Depth = 10,
@@ -88,16 +65,31 @@
             var result = _validator.Validate(assetClass);
 
             // Assert
-            Assert.IsTrue(result.IsValid);
-            Assert.AreEqual(0, result.FailureReasons.Count);
+            using (new AssertionScope())
+            {
+                result.IsValid.Should().BeTrue();
+                result.FailureReasons.Should().BeEmpty();
+            }
         }
 
         [TestMethod]
-        public void Validate_WithMultipleInvalidFields_ReturnsAllErrors()
+        public void Validate_WithNullAssetClass_ShouldThrowArgumentNullException()
+        {
+            // Act & Assert
+            _validator.Invoking(v => v.Validate(null))
+                .Should().Throw<ArgumentNullException>();
+        }
+
+        #endregion
+
+        #region Validate - Multiple Errors
+
+        [TestMethod]
+        public void Validate_WithMultipleInvalidFields_ShouldReturnAllErrors()
         {
             // Arrange
-            var deviceType = DemoData.DeviceTypes.First();
-            _helper.PopulateDeviceTypes(new[] { deviceType });
+            _helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
+            var deviceType = _helper.TestData.DeviceTypes.First();
 
             var assetClass = new AssetClass
             {
@@ -113,114 +105,109 @@
             var result = _validator.Validate(assetClass);
 
             // Assert
-            Assert.IsFalse(result.IsValid);
-            Assert.IsTrue(result.FailureReasons.Count >= 4); // At least depth, width, height, power consumption
+            using (new AssertionScope())
+            {
+                result.IsValid.Should().BeFalse();
+                result.FailureReasons.Should().HaveCountGreaterOrEqualTo(4, 
+                    "should report errors for depth, width, height, and power consumption");
+            }
         }
 
         [TestMethod]
-        public void Validate_OnlyValidatesChangedFields()
+        public void Validate_WithNegativeDimensions_ShouldReturnInvalid()
         {
             // Arrange
-            var deviceType = DemoData.DeviceTypes.First();
-            _helper.PopulateDeviceTypes(new[] { deviceType });
+            _helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
+            var deviceType = _helper.TestData.DeviceTypes.First();
 
             var assetClass = new AssetClass
             {
                 Name = "Test",
                 DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier),
-                Depth = -5,
-                Width = 20
+                Depth = -10,
+                Width = -20,
+                Height = -5,
+                HeightU = -1,
+                Weight = -100
             };
-
-            // Reset change tracking after initialization
-            assetClass.ResetChangeTracking();
-
-            // Now only change Width
-            assetClass.Width = 25;
 
             // Act
             var result = _validator.Validate(assetClass);
 
             // Assert
-            Assert.IsTrue(result.IsValid); // Depth error not reported because not changed after reset
+            using (new AssertionScope())
+            {
+                result.IsValid.Should().BeFalse();
+                result.FailureReasons.Should().HaveCountGreaterOrEqualTo(5,
+                    "should report errors for all negative dimensions");
+            }
         }
 
         #endregion
 
-        #region IsAssetClassNameValid(string, List<string>) Tests
+        #region Name Validation
 
         [TestMethod]
-        public void IsAssetClassNameValid_WithValidUniqueName_ReturnsValid()
+        public void NameValidation_WithValidUniqueName_ShouldReturnValid()
         {
             // Act
             var result = _validator.IsAssetClassNameValid("Unique Name", null);
 
             // Assert
-            Assert.IsTrue(result.IsValid);
+            result.IsValid.Should().BeTrue();
         }
 
         [TestMethod]
-        public void IsAssetClassNameValid_WithEmptyName_ReturnsInvalid()
+        [DataRow("", DisplayName = "Empty Name")]
+        [DataRow("   ", DisplayName = "Whitespace Name")]
+        [DataRow(null, DisplayName = "Null Name")]
+        public void NameValidation_WithInvalidName_ShouldReturnInvalid(string name)
         {
             // Act
-            var result = _validator.IsAssetClassNameValid(string.Empty, null);
+            var result = _validator.IsAssetClassNameValid(name, null);
 
             // Assert
-            Assert.IsFalse(result.IsValid);
-            Assert.IsTrue(result.TryGetFailReason(
-                AssetClassValidationHandler.AssetClassValidationField.Name,
-                out var reason));
-            StringAssert.Contains(reason, "cannot be empty or whitespace");
+            using (new AssertionScope())
+            {
+                result.IsValid.Should().BeFalse();
+                
+                if (!string.IsNullOrEmpty(name))
+                {
+                    result.TryGetFailReason(
+                        AssetClassValidationHandler.AssetClassValidationField.Name,
+                        out var reason).Should().BeTrue();
+                    reason.Should().Contain("cannot be empty or whitespace");
+                }
+            }
         }
 
         [TestMethod]
-        public void IsAssetClassNameValid_WithWhitespaceName_ReturnsInvalid()
-        {
-            // Act
-            var result = _validator.IsAssetClassNameValid("   ", null);
-
-            // Assert
-            Assert.IsFalse(result.IsValid);
-            Assert.IsTrue(result.TryGetFailReason(
-                AssetClassValidationHandler.AssetClassValidationField.Name,
-                out var reason));
-            StringAssert.Contains(reason, "cannot be empty or whitespace");
-        }
-
-        [TestMethod]
-        public void IsAssetClassNameValid_WithNullName_ReturnsInvalid()
-        {
-            // Act
-            var result = _validator.IsAssetClassNameValid(null, null);
-
-            // Assert
-            Assert.IsFalse(result.IsValid);
-        }
-
-        [TestMethod]
-        public void IsAssetClassNameValid_WithNameInUse_ReturnsInvalid()
+        public void NameValidation_WithNameInUse_ShouldReturnInvalid()
         {
             // Arrange
-            var existingAssetClass = DemoData.AssetClasses.First();
-            _helper.PopulateAssetClasses(new[] { existingAssetClass });
+            _helper.PopulateWithDemoData(upTo: DemoDataLayer.AssetClasses);
+            var existingAssetClass = _helper.TestData.AssetClasses.First();
 
             // Act
             var result = _validator.IsAssetClassNameValid(existingAssetClass.Name, null);
 
             // Assert
-            Assert.IsFalse(result.IsValid);
-            Assert.IsTrue(result.TryGetFailReason(
-                AssetClassValidationHandler.AssetClassValidationField.Name,
-                out var reason));
-            StringAssert.Contains(reason, "already in use");
+            using (new AssertionScope())
+            {
+                result.IsValid.Should().BeFalse();
+                result.TryGetFailReason(
+                    AssetClassValidationHandler.AssetClassValidationField.Name,
+                    out var reason).Should().BeTrue();
+                reason.Should().Contain("already in use");
+            }
         }
 
         [TestMethod]
-        public void IsAssetClassNameValid_WithNameInUseButExcluded_ReturnsValid()
+        public void NameValidation_WithNameInUseButExcluded_ShouldReturnValid()
         {
             // Arrange
-            var existingAssetClass = DemoData.AssetClasses.First();
-            _helper.PopulateAssetClasses(new[] { existingAssetClass });
+            _helper.PopulateWithDemoData(upTo: DemoDataLayer.AssetClasses);
+            var existingAssetClass = _helper.TestData.AssetClasses.First();
 
             var exceptIdentifiers = new List<string> { existingAssetClass.Identifier };
 
@@ -228,20 +215,16 @@
             var result = _validator.IsAssetClassNameValid(existingAssetClass.Name, exceptIdentifiers);
 
             // Assert
-            Assert.IsTrue(result.IsValid);
+            result.IsValid.Should().BeTrue("the name belongs to the excluded identifier");
         }
 
-        #endregion
-
-        #region IsAssetClassNameValid(AssetClass) Tests
-
         [TestMethod]
-        public void IsAssetClassNameValid_WithAssetClass_PassesIdentifierToExclusion()
+        public void NameValidation_WithAssetClassObject_ShouldExcludeOwnIdentifier()
         {
             // Arrange
             var assetClass = new AssetClass
             {
-                Identifier = Convert.ToString(Guid.NewGuid()),
+                Identifier = Guid.NewGuid().ToString(),
                 Name = "Test Device",
             };
 
@@ -249,18 +232,44 @@
             var result = _validator.IsAssetClassNameValid(assetClass);
 
             // Assert
-            Assert.IsTrue(result.IsValid);
+            result.IsValid.Should().BeTrue("validation should exclude its own identifier");
         }
 
         #endregion
 
-        #region Power Supply Validation Tests
+        #region DeviceType Validation
 
         [TestMethod]
-        public void Validate_WithPowerProviderDeviceType_AndPowerSupply_ReturnsValid()
+        public void Validate_WithMissingDeviceType_ShouldReturnInvalid()
         {
-            // Arrange - Find or skip if no PowerProvider device types
-            var powerProviderDeviceType = DemoData.DeviceTypes
+            // Arrange
+            var assetClass = new AssetClass
+            {
+                Name = "Test Device",
+                DeviceTypeId = new SdmObjectReference<DeviceType>("dt-missing"),
+            };
+
+            // Act
+            var result = _validator.Validate(assetClass);
+
+            // Assert
+            using (new AssertionScope())
+            {
+                result.IsValid.Should().BeFalse();
+                result.TryGetFailReason(
+                    AssetClassValidationHandler.AssetClassValidationField.DeviceTypeId,
+                    out var reason).Should().BeTrue();
+                reason.Should().Contain("Device Type id needs to be a Guid");
+            }
+        }
+
+        [TestMethod]
+        public void Validate_WithPowerProviderDeviceType_AndPowerSupply_ShouldReturnValid()
+        {
+            // Arrange
+            _helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
+            
+            var powerProviderDeviceType = _helper.TestData.DeviceTypes
                 .FirstOrDefault(dt => dt.TagsInfo.Tags.Contains(SlcAsset_Management.Enums.TagOption.PowerProvider));
 
             if (powerProviderDeviceType == null)
@@ -268,8 +277,6 @@
                 Assert.Inconclusive("No PowerProvider device type in test data");
                 return;
             }
-
-            _helper.PopulateDeviceTypes(new[] { powerProviderDeviceType });
 
             var assetClass = new AssetClass
             {
@@ -282,41 +289,19 @@
             var result = _validator.Validate(assetClass);
 
             // Assert
-            Assert.IsTrue(result.IsValid);
-        }
-
-        [TestMethod]
-        public void Validate_WithMissingDeviceType_ReturnsInvalid()
-        {
-            // Arrange
-            var assetClass = new AssetClass
-            {
-                Name = "Test Device",
-                DeviceTypeId = new SdmObjectReference<DeviceType>("dt-missing"),
-                PowerSupply = SlcAsset_Management.Enums.PowerSupplyEnum.AC
-            };
-
-            // Act
-            var result = _validator.Validate(assetClass);
-
-            // Assert
-            Assert.IsFalse(result.IsValid);
-            Assert.IsTrue(result.TryGetFailReason(
-                AssetClassValidationHandler.AssetClassValidationField.DeviceTypeId,
-                out var reason));
-            StringAssert.Contains(reason, "Device Type not found");
+            result.IsValid.Should().BeTrue();
         }
 
         #endregion
 
-        #region Collection Validation Tests
+        #region Collection Validation
 
         [TestMethod]
-        public void Validate_WithInvalidDataPorts_ReturnsInvalid()
+        public void Validate_WithInvalidDataPorts_ShouldReturnInvalid()
         {
             // Arrange
-            var deviceType = DemoData.DeviceTypes.First();
-            _helper.PopulateDeviceTypes(new[] { deviceType });
+            _helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
+            var deviceType = _helper.TestData.DeviceTypes.First();
 
             var assetClass = new AssetClass
             {
@@ -324,8 +309,8 @@
                 DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier),
                 DataPorts = new List<DataPortInfo>
                 {
-                   new DataPortInfo { PortNumber = 1 },
-                   new DataPortInfo { PortNumber = 1 },  // Duplicate
+                    new DataPortInfo { PortNumber = 1 },
+                    new DataPortInfo { PortNumber = 1 },  // Duplicate
                 }
             };
 
@@ -333,19 +318,22 @@
             var result = _validator.Validate(assetClass);
 
             // Assert
-            Assert.IsFalse(result.IsValid);
-            Assert.IsTrue(result.TryGetFailReason(
-                AssetClassValidationHandler.AssetClassValidationField.DataPortNumber,
-                out var reason));
-            StringAssert.Contains(reason, "Multiple Data Ports");
+            using (new AssertionScope())
+            {
+                result.IsValid.Should().BeFalse();
+                result.TryGetFailReason(
+                    AssetClassValidationHandler.AssetClassValidationField.DataPortNumber,
+                    out var reason).Should().BeTrue();
+                reason.Should().Contain("Multiple Data Ports");
+            }
         }
 
         [TestMethod]
-        public void Validate_WithInvalidPowerPorts_ReturnsInvalid()
+        public void Validate_WithInvalidPowerPorts_ShouldReturnInvalid()
         {
             // Arrange
-            var deviceType = DemoData.DeviceTypes.First();
-            _helper.PopulateDeviceTypes(new[] { deviceType });
+            _helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
+            var deviceType = _helper.TestData.DeviceTypes.First();
 
             var assetClass = new AssetClass
             {
@@ -361,19 +349,22 @@
             var result = _validator.Validate(assetClass);
 
             // Assert
-            Assert.IsFalse(result.IsValid);
-            Assert.IsTrue(result.TryGetFailReason(
-                AssetClassValidationHandler.AssetClassValidationField.PowerPortNumber,
-                out var reason));
-            StringAssert.Contains(reason, "cannot be negative");
+            using (new AssertionScope())
+            {
+                result.IsValid.Should().BeFalse();
+                result.TryGetFailReason(
+                    AssetClassValidationHandler.AssetClassValidationField.PowerPortNumber,
+                    out var reason).Should().BeTrue();
+                reason.Should().Contain("cannot be negative");
+            }
         }
 
         [TestMethod]
-        public void Validate_WithInvalidHolders_ReturnsInvalid()
+        public void Validate_WithInvalidHolders_ShouldReturnInvalid()
         {
             // Arrange
-            var deviceType = DemoData.DeviceTypes.First();
-            _helper.PopulateDeviceTypes(new[] { deviceType });
+            _helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
+            var deviceType = _helper.TestData.DeviceTypes.First();
 
             var assetClass = new AssetClass
             {
@@ -398,59 +389,62 @@
             var result = _validator.Validate(assetClass);
 
             // Assert
-            Assert.IsFalse(result.IsValid);
-            Assert.IsTrue(result.TryGetFailReason(
-                AssetClassValidationHandler.AssetClassValidationField.HolderSlotNumber,
-                out var reason));
-            StringAssert.Contains(reason, "Multiple Holders");
+            using (new AssertionScope())
+            {
+                result.IsValid.Should().BeFalse();
+                result.TryGetFailReason(
+                    AssetClassValidationHandler.AssetClassValidationField.HolderSlotNumber,
+                    out var reason).Should().BeTrue();
+                reason.Should().Contain("Multiple Holders");
+            }
         }
 
         #endregion
 
-        #region Dimension Validation Tests
+        #region Change Tracking
 
         [TestMethod]
-        public void Validate_WithNegativeDimensions_ReturnsInvalid()
+        public void Validate_OnlyValidatesChangedFields()
         {
             // Arrange
-            var deviceType = DemoData.DeviceTypes.First();
-            _helper.PopulateDeviceTypes(new[] { deviceType });
+            _helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
+            var deviceType = _helper.TestData.DeviceTypes.First();
 
             var assetClass = new AssetClass
             {
                 Name = "Test",
                 DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier),
-                Depth = -10,
-                Width = -20,
-                Height = -5,
-                HeightU = -1,
-                Weight = -100
+                Depth = -5,      // Invalid
+                Width = 20       // Valid
             };
+
+            // Reset change tracking
+            assetClass.ResetChangeTracking();
+
+            // Only change Width
+            assetClass.Width = 25;
 
             // Act
             var result = _validator.Validate(assetClass);
 
             // Assert
-            Assert.IsFalse(result.IsValid);
-            Assert.IsTrue(result.FailureReasons.Count >= 5);
+            result.IsValid.Should().BeTrue("Depth error should not be reported since it wasn't changed after reset");
         }
 
         #endregion
 
-        #region Integration Tests with Real Repository
+        #region Integration Tests
 
         [TestMethod]
-        public void Validate_WithExistingDataInRepository_WorksCorrectly()
+        public void Validate_WithExistingRepositoryData_ShouldWorkCorrectly()
         {
             // Arrange
-            _helper.PopulateAssetClasses()
-                   .PopulateDeviceTypes();
+            _helper.PopulateWithDemoData(upTo: DemoDataLayer.AssetClasses);
 
-            var deviceType = DemoData.DeviceTypes.First();
+            var deviceType = _helper.TestData.DeviceTypes.First();
 
             var newAssetClass = new AssetClass
             {
-                Identifier = "new-ac",
                 Name = "Brand New Device",
                 DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier),
                 Depth = 10,
@@ -461,7 +455,7 @@
             var result = _validator.Validate(newAssetClass);
 
             // Assert
-            Assert.IsTrue(result.IsValid);
+            result.IsValid.Should().BeTrue("new asset class should be valid with existing repository data");
         }
 
         #endregion

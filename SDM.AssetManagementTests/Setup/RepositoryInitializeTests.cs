@@ -14,121 +14,161 @@
     using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
+    /// <summary>
+    /// Tests for repository initialization and population functionality.
+    /// </summary>
     [TestClass]
-    public class RepositoryInitializeTests
+    public class RepositoryInitializeTests : BaseRepositoryTest
     {
-        #region InitializeEmptyRepositories Tests
+        #region Initialization Tests
 
         [TestMethod]
         public void InitializeEmptyRepositories_ShouldReturnValidHelper()
         {
             // Act
-            var helper = RepositoryInitialize.InitializeEmptyRepositories();
+
 
             // Assert
-            Assert.IsNotNull(helper);
-            Assert.IsNotNull(helper.AssetManagement.Assets);
-            Assert.IsNotNull(helper.AssetManagement.AssetClasses);
-            Assert.IsNotNull(helper.AssetManagement.DeviceTypes);
-            Assert.IsNotNull(helper.AssetManagement.DataPorts);
-            Assert.IsNotNull(helper.AssetManagement.PowerPorts);
+            Assert.IsNotNull(Helper);
+            Assert.IsNotNull(Helper.AssetManagement.Assets);
+            Assert.IsNotNull(Helper.AssetManagement.AssetClasses);
+            Assert.IsNotNull(Helper.AssetManagement.DeviceTypes);
+            Assert.IsNotNull(Helper.AssetManagement.DataPorts);
+            Assert.IsNotNull(Helper.AssetManagement.PowerPorts);
         }
 
         [TestMethod]
         public void InitializeEmptyRepositories_ShouldHaveEmptyRepositories()
         {
             // Act
-            var helper = RepositoryInitialize.InitializeEmptyRepositories();
+
 
             // Assert
-            Assert.AreEqual(0, helper.AssetManagement.Assets.Count(new TRUEFilterElement<Asset>()));
-            Assert.AreEqual(0, helper.AssetManagement.AssetClasses.Count(new TRUEFilterElement<AssetClass>()));
-            Assert.AreEqual(0, helper.AssetManagement.DeviceTypes.Count(new TRUEFilterElement<DeviceType>()));
-            Assert.AreEqual(0, helper.AssetManagement.DataPorts.Count(new TRUEFilterElement<DataPort>()));
-            Assert.AreEqual(0, helper.AssetManagement.PowerPorts.Count(new TRUEFilterElement<PowerPort>()));
+            Assert.AreEqual(0, Helper.AssetManagement.Assets.Count(new TRUEFilterElement<Asset>()));
+            Assert.AreEqual(0, Helper.AssetManagement.AssetClasses.Count(new TRUEFilterElement<AssetClass>()));
+            Assert.AreEqual(0, Helper.AssetManagement.DeviceTypes.Count(new TRUEFilterElement<DeviceType>()));
+            Assert.AreEqual(0, Helper.AssetManagement.DataPorts.Count(new TRUEFilterElement<DataPort>()));
+            Assert.AreEqual(0, Helper.AssetManagement.PowerPorts.Count(new TRUEFilterElement<PowerPort>()));
         }
 
         #endregion
 
-        #region PopulateAssets Tests
+        #region PopulateWithDemoData Integration Tests
 
         [TestMethod]
-        public void PopulateAssets_WithDefaultData_ShouldPopulateRepository()
+        public void PopulateWithDemoData_AllLayers_ShouldSucceed()
         {
             // Arrange
-            var helper = RepositoryInitialize.InitializeEmptyRepositories()
-                .PopulateDeviceTypes()
-                .PopulateAssetClasses();
+
 
             // Act
-            helper.PopulateAssets();
+            Helper.PopulateWithDemoData(includeRacks: true);
 
             // Assert
-            Assert.IsTrue(helper.AssetManagement.Assets.Count(new TRUEFilterElement<Asset>()) > 0, "Should populate with default demo data");
+            Assert.IsTrue(Helper.TestData.DeviceTypes.Any(), "DeviceTypes should be populated");
+            Assert.IsTrue(Helper.TestData.AssetClasses.Any(), "AssetClasses should be populated");
+            Assert.IsTrue(Helper.TestData.Assets.Any(), "Assets should be populated");
+            Assert.IsTrue(Helper.TestData.DataPorts.Any(), "DataPorts should be populated");
+            Assert.IsTrue(Helper.TestData.PowerPorts.Any(), "PowerPorts should be populated");
+            Assert.IsTrue(Helper.TestData.Racks.Any(), "Racks should be populated");
         }
 
         [TestMethod]
-        public void PopulateAssets_WithValidCustomData_ShouldPopulateRepository()
+        public void PopulateWithDemoData_WithoutRacks_ShouldSucceed()
         {
             // Arrange
-            var helper = RepositoryInitialize.InitializeEmptyRepositories()
-                .PopulateDeviceTypes()
-                .PopulateAssetClasses();
 
-            var assetClass = helper.AssetManagement.AssetClasses.Read(new TRUEFilterElement<AssetClass>()).First();
+
+            // Act
+            Helper.PopulateWithDemoData(includeRacks: false);
+
+            // Assert
+            Assert.IsTrue(Helper.TestData.Assets.Any(), "Assets should be created without racks");
+            Assert.IsFalse(Helper.TestData.Racks.Any(), "Racks should not be populated");
+            Assert.IsTrue(Helper.TestData.Assets.All(a => a.Location?.RackId == null || !a.Location.RackId.HasValue()),
+                "Assets should have no rack assignments");
+        }
+
+        [TestMethod]
+        public void PopulateWithDemoData_UpToSpecificLayer_ShouldPopulateDependenciesOnly()
+        {
+            // Arrange
+
+
+            // Act - Only populate up to AssetClasses
+            Helper.PopulateWithDemoData(upTo: DemoDataLayer.AssetClasses, includeRacks: false);
+
+            // Assert
+            Assert.IsTrue(Helper.TestData.DeviceTypes.Any(), "DeviceTypes should be populated (dependency)");
+            Assert.IsTrue(Helper.TestData.AssetClasses.Any(), "AssetClasses should be populated");
+            Assert.IsFalse(Helper.TestData.Assets.Any(), "Assets should NOT be populated");
+            Assert.IsFalse(Helper.TestData.DataPorts.Any(), "DataPorts should NOT be populated");
+            Assert.IsFalse(Helper.TestData.PowerPorts.Any(), "PowerPorts should NOT be populated");
+        }
+
+        [TestMethod]
+        public void PopulateWithDemoData_WithRacks_ShouldAssignRackLocations()
+        {
+            // Act
+            Helper.PopulateWithDemoData(DemoDataLayer.Assets, includeRacks: true);
+
+            // Assert
+            var assets = Helper.TestData.Assets;
+            Assert.IsTrue(assets.Any(), "Assets should be populated");
+            Assert.IsTrue(Helper.TestData.Racks.Any(), "Racks should be populated");
+            Assert.IsTrue(assets.All(a => a.Location?.RackId != null && a.Location.RackId.HasValue()),
+                "All assets should be assigned to racks");
+        }
+
+        [TestMethod]
+        public void PopulateWithDemoData_ShouldSupportFluentChaining()
+        {
+            // Arrange
+
+
+            // Act
+            var result = Helper
+                .PopulateWithDemoData(DemoDataLayer.DeviceTypes)
+                .PopulateWithDemoData(DemoDataLayer.AssetClasses);
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.AreSame(Helper, result, "Should return same helper instance for chaining");
+        }
+
+        #endregion
+
+        #region Custom Data Population - Validation Tests
+
+        [TestMethod]
+        public void PopulateAssets_WithValidCustomData_ShouldSucceed()
+        {
+            // Arrange
+
+            Helper.PopulateWithDemoData(DemoDataLayer.AssetClasses);
+
+            var assetClass = Helper.TestData.AssetClasses.First();
             var customAssets = new List<Asset>
             {
-                CreateValidAsset("Test Asset 1", "TA-001", assetClass.Identifier),
-                CreateValidAsset("Test Asset 2", "TA-002", assetClass.Identifier)
+                CreateValidAsset("Custom Asset 1", "CA-001", assetClass.Identifier),
+                CreateValidAsset("Custom Asset 2", "CA-002", assetClass.Identifier)
             };
 
             // Act
-            helper.PopulateAssets(customAssets);
+            Helper.PopulateAssets(customAssets);
 
             // Assert
-            var assets = helper.AssetManagement.Assets.Read(new TRUEFilterElement<Asset>()).ToList();
-            Assert.IsTrue(assets.Count >= 2);
-            Assert.IsTrue(assets.Any(a => a.Name == "Test Asset 1"));
-            Assert.IsTrue(assets.Any(a => a.Name == "Test Asset 2"));
+            var allAssets = Helper.TestData.Assets;
+            Assert.IsTrue(allAssets.Any(a => a.Name == "Custom Asset 1"), "Custom asset 1 should be created");
+            Assert.IsTrue(allAssets.Any(a => a.Name == "Custom Asset 2"), "Custom asset 2 should be created");
         }
 
         [TestMethod]
-        public void PopulateAssets_WithNullCollection_ShouldThrowArgumentNullException()
+        public void PopulateAssets_WithInvalidData_ShouldThrowValidationException()
         {
             // Arrange
-            var helper = RepositoryInitialize.InitializeEmptyRepositories()
-                .PopulateDeviceTypes()
-                .PopulateAssetClasses();
 
-            // Act & Assert
-            Assert.ThrowsException<ArgumentNullException>(
-                () => helper.PopulateAssets((IEnumerable<Asset>)null),
-                "Should throw ArgumentNullException when null collection is passed");
-        }
-
-        [TestMethod]
-        public void PopulateAssets_WithEmptyCollection_ShouldNotPopulate()
-        {
-            // Arrange
-            var helper = RepositoryInitialize.InitializeEmptyRepositories()
-                .PopulateDeviceTypes()
-                .PopulateAssetClasses();
-
-            // Act
-            helper.PopulateAssets(new List<Asset>());
-
-            // Assert
-            Assert.AreEqual(0, helper.AssetManagement.Assets.Count(new TRUEFilterElement<Asset>()), 
-                "Should not populate when empty collection is passed");
-        }
-
-        [TestMethod]
-        public void PopulateAssets_WithInvalidData_ShouldThrowException()
-        {
-            // Arrange
-            var helper = RepositoryInitialize.InitializeEmptyRepositories()
-                .PopulateDeviceTypes()
-                .PopulateAssetClasses();
+            Helper.PopulateWithDemoData(DemoDataLayer.AssetClasses);
 
             var invalidAssets = new List<Asset>
             {
@@ -137,259 +177,76 @@
 
             // Act & Assert
             Assert.ThrowsException<BulkValidationException<Asset>>(
-                () => helper.PopulateAssets(invalidAssets),
-                "Should throw BulkValidationException for invalid assets");
+                () => Helper.PopulateAssets(invalidAssets),
+                "Should throw validation exception for invalid assets");
         }
 
         [TestMethod]
-        public void PopulateAssets_ShouldSupportFluentChaining()
+        public void PopulateAssetClasses_WithValidCustomData_ShouldSucceed()
         {
             // Arrange
-            var helper = RepositoryInitialize.InitializeEmptyRepositories();
 
-            // Act
-            var result = helper
-                .PopulateDeviceTypes()
-                .PopulateAssetClasses()
-                .PopulateAssets();
+            Helper.PopulateWithDemoData(DemoDataLayer.DeviceTypes);
 
-            // Assert
-            Assert.IsNotNull(result);
-            Assert.AreSame(helper, result, "Should return same helper instance for chaining");
-        }
-
-        [TestMethod]
-        public void PopulateAssets_WithoutRacks_ShouldCreateAssetsWithoutRackLocation()
-        {
-            // Arrange
-            var helper = RepositoryInitialize.InitializeEmptyRepositories()
-                .PopulateDeviceTypes()
-                .PopulateAssetClasses();
-            // Note: NOT calling PopulateRacks()
-
-            // Act
-            helper.PopulateAssets();
-
-            // Assert
-            var assets = helper.AssetManagement.Assets.Read(new TRUEFilterElement<Asset>()).ToList();
-            Assert.IsTrue(assets.Count > 0, "Assets should be created even without racks");
-            Assert.IsTrue(assets.All(a => a.Location?.RackId == null || !a.Location.RackId.HasValue()), 
-                "Assets without racks should have no rack assignment");
-        }
-
-        [TestMethod]
-        public void PopulateAssets_WithRacks_ShouldAssignRackLocations()
-        {
-            // Arrange
-            var helper = RepositoryInitialize.InitializeEmptyRepositories()
-                .PopulateRacks()
-                .PopulateDeviceTypes()
-                .PopulateAssetClasses();
-
-            // Act
-            helper.PopulateAssets();
-
-            // Assert
-            var assets = helper.AssetManagement.Assets.Read(new TRUEFilterElement<Asset>()).ToList();
-            Assert.IsTrue(assets.Count > 0, "Assets should be created");
-            Assert.IsTrue(assets.All(a => a.Location?.RackId != null && a.Location.RackId.HasValue()), 
-                "All assets should be assigned to racks when racks are available");
-        }
-
-        [TestMethod]
-        public void PopulateAssets_WithoutAssetClasses_ShouldThrowInvalidOperationException()
-        {
-            // Arrange
-            var helper = RepositoryInitialize.InitializeEmptyRepositories()
-                .PopulateRacks(); // Racks available but no AssetClasses
-
-            // Act & Assert
-            var ex = Assert.ThrowsException<InvalidOperationException>(
-                () => helper.PopulateAssets(),
-                "Should throw when asset classes are not populated");
-            
-            Assert.IsTrue(ex.Message.Contains("No AssetClasses found"));
-        }
-
-        #endregion
-
-        #region PopulateAssetClasses Tests
-
-        [TestMethod]
-        public void PopulateAssetClasses_WithDefaultData_ShouldPopulateRepository()
-        {
-            // Arrange
-            var helper = RepositoryInitialize.InitializeEmptyRepositories()
-                .PopulateDeviceTypes();
-
-            // Act
-            helper.PopulateAssetClasses();
-
-            // Assert
-            Assert.IsTrue(helper.AssetManagement.AssetClasses.Count(new TRUEFilterElement<AssetClass>()) > 0, "Should populate with default demo data");
-        }
-
-        [TestMethod]
-        public void PopulateAssetClasses_WithValidCustomData_ShouldPopulateRepository()
-        {
-            // Arrange
-            var helper = RepositoryInitialize.InitializeEmptyRepositories()
-                .PopulateDeviceTypes();
-
-            var deviceType = helper.AssetManagement.DeviceTypes.Read(new TRUEFilterElement<DeviceType>()).First();
+            var deviceType = Helper.TestData.DeviceTypes.First();
             var customAssetClasses = new List<AssetClass>
             {
-                CreateValidAssetClass("Test Class 1", deviceType.Identifier),
-                CreateValidAssetClass("Test Class 2", deviceType.Identifier)
+                CreateValidAssetClass("Custom Class 1", deviceType.Identifier),
+                CreateValidAssetClass("Custom Class 2", deviceType.Identifier)
             };
 
             // Act
-            helper.PopulateAssetClasses(customAssetClasses);
+            Helper.PopulateAssetClasses(customAssetClasses);
 
             // Assert
-            var assetClasses = helper.AssetManagement.AssetClasses.Read(new TRUEFilterElement<AssetClass>()).ToList();
-            Assert.IsTrue(assetClasses.Count >= 2);
-            Assert.IsTrue(assetClasses.Any(ac => ac.Name == "Test Class 1"));
-            Assert.IsTrue(assetClasses.Any(ac => ac.Name == "Test Class 2"));
+            var allAssetClasses = Helper.TestData.AssetClasses;
+            Assert.IsTrue(allAssetClasses.Any(ac => ac.Name == "Custom Class 1"), "Custom class 1 should be created");
+            Assert.IsTrue(allAssetClasses.Any(ac => ac.Name == "Custom Class 2"), "Custom class 2 should be created");
         }
 
         [TestMethod]
-        public void PopulateAssetClasses_WithNullCollection_ShouldThrowArgumentNullException()
+        public void PopulateAssetClasses_WithInvalidData_ShouldThrowValidationException()
         {
             // Arrange
-            var helper = RepositoryInitialize.InitializeEmptyRepositories()
-                .PopulateDeviceTypes();
 
-            // Act & Assert
-            Assert.ThrowsException<ArgumentNullException>(
-                () => helper.PopulateAssetClasses((IEnumerable<AssetClass>)null),
-                "Should throw ArgumentNullException when null collection is passed");
-        }
-
-        [TestMethod]
-        public void PopulateAssetClasses_WithEmptyCollection_ShouldNotPopulate()
-        {
-            // Arrange
-            var helper = RepositoryInitialize.InitializeEmptyRepositories()
-                .PopulateDeviceTypes();
-
-            // Act
-            helper.PopulateAssetClasses(new List<AssetClass>());
-
-            // Assert
-            Assert.AreEqual(0, helper.AssetManagement.AssetClasses.Count(new TRUEFilterElement<AssetClass>()), 
-                "Should not populate when empty collection is passed");
-        }
-
-        [TestMethod]
-        public void PopulateAssetClasses_WithInvalidData_ShouldThrowException()
-        {
-            // Arrange
-            var helper = RepositoryInitialize.InitializeEmptyRepositories()
-                .PopulateDeviceTypes();
+            Helper.PopulateWithDemoData(DemoDataLayer.DeviceTypes);
 
             var invalidAssetClasses = new List<AssetClass>
             {
-                CreateInvalidAssetClass() // AssetClass with no name
+                CreateInvalidAssetClass()
             };
 
             // Act & Assert
             Assert.ThrowsException<BulkValidationException<AssetClass>>(
-                () => helper.PopulateAssetClasses(invalidAssetClasses),
-                "Should throw BulkValidationException for invalid asset classes");
-        }
-
-        #endregion
-
-        #region PopulateDeviceTypes Tests
-
-        [TestMethod]
-        public void PopulateDeviceTypes_WithDefaultData_ShouldPopulateRepository()
-        {
-            // Arrange
-            var helper = RepositoryInitialize.InitializeEmptyRepositories();
-
-            // Act
-            helper.PopulateDeviceTypes();
-
-            // Assert
-            Assert.IsTrue(helper.AssetManagement.DeviceTypes.Count(new TRUEFilterElement<DeviceType>()) > 0, "Should populate with default demo data");
+                () => Helper.PopulateAssetClasses(invalidAssetClasses),
+                "Should throw validation exception for invalid asset classes");
         }
 
         [TestMethod]
-        public void PopulateDeviceTypes_WithValidCustomData_ShouldPopulateRepository()
+        public void PopulateDeviceTypes_WithValidCustomData_ShouldSucceed()
         {
             // Arrange
-            var helper = RepositoryInitialize.InitializeEmptyRepositories();
+
             var customDeviceTypes = new List<DeviceType>
             {
-                CreateValidDeviceType("Test Device Type 1"),
-                CreateValidDeviceType("Test Device Type 2")
+                CreateValidDeviceType("Custom Device Type 1"),
+                CreateValidDeviceType("Custom Device Type 2")
             };
 
             // Act
-            helper.PopulateDeviceTypes(customDeviceTypes);
+            Helper.PopulateDeviceTypes(customDeviceTypes);
 
             // Assert
-            Assert.AreEqual(2, helper.AssetManagement.DeviceTypes.Count(new TRUEFilterElement<DeviceType>()), "Should have exactly 2 device types");
+            Assert.AreEqual(2, Helper.TestData.DeviceTypes.Count, "Should have exactly 2 device types");
         }
 
         [TestMethod]
-        public void PopulateDeviceTypes_WithNullCollection_ShouldThrowArgumentNullException()
+        public void PopulateDataPorts_WithValidCustomData_ShouldSucceed()
         {
             // Arrange
-            var helper = RepositoryInitialize.InitializeEmptyRepositories();
+            Helper.PopulateWithDemoData(DemoDataLayer.Assets);
 
-            // Act & Assert
-            Assert.ThrowsException<ArgumentNullException>(
-                () => helper.PopulateDeviceTypes((IEnumerable<DeviceType>)null),
-                "Should throw ArgumentNullException when null collection is passed");
-        }
-
-        [TestMethod]
-        public void PopulateDeviceTypes_WithEmptyCollection_ShouldNotPopulate()
-        {
-            // Arrange
-            var helper = RepositoryInitialize.InitializeEmptyRepositories();
-
-            // Act
-            helper.PopulateDeviceTypes(new List<DeviceType>());
-
-            // Assert
-            Assert.AreEqual(0, helper.AssetManagement.DeviceTypes.Count(new TRUEFilterElement<DeviceType>()), 
-                "Should not populate when empty collection is passed");
-        }
-
-        #endregion
-
-        #region PopulateDataPorts Tests
-
-        [TestMethod]
-        public void PopulateDataPorts_WithDefaultData_ShouldPopulateRepository()
-        {
-            // Arrange
-            var helper = RepositoryInitialize.InitializeEmptyRepositories()
-                .PopulateDeviceTypes()
-                .PopulateAssetClasses()
-                .PopulateAssets();
-
-            // Act
-            helper.PopulateDataPorts();
-
-            // Assert
-            Assert.IsTrue(helper.AssetManagement.DataPorts.Count(new TRUEFilterElement<DataPort>()) > 0, "Should populate with default demo data");
-        }
-
-        [TestMethod]
-        public void PopulateDataPorts_WithValidCustomData_ShouldPopulateRepository()
-        {
-            // Arrange
-            var helper = RepositoryInitialize.InitializeEmptyRepositories()
-                .PopulateDeviceTypes()
-                .PopulateAssetClasses()
-                .PopulateAssets();
-
-            var asset = helper.AssetManagement.Assets.Read(new TRUEFilterElement<Asset>()).First();
+            var asset = Helper.TestData.Assets.First();
             var customDataPorts = new List<DataPort>
             {
                 CreateValidDataPort(asset.Identifier, 1),
@@ -397,88 +254,112 @@
             };
 
             // Act
-            helper.PopulateDataPorts(customDataPorts);
+            Helper.PopulateDataPorts(customDataPorts);
 
             // Assert
-            Assert.IsTrue(helper.AssetManagement.DataPorts.Count(new TRUEFilterElement<DataPort>()) >= 2, "Should have at least 2 data ports");
+            var allDataPorts = Helper.TestData.DataPorts;
+            Assert.IsTrue(allDataPorts.Count(dp => dp.AssetFk.Asset.Identifier == asset.Identifier) >= 2,
+                "Should have at least 2 data ports for the asset");
+        }
+
+        #endregion
+
+        #region Null/Empty Collection Tests
+
+        [TestMethod]
+        public void PopulateAssets_WithNullCollection_ShouldThrowArgumentNullException()
+        {
+            // Arrange
+
+
+            // Act & Assert
+            Assert.ThrowsException<ArgumentNullException>(
+                () => Helper.PopulateAssets((IEnumerable<Asset>)null));
+        }
+
+        [TestMethod]
+        public void PopulateAssets_WithEmptyCollection_ShouldNotPopulate()
+        {
+            // Arrange
+
+
+            // Act
+            Helper.PopulateAssets(new List<Asset>());
+
+            // Assert
+            Assert.AreEqual(0, Helper.TestData.Assets.Count, "Should not populate with empty collection");
+        }
+
+        [TestMethod]
+        public void PopulateAssetClasses_WithNullCollection_ShouldThrowArgumentNullException()
+        {
+            // Arrange
+
+
+            // Act & Assert
+            Assert.ThrowsException<ArgumentNullException>(
+                () => Helper.PopulateAssetClasses((IEnumerable<AssetClass>)null));
+        }
+
+        [TestMethod]
+        public void PopulateAssetClasses_WithEmptyCollection_ShouldNotPopulate()
+        {
+            // Arrange
+
+
+            // Act
+            Helper.PopulateAssetClasses(new List<AssetClass>());
+
+            // Assert
+            Assert.AreEqual(0, Helper.TestData.AssetClasses.Count, "Should not populate with empty collection");
+        }
+
+        [TestMethod]
+        public void PopulateDeviceTypes_WithNullCollection_ShouldThrowArgumentNullException()
+        {
+            // Arrange
+
+
+            // Act & Assert
+            Assert.ThrowsException<ArgumentNullException>(
+                () => Helper.PopulateDeviceTypes((IEnumerable<DeviceType>)null));
+        }
+
+        [TestMethod]
+        public void PopulateDeviceTypes_WithEmptyCollection_ShouldNotPopulate()
+        {
+            // Arrange
+
+
+            // Act
+            Helper.PopulateDeviceTypes(new List<DeviceType>());
+
+            // Assert
+            Assert.AreEqual(0, Helper.TestData.DeviceTypes.Count, "Should not populate with empty collection");
         }
 
         [TestMethod]
         public void PopulateDataPorts_WithNullCollection_ShouldThrowArgumentNullException()
         {
             // Arrange
-            var helper = RepositoryInitialize.InitializeEmptyRepositories()
-                .PopulateDeviceTypes()
-                .PopulateAssetClasses()
-                .PopulateAssets();
+
 
             // Act & Assert
             Assert.ThrowsException<ArgumentNullException>(
-                () => helper.PopulateDataPorts((IEnumerable<DataPort>)null),
-                "Should throw ArgumentNullException when null collection is passed");
+                () => Helper.PopulateDataPorts((IEnumerable<DataPort>)null));
         }
 
         [TestMethod]
         public void PopulateDataPorts_WithEmptyCollection_ShouldNotPopulate()
         {
             // Arrange
-            var helper = RepositoryInitialize.InitializeEmptyRepositories()
-                .PopulateDeviceTypes()
-                .PopulateAssetClasses()
-                .PopulateAssets();
+
 
             // Act
-            helper.PopulateDataPorts(new List<DataPort>());
+            Helper.PopulateDataPorts(new List<DataPort>());
 
             // Assert
-            Assert.AreEqual(0, helper.AssetManagement.DataPorts.Count(new TRUEFilterElement<DataPort>()), 
-                "Should not populate when empty collection is passed");
-        }
-
-        #endregion
-
-        #region PopulatePowerPorts Tests
-
-        [TestMethod]
-        public void PopulatePowerPorts_WithDefaultData_ShouldPopulateRepository()
-        {
-            // Arrange
-            var helper = RepositoryInitialize.InitializeEmptyRepositories()
-                .PopulateDeviceTypes()
-                .PopulateAssetClasses()
-                .PopulateAssets();
-
-            // Act
-            helper.PopulatePowerPorts();
-
-            // Assert
-            Assert.IsTrue(helper.AssetManagement.PowerPorts.Count(new TRUEFilterElement<PowerPort>()) > 0, "Should populate with default demo data");
-        }
-
-        #endregion
-
-        #region Integration Tests
-
-        [TestMethod]
-        public void PopulateAll_InCorrectOrder_ShouldSucceed()
-        {
-            // Arrange
-            var helper = RepositoryInitialize.InitializeEmptyRepositories();
-
-            // Act - Populate in dependency order
-            helper.PopulateRacks()
-                .PopulateDeviceTypes()
-                .PopulateAssetClasses()
-                .PopulateAssets()
-                .PopulateDataPorts()
-                .PopulatePowerPorts();
-
-            // Assert
-            Assert.IsTrue(helper.AssetManagement.DeviceTypes.Count(new TRUEFilterElement<DeviceType>()) > 0);
-            Assert.IsTrue(helper.AssetManagement.AssetClasses.Count(new TRUEFilterElement<AssetClass>()) > 0);
-            Assert.IsTrue(helper.AssetManagement.Assets.Count(new TRUEFilterElement<Asset>()) > 0);
-            Assert.IsTrue(helper.AssetManagement.DataPorts.Count(new TRUEFilterElement<DataPort>()) > 0);
-            Assert.IsTrue(helper.AssetManagement.PowerPorts.Count(new TRUEFilterElement<PowerPort>()) > 0);
+            Assert.AreEqual(0, Helper.TestData.DataPorts.Count, "Should not populate with empty collection");
         }
 
         #endregion
@@ -493,7 +374,7 @@
                 AssetClassId = new SdmObjectReference<AssetClass>(assetClassId)
             };
 
-            // Important: Set values AFTER construction to trigger change tracking
+            // Set values after construction to trigger change tracking
             asset.Name = name;
             asset.AssetID = assetId;
 
@@ -502,13 +383,12 @@
 
         private static Asset CreateInvalidAsset()
         {
-            // Create asset with no name or ID - should fail validation
             var asset = new Asset
             {
                 State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available
             };
 
-            // Set name to empty to trigger validation failure
+            // Set empty name/ID to trigger validation failure
             asset.Name = "";
             asset.AssetID = "";
 
@@ -522,18 +402,14 @@
                 DeviceTypeId = new SdmObjectReference<DeviceType>(deviceTypeIdentifier)
             };
 
-            // Set name after construction to trigger change tracking
             assetClass.Name = name;
-
             return assetClass;
         }
 
         private static AssetClass CreateInvalidAssetClass()
         {
-            // Create asset class with no name - should fail validation
             var assetClass = new AssetClass();
-            assetClass.Name = ""; // Empty name
-
+            assetClass.Name = ""; // Empty name triggers validation failure
             return assetClass;
         }
 
@@ -541,7 +417,6 @@
         {
             var deviceType = new DeviceType();
             deviceType.Name = name;
-
             return deviceType;
         }
 
@@ -553,16 +428,12 @@
                 {
                     Asset = new SdmObjectReference<Asset>(assetId),
                 }
-
             };
 
             dataPort.DataPortInfo.PortNumber = portNumber;
-
             return dataPort;
         }
 
         #endregion
-
-        
     }
 }

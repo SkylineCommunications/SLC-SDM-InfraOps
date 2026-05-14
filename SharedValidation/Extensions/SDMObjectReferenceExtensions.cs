@@ -21,22 +21,12 @@
                 return false;
             }
 
-            // Check if identifier is a valid GUID and not empty
-            if (Guid.TryParse(reference.Identifier, out var guid))
+            if(!Guid.TryParse(reference.Identifier, out var guid))
             {
-                return guid != Guid.Empty;
+                return false;
             }
 
-            // For non-GUID identifiers, just check it's not empty
-            return true;
-        }
-
-        /// <summary>
-        /// Checks if the SdmObjectReference does not have a valid value.
-        /// </summary>
-        public static bool IsEmpty<T>(this SdmObjectReference<T> reference) where T : SdmObject<T>
-        {
-            return !HasValue(reference);
+            return guid != Guid.Empty;
         }
     }
 }

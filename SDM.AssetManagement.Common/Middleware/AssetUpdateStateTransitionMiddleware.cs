@@ -92,6 +92,8 @@
             {
                 throw new ArgumentNullException(nameof(oToDelete), "The assets to delete cannot be null.");
             }
+
+            next(oToDelete);
         }
 
         public void OnDelete(Asset oToDelete, Action<Asset> next)
@@ -100,6 +102,8 @@
             {
                 throw new ArgumentNullException(nameof(oToDelete), "The asset to delete cannot be null.");
             }
+
+            next(oToDelete);
         }
 
         public IEnumerable<Asset> OnRead(FilterElement<Asset> filter, Func<FilterElement<Asset>, IEnumerable<Asset>> next)

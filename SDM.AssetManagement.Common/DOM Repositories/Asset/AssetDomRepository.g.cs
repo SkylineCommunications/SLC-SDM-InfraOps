@@ -798,8 +798,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
         private DomInstance ToInstance(Asset obj)
         {
-            bool isNew = false;
             Guid id = default(Guid);
+            bool isNew = obj.IsNew || String.IsNullOrWhiteSpace(obj.Identifier);
 
             if (!String.IsNullOrEmpty(obj.Identifier))
             {
@@ -808,7 +808,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             else
             {
                 id = Guid.NewGuid();
-                isNew = true;
             }
 
             var instance = new DomInstance

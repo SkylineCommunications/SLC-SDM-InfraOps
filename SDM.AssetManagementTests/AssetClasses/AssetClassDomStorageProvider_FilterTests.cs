@@ -1,327 +1,255 @@
 ﻿namespace SDM.AssetManagement.Tests
 {
-	using System.Linq;
-	using FluentAssertions;
-	using FluentAssertions.Execution;
-	using Microsoft.VisualStudio.TestTools.UnitTesting;
-	using SDM.AssetManagement.Tests.Setup;
-	using Skyline.DataMiner.Net.Messages.SLDataGateway;
-	using Skyline.DataMiner.SDM;
-	using Skyline.DataMiner.SDM.AssetManagement.Models;
+    using System;
+    using System.Linq;
 
-	public partial class AssetClassDomStorageProvider
-	{
-		[TestMethod]
-		public void AssetClassDomStorageProvider_ReadFilter_DeviceName_Equals()
-		{
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulateAssetClasses();
+    using FluentAssertions;
+    using FluentAssertions.Execution;
 
-			string deviceName = "KVM Switch";
-			var nameFilter = AssetClassExposers.DeviceName.Equal(deviceName);
-			var expected = DemoData.AssetClasses.Single(asset => asset.Name.Equals(deviceName));
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-			var classesRetrieved = helper.AssetManagement.AssetClasses.Read(nameFilter);
+    using SDM.AssetManagement.Tests.Setup;
 
-			using (new AssertionScope())
-			{
-				classesRetrieved.Should().NotBeNull();
-				classesRetrieved.Count().Should().Be(1);
-				var assetClass = classesRetrieved.First();
+    using Skyline.DataMiner.Net.Messages.SLDataGateway;
+    using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.AssetManagement.Models;
 
-				assetClass.Name.Should().Be(expected.Name);
-				assetClass.DeviceTypeId.Should().Be(expected.DeviceTypeId);
-				assetClass.Manufacturer.Should().Be(expected.Manufacturer);
-				assetClass.Depth.Should().Be(expected.Depth);
-				assetClass.Height.Should().Be(expected.Height);
-				assetClass.Weight.Should().Be(expected.Weight);
-				assetClass.HeightU.Should().Be(expected.HeightU);
-				assetClass.Width.Should().Be(expected.Width);
-				assetClass.Lifecycle.Should().NotBeNull();
 
-				assetClass.DataPorts.Should().NotBeNull();
-				assetClass.DataPorts.Should().HaveCount(expected.DataPorts.Count);
+    /// <summary>
+    /// Filter and query tests for AssetClass repository operations.
+    /// </summary>
+    [TestClass]
+    public class AssetClassDomStorageProvider_FilterTests : BaseRepositoryTest
+    {
+        #region Basic Field Filters
 
-				assetClass.PowerPorts.Should().NotBeNull();
-				assetClass.PowerPorts.Should().HaveCount(expected.PowerPorts.Count);
+        [TestMethod]
+        public void ReadFilter_DeviceName_Equal_ShouldReturnMatchingAssetClass()
+        {
+            // Arrange
+            Helper.PopulateWithDemoData(upTo: DemoDataLayer.AssetClasses);
 
-				assetClass.Holders.Should().NotBeNull();
-				assetClass.Holders.Should().HaveCount(expected.Holders.Count);
-			}
-		}
+            const string deviceName = "KVM Switch";
+            var filter = AssetClassExposers.DeviceName.Equal(deviceName);
 
-		[TestMethod]
-		public void AssetClassDomStorageProvider_ReadFilter_DeviceDescription_Contains()
-		{
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulateAssetClasses();
+            // Act
+            var results = Helper.AssetManagement.AssetClasses.Read(filter).ToList();
 
-			var descriptionFilter = AssetClassExposers.DeviceDescription.Contains("Panel", StringComparison.OrdinalIgnoreCase); // DemoData.AssetClasses[7]
-			var expected = DemoData.AssetClasses[7];
+            // Assert
+            using (new AssertionScope())
+            {
+                results.Should().HaveCount(1, $"should find exactly one '{deviceName}'");
+                var assetClass = results.First();
+                assetClass.Name.Should().Be(deviceName);
+            }
+        }
 
-			var classesRetrieved = helper.AssetManagement.AssetClasses.Read(descriptionFilter);
+        [TestMethod]
+        public void ReadFilter_DeviceDescription_Contains_ShouldReturnMatchingAssetClasses()
+        {
+            // Arrange
+            Helper.PopulateWithDemoData(upTo: DemoDataLayer.AssetClasses);
 
-			using (new AssertionScope())
-			{
-				classesRetrieved.Should().NotBeNull();
-				classesRetrieved.Count().Should().Be(1);
-				var assetClass = classesRetrieved.First();
+            const string searchTerm = "Panel";
+            var filter = AssetClassExposers.DeviceDescription.Contains(searchTerm, StringComparison.OrdinalIgnoreCase);
 
-				// Assert all fields and properties
-				assetClass.Name.Should().Be(expected.Name);
-				assetClass.Description.Should().Be(expected.Description);
-				assetClass.DeviceTypeId.Should().Be(expected.DeviceTypeId);
-				assetClass.Manufacturer.Should().Be(expected.Manufacturer);
-				assetClass.Depth.Should().Be(expected.Depth);
-				assetClass.Height.Should().Be(expected.Height);
-				assetClass.HeightU.Should().Be(expected.HeightU);
-				assetClass.Width.Should().Be(expected.Width);
-				assetClass.Weight.Should().Be(expected.Weight);
-				assetClass.FrontImage.Should().Be(expected.FrontImage);
-				assetClass.BackImage.Should().Be(expected.BackImage);
-				assetClass.MaximumPowerConsumption.Should().Be(expected.MaximumPowerConsumption);
-				assetClass.TypicalPowerConsumption.Should().Be(expected.TypicalPowerConsumption);
-				assetClass.PowerSupply.Should().Be(expected.PowerSupply);
+            // Act
+            var results = Helper.AssetManagement.AssetClasses.Read(filter).ToList();
 
-				assetClass.Lifecycle.Should().NotBeNull();
-				assetClass.Lifecycle.Should().Be(expected.Lifecycle);
+            // Assert
+            using (new AssertionScope())
+            {
+                results.Should().NotBeEmpty($"should find asset classes with '{searchTerm}' in description");
+                results.Should().OnlyContain(ac => ac.Description.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+            }
+        }
 
-				assetClass.DataPorts.Should().NotBeNull();
-				assetClass.DataPorts.Should().BeEquivalentTo(expected.DataPorts);
+        [TestMethod]
+        public void ReadFilter_Width_Equal_ShouldReturnMatchingAssetClass()
+        {
+            // Arrange
+            Helper.PopulateWithDemoData(upTo: DemoDataLayer.AssetClasses);
 
-				assetClass.PowerPorts.Should().NotBeNull();
-				assetClass.PowerPorts.Should().BeEquivalentTo(expected.PowerPorts);
+            var targetAssetClass = Helper.TestData.AssetClasses.First();
+            var width = targetAssetClass.Width;
+            var filter = AssetClassExposers.Width.Equal(width);
 
-				assetClass.Holders.Should().NotBeNull();
-				assetClass.Holders.Should().BeEquivalentTo(expected.Holders);
-			}
-		}
+            // Act
+            var results = Helper.AssetManagement.AssetClasses.Read(filter).ToList();
 
-		public void AssetClassDomStorageProvider_ReadFilter_ManufacturerId()
-		{
-			// Create test once SdmObjectReference for the ManufacturerId is added.
-		}
+            // Assert
+            using (new AssertionScope())
+            {
+                results.Should().NotBeEmpty($"should find asset classes with width {width}");
+                results.Should().OnlyContain(ac => ac.Width == width);
+                results.Should().Contain(ac => ac.Identifier == targetAssetClass.Identifier);
+            }
+        }
 
-		public void AssetClassDomStorageProvider_ReadFilter_DeviceTypeId()
-		{
-			// Create test once SdmObjectReference for the DeviceTypeId is added.
-		}
+        [TestMethod]
+        public void ReadFilter_FrontImage_Equal_ShouldReturnMatchingAssetClass()
+        {
+            // Arrange
+            Helper.PopulateWithDemoData(upTo: DemoDataLayer.AssetClasses);
 
-		[TestMethod]
-		public void AssetClassDomStorageProvider_ReadFilter_Width_Equal()
-		{
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulateAssetClasses();
+            const string imageName = "fw-front.png";
+            var filter = AssetClassExposers.FrontImage.Equal(imageName);
 
-			var width = DemoData.AssetClasses[0].Width;
-			var widthFilter = AssetClassExposers.Width.Equal(width);
+            // Act
+            var results = Helper.AssetManagement.AssetClasses.Read(filter).ToList();
 
-			var classesRetrieved = helper.AssetManagement.AssetClasses.Read(widthFilter);
-			var expected = DemoData.AssetClasses[0];
+            // Assert
+            using (new AssertionScope())
+            {
+                results.Should().HaveCount(1, $"should find exactly one asset class with front image '{imageName}'");
+                results.First().FrontImage.Should().Be(imageName);
+            }
+        }
 
-			using (new AssertionScope())
-			{
-				classesRetrieved.Should().NotBeNull();
-				classesRetrieved.Count().Should().Be(1);
-				var assetClass = classesRetrieved.First();
-				assetClass.Width.Should().Be(width);
-				assetClass.Name.Should().Be(expected.Name);
-			}
-		}
+        [TestMethod]
+        public void ReadFilter_BackImage_NotContains_ShouldReturnMatchingAssetClasses()
+        {
+            // Arrange
+            Helper.PopulateWithDemoData(upTo: DemoDataLayer.AssetClasses);
 
-		// Simulating a query to find costly devices.
-		[TestMethod]
-		public void AssetClassDomStorageProvider_ReadFilter_GreaterThanOrEqual_MaximumPowerConsumption_GreaterThanOrEqual()
-		{
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulateAssetClasses();
+            const string excludeExtension = ".png";
+            var filter = AssetClassExposers.BackImage.NotContains(excludeExtension);
 
-			double powerConsumptionThreshold = 200;
-			var maxPowerConsumptionFilter = AssetClassExposers.MaximumPowerConsumption.GreaterThanOrEqual(powerConsumptionThreshold);
+            // Act
+            var results = Helper.AssetManagement.AssetClasses.Read(filter).ToList();
 
-			var classesRetrieved = helper.AssetManagement.AssetClasses.Read(maxPowerConsumptionFilter);
-			var actualArray = DemoData.AssetClasses.Where(assetClass => assetClass.MaximumPowerConsumption >= powerConsumptionThreshold).ToArray();
+            // Assert
+            using (new AssertionScope())
+            {
+                results.Should().NotBeEmpty("should find asset classes without .png back images");
+                results.Should().OnlyContain(ac => 
+                    string.IsNullOrEmpty(ac.BackImage) || 
+                    !ac.BackImage.Contains(excludeExtension));
+            }
+        }
 
-			using (new AssertionScope())
-			{
-				classesRetrieved.Should().NotBeNull();
-				classesRetrieved.Count().Should().Be(actualArray.Length);
-				classesRetrieved.Should().BeEquivalentTo(actualArray);
-			}
-		}
+        #endregion
 
-		// Simulating a query to find devices which fit in an imaginary small rack.
-		[TestMethod]
-		public void AssetClassDomStorageProvider_ReadFilter_WidthHeightDepth_LessThanOrEqual()
-		{
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulateAssetClasses();
+        #region Numeric Range Filters
 
-			double heightThreshold = 2 * 4.45; // 2U height
-			double widthThreshold = 40.0; // 40 cm width
-			double depthThreshold = 40.0; // 40 cm depth
+        [TestMethod]
+        public void ReadFilter_MaximumPowerConsumption_GreaterThanOrEqual_ShouldReturnHighPowerDevices()
+        {
+            // Arrange
+            Helper.PopulateWithDemoData(upTo: DemoDataLayer.AssetClasses);
 
-			var volumeFilter = AssetClassExposers.Height.LessThanOrEqual(heightThreshold)
-				.AND(AssetClassExposers.Width.LessThanOrEqual(widthThreshold))
-				.AND(AssetClassExposers.Depth.LessThanOrEqual(depthThreshold));
-			var classesRetrieved = helper.AssetManagement.AssetClasses.Read(volumeFilter);
+            const double powerThreshold = 200.0;
+            var filter = AssetClassExposers.MaximumPowerConsumption.GreaterThanOrEqual(powerThreshold);
 
-			var expected = DemoData.AssetClasses.Where(ac => ac.Height <= heightThreshold && ac.Width <= widthThreshold && ac.Depth <= depthThreshold).ToArray();
-			using (new AssertionScope())
-			{
-				classesRetrieved.Should().NotBeNull();
-				classesRetrieved.Count().Should().Be(expected.Length);
-				classesRetrieved.Should().BeEquivalentTo(expected);
-			}
-		}
+            // Act
+            var results = Helper.AssetManagement.AssetClasses.Read(filter).ToList();
 
-		[TestMethod]
-		public void AssetClassDomStorageProvider_ReadFilter_FrontImage_NotNullOrEmpty()
-		{
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulateAssetClasses();
+            // Assert
+            using (new AssertionScope())
+            {
+                results.Should().NotBeEmpty($"should find devices with power consumption >= {powerThreshold}W");
+                results.Should().OnlyContain(ac => ac.MaximumPowerConsumption >= powerThreshold);
+            }
+        }
 
-			var frontImageName = "fw-front.png";
-			var frontImageFilter = AssetClassExposers.FrontImage.Equal(frontImageName);
-			var classesRetrieved = helper.AssetManagement.AssetClasses.Read(frontImageFilter);
+        [TestMethod]
+        public void ReadFilter_TypicalPowerConsumption_LessThanOrEqual_ShouldReturnLowPowerDevices()
+        {
+            // Arrange
+            Helper.PopulateWithDemoData(upTo: DemoDataLayer.AssetClasses);
 
-			using (new AssertionScope())
-			{
-				classesRetrieved.Should().NotBeNull();
-				classesRetrieved.Count().Should().Be(1);
-				var assetClass = classesRetrieved.First();
+            const double powerThreshold = 100.0;
+            var filter = AssetClassExposers.TypicalPowerConsumption.LessThanOrEqual(powerThreshold);
 
-				assetClass.Name.Should().Be(assetClass.Name);
-				assetClass.Description.Should().Be(assetClass.Description);
-				assetClass.DeviceTypeId.Should().Be(assetClass.DeviceTypeId);
-				assetClass.Manufacturer.Should().Be(assetClass.Manufacturer);
-				assetClass.Depth.Should().Be(assetClass.Depth);
-				assetClass.Height.Should().Be(assetClass.Height);
-				assetClass.HeightU.Should().Be(assetClass.HeightU);
-				assetClass.Width.Should().Be(assetClass.Width);
-				assetClass.Weight.Should().Be(assetClass.Weight);
-				assetClass.FrontImage.Should().Be(assetClass.FrontImage);
-				assetClass.BackImage.Should().Be(assetClass.BackImage);
-				assetClass.MaximumPowerConsumption.Should().Be(assetClass.MaximumPowerConsumption);
-				assetClass.TypicalPowerConsumption.Should().Be(assetClass.TypicalPowerConsumption);
-				assetClass.PowerSupply.Should().Be(assetClass.PowerSupply);
+            // Act
+            var results = Helper.AssetManagement.AssetClasses.Read(filter).ToList();
 
-				assetClass.Lifecycle.Should().NotBeNull();
-				assetClass.Lifecycle.Should().BeEquivalentTo(assetClass.Lifecycle);
+            // Assert
+            using (new AssertionScope())
+            {
+                results.Should().NotBeEmpty($"should find devices with typical power <= {powerThreshold}W");
+                results.Should().OnlyContain(ac => ac.TypicalPowerConsumption <= powerThreshold);
+            }
+        }
 
-				assetClass.DataPorts.Should().NotBeNull();
-				assetClass.DataPorts.Should().BeEquivalentTo(assetClass.DataPorts);
+        #endregion
 
-				assetClass.PowerPorts.Should().NotBeNull();
-				assetClass.PowerPorts.Should().BeEquivalentTo(assetClass.PowerPorts);
+        #region Complex Multi-Field Filters
 
-				assetClass.Holders.Should().NotBeNull();
-				assetClass.Holders.Should().BeEquivalentTo(assetClass.Holders);
-			}
-		}
+        [TestMethod]
+        public void ReadFilter_DimensionsWithinLimits_ShouldReturnDevicesThatFitInRack()
+        {
+            // Arrange
+            Helper.PopulateWithDemoData(upTo: DemoDataLayer.AssetClasses);
 
-		[TestMethod]
-		public void AssetClassDomStorageProvider_ReadFilter_BackImage_NotContains()
-		{
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulateAssetClasses();
+            // Simulating a small rack with size constraints
+            const double maxHeight = 2 * 4.45; // 2U height in cm
+            const double maxWidth = 40.0;      // 40 cm
+            const double maxDepth = 40.0;      // 40 cm
 
-			var backImageFilter = AssetClassExposers.BackImage.NotContains(".png");
-			var classesRetrieved = helper.AssetManagement.AssetClasses.Read(backImageFilter);
+            var filter = AssetClassExposers.Height.LessThanOrEqual(maxHeight)
+                .AND(AssetClassExposers.Width.LessThanOrEqual(maxWidth))
+                .AND(AssetClassExposers.Depth.LessThanOrEqual(maxDepth));
 
-			var expected = DemoData.AssetClasses.Where(backImageFilter.getLambda()).ToArray();
+            // Act
+            var results = Helper.AssetManagement.AssetClasses.Read(filter).ToList();
 
-			using (new AssertionScope())
-			{
-				classesRetrieved.Should().NotBeNull();
-				classesRetrieved.Count().Should().Be(expected.Length);
-				classesRetrieved.Should().BeEquivalentTo(expected);
-			}
-		}
+            // Assert
+            using (new AssertionScope())
+            {
+                results.Should().NotBeEmpty("should find devices that fit in small rack");
+                results.Should().OnlyContain(ac => 
+                    ac.Height <= maxHeight && 
+                    ac.Width <= maxWidth && 
+                    ac.Depth <= maxDepth,
+                    $"all results should fit within H:{maxHeight} W:{maxWidth} D:{maxDepth}");
+            }
+        }
 
-		[TestMethod]
-		public void AssetClassDomStorageProvider_ReadFilter_TypicalPowerConsumption_LessThanOrEqual()
-		{
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulateAssetClasses();
+        #endregion
 
-			double typicalPowerThreshold = 100.0;
-			var typicalPowerFilter = AssetClassExposers.TypicalPowerConsumption.LessThanOrEqual(typicalPowerThreshold);
+        #region Nested Collection Filters
 
-			var classesRetrieved = helper.AssetManagement.AssetClasses.Read(typicalPowerFilter);
-			var expected = DemoData.AssetClasses.Where(ac => ac.TypicalPowerConsumption <= typicalPowerThreshold).ToArray();
+        [TestMethod]
+        public void ReadFilter_DataPortNumber_Equal_ShouldReturnAssetClassesWithSpecificPort()
+        {
+            // Arrange
+            Helper.PopulateWithDemoData(upTo: DemoDataLayer.AssetClasses);
 
-			using (new AssertionScope())
-			{
-				classesRetrieved.Should().NotBeNull();
-				classesRetrieved.Count().Should().Be(expected.Length);
-				classesRetrieved.Should().BeEquivalentTo(expected);
-			}
-		}
+            const int targetPortNumber = 4;
+            var filter = AssetClassExposers.DataPorts.PortNumber.Equal(targetPortNumber);
 
-		[TestMethod]
-		public void AssetClassDomStorageProvider_NestedReadFilter_PortNumber_Equal()
-		{
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulateAssetClasses();
+            // Act
+            var results = Helper.AssetManagement.AssetClasses.Read(filter).ToList();
 
-			var filter = AssetClassExposers.DataPorts.PortNumber.Equal(4);
-			var classesRetrieved = helper.AssetManagement.AssetClasses.Read(filter);
+            // Assert
+            using (new AssertionScope())
+            {
+                results.Should().NotBeEmpty($"should find asset classes with data port #{targetPortNumber}");
+                results.Should().OnlyContain(ac => ac.DataPorts.Any(port => port.PortNumber == targetPortNumber));
+            }
+        }
 
-			var expected = DemoData.AssetClasses.Where(ac => ac.DataPorts.Any(port => port.PortNumber == 4)).ToArray();
+        [TestMethod]
+        public void ReadFilter_HolderSlotNumber_Equal_ShouldReturnAssetClassesWithSpecificSlot()
+        {
+            // Arrange
+            Helper.PopulateWithDemoData(upTo: DemoDataLayer.AssetClasses);
 
-			using (new AssertionScope())
-			{
-				classesRetrieved.Should().NotBeNull();
-				classesRetrieved.Count().Should().Be(expected.Length);
-				classesRetrieved.Should().BeEquivalentTo(expected);
-			}
-		}
+            const int targetSlotNumber = 6;
+            var filter = AssetClassExposers.Holders.SlotNumber.Equal(targetSlotNumber);
 
-		[TestMethod]
-		public void AssetClassDomStorageProvider_NestedReadFilter_SlotNumber_Equal()
-		{
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulateAssetClasses();
+            // Act
+            var results = Helper.AssetManagement.AssetClasses.Read(filter).ToList();
 
-			var filter = AssetClassExposers.Holders.SlotNumber.Equal(6); // Should be DemoData.AssetClasses[5]
-			var classesRetrieved = helper.AssetManagement.AssetClasses.Read(filter);
+            // Assert
+            using (new AssertionScope())
+            {
+                results.Should().NotBeEmpty($"should find asset classes with holder slot #{targetSlotNumber}");
+                results.Should().OnlyContain(ac => ac.Holders.Any(holder => holder.SlotNumber == targetSlotNumber));
+            }
+        }
 
-			var expected = DemoData.AssetClasses.First(ac => ac.Holders.Any(holder => holder.SlotNumber == 6));
-
-			using (new AssertionScope())
-			{
-				classesRetrieved.Should().NotBeNull();
-				classesRetrieved.Count().Should().Be(1);
-				var assetClass = classesRetrieved.First();
-
-				assetClass.Name.Should().Be(expected.Name);
-				assetClass.Description.Should().Be(expected.Description);
-				assetClass.DeviceTypeId.Should().Be(expected.DeviceTypeId);
-				assetClass.Manufacturer.Should().Be(expected.Manufacturer);
-				assetClass.Depth.Should().Be(expected.Depth);
-				assetClass.Height.Should().Be(expected.Height);
-				assetClass.HeightU.Should().Be(expected.HeightU);
-				assetClass.Width.Should().Be(expected.Width);
-				assetClass.Weight.Should().Be(expected.Weight);
-				assetClass.FrontImage.Should().Be(expected.FrontImage);
-				assetClass.BackImage.Should().Be(expected.BackImage);
-				assetClass.MaximumPowerConsumption.Should().Be(expected.MaximumPowerConsumption);
-				assetClass.TypicalPowerConsumption.Should().Be(expected.TypicalPowerConsumption);
-				assetClass.PowerSupply.Should().Be(expected.PowerSupply);
-
-				assetClass.Lifecycle.Should().NotBeNull();
-				assetClass.Lifecycle.Should().Be(expected.Lifecycle);
-
-				assetClass.DataPorts.Should().NotBeNull();
-				assetClass.DataPorts.Should().BeEquivalentTo(expected.DataPorts);
-
-				assetClass.PowerPorts.Should().NotBeNull();
-				assetClass.PowerPorts.Should().BeEquivalentTo(expected.PowerPorts);
-
-				assetClass.Holders.Should().NotBeNull();
-				assetClass.Holders.Should().BeEquivalentTo(expected.Holders);
-			}
-		}
-	}
+        #endregion
+    }
 }

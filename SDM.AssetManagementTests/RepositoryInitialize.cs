@@ -14,15 +14,108 @@
     using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
 
+    /// <summary>
+    /// Defines the data layers that can be populated in the test environment.
+    /// The order represents the dependency hierarchy.
+    /// </summary>
+    public enum DemoDataLayer
+    {
+        /// <summary>
+        /// Device types - no dependencies.
+        /// </summary>
+        DeviceTypes = 1,
+
+        /// <summary>
+        /// Racks - no dependencies (optional for Assets).
+        /// </summary>
+        Racks = 2,
+
+        /// <summary>
+        /// Asset classes - depends on DeviceTypes.
+        /// </summary>
+        AssetClasses = 3,
+
+        /// <summary>
+        /// Assets - depends on AssetClasses (and optionally Racks).
+        /// </summary>
+        Assets = 4,
+
+        /// <summary>
+        /// Data ports - depends on Assets.
+        /// </summary>
+        DataPorts = 5,
+
+        /// <summary>
+        /// Power ports - depends on Assets.
+        /// </summary>
+        PowerPorts = 6,
+    }
+
     public static partial class RepositoryInitialize
     {
         public static ITestApiHelper InitializeEmptyRepositories()
         {
             var connection = ConnectionHelper.CreateConnection();
-            var facilityHelper = connection.GetMockedFacilityManagementHelper();
-            var assetHelper = connection.GetMockedAssetManagementHelper(facilityHelper);
+            return new TestApiHelper(connection);
+        }
 
-            return new TestApiHelper(assetHelper, facilityHelper);
+        /// <summary>
+        /// Populates demo data up to and including the specified data layer.
+        /// Automatically populates all required dependencies.
+        /// </summary>
+        /// <param name="helper">The test API helper.</param>
+        /// <param name="upTo">The highest data layer to populate.</param>
+        /// <param name="includeRacks">Whether to include racks when populating assets.</param>
+        /// <returns>The test API helper for method chaining.</returns>
+        public static ITestApiHelper PopulateWithDemoData(
+            this ITestApiHelper helper,
+            DemoDataLayer upTo,
+            bool includeRacks = true)
+        {
+            // Layer 1: DeviceTypes (required for AssetClasses and above)
+            if (upTo >= DemoDataLayer.DeviceTypes)
+            {
+                PopulateDeviceTypes(helper);
+            }
+
+            // Layer 2: Racks (optional, but populate if requested and needed for Assets)
+            if (includeRacks && upTo >= DemoDataLayer.Assets)
+            {
+                PopulateRacks(helper);
+            }
+
+            // Layer 3: AssetClasses (required for Assets and above)
+            if (upTo >= DemoDataLayer.AssetClasses)
+            {
+                PopulateAssetClasses(helper);
+            }
+
+            // Layer 4: Assets (required for Ports)
+            if (upTo >= DemoDataLayer.Assets)
+            {
+                PopulateAssets(helper);
+            }
+
+            // Layer 5 & 6: Ports (independent of each other)
+            if (upTo >= DemoDataLayer.DataPorts)
+            {
+                PopulateDataPorts(helper);
+            }
+
+            if (upTo >= DemoDataLayer.PowerPorts)
+            {
+                PopulatePowerPorts(helper);
+            }
+
+            return helper;
+        }
+
+        /// <summary>
+        /// Populates all demo data including all ports.
+        /// </summary>
+        public static ITestApiHelper PopulateWithDemoData(this ITestApiHelper helper, bool includeRacks = true)
+        {
+            return PopulateWithDemoData(helper, DemoDataLayer.PowerPorts, includeRacks);
         }
 
         #region Assets
@@ -35,47 +128,85 @@
             }
 
             helper.AssetManagement.Assets.Create(assets);
+
+            // Refresh cache from database to ensure consistency
+            RefreshAssetsCache(helper);
+
             return helper;
         }
 
         public static ITestApiHelper PopulateAssets(this ITestApiHelper helper)
         {
-            var persistedAssetClasses = helper.AssetManagement.AssetClasses
-                .Read(new TRUEFilterElement<AssetClass>()).ToList();
+            // If already populated, return existing
+            if (helper.TestData.Assets.Any())
+            {
+                return helper;
+            }
 
-            // Validate prerequisites - AssetClasses are required
-            if (persistedAssetClasses.Count == 0)
+            // Ensure AssetClasses exist (will use cached if available)
+            helper.PopulateAssetClasses();
+            
+            var persistedAssetClasses = helper.TestData.AssetClasses;
+            if (!persistedAssetClasses.Any())
             {
                 throw new InvalidOperationException(
                     "Cannot populate assets: No AssetClasses found. Call PopulateAssetClasses() first.");
             }
 
-            // Racks are optional - check if any exist
-            var persistedRacks = helper.FacilityManagement.Racks
-                .Read(new TRUEFilterElement<Rack>()).ToList();
-            bool hasRacks = persistedRacks.Count > 0;
+            // Racks are optional
+            var assetClasses = persistedAssetClasses.ToDictionary(ac => ac.Name);
+            var persistedRacks = helper.TestData.Racks;
+            bool hasRacks = persistedRacks.Any();
+
+            // Sort racks by RackId to ensure deterministic order
+            Dictionary<string,Rack> racks = new Dictionary<string, Rack>();
+            if (hasRacks)
+            {
+                racks = persistedRacks.ToDictionary(r => r.RackId);
+            }
 
             var assets = new List<Asset>();
             for (int i = 0; i < DemoData.BaseAssets.Count; i++)
             {
                 var baseAsset = DemoData.BaseAssets[i];
-                var assetClassIndex = i % persistedAssetClasses.Count;
-                var assetClass = persistedAssetClasses[assetClassIndex];
+                string assetClassName = baseAsset.AssetClassId.Identifier;
+
+                if (!assetClasses.TryGetValue(assetClassName, out var assetClass))
+                {
+                    throw new InvalidOperationException(
+                        $"Asset '{baseAsset.SerialNumber}': Asset class with name '{assetClassName}' not found in persisted asset classes. Only asset classes available {String.Format(";", assetClasses.Keys)}.");
+                }
 
                 var asset = CloneAsset(baseAsset);
                 asset.AssetClassId = new SdmObjectReference<AssetClass>(assetClass.Identifier);
 
-                // Only assign rack if racks are available
                 if (hasRacks)
                 {
-                    var rackIndex = i % persistedRacks.Count;
-                    var rack = persistedRacks[rackIndex];
-                    asset.Location.RackId = new SdmObjectReference<Rack>(rack.Identifier);
-                    // RackPosition is already set in CloneAsset from DemoData
+                    // Use serial number from the asset to lookup rack assignment
+                    if (DemoData.AssetRackAssignments.TryGetValue(asset.SerialNumber, out var assignment))
+                    {
+                        string rackid = assignment.RackId;
+                        
+                        // Validate rack index is within bounds
+                        if (racks.TryGetValue(rackid, out Rack rack))
+                        {
+                            asset.Location.RackId = new SdmObjectReference<Rack>(rack.Identifier);
+                            asset.Location.RackPosition = assignment.Position;
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException(
+                                $"Asset '{asset.SerialNumber}': Rack id {rackid} not found in persisted racks. Only rack ids available {String.Format(";", racks.Keys)}.");
+                        }
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException(
+                            $"Asset '{asset.SerialNumber}': No rack assignment found in DemoData.AssetRackAssignments.");
+                    }
                 }
                 else
                 {
-                    // Clear rack-related location data if no racks available
                     asset.Location = null;
                 }
 
@@ -83,7 +214,19 @@
             }
 
             helper.AssetManagement.Assets.Create(assets);
+            
+            // Refresh cache from database to ensure consistency
+            RefreshAssetsCache(helper);
+            
             return helper;
+        }
+
+        private static void RefreshAssetsCache(ITestApiHelper helper)
+        {
+            var allAssets = helper.AssetManagement.Assets
+                .Read(new TRUEFilterElement<Asset>())
+                .ToList();
+            helper.TestData.Assets = allAssets.AsReadOnly();
         }
 
         #endregion
@@ -98,16 +241,26 @@
             }
 
             helper.AssetManagement.AssetClasses.Create(assetClasses);
+
+            // Refresh cache from database to ensure consistency
+            RefreshAssetClassesCache(helper);
+
             return helper;
         }
 
-        public static ITestApiHelper PopulateAssetClasses(this ITestApiHelper helper)
+        private static ITestApiHelper PopulateAssetClasses(this ITestApiHelper helper)
         {
-            var persistedDeviceTypes = helper.AssetManagement.DeviceTypes
-                .Read(new TRUEFilterElement<DeviceType>()).ToList();
+            // If already populated, return existing
+            if (helper.TestData.AssetClasses.Any())
+            {
+                return helper;
+            }
 
-            // Validate prerequisites - DeviceTypes are required
-            if (persistedDeviceTypes.Count == 0)
+            // Ensure DeviceTypes exist (will use cached if available)
+            helper.PopulateDeviceTypes();
+
+            var persistedDeviceTypes = helper.TestData.DeviceTypes;
+            if (!persistedDeviceTypes.Any())
             {
                 throw new InvalidOperationException(
                     "Cannot populate asset classes: No DeviceTypes found. Call PopulateDeviceTypes() first.");
@@ -117,8 +270,6 @@
             for (int i = 0; i < DemoData.BaseAssetClasses.Count; i++)
             {
                 var baseClass = DemoData.BaseAssetClasses[i];
-
-                // Clone the object and set reference
                 var deviceTypeIndex = i % persistedDeviceTypes.Count;
 
                 var assetClass = CloneAssetClass(baseClass);
@@ -128,7 +279,19 @@
             }
 
             helper.AssetManagement.AssetClasses.Create(assetClasses);
+
+            // Refresh cache from database to ensure consistency
+            RefreshAssetClassesCache(helper);
+
             return helper;
+        }
+
+        private static void RefreshAssetClassesCache(ITestApiHelper helper)
+        {
+            var allAssetClasses = helper.AssetManagement.AssetClasses
+                .Read(new TRUEFilterElement<AssetClass>())
+                .ToList();
+            helper.TestData.AssetClasses = allAssetClasses.AsReadOnly();
         }
 
         #endregion
@@ -143,16 +306,26 @@
             }
 
             helper.AssetManagement.DataPorts.Create(dataPorts);
+
+            // Refresh cache from database to ensure consistency
+            RefreshDataPortsCache(helper);
+
             return helper;
         }
 
-        public static ITestApiHelper PopulateDataPorts(this ITestApiHelper helper)
+        private static ITestApiHelper PopulateDataPorts(this ITestApiHelper helper)
         {
-            var persistedAssets = helper.AssetManagement.Assets
-                .Read(new TRUEFilterElement<Asset>()).ToList();
+            // If already populated, return existing
+            if (helper.TestData.DataPorts.Any())
+            {
+                return helper;
+            }
 
-            // Validate prerequisites - Assets are required
-            if (persistedAssets.Count == 0)
+            // Ensure Assets exist (will use cached if available)
+            helper.PopulateAssets();
+
+            var persistedAssets = helper.TestData.Assets;
+            if (!persistedAssets.Any())
             {
                 throw new InvalidOperationException(
                     "Cannot populate data ports: No Assets found. Call PopulateAssets() first.");
@@ -162,8 +335,6 @@
             for (int i = 0; i < DemoData.BaseDataPorts.Count; i++)
             {
                 var basePort = DemoData.BaseDataPorts[i];
-
-                // Clone the object and set reference
                 var assetIndex = i % persistedAssets.Count;
 
                 var dataPort = CloneDataPort(basePort);
@@ -176,7 +347,19 @@
             }
 
             helper.AssetManagement.DataPorts.Create(dataPorts);
+
+            // Refresh cache from database to ensure consistency
+            RefreshDataPortsCache(helper);
+
             return helper;
+        }
+
+        private static void RefreshDataPortsCache(ITestApiHelper helper)
+        {
+            var allDataPorts = helper.AssetManagement.DataPorts
+                .Read(new TRUEFilterElement<DataPort>())
+                .ToList();
+            helper.TestData.DataPorts = allDataPorts.AsReadOnly();
         }
 
         #endregion
@@ -191,16 +374,26 @@
             }
 
             helper.AssetManagement.PowerPorts.Create(powerPorts);
+
+            // Refresh cache from database to ensure consistency
+            RefreshPowerPortsCache(helper);
+
             return helper;
         }
 
-        public static ITestApiHelper PopulatePowerPorts(this ITestApiHelper helper)
+        private static ITestApiHelper PopulatePowerPorts(this ITestApiHelper helper)
         {
-            var persistedAssets = helper.AssetManagement.Assets
-                .Read(new TRUEFilterElement<Asset>()).ToList();
+            // If already populated, return existing
+            if (helper.TestData.PowerPorts.Any())
+            {
+                return helper;
+            }
 
-            // Validate prerequisites - Assets are required
-            if (persistedAssets.Count == 0)
+            // Ensure Assets exist (will use cached if available)
+            helper.PopulateAssets();
+
+            var persistedAssets = helper.TestData.Assets;
+            if (!persistedAssets.Any())
             {
                 throw new InvalidOperationException(
                     "Cannot populate power ports: No Assets found. Call PopulateAssets() first.");
@@ -210,8 +403,6 @@
             for (int i = 0; i < DemoData.BasePowerPorts.Count; i++)
             {
                 var basePort = DemoData.BasePowerPorts[i];
-
-                // Clone the object and set reference
                 var assetIndex = i % persistedAssets.Count;
 
                 var powerPort = ClonePowerPort(basePort);
@@ -221,7 +412,19 @@
             }
 
             helper.AssetManagement.PowerPorts.Create(powerPorts);
+
+            // Refresh cache from database to ensure consistency
+            RefreshPowerPortsCache(helper);
+
             return helper;
+        }
+
+        private static void RefreshPowerPortsCache(ITestApiHelper helper)
+        {
+            var allPowerPorts = helper.AssetManagement.PowerPorts
+                .Read(new TRUEFilterElement<PowerPort>())
+                .ToList();
+            helper.TestData.PowerPorts = allPowerPorts.AsReadOnly();
         }
 
         #endregion
@@ -236,14 +439,35 @@
             }
 
             helper.AssetManagement.DeviceTypes.Create(deviceTypes);
+
+            // Refresh cache from database to ensure consistency
+            RefreshDeviceTypesCache(helper);
+
             return helper;
         }
 
-        public static ITestApiHelper PopulateDeviceTypes(this ITestApiHelper helper)
+        private static ITestApiHelper PopulateDeviceTypes(this ITestApiHelper helper)
         {
-            // DeviceTypes have no dependencies, so we can use them directly
+            // If already populated, return existing
+            if (helper.TestData.DeviceTypes.Any())
+            {
+                return helper;
+            }
+
             helper.AssetManagement.DeviceTypes.Create(DemoData.DeviceTypes);
+
+            // Refresh cache from database to ensure consistency
+            RefreshDeviceTypesCache(helper);
+
             return helper;
+        }
+
+        private static void RefreshDeviceTypesCache(ITestApiHelper helper)
+        {
+            var allDeviceTypes = helper.AssetManagement.DeviceTypes
+                .Read(new TRUEFilterElement<DeviceType>())
+                .ToList();
+            helper.TestData.DeviceTypes = allDeviceTypes.AsReadOnly();
         }
 
         #endregion
@@ -258,14 +482,35 @@
             }
 
             helper.FacilityManagement.Racks.Create(racks);
+
+            // Refresh cache from database to ensure consistency
+            RefreshRacksCache(helper);
+
             return helper;
         }
 
-        public static ITestApiHelper PopulateRacks(this ITestApiHelper helper)
+        private static ITestApiHelper PopulateRacks(this ITestApiHelper helper)
         {
-            // Racks have no dependencies, so we can use them directly
+            // If already populated, return existing
+            if (helper.TestData.Racks.Any())
+            {
+                return helper;
+            }
+
             helper.FacilityManagement.Racks.Create(DemoData.Racks);
+
+            // Refresh cache from database to ensure consistency
+            RefreshRacksCache(helper);
+
             return helper;
+        }
+
+        private static void RefreshRacksCache(ITestApiHelper helper)
+        {
+            var allRacks = helper.FacilityManagement.Racks
+                .Read(new TRUEFilterElement<Rack>())
+                .ToList();
+            helper.TestData.Racks = allRacks.AsReadOnly();
         }
 
         #endregion

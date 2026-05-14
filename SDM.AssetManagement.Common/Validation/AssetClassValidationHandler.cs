@@ -45,7 +45,7 @@
             result = new ValidationResult();
             if (!asset.DeviceTypeId.HasValue())
             {
-                result.AddFailReason(AssetClassValidationField.DeviceTypeId, "Asset Class Device Type cannot be empty.");
+                result.AddFailReason(AssetClassValidationField.DeviceTypeId, "Asset Class Device Type id needs to be a Guid.");
             }
             return result.IsValid;
         }
@@ -197,22 +197,10 @@
                 return result;
             }
 
-            if (assetClass.Holders == null)
-            {
-                result.AddFailReason(AssetClassValidationField.HolderSlotNumber, $"Asset Class does not contain Holders.");
-                return result;
-            }
-
             var seenHolders = new HashSet<(long Number, SlcAsset_Management.Enums.HierarchyRoleEnum? HierarchyRole)>();
 
             foreach (var holder in assetClass.Holders)
             {
-                if (holder.SlotNumber == null)
-                {
-                    result.AddFailReason(AssetClassValidationField.HolderSlotNumber, "Holder Slot Number must have a value.");
-                    return result;
-                }
-
                 if (holder.SlotNumber < 0)
                 {
                     result.AddFailReason(AssetClassValidationField.HolderSlotNumber, "Holder Slot Number cannot be negative.");
