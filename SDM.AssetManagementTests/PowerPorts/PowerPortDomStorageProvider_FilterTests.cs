@@ -53,8 +53,8 @@
             
             Helper.PopulateWithDemoData(upTo: DemoDataLayer.PowerPorts);
 
-            var targetPowerPort = Helper.TestData.PowerPorts.Skip(7).First();
-            var portNumber = targetPowerPort.PowerPortInfo.PortNumber;
+            // Test with port number 0 to verify default value handling
+            const long portNumber = 0;
             var filter = PowerPortExposers.PowerPortInfo.PortNumber.Equal(portNumber);
 
             // Act

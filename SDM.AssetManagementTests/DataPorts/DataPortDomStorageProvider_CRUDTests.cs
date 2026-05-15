@@ -117,7 +117,7 @@
 
             // Assert
             var persisted = Helper.AssetManagement.DataPorts.Read(new TRUEFilterElement<DataPort>()).First();
-            AssertDataPortUpdateDifferences(referenceDataPort, persisted);
+            AssertDataPortUpdateDifferences(created, persisted);
         }
 
         #endregion

@@ -602,14 +602,13 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 					_powerportinfo.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.Name, Convert.ToString(obj.PowerPortInfo.Name));
 				}
 
-				if (obj.PowerPortInfo.PortNumber != default)
-				{
-					_powerportinfo.AddOrUpdateValue<long>(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.PortNumber, (long)obj.PowerPortInfo.PortNumber);
-				}
+				// Always save PortNumber, even if it's 0 (the default value for long)
+				_powerportinfo.AddOrUpdateValue<long>(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.PortNumber, (long)obj.PowerPortInfo.PortNumber);
 
 				_powerportinfo.AddOrUpdateValue<int>(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.OutputType, (int)obj.PowerPortInfo.OutputType);
 				_powerportinfo.AddOrUpdateValue<int>(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.PortExposure, (int)obj.PowerPortInfo.PortExposure);
-				if (obj.PowerPortInfo.PortType != default)
+
+                if (obj.PowerPortInfo.PortType != default)
 				{
 					_powerportinfo.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.PortType, Convert.ToString(obj.PowerPortInfo.PortType));
 				}

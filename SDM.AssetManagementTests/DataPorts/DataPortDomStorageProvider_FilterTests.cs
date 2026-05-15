@@ -51,8 +51,8 @@
             // Arrange
             Helper.PopulateWithDemoData(upTo: DemoDataLayer.DataPorts);
 
-            var targetDataPort = Helper.TestData.DataPorts.Skip(8).First();
-            var portNumber = targetDataPort.DataPortInfo.PortNumber;
+            // Test with port number 0 to verify default value handling
+            const long portNumber = 0;
             var filter = DataPortExposers.DataPortInfo.PortNumber.Equal(portNumber);
 
             // Act
