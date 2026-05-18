@@ -1,4 +1,4 @@
-﻿namespace SDM.AssetManagement.Tests
+﻿namespace SDM.AssetManagement.Tests.Assets
 {
     using System;
     using System.Collections.Generic;

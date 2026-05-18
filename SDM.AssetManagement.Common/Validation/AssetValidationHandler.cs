@@ -306,10 +306,10 @@
             bool[] locationExists = new bool[]
             {
                 asset.DestinationLocation?.ParentAsset != null && asset.DestinationLocation.ParentAsset.HasValue(),
-                asset.DestinationLocation?.RackId != default,
-                asset.DestinationLocation?.DeskId != default,
-                asset.DestinationLocation?.ContainerId != null && asset.DestinationLocation.ContainerId.HasValue(),
-                asset.DestinationLocation?.RoomId != default,
+                asset.DestinationLocation?.RackId != default && asset.DestinationLocation.RackId.HasValue(),
+                asset.DestinationLocation?.DeskId != null && asset.DestinationLocation.DeskId != default && asset.DestinationLocation.DeskId != System.Guid.Empty,
+                asset.DestinationLocation?.ContainerId != default && asset.DestinationLocation.ContainerId.HasValue(),
+                asset.DestinationLocation?.RoomId != default && asset.DestinationLocation.RoomId.HasValue(),
             };
 
             if (locationExists.Count(entry => entry) > 1)
@@ -466,7 +466,7 @@
                     asset.DestinationLocation.RoomIdField.Changed ||
                     asset.DestinationLocation.PowerSupplyRackPositionField.Changed)
                 {
-                    result.AddFailReason(AssetValidationField.Asset, "Cannot change Destination Location in current State.");
+                    result.AddFailReason(AssetValidationField.Asset, $"Cannot change Destination Location in current State ({asset.State}).");
                 }
             }
 
@@ -762,9 +762,9 @@
         /// <summary>
         /// Validates Destination Location based on Asset state.
         /// Rules:
-        /// - Destination Location is ONLY allowed when state is "In Transit"
-        /// - If defined in other states: WARNING (value will be discarded)
+        /// - Destination Location is MANDATORY when state is "In Transit"
         /// - If NOT defined in "In Transit" state: ERROR (mandatory)
+        /// - If defined in other states: WARNING (value will be ignored)
         /// </summary>
         public static ValidationResult ValidateDestinationLocation(Asset asset)
         {
@@ -793,11 +793,11 @@
             }
             else
             {
-                // Rule: Destination Location NOT allowed in other states
+                // Rule: Destination Location NOT allowed in other states - warn if present
                 if (hasDestinationLocation)
                 {
                     result.AddWarning(AssetValidationField.DestinationLocation,
-                        $"Destination Location is only applicable when Asset is in 'In Transit' state. Current state: '{state}'. The Destination Location value will be discarded.");
+                        $"Destination Location is only applicable when Asset is in 'In Transit' state. Current state: '{state}'. The Destination Location will be ignored.");
                 }
             }
 

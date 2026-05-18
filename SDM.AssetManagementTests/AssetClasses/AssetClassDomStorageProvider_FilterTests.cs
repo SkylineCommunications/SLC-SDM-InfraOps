@@ -1,4 +1,4 @@
-﻿namespace SDM.AssetManagement.Tests
+﻿namespace SDM.AssetManagement.Tests.AssetClasses
 {
     using System;
     using System.Linq;

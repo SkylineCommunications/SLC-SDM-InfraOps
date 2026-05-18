@@ -14,6 +14,7 @@
         private const string RackId001 = "RACK-001";
         private const string RackId002 = "RACK-002";
         private const string RackId003 = "RACK-003";
+        private const string RackId004 = "RACK-004";
         private const string SN123456 = "SN123456";
         private const string SN123457 = "SN123457";
         private const string SN123458 = "SN123458";
@@ -36,6 +37,17 @@
         private const string AssetClassName_WirelessAccessPoint = "Wireless Access Point";
         private const string AssetClassName_MediaConverter = "Media Converter";
 
+        private const string DeviceType_Decoder = "Decoder";
+        private const string DeviceType_Encoder = "Encoder";
+        private const string DeviceType_NetworkInterfaceCard = "Network Interface Card";
+        private const string DeviceType_Software = "Software";
+        private const string DeviceType_Firewall = "Firewall";
+        private const string DeviceType_PSU = "PSU";
+        private const string DeviceType_OpticsModule = "Optics Module";
+        private const string DeviceType_CoolingFan = "Cooling Fan";
+        private const string DeviceType_UPSSystem = "UPS System";
+        private const string DeviceType_EnterpriseStorageDrive = "Enterprise Storage Drive";
+
         private static readonly Random _random = new Random();
 
         // Facilities (Racks, in this case) - no direct references in Assets or AssetClasses yet
@@ -44,36 +56,37 @@
             CreateRack(RackId001, "Main Server Rack", 42),
             CreateRack(RackId002, "Network Equipment Rack", 42),
             CreateRack(RackId003, "Storage Rack", 42),
+            CreateRack(RackId004, "45 U Rack", 45, top: true),
         ];
 
         // DeviceTypes must be defined first since they have no dependencies
         public static readonly List<DeviceType> DeviceTypes =
         [
-            CreateDeviceType("Decoder",  SlcAsset_Management.Enums.HierarchyRoleEnum.Chassis, SlcAsset_Management.Enums.TagOption.AcceptsDataConnection),
-            CreateDeviceType("Encoder", SlcAsset_Management.Enums.HierarchyRoleEnum.Chassis, SlcAsset_Management.Enums.TagOption.AcceptsDataConnection),
-            CreateDeviceType("Network Interface Card", SlcAsset_Management.Enums.HierarchyRoleEnum.Card, SlcAsset_Management.Enums.TagOption.AcceptsDataConnection, SlcAsset_Management.Enums.TagOption.RackUnitConsumer),
-            CreateDeviceType("Software", SlcAsset_Management.Enums.HierarchyRoleEnum.None),
-            CreateDeviceType("Firewall", SlcAsset_Management.Enums.HierarchyRoleEnum.Module, SlcAsset_Management.Enums.TagOption.AcceptsDataConnection),
-            CreateDeviceType("PSU", SlcAsset_Management.Enums.HierarchyRoleEnum.PowerSupply, SlcAsset_Management.Enums.TagOption.PowerProvider),
-            CreateDeviceType("Optics Module", SlcAsset_Management.Enums.HierarchyRoleEnum.PowerSupply, SlcAsset_Management.Enums.TagOption.PowerProvider),
-            CreateDeviceType("Cooling Fan", SlcAsset_Management.Enums.HierarchyRoleEnum.Fan),
-            CreateDeviceType("UPS System", SlcAsset_Management.Enums.HierarchyRoleEnum.Chassis, SlcAsset_Management.Enums.TagOption.PowerProvider, SlcAsset_Management.Enums.TagOption.RackUnitConsumer),
-            CreateDeviceType("Enterprise Storage Drive", SlcAsset_Management.Enums.HierarchyRoleEnum.Module, SlcAsset_Management.Enums.TagOption.AcceptsDataConnection),
+            CreateDeviceType(DeviceType_Decoder,  SlcAsset_Management.Enums.HierarchyRoleEnum.Chassis, SlcAsset_Management.Enums.TagOption.AcceptsDataConnection, SlcAsset_Management.Enums.TagOption.RackUnitConsumer),
+            CreateDeviceType(DeviceType_Encoder, SlcAsset_Management.Enums.HierarchyRoleEnum.Chassis, SlcAsset_Management.Enums.TagOption.AcceptsDataConnection, SlcAsset_Management.Enums.TagOption.RackUnitConsumer),
+            CreateDeviceType(DeviceType_NetworkInterfaceCard, SlcAsset_Management.Enums.HierarchyRoleEnum.Card, SlcAsset_Management.Enums.TagOption.AcceptsDataConnection, SlcAsset_Management.Enums.TagOption.RackUnitConsumer),
+            CreateDeviceType(DeviceType_Software, SlcAsset_Management.Enums.HierarchyRoleEnum.None),
+            CreateDeviceType(DeviceType_Firewall, SlcAsset_Management.Enums.HierarchyRoleEnum.Module, SlcAsset_Management.Enums.TagOption.AcceptsDataConnection, SlcAsset_Management.Enums.TagOption.RackUnitConsumer),
+            CreateDeviceType(DeviceType_PSU, SlcAsset_Management.Enums.HierarchyRoleEnum.PowerSupply, SlcAsset_Management.Enums.TagOption.PowerProvider),
+            CreateDeviceType(DeviceType_OpticsModule, SlcAsset_Management.Enums.HierarchyRoleEnum.PowerSupply, SlcAsset_Management.Enums.TagOption.PowerProvider),
+            CreateDeviceType(DeviceType_CoolingFan, SlcAsset_Management.Enums.HierarchyRoleEnum.Fan),
+            CreateDeviceType(DeviceType_UPSSystem, SlcAsset_Management.Enums.HierarchyRoleEnum.Chassis, SlcAsset_Management.Enums.TagOption.PowerProvider, SlcAsset_Management.Enums.TagOption.RackUnitConsumer),
+            CreateDeviceType(DeviceType_EnterpriseStorageDrive, SlcAsset_Management.Enums.HierarchyRoleEnum.Module, SlcAsset_Management.Enums.TagOption.AcceptsDataConnection, SlcAsset_Management.Enums.TagOption.RackUnitConsumer),
         ];
 
         // AssetClasses reference DeviceTypes
         public static readonly List<AssetClass> BaseAssetClasses =
         [
-            CreateBaseAssetClass(1, AssetClassName_Router, "High performance router", 44.5, 4.4, 43.9, 1, 12.5, "router-front.png", "router-back.jpg", 120, 200),
-            CreateBaseAssetClass(2, AssetClassName_Switch, "Layer 2 switch", 30.0, 8.9, 44.0, 2, 3.5, "switch-front.png", "switch-back.png", 40, 60),
-            CreateBaseAssetClass(3, AssetClassName_Firewall, "Enterprise firewall", 20.0, 13.3, 20.0, 3, 2.0, "fw-front.png", "fw-back.jpg", 30, 50),
-            CreateBaseAssetClass(4, AssetClassName_Server, "Rack server", 70.0, 8.9, 44.0, 2, 25.0, "server-front.png", "server-back.png", 350, 500),
-            CreateBaseAssetClass(5, AssetClassName_Storage, "NAS storage", 60.0, 8.9, 44.0, 2, 20.0, "nas-front.png", "nas-back.png", 250, 400),
-            CreateBaseAssetClass(6, AssetClassName_UPS, "Uninterruptible Power Supply", 40.0, 8.9, 17.0, 2, 28.0, "ups-front.png", "ups-back.jpg", 120, 180),
-            CreateBaseAssetClass(7, AssetClassName_KVMSwitch, "Keyboard Video Mouse Switch", 16.0, 31.1, 44.0, 7, 2.2, "kvm-front.png", "kvm-back.png", 15, 25),
-            CreateBaseAssetClass(8, AssetClassName_PatchPanel, "24-port Patch Panel", 10.0, 4.4, 48.0, 1, 1.5, "patchpanel-front.png", "patchpanel-back.png", 5, 10),
-            CreateBaseAssetClass(9, AssetClassName_WirelessAccessPoint, "Dual-band WiFi 6 AP", 20.0, 4.4, 20.0, 1, 0.8, "ap-front.png", "ap-back.jpeg", 12, 18),
-            CreateBaseAssetClass(10, AssetClassName_MediaConverter, "Fiber to Ethernet Converter", 9.4, 4.4, 7.0, 1, 0.3, "mediaconv-front.png", "mediaconv-back.png", 3, 5),
+            CreateBaseAssetClass(DeviceType_Decoder, AssetClassName_Router, "High performance router", 44.5, 4.4, 43.9, 1, 12.5, "router-front.png", "router-back.jpg", 120, 200),
+            CreateBaseAssetClass(DeviceType_Encoder, AssetClassName_Switch, "Layer 2 switch", 30.0, 8.9, 44.0, 2, 3.5, "switch-front.png", "switch-back.png", 40, 60),
+            CreateBaseAssetClass(DeviceType_UPSSystem, AssetClassName_Firewall, "Enterprise firewall", 20.0, 13.3, 20.0, 3, 2.0, "fw-front.png", "fw-back.jpg", 30, 50),
+            CreateBaseAssetClass(DeviceType_Encoder, AssetClassName_Server, "Rack server", 70.0, 8.9, 44.0, 2, 25.0, "server-front.png", "server-back.png", 350, 500),
+            CreateBaseAssetClass(DeviceType_Encoder, AssetClassName_Storage, "NAS storage", 60.0, 8.9, 44.0, 2, 20.0, "nas-front.png", "nas-back.png", 250, 400),
+            CreateBaseAssetClass(DeviceType_Encoder, AssetClassName_UPS, "Uninterruptible Power Supply", 40.0, 8.9, 17.0, 2, 28.0, "ups-front.png", "ups-back.jpg", 120, 180),
+            CreateBaseAssetClass(DeviceType_Firewall, AssetClassName_KVMSwitch, "Keyboard Video Mouse Switch", 16.0, 31.1, 44.0, 7, 2.2, "kvm-front.png", "kvm-back.png", 15, 25),
+            CreateBaseAssetClass(DeviceType_Decoder, AssetClassName_PatchPanel, "24-port Patch Panel", 10.0, 4.4, 48.0, 1, 1.5, "patchpanel-front.png", "patchpanel-back.png", 5, 10),
+            CreateBaseAssetClass(DeviceType_UPSSystem, AssetClassName_WirelessAccessPoint, "Dual-band WiFi 6 AP", 20.0, 4.4, 20.0, 1, 0.8, "ap-front.png", "ap-back.jpeg", 12, 18),
+            CreateBaseAssetClass(DeviceType_UPSSystem, AssetClassName_MediaConverter, "Fiber to Ethernet Converter", 9.4, 4.4, 7.0, 1, 0.3, "mediaconv-front.png", "mediaconv-back.png", 3, 5),
         ];
 
         // Base Assets - will update AssetClassId and RackId at runtime
@@ -261,7 +274,7 @@
         #endregion
 
         private static AssetClass CreateBaseAssetClass(
-       int orderNo,
+       string deviceTypeName,
        string deviceName,
        string deviceDescription,
        double depth,
@@ -276,6 +289,7 @@
         {
             return new AssetClass
             {
+                DeviceTypeId = new SdmObjectReference<DeviceType>(deviceTypeName), // Will be updated at runtime to reference the correct DeviceType
                 Name = deviceName,
                 // DeviceTypeId will be set at runtime
                 Description = deviceDescription,
@@ -303,7 +317,7 @@
                 new AssetHolder
                 {
                     HierarchyRole = SlcAsset_Management.Enums.HierarchyRoleEnum.Module,
-                    SlotNumber = orderNo,
+                    SlotNumber = 1,
                 },
             },
             };
@@ -327,7 +341,7 @@
             };
         }
 
-        private static Rack CreateRack(string rackId, string name, int heightu)
+        private static Rack CreateRack(string rackId, string name, int heightu, bool top = false)
         {
             return new Rack
             {
@@ -338,7 +352,7 @@
                 {
                     MaximumRackCapacity = heightu,
                 },
-
+                Position = top == true ? SlcFacility_Management.Enums.RackpositionenumEnum.Top : SlcFacility_Management.Enums.RackpositionenumEnum.Bottom,
             };
         }
 

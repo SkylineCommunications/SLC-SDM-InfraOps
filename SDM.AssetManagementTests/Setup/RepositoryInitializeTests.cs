@@ -62,7 +62,7 @@
 
 
             // Act
-            Helper.PopulateWithDemoData(includeRacks: true);
+            Helper.PopulateWithDemoData();
 
             // Assert
             Assert.IsTrue(Helper.TestData.DeviceTypes.Any(), "DeviceTypes should be populated");
@@ -74,29 +74,13 @@
         }
 
         [TestMethod]
-        public void PopulateWithDemoData_WithoutRacks_ShouldSucceed()
-        {
-            // Arrange
-
-
-            // Act
-            Helper.PopulateWithDemoData(includeRacks: false);
-
-            // Assert
-            Assert.IsTrue(Helper.TestData.Assets.Any(), "Assets should be created without racks");
-            Assert.IsFalse(Helper.TestData.Racks.Any(), "Racks should not be populated");
-            Assert.IsTrue(Helper.TestData.Assets.All(a => a.Location?.RackId == null || !a.Location.RackId.HasValue()),
-                "Assets should have no rack assignments");
-        }
-
-        [TestMethod]
         public void PopulateWithDemoData_UpToSpecificLayer_ShouldPopulateDependenciesOnly()
         {
             // Arrange
 
 
             // Act - Only populate up to AssetClasses
-            Helper.PopulateWithDemoData(upTo: DemoDataLayer.AssetClasses, includeRacks: false);
+            Helper.PopulateWithDemoData(upTo: DemoDataLayer.AssetClasses);
 
             // Assert
             Assert.IsTrue(Helper.TestData.DeviceTypes.Any(), "DeviceTypes should be populated (dependency)");
@@ -107,10 +91,10 @@
         }
 
         [TestMethod]
-        public void PopulateWithDemoData_WithRacks_ShouldAssignRackLocations()
+        public void PopulateWithDemoData_ShouldAssignRackLocations()
         {
             // Act
-            Helper.PopulateWithDemoData(DemoDataLayer.Assets, includeRacks: true);
+            Helper.PopulateWithDemoData(DemoDataLayer.Assets);
 
             // Assert
             var assets = Helper.TestData.Assets;

@@ -5,6 +5,8 @@
 
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+    using SharedMappers.DomIds;
+
     /// <summary>
     /// Tests to validate DemoData templates and population process.
     /// If these tests fail, fix the demo data templates in DemoData.cs.
@@ -21,7 +23,7 @@
         {
                        
             // Act - This will throw if validation middleware fails
-            Helper.PopulateWithDemoData(includeRacks: true);
+            Helper.PopulateWithDemoData();
 
             // Assert
             Assert.IsTrue(Helper.TestData.Assets.Any(), "Assets should be populated");
@@ -112,6 +114,76 @@
             {
                 var duplicateList = string.Join(", ", duplicateIds.Select(g => $"'{g.Key}' ({g.Count()}x)"));
                 Assert.Fail($"Found {duplicateIds.Count} duplicate asset ID(s) in demo data templates: {duplicateList}");
+            }
+        }
+
+        /// <summary>
+        /// Validates that any AssetClass with HeightU > 0 must reference a DeviceType with the RackUnitConsumer tag.
+        /// This ensures rack placement validation will work correctly for rack-mountable equipment.
+        /// Without the RackUnitConsumer tag, rack capacity validation is skipped, causing test failures.
+        /// </summary>
+        [TestMethod]
+        public void DemoData_RackMountableAssetClasses_MustHaveRackUnitConsumerDeviceType()
+        {
+            // Arrange
+            var assetClasses = DemoData.BaseAssetClasses.ToList();
+            var deviceTypes = DemoData.DeviceTypes.ToList();
+
+            if (!assetClasses.Any())
+            {
+                Assert.Inconclusive("No asset classes in DemoData to validate");
+                return;
+            }
+
+            if (!deviceTypes.Any())
+            {
+                Assert.Inconclusive("No device types in DemoData to validate");
+                return;
+            }
+
+            // Act - Find rack-mountable AssetClasses (HeightU > 0) without RackUnitConsumer DeviceType
+            var invalidAssetClasses = assetClasses
+                .Where(ac => ac.HeightU > 0)
+                .Select(ac =>
+                {
+                    // Find the referenced DeviceType by name (before it's converted to identifier)
+                    var deviceType = deviceTypes.FirstOrDefault(dt => 
+                        dt.Name == ac.DeviceTypeId.Identifier);
+
+                    return new
+                    {
+                        AssetClass = ac,
+                        DeviceType = deviceType,
+                        HasRackUnitConsumerTag = deviceType?.TagsInfo?.Tags?.Contains(
+                            SlcAsset_Management.Enums.TagOption.RackUnitConsumer) == true
+                    };
+                })
+                .Where(x => !x.HasRackUnitConsumerTag)
+                .ToList();
+
+            // Assert
+            if (invalidAssetClasses.Any())
+            {
+                var errorMessages = invalidAssetClasses.Select(x =>
+                {
+                    if (x.DeviceType == null)
+                    {
+                        return $"  - '{x.AssetClass.Name}' (HeightU: {x.AssetClass.HeightU}U) references unknown DeviceType '{x.AssetClass.DeviceTypeId.Identifier}'";
+                    }
+                    else
+                    {
+                        var tags = x.DeviceType.TagsInfo?.Tags?.Any() == true
+                            ? string.Join(", ", x.DeviceType.TagsInfo.Tags)
+                            : "none";
+                        return $"  - '{x.AssetClass.Name}' (HeightU: {x.AssetClass.HeightU}U) uses DeviceType '{x.DeviceType.Name}' which lacks RackUnitConsumer tag (has tags: {tags})";
+                    }
+                });
+
+                var errorMessage = $"Found {invalidAssetClasses.Count} rack-mountable AssetClass(es) with invalid DeviceType configuration:\n" +
+                    string.Join("\n", errorMessages) + "\n\n" +
+                    "Fix: Add SlcAsset_Management.Enums.TagOption.RackUnitConsumer tag to the DeviceType in DemoData.DeviceTypes";
+
+                Assert.Fail(errorMessage);
             }
         }
     }

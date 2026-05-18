@@ -30,7 +30,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     using SLDataGateway.API.Types.Querying;
 
 
-    internal partial class AssetDomRepository : IBulkRepository<Asset>, IAssetQueryRepository
+    internal partial class AssetDomRepository : IBulkRepository<Asset>
     {
         private readonly IConnection connection;
         private readonly DomHelper helper;

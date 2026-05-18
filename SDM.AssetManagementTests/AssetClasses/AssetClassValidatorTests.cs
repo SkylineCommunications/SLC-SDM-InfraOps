@@ -1,4 +1,4 @@
-﻿namespace SDM.AssetManagementTests.Validation
+﻿namespace SDM.AssetManagement.Tests.AssetClasses
 {
     using System;
     using System.Collections.Generic;

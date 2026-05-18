@@ -1,4 +1,4 @@
-﻿namespace SDM.AssetManagement.Tests
+﻿namespace SDM.AssetManagement.Tests.DeviceTypes
 {
     using System.Linq;
 

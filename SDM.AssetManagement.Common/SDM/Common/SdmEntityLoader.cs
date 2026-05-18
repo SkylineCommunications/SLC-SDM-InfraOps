@@ -400,11 +400,11 @@ namespace Skyline.DataMiner.SDM.Common.Services
 
             try
             {
-                FilterElement<Asset> filter = AssetExposers.Identifier.NotEqual(Guid.Empty.ToString());
+                FilterElement<Asset> filter = new TRUEFilterElement<Asset>();
 
                 if (excludeAssetIds != null && excludeAssetIds.Any())
                 {
-                    var clauses = excludeAssetIds
+                    var clauses = excludeAssetIds.Where(id => !String.IsNullOrWhiteSpace(id))
                         .Select(id => AssetExposers.Identifier.NotEqual(id))
                         .Cast<FilterElement<Asset>>()
                         .ToArray();

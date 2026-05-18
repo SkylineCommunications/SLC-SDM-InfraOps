@@ -1,4 +1,4 @@
-﻿namespace SDM.AssetManagement.Tests
+﻿namespace SDM.AssetManagement.Tests.Assets
 {
     using System;
     using System.Linq;
@@ -186,7 +186,7 @@
         {
             // Arrange
             
-           Helper.PopulateWithDemoData(upTo: DemoDataLayer.Assets, includeRacks: true);
+           Helper.PopulateWithDemoData(upTo: DemoDataLayer.Assets);
 
             const int excludedPosition = 7;
             var filter = AssetExposers.Location.RackPosition.NotEqual(excludedPosition);

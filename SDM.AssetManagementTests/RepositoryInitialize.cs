@@ -69,8 +69,7 @@
         /// <returns>The test API helper for method chaining.</returns>
         public static ITestApiHelper PopulateWithDemoData(
             this ITestApiHelper helper,
-            DemoDataLayer upTo,
-            bool includeRacks = true)
+            DemoDataLayer upTo)
         {
             // Layer 1: DeviceTypes (required for AssetClasses and above)
             if (upTo >= DemoDataLayer.DeviceTypes)
@@ -79,7 +78,7 @@
             }
 
             // Layer 2: Racks (optional, but populate if requested and needed for Assets)
-            if (includeRacks && upTo >= DemoDataLayer.Assets)
+            if (upTo >= DemoDataLayer.Racks)
             {
                 PopulateRacks(helper);
             }
@@ -113,9 +112,9 @@
         /// <summary>
         /// Populates all demo data including all ports.
         /// </summary>
-        public static ITestApiHelper PopulateWithDemoData(this ITestApiHelper helper, bool includeRacks = true)
+        public static ITestApiHelper PopulateWithDemoData(this ITestApiHelper helper)
         {
-            return PopulateWithDemoData(helper, DemoDataLayer.PowerPorts, includeRacks);
+            return PopulateWithDemoData(helper, DemoDataLayer.PowerPorts);
         }
 
         #region Assets
@@ -256,9 +255,6 @@
                 return helper;
             }
 
-            // Ensure DeviceTypes exist (will use cached if available)
-            helper.PopulateDeviceTypes();
-
             var persistedDeviceTypes = helper.TestData.DeviceTypes;
             if (!persistedDeviceTypes.Any())
             {
@@ -266,14 +262,15 @@
                     "Cannot populate asset classes: No DeviceTypes found. Call PopulateDeviceTypes() first.");
             }
 
+            var deviceTypes = persistedDeviceTypes.ToDictionary(dt => dt.Name);
             var assetClasses = new List<AssetClass>();
             for (int i = 0; i < DemoData.BaseAssetClasses.Count; i++)
             {
                 var baseClass = DemoData.BaseAssetClasses[i];
-                var deviceTypeIndex = i % persistedDeviceTypes.Count;
+                var deviceTypeName = baseClass.DeviceTypeId.Identifier;
 
                 var assetClass = CloneAssetClass(baseClass);
-                assetClass.DeviceTypeId = new SdmObjectReference<DeviceType>(persistedDeviceTypes[deviceTypeIndex].Identifier);
+                assetClass.DeviceTypeId = new SdmObjectReference<DeviceType>(deviceTypes[deviceTypeName].Identifier);
 
                 assetClasses.Add(assetClass);
             }

@@ -102,6 +102,12 @@
         /// </summary>
         private ValidationResult ValidateLocationBusinessRules(Asset asset)
         {
+            // Early return if Location hasn't changed at all
+            if (!HasLocationChanged(asset))
+            {
+                return new ValidationResult();
+            }
+
             // State permission check - early return if fails
             if (!AssetValidationHandler.IsLocationChangeAllowed(asset, out var permissionResult))
             {
@@ -143,31 +149,78 @@
         }
 
         /// <summary>
+        /// Checks if any Location field has changed.
+        /// </summary>
+        private bool HasLocationChanged(Asset asset)
+        {
+            if (asset.Location == null)
+            {
+                return false;
+            }
+
+            return asset.Location.ParentAssetField.Changed ||
+                   asset.Location.HolderNumberField.Changed ||
+                   asset.Location.RackIdField.Changed ||
+                   asset.Location.RackPositionField.Changed ||
+                   asset.Location.SideField.Changed ||
+                   asset.Location.DeskIdField.Changed ||
+                   asset.Location.ContainerIdField.Changed ||
+                   asset.Location.RoomIdField.Changed ||
+                   asset.Location.PowerSupplyRackPositionField.Changed;
+        }
+
+        /// <summary>
+        /// Checks if any DestinationLocation field has changed.
+        /// </summary>
+        private bool HasDestinationLocationChanged(Asset asset)
+        {
+            if (asset.DestinationLocation == null)
+            {
+                return false;
+            }
+
+            return asset.DestinationLocation.ParentAssetField.Changed ||
+                   asset.DestinationLocation.HolderNumberField.Changed ||
+                   asset.DestinationLocation.RackIdField.Changed ||
+                   asset.DestinationLocation.RackPositionField.Changed ||
+                   asset.DestinationLocation.SideField.Changed ||
+                   asset.DestinationLocation.DeskIdField.Changed ||
+                   asset.DestinationLocation.ContainerIdField.Changed ||
+                   asset.DestinationLocation.RoomIdField.Changed ||
+                   asset.DestinationLocation.PowerSupplyRackPositionField.Changed;
+        }
+
+        /// <summary>
         /// Validates destination location business rules (no database access).
-        /// Checks state-based requirements and permissions.
+        /// Rules:
+        /// - DestinationLocation is MANDATORY when state is InTransit
+        /// - Only validate business rules when InTransit AND it has values
+        /// - In all other states, DestinationLocation is ignored (with warning if present)
         /// </summary>
         private ValidationResult ValidateDestinationLocationBusinessRules(Asset asset)
         {
             var result = new ValidationResult();
 
-            // ✅ State-based Destination Location validation (includes warnings)
-            if (asset.DestinationLocation.Changed || asset.StateField.Changed)
+            // Early return if DestinationLocation hasn't changed at all
+            if (!HasDestinationLocationChanged(asset) && !asset.StateField.Changed)
             {
-                var destinationLocationResult = AssetValidationHandler.ValidateDestinationLocation(asset);
-                result.AddFrom(destinationLocationResult);
-            }
-
-            // State permission check - early return if fails
-            if (!AssetValidationHandler.IsDestinationLocationChangeAllowed(asset, out var permissionResult))
-            {
-                result.AddFrom(permissionResult);
                 return result;
             }
 
-            // Early return if not in transit
+            // If we reached here, at least one field changed - check for mandatory/warning validation
+            var destinationLocationResult = AssetValidationHandler.ValidateDestinationLocation(asset);
+            result.AddFrom(destinationLocationResult);
+
+            // DestinationLocation business rules validation ONLY applies when state is InTransit
             if (asset.State != SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit)
             {
-                return result;
+                return result; // Ignore DestinationLocation in all other states
+            }
+
+            // Check if DestinationLocation has any values set
+            if (!HasDestinationLocationValues(asset))
+            {
+                return result; // Already validated as mandatory above, no business rules to check
             }
 
             // After checks pass, collect all destination location errors
@@ -204,6 +257,23 @@
             }
 
             return validations.MergeAll();
+        }
+
+        /// <summary>
+        /// Checks if DestinationLocation has any values set.
+        /// </summary>
+        private bool HasDestinationLocationValues(Asset asset)
+        {
+            if (asset.DestinationLocation == null)
+            {
+                return false;
+            }
+
+            return asset.DestinationLocation.ParentAsset.HasValue() ||
+                   asset.DestinationLocation.RackId.HasValue() ||
+                   asset.DestinationLocation.DeskId != default ||
+                   asset.DestinationLocation.ContainerId.HasValue() ||
+                   asset.DestinationLocation.RoomId.HasValue();
         }
 
         private ValidationResult ValidateLifecycle(Asset asset)
@@ -290,7 +360,7 @@
             // Bulk validation uses optimized PlacementValidator instead
             if (context == null)
             {
-                validations.Add(ValidatePlacementChecks(asset));
+                validations.Add(ValidateLocationPlacement(asset));
             }
 
             return validations.MergeAll();
@@ -348,18 +418,6 @@
             }
 
             return validations.MergeAll();
-        }
-
-        /// <summary>
-        /// Validates physical placement (holder availability, rack space).
-        /// Only runs in single validation mode.
-        /// </summary>
-        private ValidationResult ValidatePlacementChecks(Asset asset)
-        {
-            return new[]
-            {
-                ValidateLocationPlacement(asset),
-            }.MergeAll();
         }
 
         /// <summary>
@@ -971,13 +1029,6 @@
             }
 
             return result;
-        }
-
-        private ValidationResult ValidateDestinationRackSpaceAvailability(
-            Asset asset, AssetClass assetClass, AssetValidationContext context)
-        {
-            // TODO: Implement if needed
-            return new ValidationResult();
         }
 
         private bool DoRangesOverlap(long start1, long end1, long start2, long end2)
