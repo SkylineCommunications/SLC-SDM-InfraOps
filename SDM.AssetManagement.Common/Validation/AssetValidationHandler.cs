@@ -66,7 +66,6 @@
             ModificationDate,
             EndOfLifeDate,
             EndOfWarrantyDate,
-            State,
 
             // Ownership
             OwnerOrganization,
@@ -206,7 +205,7 @@
 
             var hasRack = asset.Location?.RackId != null && asset.Location.RackId != default;
             //TODO SDM-1234: Change rack check to only check for HasValue() once all code is updated to use nullable DomIds
-            var hasPosition = asset.Location?.RackPosition != null && asset.Location.RackPosition > 0;
+            var hasPosition = asset.Location?.RackPosition != null;
             var hasSide = asset.Location?.Side != null;
 
             // If no rack, position and side must not be set
@@ -268,23 +267,25 @@
                 return result.IsValid;
             }
 
-            if (!CanEditLocation(asset))
+            if (LocationChanged(asset) && !CanEditLocation(asset))
             {
-                if (asset.Location.ParentAssetField.Changed ||
-                    asset.Location.HolderNumberField.Changed ||
-                    asset.Location.RackIdField.Changed ||
-                    asset.Location.RackPositionField.Changed ||
-                    asset.Location.SideField.Changed ||
-                    asset.Location.DeskIdField.Changed ||
-                    asset.Location.ContainerIdField.Changed ||
-                    asset.Location.RoomIdField.Changed ||
-                    asset.Location.PowerSupplyRackPositionField.Changed)
-                {
-                    result.AddFailReason(AssetValidationField.Asset, $"Cannot change Location in current State '{asset.StateField.OriginalValue}'.");
-                }
+                result.AddFailReason(AssetValidationField.Asset, $"Cannot change Location in current State '{asset.StateField.OriginalValue}'.");
             }
 
             return result.IsValid;
+        }
+
+        private static bool LocationChanged(Asset asset)
+        {
+            return asset.Location.ParentAssetField.Changed ||
+                                asset.Location.HolderNumberField.Changed ||
+                                asset.Location.RackIdField.Changed ||
+                                asset.Location.RackPositionField.Changed ||
+                                asset.Location.SideField.Changed ||
+                                asset.Location.DeskIdField.Changed ||
+                                asset.Location.ContainerIdField.Changed ||
+                                asset.Location.RoomIdField.Changed ||
+                                asset.Location.PowerSupplyRackPositionField.Changed;
         }
         #endregion
 
@@ -454,23 +455,25 @@
                 return result.IsValid;
             }
 
-            if (!CanEditDestinationLocation(asset))
+            if (!CanEditDestinationLocation(asset) && DestinationLocationChanged(asset))
             {
-                if (asset.DestinationLocation.ParentAssetField.Changed ||
-                    asset.DestinationLocation.HolderNumberField.Changed ||
-                    asset.DestinationLocation.RackIdField.Changed ||
-                    asset.DestinationLocation.RackPositionField.Changed ||
-                    asset.DestinationLocation.SideField.Changed ||
-                    asset.DestinationLocation.DeskIdField.Changed ||
-                    asset.DestinationLocation.ContainerIdField.Changed ||
-                    asset.DestinationLocation.RoomIdField.Changed ||
-                    asset.DestinationLocation.PowerSupplyRackPositionField.Changed)
-                {
-                    result.AddFailReason(AssetValidationField.Asset, $"Cannot change Destination Location in current State ({asset.State}).");
-                }
+                result.AddFailReason(AssetValidationField.Asset, $"Cannot change Destination Location in current State ({asset.State}).");
             }
 
             return result.IsValid;
+        }
+
+        private static bool DestinationLocationChanged(Asset asset)
+        {
+            return asset.DestinationLocation.ParentAssetField.Changed ||
+                                asset.DestinationLocation.HolderNumberField.Changed ||
+                                asset.DestinationLocation.RackIdField.Changed ||
+                                asset.DestinationLocation.RackPositionField.Changed ||
+                                asset.DestinationLocation.SideField.Changed ||
+                                asset.DestinationLocation.DeskIdField.Changed ||
+                                asset.DestinationLocation.ContainerIdField.Changed ||
+                                asset.DestinationLocation.RoomIdField.Changed ||
+                                asset.DestinationLocation.PowerSupplyRackPositionField.Changed;
         }
 
         #endregion
@@ -734,12 +737,11 @@
                 return true;
             }
 
-            return asset.StateField.OriginalValue == SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available
-                || asset.StateField.OriginalValue == SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InPlanning
-                || asset.StateField.OriginalValue == SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.BuildPlanReady
-                || asset.StateField.OriginalValue == SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InRepair
-                || asset.StateField.OriginalValue == SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Disposed
-                || asset.StateField.OriginalValue == SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit;
+            return asset.State == SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available
+                || asset.State == SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InPlanning
+                || asset.State == SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.BuildPlanReady
+                || asset.State == SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InRepair
+                || asset.State == SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Disposed;
         }
 
         /// <summary>
@@ -805,43 +807,6 @@
         }
 
         /// <summary>
-        /// Validates if the state transition is allowed by the state machine.
-        /// </summary>
-        public static ValidationResult ValidateStateTransition(Asset asset)
-        {
-            var result = new ValidationResult();
-
-            // For new assets (not yet persisted), state transition validation doesn't apply
-            if (string.IsNullOrEmpty(asset.Identifier))
-            {
-                return result;
-            }
-
-            // If state hasn't changed, no transition to validate
-            if (!asset.StateField.Changed)
-            {
-                return result;
-            }
-
-            var fromState = asset.StateField.OriginalValue;
-            var toState = asset.StateField.Value;
-
-            if (fromState == toState)
-            {
-                return result;
-            }
-
-            if (!StateMachine.IsTransitionAllowed(fromState, toState))
-            {
-                result.AddFailReason(
-                    AssetClassValidationHandler.AssetClassValidationField.State,
-                    $"Invalid state transition: Cannot transition from '{fromState}' to '{toState}'. This transition is not allowed by the state machine.");
-            }
-
-            return result;
-        }
-
-        /// <summary>
         /// Checks if the Asset has any Destination Location defined.
         /// </summary>
         private static bool HasDestinationLocation(Asset asset)
@@ -852,8 +817,8 @@
             }
 
             // Check if any destination location field is populated
-            return asset.DestinationLocation.ParentAsset.HasValue()  ||
-                   asset.DestinationLocation.RackId.HasValue()  ||
+            return asset.DestinationLocation.ParentAsset.HasValue() ||
+                   asset.DestinationLocation.RackId.HasValue() ||
                    asset.DestinationLocation.DeskId != default ||
                    asset.DestinationLocation.ContainerId.HasValue() ||
                    asset.DestinationLocation.RoomId.HasValue();

@@ -252,7 +252,7 @@
             var rackValidator = new RackValidator();
 
             // Build occupation list (existing assets + batch assets)
-            var occupiedAssets = BuildRackOccupationList(rackId, assetIndex, context, isDestination: false);
+            var occupiedAssets = BuildRackOccupationList(rackId, asset, context, isDestination: false);
 
             // Validate using RackValidationHandler
             var assetClass = _entityLoader.LoadAssetClass(asset.AssetClassId);
@@ -282,7 +282,7 @@
         /// </summary>
         private List<(Asset, int, int)> BuildRackOccupationList(
             string rackId,
-            int currentAssetIndex,
+            Asset asset,
             PlacementValidationContext context,
             bool isDestination)
         {
@@ -306,15 +306,15 @@
             }
 
             // Add other assets from batch (exclude current by index)
-            for (int i = 0; i < context.AssetsBeingValidated.Count; i++)
+            foreach(var assetBeingValidated in context.AssetsBeingValidated)
             {
-                if (i == currentAssetIndex) continue; // Use index comparison instead of identifier
+                if (assetBeingValidated.Identifier == asset.Identifier) continue;
 
-                var other = context.AssetsBeingValidated[i];
+                var other = assetBeingValidated;
                 var otherRackId = isDestination ? other.DestinationLocation?.RackId : other.Location?.RackId;
                 var pos = isDestination ? other.DestinationLocation?.RackPosition : other.Location?.RackPosition;
 
-                if (otherRackId?.ToString() == rackId && pos != null)
+                if (otherRackId?.Identifier == rackId && pos != null)
                 {
                     var ac = _entityLoader.LoadAssetClass(other.AssetClassId);
                     if (ac != null && ac.HeightU > 0)

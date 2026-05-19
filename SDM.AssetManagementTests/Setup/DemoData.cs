@@ -78,12 +78,25 @@
         public static readonly List<AssetClass> BaseAssetClasses =
         [
             CreateBaseAssetClass(DeviceType_Decoder, AssetClassName_Router, "High performance router", 44.5, 4.4, 43.9, 1, 12.5, "router-front.png", "router-back.jpg", 120, 200),
-            CreateBaseAssetClass(DeviceType_Encoder, AssetClassName_Switch, "Layer 2 switch", 30.0, 8.9, 44.0, 2, 3.5, "switch-front.png", "switch-back.png", 40, 60),
-            CreateBaseAssetClass(DeviceType_UPSSystem, AssetClassName_Firewall, "Enterprise firewall", 20.0, 13.3, 20.0, 3, 2.0, "fw-front.png", "fw-back.jpg", 30, 50),
-            CreateBaseAssetClass(DeviceType_Encoder, AssetClassName_Server, "Rack server", 70.0, 8.9, 44.0, 2, 25.0, "server-front.png", "server-back.png", 350, 500),
-            CreateBaseAssetClass(DeviceType_Encoder, AssetClassName_Storage, "NAS storage", 60.0, 8.9, 44.0, 2, 20.0, "nas-front.png", "nas-back.png", 250, 400),
+            CreateBaseAssetClass(DeviceType_Encoder, AssetClassName_Switch, "Layer 2 switch", 30.0, 8.9, 44.0, 2, 3.5, "switch-front.png", "switch-back.png", 40, 60, 
+                new List<AssetHolder> { new AssetHolder { HierarchyRole = SlcAsset_Management.Enums.HierarchyRoleEnum.Card, SlotNumber = 2 } }),
+            CreateBaseAssetClass(DeviceType_UPSSystem, AssetClassName_Firewall, "Enterprise firewall", 20.0, 13.3, 20.0, 3, 2.0, "fw-front.png", "fw-back.jpg", 30, 50,
+                new List<AssetHolder> { new AssetHolder { HierarchyRole = SlcAsset_Management.Enums.HierarchyRoleEnum.Module, SlotNumber = 3 } }),
+            CreateBaseAssetClass(DeviceType_Encoder, AssetClassName_Server, "Rack server", 70.0, 8.9, 44.0, 2, 25.0, "server-front.png", "server-back.png", 350, 500,
+                new List<AssetHolder> 
+                { 
+                    new AssetHolder { HierarchyRole = SlcAsset_Management.Enums.HierarchyRoleEnum.Card, SlotNumber = 4 },
+                    new AssetHolder { HierarchyRole = SlcAsset_Management.Enums.HierarchyRoleEnum.PowerSupply, SlotNumber = 5 }
+                }),
+            CreateBaseAssetClass(DeviceType_Encoder, AssetClassName_Storage, "NAS storage", 60.0, 8.9, 44.0, 2, 20.0, "nas-front.png", "nas-back.png", 250, 400,
+                new List<AssetHolder> 
+                { 
+                    new AssetHolder { HierarchyRole = SlcAsset_Management.Enums.HierarchyRoleEnum.Module, SlotNumber = 6 },
+                    new AssetHolder { HierarchyRole = SlcAsset_Management.Enums.HierarchyRoleEnum.Fan, SlotNumber = 7 }
+                }),
             CreateBaseAssetClass(DeviceType_Encoder, AssetClassName_UPS, "Uninterruptible Power Supply", 40.0, 8.9, 17.0, 2, 28.0, "ups-front.png", "ups-back.jpg", 120, 180),
-            CreateBaseAssetClass(DeviceType_Firewall, AssetClassName_KVMSwitch, "Keyboard Video Mouse Switch", 16.0, 31.1, 44.0, 7, 2.2, "kvm-front.png", "kvm-back.png", 15, 25),
+            CreateBaseAssetClass(DeviceType_Firewall, AssetClassName_KVMSwitch, "Keyboard Video Mouse Switch", 16.0, 31.1, 44.0, 7, 2.2, "kvm-front.png", "kvm-back.png", 15, 25,
+                new List<AssetHolder> { new AssetHolder { HierarchyRole = SlcAsset_Management.Enums.HierarchyRoleEnum.Chassis, SlotNumber = 8 } }),
             CreateBaseAssetClass(DeviceType_Decoder, AssetClassName_PatchPanel, "24-port Patch Panel", 10.0, 4.4, 48.0, 1, 1.5, "patchpanel-front.png", "patchpanel-back.png", 5, 10),
             CreateBaseAssetClass(DeviceType_UPSSystem, AssetClassName_WirelessAccessPoint, "Dual-band WiFi 6 AP", 20.0, 4.4, 20.0, 1, 0.8, "ap-front.png", "ap-back.jpeg", 12, 18),
             CreateBaseAssetClass(DeviceType_UPSSystem, AssetClassName_MediaConverter, "Fiber to Ethernet Converter", 9.4, 4.4, 7.0, 1, 0.3, "mediaconv-front.png", "mediaconv-back.png", 3, 5),
@@ -285,7 +298,8 @@
        string frontImage,
        string backImage,
        double typicalPowerConsumption,
-       double maximumPowerConsumption)
+       double maximumPowerConsumption,
+       List<AssetHolder> holders = null)
         {
             return new AssetClass
             {
@@ -312,7 +326,7 @@
                 },
                 DataPorts = GenerateRandomDataPortInfos(),
                 PowerPorts = GenerateRandomPowerPortInfos(),
-                Holders = new List<AssetHolder>
+                Holders = holders ?? new List<AssetHolder>
             {
                 new AssetHolder
                 {
@@ -363,6 +377,7 @@
             string assetClassName)
         {
             var assetId = Guid.NewGuid();
+
 
             return new Asset
             {

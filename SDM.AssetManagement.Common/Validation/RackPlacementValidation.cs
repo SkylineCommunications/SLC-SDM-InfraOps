@@ -44,7 +44,7 @@
 
                 var (occupiedStart, occupiedEnd) = CalculateOccupiedRange(rackPosition, occupied.Position, occupied.HeightU);
 
-                if (startPosition < occupiedEnd && endPosition > occupiedStart)
+                if (DoRangesOverlap(startPosition, endPosition, occupiedStart, occupiedEnd))
                 {
                     result.AddFailReason(RackValidationField.RackSpaceOccupied,
                         $"Invalid Position. Rack space is already occupied by asset '{occupied.Asset.Name}' at position {occupied.Position}.");
@@ -85,7 +85,7 @@
                     long reservedStart = range.LowerBound - 1;
                     long reservedEnd = range.UpperBound;
 
-                    if (startPosition < reservedEnd && endPosition > reservedStart)
+                    if (DoRangesOverlap(startPosition, endPosition, reservedStart, reservedEnd))
                     {
                         result.AddFailReason(RackValidationField.RackSpacePosition,
                             $"Invalid Position. Rack space is already reserved (units {range.LowerBound}-{range.UpperBound}).");
@@ -257,6 +257,53 @@
             }
 
             return result.IsValid;
+        }
+
+        #endregion
+
+        #region Range Overlap Logic
+
+        /// <summary>
+        /// Checks if two ranges overlap.
+        /// ⚠️ WARNING: For asset positions, use DoAssetsOverlap() instead.
+        /// This method should only be used with pre-calculated ranges (e.g., reservations).
+        /// </summary>
+        /// <remarks>
+        /// This method expects ranges that have already been calculated.
+        /// For asset positions, you MUST call CalculateOccupiedRange() first,
+        /// or use DoAssetsOverlap() which handles this automatically.
+        /// </remarks>
+        /// <param name="start1">Start position of first range (inclusive).</param>
+        /// <param name="end1">End position of first range (exclusive).</param>
+        /// <param name="start2">Start position of second range (inclusive).</param>
+        /// <param name="end2">End position of second range (exclusive).</param>
+        /// <returns>True if ranges overlap, false otherwise.</returns>
+        internal static bool DoRangesOverlap(long start1, long end1, long start2, long end2)
+        {
+            return start1 < end2 && end1 > start2;
+        }
+
+        /// <summary>
+        /// Checks if two assets overlap in rack space.
+        /// This is the PREFERRED method for checking asset overlap.
+        /// Automatically handles rack position numbering (Top/Bottom).
+        /// </summary>
+        /// <param name="rackPosition">Rack position enum (Top or Bottom numbering).</param>
+        /// <param name="position1">First asset's rack position.</param>
+        /// <param name="heightU1">First asset's height in rack units.</param>
+        /// <param name="position2">Second asset's rack position.</param>
+        /// <param name="heightU2">Second asset's height in rack units.</param>
+        /// <returns>True if assets overlap, false otherwise.</returns>
+        public static bool DoAssetsOverlap(
+            SharedMappers.DomIds.SlcFacility_Management.Enums.RackpositionenumEnum rackPosition,
+            int position1,
+            int heightU1,
+            int position2,
+            int heightU2)
+        {
+            var (start1, end1) = CalculateOccupiedRange(rackPosition, position1, heightU1);
+            var (start2, end2) = CalculateOccupiedRange(rackPosition, position2, heightU2);
+            return DoRangesOverlap(start1, end1, start2, end2);
         }
 
         #endregion

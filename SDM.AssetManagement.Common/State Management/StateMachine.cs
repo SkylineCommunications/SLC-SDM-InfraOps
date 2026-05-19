@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-using SharedMappers.DomIds;
-
-using Skyline.DataMiner.Net.Apps.DataMinerObjectModel.Status;
-using Skyline.DataMiner.SDM.AssetManagement.Models;
-
-namespace SharedCommonLibrary.AssetManagement.State_Management
+﻿namespace SharedCommonLibrary.AssetManagement.State_Management
 {
+    using System.Collections.Generic;
+
+    using SharedMappers.DomIds;
+
     internal static class StateMachine
     {
 
@@ -281,26 +276,6 @@ namespace SharedCommonLibrary.AssetManagement.State_Management
             }
 
             return null;
-        }
-
-        /// <summary>
-        /// Gets the required transition path (list of transition steps) to move from one status to another.
-        /// </summary>
-        /// <param name="fromStatus">The starting status.</param>
-        /// <param name="toStatus">The target status.</param>
-        /// <returns>A list of transitions required to reach the target status, or null if no valid path exists.</returns>
-        public static List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum> GetTransitionPath(Asset asset)
-        {
-            bool isNew = String.IsNullOrWhiteSpace(asset.Identifier);
-            var from = isNew == true ? SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable : asset.StateField.OriginalValue;
-            var to = asset.State;
-
-            if (to != from)
-            {
-                return GetTransitionPath(from, to);
-            }
-
-            return new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum>();
         }
     }
 }

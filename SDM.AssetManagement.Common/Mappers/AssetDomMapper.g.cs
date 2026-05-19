@@ -58,6 +58,22 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             internal static FieldDescriptorID PowerSupplyRackPosition = SharedMappers.DomIds.SlcAsset_Management.Sections.AssetLocation.PowerSupplyRackPosition;
         }
 
+        internal static class DestinationLocation
+        {
+            internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(SharedMappers.DomIds.SlcAsset_Management.Sections.AssetLocationDestination.Id.Id)
+            { ModuleId = ModuleId };
+
+            internal static FieldDescriptorID HolderNumber = SharedMappers.DomIds.SlcAsset_Management.Sections.AssetLocationDestination.HolderNumber;
+            internal static FieldDescriptorID ParentAsset = SharedMappers.DomIds.SlcAsset_Management.Sections.AssetLocationDestination.ParentAsset;
+            internal static FieldDescriptorID Rack = SharedMappers.DomIds.SlcAsset_Management.Sections.AssetLocationDestination.Rack;
+            internal static FieldDescriptorID RackPosition = SharedMappers.DomIds.SlcAsset_Management.Sections.AssetLocationDestination.RackPosition;
+            internal static FieldDescriptorID Side = SharedMappers.DomIds.SlcAsset_Management.Sections.AssetLocationDestination.Side;
+            internal static FieldDescriptorID Desk = SharedMappers.DomIds.SlcAsset_Management.Sections.AssetLocationDestination.Desk;
+            internal static FieldDescriptorID Container = SharedMappers.DomIds.SlcAsset_Management.Sections.AssetLocationDestination.Container;
+            internal static FieldDescriptorID Room = SharedMappers.DomIds.SlcAsset_Management.Sections.AssetLocationDestination.Room;
+            internal static FieldDescriptorID PowerSupplyRackPosition = SharedMappers.DomIds.SlcAsset_Management.Sections.AssetLocationDestination.PowerSupplyRackPosition;
+        }
+
         internal static class Lifecycle
         {
             internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(SharedMappers.DomIds.SlcAsset_Management.Sections.AssetLifecycle.Id.Id)

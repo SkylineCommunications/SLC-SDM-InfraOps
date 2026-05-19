@@ -8,6 +8,7 @@ using Skyline.DataMiner.SDM.AssetManagement.Models;
 using Skyline.DataMiner.SDM.AssetManagement.Validation;
 using Skyline.DataMiner.SDM.Common.Services;
 using Skyline.DataMiner.SDM.FacilityManagement.Helpers;
+using Skyline.DataMiner.SDM.Middleware;
 
 public class AssetManagementApiHelper : IAssetManagementApiHelper
 {
@@ -65,7 +66,8 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
         // Wrap with middleware
         Assets = _assetRepository
             .WithMiddleware(new AssetValidationMiddleware(_assetValidator))
-            .WithMiddleware(new AssetUpdateStateTransitionMiddleware(connection));
+            .WithMiddleware(new IdentifierMiddleware<Asset>());
+            
 
         AssetClasses = _assetClassRepository.WithMiddleware(
             new AssetClassValidationMiddleware(_assetClassValidator));

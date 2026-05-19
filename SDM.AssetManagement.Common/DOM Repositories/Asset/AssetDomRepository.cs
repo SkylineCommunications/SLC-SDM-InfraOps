@@ -1,7 +1,24 @@
 ﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
+    using System;
+
+    using SharedCommonLibrary.AssetManagement.State_Management;
+
     using SharedMappers.DomIds;
 
+    using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+
+    using static SLDataGateway.API.Types.Tasks.TaskStatus;
+
+    /// <summary>
+    /// Defines methods for updating asset fields and managing asset state transitions in a repository. Extends bulk
+    /// operations for assets.
+    /// </summary>
+    /// <remarks>This interface provides operations to update asset properties and change their workflow
+    /// state, supporting scenarios where field updates and state transitions must occur in a specific order.
+    /// Implementations should ensure that combined operations are performed atomically to maintain data consistency.
+    /// The interface is intended for use in asset management systems where assets have lifecycle states and validation
+    /// rules that may depend on the current state.</remarks>
     public interface IAssetRepository : IBulkRepository<Asset>
     {
         /// <summary>
@@ -37,12 +54,28 @@
     {
         public Asset TransitionTo(Asset asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum newState)
         {
-            throw new NotImplementedException();
+            if(asset == null) throw new ArgumentNullException(nameof(asset));
+
+            if(!StateMachine.IsTransitionAllowed(asset.State, newState))
+            {
+                throw new InvalidOperationException($"State transition from {asset.State} to {newState} is not allowed.");
+            }
+
+            return ExecuteStateTransition(asset, newState);
         }
 
         public Asset UpdateAndTransitionTo(Asset asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum newState)
         {
-            throw new NotImplementedException();
+            if (asset == null) throw new ArgumentNullException(nameof(asset));
+
+            if (!StateMachine.IsTransitionAllowed(asset.State, newState))
+            {
+                throw new InvalidOperationException($"State transition from {asset.State} to {newState} is not allowed.");
+            }
+
+            var updated = Update(asset);
+
+            return ExecuteStateTransition(updated, newState);
         }
 
         /// <summary>
@@ -54,11 +87,54 @@
         /// </summary>
         public Asset TransitionAndUpdate(Asset asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum newState)
         {
-            // 1. Validate state transition
-            // 2. Transition state
-            // 3. Validate field changes against new state
-            // 4. Update fields
-            return asset;
+            if (asset == null) throw new ArgumentNullException(nameof(asset));
+
+            if (!StateMachine.IsTransitionAllowed(asset.State, newState))
+            {
+                throw new InvalidOperationException($"State transition from {asset.State} to {newState} is not allowed.");
+            }
+
+            var transitioned = ExecuteStateTransition(asset, newState);
+
+            return Update(transitioned);
+        }
+
+        private Asset ExecuteStateTransition(
+            Asset asset,
+            SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum toState)
+        {
+            if (asset == null) throw new ArgumentNullException(nameof(asset));
+
+            try
+            {
+                var transitions = StateMachine.GetTransitionPath(asset.State, toState);
+
+                if (transitions == null)
+                {
+                    throw new InvalidOperationException($"No valid transition path found from {asset.State} to {toState}.");
+                }
+
+                var instanceId = new DomInstanceId(Guid.Parse(asset.Identifier))
+                {
+                    ModuleId = AssetDomMapper.ModuleId
+                };
+
+                DomInstance currentInstance = null;
+                foreach (var transitionId in transitions)
+                {
+                    currentInstance = helper.DomInstances.DoStatusTransition(instanceId, SlcAsset_Management.Behaviors.Asset_Behavior.Transitions.ToValue(transitionId));
+                }
+
+                // return back Asset with updated state
+                asset.State = SlcAsset_Management.Behaviors.Asset_Behavior.Statuses.ToEnum(currentInstance.StatusId);
+                return asset;
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException(
+                    $"Failed to transition asset '{asset.Identifier}' from {asset.State} to {toState}: {ex.Message}",
+                    ex);
+            }
         }
     }
 }

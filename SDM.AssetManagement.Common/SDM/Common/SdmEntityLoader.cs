@@ -404,11 +404,16 @@ namespace Skyline.DataMiner.SDM.Common.Services
 
                 if (excludeAssetIds != null && excludeAssetIds.Any())
                 {
-                    var clauses = excludeAssetIds.Where(id => !String.IsNullOrWhiteSpace(id))
-                        .Select(id => AssetExposers.Identifier.NotEqual(id))
-                        .Cast<FilterElement<Asset>>()
-                        .ToArray();
-                    filter = filter.AND(new ANDFilterElement<Asset>(clauses));
+                    var validIdentifiers = excludeAssetIds.Where(id => !string.IsNullOrWhiteSpace(id)).ToList();
+
+                    if (validIdentifiers.Any())
+                    {
+                        var clauses = validIdentifiers
+                            .Select(id => AssetExposers.Identifier.NotEqual(id))
+                            .Cast<FilterElement<Asset>>()
+                            .ToArray();
+                        filter = filter.AND(new ANDFilterElement<Asset>(clauses));
+                    }
                 }
 
                 var allAssets = _assetRepository.Read(filter);
@@ -435,24 +440,25 @@ namespace Skyline.DataMiner.SDM.Common.Services
 
             try
             {
-                FilterElement<Asset> filter = AssetExposers.Identifier.NotEqual(string.Empty);
+                FilterElement<Asset> filter = new TRUEFilterElement<Asset>();
 
                 if (excludeAssetIds != null && excludeAssetIds.Any())
                 {
-                    var clauses = excludeAssetIds
-                        .Select(id => AssetExposers.Identifier.NotEqual(id))
-                        .Cast<FilterElement<Asset>>()
-                        .ToArray();
-                    filter = filter.AND(new ANDFilterElement<Asset>(clauses));
+                    var validIdentifiers = excludeAssetIds.Where(id => !string.IsNullOrWhiteSpace(id)).ToList();
+
+                    if (validIdentifiers.Any())
+                    {
+                        var clauses = validIdentifiers
+                            .Select(id => AssetExposers.Identifier.NotEqual(id))
+                            .Cast<FilterElement<Asset>>()
+                            .ToArray();
+                        filter = filter.AND(new ANDFilterElement<Asset>(clauses));
+                    }
                 }
 
-                var allAssets = _assetRepository.Read(filter);
+                var allAssets = _assetRepository.Read(filter.AND(AssetExposers.Location.ParentAsset.Equal(new SdmObjectReference<Asset>(parentAssetIdentifier))));
 
-                // Filter in memory for child assets
-                return allAssets
-                    .Where(a => (a.Location?.ParentAsset != null && a.Location.ParentAsset.Identifier == parentAssetIdentifier) ||
-                               (a.DestinationLocation?.ParentAsset != null && a.DestinationLocation.ParentAsset.Identifier == parentAssetIdentifier))
-                    .ToList();
+                return allAssets.ToList();
             }
             catch (Exception ex)
             {

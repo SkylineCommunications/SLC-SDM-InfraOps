@@ -60,22 +60,13 @@
 
             // Business rules - collect all errors
             var businessRules = Validator<Asset>
-                .Create(ValidateStateTransition)
-                .AndThen(ValidateLocationBusinessRules)
+                .Create(ValidateLocationBusinessRules)
                 .AndThen(ValidateDestinationLocationBusinessRules)
                 .AndThen(ValidateLifecycle)
                 .AndThen(ValidateOwnershipAndCustody)
                 .AndThen(ValidateCollections);
 
             return assetClassValidation.AndThen(businessRules);
-        }
-
-        /// <summary>
-        /// Validates state transition using AssetValidationHandler.
-        /// </summary>
-        private ValidationResult ValidateStateTransition(Asset asset)
-        {
-            return AssetValidationHandler.ValidateStateTransition(asset);
         }
 
         /// <summary>
@@ -211,16 +202,15 @@
             var destinationLocationResult = AssetValidationHandler.ValidateDestinationLocation(asset);
             result.AddFrom(destinationLocationResult);
 
+            if (!result.IsValid)
+            {
+                return result; // If mandatory validation fails, return immediately without further business rules checks
+            }
+
             // DestinationLocation business rules validation ONLY applies when state is InTransit
             if (asset.State != SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit)
             {
                 return result; // Ignore DestinationLocation in all other states
-            }
-
-            // Check if DestinationLocation has any values set
-            if (!HasDestinationLocationValues(asset))
-            {
-                return result; // Already validated as mandatory above, no business rules to check
             }
 
             // After checks pass, collect all destination location errors
@@ -259,23 +249,6 @@
             return validations.MergeAll();
         }
 
-        /// <summary>
-        /// Checks if DestinationLocation has any values set.
-        /// </summary>
-        private bool HasDestinationLocationValues(Asset asset)
-        {
-            if (asset.DestinationLocation == null)
-            {
-                return false;
-            }
-
-            return asset.DestinationLocation.ParentAsset.HasValue() ||
-                   asset.DestinationLocation.RackId.HasValue() ||
-                   asset.DestinationLocation.DeskId != default ||
-                   asset.DestinationLocation.ContainerId.HasValue() ||
-                   asset.DestinationLocation.RoomId.HasValue();
-        }
-
         private ValidationResult ValidateLifecycle(Asset asset)
         {
             var validations = new List<ValidationResult>();
@@ -303,7 +276,7 @@
         {
             var validations = new List<ValidationResult>();
 
-            if (asset.Ownership.ContactPersonField.Changed || asset.Ownership.ContactPersonRoleField.Changed)
+            if (asset.Ownership != null && asset.Ownership.Changed)
             {
                 if (!AssetValidationHandler.IsOwnershipValid(asset, out var ownerResult))
                 {
@@ -311,7 +284,7 @@
                 }
             }
 
-            if (asset.Custody.ContactPersonField.Changed || asset.Custody.ContactPersonRoleField.Changed)
+            if (asset.Custody != null && asset.Custody.Changed)
             {
                 if (!AssetValidationHandler.IsCustodyValid(asset, out var custodyResult))
                 {
@@ -427,6 +400,11 @@
         private ValidationResult ValidateLocationPlacement(Asset asset)
         {
             var validations = new List<ValidationResult>();
+
+            if(asset.Location == null)
+            {
+                return new ValidationResult();
+            }
 
             // Parent asset holder availability
             if ((asset.Location.ParentAssetField.Changed || asset.Location.HolderNumberField.Changed)
@@ -621,6 +599,10 @@
                 var assetsInRack = rackGroup.ToList();
                 if (assetsInRack.Count < 2) continue;
 
+                // Load rack to get Position enum (needed for overlap calculation)
+                var rack = _entityLoader.LoadRack(rackGroup.Key);
+                if (rack == null) continue;
+
                 for (int i = 0; i < assetsInRack.Count; i++)
                 {
                     var item1 = assetsInRack[i];
@@ -633,9 +615,13 @@
                         var assetClass2 = _entityLoader.LoadAssetClass(item2.asset.AssetClassId);
                         if (assetClass2 == null || assetClass2.HeightU <= 0) continue;
 
-                        if (DoRangesOverlap(
-                            (int)item1.asset.Location.RackPosition, (int)assetClass1.HeightU,
-                            (int)item2.asset.Location.RackPosition, (int)assetClass2.HeightU))
+                        // Use the unified asset overlap check
+                        if (RackPlacementValidation.DoAssetsOverlap(
+                            rack.Position,
+                            (int)item1.asset.Location.RackPosition,
+                            (int)assetClass1.HeightU,
+                            (int)item2.asset.Location.RackPosition,
+                            (int)assetClass2.HeightU))
                         {
                             results[item1.index].AddFailReason(AssetValidationField.RackPosition,
                                 $"Rack Position {item1.asset.Location.RackPosition} conflicts with another asset in the validation batch.");
@@ -915,71 +901,6 @@
             return result;
         }
 
-        private ValidationResult ValidateDestinationParentAssetHolderAvailability(
-            Asset asset, AssetClass assetClass, AssetValidationContext context)
-        {
-            var result = new ValidationResult();
-
-            if (!asset.DestinationLocation.ParentAsset.HasValue() || asset.DestinationLocation?.HolderNumber == null)
-            {
-                return result;
-            }
-
-            try
-            {
-                var parentAsset = _entityLoader.LoadAsset(asset.DestinationLocation.ParentAsset);
-                if (parentAsset == null)
-                {
-                    result.AddFailReason(AssetValidationField.DestinationParentAsset,
-                        "Destination Parent Asset not found.");
-                    return result;
-                }
-
-                var deviceType = _entityLoader.LoadDeviceType(assetClass.DeviceTypeId);
-                if (deviceType?.HierarchyInfo?.HierarchyRole == null)
-                {
-                    result.AddFailReason(AssetValidationField.AssetClass,
-                        "Asset Class Device Type must have a Hierarchy Role to be attached to a parent asset.");
-                    return result;
-                }
-
-                var hierarchyRole = deviceType.HierarchyInfo.HierarchyRole;
-                var holderNumber = asset.DestinationLocation.HolderNumber;
-
-                var matchingHolder = parentAsset.Holders?
-                    .FirstOrDefault(h => h.SlotNumber == holderNumber && h.HierarchyRole == hierarchyRole);
-
-                if (matchingHolder == null)
-                {
-                    result.AddFailReason(AssetValidationField.DestinationHolderNumber,
-                        $"Invalid Holder Number: Destination Parent Asset does not have a holder slot '{holderNumber}' for Hierarchy Role '{hierarchyRole}'.");
-                    return result;
-                }
-
-                var exceptIds = GetExceptIdentifiers(asset, context);
-                var childAssets = _entityLoader.FindChildAssets(parentAsset.Identifier, exceptIds);
-
-                var occupyingAssets = childAssets
-                    .Where(a => a.DestinationLocation?.ParentAsset != null &&
-                               a.DestinationLocation.ParentAsset.Identifier == parentAsset.Identifier &&
-                               a.DestinationLocation.HolderNumber == holderNumber)
-                    .ToList();
-
-                if (occupyingAssets.Any())
-                {
-                    result.AddFailReason(AssetValidationField.DestinationHolderNumber,
-                        $"Holder Number '{holderNumber}' is already occupied on the Destination Parent Asset by another asset.");
-                }
-            }
-            catch (Exception ex)
-            {
-                result.AddFailReason(AssetValidationField.DestinationParentAsset,
-                    $"Error validating destination parent asset holder availability: {ex.Message}");
-            }
-
-            return result;
-        }
-
         private ValidationResult ValidateRackSpaceAvailability(Asset asset, AssetValidationContext context)
         {
             var result = new ValidationResult();
@@ -1029,11 +950,6 @@
             }
 
             return result;
-        }
-
-        private bool DoRangesOverlap(long start1, long end1, long start2, long end2)
-        {
-            return start1 <= end2 && end1 >= start2;
         }
 
         #endregion

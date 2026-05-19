@@ -13,14 +13,6 @@
     {
         [JsonIgnore]
         private ChangeTrackingFieldHandler _fieldHandler;
-        [JsonIgnore]
-        private AssetLocation _location;
-        [JsonIgnore]
-        private AssetLocation _destinationLocation;
-        [JsonIgnore]
-        private AssetOwnership _ownership;
-        [JsonIgnore]
-        private AssetCustody _custody;
 
         public Asset()
         {
@@ -52,12 +44,13 @@
         [JsonIgnore]
         public bool Changed =>
             FieldHandler.HasChanges ||
-            _location?.Changed == true ||
-            _destinationLocation?.Changed == true ||
-            _ownership?.Changed == true ||
-            _custody?.Changed == true ||
+            Location?.Changed == true ||
+            DestinationLocation?.Changed == true ||
+            Ownership?.Changed == true ||
+            Custody?.Changed == true ||
             HoldersField?.Changed == true ||
-            ElementsField?.Changed == true;
+            ElementsField?.Changed == true ||
+            StateField?.Changed == true;
 
         /// <summary>
         /// Gets a value indicating whether the current object has not been assigned an identifier.
@@ -65,11 +58,14 @@
         [JsonIgnore]
         public bool IsNew => true;
 
+        /// <summary>
+        /// Gets or sets the current status of the asset.
+        /// </summary>
         public SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum State
         {
-            get => StateField.Value;
-            set => StateField.Value = value;
+            get => StateField.Value; internal set => StateField.Value = value;
         }
+        
 
         #region Info Properties
 
@@ -135,17 +131,9 @@
 
         #region Location Properties
 
-        public AssetLocation Location
-        {
-            get => _location ?? (_location = new AssetLocation());
-            set => _location = value ?? new AssetLocation();
-        }
+        public AssetLocation Location { get; set; }
 
-        public AssetLocation DestinationLocation
-        {
-            get => _destinationLocation ?? (_destinationLocation = new AssetLocation());
-            set => _destinationLocation = value ?? new AssetLocation();
-        }
+        public AssetLocation DestinationLocation { get; set; }
 
         #endregion
 
@@ -203,17 +191,9 @@
 
         #region Ownership Properties
 
-        public AssetOwnership Ownership
-        {
-            get => _ownership ?? (_ownership = new AssetOwnership());
-            set => _ownership = value ?? new AssetOwnership();
-        }
+        public AssetOwnership Ownership { get; set; }
 
-        public AssetCustody Custody
-        {
-            get => _custody ?? (_custody = new AssetCustody());
-            set => _custody = value ?? new AssetCustody();
-        }
+        public AssetCustody Custody { get; set; }
 
         #endregion
 
@@ -352,10 +332,10 @@
         public void ResetChangeTracking()
         {
             FieldHandler?.ApplyChanges();
-            _location?.ResetChangeTracking();
-            _destinationLocation?.ResetChangeTracking();
-            _ownership?.ResetChangeTracking();
-            _custody?.ResetChangeTracking();
+            Location?.ResetChangeTracking();
+            DestinationLocation?.ResetChangeTracking();
+            Ownership?.ResetChangeTracking();
+            Custody?.ResetChangeTracking();
 
             // Cascade to list items if they implement IChangeTracking
             if (Holders != null)

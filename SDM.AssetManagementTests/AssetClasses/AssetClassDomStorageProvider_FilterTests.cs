@@ -237,6 +237,8 @@
             Helper.PopulateWithDemoData(upTo: DemoDataLayer.AssetClasses);
 
             const int targetSlotNumber = 6;
+            var acWithSlotNumber6 = Helper.TestData.AssetClasses.Where(ac => ac.Holders.Any(holder => holder.SlotNumber == targetSlotNumber)).Count();
+
             var filter = AssetClassExposers.Holders.SlotNumber.Equal(targetSlotNumber);
 
             // Act
@@ -245,7 +247,7 @@
             // Assert
             using (new AssertionScope())
             {
-                results.Should().NotBeEmpty($"should find asset classes with holder slot #{targetSlotNumber}");
+                results.Should().HaveCount(acWithSlotNumber6, $"should find {acWithSlotNumber6} asset class(es) with holder slot #{targetSlotNumber}");
                 results.Should().OnlyContain(ac => ac.Holders.Any(holder => holder.SlotNumber == targetSlotNumber));
             }
         }

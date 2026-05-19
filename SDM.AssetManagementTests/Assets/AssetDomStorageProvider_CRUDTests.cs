@@ -143,22 +143,13 @@
 
             var updatedAsset = new Asset
             {
+                AssetClassId = created.AssetClassId,
                 Identifier = created.Identifier,
                 AssetID = created.AssetID,
                 Name = "Updated Asset Name",
                 Description = "Updated description",
                 HardwareVersion = "HW2.0",
-                MacAddress = null, // MAC Address removed
-                Location = new AssetLocation
-                {
-                    ParentAsset = created.Location.ParentAsset,
-                    RoomId = created.Location.RoomId,
-                    RackId = created.Location.RackId,
-                    RackPosition = 12,
-                    ContainerId = created.Location.ContainerId,
-                    DeskId = created.Location.DeskId,
-                    Side = SlcAsset_Management.Enums.SideEnum.Front,
-                },
+                MacAddress = null,
                 PurchaseDate = DateTime.UtcNow.AddYears(-1),
                 FirstUseDate = DateTime.UtcNow.AddMonths(-11),
                 EndOfWarrantyDate = DateTime.UtcNow.AddYears(1),
@@ -305,14 +296,7 @@
                 updated.MacAddress.Should().BeNullOrEmpty();
 
                 // Location changes
-                updated.Location.Should().NotBeNull();
-                updated.Location.ParentAsset.Should().Be(original.Location.ParentAsset);
-                updated.Location.RoomId.Should().Be(original.Location.RoomId);
-                updated.Location.RackId.Should().Be(original.Location.RackId);
-                updated.Location.RackPosition.Should().Be(12);
-                updated.Location.ContainerId.Should().Be(original.Location.ContainerId);
-                updated.Location.DeskId.Should().Be(original.Location.DeskId);
-                updated.Location.Side.Should().Be(SlcAsset_Management.Enums.SideEnum.Front);
+                updated.Location.Should().BeNull();
 
                 // Ownership changes
                 updated.Ownership.Should().NotBeNull();
