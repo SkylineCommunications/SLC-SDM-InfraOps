@@ -224,7 +224,6 @@
         public void Delete_Single_ShouldRemoveAsset()
         {
             // Arrange
-            ;
             Helper.PopulateWithDemoData(upTo: DemoDataLayer.Assets);
 
             var initialCount = Helper.TestData.Assets.Count;

@@ -104,6 +104,74 @@
         #region Create Tests
 
         [TestMethod]
+        public void Create_WithNonExistentDeviceTypeShouldFail_FromJson()
+        {
+            // Arrange
+            Helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
+
+            string json = @"{
+  ""Name"": ""My API Asset Class"",
+  ""DeviceTypeId"": ""ca29a378-2ac2-d9b2-635a-94580d4691e8"",
+  ""Description"": ""My First asset class API"",
+  ""Manufacturer"": ""ca29a378-2ac2-d9b2-635a-94580d4691e8"",
+  ""Depth"": 6814.415912601139,
+  ""Height"": 1709.5826972307093,
+  ""Width"": 7849.388501550755,
+  ""HeightU"": 5037.701172850872,
+  ""Weight"": 8761.514126576818,
+  ""TypicalPowerConsumption"": 3494.876107564041,
+  ""MaximumPowerConsumption"": 4408.18848273218,
+  ""PowerSupply"": ""AC"",
+  ""Lifecycle"": {
+    ""EndOfLife"": ""2013-04-22T02:48:25.867Z"",
+    ""EndOfService"": ""1997-11-29T06:35:16.473Z""
+  }
+}";
+
+            var assetClassFromJson = Newtonsoft.Json.JsonConvert.DeserializeObject<AssetClass>(json);
+
+            // Act & Assert - Should throw ValidationException because DeviceTypeId doesn't exist
+            var action = () => Helper.AssetManagement.AssetClasses.Create(assetClassFromJson);
+            
+            action.Should().Throw<Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Exceptions.ValidationException>()
+                .WithMessage("*Device Type not found*");
+        }
+
+        [TestMethod]
+        public void Create_WithNonExistentDeviceTypeShouldFail()
+        {
+            // Arrange
+            Helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
+
+            var assetClass = new AssetClass
+            {
+                Name = "My API Asset Class",
+                DeviceTypeId = new SdmObjectReference<DeviceType>("ca29a378-2ac2-d9b2-635a-94580d4691e8"),
+                Description = "My Test Asset Class Description",
+                Manufacturer = Guid.Parse("ca29a378-2ac2-d9b2-635a-94580d4691e8"),
+                Depth = 6814.415912601139,
+                Height = 1709.5826972307093,
+                Width = 7849.388501550755,
+                HeightU = 5037.701172850872,
+                Weight = 8761.514126576818,
+                TypicalPowerConsumption = 3494.876107564041,
+                MaximumPowerConsumption = 4408.18848273218,
+                PowerSupply = SlcAsset_Management.Enums.PowerSupplyEnum.AC,
+                Lifecycle = new AssetClassLifecycle
+                {
+                    EndOfLife = DateTime.Now,
+                    EndOfService = DateTime.Now,
+                }
+            };
+
+            // Act & Assert - Should throw ValidationException because DeviceTypeId doesn't exist
+            var action = () => Helper.AssetManagement.AssetClasses.Create(assetClass);
+            
+            action.Should().Throw<Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Exceptions.ValidationException>()
+                .WithMessage("*Device Type not found*");
+        }
+
+        [TestMethod]
         public void Create_WithValidData_ShouldPersistAssetClass()
         {
             // Arrange
@@ -241,7 +309,7 @@
             {
                 Helper.AssetManagement.AssetClasses.Count(new TRUEFilterElement<AssetClass>())
                     .Should().Be(initialCount - 1, "one asset class should be deleted");
-                
+
                 Helper.AssetManagement.AssetClasses.Count(AssetClassExposers.Identifier.Equal(assetClassToDelete.Identifier))
                     .Should().Be(0, "deleted asset class should not exist");
             }
@@ -251,15 +319,15 @@
         public void Delete_Bulk_ShouldRemoveMultipleAssetClasses()
         {
             // Arrange
-           Helper.PopulateWithDemoData(upTo: DemoDataLayer.AssetClasses);
+            Helper.PopulateWithDemoData(upTo: DemoDataLayer.AssetClasses);
 
             var initialCount = Helper.TestData.AssetClasses.Count;
-            
+
             var filter = new ORFilterElement<AssetClass>(
                 AssetClassExposers.DeviceName.Equal("UPS"),
                 AssetClassExposers.DeviceName.Equal("Firewall"),
                 AssetClassExposers.DeviceDescription.Contains("Ethernet", StringComparison.OrdinalIgnoreCase));
-            
+
             var assetClassesToDelete = Helper.AssetManagement.AssetClasses.Read(filter).ToList();
             var deleteCount = assetClassesToDelete.Count;
 
@@ -271,10 +339,10 @@
             {
                 Helper.AssetManagement.AssetClasses.Count(new TRUEFilterElement<AssetClass>())
                     .Should().Be(initialCount - deleteCount, $"{deleteCount} asset classes should be deleted");
-                
+
                 Helper.AssetManagement.AssetClasses.Count(AssetClassExposers.DeviceName.Equal("UPS"))
                     .Should().Be(0, "UPS should be deleted");
-                
+
                 Helper.AssetManagement.AssetClasses.Count(AssetClassExposers.DeviceName.Equal("Firewall"))
                     .Should().Be(0, "Firewall should be deleted");
             }
@@ -338,7 +406,7 @@
                 Helper.AssetManagement.AssetClasses.Count(new TRUEFilterElement<AssetClass>()).Should().Be(1);
 
                 var created = Helper.AssetManagement.AssetClasses.Read(new TRUEFilterElement<AssetClass>()).First();
-                
+
                 // Basic properties
                 created.Should().NotBeNull();
                 created.Name.Should().Be("Reference Class");

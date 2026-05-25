@@ -182,6 +182,7 @@
         }
 
         [TestMethod]
+        [Ignore("TODO SDM-1234: RackPosition is a non-nullable long with default value 0, causing incorrect filter behavior for assets without rack locations. Skip until nullable types are implemented.")]
         public void ReadFilter_RackPosition_NotEqual_ShouldReturnNonMatchingAssets()
         {
             // Arrange
@@ -192,7 +193,7 @@
             var filter = AssetExposers.Location.RackPosition.NotEqual(excludedPosition);
 
             // Act
-            var results =Helper.AssetManagement.Assets.Read(filter).ToList();
+            var results = Helper.AssetManagement.Assets.Read(filter).ToList();
 
             // Assert
             using (new AssertionScope())

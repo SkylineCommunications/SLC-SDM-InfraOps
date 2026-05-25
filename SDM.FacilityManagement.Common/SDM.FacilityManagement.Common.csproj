@@ -6,8 +6,8 @@
     <Nullable>disable</Nullable>
     <AssemblyName>Skyline.DataMiner.SDM.FacilityManagement.Common</AssemblyName>
     <RootNamespace>Skyline.DataMiner.SDM.FacilityManagement.Common</RootNamespace>
-    <PackageVersion>1.0.1</PackageVersion>
-    <Version>1.0.1</Version>
+    <VersionSuffix Condition="'$(Configuration)' == 'Debug'">dev-004</VersionSuffix>
+    <VersionPrefix>1.0.1</VersionPrefix>
     <PackageTags>Skyline;DataMiner</PackageTags>
     <PackageProjectUrl>https://skyline.be</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -45,4 +45,10 @@
   <Import Project="..\SharedMappers\SharedMappers.projitems" Label="Shared" />
   
   <Import Project="..\SharedValidation\SharedValidation.projitems" Label="Shared" />
+
+  <!-- Can be used to set the location of your local nuget store to copy to -->
+  <Import Project="../Directory.Build.props.user" Condition="Exists('../Directory.Build.props.user')" />
+  <Target Name="CopyNuGetPackage" AfterTargets="Pack" Condition="'$(NuGetStorePath)' != '' and '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <Copy SourceFiles="$(OutputPath)..\$(PackageId).$(PackageVersion).nupkg" DestinationFolder="$(NuGetStorePath)\$(PackageId)" />
+  </Target>
 </Project>

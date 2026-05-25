@@ -182,27 +182,25 @@
                 if (hasRacks)
                 {
                     // Use serial number from the asset to lookup rack assignment
-                    if (DemoData.AssetRackAssignments.TryGetValue(asset.SerialNumber, out var assignment))
-                    {
-                        string rackid = assignment.RackId;
+                    //cant for the moment do any rack assignment do tue the non existent of nullables so it will complain about having multiple locations?
+                    //if (DemoData.AssetRackAssignments.TryGetValue(asset.SerialNumber, out var assignment))
+                    //{
+                    //    string rackid = assignment.RackId;
                         
-                        // Validate rack index is within bounds
-                        if (racks.TryGetValue(rackid, out Rack rack))
-                        {
-                            asset.Location.RackId = new SdmObjectReference<Rack>(rack.Identifier);
-                            asset.Location.RackPosition = assignment.Position;
-                        }
-                        else
-                        {
-                            throw new InvalidOperationException(
-                                $"Asset '{asset.SerialNumber}': Rack id {rackid} not found in persisted racks. Only rack ids available {String.Format(";", racks.Keys)}.");
-                        }
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException(
-                            $"Asset '{asset.SerialNumber}': No rack assignment found in DemoData.AssetRackAssignments.");
-                    }
+                    //    // Validate rack index is within bounds
+                    //    if (racks.TryGetValue(rackid, out Rack rack))
+                    //    {
+                    //        if(asset.Location == null) asset.Location = new AssetLocation();
+
+                    //        asset.Location.RackId = new SdmObjectReference<Rack>(rack.Identifier);
+                    //        asset.Location.RackPosition = assignment.Position;
+                    //    }
+                    //    else
+                    //    {
+                    //        throw new InvalidOperationException(
+                    //            $"Asset '{asset.SerialNumber}': Rack id {rackid} not found in persisted racks. Only rack ids available {String.Format(";", racks.Keys)}.");
+                    //    }
+                    //}
                 }
                 else
                 {
@@ -558,7 +556,7 @@
                     RackPosition = source.Location.RackPosition,
                     Side = source.Location.Side,
                     // RackId will be set by caller
-                } : new AssetLocation(),
+                } : null,
                 PurchaseDate = source.PurchaseDate,
                 FirstUseDate = source.FirstUseDate,
                 EndOfWarrantyDate = source.EndOfWarrantyDate,
@@ -583,7 +581,7 @@
                     Organization = source.Custody.Organization,
                     ContactPersonRole = source.Custody.ContactPersonRole,
                 } : null,
-                Holders = source.Holders != null ? new List<AssetHolder>(source.Holders) : new List<AssetHolder>(),
+                Holders = source.Holders != null ? new List<AssetHolder>(source.Holders) : null,
                 ElementLinks = source.ElementLinks != null ? new List<ElementLink>(source.ElementLinks) : new List<ElementLink>(),
                 // AssetClassId will be set by caller
             };

@@ -9,6 +9,7 @@
     <Import_RootNamespace>SharedCommonLibrary</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)validation\IEntityTracking.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\Validation\RackValidator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)validation\BulkValidationException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)validation\ChangeTrackingBase.cs" />

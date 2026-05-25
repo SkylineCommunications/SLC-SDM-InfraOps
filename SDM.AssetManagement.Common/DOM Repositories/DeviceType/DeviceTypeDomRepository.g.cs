@@ -513,8 +513,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 		{
 			var obj = new DeviceType
 			{
-				Identifier = instance.ID.Id.ToString()
-			};
+				Identifier = instance.ID.Id.ToString(),
+                IsNewInternal = false,
+            };
 			var _devicetypepropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.DeviceTypeProperties.SectionDefinitionId));
 			if (_devicetypepropertiesSection != default)
 			{

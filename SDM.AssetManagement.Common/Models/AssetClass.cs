@@ -14,12 +14,14 @@
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)asset_management")]
-    public class AssetClass : SdmObject<AssetClass>, IChangeTracking
+    public class AssetClass : SdmObject<AssetClass>, IEntityTracking
     {
         [JsonIgnore]
         private ChangeTrackingFieldHandler _fieldHandler;
         [JsonIgnore]
         private AssetClassLifecycle _lifecycle;
+        [JsonIgnore]
+        private bool _isNew = true;
 
         public AssetClass()
         {
@@ -38,14 +40,6 @@
                 }
                 return _fieldHandler;
             }
-        }
-
-        // Called after JSON deserialization to reset change tracking
-        [OnDeserialized]
-        internal void OnDeserializedMethod(StreamingContext context)
-        {
-            // Apply all current values as "original" values to reset change tracking
-            ResetChangeTracking();
         }
 
         // PUBLIC API: Simple types (consumers see these)
@@ -167,7 +161,16 @@
         /// Gets or sets a value indicating whether the entity has not yet been persisted or saved.
         /// </summary>
         [JsonIgnore]
-        public bool IsNew { get; set; } = true;
+        public bool IsNew => _isNew;
+
+        /// <summary>
+        /// Sets the IsNew flag. Used internally when loading from database.
+        /// </summary>
+        [JsonIgnore]
+        internal bool IsNewInternal
+        {
+            set => _isNew = value;
+        }
 
         // INTERNAL: Change tracking fields (validation handler uses these)
         [JsonIgnore]

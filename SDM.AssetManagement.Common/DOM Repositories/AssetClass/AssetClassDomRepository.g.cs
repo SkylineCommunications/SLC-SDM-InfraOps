@@ -568,8 +568,10 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 		{
 			var obj = new AssetClass
 			{
-				Identifier = instance.ID.Id.ToString()
-			};
+				Identifier = instance.ID.Id.ToString(),
+                IsNewInternal = false,
+            };
+
 			var _assetclasspropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.SectionDefinitionId));
 			if (_assetclasspropertiesSection != default)
 			{
@@ -791,7 +793,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			}
 
 			obj.Holders = _holdersList;
-            obj.IsNew = false;
             obj.ResetChangeTracking();
 
 			return obj;

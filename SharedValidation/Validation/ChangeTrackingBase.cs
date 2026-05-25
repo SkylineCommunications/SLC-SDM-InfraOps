@@ -43,16 +43,16 @@
         }
 
         /// <summary>
+        /// Gets or sets a value indicating whether the entity has not yet been persisted or saved.
+        /// </summary>
+        [JsonIgnore]
+        public bool IsNew { get; set; } = true;
+
+        /// <summary>
         /// Gets a value indicating whether any fields have been modified since the last save or initialization.
         /// </summary>
         [JsonIgnore]
         public bool Changed => FieldHandler.HasChanges;
-
-        [OnDeserialized]
-        internal void OnDeserializedMethod(StreamingContext context)
-        {
-            ResetChangeTracking();
-        }
 
         /// <summary>
         /// Resets the change tracking state for the current object, applying any pending changes.

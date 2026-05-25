@@ -76,7 +76,7 @@
         {
             var result = new ValidationResult();
 
-            if (asset.IsNew || asset.AssetClassIdField.Changed)
+            if (asset.ShouldValidate(asset.AssetClassIdField))
             {
                 if (!AssetValidationHandler.IsAssetClassValid(asset, out var assetClassResult))
                 {
@@ -115,7 +115,7 @@
             }
 
             // Parent asset holder - basic logic validation only
-            if ((asset.Location.ParentAssetField.Changed || asset.Location.HolderNumberField.Changed)
+            if (asset.ShouldValidateAny(asset.Location.ParentAssetField, asset.Location.HolderNumberField)
                 && asset.AssetClassId.HasValue())
             {
                 if (!AssetValidationHandler.IsParentAssetHolderValid(asset, out var parentResult))
@@ -125,9 +125,9 @@
             }
 
             // Rack position - basic logic validation only
-            if ((asset.Location.RackIdField.Changed ||
-                 asset.Location.RackPositionField.Changed ||
-                 asset.Location.SideField.Changed)
+            if (asset.ShouldValidateAny(asset.Location.RackIdField,
+                 asset.Location.RackPositionField,
+                 asset.Location.SideField)
                 && asset.AssetClassId.HasValue())
             {
                 if (!AssetValidationHandler.IsRackPositionValid(asset, out var rackResult))
@@ -223,7 +223,7 @@
             }
 
             // Destination parent asset holder - basic logic validation only
-            if ((asset.DestinationLocation.ParentAssetField.Changed || asset.DestinationLocation.HolderNumberField.Changed)
+            if (asset.ShouldValidateAny(asset.DestinationLocation.ParentAssetField, asset.DestinationLocation.HolderNumberField)
                 && asset.AssetClassId.HasValue())
             {
                 if (!AssetValidationHandler.IsDestinationParentAssetHolderValid(asset, out var parentResult))
@@ -235,9 +235,9 @@
             var assetClass = _entityLoader.LoadAssetClass(asset.AssetClassId);
 
             // Destination rack position - basic logic validation only
-            if ((asset.DestinationLocation.RackIdField.Changed ||
-                 asset.DestinationLocation.RackPositionField.Changed ||
-                 asset.DestinationLocation.SideField.Changed)
+            if (asset.ShouldValidateAny(asset.DestinationLocation.RackIdField,
+                 asset.DestinationLocation.RackPositionField,
+                 asset.DestinationLocation.SideField)
                 && asset.AssetClassId.HasValue())
             {
                 if (!AssetValidationHandler.IsDestinationRackPositionValid(asset, assetClass, out var rackResult))
@@ -253,7 +253,7 @@
         {
             var validations = new List<ValidationResult>();
 
-            if (asset.InstallationUserIdField.Changed || asset.InstallationDateField.Changed)
+            if (asset.ShouldValidateAny(asset.InstallationUserIdField, asset.InstallationDateField))
             {
                 if (!AssetValidationHandler.IsInstallationInfoValid(asset, out var installationResult))
                 {
@@ -261,7 +261,7 @@
                 }
             }
 
-            if (asset.ModificationUserIdField.Changed || asset.ModificationDateField.Changed)
+            if (asset.ShouldValidateAny(asset.ModificationUserIdField, asset.ModificationDateField))
             {
                 if (!AssetValidationHandler.IsModificationInfoValid(asset, out var modificationResult))
                 {
@@ -276,7 +276,7 @@
         {
             var validations = new List<ValidationResult>();
 
-            if (asset.Ownership != null && asset.Ownership.Changed)
+            if (asset.ShouldValidate(asset.Ownership))
             {
                 if (!AssetValidationHandler.IsOwnershipValid(asset, out var ownerResult))
                 {
@@ -284,7 +284,7 @@
                 }
             }
 
-            if (asset.Custody != null && asset.Custody.Changed)
+            if (asset.ShouldValidate(asset.Custody))
             {
                 if (!AssetValidationHandler.IsCustodyValid(asset, out var custodyResult))
                 {
@@ -299,12 +299,12 @@
         {
             var validations = new List<ValidationResult>();
 
-            if (asset.HoldersField.Changed)
+            if (asset.ShouldValidate(asset.HoldersField))
             {
                 validations.Add(AssetValidationHandler.ValidateAssetHolders(asset));
             }
 
-            if (asset.ElementsField.Changed)
+            if (asset.ShouldValidate(asset.ElementsField))
             {
                 validations.Add(AssetValidationHandler.ValidateAssetElements(asset));
             }
@@ -372,19 +372,19 @@
             var exceptIds = GetExceptIdentifiers(asset, context);
 
             // Name uniqueness
-            if (asset.IsNew || asset.NameField.Changed)
+            if (asset.ShouldValidate(asset.NameField))
             {
                 validations.Add(ValidateNameUniqueness(asset.Name, exceptIds));
             }
 
             // Asset ID uniqueness
-            if (asset.IsNew || asset.AssetIDField.Changed)
+            if (asset.ShouldValidate(asset.AssetIDField))
             {
                 validations.Add(ValidateAssetIdUniqueness(asset.AssetID, exceptIds));
             }
 
             // Serial number uniqueness
-            if (asset.SerialNumberField.Changed)
+            if (asset.ShouldValidate(asset.SerialNumberField))
             {
                 validations.Add(ValidateSerialNumberUniqueness(
                     asset.SerialNumber, asset.AssetClassId, exceptIds));
@@ -407,7 +407,7 @@
             }
 
             // Parent asset holder availability
-            if ((asset.Location.ParentAssetField.Changed || asset.Location.HolderNumberField.Changed)
+            if (asset.ShouldValidateAny(asset.Location.ParentAssetField, asset.Location.HolderNumberField)
                 && asset.AssetClassId.HasValue())
             {
                 var assetClass = _entityLoader.LoadAssetClass(asset.AssetClassId);
@@ -419,9 +419,9 @@
             }
 
             // Rack space availability
-            if ((asset.Location.RackIdField.Changed ||
-                 asset.Location.RackPositionField.Changed ||
-                 asset.Location.SideField.Changed)
+            if (asset.ShouldValidateAny(asset.Location.RackIdField,
+                 asset.Location.RackPositionField,
+                 asset.Location.SideField)
                 && asset.AssetClassId.HasValue())
             {
                 validations.Add(ValidateRackSpaceAvailability(asset, context: null));
@@ -507,7 +507,7 @@
             // Duplicate names
             var nameGroups = assets
                 .Select((asset, index) => new { asset, index })
-                .Where(x => x.asset.NameField.Changed && !string.IsNullOrWhiteSpace(x.asset.Name))
+                .Where(x => x.asset.ShouldValidate(x.asset.NameField) && !string.IsNullOrWhiteSpace(x.asset.Name))
                 .GroupBy(x => x.asset.Name, StringComparer.OrdinalIgnoreCase)
                 .Where(g => g.Count() > 1);
 
@@ -523,7 +523,7 @@
             // Duplicate asset IDs
             var assetIdGroups = assets
                 .Select((asset, index) => new { asset, index })
-                .Where(x => x.asset.AssetIDField.Changed && !string.IsNullOrWhiteSpace(x.asset.AssetID))
+                .Where(x => x.asset.ShouldValidate(x.asset.AssetIDField) && !string.IsNullOrWhiteSpace(x.asset.AssetID))
                 .GroupBy(x => x.asset.AssetID, StringComparer.OrdinalIgnoreCase)
                 .Where(g => g.Count() > 1);
 
@@ -539,7 +539,7 @@
             // Duplicate serial numbers (per asset class)
             var serialGroups = assets
                 .Select((asset, index) => new { asset, index })
-                .Where(x => x.asset.SerialNumberField.Changed &&
+                .Where(x => x.asset.ShouldValidate(x.asset.SerialNumberField) &&
                            !string.IsNullOrWhiteSpace(x.asset.SerialNumber) &&
                            x.asset.AssetClassId.HasValue())
                 .GroupBy(x => new { AssetClassId = x.asset.AssetClassId.Identifier, SerialNumber = x.asset.SerialNumber.ToLower() })

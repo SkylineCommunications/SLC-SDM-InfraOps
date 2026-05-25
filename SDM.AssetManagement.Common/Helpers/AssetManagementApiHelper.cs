@@ -69,8 +69,8 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
             .WithMiddleware(new IdentifierMiddleware<Asset>());
             
 
-        AssetClasses = _assetClassRepository.WithMiddleware(
-            new AssetClassValidationMiddleware(_assetClassValidator));
+        AssetClasses = _assetClassRepository.WithMiddleware(new AssetClassValidationMiddleware(_assetClassValidator))
+            .WithMiddleware(new IdentifierMiddleware<AssetClass>());
 
         //DeviceTypes = _deviceTypeRepository.WithMiddleware(
         //    new DeviceTypeValidationMiddleware(_deviceTypeValidator));

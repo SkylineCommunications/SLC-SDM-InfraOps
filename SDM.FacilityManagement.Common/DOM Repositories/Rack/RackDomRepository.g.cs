@@ -511,7 +511,8 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
         {
             var obj = new Rack
             {
-                Identifier = instance.ID.Id.ToString()
+                Identifier = instance.ID.Id.ToString(),
+                IsNewInternal = false,
             };
             var _rackpropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.SectionDefinitionId));
             if (_rackpropertiesSection != default)

@@ -14,6 +14,7 @@
 
     using SharedMappers.DomIds;
 
+    using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Common.Validation;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
@@ -410,25 +411,35 @@
             _helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
             var deviceType = _helper.TestData.DeviceTypes.First();
 
+            // Create a valid asset class and persist it
             var assetClass = new AssetClass
             {
-                Name = "Test",
+                Name = "Test Change Tracking",
                 DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier),
-                Depth = -5,      // Invalid
+                Depth = 5,       // Valid initially
                 Width = 20       // Valid
             };
 
-            // Reset change tracking
-            assetClass.ResetChangeTracking();
+            var created = _helper.AssetManagement.AssetClasses.Create(assetClass);
+
+            // Read it back from the database using TRUEFilter and filter in memory
+            // This ensures the entity is properly loaded from DB with IsNew = false
+            var loaded = _helper.AssetManagement.AssetClasses
+                .Read(new TRUEFilterElement<AssetClass>())
+                .Single(ac => ac.Identifier == created.Identifier);
+
+            // Now set an invalid value and change a valid field
+            loaded.Depth = -5;  // Make invalid (but don't save)
+            loaded.ResetChangeTracking(); // Reset to establish this as the "loaded state"
 
             // Only change Width
-            assetClass.Width = 25;
+            loaded.Width = 25;
 
             // Act
-            var result = _validator.Validate(assetClass);
+            var result = _validator.Validate(loaded);
 
             // Assert
-            result.IsValid.Should().BeTrue("Depth error should not be reported since it wasn't changed after reset");
+            result.IsValid.Should().BeTrue("Depth error should not be reported since it wasn't changed after the reset");
         }
 
         #endregion

@@ -1,9 +1,6 @@
-using System.Collections.Generic;
 namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 {
-    using System;
-    using System.Runtime.Serialization;
-
+    using System.Collections.Generic;
     using Newtonsoft.Json;
 
     using SharedMappers.DomIds;
@@ -13,10 +10,12 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
     // [GenerateExposers]
     //[SdmDomStorage("(slc)facility_management")]
-    public class Rack : SdmObject<Rack>
+    public class Rack : SdmObject<Rack>, IEntityTracking
     {
         [JsonIgnore]
         private ChangeTrackingFieldHandler _fieldHandler;
+        [JsonIgnore]
+        private bool _isNew = true;
 
         public Rack()
         {
@@ -37,12 +36,33 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             }
         }
 
-        // Called after JSON deserialization to reset change tracking
-        [OnDeserialized]
-        internal void OnDeserializedMethod(StreamingContext context)
+        [JsonIgnore]
+        public bool Changed =>
+         FieldHandler.HasChanges ||
+         NameField?.Changed == true ||
+         ModelField?.Changed == true ||
+         PositionField?.Changed == true ||
+         WidthField?.Changed == true ||
+         HeightField?.Changed == true ||
+         DepthField?.Changed == true ||
+         DescriptionField?.Changed == true ||
+         CoolingFlowField?.Changed == true ||
+         BookableField?.Changed == true ||
+         XPositionField?.Changed == true ||
+         YPositionField?.Changed == true ||
+         LabelField?.Changed == true ||
+         OrientationField?.Changed == true ||
+         RackIdField?.Changed == true ||
+         Capacity?.Changed == true;
+
+        [JsonIgnore]
+        internal bool IsNewInternal
         {
-            ResetChangeTracking();
+            set => _isNew = value;
         }
+
+        [JsonIgnore]
+        public bool IsNew => _isNew;
 
         // PUBLIC API: Simple properties
         public string Name

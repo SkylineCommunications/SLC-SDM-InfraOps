@@ -3,16 +3,20 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Runtime.Serialization;
+
     using Newtonsoft.Json;
+
     using SharedMappers.DomIds;
+
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
-    public class Asset : SdmObject<Asset>, IChangeTracking
+    public class Asset : SdmObject<Asset>, IEntityTracking
     {
         [JsonIgnore]
         private ChangeTrackingFieldHandler _fieldHandler;
+        [JsonIgnore]
+        private bool _isNew = true;
 
         public Asset()
         {
@@ -30,12 +34,6 @@
                 }
                 return _fieldHandler;
             }
-        }
-
-        [OnDeserialized]
-        internal void OnDeserializedMethod(StreamingContext context)
-        {
-            ResetChangeTracking();
         }
 
         [JsonIgnore]
@@ -56,7 +54,16 @@
         /// Gets a value indicating whether the current object has not been assigned an identifier.
         /// </summary>
         [JsonIgnore]
-        public bool IsNew => true;
+        public bool IsNew => _isNew;
+
+        /// <summary>
+        /// Sets the IsNew flag. Used internally when loading from database.
+        /// </summary>
+        [JsonIgnore]
+        internal bool IsNewInternal
+        {
+            set => _isNew = value;
+        }
 
         /// <summary>
         /// Gets or sets the current status of the asset.

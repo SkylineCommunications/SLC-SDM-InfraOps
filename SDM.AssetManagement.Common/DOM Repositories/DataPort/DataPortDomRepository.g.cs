@@ -513,6 +513,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             var obj = new DataPort
             {
                 Identifier = instance.ID.Id.ToString(),
+                IsNewInternal = false,
             };
 
             var _dataportinfoSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.SectionDefinitionId));

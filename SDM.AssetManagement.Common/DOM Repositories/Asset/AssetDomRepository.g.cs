@@ -533,6 +533,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             {
                 Identifier = instance.ID.Id.ToString(),
                 State = SlcAsset_Management.Behaviors.Asset_Behavior.Statuses.ToEnum(instance.StatusId),
+                IsNewInternal = false,
             };
 
             var _assetpropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.SectionDefinitionId));

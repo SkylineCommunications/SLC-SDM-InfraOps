@@ -414,7 +414,6 @@
                     Organization = Guid.NewGuid(),
                     ContactPersonRole = Guid.NewGuid(),
                 },
-                Holders = new List<AssetHolder>(),
                 ElementLinks = new List<ElementLink>
                 {
                     new ElementLink

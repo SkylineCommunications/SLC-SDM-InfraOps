@@ -9,7 +9,7 @@
 
     //[GenerateExposers]
     [SdmDomStorage("(slc)asset_management")]
-    public sealed class DataPort : SdmObject<DataPort>, IEquatable<DataPort>, IChangeTracking
+    public sealed class DataPort : SdmObject<DataPort>, IEquatable<DataPort>, IEntityTracking
     {
         [JsonIgnore]
         private ChangeTrackingFieldHandler _fieldHandler;
@@ -21,6 +21,8 @@
         private AddressInfo _addressInfo;
         [JsonIgnore]
         private PrimaryPortRelation _primaryPortRelation;
+        [JsonIgnore]
+        private bool _isNew = true;
 
         public DataPort()
         {
@@ -38,12 +40,6 @@
                 }
                 return _fieldHandler;
             }
-        }
-
-        [OnDeserialized]
-        internal void OnDeserializedMethod(StreamingContext context)
-        {
-            ResetChangeTracking();
         }
 
         #region Properties
@@ -77,6 +73,16 @@
         internal IChangeTrackingField<SdmObjectReference<Asset>> AssetField => FieldHandler.GetOrCreateField(
             nameof(Asset),
             () => new ChangeTrackingField<SdmObjectReference<Asset>>(default));
+
+        [JsonIgnore]
+        public bool IsNew => _isNew;
+
+
+        [JsonIgnore]
+        internal bool IsNewInternal
+        {
+            set => _isNew = value;
+        }
 
         #endregion
 

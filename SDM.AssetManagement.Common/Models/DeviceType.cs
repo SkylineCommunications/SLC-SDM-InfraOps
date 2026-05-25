@@ -7,7 +7,7 @@
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)asset_management")]
-    public class DeviceType : SdmObject<DeviceType>, IChangeTracking
+    public class DeviceType : SdmObject<DeviceType>, IEntityTracking
     {
         [JsonIgnore]
         private ChangeTrackingFieldHandler _fieldHandler;
@@ -15,6 +15,8 @@
         private TagsInfo _tagsInfo;
         [JsonIgnore]
         private HierarchyInfo _hierarchyInfo;
+        [JsonIgnore]
+        private bool _isNew = true;
 
         public DeviceType()
         {
@@ -34,10 +36,19 @@
             }
         }
 
-        [OnDeserialized]
-        internal void OnDeserializedMethod(StreamingContext context)
+        /// <summary>
+        /// Gets a value indicating whether the entity has not yet been persisted.
+        /// </summary>
+        [JsonIgnore]
+        public bool IsNew => _isNew;
+
+        /// <summary>
+        /// Sets the IsNew flag. Used internally when loading from database.
+        /// </summary>
+        [JsonIgnore]
+        internal bool IsNewInternal
         {
-            ResetChangeTracking();
+            set => _isNew = value;
         }
 
         [JsonIgnore]
