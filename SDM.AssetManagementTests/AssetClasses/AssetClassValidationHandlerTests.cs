@@ -289,8 +289,7 @@
                 result.TryGetFailReason(
                     AssetClassValidationHandler.AssetClassValidationField.DataPortNumber,
                     out var reason).Should().BeTrue();
-                reason.Should().Contain("Multiple Data Ports");
-                reason.Should().Contain("same Port Number");
+                reason.Should().Contain("Duplicate Data Port number found");
             }
         }
 
@@ -393,7 +392,7 @@
                 result.TryGetFailReason(
                     AssetClassValidationHandler.AssetClassValidationField.PowerPortNumber,
                     out var reason).Should().BeTrue();
-                reason.Should().Contain("Multiple Power Ports");
+                reason.Should().Contain("Duplicate Power Port number found");
             }
         }
 

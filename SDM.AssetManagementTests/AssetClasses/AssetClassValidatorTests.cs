@@ -325,7 +325,7 @@
                 result.TryGetFailReason(
                     AssetClassValidationHandler.AssetClassValidationField.DataPortNumber,
                     out var reason).Should().BeTrue();
-                reason.Should().Contain("Multiple Data Ports");
+                reason.Should().Contain("Duplicate Data Port number found");
             }
         }
 
