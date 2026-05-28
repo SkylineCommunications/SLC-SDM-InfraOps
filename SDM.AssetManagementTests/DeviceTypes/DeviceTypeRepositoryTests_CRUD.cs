@@ -24,7 +24,7 @@
     [TestClass]
     public class DeviceTypeRepositoryTests_CRUD : BaseRepositoryTest
     {
-        private DeviceType referenceDeviceType;
+        private DeviceType referenceDeviceType = null!;
 
         [TestInitialize]
         public void TestInitialize()
@@ -225,7 +225,7 @@
             }
         }
 
-        private void AssertCreated(IAssetManagementApiHelper helper)
+        private void AssertCreated()
         {
             using (new AssertionScope())
             {

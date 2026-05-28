@@ -23,7 +23,7 @@
     [TestClass]
     public class PowerPortDomStorageProvider_CRUDTests : BaseRepositoryTest
     {
-        private PowerPort referencePowerPort;
+        private PowerPort referencePowerPort = null!;
 
         [TestInitialize]
         public void TestInitialize()
@@ -217,7 +217,7 @@
             }
         }
 
-        private void AssertCreated(IAssetManagementApiHelper helper)
+        private void AssertCreated()
         {
             using (new AssertionScope())
             {

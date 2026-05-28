@@ -254,12 +254,9 @@
         [TestMethod]
         public void PopulateAssets_WithNullCollection_ShouldThrowArgumentNullException()
         {
-            // Arrange
-
-
             // Act & Assert
             Assert.ThrowsException<ArgumentNullException>(
-                () => Helper.PopulateAssets((IEnumerable<Asset>)null));
+                () => Helper.PopulateAssets(null));
         }
 
         [TestMethod]

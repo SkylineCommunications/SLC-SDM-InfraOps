@@ -24,7 +24,7 @@
     [TestClass]
     public class AssetDomStorageProvider_CRUDTests : BaseRepositoryTest
     {
-        private Asset referenceAsset;
+        private Asset referenceAsset = null!;
 
         [TestInitialize]
         public void TestInitialize()
@@ -318,7 +318,7 @@
             }
         }
 
-        private void AssertCreated(IAssetManagementApiHelper helper)
+        private void AssertCreated()
         {
             using (new AssertionScope())
             {
@@ -334,6 +334,11 @@
                 created.MacAddress.Should().NotBeNull();
 
                 // Lifecycle dates
+
+                created.EndOfWarrantyDate.Should().NotBe(null);
+                created.InstallationDate.Should().NotBe(null);
+                created.EndOfLifeDate.Should().NotBe(null);
+                created.FirstUseDate.Should().NotBe(null);
                 created.PurchaseDate.Should().BeBefore(created.EndOfWarrantyDate.Value);
                 created.PurchaseDate.Should().BeBefore(created.InstallationDate.Value);
                 created.FirstUseDate.Should().BeBefore(created.EndOfLifeDate.Value);
@@ -345,7 +350,9 @@
 
                 // Custody
                 created.Custody.Should().NotBeNull();
+                created.Custody.Till.Should().NotBeNull();
                 created.Custody.From.Should().BeBefore(created.Custody.Till.Value);
+
 
                 // Holders
                 created.Holders.Should().NotBeNull();

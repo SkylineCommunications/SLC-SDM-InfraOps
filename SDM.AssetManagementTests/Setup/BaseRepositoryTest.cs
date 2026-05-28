@@ -5,7 +5,7 @@
     [TestClass]
     public abstract class BaseRepositoryTest
     {
-        protected ITestApiHelper Helper { get; private set; }
+        protected ITestApiHelper Helper { get; private set; } = null!;
 
         [TestInitialize]
         public void BaseTestInitialize()

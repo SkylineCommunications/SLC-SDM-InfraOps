@@ -22,7 +22,7 @@
     [TestClass]
     public class AssetClassDomStorageProvider_CRUDTests : BaseRepositoryTest
     {
-        private AssetClass referenceAssetClass;
+        private AssetClass referenceAssetClass = null!;
 
         [TestInitialize]
         public void TestInitialize()
@@ -399,7 +399,7 @@
             }
         }
 
-        private void AssertCreated(IAssetManagementApiHelper helper)
+        private void AssertCreated()
         {
             using (new AssertionScope())
             {

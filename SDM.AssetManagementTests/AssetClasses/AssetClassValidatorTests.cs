@@ -27,8 +27,8 @@
     [TestClass]
     public class AssetClassValidatorTests : BaseRepositoryTest
     {
-        private ITestApiHelper _helper;
-        private AssetClassValidator _validator;
+        private ITestApiHelper _helper = null!;
+        private AssetClassValidator _validator = null!;
 
         [TestInitialize]
         public void Setup()

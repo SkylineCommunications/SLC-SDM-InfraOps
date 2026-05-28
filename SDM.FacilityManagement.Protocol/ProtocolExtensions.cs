@@ -10,16 +10,13 @@
     /// </summary>
     public static class ProtocolExtensions
     {
-        /// <summary>
-        /// Gets an <see cref="IpAddressApiHelper"/> instance for the specified <see cref="SLProtocol"/>.
-        /// </summary>
-        /// <param name="protocol">The protocol instance to extend.</param>
-        /// <returns>
-        /// An <see cref="IpAddressApiHelper"/> initialized with the Protocol connection.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        /// Thrown when <paramref name="protocol"/> is <c>null</c>.
-        /// </exception>
+       /// <summary>
+       /// Creates an instance of an object that provides facility management API operations for the specified protocol.
+       /// </summary>
+       /// <param name="protocol">The protocol instance used to access facility management API functionality. Cannot be null.</param>
+       /// <returns>An object that implements the IFacilityManagementApiHelper interface for interacting with facility management
+       /// APIs.</returns>
+       /// <exception cref="ArgumentNullException">Thrown if protocol is null.</exception>
         public static IFacilityManagementApiHelper GetFacilityManagementApiHelper(this SLProtocol protocol)
         {
             if (protocol is null)

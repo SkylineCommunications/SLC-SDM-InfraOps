@@ -15,7 +15,7 @@
 	[TestClass]
 	public partial class FacilityDomRepositoryTests
 	{
-		private Facility referenceFacility;
+		private Facility referenceFacility = null!;
 
 		[TestInitialize]
 		public void TestInitialize()

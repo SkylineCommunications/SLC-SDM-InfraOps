@@ -25,8 +25,8 @@
     [TestClass]
     public class AssetValidatorTests : BaseRepositoryTest
     {
-        private Asset baseValidAsset;
-        private AssetClass testAssetClass;
+        private Asset baseValidAsset = null!;
+        private AssetClass testAssetClass = null!;
 
         [TestInitialize]
         public void TestInitialize()
