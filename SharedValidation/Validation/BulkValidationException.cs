@@ -69,57 +69,50 @@
             Func<T, string> getDisplayName)
         {
             if (entities == null || results == null || entities.Count == 0)
-            {
                 return "Bulk validation failed.";
-            }
 
-            var failedCount = 0;
+            var failedCount = results.Count(r => !r.IsValid);
+
             var sb = new StringBuilder();
-            
-            // Count failures first
-            for (int i = 0; i < results.Count; i++)
-            {
-                if (!results[i].IsValid)
-                {
-                    failedCount++;
-                }
-            }
-
             sb.AppendLine($"Bulk validation failed for {failedCount} item(s):");
             sb.AppendLine();
 
-            var displayedCount = 0;
-            for (int i = 0; i < entities.Count && displayedCount < 5; i++)
+            var displayed = 0;
+            for (int i = 0; i < entities.Count && displayed < 5; i++)
             {
-                if (!results[i].IsValid)
-                {
-                    displayedCount++;
-                    var entityName = getDisplayName?.Invoke(entities[i]) ?? $"Item at index {i}";
-                    
-                    sb.AppendLine($"{entityName}:");
-                    
-                    var errorCount = 0;
-                    foreach (var error in results[i].FailureReasons)
-                    {
-                        if (errorCount++ >= 3) break; // Show max 3 errors per entity
-                        sb.AppendLine($"  - [{error.Key}] {error.Value}");
-                    }
-                    
-                    if (results[i].FailureReasons.Count > 3)
-                    {
-                        sb.AppendLine($"  ... and {results[i].FailureReasons.Count - 3} more error(s)");
-                    }
-                    
-                    sb.AppendLine();
-                }
+                if (results[i].IsValid) continue;
+                AppendEntityErrors(sb, entities[i], results[i], i, getDisplayName);
+                displayed++;
             }
 
             if (failedCount > 5)
-            {
                 sb.AppendLine($"... and {failedCount - 5} more failed item(s)");
-            }
 
             return sb.ToString();
+        }
+
+        private static void AppendEntityErrors(
+            StringBuilder sb,
+            T entity,
+            ValidationResult result,
+            int index,
+            Func<T, string> getDisplayName)
+        {
+            const int maxErrors = 3;
+            var entityName = getDisplayName?.Invoke(entity) ?? $"Item at index {index}";
+            sb.AppendLine($"{entityName}:");
+
+            var shown = 0;
+            foreach (var error in result.FailureReasons)
+            {
+                if (shown++ >= maxErrors) break;
+                sb.AppendLine($"  - [{error.Key}] {error.Value}");
+            }
+
+            if (result.FailureReasons.Count > maxErrors)
+                sb.AppendLine($"  ... and {result.FailureReasons.Count - maxErrors} more error(s)");
+
+            sb.AppendLine();
         }
 
         /// <summary>

@@ -124,22 +124,8 @@
                 return result;
             }
 
-            var seenPorts = new HashSet<long>();
-
-            foreach (var port in assetClass.DataPorts)
-            {
-                if (port.PortNumber < 0)
-                {
-                    result.AddFailReason(AssetClassValidationField.DataPortNumber, "Data Port Number cannot be negative.");
-                    return result;
-                }
-
-                if (!seenPorts.Add(port.PortNumber))
-                {
-                    result.AddFailReason(AssetClassValidationField.DataPortNumber, $"Multiple Data Ports have the same Port Number '{port.PortNumber}'.");
-                    return result;
-                }
-            }
+            result.AddFailuresFrom(PortNumberValidator.ValidateCollection(
+                assetClass.DataPorts, p => p.PortNumber, AssetClassValidationField.DataPortNumber, "Data Port"));
 
             return result;
         }
@@ -163,22 +149,8 @@
                return result;
             }
 
-            var seenPorts = new HashSet<long>();
-
-            foreach (var port in assetClass.PowerPorts)
-            {
-                if (port.PortNumber < 0)
-                {
-                    result.AddFailReason(AssetClassValidationField.PowerPortNumber, "Power Port Number cannot be negative.");
-                    return result;
-                }
-
-                if (!seenPorts.Add(port.PortNumber))
-                {
-                    result.AddFailReason(AssetClassValidationField.PowerPortNumber, $"Multiple Power Ports have the same Port Number '{port.PortNumber}'.");
-                    return result;
-                }
-            }
+            result.AddFailuresFrom(PortNumberValidator.ValidateCollection(
+                assetClass.PowerPorts, p => p.PortNumber, AssetClassValidationField.PowerPortNumber, "Power Port"));
 
             return result;
         }

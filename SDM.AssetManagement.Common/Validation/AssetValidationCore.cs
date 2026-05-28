@@ -76,12 +76,10 @@
         {
             var result = new ValidationResult();
 
-            if (asset.ShouldValidate(asset.AssetClassIdField))
+            if (asset.ShouldValidate(asset.AssetClassIdField)
+                && !AssetValidationHandler.IsAssetClassValid(asset, out var assetClassResult))
             {
-                if (!AssetValidationHandler.IsAssetClassValid(asset, out var assetClassResult))
-                {
-                    result.AddFailuresFrom(assetClassResult);
-                }
+                result.AddFailuresFrom(assetClassResult);
             }
 
             return result;
@@ -116,25 +114,17 @@
 
             // Parent asset holder - basic logic validation only
             if (asset.ShouldValidateAny(asset.Location.ParentAssetField, asset.Location.HolderNumberField)
-                && asset.AssetClassId.HasValue())
-            {
-                if (!AssetValidationHandler.IsParentAssetHolderValid(asset, out var parentResult))
-                {
-                    validations.Add(parentResult);
-                }
-            }
+                && asset.AssetClassId.HasValue()
+                && !AssetValidationHandler.IsParentAssetHolderValid(asset, out var parentResult))
+                validations.Add(parentResult);
 
             // Rack position - basic logic validation only
             if (asset.ShouldValidateAny(asset.Location.RackIdField,
                  asset.Location.RackPositionField,
                  asset.Location.SideField)
-                && asset.AssetClassId.HasValue())
-            {
-                if (!AssetValidationHandler.IsRackPositionValid(asset, out var rackResult))
-                {
-                    validations.Add(rackResult);
-                }
-            }
+                && asset.AssetClassId.HasValue()
+                && !AssetValidationHandler.IsRackPositionValid(asset, out var rackResult))
+                validations.Add(rackResult);
 
             return validations.MergeAll();
         }
@@ -224,13 +214,9 @@
 
             // Destination parent asset holder - basic logic validation only
             if (asset.ShouldValidateAny(asset.DestinationLocation.ParentAssetField, asset.DestinationLocation.HolderNumberField)
-                && asset.AssetClassId.HasValue())
-            {
-                if (!AssetValidationHandler.IsDestinationParentAssetHolderValid(asset, out var parentResult))
-                {
-                    validations.Add(parentResult);
-                }
-            }
+                && asset.AssetClassId.HasValue()
+                && !AssetValidationHandler.IsDestinationParentAssetHolderValid(asset, out var parentResult))
+                validations.Add(parentResult);
 
             var assetClass = _entityLoader.LoadAssetClass(asset.AssetClassId);
 
@@ -238,13 +224,9 @@
             if (asset.ShouldValidateAny(asset.DestinationLocation.RackIdField,
                  asset.DestinationLocation.RackPositionField,
                  asset.DestinationLocation.SideField)
-                && asset.AssetClassId.HasValue())
-            {
-                if (!AssetValidationHandler.IsDestinationRackPositionValid(asset, assetClass, out var rackResult))
-                {
-                    validations.Add(rackResult);
-                }
-            }
+                && asset.AssetClassId.HasValue()
+                && !AssetValidationHandler.IsDestinationRackPositionValid(asset, assetClass, out var rackResult))
+                validations.Add(rackResult);
 
             return validations.MergeAll();
         }
@@ -253,21 +235,13 @@
         {
             var validations = new List<ValidationResult>();
 
-            if (asset.ShouldValidateAny(asset.InstallationUserIdField, asset.InstallationDateField))
-            {
-                if (!AssetValidationHandler.IsInstallationInfoValid(asset, out var installationResult))
-                {
-                    validations.Add(installationResult);
-                }
-            }
+            if (asset.ShouldValidateAny(asset.InstallationUserIdField, asset.InstallationDateField)
+                && !AssetValidationHandler.IsInstallationInfoValid(asset, out var installationResult))
+                validations.Add(installationResult);
 
-            if (asset.ShouldValidateAny(asset.ModificationUserIdField, asset.ModificationDateField))
-            {
-                if (!AssetValidationHandler.IsModificationInfoValid(asset, out var modificationResult))
-                {
-                    validations.Add(modificationResult);
-                }
-            }
+            if (asset.ShouldValidateAny(asset.ModificationUserIdField, asset.ModificationDateField)
+                && !AssetValidationHandler.IsModificationInfoValid(asset, out var modificationResult))
+                validations.Add(modificationResult);
 
             return validations.MergeAll();
         }
@@ -276,21 +250,13 @@
         {
             var validations = new List<ValidationResult>();
 
-            if (asset.ShouldValidate(asset.Ownership))
-            {
-                if (!AssetValidationHandler.IsOwnershipValid(asset, out var ownerResult))
-                {
-                    validations.Add(ownerResult);
-                }
-            }
+            if (asset.ShouldValidate(asset.Ownership)
+                && !AssetValidationHandler.IsOwnershipValid(asset, out var ownerResult))
+                validations.Add(ownerResult);
 
-            if (asset.ShouldValidate(asset.Custody))
-            {
-                if (!AssetValidationHandler.IsCustodyValid(asset, out var custodyResult))
-                {
-                    validations.Add(custodyResult);
-                }
-            }
+            if (asset.ShouldValidate(asset.Custody)
+                && !AssetValidationHandler.IsCustodyValid(asset, out var custodyResult))
+                validations.Add(custodyResult);
 
             return validations.MergeAll();
         }
@@ -326,7 +292,6 @@
             var validations = new List<ValidationResult>
             {
                 ValidateUniquenessChecks(asset, context),
-                ValidatePortChecks(asset)
             };
 
             // Only run placement checks in single validation mode (context == null)
@@ -337,29 +302,6 @@
             }
 
             return validations.MergeAll();
-        }
-
-        /// <summary>
-        /// Validates port data (data ports, power ports).
-        /// Runs for both single and bulk validation.
-        /// </summary>
-        private ValidationResult ValidatePortChecks(Asset asset)
-        {
-            var result = new ValidationResult();
-
-            // Data ports validation
-            //if (asset.DataPortsField.Changed)
-            //{
-            //    result.AddFailuresFrom(ValidateDataPorts(asset));
-            //}
-
-            //// Power ports validation
-            //if (asset.PowerPortsField.Changed)
-            //{
-            //    result.AddFailuresFrom(ValidatePowerPorts(asset));
-            //}
-
-            return result;
         }
 
         /// <summary>
@@ -424,7 +366,7 @@
                  asset.Location.SideField)
                 && asset.AssetClassId.HasValue())
             {
-                validations.Add(ValidateRackSpaceAvailability(asset, context: null));
+                validations.Add(ValidateRackSpaceAvailability(asset));
             }
 
             return validations.MergeAll();
@@ -504,7 +446,89 @@
             // Initialize results - same order as input
             var results = assets.Select(a => new ValidationResult()).ToList();
 
-            // Duplicate names
+            ValidateNameDuplicatesInBatch(assets, results);
+
+            ValidateAssetIdDuplicatesInBatch(assets, results);
+
+            ValidateSerialNumberDuplicatesInBatch(assets, results);
+
+            // Parent holder conflicts
+            ValidateHolderConflictsInBatch(assets, results);
+
+            // Rack position overlaps (optimized)
+            ValidateRackConflictsInBatch(assets, results);
+
+            return results;
+        }
+
+        private void ValidateRackConflictsInBatch(List<Asset> assets, List<ValidationResult> results)
+        {
+            var rackConflicts = ValidateRackPositionOverlaps(assets);
+
+            for (int i = 0; i < assets.Count; i++)
+            {
+                results[i].AddFailuresFrom(rackConflicts[i]);
+            }
+        }
+
+        private static void ValidateHolderConflictsInBatch(List<Asset> assets, List<ValidationResult> results)
+        {
+            var holderGroups = assets
+                            .Select((asset, index) => new { asset, index })
+                            .Where(x => x.asset.Location?.ParentAsset.HasValue() == true && x.asset.Location?.HolderNumber != null)
+                            .GroupBy(x => new { ParentId = x.asset.Location.ParentAsset.Identifier, x.asset.Location.HolderNumber })
+                            .Where(g => g.Count() > 1);
+
+            foreach (var group in holderGroups)
+            {
+                foreach (var item in group)
+                {
+                    results[item.index].AddFailReason(AssetValidationField.HolderNumber,
+                        $"Holder Number '{item.asset.Location.HolderNumber}' on Parent Asset is already claimed by another asset in the validation batch.");
+                }
+            }
+        }
+
+        private static void ValidateSerialNumberDuplicatesInBatch(List<Asset> assets, List<ValidationResult> results)
+        {
+            var serialGroups = assets
+                            .Select((asset, index) => new { asset, index })
+                            .Where(x => x.asset.ShouldValidate(x.asset.SerialNumberField) &&
+                                       !string.IsNullOrWhiteSpace(x.asset.SerialNumber) &&
+                                       x.asset.AssetClassId.HasValue())
+                            .GroupBy(x => new { AssetClassId = x.asset.AssetClassId.Identifier, SerialNumber = x.asset.SerialNumber.ToLower() })
+                            .Where(g => g.Count() > 1);
+
+            foreach (var group in serialGroups)
+            {
+                foreach (var item in group)
+                {
+                    results[item.index].AddFailReason(AssetValidationField.SerialNumber,
+                        $"Serial Number '{item.asset.SerialNumber}' is duplicated within the validation batch for this Asset Class.");
+                }
+            }
+        }
+
+        private static void ValidateAssetIdDuplicatesInBatch(List<Asset> assets, List<ValidationResult> results)
+        {
+            var assetIdGroups = assets
+                            .Select((asset, index) => new { asset, index })
+                            .Where(x => x.asset.ShouldValidate(x.asset.AssetIDField) && !string.IsNullOrWhiteSpace(x.asset.AssetID))
+                            .GroupBy(x => x.asset.AssetID, StringComparer.OrdinalIgnoreCase)
+                            .Where(g => g.Count() > 1);
+
+            foreach (var group in assetIdGroups)
+            {
+                foreach (var item in group)
+                {
+                    results[item.index].AddFailReason(AssetValidationField.AssetId,
+                        $"Asset ID '{item.asset.AssetID}' is duplicated within the validation batch.");
+                }
+            }
+        }
+
+        private static void ValidateNameDuplicatesInBatch(List<Asset> assets, List<ValidationResult> results)
+        {
             var nameGroups = assets
                 .Select((asset, index) => new { asset, index })
                 .Where(x => x.asset.ShouldValidate(x.asset.NameField) && !string.IsNullOrWhiteSpace(x.asset.Name))
@@ -519,120 +543,66 @@
                         $"Asset Name '{item.asset.Name}' is duplicated within the validation batch.");
                 }
             }
-
-            // Duplicate asset IDs
-            var assetIdGroups = assets
-                .Select((asset, index) => new { asset, index })
-                .Where(x => x.asset.ShouldValidate(x.asset.AssetIDField) && !string.IsNullOrWhiteSpace(x.asset.AssetID))
-                .GroupBy(x => x.asset.AssetID, StringComparer.OrdinalIgnoreCase)
-                .Where(g => g.Count() > 1);
-
-            foreach (var group in assetIdGroups)
-            {
-                foreach (var item in group)
-                {
-                    results[item.index].AddFailReason(AssetValidationField.AssetId,
-                        $"Asset ID '{item.asset.AssetID}' is duplicated within the validation batch.");
-                }
-            }
-
-            // Duplicate serial numbers (per asset class)
-            var serialGroups = assets
-                .Select((asset, index) => new { asset, index })
-                .Where(x => x.asset.ShouldValidate(x.asset.SerialNumberField) &&
-                           !string.IsNullOrWhiteSpace(x.asset.SerialNumber) &&
-                           x.asset.AssetClassId.HasValue())
-                .GroupBy(x => new { AssetClassId = x.asset.AssetClassId.Identifier, SerialNumber = x.asset.SerialNumber.ToLower() })
-                .Where(g => g.Count() > 1);
-
-            foreach (var group in serialGroups)
-            {
-                foreach (var item in group)
-                {
-                    results[item.index].AddFailReason(AssetValidationField.SerialNumber,
-                        $"Serial Number '{item.asset.SerialNumber}' is duplicated within the validation batch for this Asset Class.");
-                }
-            }
-
-            // Parent holder conflicts
-            var holderGroups = assets
-                .Select((asset, index) => new { asset, index })
-                .Where(x => x.asset.Location?.ParentAsset.HasValue() == true && x.asset.Location?.HolderNumber != null)
-                .GroupBy(x => new { ParentId = x.asset.Location.ParentAsset.Identifier, x.asset.Location.HolderNumber })
-                .Where(g => g.Count() > 1);
-
-            foreach (var group in holderGroups)
-            {
-                foreach (var item in group)
-                {
-                    results[item.index].AddFailReason(AssetValidationField.HolderNumber,
-                        $"Holder Number '{item.asset.Location.HolderNumber}' on Parent Asset is already claimed by another asset in the validation batch.");
-                }
-            }
-
-            // Rack position overlaps (optimized)
-            var rackConflicts = ValidateBatchRackConflicts(assets);
-            for (int i = 0; i < assets.Count; i++)
-            {
-                results[i].AddFailuresFrom(rackConflicts[i]);
-            }
-
-            return results;
         }
 
         /// <summary>
         /// Validates rack position conflicts within a batch.
         /// Returns a list of validation results in the same order as input assets.
         /// </summary>
-        private List<ValidationResult> ValidateBatchRackConflicts(List<Asset> assets)
+        private List<ValidationResult> ValidateRackPositionOverlaps(List<Asset> assets)
         {
             // Initialize results - same order as input
             var results = assets.Select(a => new ValidationResult()).ToList();
 
             var rackGroups = assets
-                .Select((asset, index) => new { asset, index })
+                .Select((asset, index) => (asset, index))
                 .Where(x => x.asset.Location != null && x.asset.Location.RackId.HasValue() && x.asset.Location.RackPosition > 0)
                 .GroupBy(x => x.asset.Location.RackId);
 
             foreach (var rackGroup in rackGroups)
-            {
-                var assetsInRack = rackGroup.ToList();
-                if (assetsInRack.Count < 2) continue;
-
-                // Load rack to get Position enum (needed for overlap calculation)
-                var rack = _entityLoader.LoadRack(rackGroup.Key);
-                if (rack == null) continue;
-
-                for (int i = 0; i < assetsInRack.Count; i++)
-                {
-                    var item1 = assetsInRack[i];
-                    var assetClass1 = _entityLoader.LoadAssetClass(item1.asset.AssetClassId);
-                    if (assetClass1 == null || assetClass1.HeightU <= 0) continue;
-
-                    for (int j = i + 1; j < assetsInRack.Count; j++)
-                    {
-                        var item2 = assetsInRack[j];
-                        var assetClass2 = _entityLoader.LoadAssetClass(item2.asset.AssetClassId);
-                        if (assetClass2 == null || assetClass2.HeightU <= 0) continue;
-
-                        // Use the unified asset overlap check
-                        if (RackPlacementValidation.DoAssetsOverlap(
-                            rack.Position,
-                            (int)item1.asset.Location.RackPosition,
-                            (int)assetClass1.HeightU,
-                            (int)item2.asset.Location.RackPosition,
-                            (int)assetClass2.HeightU))
-                        {
-                            results[item1.index].AddFailReason(AssetValidationField.RackPosition,
-                                $"Rack Position {item1.asset.Location.RackPosition} conflicts with another asset in the validation batch.");
-                            results[item2.index].AddFailReason(AssetValidationField.RackPosition,
-                                $"Rack Position {item2.asset.Location.RackPosition} conflicts with another asset in the validation batch.");
-                        }
-                    }
-                }
-            }
+                ProcessRackGroup(rackGroup, results);
 
             return results;
+        }
+
+        private void ProcessRackGroup(IGrouping<SdmObjectReference<Rack>, (Asset asset, int index)> rackGroup, List<ValidationResult> results)
+        {
+            var assetsInRack = rackGroup.ToList();
+            if (assetsInRack.Count < 2) return;
+
+            // Load rack to get Position enum (needed for overlap calculation)
+            var rack = _entityLoader.LoadRack(rackGroup.Key);
+            if (rack == null) return;
+
+            for (int i = 0; i < assetsInRack.Count; i++)
+            {
+                var item1 = assetsInRack[i];
+                var assetClass1 = _entityLoader.LoadAssetClass(item1.asset.AssetClassId);
+                if (assetClass1 == null || assetClass1.HeightU <= 0) continue;
+
+                for (int j = i + 1; j < assetsInRack.Count; j++)
+                    CheckAndRecordOverlap(item1, assetClass1, assetsInRack[j], rack, results);
+            }
+        }
+
+        private void CheckAndRecordOverlap((Asset asset, int index) item1, AssetClass assetClass1, (Asset asset, int index) item2, Rack rack, List<ValidationResult> results)
+        {
+            var assetClass2 = _entityLoader.LoadAssetClass(item2.asset.AssetClassId);
+            if (assetClass2 == null || assetClass2.HeightU <= 0) return;
+
+            // Use the unified asset overlap check
+            if (!RackPlacementValidation.DoAssetsOverlap(
+                rack.Position,
+                (int)item1.asset.Location.RackPosition,
+                (int)assetClass1.HeightU,
+                (int)item2.asset.Location.RackPosition,
+                (int)assetClass2.HeightU))
+                return;
+
+            results[item1.index].AddFailReason(AssetValidationField.RackPosition,
+                $"Rack Position {item1.asset.Location.RackPosition} conflicts with another asset in the validation batch.");
+            results[item2.index].AddFailReason(AssetValidationField.RackPosition,
+                $"Rack Position {item2.asset.Location.RackPosition} conflicts with another asset in the validation batch.");
         }
 
         #endregion
@@ -652,53 +622,8 @@
             try
             {
                 var dataPorts = _entityLoader.LoadDataPorts(asset);
-
-                var seenPortNumbers = new HashSet<long>();
-                int primaryIPv4Count = 0;
-                int primaryIPv6Count = 0;
-
-                foreach (var port in dataPorts)
-                {
-                    // Check for negative port numbers
-                    if (port.DataPortInfo.PortNumber < 0)
-                    {
-                        result.AddFailReason(AssetValidationField.DataPort,
-                            $"Data Port number cannot be negative. Found: {port.DataPortInfo.PortNumber}");
-                        return result;
-                    }
-
-                    // Check for duplicate port numbers
-                    if (!seenPortNumbers.Add(port.DataPortInfo.PortNumber))
-                    {
-                        result.AddFailReason(AssetValidationField.DataPort,
-                            $"Duplicate Data Port number found: {port.DataPortInfo.PortNumber}");
-                        return result;
-                    }
-
-                    // Count primary IPv4 ports
-                    if (port.PrimaryPortRelation.IsPrimaryIpv4)
-                    {
-                        primaryIPv4Count++;
-                        if (primaryIPv4Count > 1)
-                        {
-                            result.AddFailReason(AssetValidationField.DataPort,
-                                "Only one Data Port can be marked as Primary IPv4.");
-                            return result;
-                        }
-                    }
-
-                    // Count primary IPv6 ports
-                    if (port.PrimaryPortRelation.IsPrimaryIpv6)
-                    {
-                        primaryIPv6Count++;
-                        if (primaryIPv6Count > 1)
-                        {
-                            result.AddFailReason(AssetValidationField.DataPort,
-                                "Only one Data Port can be marked as Primary IPv6.");
-                            return result;
-                        }
-                    }
-                }
+                var core = new DataPortValidationCore(_entityLoader);
+                result.AddFailuresFrom(core.ValidateDataPortCollection(dataPorts));
             }
             catch (Exception ex)
             {
@@ -722,27 +647,8 @@
             try
             {
                 var powerPorts = _entityLoader.LoadPowerPorts(asset);
-
-                var seenPortNumbers = new HashSet<long>();
-
-                foreach (var port in powerPorts)
-                {
-                    // Check for negative port numbers
-                    if (port.PowerPortInfo.PortNumber < 0)
-                    {
-                        result.AddFailReason(AssetValidationField.PowerPort,
-                            $"Power Port number cannot be negative. Found: {port.PowerPortInfo.PortNumber}");
-                        return result;
-                    }
-
-                    // Check for duplicate port numbers
-                    if (!seenPortNumbers.Add(port.PowerPortInfo.PortNumber))
-                    {
-                        result.AddFailReason(AssetValidationField.PowerPort,
-                            $"Duplicate Power Port number found: {port.PowerPortInfo.PortNumber}");
-                        return result;
-                    }
-                }
+                result.AddFailuresFrom(PortNumberValidator.ValidateCollection(
+                    powerPorts, p => p.PowerPortInfo.PortNumber, AssetValidationField.PowerPort, "Power Port"));
             }
             catch (Exception ex)
             {
@@ -798,26 +704,8 @@
 
             try
             {
-                var seenPortNumbers = new HashSet<long>();
-
-                foreach (var port in powerPorts)
-                {
-                    // Check for negative port numbers
-                    if (port.PowerPortInfo.PortNumber < 0)
-                    {
-                        result.AddFailReason(AssetValidationField.PowerPort,
-                            $"Power Port number cannot be negative. Found: {port.PowerPortInfo.PortNumber}");
-                        return result;
-                    }
-
-                    // Check for duplicate port numbers
-                    if (!seenPortNumbers.Add(port.PowerPortInfo.PortNumber))
-                    {
-                        result.AddFailReason(AssetValidationField.PowerPort,
-                            $"Duplicate Power Port number found: {port.PowerPortInfo.PortNumber}");
-                        return result;
-                    }
-                }
+                result.AddFailuresFrom(PortNumberValidator.ValidateCollection(
+                    powerPorts, p => p.PowerPortInfo.PortNumber, AssetValidationField.PowerPort, "Power Port"));
             }
             catch (Exception ex)
             {
@@ -834,7 +722,7 @@
 
         private List<string> GetExceptIdentifiers(Asset asset, AssetValidationContext context)
         {
-            return context?.ValidatedAssetIdentifiers ?? new List<string> { asset.Identifier };
+            return context?.GetValidatedAssetIdentifiers() ?? new List<string> { asset.Identifier };
         }
 
         private ValidationResult ValidateParentAssetHolderAvailability(
@@ -901,7 +789,7 @@
             return result;
         }
 
-        private ValidationResult ValidateRackSpaceAvailability(Asset asset, AssetValidationContext context)
+        private ValidationResult ValidateRackSpaceAvailability(Asset asset)
         {
             var result = new ValidationResult();
 
@@ -986,7 +874,7 @@
         /// <summary>
         /// Validates a single asset in a specific rack.
         /// </summary>
-        private ValidationResult ValidateAssetInRack(Asset asset, string rackIdentifier, int position, bool isDestination = false)
+        private ValidationResult ValidateAssetInRack(Asset asset, string rackIdentifier, int position)
         {
             var result = new ValidationResult();
 
@@ -1031,6 +919,7 @@
             var result = new ValidationResult();
 
             // Check Location rack placement
+#pragma warning disable CS0472 // The result of the expression is always the same since a value of this type is never equal to 'null'
             if (asset.Location?.RackId != null && asset.Location.RackId != default && asset.Location.RackPosition != null)
             {
                 result.AddFailuresFrom(ValidateRackPlacementWithContext(
@@ -1039,8 +928,10 @@
                     asset.Location.RackPosition,
                     context));
             }
+#pragma warning restore CS0472 // The result of the expression is always the same since a value of this type is never equal to 'null'
 
             // Check DestinationLocation rack placement
+#pragma warning disable CS0472 // The result of the expression is always the same since a value of this type is never equal to 'null'
             if (asset.DestinationLocation?.RackId != null && asset.DestinationLocation.RackId != default && asset.DestinationLocation.RackPosition != null)
             {
                 result.AddFailuresFrom(ValidateRackPlacementWithContext(
@@ -1050,6 +941,7 @@
                     context,
                     isDestination: true));
             }
+#pragma warning restore CS0472 // The result of the expression is always the same since a value of this type is never equal to 'null'
 
             return result;
         }

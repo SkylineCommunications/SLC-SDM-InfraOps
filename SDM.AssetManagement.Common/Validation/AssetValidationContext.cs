@@ -19,7 +19,7 @@
         /// <summary>
         /// Gets list of identifiers for assets being validated.
         /// </summary>
-        public List<string> ValidatedAssetIdentifiers =>
+        public List<string> GetValidatedAssetIdentifiers() =>
             AssetsBeingValidated.Select(a => a.Identifier).ToList();
 
         /// <summary>

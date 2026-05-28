@@ -255,65 +255,6 @@
 
         #endregion
 
-        #region Bulk Validation
-
-        /// <summary>
-        /// Builds validation context for bulk operations.
-        /// Loads all affected racks and existing assets once.
-        /// </summary>
-        private RackValidationContext BuildRackValidationContext(List<Asset> assetsToValidate)
-        {
-            var context = new RackValidationContext
-            {
-                AssetsBeingValidated = assetsToValidate
-            };
-
-            // Get all unique rack identifiers from validation batch
-            var rackIds = new HashSet<string>();
-            foreach (var asset in assetsToValidate)
-            {
-                if (asset.Location?.RackId != null && asset.Location.RackId != default)
-                {
-                    rackIds.Add(asset.Location.RackId.ToString());
-                }
-
-                if (asset.DestinationLocation?.RackId != null && asset.DestinationLocation.RackId != default)
-                {
-                    rackIds.Add(asset.DestinationLocation.RackId.ToString());
-                }
-            }
-
-            // Load all affected racks
-            foreach (var rackId in rackIds)
-            {
-                var rack = _entityLoader.LoadRack(rackId);
-                if (rack != null)
-                {
-                    context.LoadedRacks[rackId] = rack;
-                }
-            }
-
-            // Get identifiers of assets being validated
-            var validatedAssetIds = assetsToValidate.Select(a => a.Identifier).ToList();
-
-            // Load existing assets in affected racks (excluding assets being validated)
-            foreach (var rackId in rackIds)
-            {
-                var assetsInRack = _entityLoader.FindAssetsInRack(rackId, validatedAssetIds);
-                context.ExistingAssetsInRacks[rackId] = assetsInRack;
-            }
-
-            return context;
-        }
-
-        
-
-        #endregion
-
-        
-
-        #endregion
-
         #region Pipeline Construction (Single Validation)
 
         private Validator<Asset> BuildValidationPipeline()

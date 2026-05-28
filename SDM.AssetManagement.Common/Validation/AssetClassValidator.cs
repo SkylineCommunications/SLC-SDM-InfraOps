@@ -134,12 +134,10 @@
             }
 
             // Device Type is critical
-            if (assetClass.ShouldValidate(assetClass.DeviceTypeIdField))
+            if (assetClass.ShouldValidate(assetClass.DeviceTypeIdField)
+                && !AssetClassValidationHandler.IsAssetClassDeviceTypeValid(assetClass, out var deviceTypeResult))
             {
-                if (!AssetClassValidationHandler.IsAssetClassDeviceTypeValid(assetClass, out var deviceTypeResult))
-                {
-                    result.AddFailuresFrom(deviceTypeResult);
-                }
+                result.AddFailuresFrom(deviceTypeResult);
             }
 
             return result;
@@ -185,11 +183,13 @@
                 return result;
             }
 
+#pragma warning disable CS0472 // The result of the expression is always the same since a value of this type is never equal to 'null'
             if (deviceType.TagsInfo.Tags.Contains(SlcAsset_Management.Enums.TagOption.PowerProvider) && assetClass.PowerSupply == null)
             {
                 result.AddFailReason(AssetClassValidationHandler.AssetClassValidationField.PowerSupply,
                     "Asset Class with 'Power Provider' Device Type must have a Power Supply.");
             }
+#pragma warning restore CS0472 // The result of the expression is always the same since a value of this type is never equal to 'null'
 
             return result;
         }
@@ -198,45 +198,25 @@
         {
             var validations = new List<ValidationResult>();
 
-            if(assetClass.ShouldValidate(assetClass.DepthField))
-            {
-                if (!AssetClassValidationHandler.IsDepthValid(assetClass, out var depthResult))
-                {
-                    validations.Add(depthResult);
-                }
-            }
+            if (assetClass.ShouldValidate(assetClass.DepthField)
+                && !AssetClassValidationHandler.IsDepthValid(assetClass, out var depthResult))
+                validations.Add(depthResult);
 
-            if (assetClass.ShouldValidate(assetClass.WidthField))
-            {
-                if (!AssetClassValidationHandler.IsWidthValid(assetClass, out var widthResult))
-                {
-                    validations.Add(widthResult);
-                }
-            }
+            if (assetClass.ShouldValidate(assetClass.WidthField)
+                && !AssetClassValidationHandler.IsWidthValid(assetClass, out var widthResult))
+                validations.Add(widthResult);
 
-            if (assetClass.ShouldValidate(assetClass.HeightField))
-            {
-                if (!AssetClassValidationHandler.IsHeightValid(assetClass, out var heightResult))
-                {
-                    validations.Add(heightResult);
-                }
-            }
+            if (assetClass.ShouldValidate(assetClass.HeightField)
+                && !AssetClassValidationHandler.IsHeightValid(assetClass, out var heightResult))
+                validations.Add(heightResult);
 
-            if (assetClass.ShouldValidate(assetClass.HeightUField))
-            {
-                if (!AssetClassValidationHandler.IsHeightUnitValid(assetClass, out var heightUResult))
-                {
-                    validations.Add(heightUResult);
-                }
-            }
+            if (assetClass.ShouldValidate(assetClass.HeightUField)
+                && !AssetClassValidationHandler.IsHeightUnitValid(assetClass, out var heightUResult))
+                validations.Add(heightUResult);
 
-            if (assetClass.ShouldValidate(assetClass.WeightField))
-            {
-                if (!AssetClassValidationHandler.IsWeightValid(assetClass, out var weightResult))
-                {
-                    validations.Add(weightResult);
-                }
-            }
+            if (assetClass.ShouldValidate(assetClass.WeightField)
+                && !AssetClassValidationHandler.IsWeightValid(assetClass, out var weightResult))
+                validations.Add(weightResult);
 
             return validations.MergeAll();
         }
@@ -245,21 +225,13 @@
         {
             var validations = new List<ValidationResult>();
 
-            if (assetClass.ShouldValidate(assetClass.TypicalPowerConsumptionField))
-            {
-                if (!AssetClassValidationHandler.IsTypicalPowerConsumptionValid(assetClass, out var typicalResult))
-                {
-                    validations.Add(typicalResult);
-                }
-            }
+            if (assetClass.ShouldValidate(assetClass.TypicalPowerConsumptionField)
+                && !AssetClassValidationHandler.IsTypicalPowerConsumptionValid(assetClass, out var typicalResult))
+                validations.Add(typicalResult);
 
-            if (assetClass.ShouldValidate(assetClass.MaximumPowerConsumptionField))
-            {
-                if (!AssetClassValidationHandler.IsMaxPowerConsumptionValid(assetClass, out var maxResult))
-                {
-                    validations.Add(maxResult);
-                }
-            }
+            if (assetClass.ShouldValidate(assetClass.MaximumPowerConsumptionField)
+                && !AssetClassValidationHandler.IsMaxPowerConsumptionValid(assetClass, out var maxResult))
+                validations.Add(maxResult);
 
             return validations.MergeAll();
         }

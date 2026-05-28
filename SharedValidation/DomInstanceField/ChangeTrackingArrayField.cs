@@ -20,7 +20,6 @@
 			_originalValue = value.ToList();
 			_originalValueChanges = getChangesConverter?.Invoke(_originalValue) ?? _originalValue;
 			_currentValue = value.ToList();
-			//_applyChanges = applyChanges ?? throw new ArgumentNullException(nameof(applyChanges));
 			_getChangesConverter = getChangesConverter;
 		}
 
@@ -42,7 +41,7 @@
 		{
 			get
 			{
-				return _originalValue.ToList();
+				return _originalValue;
 			}
 		}
 

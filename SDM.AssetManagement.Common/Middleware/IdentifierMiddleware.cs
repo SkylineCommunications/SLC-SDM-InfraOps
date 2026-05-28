@@ -19,55 +19,55 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Common.Middleware
         where T : SdmObject<T>
     {
         public IReadOnlyCollection<T> OnCreate(
-            IEnumerable<T> items,
+            IEnumerable<T> oToCreate,
             Func<IEnumerable<T>, IReadOnlyCollection<T>> next)
         {
-            var itemsList = items.ToList();
+            var itemsList = oToCreate.ToList();
             EnsureIdentifiers(itemsList);
             return next(itemsList);
         }
 
         public IReadOnlyCollection<T> OnCreateOrUpdate(
-            IEnumerable<T> items,
+            IEnumerable<T> oToCreateOrUpdate,
             Func<IEnumerable<T>, IReadOnlyCollection<T>> next)
         {
-            var itemsList = items.ToList();
+            var itemsList = oToCreateOrUpdate.ToList();
             EnsureIdentifiers(itemsList);
             return next(itemsList);
         }
 
         public IReadOnlyCollection<T> OnUpdate(
-            IEnumerable<T> items,
+            IEnumerable<T> oToUpdate,
             Func<IEnumerable<T>, IReadOnlyCollection<T>> next)
         {
             // Updates should already have identifiers, but ensure anyway
-            var itemsList = items.ToList();
+            var itemsList = oToUpdate.ToList();
             EnsureIdentifiers(itemsList);
             return next(itemsList);
         }
 
-        public T OnCreate(T item, Func<T, T> next)
+        public T OnCreate(T oToCreate, Func<T, T> next)
         {
-            EnsureIdentifier(item);
-            return next(item);
+            EnsureIdentifier(oToCreate);
+            return next(oToCreate);
         }
 
-        public T OnUpdate(T item, Func<T, T> next)
+        public T OnUpdate(T oToUpdate, Func<T, T> next)
         {
-            EnsureIdentifier(item);
-            return next(item);
+            EnsureIdentifier(oToUpdate);
+            return next(oToUpdate);
         }
 
-        public void OnDelete(IEnumerable<T> items, Action<IEnumerable<T>> next)
+        public void OnDelete(IEnumerable<T> oToDelete, Action<IEnumerable<T>> next)
         {
             // Deletes don't need new identifiers
-            next(items);
+            next(oToDelete);
         }
 
-        public void OnDelete(T item, Action<T> next)
+        public void OnDelete(T oToDelete, Action<T> next)
         {
             // Deletes don't need new identifiers
-            next(item);
+            next(oToDelete);
         }
 
         public IEnumerable<T> OnRead(FilterElement<T> filter, Func<FilterElement<T>, IEnumerable<T>> next)

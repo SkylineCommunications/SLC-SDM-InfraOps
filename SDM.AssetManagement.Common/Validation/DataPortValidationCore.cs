@@ -36,31 +36,21 @@
             var result = new ValidationResult();
 
             // Mandatory fields
-            if (dataPort.DataPortInfo.Changed)
+            if (dataPort.DataPortInfo.Changed
+                && !DataPortValidationHandler.AreMandatoryFieldsValid(dataPort, out var mandatoryResult))
             {
-                if (!DataPortValidationHandler.AreMandatoryFieldsValid(dataPort, out var mandatoryResult))
-                {
-                    result.AddFailuresFrom(mandatoryResult);
-                    return result; // Stop if mandatory fields fail
-                }
+                result.AddFailuresFrom(mandatoryResult);
+                return result; // Stop if mandatory fields fail
             }
 
             // Asset link
-            if (dataPort.AssetField.Changed)
-            {
-                if (!DataPortValidationHandler.IsAssetLinkValid(dataPort, out var assetLinkResult))
-                {
-                    result.AddFailuresFrom(assetLinkResult);
-                }
-            }
+            if (dataPort.AssetField.Changed
+                && !DataPortValidationHandler.IsAssetLinkValid(dataPort, out var assetLinkResult))
+                result.AddFailuresFrom(assetLinkResult);
 
-            if (dataPort.AddressInfo.Changed || dataPort.PrimaryPortRelation.Changed)
-            {
-                if (!DataPortValidationHandler.IsAddressInfoValid(dataPort, out var addressResult))
-                {
-                    result.AddFailuresFrom(addressResult);
-                }
-            }
+            if ((dataPort.AddressInfo.Changed || dataPort.PrimaryPortRelation.Changed)
+                && !DataPortValidationHandler.IsAddressInfoValid(dataPort, out var addressResult))
+                result.AddFailuresFrom(addressResult);
 
             return result;
         }
@@ -198,52 +188,29 @@
                     nameof(dataPorts));
             }
 
-            var result = new ValidationResult();
+            // Basic checks: negative and duplicate port numbers
+            var result = PortNumberValidator.ValidateCollection(
+                dataPorts, p => p.DataPortInfo.PortNumber, DataPortValidationField.PortNumber, "Data Port");
+            if (!result.IsValid) return result;
 
-            var seenPortNumbers = new HashSet<long>();
+            // DataPort-specific: primary IPv4/IPv6 uniqueness
             int primaryIPv4Count = 0;
             int primaryIPv6Count = 0;
 
             foreach (var port in dataPorts)
             {
-                // Check for negative port numbers
-                if (port.DataPortInfo.PortNumber < 0)
+                if (port.PrimaryPortRelation.IsPrimaryIpv4 && ++primaryIPv4Count > 1)
                 {
-                    result.AddFailReason(DataPortValidationField.PortNumber,
-                        $"Data Port number cannot be negative. Found: {port.DataPortInfo.PortNumber}");
+                    result.AddFailReason(DataPortValidationField.PrimaryPort,
+                        "Only one Data Port can be marked as Primary IPv4.");
                     return result;
                 }
 
-                // Check for duplicate port numbers
-                if (!seenPortNumbers.Add(port.DataPortInfo.PortNumber))
+                if (port.PrimaryPortRelation.IsPrimaryIpv6 && ++primaryIPv6Count > 1)
                 {
-                    result.AddFailReason(DataPortValidationField.PortNumber,
-                        $"Port number {port.DataPortInfo.PortNumber} is already in use on the asset.");
+                    result.AddFailReason(DataPortValidationField.PrimaryPort,
+                        "Only one Data Port can be marked as Primary IPv6.");
                     return result;
-                }
-
-                // Count primary IPv4 ports
-                if (port.PrimaryPortRelation.IsPrimaryIpv4)
-                {
-                    primaryIPv4Count++;
-                    if (primaryIPv4Count > 1)
-                    {
-                        result.AddFailReason(DataPortValidationField.PrimaryPort,
-                            "Only one Data Port can be marked as Primary IPv4.");
-                        return result;
-                    }
-                }
-
-                // Count primary IPv6 ports
-                if (port.PrimaryPortRelation.IsPrimaryIpv6)
-                {
-                    primaryIPv6Count++;
-                    if (primaryIPv6Count > 1)
-                    {
-                        result.AddFailReason(DataPortValidationField.PrimaryPort,
-                            "Only one Data Port can be marked as Primary IPv6.");
-                        return result;
-                    }
                 }
             }
 

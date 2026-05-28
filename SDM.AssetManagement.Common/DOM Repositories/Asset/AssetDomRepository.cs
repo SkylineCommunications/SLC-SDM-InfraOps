@@ -125,6 +125,11 @@
                     currentInstance = helper.DomInstances.DoStatusTransition(instanceId, SlcAsset_Management.Behaviors.Asset_Behavior.Transitions.ToValue(transitionId));
                 }
 
+                if(currentInstance == null)
+                {
+                    throw new InvalidOperationException($"State transition failed for asset '{asset.Identifier}' to {toState}.");
+                }
+
                 // return back Asset with updated state
                 asset.State = SlcAsset_Management.Behaviors.Asset_Behavior.Statuses.ToEnum(currentInstance.StatusId);
                 return asset;

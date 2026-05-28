@@ -59,7 +59,7 @@
                     results[i].AddFailuresFrom(ValidateParentHolderPlacement(asset, i, context));
 
                     // Validate rack placement
-                    results[i].AddFailuresFrom(ValidateRackPlacement(asset, i, context));
+                    results[i].AddFailuresFrom(ValidateRackPlacement(asset, context));
 
                     // todo Validate destination parent holder placement
                 }
@@ -142,7 +142,7 @@
                 }
                 else
                 {
-                    throw new Exception($"Rack with ID '{rackId}' not found during context building.");
+                    throw new InvalidOperationException($"Rack with ID '{rackId}' not found during context building.");
                 }
             }
 
@@ -230,7 +230,7 @@
         /// <summary>
         /// Validates rack placement using pre-loaded context.
         /// </summary>
-        private ValidationResult ValidateRackPlacement(Asset asset, int assetIndex, PlacementValidationContext context)
+        private ValidationResult ValidateRackPlacement(Asset asset, PlacementValidationContext context)
         {
             var result = new ValidationResult();
 
@@ -248,11 +248,8 @@
                 return result;
             }
 
-            // Use RackValidator logic for space validation
-            var rackValidator = new RackValidator();
-
             // Build occupation list (existing assets + batch assets)
-            var occupiedAssets = BuildRackOccupationList(rackId, asset, context, isDestination: false);
+            var occupiedAssets = BuildRackOccupationList(rackId, asset, context);
 
             // Validate using RackValidationHandler
             var assetClass = _entityLoader.LoadAssetClass(asset.AssetClassId);
@@ -283,48 +280,37 @@
         private List<(Asset, int, int)> BuildRackOccupationList(
             string rackId,
             Asset asset,
-            PlacementValidationContext context,
-            bool isDestination)
+            PlacementValidationContext context)
         {
             var list = new List<(Asset, int, int)>();
 
-            // Add existing assets from DB (already excludes batch)
             if (context.ExistingAssetsInRacks.TryGetValue(rackId, out var existing))
             {
                 foreach (var a in existing)
                 {
-                    var pos = isDestination ? a.DestinationLocation?.RackPosition : a.Location?.RackPosition;
-                    if (pos != null)
-                    {
-                        var ac = _entityLoader.LoadAssetClass(a.AssetClassId);
-                        if (ac != null && ac.HeightU > 0)
-                        {
-                            list.Add((a, (int)pos.Value, (int)ac.HeightU));
-                        }
-                    }
+                    TryAddToList(list, a, a.Location?.RackPosition);
                 }
             }
 
-            // Add other assets from batch (exclude current by index)
-            foreach(var assetBeingValidated in context.AssetsBeingValidated)
+            foreach (var other in context.AssetsBeingValidated)
             {
-                if (assetBeingValidated.Identifier == asset.Identifier) continue;
-
-                var other = assetBeingValidated;
-                var otherRackId = isDestination ? other.DestinationLocation?.RackId : other.Location?.RackId;
-                var pos = isDestination ? other.DestinationLocation?.RackPosition : other.Location?.RackPosition;
-
-                if (otherRackId?.Identifier == rackId && pos != null)
+                if (other.Identifier == asset.Identifier) continue;
+                    
+                if (other.Location?.RackId.Identifier == rackId)
                 {
-                    var ac = _entityLoader.LoadAssetClass(other.AssetClassId);
-                    if (ac != null && ac.HeightU > 0)
-                    {
-                        list.Add((other, (int)pos.Value, (int)ac.HeightU));
-                    }
+                    TryAddToList(list, other, other.Location?.RackPosition);
                 }
             }
 
             return list;
+        }
+
+        private void TryAddToList(List<(Asset, int, int)> list, Asset a, long? position)
+        {
+            if (position == null) return;
+            var ac = _entityLoader.LoadAssetClass(a.AssetClassId);
+            if (ac != null && ac.HeightU > 0)
+                list.Add((a, (int)position.Value, (int)ac.HeightU));
         }
 
         private List<(InfraopsReservation, List<(long, long)>)> LoadReservationsForRack(Rack rack)

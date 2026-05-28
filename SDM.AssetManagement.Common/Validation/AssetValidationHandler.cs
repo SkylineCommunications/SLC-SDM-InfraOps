@@ -1,5 +1,6 @@
 ﻿namespace Skyline.DataMiner.SDM.AssetManagement.Common.Validation
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
 
@@ -133,7 +134,7 @@
             {
                 asset.Location?.ParentAsset != null && asset.Location.ParentAsset.HasValue(),
                 asset.Location?.RackId != default && asset.Location.RackId.HasValue(),
-                 asset.Location?.DeskId != null && asset.Location.DeskId != default && asset.Location.DeskId != System.Guid.Empty,
+                 asset.Location?.DeskId != null && asset.Location.DeskId != System.Guid.Empty,
                 asset.Location?.ContainerId != null && asset.Location.ContainerId.HasValue(),
                 asset.Location?.RoomId != default && asset.Location.RoomId.HasValue(),
             };
@@ -308,7 +309,7 @@
             {
                 asset.DestinationLocation?.ParentAsset != null && asset.DestinationLocation.ParentAsset.HasValue(),
                 asset.DestinationLocation?.RackId != default && asset.DestinationLocation.RackId.HasValue(),
-                asset.DestinationLocation?.DeskId != null && asset.DestinationLocation.DeskId != default && asset.DestinationLocation.DeskId != System.Guid.Empty,
+                asset.DestinationLocation?.DeskId != null && asset.DestinationLocation.DeskId != System.Guid.Empty,
                 asset.DestinationLocation?.ContainerId != default && asset.DestinationLocation.ContainerId.HasValue(),
                 asset.DestinationLocation?.RoomId != default && asset.DestinationLocation.RoomId.HasValue(),
             };
@@ -493,7 +494,7 @@
                 return result.IsValid;
             }
 
-            var hasUserId = asset.InstallationUserId != default;
+            var hasUserId = asset.InstallationUserId != Guid.Empty;
             var hasDate = asset.InstallationDate.HasValue;
 
             // Both must be set or both must be empty
@@ -527,7 +528,7 @@
                 return result.IsValid;
             }
 
-            var hasUserId = asset.ModificationUserId != default;
+            var hasUserId = asset.ModificationUserId != Guid.Empty;
             var hasDate = asset.ModificationDate.HasValue;
 
             // Both must be set or both must be empty
@@ -565,8 +566,8 @@
                 return result.IsValid;
             }
 
-            var hasContactPerson = asset.Ownership?.ContactPerson != null && asset.Ownership.ContactPerson != default;
-            var hasRole = asset.Ownership?.ContactPersonRole != null && asset.Ownership.ContactPersonRole != default;
+            var hasContactPerson = asset.Ownership?.ContactPerson != null && asset.Ownership.ContactPerson != Guid.Empty;
+            var hasRole = asset.Ownership?.ContactPersonRole != null && asset.Ownership.ContactPersonRole != Guid.Empty;
 
             // Both must be set or both must be empty
             if (hasContactPerson && !hasRole)
@@ -599,8 +600,8 @@
                 return result.IsValid;
             }
 
-            var hasContactPerson = asset.Custody?.ContactPerson != null && asset.Custody.ContactPerson != default;
-            var hasRole = asset.Custody?.ContactPersonRole != null && asset.Custody.ContactPersonRole != default;
+            var hasContactPerson = asset.Custody?.ContactPerson != null && asset.Custody.ContactPerson != Guid.Empty;
+            var hasRole = asset.Custody?.ContactPersonRole != null && asset.Custody.ContactPersonRole != Guid.Empty;
 
             // Both must be set or both must be empty
             if (hasContactPerson && !hasRole)
@@ -643,12 +644,14 @@
             foreach (var holder in holders)
             {
                 // Check for empty slot number
+#pragma warning disable CS0472 // The result of the expression is always the same since a value of this type is never equal to 'null'
                 if (holder.SlotNumber == null)
                 {
                     result.AddFailReason(AssetValidationField.Holder,
                         "All Holders must have a Slot Number.");
                     return result;
                 }
+#pragma warning restore CS0472 // The result of the expression is always the same since a value of this type is never equal to 'null'
 
                 // Check for negative slot number
                 if (holder.SlotNumber < 0)
@@ -704,14 +707,11 @@
                 }
 
                 // Check for duplicate element IDs
-                if (element.ElementID != null)
+                if (element.ElementID != null && !seenElementIds.Add(element.ElementID))
                 {
-                    if (!seenElementIds.Add(element.ElementID))
-                    {
-                        result.AddFailReason(AssetValidationField.Element,
-                            $"Duplicate Element ID found: {element.ElementID}");
-                        return result;
-                    }
+                    result.AddFailReason(AssetValidationField.Element,
+                        $"Duplicate Element ID found: {element.ElementID}");
+                    return result;
                 }
             }
 
@@ -819,7 +819,7 @@
             // Check if any destination location field is populated
             return asset.DestinationLocation.ParentAsset.HasValue() ||
                    asset.DestinationLocation.RackId.HasValue() ||
-                   asset.DestinationLocation.DeskId != default ||
+                   asset.DestinationLocation.DeskId != Guid.Empty ||
                    asset.DestinationLocation.ContainerId.HasValue() ||
                    asset.DestinationLocation.RoomId.HasValue();
         }

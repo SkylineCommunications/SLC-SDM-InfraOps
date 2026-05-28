@@ -15,7 +15,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Validation\ChangeTrackingBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Validation\IChangeTracking.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Validation\ValidationResultExtensions.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)DomInstanceField\DomInstanceArrayField.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\SDMObjectReferenceExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Validation\InfraOpsException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Validation\NumericValidator.cs" />
