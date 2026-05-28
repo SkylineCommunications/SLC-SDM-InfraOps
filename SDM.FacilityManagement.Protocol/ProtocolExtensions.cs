@@ -6,7 +6,7 @@
     using Skyline.DataMiner.SDM.FacilityManagement.Helpers;
 
     /// <summary>
-    /// Provides extension methods for the <see cref="SLProtocol"/> class to support IpAddressApiHelper operations.
+    /// Provides extension methods for working with protocol instances to enable facility management API operations.
     /// </summary>
     public static class ProtocolExtensions
     {

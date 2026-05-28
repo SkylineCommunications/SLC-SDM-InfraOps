@@ -6,7 +6,8 @@
     using Skyline.DataMiner.SDM.AssetManagement.Helpers;
 
     /// <summary>
-    /// Provides extension methods for the <see cref="GQIDMS"/> related to IpAddressApiHelper.
+    /// Provides extension methods for obtaining an asset management API helper from GQIDMS and OnInitInputArgs
+    /// instances.
     /// </summary>
     public static class GqiExtensions
     {

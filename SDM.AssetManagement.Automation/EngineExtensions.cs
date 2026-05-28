@@ -10,12 +10,12 @@
     /// </summary>
     public static class EngineExtensions
     {
-        /// <summary>
-        /// Gets an <see cref="IpAddressApiHelper"/> instance for the specified <see cref="IEngine"/>.
-        /// </summary>
-        /// <param name="engine">The engine to retrieve the IpAddressApiHelper for.</param>
-        /// <returns>An <see cref="IpAddressApiHelper"/> instance associated with the engine's user connection.</returns>
-        /// <exception cref="ArgumentNullException">Thrown when <paramref name="engine"/> is <c>null</c>.</exception>
+       /// <summary>
+       /// Creates an instance of an asset management API helper for the specified engine.
+       /// </summary>
+       /// <param name="engine">The engine instance for which to create the asset management API helper. Cannot be null.</param>
+       /// <returns>An implementation of IAssetManagementApiHelper associated with the specified engine.</returns>
+       /// <exception cref="ArgumentNullException">Thrown if engine is null.</exception>
         public static IAssetManagementApiHelper GetAssetManagementApiHelper(this IEngine engine)
         {
             if (engine is null)

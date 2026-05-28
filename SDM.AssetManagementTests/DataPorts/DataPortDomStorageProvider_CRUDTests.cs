@@ -66,7 +66,7 @@
             Helper.AssetManagement.DataPorts.Create(referenceDataPort);
 
             // Assert
-            AssertCreated(Helper.AssetManagement);
+            AssertCreated();
         }
 
         [TestMethod]
@@ -77,7 +77,7 @@
             Helper.AssetManagement.DataPorts.CreateOrUpdate([referenceDataPort]);
 
             // Assert
-            AssertCreated(Helper.AssetManagement);
+            AssertCreated();
         }
 
         [TestMethod]

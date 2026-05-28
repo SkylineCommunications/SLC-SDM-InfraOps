@@ -5,18 +5,10 @@
     using System.Linq;
 
     using SharedCommonLibrary.AssetManagement.Models;
-    using SharedCommonLibrary.AssetManagement.State_Management;
 
-    using SharedMappers.DomIds;
-
-    using Skyline.DataMiner.Net.Apps.DataMinerObjectModel.Status;
-    using Skyline.DataMiner.SDM.AssetManagement.Common.Validation;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
-    using Skyline.DataMiner.SDM.AssetManagement.Repositories;
     using Skyline.DataMiner.SDM.Common.Services;
     using Skyline.DataMiner.SDM.Extensions;
-    using Skyline.DataMiner.SDM.FacilityManagement.Models;
-    using Skyline.DataMiner.SDM.FacilityManagement.Validation;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
     using static Skyline.DataMiner.SDM.FacilityManagement.Validation.RackValidationHandler;
@@ -180,6 +172,8 @@
 
             return results;
         }
+
+        #endregion
 
         #region Public API - Reservation Placement
 

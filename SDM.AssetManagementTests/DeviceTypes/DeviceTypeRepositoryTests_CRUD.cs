@@ -59,7 +59,7 @@
             Helper.AssetManagement.DeviceTypes.Create(referenceDeviceType);
 
             // Assert
-            AssertCreated(Helper.AssetManagement);
+            AssertCreated();
         }
 
         [TestMethod]
@@ -72,7 +72,7 @@
             Helper.AssetManagement.DeviceTypes.CreateOrUpdate([referenceDeviceType]);
 
             // Assert
-            AssertCreated(Helper.AssetManagement);
+            AssertCreated();
         }
 
         [TestMethod]

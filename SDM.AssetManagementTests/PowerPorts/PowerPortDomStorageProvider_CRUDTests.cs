@@ -55,7 +55,7 @@
             Helper.AssetManagement.PowerPorts.Create(referencePowerPort);
 
             // Assert
-            AssertCreated(Helper.AssetManagement);
+            AssertCreated();
         }
 
         [TestMethod]
@@ -68,7 +68,7 @@
             Helper.AssetManagement.PowerPorts.CreateOrUpdate([referencePowerPort]);
 
             // Assert
-            AssertCreated(Helper.AssetManagement);
+            AssertCreated();
         }
 
         [TestMethod]

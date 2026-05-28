@@ -118,7 +118,7 @@
             Helper.AssetManagement.Assets.Create(referenceAsset);
 
             // Assert
-            AssertCreated(Helper.AssetManagement);
+            AssertCreated();
         }
 
         [TestMethod]
@@ -131,7 +131,7 @@
             Helper.AssetManagement.Assets.CreateOrUpdate([referenceAsset]);
 
             // Assert
-            AssertCreated(Helper.AssetManagement);
+            AssertCreated();
         }
 
         [TestMethod]
