@@ -44,7 +44,7 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
            assetRepository: assetRepository,
            assetClassRepository: assetClassRepository,
            deviceTypeRepository: deviceTypeRepository,
-           rackRepository: facilityManagementHelper?.Racks,
+           rackRepository: facilityManagementHelper.Racks,
            dataPortRepository: dataPortRepository,
            powerPortRepository: powerPortRepository);
 

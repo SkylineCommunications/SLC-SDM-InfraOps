@@ -8,7 +8,7 @@
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     //[GenerateExposers]
-    [SdmDomStorage("(slc)asset_management")]
+    //[SdmDomStorage("(slc)asset_management")]
     public sealed class DataPort : SdmObject<DataPort>, IEquatable<DataPort>, IEntityTracking
     {
         [JsonIgnore]

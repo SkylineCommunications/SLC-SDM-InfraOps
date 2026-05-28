@@ -27,20 +27,6 @@
             Ipv6Address,
         }
 
-        #region IPv4/IPv6 Address Validation Patterns
-
-        // IPv4 pattern: xxx.xxx.xxx.xxx where xxx is 0-255
-        private static readonly Regex Ipv4Regex = new Regex(
-            @"^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$",
-            RegexOptions.Compiled);
-
-        // IPv6 pattern: supports standard and compressed formats
-        private static readonly Regex Ipv6Regex = new Regex(
-            @"^(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$",
-            RegexOptions.Compiled);
-
-        #endregion
-
         #region Info Validation
 
         /// <summary>
@@ -129,43 +115,31 @@
             var primaryPortRelation = dataPort.PrimaryPortRelation;
 
             // Validate IPv4 Address Format (if provided)
-            if (!string.IsNullOrWhiteSpace(addressInfo?.Ipv4Address))
+            if (!string.IsNullOrWhiteSpace(addressInfo?.Ipv4Address) && !IsValidIpv4Address(addressInfo.Ipv4Address))
             {
-                if (!IsValidIpv4Address(addressInfo.Ipv4Address))
-                {
-                    result.AddFailReason(DataPortValidationField.Ipv4Address,
-                        $"Invalid IPv4 address format: '{addressInfo.Ipv4Address}'. Expected format: xxx.xxx.xxx.xxx (e.g., 192.168.1.1)");
-                }
+                result.AddFailReason(DataPortValidationField.Ipv4Address,
+                    $"Invalid IPv4 address format: '{addressInfo.Ipv4Address}'. Expected format: xxx.xxx.xxx.xxx (e.g., 192.168.1.1)");
             }
 
             // Validate IPv6 Address Format (if provided)
-            if (!string.IsNullOrWhiteSpace(addressInfo?.Ipv6Address))
+            if (!string.IsNullOrWhiteSpace(addressInfo?.Ipv6Address) && !IsValidIpv6Address(addressInfo.Ipv6Address))
             {
-                if (!IsValidIpv6Address(addressInfo.Ipv6Address))
-                {
-                    result.AddFailReason(DataPortValidationField.Ipv6Address,
-                        $"Invalid IPv6 address format: '{addressInfo.Ipv6Address}'. Expected format: xxxx:xxxx:xxxx:xxxx:xxxx:xxxx:xxxx:xxxx (e.g., 2001:0db8:85a3::8a2e:0370:7334)");
-                }
+                result.AddFailReason(DataPortValidationField.Ipv6Address,
+                    $"Invalid IPv6 address format: '{addressInfo.Ipv6Address}'. Expected format: xxxx:xxxx:xxxx:xxxx:xxxx:xxxx:xxxx:xxxx (e.g., 2001:0db8:85a3::8a2e:0370:7334)");
             }
 
             // If marked as Primary IPv4, IPv4 address must be populated
-            if (primaryPortRelation?.IsPrimaryIpv4 == true)
+            if (primaryPortRelation?.IsPrimaryIpv4 == true && string.IsNullOrWhiteSpace(addressInfo?.Ipv4Address))
             {
-                if (string.IsNullOrWhiteSpace(addressInfo?.Ipv4Address))
-                {
-                    result.AddFailReason(DataPortValidationField.Ipv4Address,
-                        "DataPort marked as Primary IPv4 must have an IPv4 address.");
-                }
+                result.AddFailReason(DataPortValidationField.Ipv4Address,
+                    "DataPort marked as Primary IPv4 must have an IPv4 address.");
             }
 
             // If marked as Primary IPv6, IPv6 address must be populated
-            if (primaryPortRelation?.IsPrimaryIpv6 == true)
+            if (primaryPortRelation?.IsPrimaryIpv6 == true && string.IsNullOrWhiteSpace(addressInfo?.Ipv6Address))
             {
-                if (string.IsNullOrWhiteSpace(addressInfo?.Ipv6Address))
-                {
-                    result.AddFailReason(DataPortValidationField.Ipv6Address,
-                        "DataPort marked as Primary IPv6 must have an IPv6 address.");
-                }
+                result.AddFailReason(DataPortValidationField.Ipv6Address,
+                    "DataPort marked as Primary IPv6 must have an IPv6 address.");
             }
 
             return result.IsValid;

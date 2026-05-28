@@ -83,12 +83,9 @@
             var result = new ValidationResult();
 
             // Rack Units is critical
-            if (rack.Capacity.RackUnitsField.Changed)
+            if (rack.Capacity.RackUnitsField.Changed && !RackValidationHandler.IsRackUnitCapacityValid(rack, out var unitsResult))
             {
-                if (!RackValidationHandler.IsRackUnitCapacityValid(rack, out var unitsResult))
-                {
-                    result.AddFailuresFrom(unitsResult);
-                }
+                result.AddFailuresFrom(unitsResult);
             }
 
             return result;
@@ -98,28 +95,19 @@
         {
             var result = new ValidationResult();
 
-            if (rack.HeightField.Changed)
+            if (rack.HeightField.Changed && !RackValidationHandler.IsRackHeightValid(rack, out var heightResult))
             {
-                if (!RackValidationHandler.IsRackHeightValid(rack, out var heightResult))
-                {
-                    result.AddFailuresFrom(heightResult);
-                }
+                result.AddFailuresFrom(heightResult);
             }
 
-            if (rack.WidthField.Changed)
+            if (rack.WidthField.Changed && !RackValidationHandler.IsRackWidthValid(rack, out var widthResult))
             {
-                if (!RackValidationHandler.IsRackWidthValid(rack, out var widthResult))
-                {
-                    result.AddFailuresFrom(widthResult);
-                }
+                result.AddFailuresFrom(widthResult);
             }
 
-            if (rack.DepthField.Changed)
+            if (rack.DepthField.Changed && !RackValidationHandler.IsRackDepthValid(rack, out var depthResult))
             {
-                if (!RackValidationHandler.IsRackDepthValid(rack, out var depthResult))
-                {
-                    result.AddFailuresFrom(depthResult);
-                }
+                result.AddFailuresFrom(depthResult);
             }
 
             return result;
@@ -129,12 +117,9 @@
         {
             var result = new ValidationResult();
 
-            if (rack.Capacity.PowerCapacityField.Changed)
+            if (rack.Capacity.PowerCapacityField.Changed && !RackValidationHandler.IsRackPowerCapacityValid(rack, out var powerResult))
             {
-                if (!RackValidationHandler.IsRackPowerCapacityValid(rack, out var powerResult))
-                {
-                    result.AddFailuresFrom(powerResult);
-                }
+                result.AddFailuresFrom(powerResult);    
             }
 
             return result;

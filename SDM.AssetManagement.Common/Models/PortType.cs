@@ -1,7 +1,7 @@
 ﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
     //[GenerateExposers]
-    [SdmDomStorage("(slc)asset_management")]
+    //[SdmDomStorage("(slc)asset_management")]
     public class PortType : SdmObject<PortType>
     {
         public string Name { get; set; }
