@@ -9,18 +9,18 @@
     <Import_RootNamespace>SharedCommonLibrary</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)validation\IEntityTracking.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Validation\IEntityTracking.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FacilityManagement\Validation\RackValidator.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)validation\BulkValidationException.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)validation\ChangeTrackingBase.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)validation\IChangeTracking.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)validation\ValidationResultExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Validation\BulkValidationException.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Validation\ChangeTrackingBase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Validation\IChangeTracking.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Validation\ValidationResultExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DomInstanceField\DomInstanceArrayField.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\SDMObjectReferenceExtensions.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)validation\InfraOpsException.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)validation\NumericValidator.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)validation\ValidationException.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)validation\Validator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Validation\InfraOpsException.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Validation\NumericValidator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Validation\ValidationException.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Validation\Validator.cs" />
     <Compile Include="..\SharedValidation\DomInstanceField\ChangeTrackingArrayField.cs" />
     <Compile Include="..\SharedValidation\DomInstanceField\ChangeTrackingField.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DomInstanceField\ChangeTrackingFieldHandler.cs" />
