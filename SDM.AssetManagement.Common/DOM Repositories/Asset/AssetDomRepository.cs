@@ -109,7 +109,7 @@
             {
                 var transitions = StateMachine.GetTransitionPath(asset.State, toState);
 
-                if (transitions == null)
+                if (transitions.Count == 0)
                 {
                     throw new InvalidOperationException($"No valid transition path found from {asset.State} to {toState}.");
                 }

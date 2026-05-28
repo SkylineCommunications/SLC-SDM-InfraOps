@@ -50,7 +50,11 @@
             set => _dataPortInfo = value ?? new DataPortInfo();
         }
 
-        public SdmObjectReference<Asset> Asset { get; set; }
+        public SdmObjectReference<Asset> Asset
+        {
+            get => (_assetFk ?? (_assetFk = new AssetRelation())).Asset;
+            set => (_assetFk ?? (_assetFk = new AssetRelation())).Asset = value;
+        }
 
         public AddressInfo AddressInfo
         {
@@ -65,14 +69,13 @@
         }
 
         public bool Changed => _dataPortInfo?.Changed == true ||
+        _assetFk?.Changed == true ||
         _addressInfo?.Changed == true ||
-        _primaryPortRelation?.Changed == true ||
-        _assetFk?.Changed == true;
+        _primaryPortRelation?.Changed == true;
 
         [JsonIgnore]
-        internal IChangeTrackingField<SdmObjectReference<Asset>> AssetField => FieldHandler.GetOrCreateField(
-            nameof(Asset),
-            () => new ChangeTrackingField<SdmObjectReference<Asset>>(default));
+        internal IChangeTrackingField<SdmObjectReference<Asset>> AssetField =>
+            (_assetFk ?? (_assetFk = new AssetRelation())).AssetField;
 
         [JsonIgnore]
         public bool IsNew => _isNew;

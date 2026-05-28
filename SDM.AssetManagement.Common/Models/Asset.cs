@@ -298,7 +298,7 @@
         [JsonIgnore]
         internal IChangeTrackingField<Guid> ModificationUserIdField => FieldHandler.GetOrCreateField(
             nameof(ModificationUserId),
-            () => new ChangeTrackingField<Guid>(default));
+            () => new ChangeTrackingField<Guid>(Guid.Empty));
 
         [JsonIgnore]
         internal IChangeTrackingField<DateTime?> ModificationDateField => FieldHandler.GetOrCreateField(

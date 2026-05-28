@@ -15,7 +15,6 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="RackValidator"/> class.
         /// </summary>
-        /// <param name="entityLoader">Shared entity loader service (handles all data access).</param>
         public RackValidator()
         {
             _validationPipeline = BuildValidationPipeline();

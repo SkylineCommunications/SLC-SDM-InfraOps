@@ -91,12 +91,13 @@
         [JsonIgnore]
         internal IChangeTrackingField<Guid> DeskIdField => FieldHandler.GetOrCreateField(
             nameof(DeskId),
-            () => new ChangeTrackingField<Guid>(default));
+            () => new ChangeTrackingField<Guid>(Guid.Empty));
+
 
         [JsonIgnore]
-        internal IChangeTrackingField<SdmObjectReference<FacilityManagement.Models.Facility>> ContainerIdField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<SdmObjectReference<Facility>> ContainerIdField => FieldHandler.GetOrCreateField(
             nameof(ContainerId),
-            () => new ChangeTrackingField<SdmObjectReference<FacilityManagement.Models.Facility>>(default));
+            () => new ChangeTrackingField<SdmObjectReference<Facility>>(default));
 
         [JsonIgnore]
         internal IChangeTrackingField<SdmObjectReference<FacilityManagement.Models.Room>> RoomIdField => FieldHandler.GetOrCreateField(

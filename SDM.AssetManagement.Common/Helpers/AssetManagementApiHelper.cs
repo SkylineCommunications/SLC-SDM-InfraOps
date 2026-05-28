@@ -12,12 +12,6 @@ using Skyline.DataMiner.SDM.Middleware;
 
 public class AssetManagementApiHelper : IAssetManagementApiHelper
 {
-    private readonly AssetDomRepository _assetRepository;
-    private readonly AssetClassDomRepository _assetClassRepository;
-    private readonly DeviceTypeDomRepository _deviceTypeRepository;
-    private readonly DataPortDomRepository _dataPortRepository;
-    private readonly PowerPortDomRepository _powerPortRepository;
-    private readonly SdmEntityLoader _entityLoader;
     private readonly AssetValidator _assetValidator;
     private readonly AssetClassValidator _assetClassValidator;
     //private readonly DeviceTypeValidator _deviceTypeValidator;
@@ -40,45 +34,45 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
         }
 
         // Initialize repositories
-        _assetRepository = new AssetDomRepository(connection);
-        _assetClassRepository = new AssetClassDomRepository(connection);
-        _deviceTypeRepository = new DeviceTypeDomRepository(connection);
-        _dataPortRepository = new DataPortDomRepository(connection);
-        _powerPortRepository = new PowerPortDomRepository(connection);
+        var assetRepository = new AssetDomRepository(connection);
+        var assetClassRepository = new AssetClassDomRepository(connection);
+        var deviceTypeRepository = new DeviceTypeDomRepository(connection);
+        var dataPortRepository = new DataPortDomRepository(connection);
+        var powerPortRepository = new PowerPortDomRepository(connection);
 
-        _entityLoader = new SdmEntityLoader(
-           assetRepository: _assetRepository,
-           assetClassRepository: _assetClassRepository,
-           deviceTypeRepository: _deviceTypeRepository,
+        var entityLoader = new SdmEntityLoader(
+           assetRepository: assetRepository,
+           assetClassRepository: assetClassRepository,
+           deviceTypeRepository: deviceTypeRepository,
            rackRepository: facilityManagementHelper?.Racks,
-           dataPortRepository: _dataPortRepository,
-           powerPortRepository: _powerPortRepository);
+           dataPortRepository: dataPortRepository,
+           powerPortRepository: powerPortRepository);
 
         // Initialize validators
-        _assetValidator = new AssetValidator(_entityLoader);
+        _assetValidator = new AssetValidator(entityLoader);
 
-        _assetClassValidator = new AssetClassValidator(_entityLoader);
+        _assetClassValidator = new AssetClassValidator(entityLoader);
 
         //_deviceTypeValidator = new DeviceTypeValidator(
         //    _deviceTypeRepository,
         //    _assetRepository);
 
         // Wrap with middleware
-        Assets = _assetRepository
+        Assets = assetRepository
             .WithMiddleware(new AssetValidationMiddleware(_assetValidator))
             .WithMiddleware(new IdentifierMiddleware<Asset>());
             
 
-        AssetClasses = _assetClassRepository.WithMiddleware(new AssetClassValidationMiddleware(_assetClassValidator))
+        AssetClasses = assetClassRepository.WithMiddleware(new AssetClassValidationMiddleware(_assetClassValidator))
             .WithMiddleware(new IdentifierMiddleware<AssetClass>());
 
         //DeviceTypes = _deviceTypeRepository.WithMiddleware(
         //    new DeviceTypeValidationMiddleware(_deviceTypeValidator));
 
         // Expose repositories directly (or wrap with middleware later)
-        PowerPorts = _powerPortRepository;
-        DataPorts = _dataPortRepository;
-        DeviceTypes = _deviceTypeRepository;
+        PowerPorts = powerPortRepository;
+        DataPorts = dataPortRepository;
+        DeviceTypes = deviceTypeRepository;
     }
 
     public IConnection Connection { get; }

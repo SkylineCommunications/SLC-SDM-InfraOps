@@ -15,6 +15,7 @@
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <PackageIcon>Icon.png</PackageIcon>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <NoWarn>CS1591</NoWarn>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Authors>SkylineCommunications</Authors>
     <Company>Skyline Communications</Company>

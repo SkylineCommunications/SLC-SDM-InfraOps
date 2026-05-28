@@ -267,7 +267,7 @@
         /// </summary>
         /// <param name="fromStatus">The starting status.</param>
         /// <param name="toStatus">The target status.</param>
-        /// <returns>A list of transitions required to reach the target status, or null if no valid path exists.</returns>
+        /// <returns>A list of transitions required to reach the target status, or an empty list if no valid path exists.</returns>
         public static List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum> GetTransitionPath(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum fromStatus, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum toStatus)
         {
             if (AssetStatusToStatusTransitions.TryGetValue((fromStatus, toStatus), out var transitions))
@@ -275,7 +275,7 @@
                 return new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum>(transitions);
             }
 
-            return null;
+            return new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum>();
         }
     }
 }

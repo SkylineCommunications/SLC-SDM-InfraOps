@@ -27,6 +27,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Common.Middleware
             return next(itemsList);
         }
 
+        public T OnCreate(T oToCreate, Func<T, T> next)
+        {
+            EnsureIdentifier(oToCreate);
+            return next(oToCreate);
+        }
+
         public IReadOnlyCollection<T> OnCreateOrUpdate(
             IEnumerable<T> oToCreateOrUpdate,
             Func<IEnumerable<T>, IReadOnlyCollection<T>> next)
@@ -44,12 +50,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Common.Middleware
             var itemsList = oToUpdate.ToList();
             EnsureIdentifiers(itemsList);
             return next(itemsList);
-        }
-
-        public T OnCreate(T oToCreate, Func<T, T> next)
-        {
-            EnsureIdentifier(oToCreate);
-            return next(oToCreate);
         }
 
         public T OnUpdate(T oToUpdate, Func<T, T> next)

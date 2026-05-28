@@ -4,7 +4,7 @@
     using Newtonsoft.Json;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
-    public class PrimaryPortRelation : ChangeTrackingBase, IEquatable<PrimaryPortRelation>
+    public sealed class PrimaryPortRelation : ChangeTrackingBase, IEquatable<PrimaryPortRelation>
     {
         public bool IsPrimaryIpv6
         {

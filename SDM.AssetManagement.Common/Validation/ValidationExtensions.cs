@@ -24,15 +24,6 @@
         }
 
         /// <summary>
-        /// Determines if any of the specified fields should be validated.
-        /// </summary>
-        public static bool ShouldValidateAny<T>(this T entity, params IChangeTrackingField[] fields)
-            where T : IEntityTracking
-        {
-            return entity.IsNew || fields.Any(f => f.Changed);
-        }
-
-        /// <summary>
         /// Determines if a nested change-tracking object should be validated.
         /// Use this for complex nested objects (like Ownership, Custody) that implement IChangeTracking.
         /// </summary>
@@ -44,6 +35,15 @@
             where T : IEntityTracking
         {
             return entity.IsNew || (nested?.Changed ?? false);
+        }
+
+        /// <summary>
+        /// Determines if any of the specified fields should be validated.
+        /// </summary>
+        public static bool ShouldValidateAny<T>(this T entity, params IChangeTrackingField[] fields)
+            where T : IEntityTracking
+        {
+            return entity.IsNew || fields.Any(f => f.Changed);
         }
     }
 }

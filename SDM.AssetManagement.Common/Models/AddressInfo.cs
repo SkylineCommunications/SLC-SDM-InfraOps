@@ -6,7 +6,7 @@ using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
 namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
-    public class AddressInfo : ChangeTrackingBase, IEquatable<AddressInfo>
+    public sealed class AddressInfo : ChangeTrackingBase, IEquatable<AddressInfo>
     {
         public string Ipv4Address
         {

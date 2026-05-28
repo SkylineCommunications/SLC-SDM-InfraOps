@@ -26,8 +26,7 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="AssetClassValidator"/> class.
         /// </summary>
-        /// <param name="assetClassRepository">Repository for querying asset classes.</param>
-        /// <param name="deviceTypeRepository">Repository for querying device types.</param>
+        /// <param name="entityLoader">The entity loader for querying asset classes and device types.</param>
         public AssetClassValidator(SdmEntityLoader entityLoader)
         {
             _entityLoader = entityLoader ?? throw new ArgumentNullException(nameof(entityLoader));

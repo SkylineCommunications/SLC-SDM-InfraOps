@@ -4,7 +4,7 @@
     using Newtonsoft.Json;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
-    public class AssetClassLifecycle : ChangeTrackingBase, IEquatable<AssetClassLifecycle>
+    public sealed class AssetClassLifecycle : ChangeTrackingBase, IEquatable<AssetClassLifecycle>
     {
         public DateTime EndOfLife
         {

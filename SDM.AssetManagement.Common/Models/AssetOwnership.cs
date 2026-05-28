@@ -34,21 +34,21 @@
         [JsonIgnore]
         internal IChangeTrackingField<Guid> OrganizationField => FieldHandler.GetOrCreateField(
             nameof(Organization),
-            () => new ChangeTrackingField<Guid>(default));
+            () => new ChangeTrackingField<Guid>(Guid.Empty));
 
         [JsonIgnore]
         internal IChangeTrackingField<Guid> ContactPersonField => FieldHandler.GetOrCreateField(
             nameof(ContactPerson),
-            () => new ChangeTrackingField<Guid>(default));
+            () => new ChangeTrackingField<Guid>(Guid.Empty));
 
         [JsonIgnore]
         internal IChangeTrackingField<Guid> ContactPersonRoleField => FieldHandler.GetOrCreateField(
             nameof(ContactPersonRole),
-            () => new ChangeTrackingField<Guid>(default));
+            () => new ChangeTrackingField<Guid>(Guid.Empty));
 
         [JsonIgnore]
         internal IChangeTrackingField<Guid> TeamField => FieldHandler.GetOrCreateField(
             nameof(Team),
-            () => new ChangeTrackingField<Guid>(default));
+            () => new ChangeTrackingField<Guid>(Guid.Empty));
     }
 }

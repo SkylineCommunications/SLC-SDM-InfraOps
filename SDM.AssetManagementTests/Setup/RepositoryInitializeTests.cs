@@ -256,7 +256,7 @@
         {
             // Act & Assert
             Assert.ThrowsException<ArgumentNullException>(
-                () => Helper.PopulateAssets(null));
+                () => Helper.PopulateAssets(null!));
         }
 
         [TestMethod]
@@ -280,7 +280,7 @@
 
             // Act & Assert
             Assert.ThrowsException<ArgumentNullException>(
-                () => Helper.PopulateAssetClasses((IEnumerable<AssetClass>)null));
+                () => Helper.PopulateAssetClasses((IEnumerable<AssetClass>)null!));
         }
 
         [TestMethod]
@@ -304,7 +304,7 @@
 
             // Act & Assert
             Assert.ThrowsException<ArgumentNullException>(
-                () => Helper.PopulateDeviceTypes((IEnumerable<DeviceType>)null));
+                () => Helper.PopulateDeviceTypes((IEnumerable<DeviceType>)null!));
         }
 
         [TestMethod]
@@ -328,7 +328,7 @@
 
             // Act & Assert
             Assert.ThrowsException<ArgumentNullException>(
-                () => Helper.PopulateDataPorts((IEnumerable<DataPort>)null));
+                () => Helper.PopulateDataPorts((IEnumerable<DataPort>)null!));
         }
 
         [TestMethod]

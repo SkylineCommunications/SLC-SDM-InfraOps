@@ -126,7 +126,7 @@
             public int Position { get; set; }
             public string Comment { get; set; }
 
-            public AssetRackPlacement(string rackId, int position, string comment = null)
+            public AssetRackPlacement(string rackId, int position, string? comment = null)
             {
                 RackId = rackId;
                 Position = position;
@@ -299,7 +299,7 @@
        string backImage,
        double typicalPowerConsumption,
        double maximumPowerConsumption,
-       List<AssetHolder> holders = null)
+       List<AssetHolder>? holders = null)
         {
             return new AssetClass
             {

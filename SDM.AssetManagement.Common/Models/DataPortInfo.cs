@@ -6,7 +6,7 @@ using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
 namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
-    public class DataPortInfo : ChangeTrackingBase, IEquatable<DataPortInfo>
+    public sealed class DataPortInfo : ChangeTrackingBase, IEquatable<DataPortInfo>
     {
         public DataPortInfo() : base()
         {

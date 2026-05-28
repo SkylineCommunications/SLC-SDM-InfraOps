@@ -912,84 +912,6 @@
         }
 
         /// <summary>
-        /// Validates asset placement using pre-loaded context (for bulk validation).
-        /// </summary>
-        internal ValidationResult ValidateAssetPlacementWithContext(Asset asset, RackValidationContext context)
-        {
-            var result = new ValidationResult();
-
-            // Check Location rack placement
-#pragma warning disable CS0472 // The result of the expression is always the same since a value of this type is never equal to 'null'
-            if (asset.Location?.RackId != null && asset.Location.RackId != default && asset.Location.RackPosition != null)
-            {
-                result.AddFailuresFrom(ValidateRackPlacementWithContext(
-                    asset,
-                    asset.Location.RackId.ToString(),
-                    asset.Location.RackPosition,
-                    context));
-            }
-#pragma warning restore CS0472 // The result of the expression is always the same since a value of this type is never equal to 'null'
-
-            // Check DestinationLocation rack placement
-#pragma warning disable CS0472 // The result of the expression is always the same since a value of this type is never equal to 'null'
-            if (asset.DestinationLocation?.RackId != null && asset.DestinationLocation.RackId != default && asset.DestinationLocation.RackPosition != null)
-            {
-                result.AddFailuresFrom(ValidateRackPlacementWithContext(
-                    asset,
-                    asset.DestinationLocation.RackId.ToString(),
-                    asset.DestinationLocation.RackPosition,
-                    context,
-                    isDestination: true));
-            }
-#pragma warning restore CS0472 // The result of the expression is always the same since a value of this type is never equal to 'null'
-
-            return result;
-        }
-
-        /// <summary>
-        /// Validates specific rack placement using pre-loaded context.
-        /// </summary>
-        private ValidationResult ValidateRackPlacementWithContext(
-            Asset asset,
-            string rackIdentifier,
-            long? rackPosition,
-            RackValidationContext context,
-            bool isDestination = false)
-        {
-            var result = new ValidationResult();
-
-            if (rackPosition == null)
-            {
-                return result;
-            }
-
-            if (!context.LoadedRacks.TryGetValue(rackIdentifier, out var rack))
-            {
-                result.AddFailReason(RackValidationField.RackSpacePosition, "Rack not found.");
-                return result;
-            }
-
-            var heightU = GetAssetHeightU(asset);
-
-            // Build occupation list (existing assets + other assets being validated)
-            var occupiedSpaces = BuildBulkOccupationList(rackIdentifier, asset, context, isDestination);
-
-            // Load reservations for this rack
-            var reservations = LoadReservationsForRack(rack);
-
-            result.AddFailuresFrom(ValidateRangeOccupancy(
-                rack,
-                (int)rackPosition,
-                heightU,
-                asset,
-                null, // No current reservation
-                occupiedSpaces,
-                reservations));
-
-            return result;
-        }
-
-        /// <summary>
         /// Core validation logic - checks if a range is available in the rack.
         /// </summary>
         internal ValidationResult ValidateRangeOccupancy(
@@ -1050,14 +972,10 @@
                 catch (InvalidOperationException)
                 {
                     // Skip assets with invalid height data
-                    continue;
                 }
             }
-
             return occupationList;
         }
-
-        /// <summary>
         /// Loads all reservations for a specific rack (excluding specified reservation).
         /// </summary>
         internal List<(InfraopsReservation Reservation, List<(long LowerBound, long UpperBound)> Ranges)> LoadReservationsForRack(
@@ -1110,69 +1028,11 @@
         #endregion
 
 
-        /// <summary>
-        /// Builds occupation list for bulk validation context.
-        /// Combines existing assets (from DB) + other assets being validated.
-        /// </summary>
-        private List<(Asset Asset, int Position, int HeightU)> BuildBulkOccupationList(
-            string rackIdentifier,
-            Asset currentAsset,
-            RackValidationContext context,
-            bool isDestination)
-        {
-            var occupationList = new List<(Asset, int, int)>();
+       
 
-            // Add existing assets in rack (already filtered to exclude validation batch)
-            if (context.ExistingAssetsInRacks.TryGetValue(rackIdentifier, out var existingAssets))
-            {
-                foreach (var existing in existingAssets)
-                {
-                    var position = isDestination ? existing.DestinationLocation?.RackPosition : existing.Location?.RackPosition;
+       
+        
 
-                    if (position != null)
-                    {
-                        try
-                        {
-                            var heightU = GetAssetHeightU(existing);
-                            occupationList.Add((existing, (int)position, heightU));
-                        }
-                        catch (InvalidOperationException)
-                        {
-                            // Skip assets with invalid height data
-                            continue;
-                        }
-                    }
-                }
-            }
-
-            // Add other assets being validated in the same rack (exclude current asset)
-            foreach (var other in context.AssetsBeingValidated)
-            {
-                if (other.Identifier == currentAsset.Identifier)
-                {
-                    continue;
-                }
-
-                var rackId = isDestination ? other.DestinationLocation?.RackId : other.Location?.RackId;
-                var position = isDestination ? other.DestinationLocation?.RackPosition : other.Location?.RackPosition;
-
-                if (rackId?.ToString() == rackIdentifier && position != null)
-                {
-                    try
-                    {
-                        var heightU = GetAssetHeightU(other);
-                        occupationList.Add((other, (int)position, heightU));
-                    }
-                    catch (InvalidOperationException)
-                    {
-                        // Skip - let individual validation catch this
-                        continue;
-                    }
-                }
-            }
-
-            return occupationList;
-        }
 
     }
 }
