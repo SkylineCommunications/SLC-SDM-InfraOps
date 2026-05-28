@@ -8,7 +8,6 @@
 		private readonly T1 _baseEntry;
 		private readonly List<T1> _otherChangedEntries;
 		private readonly List<T1> _allChangedEntries;
-		private bool _returnWhenInvalid = true;
 
 		public ValidatorContext()
 		{
@@ -58,18 +57,7 @@
 			}
 		}
 
-		public bool ReturnWhenInvalid
-		{
-			get
-			{
-				return _returnWhenInvalid;
-			}
-
-			set
-			{
-				_returnWhenInvalid = value;
-			}
-		}
+		public bool ReturnWhenInvalid { get; set; } = true;
 
 		// TODO: Add Status Transition information in order to perform validactions considering the end status of the entry (e.g. when validating a change from Not Avaiable to Avaiable, consider the entry as Avaiable for validation purposes)
 

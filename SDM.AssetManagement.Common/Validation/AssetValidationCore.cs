@@ -976,6 +976,7 @@
             }
             return occupationList;
         }
+        /// <summary>
         /// Loads all reservations for a specific rack (excluding specified reservation).
         /// </summary>
         internal List<(InfraopsReservation Reservation, List<(long LowerBound, long UpperBound)> Ranges)> LoadReservationsForRack(

@@ -58,6 +58,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
         [JsonIgnore]
         internal bool IsNewInternal
         {
+            get => _isNew;
             set => _isNew = value;
         }
 

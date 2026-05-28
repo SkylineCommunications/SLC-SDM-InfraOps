@@ -62,6 +62,7 @@
         [JsonIgnore]
         internal bool IsNewInternal
         {
+            get => _isNew;
             set => _isNew = value;
         }
 
@@ -278,7 +279,7 @@
         [JsonIgnore]
         internal IChangeTrackingField<Guid> InstallationUserIdField => FieldHandler.GetOrCreateField(
             nameof(InstallationUserId),
-            () => new ChangeTrackingField<Guid>(default));
+            () => new ChangeTrackingField<Guid>(Guid.Empty));
 
         [JsonIgnore]
         internal IChangeTrackingField<DateTime?> InstallationDateField => FieldHandler.GetOrCreateField(

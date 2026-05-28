@@ -124,13 +124,11 @@
         {
             public string RackId { get; set; }
             public int Position { get; set; }
-            public string Comment { get; set; }
 
-            public AssetRackPlacement(string rackId, int position, string? comment = null)
+            public AssetRackPlacement(string rackId, int position)
             {
                 RackId = rackId;
                 Position = position;
-                Comment = comment;
             }
         }
 
@@ -141,20 +139,20 @@
         public static readonly Dictionary<string, AssetRackPlacement> AssetRackAssignments = new Dictionary<string, AssetRackPlacement>
         {
             // Rack 0 (RACK-001)
-            { SN123456, new AssetRackPlacement(RackId001, 1, "Router - 1U") },
-            { SN123457, new AssetRackPlacement(RackId001, 2, "Switch - 2U") },
-            { SN123458, new AssetRackPlacement(RackId001, 4, "Firewall - 3U") },
-            { SN123459, new AssetRackPlacement(RackId001, 7, "Server - 2U") },
+            { SN123456, new AssetRackPlacement(RackId001, 1) },
+            { SN123457, new AssetRackPlacement(RackId001, 2) },
+            { SN123458, new AssetRackPlacement(RackId001, 4) },
+            { SN123459, new AssetRackPlacement(RackId001, 7) },
             
             // Rack 1 (RACK-002)
-            { SN123460, new AssetRackPlacement(RackId002, 9, "Storage - 2U") },
-            { SN123461, new AssetRackPlacement(RackId002, 11, "UPS - 2U") },
-            { SN123462, new AssetRackPlacement(RackId002, 13, "KVM - 7U") },
+            { SN123460, new AssetRackPlacement(RackId002, 9) },
+            { SN123461, new AssetRackPlacement(RackId002, 11) },
+            { SN123462, new AssetRackPlacement(RackId002, 13) },
             
             // Rack 2 (RACK-003)
-            { SN123463, new AssetRackPlacement(RackId003, 20, "Patch Panel - 1U") },
-            { SN123464, new AssetRackPlacement(RackId003, 21, "Access Point - 1U") },
-            { SN123465, new AssetRackPlacement(RackId003, 22, "Media Converter - 1U") },
+            { SN123463, new AssetRackPlacement(RackId003, 20) },
+            { SN123464, new AssetRackPlacement(RackId003, 21) },
+            { SN123465, new AssetRackPlacement(RackId003, 22) },
         };
 
         // Base DataPorts - will update Asset reference at runtime

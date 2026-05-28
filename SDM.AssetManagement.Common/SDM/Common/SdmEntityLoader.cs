@@ -33,7 +33,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
         private readonly IBulkRepository<InfraopsReservation> _reservationRepository;
         private readonly IBulkRepository<PortType> _portTypeRepository;
 
-        public SdmEntityLoader(
+        public SdmEntityLoader( // NOSONAR S107 - all 8 params are optional repository dependencies; splitting would reduce clarity
             IBulkRepository<Asset> assetRepository = null,
             IBulkRepository<AssetClass> assetClassRepository = null,
             IBulkRepository<DeviceType> deviceTypeRepository = null,

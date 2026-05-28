@@ -13,13 +13,12 @@
 
 		private List<T1> _originalValue;
 		private object _originalValueChanges;
-		private List<T1> _currentValue;
 
 		public ChangeTrackingArrayField(IEnumerable<T1> value, Func<List<T1>, object> getChangesConverter = null)
 		{
 			_originalValue = value.ToList();
 			_originalValueChanges = getChangesConverter?.Invoke(_originalValue) ?? _originalValue;
-			_currentValue = value.ToList();
+			Value = value.ToList();
 			_getChangesConverter = getChangesConverter;
 		}
 
@@ -45,25 +44,14 @@
 			}
 		}
 
-		public List<T1> Value
-		{
-			get
-			{
-				return _currentValue;
-			}
-
-			set
-			{
-				_currentValue = value;
-			}
-		}
+		public List<T1> Value { get; set; }
 
 		public bool Changed
 		{
 			get
 			{
 				bool originalIsNull = _originalValue == null;
-				bool currentIsNull = _currentValue == null;
+				bool currentIsNull = Value == null;
 
 				if (originalIsNull)
 				{
@@ -75,7 +63,7 @@
 					return !originalIsNull;
 				}
 
-				if (_originalValue.Count != _currentValue.Count)
+				if (_originalValue.Count != Value.Count)
 				{
 					return true;
 				}
@@ -107,15 +95,13 @@
 
 		public void ApplyChanges()
 		{
-			//_applyChanges.Invoke(_originalValue, _currentValue);
-
-			_originalValue = _currentValue.ToList();
+			_originalValue = Value.ToList();
 			_originalValueChanges = _getChangesConverter?.Invoke(_originalValue) ?? _originalValue;
 		}
 
 		public void Reset()
 		{
-			_currentValue = _originalValue.ToList();
+			Value = _originalValue.ToList();
 		}
 
 		public void Add(T1 item)

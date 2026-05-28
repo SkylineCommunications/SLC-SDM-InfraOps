@@ -48,6 +48,7 @@
         [JsonIgnore]
         internal bool IsNewInternal
         {
+            get => _isNew;
             set => _isNew = value;
         }
 
