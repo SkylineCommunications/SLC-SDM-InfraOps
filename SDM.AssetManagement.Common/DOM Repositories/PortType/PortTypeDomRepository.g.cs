@@ -10,6 +10,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     using System.Collections.Generic;
     using System.Linq;
 
+    using SharedMappers.DomIds;
+
     using Skyline.DataMiner.Net;
     using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
     using Skyline.DataMiner.Net.Apps.Sections.Sections;
@@ -535,7 +537,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 var _categorylinkscategories = _categorylinksSection.GetListValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.CategoryRelation.CategoryLinks);
                 if (_categorylinkscategories != null)
                 {
-                    obj.CategoryLinks.Categories = _categorylinkscategories.Values.Select(x => (SharedMappers.DomIds.SlcAsset_Management.Enums.CategoriesEnum)Enum.Parse(typeof(SharedMappers.DomIds.SlcAsset_Management.Enums.CategoriesEnum), x)).ToList();
+                    obj.CategoryLinks.Categories = _categorylinkscategories.Values.Select(x => (SharedMappers.DomIds.SlcAsset_Management.Enums.Categories.ToEnum(x))).ToList();
                 }
             }
 
@@ -590,7 +592,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 var _categorylinks = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.CategoryRelation.SectionDefinitionId);
                 if (obj.CategoryLinks.Categories != default)
                 {
-                    _categorylinks.AddOrUpdateListValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.CategoryRelation.CategoryLinks, obj.CategoryLinks.Categories.Select(x => x.ToString()).ToList());
+                    _categorylinks.AddOrUpdateListValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.CategoryRelation.CategoryLinks, obj.CategoryLinks.Categories.Select(x => SlcAsset_Management.Enums.Categories.ToValue(x)).ToList());
                 }
 
                 instance.Sections.Add(_categorylinks);
