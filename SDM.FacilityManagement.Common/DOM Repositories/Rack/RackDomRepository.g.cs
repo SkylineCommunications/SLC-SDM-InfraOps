@@ -829,33 +829,33 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             {
                 case "Identifier":
                     return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.Id, comparer, Guid.Parse((string)value));
-                case "RackProperties.Name":
+                case "Name":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.Name), comparer, (string)value);
-                case "RackProperties.Model":
+                case "Model":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.Model), comparer, (string)value);
-                case "RackProperties.Position":
+                case "Position":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.Position), comparer, (int)(SharedMappers.DomIds.SlcFacility_Management.Enums.RackpositionenumEnum)value);
-                case "RackProperties.Width":
+                case "Width":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.Width), comparer, (double)value);
-                case "RackProperties.Height":
+                case "Height":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.Height), comparer, (double)value);
-                case "RackProperties.Depth":
+                case "Depth":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.Depth), comparer, (double)value);
-                case "RackProperties.Description":
+                case "Description":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.Description), comparer, (string)value);
-                case "RackProperties.Bookable":
+                case "Bookable":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.Bookable), comparer, (bool)value);
-                case "RackProperties.CoolingFlow":
+                case "CoolingFlow":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.CoolingFlow), comparer, (int)(SharedMappers.DomIds.SlcFacility_Management.Enums.CoolingflowenumEnum)value);
-                case "RackProperties.XPosition":
+                case "XPosition":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.XPosition), comparer, (double)value);
-                case "RackProperties.YPosition":
+                case "YPosition":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.YPosition), comparer, (double)value);
-                case "RackProperties.Label":
+                case ".Label":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.Label), comparer, (string)value);
-                case "RackProperties.Orientation":
+                case "Orientation":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.Orientation), comparer, (int)(SharedMappers.DomIds.SlcFacility_Management.Enums.Placementorientationenum)value);
-                case "RackProperties.RackId":
+                case "RackId":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.RackId), comparer, (string)value);
                 case "Capacity.MaximumRackCapacity":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.Capacity.MaximumRackCapacity), comparer, (double)value);
@@ -882,33 +882,33 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             {
                 case "Identifier":
                     return OrderByElementFactory.Create(DomInstanceExposers.Id, sortOrder, naturalSort);
-                case "RackProperties.Name":
+                case "Name":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.Name), sortOrder, naturalSort);
-                case "RackProperties.Model":
+                case "Model":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.Model), sortOrder, naturalSort);
-                case "RackProperties.Position":
+                case "Position":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.Position), sortOrder, naturalSort);
-                case "RackProperties.Width":
+                case "Width":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.Width), sortOrder, naturalSort);
-                case "RackProperties.Height":
+                case "Height":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.Height), sortOrder, naturalSort);
-                case "RackProperties.Depth":
+                case "Depth":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.Depth), sortOrder, naturalSort);
-                case "RackProperties.Description":
+                case "Description":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.Description), sortOrder, naturalSort);
-                case "RackProperties.Bookable":
+                case "Bookable":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.Bookable), sortOrder, naturalSort);
-                case "RackProperties.CoolingFlow":
+                case "CoolingFlow":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.CoolingFlow), sortOrder, naturalSort);
-                case "RackProperties.XPosition":
+                case "XPosition":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.XPosition), sortOrder, naturalSort);
-                case "RackProperties.YPosition":
+                case "YPosition":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.YPosition), sortOrder, naturalSort);
-                case "RackProperties.Label":
+                case "Label":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.Label), sortOrder, naturalSort);
-                case "RackProperties.Orientation":
+                case "Orientation":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.Orientation), sortOrder, naturalSort);
-                case "RackProperties.RackId":
+                case "RackId":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.RackId), sortOrder, naturalSort);
                 case "Capacity.MaximumRackCapacity":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.Capacity.MaximumRackCapacity), sortOrder, naturalSort);
