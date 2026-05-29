@@ -18,6 +18,8 @@
 
 		IBulkRepository<DeviceType> DeviceTypes { get; }
 
+		IBulkRepository<PortType> PortTypes { get; }
+
         AssetClassValidator AssetClassValidator { get; }
 
         //DeviceTypeValidator DeviceTypeValidator { get; }

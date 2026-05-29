@@ -49,6 +49,11 @@
         /// Power ports - depends on Assets.
         /// </summary>
         PowerPorts = 6,
+
+        /// <summary>
+        /// Port types - no dependencies.
+        /// </summary>
+        PortTypes = 7,
     }
 
     public static partial class RepositoryInitialize
@@ -106,6 +111,11 @@
                 PopulatePowerPorts(helper);
             }
 
+            if (upTo >= DemoDataLayer.PortTypes)
+            {
+                PopulatePortTypes(helper);
+            }
+
             return helper;
         }
 
@@ -114,7 +124,7 @@
         /// </summary>
         public static ITestApiHelper PopulateWithDemoData(this ITestApiHelper helper)
         {
-            return PopulateWithDemoData(helper, DemoDataLayer.PowerPorts);
+            return PopulateWithDemoData(helper, DemoDataLayer.PortTypes);
         }
 
         #region Assets
@@ -417,6 +427,49 @@
                 .Read(new TRUEFilterElement<PowerPort>())
                 .ToList();
             helper.TestData.PowerPorts = allPowerPorts.AsReadOnly();
+        }
+
+        #endregion
+
+        #region PortTypes
+
+        public static ITestApiHelper PopulatePortTypes(this ITestApiHelper helper, IEnumerable<PortType> portTypes)
+        {
+            if (portTypes == null)
+            {
+                throw new ArgumentNullException(nameof(portTypes));
+            }
+
+            helper.AssetManagement.PortTypes.Create(portTypes);
+
+            // Refresh cache from database to ensure consistency
+            RefreshPortTypesCache(helper);
+
+            return helper;
+        }
+
+        private static ITestApiHelper PopulatePortTypes(this ITestApiHelper helper)
+        {
+            // If already populated, return existing
+            if (helper.TestData.PortTypes.Any())
+            {
+                return helper;
+            }
+
+            helper.AssetManagement.PortTypes.Create(DemoData.PortTypes);
+
+            // Refresh cache from database to ensure consistency
+            RefreshPortTypesCache(helper);
+
+            return helper;
+        }
+
+        private static void RefreshPortTypesCache(ITestApiHelper helper)
+        {
+            var allPortTypes = helper.AssetManagement.PortTypes
+                .Read(new TRUEFilterElement<PortType>())
+                .ToList();
+            helper.TestData.PortTypes = allPortTypes.AsReadOnly();
         }
 
         #endregion

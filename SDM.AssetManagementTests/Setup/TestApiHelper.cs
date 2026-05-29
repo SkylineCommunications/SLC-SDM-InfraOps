@@ -40,6 +40,7 @@
         IReadOnlyList<Asset> Assets { get; internal set; }
         IReadOnlyList<DataPort> DataPorts { get; internal set; }
         IReadOnlyList<PowerPort> PowerPorts { get; internal set; }
+        IReadOnlyList<PortType> PortTypes { get; internal set; }
         IReadOnlyList<Rack> Racks { get; internal set; }
     }
 
@@ -53,6 +54,7 @@
         public IReadOnlyList<Asset> Assets { get; set; } = Array.Empty<Asset>();
         public IReadOnlyList<DataPort> DataPorts { get; set; } = Array.Empty<DataPort>();
         public IReadOnlyList<PowerPort> PowerPorts { get; set; } = Array.Empty<PowerPort>();
+        public IReadOnlyList<PortType> PortTypes { get; set; } = Array.Empty<PortType>();
         public IReadOnlyList<Rack> Racks { get; set; } = Array.Empty<Rack>();
     }
 

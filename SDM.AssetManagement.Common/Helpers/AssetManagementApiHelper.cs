@@ -73,6 +73,7 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
         PowerPorts = powerPortRepository;
         DataPorts = dataPortRepository;
         DeviceTypes = deviceTypeRepository;
+        PortTypes = new PortTypeDomRepository(connection);
     }
 
     public IConnection Connection { get; }
@@ -81,6 +82,7 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
     public IBulkRepository<PowerPort> PowerPorts { get; }
     public IBulkRepository<DataPort> DataPorts { get; }
     public IBulkRepository<DeviceType> DeviceTypes { get; }
+    public IBulkRepository<PortType> PortTypes { get; }
 
     public AssetValidator AssetValidator => _assetValidator;
     public AssetClassValidator AssetClassValidator => _assetClassValidator;
