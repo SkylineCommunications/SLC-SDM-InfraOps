@@ -10,5 +10,7 @@
 		IBulkRepository<Facility> Facilities { get; }
 
         IBulkRepository<Rack> Racks { get; }
+
+        IBulkRepository<Room> Rooms { get; }
     }
 }

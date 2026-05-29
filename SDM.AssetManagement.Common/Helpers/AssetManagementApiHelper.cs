@@ -8,7 +8,6 @@ using Skyline.DataMiner.SDM.AssetManagement.Models;
 using Skyline.DataMiner.SDM.AssetManagement.Validation;
 using Skyline.DataMiner.SDM.Common.Services;
 using Skyline.DataMiner.SDM.FacilityManagement.Helpers;
-using Skyline.DataMiner.SDM.Middleware;
 
 public class AssetManagementApiHelper : IAssetManagementApiHelper
 {
@@ -39,6 +38,7 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
         var deviceTypeRepository = new DeviceTypeDomRepository(connection);
         var dataPortRepository = new DataPortDomRepository(connection);
         var powerPortRepository = new PowerPortDomRepository(connection);
+        var portTypeRepository = new PortTypeDomRepository(connection);
 
         var entityLoader = new SdmEntityLoader(
            assetRepository: assetRepository,
@@ -46,7 +46,8 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
            deviceTypeRepository: deviceTypeRepository,
            rackRepository: facilityManagementHelper.Racks,
            dataPortRepository: dataPortRepository,
-           powerPortRepository: powerPortRepository);
+           powerPortRepository: powerPortRepository,
+           portTypeRepository: portTypeRepository);
 
         // Initialize validators
         _assetValidator = new AssetValidator(entityLoader);
@@ -73,6 +74,7 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
         PowerPorts = powerPortRepository;
         DataPorts = dataPortRepository;
         DeviceTypes = deviceTypeRepository;
+        PortTypes = portTypeRepository;
     }
 
     public IConnection Connection { get; }
@@ -81,8 +83,9 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
     public IBulkRepository<PowerPort> PowerPorts { get; }
     public IBulkRepository<DataPort> DataPorts { get; }
     public IBulkRepository<DeviceType> DeviceTypes { get; }
+    public IBulkRepository<PortType> PortTypes { get; }
 
     public AssetValidator AssetValidator => _assetValidator;
     public AssetClassValidator AssetClassValidator => _assetClassValidator;
-    //public DeviceTypeValidator DeviceTypeValidator => _deviceTypeValidator;
+    
 }
