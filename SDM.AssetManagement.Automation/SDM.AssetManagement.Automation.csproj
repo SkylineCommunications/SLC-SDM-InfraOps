@@ -6,7 +6,7 @@
     <Nullable>disable</Nullable>
     <AssemblyName>Skyline.DataMiner.SDM.AssetManagement.Automation</AssemblyName>
     <RootNamespace>Skyline.DataMiner.SDM.AssetManagement.Automation</RootNamespace>
-    <VersionSuffix Condition="'$(Configuration)' == 'Debug'">dev-007</VersionSuffix>
+    <VersionSuffix Condition="'$(Configuration)' == 'Debug'">dev-008</VersionSuffix>
     <VersionPrefix>1.0.1</VersionPrefix>
     <PackageTags>Skyline;DataMiner</PackageTags>
     <PackageProjectUrl>https://skyline.be</PackageProjectUrl>
