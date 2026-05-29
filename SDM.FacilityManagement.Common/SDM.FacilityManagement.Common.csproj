@@ -6,7 +6,7 @@
     <Nullable>disable</Nullable>
     <AssemblyName>Skyline.DataMiner.SDM.FacilityManagement.Common</AssemblyName>
     <RootNamespace>Skyline.DataMiner.SDM.FacilityManagement.Common</RootNamespace>
-    <VersionSuffix Condition="'$(Configuration)' == 'Debug'">dev-006</VersionSuffix>
+    <VersionSuffix Condition="'$(Configuration)' == 'Debug'">dev-007</VersionSuffix>
     <VersionPrefix>1.0.1</VersionPrefix>
     <PackageTags>Skyline;DataMiner</PackageTags>
     <PackageProjectUrl>https://skyline.be</PackageProjectUrl>
