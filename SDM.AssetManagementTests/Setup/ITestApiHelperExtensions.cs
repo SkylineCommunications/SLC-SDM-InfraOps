@@ -105,6 +105,15 @@ namespace SDM.AssetManagement.Tests.Setup
             // Delete in reverse dependency order
             SafeDelete(() =>
             {
+                var portTypes = helper.AssetManagement.PortTypes.Read(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.PortType>());
+                if (portTypes.Any())
+                {
+                    helper.AssetManagement.PortTypes.Delete(portTypes);
+                }
+            });
+
+            SafeDelete(() =>
+            {
                 var powerPorts = helper.AssetManagement.PowerPorts.Read(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort>());
                 if (powerPorts.Any())
                 {
@@ -166,6 +175,7 @@ namespace SDM.AssetManagement.Tests.Setup
                 cache.Assets = Array.Empty<Skyline.DataMiner.SDM.AssetManagement.Models.Asset>();
                 cache.DataPorts = Array.Empty<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort>();
                 cache.PowerPorts = Array.Empty<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort>();
+                cache.PortTypes = Array.Empty<Skyline.DataMiner.SDM.AssetManagement.Models.PortType>();
                 cache.Racks = Array.Empty<Skyline.DataMiner.SDM.FacilityManagement.Models.Rack>();
             }
         }

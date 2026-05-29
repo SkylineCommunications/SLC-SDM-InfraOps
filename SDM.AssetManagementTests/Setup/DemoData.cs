@@ -184,6 +184,33 @@
             CreateBasePowerPort(9),
         ];
 
+        private static readonly SlcAsset_Management.Enums.CategoriesEnum[] AllCategories =
+        [
+            SlcAsset_Management.Enums.CategoriesEnum.Networking,
+            SlcAsset_Management.Enums.CategoriesEnum.Power,
+            SlcAsset_Management.Enums.CategoriesEnum.Audio,
+            SlcAsset_Management.Enums.CategoriesEnum.Storage,
+            SlcAsset_Management.Enums.CategoriesEnum.Peripheral,
+            SlcAsset_Management.Enums.CategoriesEnum.Video,
+            SlcAsset_Management.Enums.CategoriesEnum.Misc,
+            SlcAsset_Management.Enums.CategoriesEnum.Data,
+            SlcAsset_Management.Enums.CategoriesEnum.Broadcast,
+        ];
+
+        public static readonly List<PortType> PortTypes =
+        [
+            CreatePortType(0),
+            CreatePortType(1),
+            CreatePortType(2),
+            CreatePortType(3),
+            CreatePortType(4),
+            CreatePortType(5),
+            CreatePortType(6),
+            CreatePortType(7),
+            CreatePortType(8),
+            CreatePortType(9),
+        ];
+
         #region Asset Port Instances (DataPort, PowerPort)
 
         private static DataPort CreateBaseDataPort(int i)
@@ -227,6 +254,40 @@
                     Label = $"Power Port Label {i}",
                 },
                 // Asset will be set at runtime
+            };
+        }
+
+        private static PortType CreatePortType(int i)
+        {
+            var categories = new List<SlcAsset_Management.Enums.CategoriesEnum>
+            {
+                AllCategories[i % AllCategories.Length],
+                AllCategories[(i + 3) % AllCategories.Length],
+            };
+
+            var cableTypeFks = new List<SdmObjectReference<CableType>>
+            {
+                new SdmObjectReference<CableType>(Guid.NewGuid().ToString()),
+            };
+
+            if (i % 3 == 0)
+            {
+                cableTypeFks.Add(new SdmObjectReference<CableType>(Guid.NewGuid().ToString()));
+            }
+
+            return new PortType
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                Name = $"Port Type {i}",
+                Description = $"Description for port type {i}",
+                CategoryLinks = new CategoryRelation
+                {
+                    Categories = categories,
+                },
+                CableFKs = new CableRelation
+                {
+                    CableTypeFks = cableTypeFks,
+                },
             };
         }
 

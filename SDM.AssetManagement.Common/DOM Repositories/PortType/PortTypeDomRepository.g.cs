@@ -10,6 +10,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     using System.Collections.Generic;
     using System.Linq;
 
+    using SharedMappers.DomIds;
+
     using Skyline.DataMiner.Net;
     using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
     using Skyline.DataMiner.Net.Apps.Sections.Sections;
@@ -528,6 +530,17 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 }
             }
 
+            var _categorylinksSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.CategoryRelation.SectionDefinitionId));
+            if (_categorylinksSection != default)
+            {
+                obj.CategoryLinks = new Skyline.DataMiner.SDM.AssetManagement.Models.CategoryRelation();
+                var _categorylinkscategories = _categorylinksSection.GetListValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.CategoryRelation.CategoryLinks);
+                if (_categorylinkscategories != null)
+                {
+                    obj.CategoryLinks.Categories = _categorylinkscategories.Values.Select(x => (SharedMappers.DomIds.SlcAsset_Management.Enums.Categories.ToEnum(x))).ToList();
+                }
+            }
+
             var _cablefksSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.CableFKs.SectionDefinitionId));
             if (_cablefksSection != default)
             {
@@ -574,6 +587,17 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
 
             instance.Sections.Add(_porttypeproperties);
+            if (obj.CategoryLinks != null)
+            {
+                var _categorylinks = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.CategoryRelation.SectionDefinitionId);
+                if (obj.CategoryLinks.Categories != default)
+                {
+                    _categorylinks.AddOrUpdateListValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.CategoryRelation.CategoryLinks, obj.CategoryLinks.Categories.Select(x => SlcAsset_Management.Enums.Categories.ToValue(x)).ToList());
+                }
+
+                instance.Sections.Add(_categorylinks);
+            }
+
             if (obj.CableFKs != null)
             {
                 var _cablefks = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.CableFKs.SectionDefinitionId);
@@ -600,6 +624,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.PortTypeProperties.Description), comparer, (string)value);
                 case "CableFKs.CableTypeFks":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.CableFKs.CableTypeFks), comparer, System.Guid.Parse(Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.CableType>.Convert(value).Identifier));
+                case "CategoryLinks.Categories":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.CategoryRelation.CategoryLinks), comparer, Convert.ToString(value));
                 default:
                     throw new NotImplementedException();
             }
@@ -617,6 +643,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.PortTypeProperties.Description), sortOrder, naturalSort);
                 case "CableFKs.CableTypeFks":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.CableFKs.CableTypeFks), sortOrder, naturalSort);
+                case "CategoryLinks.Categories":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.CategoryRelation.CategoryLinks), sortOrder, naturalSort);
                 default:
                     throw new NotImplementedException();
             }
