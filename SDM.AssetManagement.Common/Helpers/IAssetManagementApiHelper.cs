@@ -3,8 +3,9 @@
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.AssetManagement.Validation;
+    using Connection = Skyline.DataMiner.SDM.AssetManagement.Models.Connection;
 
-	public interface IAssetManagementApiHelper
+    public interface IAssetManagementApiHelper
 	{
 		IConnection Connection { get; }
 
@@ -20,8 +21,9 @@
 
         IBulkRepository<PortType> PortTypes { get; }
 
-        AssetClassValidator AssetClassValidator { get; }
+        IBulkRepository<Connection> Connections { get; }
 
+        AssetClassValidator AssetClassValidator { get; }
         //DeviceTypeValidator DeviceTypeValidator { get; }
     }
 }

@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using Skyline.DataMiner.SDM.AssetManagement.Models;
-
-namespace Skyline.DataMiner.SDM.AssetManagement.Common.Models
+﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
+    using System;
+
     public class DestinationInfo
     {
         public string CableTag { get; set; }

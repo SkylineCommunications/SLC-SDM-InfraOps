@@ -11,6 +11,8 @@
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
+    //[GenerateExposers]
+    //[SdmDomStorage("(slc)asset_management")]
     public class Asset : SdmObject<Asset>, IEntityTracking
     {
         [JsonIgnore]

@@ -3,11 +3,13 @@
 using Skyline.DataMiner.Net;
 using Skyline.DataMiner.SDM;
 using Skyline.DataMiner.SDM.AssetManagement.Common.Middleware;
-using Skyline.DataMiner.SDM.AssetManagement.Helpers;
 using Skyline.DataMiner.SDM.AssetManagement.Models;
+using Skyline.DataMiner.SDM.AssetManagement.Helpers;
 using Skyline.DataMiner.SDM.AssetManagement.Validation;
 using Skyline.DataMiner.SDM.Common.Services;
 using Skyline.DataMiner.SDM.FacilityManagement.Helpers;
+
+using Connection = Skyline.DataMiner.SDM.AssetManagement.Models.Connection;
 
 public class AssetManagementApiHelper : IAssetManagementApiHelper
 {
@@ -39,6 +41,7 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
         var dataPortRepository = new DataPortDomRepository(connection);
         var powerPortRepository = new PowerPortDomRepository(connection);
         var portTypeRepository = new PortTypeDomRepository(connection);
+        var connectionDomRepository = new ConnectionDomRepository(connection);
 
         var entityLoader = new SdmEntityLoader(
            assetRepository: assetRepository,
@@ -75,6 +78,7 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
         DataPorts = dataPortRepository;
         DeviceTypes = deviceTypeRepository;
         PortTypes = portTypeRepository;
+        Connection = connection;
     }
 
     public IConnection Connection { get; }
@@ -84,6 +88,7 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
     public IBulkRepository<DataPort> DataPorts { get; }
     public IBulkRepository<DeviceType> DeviceTypes { get; }
     public IBulkRepository<PortType> PortTypes { get; }
+    public IBulkRepository<Connection> Connections { get; }
 
     public AssetValidator AssetValidator => _assetValidator;
     public AssetClassValidator AssetClassValidator => _assetClassValidator;

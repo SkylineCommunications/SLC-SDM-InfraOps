@@ -11,7 +11,6 @@
     using Skyline.DataMiner.SDM.Common.Services;
     using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
-    using Skyline.DataMiner.SDM.FacilityManagement.Validation;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
     using static Skyline.DataMiner.SDM.AssetManagement.Common.Validation.AssetValidationHandler;

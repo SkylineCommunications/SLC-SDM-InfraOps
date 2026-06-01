@@ -32,8 +32,9 @@ namespace Skyline.DataMiner.SDM.Common.Services
         private readonly IBulkRepository<PowerPort> _powerPortRepository;
         private readonly IBulkRepository<InfraopsReservation> _reservationRepository;
         private readonly IBulkRepository<PortType> _portTypeRepository;
+        private readonly IBulkRepository<CableType> _cableTypeRepository;
 
-        public SdmEntityLoader( // NOSONAR S107 - all 8 params are optional repository dependencies; splitting would reduce clarity
+        public SdmEntityLoader( // NOSONAR S107 - all params are optional repository dependencies; splitting would reduce clarity
             IBulkRepository<Asset> assetRepository = null,
             IBulkRepository<AssetClass> assetClassRepository = null,
             IBulkRepository<DeviceType> deviceTypeRepository = null,
@@ -41,7 +42,8 @@ namespace Skyline.DataMiner.SDM.Common.Services
             IBulkRepository<DataPort> dataPortRepository = null,
             IBulkRepository<PowerPort> powerPortRepository = null,
             IBulkRepository<InfraopsReservation> reservationRepository = null,
-            IBulkRepository<PortType> portTypeRepository = null)
+            IBulkRepository<PortType> portTypeRepository = null,
+            IBulkRepository<CableType> cableTypeRepository = null)
         {
             _assetRepository = assetRepository;
             _assetClassRepository = assetClassRepository;
@@ -51,6 +53,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
             _powerPortRepository = powerPortRepository;
             _reservationRepository = reservationRepository;
             _portTypeRepository = portTypeRepository;
+            _cableTypeRepository = cableTypeRepository;
         }
 
         #region Single Entity Loaders
@@ -355,6 +358,35 @@ namespace Skyline.DataMiner.SDM.Common.Services
             }
 
             return _assetRepository.Count(filter);
+        }
+
+        /// <summary>
+        /// Counts CableTypes with the specified name, excluding given identifiers.
+        /// </summary>
+        public long CountCableTypesByName(string name, List<string> exceptIdentifiers = null)
+        {
+            if (_cableTypeRepository == null || string.IsNullOrWhiteSpace(name))
+            {
+                return 0;
+            }
+
+            FilterElement<CableType> filter = CableTypeExposers.Name.Equal(name);
+
+            if (exceptIdentifiers != null && exceptIdentifiers.Any())
+            {
+                var validIdentifiers = exceptIdentifiers.Where(id => !string.IsNullOrWhiteSpace(id)).ToList();
+
+                if (validIdentifiers.Any())
+                {
+                    var clauses = validIdentifiers
+                        .Select(id => CableTypeExposers.Identifier.NotEqual(id))
+                        .Cast<FilterElement<CableType>>()
+                        .ToArray();
+                    filter = filter.AND(new ANDFilterElement<CableType>(clauses));
+                }
+            }
+
+            return _cableTypeRepository.Count(filter);
         }
 
         /// <summary>
