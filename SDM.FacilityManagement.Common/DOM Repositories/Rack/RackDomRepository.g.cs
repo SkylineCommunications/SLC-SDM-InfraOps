@@ -851,7 +851,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.XPosition), comparer, (double)value);
                 case "YPosition":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.YPosition), comparer, (double)value);
-                case ".Label":
+                case "Label":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.Label), comparer, (string)value);
                 case "Orientation":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.Orientation), comparer, (int)(SharedMappers.DomIds.SlcFacility_Management.Enums.Placementorientationenum)value);

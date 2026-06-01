@@ -40,5 +40,29 @@
 
 			return helper;
 		}
+
+		/// <summary>
+		/// Populates the Racks repository with default <see cref="Rack"/> test data.
+		/// </summary>
+		/// <param name="helper">Mocked API helper.</param>
+		/// <returns><see cref="IFacilityManagementApiHelper"/> API helper interface with populated data.</returns>
+		public static IFacilityManagementApiHelper PopulateRacks(this IFacilityManagementApiHelper helper)
+		{
+			helper.Racks.Create(DemoData.Racks);
+
+			return helper;
+		}
+
+		/// <summary>
+		/// Populates the Rooms repository with default <see cref="Room"/> test data.
+		/// </summary>
+		/// <param name="helper">Mocked API helper.</param>
+		/// <returns><see cref="IFacilityManagementApiHelper"/> API helper interface with populated data.</returns>
+		public static IFacilityManagementApiHelper PopulateRooms(this IFacilityManagementApiHelper helper)
+		{
+			helper.Rooms.Create(DemoData.Rooms);
+
+			return helper;
+		}
 	}
 }

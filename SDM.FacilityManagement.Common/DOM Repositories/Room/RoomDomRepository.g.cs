@@ -693,17 +693,17 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             {
                 case "Identifier":
                     return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.Id, comparer, Guid.Parse((string)value));
-                case "RoomProperties.Name":
+                case "Name":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RoomDomMapper.RoomProperties.Name), comparer, (string)value);
-                case "RoomProperties.Plan":
+                case "Plan":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RoomDomMapper.RoomProperties.Plan), comparer, (string)value);
-                case "RoomProperties.Description":
+                case "Description":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RoomDomMapper.RoomProperties.Description), comparer, (string)value);
-                case "RoomProperties.Width":
+                case "Width":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RoomDomMapper.RoomProperties.Width), comparer, (long)value);
-                case "RoomProperties.Depth":
+                case "Depth":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RoomDomMapper.RoomProperties.Depth), comparer, (long)value);
-                case "RoomProperties.RoomId":
+                case "RoomId":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RoomDomMapper.RoomProperties.RoomId), comparer, (string)value);
                 case "Onwership.Team":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RoomDomMapper.Onwership.Team), comparer, Convert.ToString((System.Guid)value));
@@ -724,17 +724,17 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             {
                 case "Identifier":
                     return OrderByElementFactory.Create(DomInstanceExposers.Id, sortOrder, naturalSort);
-                case "RoomProperties.Name":
+                case "Name":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RoomDomMapper.RoomProperties.Name), sortOrder, naturalSort);
-                case "RoomProperties.Plan":
+                case "Plan":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RoomDomMapper.RoomProperties.Plan), sortOrder, naturalSort);
-                case "RoomProperties.Description":
+                case "Description":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RoomDomMapper.RoomProperties.Description), sortOrder, naturalSort);
-                case "RoomProperties.Width":
+                case "Width":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RoomDomMapper.RoomProperties.Width), sortOrder, naturalSort);
-                case "RoomProperties.Depth":
+                case "Depth":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RoomDomMapper.RoomProperties.Depth), sortOrder, naturalSort);
-                case "RoomProperties.RoomId":
+                case "RoomId":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RoomDomMapper.RoomProperties.RoomId), sortOrder, naturalSort);
                 case "Onwership.Team":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RoomDomMapper.Onwership.Team), sortOrder, naturalSort);
