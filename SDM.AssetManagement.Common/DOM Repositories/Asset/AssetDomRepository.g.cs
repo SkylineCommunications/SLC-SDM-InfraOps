@@ -924,19 +924,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             instance.Sections.Add(_networkdetails);
 
 
-			if (obj.Location != null)
-			{
-				var _location = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.SectionDefinitionId);
-				if (obj.Location.HolderNumber != default)
-				{
-					_location.AddOrUpdateValue<long>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.HolderNumber, (long)(obj.Location.HolderNumber).Value);
-				}
             if (obj.Location != null)
             {
                 var _location = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.SectionDefinitionId);
                 if (obj.Location.HolderNumber != default)
                 {
-                    _location.AddOrUpdateValue<long>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.HolderNumber, (long)obj.Location.HolderNumber);
+                    _location.AddOrUpdateValue<long>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.HolderNumber, (long)(obj.Location.HolderNumber).Value);
                 }
 
                 if (obj.Location.ParentAsset != default)
@@ -944,13 +937,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     _location.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.ParentAsset, System.Guid.Parse(obj.Location.ParentAsset.Identifier));
                 }
 
-				if (obj.Location.RackPosition != default)
-				{
-					_location.AddOrUpdateValue<long>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.RackPosition, (long)(obj.Location.RackPosition).Value);
-				}
                 if (obj.Location.RackPosition != default)
                 {
-                    _location.AddOrUpdateValue<long>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.RackPosition, (long)obj.Location.RackPosition);
+                    _location.AddOrUpdateValue<long>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.RackPosition, (long)(obj.Location.RackPosition).Value);
                 }
 
                 if (obj.Location.RackId != default)
@@ -958,10 +947,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     _location.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Rack, System.Guid.Parse(obj.Location.RackId.Identifier));
                 }
 
-				if (obj.Location.DeskId != default)
-				{
-					_location.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Desk, (obj.Location.DeskId).Value);
-				}
                 if (obj.Location.DeskId != default)
                 {
                     _location.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Desk, obj.Location.DeskId.Value);
@@ -977,13 +962,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     _location.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Room, System.Guid.Parse(obj.Location.RoomId.Identifier));
                 }
 
-				if (obj.Location.Side != default)
-				{
-					_location.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Side, Convert.ToString((obj.Location.Side).Value));
-				}
                 if (obj.Location.Side != default)
                 {
-                    _location.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Side, Convert.ToString(obj.Location.Side));
+                    _location.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Side, Convert.ToString((obj.Location.Side).Value));
                 }
 
                 instance.Sections.Add(_location);
@@ -994,7 +975,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 var _destinationlocation = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.SectionDefinitionId);
                 if (obj.DestinationLocation.HolderNumber != default)
                 {
-                    _destinationlocation.AddOrUpdateValue<long>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.HolderNumber, (long)obj.DestinationLocation.HolderNumber);
+                    _destinationlocation.AddOrUpdateValue<long>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.HolderNumber, (long)(obj.DestinationLocation.HolderNumber).Value);
                 }
 
                 if (obj.DestinationLocation.ParentAsset != default)
@@ -1004,7 +985,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
                 if (obj.DestinationLocation.RackPosition != default)
                 {
-                    _destinationlocation.AddOrUpdateValue<long>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.RackPosition, (long)obj.DestinationLocation.RackPosition);
+                    _destinationlocation.AddOrUpdateValue<long>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.RackPosition, (long)(obj.DestinationLocation.RackPosition).Value);
                 }
 
                 if (obj.DestinationLocation.RackId != default)
@@ -1029,7 +1010,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
                 if (obj.DestinationLocation.Side != default)
                 {
-                    _destinationlocation.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.Side, Convert.ToString(obj.DestinationLocation.Side));
+                    _destinationlocation.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.Side, Convert.ToString((obj.DestinationLocation.Side).Value));
                 }
 
                 instance.Sections.Add(_destinationlocation);
@@ -1190,16 +1171,24 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.NetworkDetails.MACAddress), comparer, (string)value);
 				case "Location.HolderNumber" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
 					return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.HolderNumber.Id.ToString()).Equal(comparer == Comparer.NotEquals);
+				case "Location.HolderNumber":
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.HolderNumber), comparer, (long)((long?)value).Value);
 				case "Location.ParentAsset":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.ParentAsset), comparer, System.Guid.Parse(Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.Asset>.Convert(value).Identifier));
 				case "Location.RackPosition" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
 					return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.RackPosition.Id.ToString()).Equal(comparer == Comparer.NotEquals);
+				case "Location.RackPosition":
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.RackPosition), comparer, (long)((long?)value).Value);
 				case "Location.Side" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
 					return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Side.Id.ToString()).Equal(comparer == Comparer.NotEquals);
+				case "Location.Side":
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Side), comparer, Convert.ToString(((SlcAsset_Management.Enums.SideEnum?)value).Value));
 				case "Location.Rack":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Rack), comparer, Guid.Parse((string)value));
 				case "Location.Desk" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
 					return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Desk.Id.ToString()).Equal(comparer == Comparer.NotEquals);
+				case "Location.Desk":
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Desk), comparer, ((System.Guid?)value).Value);
 				case "Location.Container":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Container), comparer, Guid.Parse((string)value));
 				case "Location.Room":

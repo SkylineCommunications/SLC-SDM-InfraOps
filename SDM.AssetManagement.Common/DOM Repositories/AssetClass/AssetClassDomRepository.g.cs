@@ -841,27 +841,27 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
 			if (obj.Depth != default)
 			{
-				_assetclassproperties.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Depth, (double)obj.Depth);
+				_assetclassproperties.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Depth, (double)(obj.Depth).Value);
 			}
 
 			if (obj.Height != default)
 			{
-				_assetclassproperties.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Height, (double)obj.Height);
+				_assetclassproperties.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Height, (double)(obj.Height).Value);
 			}
 
 			if (obj.Width != default)
 			{
-				_assetclassproperties.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Width, (double)obj.Width);
+				_assetclassproperties.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Width, (double)(obj.Width).Value);
 			}
 
 			if (obj.HeightU != default)
 			{
-				_assetclassproperties.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.HeightU, (double)obj.HeightU);
+				_assetclassproperties.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.HeightU, (double)(obj.HeightU).Value);
 			}
 
 			if (obj.Weight != default)
 			{
-				_assetclassproperties.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Weight, (double)obj.Weight);
+				_assetclassproperties.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Weight, (double)(obj.Weight).Value);
 			}
 
 			if (obj.FrontImage != default)
@@ -876,17 +876,17 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
 			if (obj.TypicalPowerConsumption != default)
 			{
-				_assetclassproperties.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.TypicalPowerConsumption, (double)obj.TypicalPowerConsumption);
+				_assetclassproperties.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.TypicalPowerConsumption, (double)(obj.TypicalPowerConsumption).Value);
 			}
 
 			if (obj.MaximumPowerConsumption != default)
 			{
-				_assetclassproperties.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.MaximumPowerConsumption, (double)obj.MaximumPowerConsumption);
+				_assetclassproperties.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.MaximumPowerConsumption, (double)(obj.MaximumPowerConsumption).Value);
 			}
 
 			if (obj.PowerSupply != default)
 			{
-				_assetclassproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.PowerSupply, Convert.ToString(obj.PowerSupply));
+				_assetclassproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.PowerSupply, Convert.ToString((obj.PowerSupply).Value));
 			}
 
 			instance.Sections.Add(_assetclassproperties);
@@ -995,30 +995,48 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.DeviceName), comparer, (string)value);
 				case "DeviceTypeId":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.DeviceType), comparer, System.Guid.Parse(Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType>.Convert(value).Identifier));
+				case "Manufacturer" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+					return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Manufacturer.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "Manufacturer":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Manufacturer), comparer, Convert.ToString((System.Guid)value));
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Manufacturer), comparer, ((System.Guid?)value).Value);
 				case "Description":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.DeviceDescription), comparer, (string)value);
+				case "Depth" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+					return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Depth.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "Depth":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Depth), comparer, (double)value);
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Depth), comparer, (double)((double?)value).Value);
+				case "Height" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+					return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Height.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "Height":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Height), comparer, (double)value);
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Height), comparer, (double)((double?)value).Value);
+				case "Width" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+					return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Width.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "Width":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Width), comparer, (double)value);
-               case "HeightU":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.HeightU), comparer, (double)value);
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Width), comparer, (double)((double?)value).Value);
+				case "HeightU" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+					return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.HeightU.Id.ToString()).Equal(comparer == Comparer.NotEquals);
+				case "HeightU":
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.HeightU), comparer, (double)((double?)value).Value);
+				case "Weight" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+					return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Weight.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "Weight":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Weight), comparer, (double)value);
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Weight), comparer, (double)((double?)value).Value);
 				case "FrontImage":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.FrontImage), comparer, (string)value);
 				case "BackImage":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.BackImage), comparer, (string)value);
+				case "TypicalPowerConsumption" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+					return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.TypicalPowerConsumption.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "TypicalPowerConsumption":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.TypicalPowerConsumption), comparer, (double)value);
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.TypicalPowerConsumption), comparer, (double)((double?)value).Value);
+				case "MaximumPowerConsumption" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+					return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.MaximumPowerConsumption.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "MaximumPowerConsumption":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.MaximumPowerConsumption), comparer, (double)value);
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.MaximumPowerConsumption), comparer, (double)((double?)value).Value);
+				case "PowerSupply" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+					return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.PowerSupply.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "PowerSupply":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.PowerSupply), comparer, (int)(SharedMappers.DomIds.SlcAsset_Management.Enums.PowerSupplyEnum)value);
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.PowerSupply), comparer, Convert.ToString(((SharedMappers.DomIds.SlcAsset_Management.Enums.PowerSupplyEnum?)value).Value));
 				case "Lifecycle.EndOfLife":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.Lifecycle.EndOfLife), comparer, (DateTime)(DateTime)value);
 				case "Lifecycle.EndOfService":
