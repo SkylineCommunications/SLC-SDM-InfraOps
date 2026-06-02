@@ -53,7 +53,7 @@
 
             // Test with port number 0 to verify default value handling
             const long portNumber = 0;
-            var filter = DataPortExposers.DataPortInfo.PortNumber.Equal(portNumber);
+            var filter = DataPortExposers.DataPortInfo.PortNumber.UncheckedEqual((long?)portNumber);
 
             // Act
             var results = Helper.AssetManagement.DataPorts.Read(filter).ToList();

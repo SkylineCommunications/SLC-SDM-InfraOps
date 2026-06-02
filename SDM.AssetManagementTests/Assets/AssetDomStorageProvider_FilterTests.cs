@@ -190,7 +190,7 @@
            Helper.PopulateWithDemoData(upTo: DemoDataLayer.Assets);
 
             const int excludedPosition = 7;
-            var filter = AssetExposers.Location.RackPosition.NotEqual(excludedPosition);
+            var filter = AssetExposers.Location.RackPosition.UncheckedNotEqual((long?)excludedPosition);
 
             // Act
             var results = Helper.AssetManagement.Assets.Read(filter).ToList();
@@ -215,7 +215,7 @@
            Helper.PopulateWithDemoData(upTo: DemoDataLayer.Assets);
 
             var cutoffDate = DateTime.UtcNow.AddYears(-3);
-            var filter = AssetExposers.Lifecycle.FirstUseDate.LessThanOrEqual(cutoffDate);
+            var filter = AssetExposers.Lifecycle.FirstUseDate.UncheckedLessThanOrEqual((DateTime?)cutoffDate);
 
             // Act
             var results =Helper.AssetManagement.Assets.Read(filter).ToList();
@@ -236,7 +236,7 @@
            Helper.PopulateWithDemoData(upTo: DemoDataLayer.Assets);
 
             var cutoffDate = DateTime.UtcNow.AddYears(5);
-            var filter = AssetExposers.Lifecycle.EndOfWarrantyDate.LessThan(cutoffDate);
+            var filter = AssetExposers.Lifecycle.EndOfWarrantyDate.UncheckedLessThan((DateTime?)cutoffDate);
 
             // Act
             var results =Helper.AssetManagement.Assets.Read(filter).ToList();
@@ -259,8 +259,8 @@
             var startDate = DateTime.UtcNow.AddYears(-6);
             var endDate = DateTime.UtcNow.AddYears(-3);
 
-            var filter = AssetExposers.Lifecycle.InstallationDate.GreaterThan(startDate)
-                .AND(AssetExposers.Lifecycle.InstallationDate.LessThan(endDate));
+            var filter = AssetExposers.Lifecycle.InstallationDate.UncheckedGreaterThan((DateTime?)startDate)
+                .AND(AssetExposers.Lifecycle.InstallationDate.UncheckedLessThan((DateTime?)endDate));
 
             // Act
             var results =Helper.AssetManagement.Assets.Read(filter).ToList();

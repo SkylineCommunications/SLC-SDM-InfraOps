@@ -55,7 +55,7 @@
 
             // Test with port number 0 to verify default value handling
             const long portNumber = 0;
-            var filter = PowerPortExposers.PowerPortInfo.PortNumber.Equal(portNumber);
+            var filter = PowerPortExposers.PowerPortInfo.PortNumber.UncheckedEqual((long?)portNumber);
 
             // Act
             var results = Helper.AssetManagement.PowerPorts.Read(filter).ToList();

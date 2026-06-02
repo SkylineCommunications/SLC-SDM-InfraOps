@@ -72,7 +72,7 @@
 
             var targetAssetClass = Helper.TestData.AssetClasses.First();
             var width = targetAssetClass.Width;
-            var filter = AssetClassExposers.Width.Equal(width);
+            var filter = AssetClassExposers.Width.UncheckedEqual(width);
 
             // Act
             var results = Helper.AssetManagement.AssetClasses.Read(filter).ToList();
@@ -139,7 +139,7 @@
             Helper.PopulateWithDemoData(upTo: DemoDataLayer.AssetClasses);
 
             const double powerThreshold = 200.0;
-            var filter = AssetClassExposers.MaximumPowerConsumption.GreaterThanOrEqual(powerThreshold);
+            var filter = AssetClassExposers.MaximumPowerConsumption.UncheckedGreaterThanOrEqual((double?)powerThreshold);
 
             // Act
             var results = Helper.AssetManagement.AssetClasses.Read(filter).ToList();
@@ -159,7 +159,7 @@
             Helper.PopulateWithDemoData(upTo: DemoDataLayer.AssetClasses);
 
             const double powerThreshold = 100.0;
-            var filter = AssetClassExposers.TypicalPowerConsumption.LessThanOrEqual(powerThreshold);
+            var filter = AssetClassExposers.TypicalPowerConsumption.UncheckedLessThanOrEqual((double?)powerThreshold);
 
             // Act
             var results = Helper.AssetManagement.AssetClasses.Read(filter).ToList();
@@ -187,9 +187,9 @@
             const double maxWidth = 40.0;      // 40 cm
             const double maxDepth = 40.0;      // 40 cm
 
-            var filter = AssetClassExposers.Height.LessThanOrEqual(maxHeight)
-                .AND(AssetClassExposers.Width.LessThanOrEqual(maxWidth))
-                .AND(AssetClassExposers.Depth.LessThanOrEqual(maxDepth));
+            var filter = AssetClassExposers.Height.UncheckedLessThanOrEqual((double?)maxHeight)
+                .AND(AssetClassExposers.Width.UncheckedLessThanOrEqual((double?)maxWidth))
+                .AND(AssetClassExposers.Depth.UncheckedLessThanOrEqual((double?)maxDepth));
 
             // Act
             var results = Helper.AssetManagement.AssetClasses.Read(filter).ToList();
