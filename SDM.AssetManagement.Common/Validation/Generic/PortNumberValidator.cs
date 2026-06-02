@@ -23,6 +23,43 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
         /// <param name="portTypeName">Human-readable port type name used in error messages (e.g. "Data Port", "Power Port").</param>
         public static ValidationResult ValidateCollection<TPort, TField>(
             IEnumerable<TPort> ports,
+            Func<TPort, long?> getPortNumber,
+            TField field,
+            string portTypeName = "Port") where TField : Enum
+        {
+            var result = new ValidationResult();
+            var seen = new HashSet<long>();
+
+            foreach (var port in ports)
+            {
+                var nullable = getPortNumber(port);
+
+                if (!nullable.HasValue)
+                {
+                    result.AddFailReason(field, $"{portTypeName} number must have a value.");
+                    return result;
+                }
+
+                var number = nullable.Value;
+
+                if (number < 0)
+                {
+                    result.AddFailReason(field, $"{portTypeName} number cannot be negative. Found: {number}");
+                    return result;
+                }
+
+                if (!seen.Add(number))
+                {
+                    result.AddFailReason(field, $"Duplicate {portTypeName} number found: {number}");
+                    return result;
+                }
+            }
+
+            return result;
+        }
+
+        public static ValidationResult ValidateCollection<TPort, TField>(
+            IEnumerable<TPort> ports,
             Func<TPort, long> getPortNumber,
             TField field,
             string portTypeName = "Port") where TField : Enum

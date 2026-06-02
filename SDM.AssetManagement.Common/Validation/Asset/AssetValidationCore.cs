@@ -146,8 +146,7 @@
                    asset.Location.SideField.Changed ||
                    asset.Location.DeskIdField.Changed ||
                    asset.Location.ContainerIdField.Changed ||
-                   asset.Location.RoomIdField.Changed ||
-                   asset.Location.PowerSupplyRackPositionField.Changed;
+                   asset.Location.RoomIdField.Changed;
         }
 
         /// <summary>
@@ -167,8 +166,7 @@
                    asset.DestinationLocation.SideField.Changed ||
                    asset.DestinationLocation.DeskIdField.Changed ||
                    asset.DestinationLocation.ContainerIdField.Changed ||
-                   asset.DestinationLocation.RoomIdField.Changed ||
-                   asset.DestinationLocation.PowerSupplyRackPositionField.Changed;
+                   asset.DestinationLocation.RoomIdField.Changed;
         }
 
         /// <summary>

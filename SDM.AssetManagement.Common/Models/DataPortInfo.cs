@@ -18,13 +18,13 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             set => NameField.Value = value;
         }
 
-        public long PortNumber
+        public long? PortNumber
         {
             get => PortNumberField.Value;
             set => PortNumberField.Value = value;
         }
 
-        public SlcAsset_Management.Enums.Outputtype OutputType
+        public SlcAsset_Management.Enums.Outputtype? OutputType
         {
             get => OutputTypeField.Value;
             set => OutputTypeField.Value = value;
@@ -54,14 +54,14 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             () => new ChangeTrackingStringField(null));
 
         [JsonIgnore]
-        internal IChangeTrackingField<long> PortNumberField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<long?> PortNumberField => FieldHandler.GetOrCreateField(
             nameof(PortNumber),
-            () => new ChangeTrackingField<long>(0));
+            () => new ChangeTrackingField<long?>(null));
 
         [JsonIgnore]
-        internal IChangeTrackingField<SlcAsset_Management.Enums.Outputtype> OutputTypeField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<SlcAsset_Management.Enums.Outputtype?> OutputTypeField => FieldHandler.GetOrCreateField(
             nameof(OutputType),
-            () => new ChangeTrackingField<SlcAsset_Management.Enums.Outputtype>(default));
+            () => new ChangeTrackingField<SlcAsset_Management.Enums.Outputtype?>(null));
 
         [JsonIgnore]
         internal IChangeTrackingField<SlcAsset_Management.Enums.PortExposureEnum> PortExposureField => FieldHandler.GetOrCreateField(

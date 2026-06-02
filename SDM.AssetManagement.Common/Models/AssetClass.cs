@@ -61,37 +61,37 @@
             set => DescriptionField.Value = value;
         }
 
-        public Guid Manufacturer
+        public Guid? Manufacturer
         {
             get => ManufacturerField.Value;
             set => ManufacturerField.Value = value;
         }
 
-        public double Depth
+        public double? Depth
         {
             get => DepthField.Value;
             set => DepthField.Value = value;
         }
 
-        public double Height
+        public double? Height
         {
             get => HeightField.Value;
             set => HeightField.Value = value;
         }
 
-        public double Width
+        public double? Width
         {
             get => WidthField.Value;
             set => WidthField.Value = value;
         }
 
-        public double HeightU
+        public double? HeightU
         {
             get => HeightUField.Value;
             set => HeightUField.Value = value;
         }
 
-        public double Weight
+        public double? Weight
         {
             get => WeightField.Value;
             set => WeightField.Value = value;
@@ -115,19 +115,19 @@
             set => BackImageField.Value = value;
         }
 
-        public double TypicalPowerConsumption
+        public double? TypicalPowerConsumption
         {
             get => TypicalPowerConsumptionField.Value;
             set => TypicalPowerConsumptionField.Value = value;
         }
 
-        public double MaximumPowerConsumption
+        public double? MaximumPowerConsumption
         {
             get => MaximumPowerConsumptionField.Value;
             set => MaximumPowerConsumptionField.Value = value;
         }
 
-        public SlcAsset_Management.Enums.PowerSupplyEnum PowerSupply
+        public SlcAsset_Management.Enums.PowerSupplyEnum? PowerSupply
         {
             get => PowerSupplyField.Value;
             set => PowerSupplyField.Value = value;
@@ -190,34 +190,34 @@
             () => new ChangeTrackingStringField(null));
 
         [JsonIgnore]
-        internal IChangeTrackingField<Guid> ManufacturerField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<Guid?> ManufacturerField => FieldHandler.GetOrCreateField(
             nameof(Manufacturer),
-            () => new ChangeTrackingField<Guid>(Guid.Empty));
+            () => new ChangeTrackingField<Guid?>(null));
 
         [JsonIgnore]
-        internal IChangeTrackingField<double> DepthField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<double?> DepthField => FieldHandler.GetOrCreateField(
             nameof(Depth),
-            () => new ChangeTrackingField<double>(0));
+            () => new ChangeTrackingField<double?>(null));
 
         [JsonIgnore]
-        internal IChangeTrackingField<double> HeightField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<double?> HeightField => FieldHandler.GetOrCreateField(
             nameof(Height),
-            () => new ChangeTrackingField<double>(0));
+            () => new ChangeTrackingField<double?>(null));
 
         [JsonIgnore]
-        internal IChangeTrackingField<double> WidthField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<double?> WidthField => FieldHandler.GetOrCreateField(
             nameof(Width),
-            () => new ChangeTrackingField<double>(0));
+            () => new ChangeTrackingField<double?>(null));
 
         [JsonIgnore]
-        internal IChangeTrackingField<double> HeightUField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<double?> HeightUField => FieldHandler.GetOrCreateField(
             nameof(HeightU),
-            () => new ChangeTrackingField<double>(0));
+            () => new ChangeTrackingField<double?>(null));
 
         [JsonIgnore]
-        internal IChangeTrackingField<double> WeightField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<double?> WeightField => FieldHandler.GetOrCreateField(
             nameof(Weight),
-            () => new ChangeTrackingField<double>(0));
+            () => new ChangeTrackingField<double?>(null));
 
         [JsonIgnore]
         internal IChangeTrackingField<string> PlanField => FieldHandler.GetOrCreateField(
@@ -235,19 +235,19 @@
             () => new ChangeTrackingStringField(null));
 
         [JsonIgnore]
-        internal IChangeTrackingField<double> TypicalPowerConsumptionField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<double?> TypicalPowerConsumptionField => FieldHandler.GetOrCreateField(
             nameof(TypicalPowerConsumption),
-            () => new ChangeTrackingField<double>(0));
+            () => new ChangeTrackingField<double?>(null));
 
         [JsonIgnore]
-        internal IChangeTrackingField<double> MaximumPowerConsumptionField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<double?> MaximumPowerConsumptionField => FieldHandler.GetOrCreateField(
             nameof(MaximumPowerConsumption),
-            () => new ChangeTrackingField<double>(0));
+            () => new ChangeTrackingField<double?>(null));
 
         [JsonIgnore]
-        internal IChangeTrackingField<SlcAsset_Management.Enums.PowerSupplyEnum> PowerSupplyField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<SlcAsset_Management.Enums.PowerSupplyEnum?> PowerSupplyField => FieldHandler.GetOrCreateField(
             nameof(PowerSupply),
-            () => new ChangeTrackingField<SlcAsset_Management.Enums.PowerSupplyEnum>(default));
+            () => new ChangeTrackingField<SlcAsset_Management.Enums.PowerSupplyEnum?>(null));
 
         [JsonIgnore]
         internal ChangeTrackingArrayField<DataPortInfo> DataPortsField => FieldHandler.GetOrCreateArrayField(

@@ -949,7 +949,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
                 if (obj.Location.DeskId != default)
                 {
-                    _location.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Desk, obj.Location.DeskId);
+                    _location.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Desk, obj.Location.DeskId.Value);
                 }
 
                 if (obj.Location.ContainerId != default)
@@ -995,7 +995,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
                 if (obj.DestinationLocation.DeskId != default)
                 {
-                    _destinationlocation.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.Desk, obj.DestinationLocation.DeskId);
+                    _destinationlocation.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.Desk, obj.DestinationLocation.DeskId.Value);
                 }
 
                 if (obj.DestinationLocation.ContainerId != default)

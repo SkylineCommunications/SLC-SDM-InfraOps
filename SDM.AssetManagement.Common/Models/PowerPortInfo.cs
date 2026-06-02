@@ -8,9 +8,9 @@
 	{
 		public string Name { get; set; }
 
-		public long PortNumber { get; set; }
+		public long? PortNumber { get; set; }
 
-		public SlcAsset_Management.Enums.Outputtype OutputType { get; set; }
+		public SlcAsset_Management.Enums.Outputtype? OutputType { get; set; }
 
 		public SlcAsset_Management.Enums.PortExposureEnum PortExposure { get; set; }
 

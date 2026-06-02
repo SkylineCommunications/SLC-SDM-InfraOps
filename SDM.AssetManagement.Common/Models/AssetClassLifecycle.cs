@@ -6,38 +6,38 @@
 
     public sealed class AssetClassLifecycle : ChangeTrackingBase, IEquatable<AssetClassLifecycle>
     {
-        public DateTime EndOfLife
+        public DateTime? EndOfLife
         {
             get => EndOfLifeField.Value;
             set => EndOfLifeField.Value = value;
         }
 
-        public DateTime EndOfService
+        public DateTime? EndOfService
         {
             get => EndOfServiceField.Value;
             set => EndOfServiceField.Value = value;
         }
 
-        public TimeSpan NominalLifetime
+        public TimeSpan? NominalLifetime
         {
             get => NominalLifetimeField.Value;
             set => NominalLifetimeField.Value = value;
         }
 
         [JsonIgnore]
-        internal IChangeTrackingField<DateTime> EndOfLifeField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<DateTime?> EndOfLifeField => FieldHandler.GetOrCreateField(
             nameof(EndOfLife),
-            () => new ChangeTrackingField<DateTime>(default));
+            () => new ChangeTrackingField<DateTime?>(null));
 
         [JsonIgnore]
-        internal IChangeTrackingField<DateTime> EndOfServiceField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<DateTime?> EndOfServiceField => FieldHandler.GetOrCreateField(
             nameof(EndOfService),
-            () => new ChangeTrackingField<DateTime>(default));
+            () => new ChangeTrackingField<DateTime?>(null));
 
         [JsonIgnore]
-        internal IChangeTrackingField<TimeSpan> NominalLifetimeField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<TimeSpan?> NominalLifetimeField => FieldHandler.GetOrCreateField(
             nameof(NominalLifetime),
-            () => new ChangeTrackingField<TimeSpan>(default));
+            () => new ChangeTrackingField<TimeSpan?>(null));
 
         public bool Equals(AssetClassLifecycle other)
         {
@@ -67,9 +67,9 @@
             unchecked
             {
                 int hash = (2 << 12) - 1;
-                hash = (hash * 23) + EndOfLife.GetHashCode();
-                hash = (hash * 23) + EndOfService.GetHashCode();
-                hash = (hash * 23) + NominalLifetime.GetHashCode();
+                hash = (hash * 23) + (EndOfLife?.GetHashCode() ?? 0);
+                hash = (hash * 23) + (EndOfService?.GetHashCode() ?? 0);
+                hash = (hash * 23) + (NominalLifetime?.GetHashCode() ?? 0);
                 return hash;
             }
         }
