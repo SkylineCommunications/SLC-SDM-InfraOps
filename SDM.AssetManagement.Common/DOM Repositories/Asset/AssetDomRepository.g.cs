@@ -1224,7 +1224,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				case "Holders.SlotNumber":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Holders.SlotNumber), comparer, (long)value);
 				case "Holders.HierarchyRole":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Holders.HierarchyRole), comparer, FromDomHierarchyRole((string)value));
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Holders.HierarchyRole), comparer, SlcAsset_Management.Enums.Hierarchyrole.ToValue((SlcAsset_Management.Enums.HierarchyRoleEnum)value));
 				case "ElementLinks.Identifier":
 					return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.SectionIds, comparer, Guid.Parse((string)value));
 				case "ElementLinks.ElementID":
