@@ -184,7 +184,6 @@
         }
 
         [TestMethod]
-        [Ignore("TODO SDM-1234: RackPosition is a non-nullable long with default value 0, causing incorrect filter behavior for assets without rack locations. Skip until nullable types are implemented.")]
         public void ReadFilter_RackPosition_NotEqual_ShouldReturnNonMatchingAssets()
         {
             // Arrange
@@ -234,10 +233,10 @@
         public void ReadFilter_EndOfWarrantyDate_LessThan_ShouldReturnAssetsWithWarrantyExpiringSoon()
         {
             // Arrange
-            
-           Helper.PopulateWithDemoData(upTo: DemoDataLayer.Assets);
+            Helper.PopulateWithDemoData(upTo: DemoDataLayer.Assets);
 
             var cutoffDate = DateTime.UtcNow.AddYears(5);
+
             var filter = AssetExposers.Lifecycle.EndOfWarrantyDate.LessThan(cutoffDate);
 
             // Act

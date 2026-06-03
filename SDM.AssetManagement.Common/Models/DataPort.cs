@@ -25,21 +25,7 @@
         private bool _isNew = true;
 
         public DataPort()
-        {
-            _fieldHandler = new ChangeTrackingFieldHandler();
-        }
-
-        [JsonIgnore]
-        private ChangeTrackingFieldHandler FieldHandler
-        {
-            get
-            {
-                if (_fieldHandler == null)
-                {
-                    _fieldHandler = new ChangeTrackingFieldHandler();
-                }
-                return _fieldHandler;
-            }
+        { 
         }
 
         #region Properties

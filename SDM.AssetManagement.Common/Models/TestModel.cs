@@ -12,6 +12,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Common.Models
         public GuardStatus? MyEnum { get; set; }
 
         public Guid? MyGuid { get; set; }
+
+        public DateTime? MyDateTime { get; set; }
     }
 
     public enum GuardStatus

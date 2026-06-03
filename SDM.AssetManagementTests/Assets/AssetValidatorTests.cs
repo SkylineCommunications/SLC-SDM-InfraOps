@@ -334,7 +334,6 @@
         }
 
         [TestMethod]
-        [Ignore("Waiting for nullable Side support")]
         public void Create_WithRackSideButNoRack_ShouldFail()
         {
             // Arrange
@@ -359,7 +358,6 @@
         }
 
         [TestMethod]
-        [Ignore("Waiting for nullable Position support")]
         public void Create_WithRackButNoPosition_ShouldFail()
         {
             // Arrange
@@ -388,7 +386,6 @@
         }
 
         [TestMethod]
-        [Ignore("Waiting for nullable Side support")]
         public void Create_WithRackButNoSide_ShouldFail()
         {
             // Arrange
@@ -555,7 +552,6 @@
         #region Destination Parent Asset Holder Validation Tests
 
         [TestMethod]
-        [Ignore("Waiting for nullable HolderNumber support")]
         public void Create_WithDestinationHolderButNoParentAsset_ShouldFail()
         {
             // Arrange
@@ -612,7 +608,6 @@
         #region Destination Rack Position Validation Tests
 
         [TestMethod]
-        [Ignore("Waiting for nullable RackSide support")]
         public void Create_WithDestinationRackPositionButNoRack_ShouldFail()
         {
             // Arrange
@@ -638,7 +633,6 @@
         }
 
         [TestMethod]
-        [Ignore("Waiting for nullable RackPosition support")]
         public void Create_WithDestinationRackButNoPosition_ShouldFail()
         {
             // Arrange
@@ -668,7 +662,6 @@
         }
 
         [TestMethod]
-        [Ignore("Waiting for nullable RackSide support")]
         public void Create_WithDestinationRackButNoSide_ShouldFail()
         {
             // Arrange
@@ -1142,7 +1135,6 @@
         #region Rack Space Availability Tests
 
         [TestMethod]
-        [Ignore("Waiting for nullable Location fields support")]
         public void Create_WithRackPositionExceedingCapacity_ShouldFail()
         {
             // Arrange
@@ -1210,8 +1202,7 @@
         }
 
         [TestMethod]
-        [Ignore("Waiting for nullable Location fields support")]
-        public void Create_WithRackPositionCausingOverlapWithExistingAsset_ShouldFail()
+       public void Create_WithRackPositionCausingOverlapWithExistingAsset_ShouldFail()
         {
             // Arrange
             Helper.PopulateWithDemoData(DemoDataLayer.Racks);
@@ -1264,7 +1255,6 @@
         }
 
         [TestMethod]
-        [Ignore("TODO SDM-1234: RackPosition is a non-nullable long with default value 0, causing incorrect validation behavior for rack capacity checks. Skip until nullable types are implemented.")]
         public void Create_WithAssetHeightExceedingRackCapacity_BottomToTop_ShouldFail()
         {
             // Arrange
@@ -1319,7 +1309,6 @@
         }
 
         [TestMethod]
-        [Ignore("TODO SDM-1234: RackPosition is a non-nullable long with default value 0, causing incorrect validation behavior for rack capacity checks. Skip until nullable types are implemented.")]
         public void Create_WithAssetHeightExceedingRackCapacity_TopToBottom_ShouldFail()
         {
             // Arrange
@@ -1369,7 +1358,6 @@
         }
 
         [TestMethod]
-        [Ignore("Waiting for nullable Location fields support")]
         public void CreateOrUpdate_WithOverlappingRackPositionsInBatch_ShouldFail()
         {
             // Arrange
@@ -1427,8 +1415,7 @@
         #region Parent Asset Holder Availability Tests
 
         [TestMethod]
-        [Ignore("Waiting for nullable Location fields support")]
-        public void Create_WithHolderAlreadyOccupiedByAnotherAsset_ShouldFail()
+       public void Create_WithHolderAlreadyOccupiedByAnotherAsset_ShouldFail()
         {
 
             var deviceType = Helper.TestData.DeviceTypes.First(dt => dt.Identifier == testAssetClass.DeviceTypeId.Identifier);
@@ -1491,8 +1478,7 @@
         }
 
         [TestMethod]
-        [Ignore("Waiting for nullable Location fields support")]
-        public void Create_WithInvalidHolderSlotOnParent_ShouldFail()
+         public void Create_WithInvalidHolderSlotOnParent_ShouldFail()
         {
             // Arrange
             var parentAsset = new Asset
@@ -1538,7 +1524,6 @@
         }
 
         [TestMethod]
-        [Ignore("Waiting for nullable Location fields support")]
         public void Create_WithMismatchedHierarchyRoleOnParent_ShouldFail()
         {
             // Arrange
@@ -1594,7 +1579,6 @@
         }
 
         [TestMethod]
-        [Ignore("Waiting for nullable Location fields support")]
         public void CreateOrUpdate_WithSameHolderInBatch_ShouldFail()
         {
             // Arrange

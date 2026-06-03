@@ -20,6 +20,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Common.Models
             public static readonly FieldDescriptorID MyInteger = new FieldDescriptorID(new Guid("89489249-3401-4994-a64e-4e9d647a95e6"));
             public static readonly FieldDescriptorID MyEnum = new FieldDescriptorID(new Guid("dc04b2aa-2b6a-486c-8cb7-eb71baa63d75"));
             public static readonly FieldDescriptorID MyGuid = new FieldDescriptorID(new Guid("0ee92017-2a1e-479e-9cf5-147b0ef8c2a8"));
+            public static readonly FieldDescriptorID MyDateTime = new FieldDescriptorID(new Guid("55ff3199-ffd6-4f2c-b2e4-a6390b06e74b"));
         }
     }
 }

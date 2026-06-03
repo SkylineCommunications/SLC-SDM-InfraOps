@@ -55,8 +55,7 @@
             if(!asset.Depth.HasValue)
             {
                 result = new ValidationResult();
-                result.AddFailReason(AssetClassValidationField.Depth, "Asset Class Depth needs to have a value.");
-                return false;
+                return true;
             }
 
             return NumericValidators.ValidateNonNegative(
@@ -70,8 +69,7 @@
             if(!asset.Width.HasValue)
             {
                 result = new ValidationResult();
-                result.AddFailReason(AssetClassValidationField.Width, "Asset Class Width needs to have a value.");
-                return false;
+                return true;
             }
 
             return NumericValidators.ValidateNonNegative(
@@ -85,8 +83,7 @@
             if(!asset.Height.HasValue)
             {
                 result = new ValidationResult();
-                result.AddFailReason(AssetClassValidationField.Height, "Asset Class Height needs to have a value.");
-                return false;
+                return true;
             }
 
             return NumericValidators.ValidateNonNegative(
@@ -100,8 +97,7 @@
             if(!asset.HeightU.HasValue)
             {
                 result = new ValidationResult();
-                result.AddFailReason(AssetClassValidationField.HeightU, "Asset Class Height Unit needs to have a value.");
-                return false;
+                return true;
             }
 
             return NumericValidators.ValidateNonNegative(
@@ -115,8 +111,7 @@
             if(!asset.Weight.HasValue)
             {
                 result = new ValidationResult();
-                result.AddFailReason(AssetClassValidationField.Weight, "Asset Class Weight needs to have a value.");
-                return false;
+                return true;
             }
 
             return NumericValidators.ValidateNonNegative(
@@ -130,8 +125,7 @@
             if(!asset.TypicalPowerConsumption.HasValue)
             {
                 result = new ValidationResult();
-                result.AddFailReason(AssetClassValidationField.TypicalPowerConsumption, "Asset Class Typical Power Consumption needs to have a value.");
-                return false;
+                return true;
             }
 
             return NumericValidators.ValidateNonNegative(
@@ -145,8 +139,7 @@
             if(!asset.MaximumPowerConsumption.HasValue)
             {
                 result = new ValidationResult();
-                result.AddFailReason(AssetClassValidationField.MaxPowerConsumption, "Asset Class Maximum Power Consumption needs to have a value.");
-                return false;
+                return true;
             }
 
             return NumericValidators.ValidateNonNegative(

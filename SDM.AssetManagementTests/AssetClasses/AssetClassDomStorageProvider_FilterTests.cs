@@ -13,6 +13,8 @@
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
+    using Skyline.DataMiner.SDM.Extensions;
+ 
 
 
     /// <summary>
@@ -139,7 +141,7 @@
             Helper.PopulateWithDemoData(upTo: DemoDataLayer.AssetClasses);
 
             const double powerThreshold = 200.0;
-            var filter = AssetClassExposers.MaximumPowerConsumption.UncheckedGreaterThanOrEqual((double?)powerThreshold);
+            var filter = AssetClassExposers.MaximumPowerConsumption.GreaterThanOrEqual(powerThreshold);
 
             // Act
             var results = Helper.AssetManagement.AssetClasses.Read(filter).ToList();
@@ -159,7 +161,7 @@
             Helper.PopulateWithDemoData(upTo: DemoDataLayer.AssetClasses);
 
             const double powerThreshold = 100.0;
-            var filter = AssetClassExposers.TypicalPowerConsumption.UncheckedLessThanOrEqual((double?)powerThreshold);
+            var filter = AssetClassExposers.TypicalPowerConsumption.LessThanOrEqual(powerThreshold);
 
             // Act
             var results = Helper.AssetManagement.AssetClasses.Read(filter).ToList();
@@ -187,9 +189,9 @@
             const double maxWidth = 40.0;      // 40 cm
             const double maxDepth = 40.0;      // 40 cm
 
-            var filter = AssetClassExposers.Height.UncheckedLessThanOrEqual((double?)maxHeight)
-                .AND(AssetClassExposers.Width.UncheckedLessThanOrEqual((double?)maxWidth))
-                .AND(AssetClassExposers.Depth.UncheckedLessThanOrEqual((double?)maxDepth));
+            var filter = AssetClassExposers.Height.LessThanOrEqual(maxHeight)
+                .AND(AssetClassExposers.Width.LessThanOrEqual(maxWidth))
+                .AND(AssetClassExposers.Depth.LessThanOrEqual(maxDepth));
 
             // Act
             var results = Helper.AssetManagement.AssetClasses.Read(filter).ToList();

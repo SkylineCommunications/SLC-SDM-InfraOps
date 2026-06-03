@@ -654,7 +654,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 {
                     _dataportinfo.AddOrUpdateValue<int>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.OutputType, (int)(obj.DataPortInfo.OutputType).Value);
                 }
+
                 _dataportinfo.AddOrUpdateValue<int>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.PortExposure, (int)obj.DataPortInfo.PortExposure);
+
                 if (obj.DataPortInfo.Type != default)
                 {
                     _dataportinfo.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.Type, System.Guid.Parse(obj.DataPortInfo.Type.Identifier));

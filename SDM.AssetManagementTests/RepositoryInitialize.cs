@@ -193,24 +193,25 @@
                 {
                     // Use serial number from the asset to lookup rack assignment
                     //cant for the moment do any rack assignment do tue the non existent of nullables so it will complain about having multiple locations?
-                    //if (DemoData.AssetRackAssignments.TryGetValue(asset.SerialNumber, out var assignment))
-                    //{
-                    //    string rackid = assignment.RackId;
-                        
-                    //    // Validate rack index is within bounds
-                    //    if (racks.TryGetValue(rackid, out Rack rack))
-                    //    {
-                    //        if(asset.Location == null) asset.Location = new AssetLocation();
+                    if (DemoData.AssetRackAssignments.TryGetValue(asset.SerialNumber, out var assignment))
+                    {
+                        string rackid = assignment.RackId;
 
-                    //        asset.Location.RackId = new SdmObjectReference<Rack>(rack.Identifier);
-                    //        asset.Location.RackPosition = assignment.Position;
-                    //    }
-                    //    else
-                    //    {
-                    //        throw new InvalidOperationException(
-                    //            $"Asset '{asset.SerialNumber}': Rack id {rackid} not found in persisted racks. Only rack ids available {String.Format(";", racks.Keys)}.");
-                    //    }
-                    //}
+                        // Validate rack index is within bounds
+                        if (racks.TryGetValue(rackid, out Rack rack))
+                        {
+                            if (asset.Location == null) asset.Location = new AssetLocation();
+
+                            asset.Location.RackId = new SdmObjectReference<Rack>(rack.Identifier);
+                            asset.Location.RackPosition = assignment.Position;
+                            asset.Location.Side = SlcAsset_Management.Enums.SideEnum.Front;
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException(
+                                $"Asset '{asset.SerialNumber}': Rack id {rackid} not found in persisted racks. Only rack ids available {String.Format(";", racks.Keys)}.");
+                        }
+                    }
                 }
                 else
                 {

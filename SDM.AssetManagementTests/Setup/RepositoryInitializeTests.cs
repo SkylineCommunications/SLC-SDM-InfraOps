@@ -91,7 +91,6 @@
         }
 
         [TestMethod]
-        [Ignore("Waiting for nullable Location fields support")]
         public void PopulateWithDemoData_ShouldAssignRackLocations()
         {
             // Act
@@ -176,8 +175,8 @@
             var deviceType = Helper.TestData.DeviceTypes.First();
             var customAssetClasses = new List<AssetClass>
             {
-                CreateValidAssetClass("Custom Class 1", deviceType.Identifier),
-                CreateValidAssetClass("Custom Class 2", deviceType.Identifier)
+                CreateValidAssetClass("Custom Class 1", deviceType),
+                CreateValidAssetClass("Custom Class 2", deviceType)
             };
 
             // Act
@@ -377,14 +376,19 @@
             return asset;
         }
 
-        private static AssetClass CreateValidAssetClass(string name, string deviceTypeIdentifier)
+        private static AssetClass CreateValidAssetClass(string name, DeviceType deviceType)
         {
             var assetClass = new AssetClass
             {
-                DeviceTypeId = new SdmObjectReference<DeviceType>(deviceTypeIdentifier)
+                DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier),
+                Name = name,
             };
 
-            assetClass.Name = name;
+            if (deviceType.TagsInfo.Tags.Contains(SlcAsset_Management.Enums.TagOption.PowerProvider))
+            {
+                assetClass.PowerSupply = SlcAsset_Management.Enums.PowerSupplyEnum.DC;
+            }
+
             return assetClass;
         }
 
