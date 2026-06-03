@@ -641,7 +641,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 var _locationroom = _locationSection.GetValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Room);
                 if (_locationroom != null)
                 {
-                    obj.Location.RoomId = new Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.FacilityManagement.Models.Room>(Convert.ToString(_locationcontainer.Value));
+                    obj.Location.RoomId = new Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.FacilityManagement.Models.Room>(Convert.ToString(_locationroom.Value));
                 }
             }
 
@@ -649,52 +649,52 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             if (_destinationlocationSection != default)
             {
                 obj.DestinationLocation = new Skyline.DataMiner.SDM.AssetManagement.Models.AssetLocation();
-                var _locationholdernumber = _locationSection.GetValue<long>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.HolderNumber);
+                var _locationholdernumber = _destinationlocationSection.GetValue<long>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.HolderNumber);
                 if (_locationholdernumber != null)
                 {
                     obj.DestinationLocation.HolderNumber = _locationholdernumber.Value;
                 }
 
-                var _locationparentasset = _locationSection.GetValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.ParentAsset);
+                var _locationparentasset = _destinationlocationSection.GetValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.ParentAsset);
                 if (_locationparentasset != null)
                 {
                     obj.DestinationLocation.ParentAsset = new Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.Asset>(Convert.ToString(_locationparentasset.Value));
                 }
 
-                var _locationrackposition = _locationSection.GetValue<long>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.RackPosition);
+                var _locationrackposition = _destinationlocationSection.GetValue<long>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.RackPosition);
                 if (_locationrackposition != null)
                 {
                     obj.DestinationLocation.RackPosition = _locationrackposition.Value;
                 }
 
-                var _locationside = _locationSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.Side);
+                var _locationside = _destinationlocationSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.Side);
                 if (_locationside != null)
                 {
                     obj.DestinationLocation.Side = (SharedMappers.DomIds.SlcAsset_Management.Enums.SideEnum)Enum.Parse(typeof(SharedMappers.DomIds.SlcAsset_Management.Enums.SideEnum), _locationside.Value);
                 }
 
-                var _locationrack = _locationSection.GetValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.Rack);
+                var _locationrack = _destinationlocationSection.GetValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.Rack);
                 if (_locationrack != null)
                 {
                     obj.DestinationLocation.RackId = new Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.FacilityManagement.Models.Rack>(Convert.ToString(_locationrack.Value));
                 }
 
-                var _locationdesk = _locationSection.GetValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.Desk);
+                var _locationdesk = _destinationlocationSection.GetValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.Desk);
                 if (_locationdesk != null)
                 {
                     obj.DestinationLocation.DeskId = System.Guid.Parse(Convert.ToString(_locationdesk.Value));
                 }
 
-                var _locationcontainer = _locationSection.GetValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.Container);
+                var _locationcontainer = _destinationlocationSection.GetValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.Container);
                 if (_locationcontainer != null)
                 {
                     obj.DestinationLocation.ContainerId = new Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.FacilityManagement.Models.Facility>(Convert.ToString(_locationcontainer.Value));
                 }
 
-                var _locationroom = _locationSection.GetValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.Room);
+                var _locationroom = _destinationlocationSection.GetValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.Room);
                 if (_locationroom != null)
                 {
-                    obj.DestinationLocation.RoomId = new Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.FacilityManagement.Models.Room>(Convert.ToString(_locationcontainer.Value));
+                    obj.DestinationLocation.RoomId = new Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.FacilityManagement.Models.Room>(Convert.ToString(_locationroom.Value));
                 }
             }
 

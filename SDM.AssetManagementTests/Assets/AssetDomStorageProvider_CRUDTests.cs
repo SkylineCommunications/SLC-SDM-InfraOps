@@ -17,6 +17,7 @@
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Helpers;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
+    using Skyline.DataMiner.SDM.FacilityManagement.Models;
 
     /// <summary>
     /// CRUD tests for Asset repository operations.
@@ -274,6 +275,41 @@
 
                 Helper.AssetManagement.Assets.Count(AssetExposers.AssetDescription.Equal("Sample asset 7"))
                     .Should().Be(0, "asset with description 'Sample asset 7' should be deleted");
+            }
+        }
+
+        #endregion
+
+        #region Regression Tests
+
+        [TestMethod]
+        public void Create_WithRoomOnlyLocation_ShouldPersistAndReadBackCorrectly()
+        {
+            // Arrange — asset with a Room location but no Rack or Container (Facility).
+            // Regression: AssetDomRepository.FromInstance was reading _locationcontainer.Value
+            // instead of _locationroom.Value, causing NullReferenceException when ContainerId was absent.
+            PrepareReferenceAssetWithAssetClass();
+            var roomId = Guid.NewGuid();
+            referenceAsset.Location = new AssetLocation
+            {
+                RoomId = new SdmObjectReference<Room>(roomId.ToString()),
+            };
+
+            // Act
+            Helper.AssetManagement.Assets.Create(referenceAsset);
+            var readBack = Helper.AssetManagement.Assets
+                .Read(AssetExposers.AssetName.Equal(referenceAsset.Name))
+                .Single();
+
+            // Assert
+            using (new AssertionScope())
+            {
+                readBack.Should().NotBeNull();
+                readBack.Location.Should().NotBeNull();
+                readBack.Location.RoomId.Should().NotBeNull();
+                readBack.Location.RoomId.Identifier.Should().Be(roomId.ToString());
+                readBack.Location.RackId.Should().BeNull();
+                readBack.Location.ContainerId.Should().BeNull();
             }
         }
 
