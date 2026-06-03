@@ -529,13 +529,13 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 var _dataportinfoportnumber = _dataportinfoSection.GetValue<long>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.PortNumber);
                 if (_dataportinfoportnumber != null)
                 {
-                    obj.DataPortInfo.PortNumber = _dataportinfoportnumber.Value;
+                    obj.DataPortInfo.PortNumber = (long?)_dataportinfoportnumber.Value;
                 }
 
                 var _dataportinfooutputtype = _dataportinfoSection.GetValue<int>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.OutputType);
                 if (_dataportinfooutputtype != null)
                 {
-                    obj.DataPortInfo.OutputType = (SharedMappers.DomIds.SlcAsset_Management.Enums.Outputtype)_dataportinfooutputtype.Value;
+                    obj.DataPortInfo.OutputType = (SharedMappers.DomIds.SlcAsset_Management.Enums.Outputtype?)_dataportinfooutputtype.Value;
                 }
 
                 var _dataportinfoportexposure = _dataportinfoSection.GetValue<int>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.PortExposure);
@@ -645,10 +645,15 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     _dataportinfo.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.Name, Convert.ToString(obj.DataPortInfo.Name));
                 }
 
-                
-                _dataportinfo.AddOrUpdateValue<long>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.PortNumber, (long)obj.DataPortInfo.PortNumber);
+                if (obj.DataPortInfo.PortNumber != default)
+                {
+                    _dataportinfo.AddOrUpdateValue<long>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.PortNumber, (long)(obj.DataPortInfo.PortNumber).Value);
+                }
 
-                _dataportinfo.AddOrUpdateValue<int>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.OutputType, (int)obj.DataPortInfo.OutputType);
+                if (obj.DataPortInfo.OutputType != default)
+                {
+                    _dataportinfo.AddOrUpdateValue<int>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.OutputType, (int)(obj.DataPortInfo.OutputType).Value);
+                }
                 _dataportinfo.AddOrUpdateValue<int>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.PortExposure, (int)obj.DataPortInfo.PortExposure);
                 if (obj.DataPortInfo.Type != default)
                 {
@@ -727,10 +732,14 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.Id, comparer, Guid.Parse((string)value));
                 case "DataPortInfo.Name":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.Name), comparer, (string)value);
+                case "DataPortInfo.PortNumber" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.PortNumber.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "DataPortInfo.PortNumber":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.PortNumber), comparer, (long)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.PortNumber), comparer, ((long?)value).Value);
+                case "DataPortInfo.OutputType" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.OutputType.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "DataPortInfo.OutputType":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.OutputType), comparer, (int)(SharedMappers.DomIds.SlcAsset_Management.Enums.Outputtype)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.OutputType), comparer, (int)((SharedMappers.DomIds.SlcAsset_Management.Enums.Outputtype?)value).Value);
                 case "DataPortInfo.PortExposure":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.PortExposure), comparer, (int)(SharedMappers.DomIds.SlcAsset_Management.Enums.PortExposureEnum)value);
                 case "DataPortInfo.Type":
