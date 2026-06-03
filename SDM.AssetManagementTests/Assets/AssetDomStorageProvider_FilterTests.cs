@@ -11,8 +11,10 @@
     using SDM.AssetManagement.Tests.Setup;
 
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
+    using Skyline.DataMiner.Net.Serialization;
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
+    using Skyline.DataMiner.SDM.Extensions;
 
     /// <summary>
     /// Filter and query tests for Asset repository operations.
@@ -215,7 +217,7 @@
            Helper.PopulateWithDemoData(upTo: DemoDataLayer.Assets);
 
             var cutoffDate = DateTime.UtcNow.AddYears(-3);
-            var filter = AssetExposers.Lifecycle.FirstUseDate.UncheckedLessThanOrEqual((DateTime?)cutoffDate);
+            var filter = AssetExposers.Lifecycle.FirstUseDate.LessThanOrEqual(cutoffDate);
 
             // Act
             var results =Helper.AssetManagement.Assets.Read(filter).ToList();
@@ -236,10 +238,10 @@
            Helper.PopulateWithDemoData(upTo: DemoDataLayer.Assets);
 
             var cutoffDate = DateTime.UtcNow.AddYears(5);
-            var filter = AssetExposers.Lifecycle.EndOfWarrantyDate.UncheckedLessThan((DateTime?)cutoffDate);
+            var filter = AssetExposers.Lifecycle.EndOfWarrantyDate.LessThan(cutoffDate);
 
             // Act
-            var results =Helper.AssetManagement.Assets.Read(filter).ToList();
+            var results = Helper.AssetManagement.Assets.Read(filter).ToList();
 
             // Assert
             using (new AssertionScope())
@@ -259,8 +261,8 @@
             var startDate = DateTime.UtcNow.AddYears(-6);
             var endDate = DateTime.UtcNow.AddYears(-3);
 
-            var filter = AssetExposers.Lifecycle.InstallationDate.UncheckedGreaterThan((DateTime?)startDate)
-                .AND(AssetExposers.Lifecycle.InstallationDate.UncheckedLessThan((DateTime?)endDate));
+            var filter = AssetExposers.Lifecycle.InstallationDate.GreaterThan(startDate)
+                .AND(AssetExposers.Lifecycle.InstallationDate.LessThan(endDate));
 
             // Act
             var results =Helper.AssetManagement.Assets.Read(filter).ToList();
