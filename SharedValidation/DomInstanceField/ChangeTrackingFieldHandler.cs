@@ -1,16 +1,17 @@
 ﻿namespace Skyline.DataMiner.Utils.InfraOps.Common.Fields
 {
     using System;
+	using System.Collections.Concurrent;
 	using System.Collections.Generic;
 	using System.Linq;
 
 	public sealed class ChangeTrackingFieldHandler
     {
-		private readonly Dictionary<string, IDomInstanceFieldApplyChanges> _fields;
+		private readonly ConcurrentDictionary<string, IDomInstanceFieldApplyChanges> _fields;
 
 		public ChangeTrackingFieldHandler()
 		{
-			_fields = new Dictionary<string, IDomInstanceFieldApplyChanges>();
+			_fields = new ConcurrentDictionary<string, IDomInstanceFieldApplyChanges>();
 		}
 
 		public bool HasChanges
@@ -23,11 +24,7 @@
 
 		public ChangeTrackingField<T1> GetOrCreateField<T1>(string fieldName, Func<ChangeTrackingField<T1>> creator)
 		{
-			if (!_fields.TryGetValue(fieldName, out var field))
-			{
-				field = creator();
-				_fields.Add(fieldName, field);
-			}
+			var field = _fields.GetOrAdd(fieldName, _ => creator());
 
 			if(field is ChangeTrackingField<T1> typedField)
 			{
@@ -39,11 +36,7 @@
 
 		public ChangeTrackingArrayField<T1> GetOrCreateArrayField<T1>(string fieldName, Func<ChangeTrackingArrayField<T1>> creator)
 		{
-			if (!_fields.TryGetValue(fieldName, out var field))
-			{
-				field = creator();
-				_fields.Add(fieldName, field);
-			}
+			var field = _fields.GetOrAdd(fieldName, _ => creator());
 
 			if (field is ChangeTrackingArrayField<T1> typedField)
 			{

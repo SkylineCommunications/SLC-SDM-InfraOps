@@ -44,7 +44,7 @@
         {
             // Arrange
             _helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
-            var deviceType = _helper.TestData.DeviceTypes.First( d => !d.TagsInfo.Tags.Contains(SlcAsset_Management.Enums.TagOption.PowerProvider));
+            var deviceType = _helper.TestData.NonPowerProviderDeviceType();
 
             var assetClass = new AssetClass
             {
@@ -90,7 +90,7 @@
         {
             // Arrange
             _helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
-            var deviceType = _helper.TestData.DeviceTypes.First();
+            var deviceType = _helper.TestData.NonPowerProviderDeviceType();
 
             var assetClass = new AssetClass
             {
@@ -119,7 +119,7 @@
         {
             // Arrange
             _helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
-            var deviceType = _helper.TestData.DeviceTypes.First();
+            var deviceType = _helper.TestData.NonPowerProviderDeviceType();
 
             var assetClass = new AssetClass
             {
@@ -302,7 +302,7 @@
         {
             // Arrange
             _helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
-            var deviceType = _helper.TestData.DeviceTypes.First();
+            var deviceType = _helper.TestData.NonPowerProviderDeviceType();
 
             var assetClass = new AssetClass
             {
@@ -334,7 +334,7 @@
         {
             // Arrange
             _helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
-            var deviceType = _helper.TestData.DeviceTypes.First();
+            var deviceType = _helper.TestData.NonPowerProviderDeviceType();
 
             var assetClass = new AssetClass
             {
@@ -365,7 +365,7 @@
         {
             // Arrange
             _helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
-            var deviceType = _helper.TestData.DeviceTypes.First();
+            var deviceType = _helper.TestData.NonPowerProviderDeviceType();
 
             var assetClass = new AssetClass
             {
@@ -409,7 +409,7 @@
         {
             // Arrange
             _helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
-            var deviceType = _helper.TestData.DeviceTypes.First();
+            var deviceType = _helper.TestData.NonPowerProviderDeviceType();
 
             // Create a valid asset class and persist it
             var assetClass = new AssetClass
@@ -452,8 +452,8 @@
             // Arrange
             _helper.PopulateWithDemoData(upTo: DemoDataLayer.AssetClasses);
 
-            var deviceType = _helper.TestData.DeviceTypes.First();
-
+            var deviceType = _helper.TestData.NonPowerProviderDeviceType();
+           
             var newAssetClass = new AssetClass
             {
                 Name = "Brand New Device",

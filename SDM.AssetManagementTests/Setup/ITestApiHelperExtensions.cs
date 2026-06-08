@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using SharedMappers.DomIds;
+
 using Skyline.DataMiner.SDM.AssetManagement.Validation;
 using Skyline.DataMiner.SDM.Common.Services;
 
@@ -278,6 +280,19 @@ namespace SDM.AssetManagement.Tests.Setup
                 ["Racks"] = helper.FacilityManagement.Racks.Count(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<Skyline.DataMiner.SDM.FacilityManagement.Models.Rack>())
             };
         }
+
+        #endregion
+
+        #region Test Data Helpers
+
+        /// <summary>
+        /// Returns the first device type in the cache that does not carry the PowerProvider tag.
+        /// Use this instead of <c>DeviceTypes.First()</c> when creating asset classes in tests,
+        /// because repo ordering is non-deterministic and a PowerProvider device type requires
+        /// PowerSupply to be set on the asset class or validation will fail.
+        /// </summary>
+        public static Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType NonPowerProviderDeviceType(this ITestDataCache testData)
+            => testData.DeviceTypes.First(d => !d.TagsInfo.Tags.Contains(SlcAsset_Management.Enums.TagOption.PowerProvider));
 
         #endregion
     }

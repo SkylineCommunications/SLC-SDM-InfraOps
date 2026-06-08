@@ -1,1 +1,1 @@
-﻿[assembly: Parallelize(Scope = ExecutionScope.MethodLevel)]
+﻿[assembly: Microsoft.VisualStudio.TestTools.UnitTesting.DoNotParallelize]
