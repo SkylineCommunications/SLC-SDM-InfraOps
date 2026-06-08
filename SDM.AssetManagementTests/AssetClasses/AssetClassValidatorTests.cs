@@ -44,7 +44,7 @@
         {
             // Arrange
             _helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
-            var deviceType = _helper.TestData.DeviceTypes.First();
+            var deviceType = _helper.TestData.DeviceTypes.First( d => !d.TagsInfo.Tags.Contains(SlcAsset_Management.Enums.TagOption.PowerProvider));
 
             var assetClass = new AssetClass
             {
