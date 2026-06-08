@@ -17,6 +17,7 @@
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Helpers;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
+    using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
 
     /// <summary>
@@ -308,8 +309,8 @@
                 readBack.Location.Should().NotBeNull();
                 readBack.Location.RoomId.Should().NotBeNull();
                 readBack.Location.RoomId.Identifier.Should().Be(roomId.ToString());
-                readBack.Location.RackId.Should().BeNull();
-                readBack.Location.ContainerId.Should().BeNull();
+                readBack.Location.RackId.HasValue().Should().BeFalse();
+                readBack.Location.ContainerId.HasValue().Should().BeFalse();
             }
         }
 

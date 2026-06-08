@@ -26,7 +26,7 @@ namespace SDM.FacilityManagement.Tests.Racks
     /// </list>
     /// </summary>
     [TestClass]
-    public partial class RackDomRepositoryTests
+    public partial class RackDomRepositoryTests : BaseRepositoryTest
     {
         // ---------------------------------------------------------------------------
         // RackProperties.Name
@@ -40,14 +40,13 @@ namespace SDM.FacilityManagement.Tests.Racks
         [TestMethod]
         public void RackDomRepository_ReadFilter_Name_Equals()
         {
-            var helper = RepositoryInitialize.InitializeEmptyRepositories();
-            helper.PopulateRacks();
+                Helper.PopulateRacks();
 
             string rackName = "Core Switch Enclosure";
             var nameFilter = RackExposers.RackProperties.Name.Equal(rackName);
             var expected = DemoData.Racks.Single(r => r.Name == rackName);
 
-            var racksRetrieved = helper.Racks.Read(nameFilter);
+            var racksRetrieved = Helper.Racks.Read(nameFilter);
 
             using (new AssertionScope())
             {
@@ -73,8 +72,7 @@ namespace SDM.FacilityManagement.Tests.Racks
         [TestMethod]
         public void RackDomRepository_ReadFilter_Name_Contains()
         {
-            var helper = RepositoryInitialize.InitializeEmptyRepositories();
-            helper.PopulateRacks();
+                Helper.PopulateRacks();
 
             // "Alpha Server Rack" and "Alpha Patch Panel" both contain "Alpha".
             var nameFilter = RackExposers.RackProperties.Name.Contains("Alpha", StringComparison.OrdinalIgnoreCase);
@@ -82,7 +80,7 @@ namespace SDM.FacilityManagement.Tests.Racks
                 .Where(r => r.Name.Contains("Alpha", StringComparison.OrdinalIgnoreCase))
                 .ToArray();
 
-            var racksRetrieved = helper.Racks.Read(nameFilter);
+            var racksRetrieved = Helper.Racks.Read(nameFilter);
 
             using (new AssertionScope())
             {
@@ -103,14 +101,13 @@ namespace SDM.FacilityManagement.Tests.Racks
         [TestMethod]
         public void RackDomRepository_ReadFilter_Identifier_Equal()
         {
-            var helper = RepositoryInitialize.InitializeEmptyRepositories();
-            helper.PopulateRacks();
+                Helper.PopulateRacks();
 
             var rackIdentifier = DemoData.Racks[1].Identifier;
             var filter = RackExposers.Identifier.Equal(rackIdentifier);
             var expected = DemoData.Racks.Single(filter.getLambda());
 
-            var racksRetrieved = helper.Racks.Read(filter);
+            var racksRetrieved = Helper.Racks.Read(filter);
 
             using (new AssertionScope())
             {
@@ -137,14 +134,13 @@ namespace SDM.FacilityManagement.Tests.Racks
         [TestMethod]
         public void RackDomRepository_ReadFilter_Model_Equal()
         {
-            var helper = RepositoryInitialize.InitializeEmptyRepositories();
-            helper.PopulateRacks();
+                Helper.PopulateRacks();
 
             string model = "Schneider Electric";
             var modelFilter = RackExposers.RackProperties.Model.Equal(model);
             var expected = DemoData.Racks.Where(r => r.Model == model).ToArray();
 
-            var racksRetrieved = helper.Racks.Read(modelFilter);
+            var racksRetrieved = Helper.Racks.Read(modelFilter);
 
             using (new AssertionScope())
             {
@@ -167,15 +163,14 @@ namespace SDM.FacilityManagement.Tests.Racks
         [TestMethod]
         public void RackDomRepository_ReadFilter_Position_Equal()
         {
-            var helper = RepositoryInitialize.InitializeEmptyRepositories();
-            helper.PopulateRacks();
+                Helper.PopulateRacks();
 
             var position = SlcFacility_Management.Enums.RackpositionenumEnum.Bottom;
             var positionFilter = RackExposers.RackProperties.Position.Equal(position);
             // Alpha Server Rack, Core Switch Enclosure, Alpha Patch Panel, Storage Array Cabinet.
             var expected = DemoData.Racks.Where(r => r.Position == position).ToArray();
 
-            var racksRetrieved = helper.Racks.Read(positionFilter);
+            var racksRetrieved = Helper.Racks.Read(positionFilter);
 
             using (new AssertionScope())
             {
@@ -199,14 +194,13 @@ namespace SDM.FacilityManagement.Tests.Racks
         [TestMethod]
         public void RackDomRepository_ReadFilter_Label_Equal()
         {
-            var helper = RepositoryInitialize.InitializeEmptyRepositories();
-            helper.PopulateRacks();
+                Helper.PopulateRacks();
 
             string label = "A01";
             var labelFilter = RackExposers.RackProperties.Label.Equal(label);
             var expected = DemoData.Racks.Single(r => r.Label == label);
 
-            var racksRetrieved = helper.Racks.Read(labelFilter);
+            var racksRetrieved = Helper.Racks.Read(labelFilter);
 
             using (new AssertionScope())
             {
@@ -231,8 +225,7 @@ namespace SDM.FacilityManagement.Tests.Racks
         [TestMethod]
         public void RackDomRepository_ReadFilter_ModelAndPosition_Equal()
         {
-            var helper = RepositoryInitialize.InitializeEmptyRepositories();
-            helper.PopulateRacks();
+                Helper.PopulateRacks();
 
             string model = "APC NetShelter SX";
             var position = SlcFacility_Management.Enums.RackpositionenumEnum.Top;
@@ -241,7 +234,7 @@ namespace SDM.FacilityManagement.Tests.Racks
                 .AND(RackExposers.RackProperties.Position.Equal(position));
 
             // Only "Beta Network Rack" matches both.
-            var racksRetrieved = helper.Racks.Read(combinedFilter);
+            var racksRetrieved = Helper.Racks.Read(combinedFilter);
             var expected = DemoData.Racks
                 .Where(r => r.Model == model && r.Position == position)
                 .ToArray();

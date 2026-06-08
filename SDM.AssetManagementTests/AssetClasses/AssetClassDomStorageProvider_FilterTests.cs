@@ -218,7 +218,8 @@
             // Arrange
             Helper.PopulateWithDemoData(upTo: DemoDataLayer.AssetClasses);
 
-            const int targetPortNumber = 4;
+            var assetClassWithPorts = Helper.TestData.AssetClasses.First(a => a.DataPorts.Count > 0);
+            var targetPortNumber = assetClassWithPorts.DataPorts.First().PortNumber;
             var filter = AssetClassExposers.DataPorts.PortNumber.Equal(targetPortNumber);
 
             // Act

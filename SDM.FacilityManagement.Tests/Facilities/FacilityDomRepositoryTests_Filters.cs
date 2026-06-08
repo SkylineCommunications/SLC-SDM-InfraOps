@@ -1,4 +1,4 @@
-﻿namespace SDM.FacilityManagement.Tests.Facilities
+namespace SDM.FacilityManagement.Tests.Facilities
 {
     using System;
     using System.Linq;
@@ -21,14 +21,13 @@
 		[TestMethod]
 		public void FacilityDomRepository_ReadFilter_Name_Equals()
 		{
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulateFacilities();
+			Helper.PopulateFacilities();
 
 			string facilityName = "Tokyo Warehouse";
 			var nameFilter = FacilityExposers.Name.Equal(facilityName);
 			var expected = DemoData.Facilities.Single(facility => facility.Name.Equals(facilityName));
 
-			var facilitiesRetrieved = helper.Facilities.Read(nameFilter);
+			var facilitiesRetrieved = Helper.Facilities.Read(nameFilter);
 
 			using (new AssertionScope())
 			{
@@ -52,13 +51,12 @@
 		[TestMethod]
 		public void FacilityDomRepository_ReadFilter_Description_Contains()
 		{
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulateFacilities();
+			Helper.PopulateFacilities();
 
 			var descriptionFilter = FacilityExposers.Description.Contains("data center", StringComparison.OrdinalIgnoreCase);
 			var expected = DemoData.Facilities.Where(f => f.Description.Contains("data center", StringComparison.OrdinalIgnoreCase)).ToArray();
 
-			var facilitiesRetrieved = helper.Facilities.Read(descriptionFilter);
+			var facilitiesRetrieved = Helper.Facilities.Read(descriptionFilter);
 
 			using (new AssertionScope())
 			{
@@ -71,13 +69,12 @@
 		[TestMethod]
 		public void FacilityDomRepository_ReadFilter_Type_NotEquals()
 		{
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulateFacilities();
+			Helper.PopulateFacilities();
 
 			var typeFilter = FacilityExposers.FacilityType.UncheckedNotEqual(SlcFacility_Management.Enums.FacilityTypeEnum.Building);
 			var expected = DemoData.Facilities.Where(f => f.FacilityType != SlcFacility_Management.Enums.FacilityTypeEnum.Building).ToArray();
 
-			var facilitiesRetrieved = helper.Facilities.Read(typeFilter);
+			var facilitiesRetrieved = Helper.Facilities.Read(typeFilter);
 
 			using (new AssertionScope())
 			{
@@ -90,13 +87,12 @@
 		[TestMethod]
 		public void FacilityDomRepository_ReadFilter_City_Equal()
 		{
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulateFacilities();
+			Helper.PopulateFacilities();
 
 			var city = "New York";
 			var cityFilter = FacilityExposers.City.Equal(city);
 
-			var facilitiesRetrieved = helper.Facilities.Read(cityFilter);
+			var facilitiesRetrieved = Helper.Facilities.Read(cityFilter);
 			var expected = DemoData.Facilities.Where(f => f.City == city).ToArray();
 
 			using (new AssertionScope())
@@ -110,13 +106,12 @@
 		[TestMethod]
 		public void FacilityDomRepository_ReadFilter_Country_Equal()
 		{
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulateFacilities();
+			Helper.PopulateFacilities();
 
 			var country = "USA";
 			var countryFilter = FacilityExposers.Country.Equal(country);
 
-			var facilitiesRetrieved = helper.Facilities.Read(countryFilter);
+			var facilitiesRetrieved = Helper.Facilities.Read(countryFilter);
 			var expected = DemoData.Facilities.Where(f => f.Country == country).ToArray();
 
 			using (new AssertionScope())
@@ -130,13 +125,12 @@
 		[TestMethod]
 		public void FacilityDomRepository_ReadFilter_Latitude_GreaterThanOrEqual()
 		{
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulateFacilities();
+			Helper.PopulateFacilities();
 
 			double latitudeThreshold = 40.0;
 			var latitudeFilter = FacilityExposers.Latitude.GreaterThanOrEqual(latitudeThreshold);
 
-			var facilitiesRetrieved = helper.Facilities.Read(latitudeFilter);
+			var facilitiesRetrieved = Helper.Facilities.Read(latitudeFilter);
 			var expected = DemoData.Facilities.Where(f => f.Latitude >= latitudeThreshold).ToArray();
 
 			using (new AssertionScope())
@@ -150,13 +144,12 @@
 		[TestMethod]
 		public void FacilityDomRepository_ReadFilter_Longitude_LessThanOrEqual()
 		{
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulateFacilities();
+			Helper.PopulateFacilities();
 
 			double longitudeThreshold = -70.0;
 			var longitudeFilter = FacilityExposers.Longitude.LessThanOrEqual(longitudeThreshold);
 
-			var facilitiesRetrieved = helper.Facilities.Read(longitudeFilter);
+			var facilitiesRetrieved = Helper.Facilities.Read(longitudeFilter);
 			var expected = DemoData.Facilities.Where(f => f.Longitude <= longitudeThreshold).ToArray();
 
 			using (new AssertionScope())
@@ -170,8 +163,7 @@
 		[TestMethod]
 		public void FacilityDomRepository_ReadFilter_CityAndCountry_Equal()
 		{
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulateFacilities();
+			Helper.PopulateFacilities();
 
 			var city = "London";
 			var country = "UK";
@@ -179,7 +171,7 @@
 			var combinedFilter = FacilityExposers.City.Equal(city)
 				.AND(FacilityExposers.Country.Equal(country));
 
-			var facilitiesRetrieved = helper.Facilities.Read(combinedFilter);
+			var facilitiesRetrieved = Helper.Facilities.Read(combinedFilter);
 			var expected = DemoData.Facilities.Where(f => f.City == city && f.Country == country).ToArray();
 
 			using (new AssertionScope())
@@ -193,8 +185,7 @@
 		[TestMethod]
 		public void FacilityDomRepository_ReadFilter_LatitudeLongitude_Range()
 		{
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulateFacilities();
+			Helper.PopulateFacilities();
 
 			double minLatitude = 40.0;
 			double maxLatitude = 50.0;
@@ -206,7 +197,7 @@
 				.AND(FacilityExposers.Longitude.GreaterThanOrEqual(minLongitude))
 				.AND(FacilityExposers.Longitude.LessThanOrEqual(maxLongitude));
 
-			var facilitiesRetrieved = helper.Facilities.Read(locationFilter);
+			var facilitiesRetrieved = Helper.Facilities.Read(locationFilter);
 			var expected = DemoData.Facilities.Where(f =>
 				f.Latitude >= minLatitude && f.Latitude <= maxLatitude &&
 				f.Longitude >= minLongitude && f.Longitude <= maxLongitude).ToArray();
@@ -222,11 +213,10 @@
 		[TestMethod]
 		public void FacilityDomRepository_ReadFilter_ZipCode_NotContains()
 		{
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulateFacilities();
+			Helper.PopulateFacilities();
 
 			var zipCodeFilter = FacilityExposers.ZipCode.NotContains("000");
-			var facilitiesRetrieved = helper.Facilities.Read(zipCodeFilter);
+			var facilitiesRetrieved = Helper.Facilities.Read(zipCodeFilter);
 
 			var expected = DemoData.Facilities.Where(zipCodeFilter.getLambda()).ToArray();
 
@@ -241,13 +231,12 @@
 		[TestMethod]
 		public void FacilityDomRepository_ReadFilter_FacilityId_Equal()
 		{
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulateFacilities();
+			Helper.PopulateFacilities();
 
 			var facilityId = DemoData.Facilities[5].FacilityId;
 			var filter = FacilityExposers.FacilityId.Equal(facilityId);
 
-			var facilitiesRetrieved = helper.Facilities.Read(filter);
+			var facilitiesRetrieved = Helper.Facilities.Read(filter);
 			var expected = DemoData.Facilities.Single(filter.getLambda());
 
 			using (new AssertionScope())

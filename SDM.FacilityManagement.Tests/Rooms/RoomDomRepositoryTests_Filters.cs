@@ -25,7 +25,7 @@ namespace SDM.FacilityManagement.Tests.Rooms
     /// to <c>default: throw new NotImplementedException()</c>.
     /// </summary>
     [TestClass]
-    public partial class RoomDomRepositoryTests
+    public partial class RoomDomRepositoryTests : BaseRepositoryTest
     {
         // ---------------------------------------------------------------------------
         // RoomProperties.Name  ← primary regression test for the prefix bug
@@ -42,14 +42,13 @@ namespace SDM.FacilityManagement.Tests.Rooms
         [TestMethod]
         public void RoomDomRepository_ReadFilter_Name_Equals()
         {
-            var helper = RepositoryInitialize.InitializeEmptyRepositories();
-            helper.PopulateRooms();
+                Helper.PopulateRooms();
 
             string roomName = "Network Operations Center";
             var nameFilter = RoomExposers.RoomProperties.Name.Equal(roomName);
             var expected = DemoData.Rooms.Single(r => r.Name == roomName);
 
-            var roomsRetrieved = helper.Rooms.Read(nameFilter);
+            var roomsRetrieved = Helper.Rooms.Read(nameFilter);
 
             using (new AssertionScope())
             {
@@ -74,8 +73,7 @@ namespace SDM.FacilityManagement.Tests.Rooms
         [TestMethod]
         public void RoomDomRepository_ReadFilter_Name_Contains()
         {
-            var helper = RepositoryInitialize.InitializeEmptyRepositories();
-            helper.PopulateRooms();
+                Helper.PopulateRooms();
 
             // "Main Server Room" and "Main Storage Area" both contain "Main".
             var nameFilter = RoomExposers.RoomProperties.Name.Contains("Main", StringComparison.OrdinalIgnoreCase);
@@ -83,7 +81,7 @@ namespace SDM.FacilityManagement.Tests.Rooms
                 .Where(r => r.Name.Contains("Main", StringComparison.OrdinalIgnoreCase))
                 .ToArray();
 
-            var roomsRetrieved = helper.Rooms.Read(nameFilter);
+            var roomsRetrieved = Helper.Rooms.Read(nameFilter);
 
             using (new AssertionScope())
             {
@@ -106,14 +104,13 @@ namespace SDM.FacilityManagement.Tests.Rooms
         [TestMethod]
         public void RoomDomRepository_ReadFilter_Identifier_Equal()
         {
-            var helper = RepositoryInitialize.InitializeEmptyRepositories();
-            helper.PopulateRooms();
+                Helper.PopulateRooms();
 
             var roomIdentifier = DemoData.Rooms[3].Identifier;
             var filter = RoomExposers.Identifier.Equal(roomIdentifier);
             var expected = DemoData.Rooms.Single(filter.getLambda());
 
-            var roomsRetrieved = helper.Rooms.Read(filter);
+            var roomsRetrieved = Helper.Rooms.Read(filter);
 
             using (new AssertionScope())
             {
@@ -141,14 +138,13 @@ namespace SDM.FacilityManagement.Tests.Rooms
         [TestMethod]
         public void RoomDomRepository_ReadFilter_RoomId_Equal()
         {
-            var helper = RepositoryInitialize.InitializeEmptyRepositories();
-            helper.PopulateRooms();
+                Helper.PopulateRooms();
 
             string roomId = "RM-005";
             var roomIdFilter = RoomExposers.RoomProperties.RoomId.Equal(roomId);
             var expected = DemoData.Rooms.Single(r => r.RoomId == roomId);
 
-            var roomsRetrieved = helper.Rooms.Read(roomIdFilter);
+            var roomsRetrieved = Helper.Rooms.Read(roomIdFilter);
 
             using (new AssertionScope())
             {
@@ -174,8 +170,7 @@ namespace SDM.FacilityManagement.Tests.Rooms
         [TestMethod]
         public void RoomDomRepository_ReadFilter_Width_GreaterThanOrEqual()
         {
-            var helper = RepositoryInitialize.InitializeEmptyRepositories();
-            helper.PopulateRooms();
+                Helper.PopulateRooms();
 
             // "Main Server Room" (1500), "Network Operations Center" (900),
             // "Cooling Equipment Room" (800) — three rooms at or above 800.
@@ -183,7 +178,7 @@ namespace SDM.FacilityManagement.Tests.Rooms
             var widthFilter = RoomExposers.RoomProperties.Width.GreaterThanOrEqual(widthThreshold);
             var expected = DemoData.Rooms.Where(r => r.Width >= widthThreshold).ToArray();
 
-            var roomsRetrieved = helper.Rooms.Read(widthFilter);
+            var roomsRetrieved = Helper.Rooms.Read(widthFilter);
 
             using (new AssertionScope())
             {
@@ -205,8 +200,7 @@ namespace SDM.FacilityManagement.Tests.Rooms
         [TestMethod]
         public void RoomDomRepository_ReadFilter_Description_Contains()
         {
-            var helper = RepositoryInitialize.InitializeEmptyRepositories();
-            helper.PopulateRooms();
+                Helper.PopulateRooms();
 
             // "Primary data center floor with raised flooring" and
             // "Precision cooling and HVAC units" do NOT share a keyword;
@@ -217,7 +211,7 @@ namespace SDM.FacilityManagement.Tests.Rooms
                 .Where(r => r.Description.Contains("flooring", StringComparison.OrdinalIgnoreCase))
                 .ToArray();
 
-            var roomsRetrieved = helper.Rooms.Read(descriptionFilter);
+            var roomsRetrieved = Helper.Rooms.Read(descriptionFilter);
 
             using (new AssertionScope())
             {
@@ -238,15 +232,14 @@ namespace SDM.FacilityManagement.Tests.Rooms
         [TestMethod]
         public void RoomDomRepository_ReadFilter_NameContainsAndWidthLessThan_Combined()
         {
-            var helper = RepositoryInitialize.InitializeEmptyRepositories();
-            helper.PopulateRooms();
+                Helper.PopulateRooms();
 
             // "Main Server Room" (Width=1500) and "Main Storage Area" (Width=600).
             // Applying Width < 1000 should keep only "Main Storage Area".
             var combinedFilter = RoomExposers.RoomProperties.Name.Contains("Main", StringComparison.OrdinalIgnoreCase)
                 .AND(RoomExposers.RoomProperties.Width.LessThan(1000L));
 
-            var roomsRetrieved = helper.Rooms.Read(combinedFilter);
+            var roomsRetrieved = Helper.Rooms.Read(combinedFilter);
             var expected = DemoData.Rooms
                 .Where(r => r.Name.Contains("Main", StringComparison.OrdinalIgnoreCase) && r.Width < 1000L)
                 .ToArray();
