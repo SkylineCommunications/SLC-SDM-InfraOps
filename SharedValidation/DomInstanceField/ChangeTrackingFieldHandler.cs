@@ -4,7 +4,7 @@
 	using System.Collections.Generic;
 	using System.Linq;
 
-	public class ChangeTrackingFieldHandler
+	public sealed class ChangeTrackingFieldHandler
     {
 		private readonly Dictionary<string, IDomInstanceFieldApplyChanges> _fields;
 

@@ -12,8 +12,6 @@
     public sealed class DataPort : SdmObject<DataPort>, IEquatable<DataPort>, IEntityTracking
     {
         [JsonIgnore]
-        private ChangeTrackingFieldHandler _fieldHandler;
-        [JsonIgnore]
         private DataPortInfo _dataPortInfo;
         [JsonIgnore]
         private AssetRelation _assetFk;

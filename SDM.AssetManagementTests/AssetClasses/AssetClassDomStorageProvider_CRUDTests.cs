@@ -359,7 +359,10 @@
                 // Basic properties
                 updated.Name.Should().Be("Updated Class Name");
                 updated.Description.Should().Be("Updated asset class description.");
-                updated.Manufacturer.Value.Should().NotBe(original.Manufacturer.Value);
+
+                updated.Manufacturer.Should().NotBeNull();
+                original.Manufacturer.Should().HaveValue("original Manufacturer must be set");
+                updated.Manufacturer.Should().NotBe(original.Manufacturer.Value);
 
                 // Physical dimensions
                 updated.Height.Should().Be(30.0);
@@ -379,9 +382,16 @@
 
                 // Lifecycle
                 updated.Lifecycle.Should().NotBeNull();
-                updated.Lifecycle.EndOfLife.Should().BeAfter(original.Lifecycle.EndOfLife.Value);
-                updated.Lifecycle.EndOfService.Should().BeAfter(original.Lifecycle.EndOfService.Value);
-                updated.Lifecycle.NominalLifetime.Should().BeGreaterThan(original.Lifecycle.NominalLifetime.Value);
+
+                updated.Lifecycle.EndOfLife.Should().NotBeNull();
+                original.Lifecycle.EndOfLife.Should().HaveValue("original Lifecycle must be set");
+                updated.Lifecycle.EndOfLife.Should().BeAfter(original.Lifecycle.EndOfLife!.Value);
+
+                original.Lifecycle.EndOfService.Should().HaveValue("original EndOfService must be set");
+                updated.Lifecycle.EndOfService.Should().BeAfter(original.Lifecycle.EndOfService!.Value);
+
+                original.Lifecycle.NominalLifetime.Should().HaveValue("original NominalLifetime must be set");
+                updated.Lifecycle.NominalLifetime.Should().BeGreaterThan(original.Lifecycle.NominalLifetime!.Value);
 
                 // Data Ports
                 updated.DataPorts.Should().HaveCount(1);

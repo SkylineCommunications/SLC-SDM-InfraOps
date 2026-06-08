@@ -1278,12 +1278,7 @@
                 return;
             }
 
-            // Calculate position that will cause overflow
-            // For bottom-up racks: endPos = (position - 1) + heightU
-            // To exceed capacity: endPos > maxCapacity
-            // Therefore: position > maxCapacity - heightU + 1
-            // Use: position = maxCapacity - heightU + 2 to guarantee overflow
-            var assetHeight = (long)tallAssetClass.HeightU;
+            var assetHeight = (long)tallAssetClass.HeightU!.Value;
             var overflowPosition = (long)maxCapacity - assetHeight + 2;
 
             // Try to place asset where position + height exceeds capacity
@@ -1331,9 +1326,7 @@
                 return;
             }
 
-            // For top-down: to exceed at bottom, position must be < heightU
-            // Position 1 with 2U asset → occupies positions 0-1 → exceeds at bottom (position 0)
-            var assetHeight = (long)tallAssetClass.HeightU;
+            var assetHeight = (long)tallAssetClass.HeightU!.Value;
             var overflowPosition = assetHeight - 1; // Will cause negative startPos
 
             var asset = new Asset
