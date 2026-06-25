@@ -9,7 +9,7 @@
 	{
 		IConnection Connection { get; }
 
-		IBulkRepository<Asset> Assets { get; }
+		IAssetRepository Assets { get; }
 
 		IBulkRepository<AssetClass> AssetClasses { get; }
 

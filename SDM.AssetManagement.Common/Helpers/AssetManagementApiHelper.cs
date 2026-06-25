@@ -82,7 +82,7 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
     }
 
     public IConnection Connection { get; }
-    public IBulkRepository<Asset> Assets { get; }
+    public IAssetRepository Assets { get; }
     public IBulkRepository<AssetClass> AssetClasses { get; }
     public IBulkRepository<PowerPort> PowerPorts { get; }
     public IBulkRepository<DataPort> DataPorts { get; }

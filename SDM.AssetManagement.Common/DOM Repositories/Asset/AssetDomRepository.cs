@@ -19,6 +19,7 @@
     /// Implementations should ensure that combined operations are performed atomically to maintain data consistency.
     /// The interface is intended for use in asset management systems where assets have lifecycle states and validation
     /// rules that may depend on the current state.</remarks>
+    [AllowSdmMiddleware]
     public interface IAssetRepository : IBulkRepository<Asset>
     {
         /// <summary>
