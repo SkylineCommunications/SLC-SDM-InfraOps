@@ -7,7 +7,11 @@
 	{
 		IConnection Connection { get; }
 
+        IBulkRepository<FacilityManagerAppSettings> AppSettings { get; }
+
 		IBulkRepository<Facility> Facilities { get; }
+
+        IBulkRepository<Desk> Desks { get; }
 
         IBulkRepository<Rack> Racks { get; }
 
