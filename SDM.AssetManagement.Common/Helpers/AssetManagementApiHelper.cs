@@ -26,8 +26,6 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
     // Internal constructor for testing - allows injection of shared FacilityManagementHelper
     internal AssetManagementApiHelper(IConnection connection, IFacilityManagementApiHelper facilityManagementHelper)
     {
-        Connection = connection;
-
         // DEBUG: Verify this constructor is being called
         if (facilityManagementHelper == null)
         {
@@ -78,10 +76,9 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
         DataPorts = dataPortRepository;
         DeviceTypes = deviceTypeRepository;
         PortTypes = portTypeRepository;
-        Connection = connection;
+        Connections = connectionDomRepository;
     }
 
-    public IConnection Connection { get; }
     public IAssetRepository Assets { get; }
     public IBulkRepository<AssetClass> AssetClasses { get; }
     public IBulkRepository<PowerPort> PowerPorts { get; }
@@ -91,6 +88,7 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
     public IBulkRepository<Connection> Connections { get; }
 
     public AssetValidator AssetValidator => _assetValidator;
+
     public AssetClassValidator AssetClassValidator => _assetClassValidator;
     
 }
