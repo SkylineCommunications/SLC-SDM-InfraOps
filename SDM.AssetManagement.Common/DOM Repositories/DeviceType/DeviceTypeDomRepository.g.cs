@@ -22,12 +22,11 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 	using Skyline.DataMiner.Net.Sections;
 	using Skyline.DataMiner.Net.SubscriptionFilters;
 	using Skyline.DataMiner.SDM;
-    using Skyline.DataMiner.SDM.AssetManagement.Repositories;
 
     using SLDataGateway.API.Querying;
 	using SLDataGateway.API.Types.Querying;
 
-	internal partial class DeviceTypeDomRepository : IBulkRepository<DeviceType>, IDeviceTypeQueryRepository
+	internal partial class DeviceTypeDomRepository : IBulkRepository<DeviceType>
 	{
 		private readonly IConnection connection;
 		private readonly DomHelper helper;

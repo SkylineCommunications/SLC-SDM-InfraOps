@@ -20,12 +20,11 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
     using Skyline.DataMiner.Net.Sections;
     using Skyline.DataMiner.Net.SubscriptionFilters;
     using Skyline.DataMiner.SDM;
-    using Skyline.DataMiner.SDM.FacilityManagement.Repositories;
 
     using SLDataGateway.API.Querying;
     using SLDataGateway.API.Types.Querying;
 
-    internal partial class RackDomRepository : IBulkRepository<Rack> , IRackQueryRepository
+    internal partial class RackDomRepository : IBulkRepository<Rack>
     {
         private readonly IConnection connection;
         private readonly DomHelper helper;
