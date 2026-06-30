@@ -475,6 +475,17 @@
 
         #endregion
 
+        #region AssetManagerAppSettings
+
+        public static ITestApiHelper PopulateAssetManagerAppSettings(this ITestApiHelper helper)
+        {
+            helper.AssetManagement.AppSettings.Create(DemoData.AssetManagerAppSettings);
+
+            return helper;
+        }
+
+        #endregion
+
         #region DeviceTypes
 
         public static ITestApiHelper PopulateDeviceTypes(this ITestApiHelper helper, IEnumerable<DeviceType> deviceTypes)

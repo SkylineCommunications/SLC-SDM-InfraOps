@@ -54,6 +54,30 @@
 		}
 
 		/// <summary>
+		/// Populates the Desks repository with default <see cref="Desk"/> test data.
+		/// </summary>
+		/// <param name="helper">Mocked API helper.</param>
+		/// <returns><see cref="IFacilityManagementApiHelper"/> API helper interface with populated data.</returns>
+		public static IFacilityManagementApiHelper PopulateDesks(this IFacilityManagementApiHelper helper)
+		{
+			helper.Desks.Create(DemoData.Desks);
+
+			return helper;
+		}
+
+		/// <summary>
+		/// Populates the AppSettings repository with default <see cref="FacilityManagerAppSettings"/> test data.
+		/// </summary>
+		/// <param name="helper">Mocked API helper.</param>
+		/// <returns><see cref="IFacilityManagementApiHelper"/> API helper interface with populated data.</returns>
+		public static IFacilityManagementApiHelper PopulateFacilityManagerAppSettings(this IFacilityManagementApiHelper helper)
+		{
+			helper.AppSettings.Create(DemoData.FacilityManagerAppSettings);
+
+			return helper;
+		}
+
+		/// <summary>
 		/// Populates the Rooms repository with default <see cref="Room"/> test data.
 		/// </summary>
 		/// <param name="helper">Mocked API helper.</param>

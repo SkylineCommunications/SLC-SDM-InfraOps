@@ -505,7 +505,9 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             {
                 Identifier = instance.ID.Id.ToString()
             };
-            obj.State = SharedMappers.DomIds.SlcFacility_Management.Behaviors.Desk_Behaviour.Statuses.ToEnum(instance.StatusId);
+            obj.State = String.IsNullOrWhiteSpace(instance.StatusId)
+                ? SharedMappers.DomIds.SlcFacility_Management.Behaviors.Desk_Behaviour.StatusesEnum.Draft
+                : SharedMappers.DomIds.SlcFacility_Management.Behaviors.Desk_Behaviour.Statuses.ToEnum(instance.StatusId);
             var _deskinformationSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.FacilityManagement.Models.DeskDomMapper.DeskInformation.SectionDefinitionId));
             if (_deskinformationSection != default)
             {

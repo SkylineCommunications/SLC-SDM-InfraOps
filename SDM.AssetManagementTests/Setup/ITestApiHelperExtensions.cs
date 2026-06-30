@@ -152,6 +152,15 @@ namespace SDM.AssetManagement.Tests.Setup
 
             SafeDelete(() =>
             {
+                var settings = helper.AssetManagement.AppSettings.Read(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettings>());
+                if (settings.Any())
+                {
+                    helper.AssetManagement.AppSettings.Delete(settings);
+                }
+            });
+
+            SafeDelete(() =>
+            {
                 var racks = helper.FacilityManagement.Racks.Read(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<Skyline.DataMiner.SDM.FacilityManagement.Models.Rack>());
                 if (racks.Any())
                 {
@@ -213,6 +222,7 @@ namespace SDM.AssetManagement.Tests.Setup
 
             return helper.AssetManagement.Assets.Count(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.Asset>()) == 0
                 && helper.AssetManagement.AssetClasses.Count(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass>()) == 0
+                && helper.AssetManagement.AppSettings.Count(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettings>()) == 0
                 && helper.AssetManagement.DeviceTypes.Count(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType>()) == 0
                 && helper.AssetManagement.DataPorts.Count(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort>()) == 0
                 && helper.AssetManagement.PowerPorts.Count(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort>()) == 0
@@ -238,6 +248,9 @@ namespace SDM.AssetManagement.Tests.Setup
 
             var assetClassCount = helper.AssetManagement.AssetClasses.Count(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass>());
             if (assetClassCount > 0) nonEmptyRepositories.Add($"AssetClasses ({assetClassCount})");
+
+            var appSettingsCount = helper.AssetManagement.AppSettings.Count(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettings>());
+            if (appSettingsCount > 0) nonEmptyRepositories.Add($"AssetManagerAppSettings ({appSettingsCount})");
 
             var deviceTypeCount = helper.AssetManagement.DeviceTypes.Count(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType>());
             if (deviceTypeCount > 0) nonEmptyRepositories.Add($"DeviceTypes ({deviceTypeCount})");
