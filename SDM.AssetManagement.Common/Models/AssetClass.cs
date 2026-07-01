@@ -260,12 +260,26 @@
             () => new ChangeTrackingArrayField<PowerPortInfo>(new List<PowerPortInfo>()));
 
         [JsonIgnore]
+        internal IChangeTrackingField<SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum> StateField => FieldHandler.GetOrCreateField(
+            nameof(State),
+            () => new ChangeTrackingField<SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum>(SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Draft));
+
+        [JsonIgnore]
         internal ChangeTrackingArrayField<AssetHolder> HoldersField => FieldHandler.GetOrCreateArrayField(
             nameof(Holders),
             () => new ChangeTrackingArrayField<AssetHolder>(new List<AssetHolder>()));
 
+        /// <summary>
+        /// Gets the current status of the asset class.
+        /// </summary>
+        public SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum State
+        {
+            get => StateField.Value; internal set => StateField.Value = value;
+        }
+
         public bool Changed => FieldHandler.HasChanges ||
             _lifecycle?.Changed == true ||
+            StateField?.Changed == true ||
             (DataPorts?.Any(p => p?.Changed == true) == true);
 
         public void ResetChangeTracking()
