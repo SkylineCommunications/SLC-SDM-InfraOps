@@ -36,6 +36,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 		public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, double?> TypicalPowerConsumption = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, double?>((obj) => obj.TypicalPowerConsumption, "TypicalPowerConsumption");
 		public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, double?> MaximumPowerConsumption = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, double?>((obj) => obj.MaximumPowerConsumption, "MaximumPowerConsumption");
 		public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, SlcAsset_Management.Enums.PowerSupplyEnum?> PowerSupply = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, SlcAsset_Management.Enums.PowerSupplyEnum?>((obj) => obj.PowerSupply, "PowerSupply");
+		public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum> State = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum>((obj) => obj.State, "State");
 		public static partial class Lifecycle
 		{
 			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, DateTime?> EndOfLife = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, DateTime?>((obj) => obj.Lifecycle.EndOfLife, "Lifecycle.EndOfLife");

@@ -569,6 +569,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			{
 				Identifier = instance.ID.Id.ToString(),
                 IsNewInternal = false,
+                State = SlcAsset_Management.Behaviors.Asset_Class_Behavior.Statuses.ToEnum(instance.StatusId),
             };
 
 			var _assetclasspropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.SectionDefinitionId));
@@ -800,6 +801,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 		private DomInstance ToInstance(AssetClass obj)
 		{
 			Guid id = default(Guid);
+			bool isNew = obj.IsNew || String.IsNullOrWhiteSpace(obj.Identifier);
+
 			if (!String.IsNullOrEmpty(obj.Identifier))
 			{
 				id = Guid.Parse(obj.Identifier);
@@ -817,6 +820,11 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 					ModuleId = Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.ModuleId
 				}
 			};
+
+			if (isNew)
+			{
+				instance.StatusId = SlcAsset_Management.Behaviors.Asset_Class_Behavior.Statuses.ToValue(obj.State);
+			}
 			var _assetclassproperties = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.SectionDefinitionId);
 			if (obj.Name != default)
 			{
