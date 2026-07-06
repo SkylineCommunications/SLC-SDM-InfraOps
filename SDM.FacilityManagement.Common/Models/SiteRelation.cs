@@ -1,6 +1,4 @@
-﻿using Skyline.DataMiner.SDM;
-
-namespace Skyline.DataMiner.SDM.FacilityManagement.Models
+﻿namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 {
     public class SiteRelation
     {

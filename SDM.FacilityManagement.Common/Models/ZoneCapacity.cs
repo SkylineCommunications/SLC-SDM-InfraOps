@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Skyline.DataMiner.SDM.FacilityManagement.Models
+﻿namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 {
     public class ZoneCapacity
     {

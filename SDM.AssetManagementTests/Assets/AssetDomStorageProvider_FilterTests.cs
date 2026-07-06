@@ -11,10 +11,8 @@
     using SDM.AssetManagement.Tests.Setup;
 
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
-    using Skyline.DataMiner.Net.Serialization;
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
-    using Skyline.DataMiner.SDM.Extensions;
 
     /// <summary>
     /// Filter and query tests for Asset repository operations.

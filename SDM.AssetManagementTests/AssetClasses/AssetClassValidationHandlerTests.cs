@@ -7,8 +7,6 @@
 
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-    using SDM.AssetManagement.Tests.Setup;
-
     using SharedMappers.DomIds;
 
     using Skyline.DataMiner.SDM;

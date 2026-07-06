@@ -1,7 +1,6 @@
 ﻿namespace SDM.AssetManagement.Tests.Setup
 {
     using Skyline.DataMiner.Net;
-    using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM.AssetManagement.Helpers;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.FacilityManagement.Helpers;

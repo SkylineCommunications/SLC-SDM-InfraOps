@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 using Newtonsoft.Json;
 
@@ -33,21 +33,25 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         }
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<string> Ipv4AddressField => FieldHandler.GetOrCreateField(
             nameof(Ipv4Address),
             () => new ChangeTrackingStringField(null));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<string> Ipv6AddressField => FieldHandler.GetOrCreateField(
             nameof(Ipv6Address),
             () => new ChangeTrackingStringField(null));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<string> HostnameField => FieldHandler.GetOrCreateField(
             nameof(Hostname),
             () => new ChangeTrackingStringField(null));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<bool> DNSField => FieldHandler.GetOrCreateField(
             nameof(DNS),
             () => new ChangeTrackingField<bool>(false));

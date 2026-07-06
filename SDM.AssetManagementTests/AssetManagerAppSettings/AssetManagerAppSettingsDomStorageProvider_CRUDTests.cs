@@ -11,7 +11,6 @@ namespace SDM.AssetManagement.Tests.AssetManagerAppSettings
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
-    using Skyline.DataMiner.SDM.Extensions;
 
     [TestClass]
     public class AssetManagerAppSettingsDomStorageProvider_CRUDTests : BaseRepositoryTest

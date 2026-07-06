@@ -1,12 +1,10 @@
 ﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
-	using System;
+    using System;
 
     using SharedMappers.DomIds;
 
-    using Skyline.DataMiner.SDM.AssetManagement;
-
-	public sealed class AssetHolder : IEquatable<AssetHolder>
+    public sealed class AssetHolder : IEquatable<AssetHolder>
 	{
 		public long SlotNumber { get; set; }
 

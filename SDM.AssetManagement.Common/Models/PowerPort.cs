@@ -1,9 +1,5 @@
 ﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
-	using System;
-
-    using SharedMappers.DomIds;
-
     // [GenerateExposers]
     // [SdmDomStorage("(slc)asset_management")]
     public class PowerPort : SdmObject<PowerPort>

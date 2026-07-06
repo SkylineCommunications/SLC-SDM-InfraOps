@@ -1,7 +1,6 @@
-﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
+namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
     using System;
-    using System.Runtime.Serialization;
 
     using Newtonsoft.Json;
 
@@ -58,14 +57,17 @@
         _primaryPortRelation?.Changed == true;
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<SdmObjectReference<Asset>> AssetField =>
             (_assetFk ?? (_assetFk = new AssetRelation())).AssetField;
 
         [JsonIgnore]
+        [SdmIgnore]
         public bool IsNew => _isNew;
 
 
         [JsonIgnore]
+        [SdmIgnore]
         internal bool IsNewInternal
         {
             get => _isNew;

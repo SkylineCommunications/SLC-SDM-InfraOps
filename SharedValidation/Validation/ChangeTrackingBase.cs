@@ -1,7 +1,5 @@
 ﻿namespace Skyline.DataMiner.Utils.InfraOps.Common.Fields
 {
-    using System.Runtime.Serialization;
-
     using Newtonsoft.Json;
 
     /// <summary>

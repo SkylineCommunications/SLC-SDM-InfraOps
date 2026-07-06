@@ -18,11 +18,13 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
         }
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<double> RackUnitsField => FieldHandler.GetOrCreateField(
             nameof(MaximumRackCapacity),
             () => new ChangeTrackingField<double>(0));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<double> PowerCapacityField => FieldHandler.GetOrCreateField(
             nameof(MaximumPowerCapacity),
             () => new ChangeTrackingField<double>(0));

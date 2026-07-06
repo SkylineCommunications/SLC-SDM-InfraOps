@@ -1,7 +1,7 @@
-﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
+namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
-    using System.Runtime.Serialization;
     using Newtonsoft.Json;
+
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
@@ -24,6 +24,7 @@
         }
 
         [JsonIgnore]
+        [SdmIgnore]
         private ChangeTrackingFieldHandler FieldHandler
         {
             get
@@ -40,12 +41,14 @@
         /// Gets a value indicating whether the entity has not yet been persisted.
         /// </summary>
         [JsonIgnore]
+        [SdmIgnore]
         public bool IsNew => _isNew;
 
         /// <summary>
         /// Sets the IsNew flag. Used internally when loading from database.
         /// </summary>
         [JsonIgnore]
+        [SdmIgnore]
         internal bool IsNewInternal
         {
             get => _isNew;
@@ -53,6 +56,7 @@
         }
 
         [JsonIgnore]
+        [SdmIgnore]
         public bool Changed =>
             FieldHandler.HasChanges ||
             _tagsInfo?.Changed == true ||
@@ -83,11 +87,13 @@
         }
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<string> NameField => FieldHandler.GetOrCreateField(
             nameof(Name),
             () => new ChangeTrackingStringField(null));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<string> DescriptionField => FieldHandler.GetOrCreateField(
             nameof(Description),
             () => new ChangeTrackingStringField(null));

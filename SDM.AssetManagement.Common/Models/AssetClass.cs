@@ -1,9 +1,8 @@
-﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
+namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Runtime.Serialization;
 
     using Newtonsoft.Json;
 
@@ -30,6 +29,7 @@
 
         // Ensure _fieldHandler is always initialized (handles JSON deserialization without constructor)
         [JsonIgnore]
+        [SdmIgnore]
         private ChangeTrackingFieldHandler FieldHandler
         {
             get
@@ -161,12 +161,14 @@
         /// Gets or sets a value indicating whether the entity has not yet been persisted or saved.
         /// </summary>
         [JsonIgnore]
+        [SdmIgnore]
         public bool IsNew => _isNew;
 
         /// <summary>
         /// Sets the IsNew flag. Used internally when loading from database.
         /// </summary>
         [JsonIgnore]
+        [SdmIgnore]
         internal bool IsNewInternal
         {
             get => _isNew;
@@ -175,96 +177,115 @@
 
         // INTERNAL: Change tracking fields (validation handler uses these)
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<string> NameField => FieldHandler.GetOrCreateField(
             nameof(Name),
             () => new ChangeTrackingStringField(null));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<SdmObjectReference<DeviceType>> DeviceTypeIdField => FieldHandler.GetOrCreateField(
             nameof(DeviceTypeId),
             () => new ChangeTrackingField<SdmObjectReference<DeviceType>>(default));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<string> DescriptionField => FieldHandler.GetOrCreateField(
             nameof(Description),
             () => new ChangeTrackingStringField(null));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<Guid?> ManufacturerField => FieldHandler.GetOrCreateField(
             nameof(Manufacturer),
             () => new ChangeTrackingField<Guid?>(null));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<double?> DepthField => FieldHandler.GetOrCreateField(
             nameof(Depth),
             () => new ChangeTrackingField<double?>(null));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<double?> HeightField => FieldHandler.GetOrCreateField(
             nameof(Height),
             () => new ChangeTrackingField<double?>(null));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<double?> WidthField => FieldHandler.GetOrCreateField(
             nameof(Width),
             () => new ChangeTrackingField<double?>(null));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<double?> HeightUField => FieldHandler.GetOrCreateField(
             nameof(HeightU),
             () => new ChangeTrackingField<double?>(null));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<double?> WeightField => FieldHandler.GetOrCreateField(
             nameof(Weight),
             () => new ChangeTrackingField<double?>(null));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<string> PlanField => FieldHandler.GetOrCreateField(
            nameof(Plan),
            () => new ChangeTrackingStringField(null));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<string> FrontImageField => FieldHandler.GetOrCreateField(
             nameof(FrontImage),
             () => new ChangeTrackingStringField(null));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<string> BackImageField => FieldHandler.GetOrCreateField(
             nameof(BackImage),
             () => new ChangeTrackingStringField(null));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<double?> TypicalPowerConsumptionField => FieldHandler.GetOrCreateField(
             nameof(TypicalPowerConsumption),
             () => new ChangeTrackingField<double?>(null));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<double?> MaximumPowerConsumptionField => FieldHandler.GetOrCreateField(
             nameof(MaximumPowerConsumption),
             () => new ChangeTrackingField<double?>(null));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<SlcAsset_Management.Enums.PowerSupplyEnum?> PowerSupplyField => FieldHandler.GetOrCreateField(
             nameof(PowerSupply),
             () => new ChangeTrackingField<SlcAsset_Management.Enums.PowerSupplyEnum?>(null));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal ChangeTrackingArrayField<DataPortInfo> DataPortsField => FieldHandler.GetOrCreateArrayField(
             nameof(DataPorts),
             () => new ChangeTrackingArrayField<DataPortInfo>(new List<DataPortInfo>()));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal ChangeTrackingArrayField<PowerPortInfo> PowerPortsField => FieldHandler.GetOrCreateArrayField(
             nameof(PowerPorts),
             () => new ChangeTrackingArrayField<PowerPortInfo>(new List<PowerPortInfo>()));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum> StateField => FieldHandler.GetOrCreateField(
             nameof(State),
             () => new ChangeTrackingField<SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum>(SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Draft));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal ChangeTrackingArrayField<AssetHolder> HoldersField => FieldHandler.GetOrCreateArrayField(
             nameof(Holders),
             () => new ChangeTrackingArrayField<AssetHolder>(new List<AssetHolder>()));

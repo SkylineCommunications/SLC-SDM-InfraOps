@@ -1,6 +1,5 @@
 namespace SDM.AssetManagement.Tests.AssetManagerAppSettings
 {
-    using System;
     using System.Linq;
 
     using FluentAssertions;
@@ -11,7 +10,6 @@ namespace SDM.AssetManagement.Tests.AssetManagerAppSettings
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
-    using Skyline.DataMiner.SDM.Extensions;
 
     [TestClass]
     public class AssetManagerAppSettingsDomStorageProvider_FilterTests : BaseRepositoryTest

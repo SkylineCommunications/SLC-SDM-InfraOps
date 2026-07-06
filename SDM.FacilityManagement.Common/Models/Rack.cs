@@ -24,6 +24,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
         // Ensure _fieldHandler is always initialized (handles JSON deserialization without constructor)
         [JsonIgnore]
+        [SdmIgnore]
         private ChangeTrackingFieldHandler FieldHandler
         {
             get
@@ -37,6 +38,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
         }
 
         [JsonIgnore]
+        [SdmIgnore]
         public bool Changed =>
          FieldHandler.HasChanges ||
          NameField?.Changed == true ||
@@ -56,6 +58,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
          Capacity?.Changed == true;
 
         [JsonIgnore]
+        [SdmIgnore]
         internal bool IsNewInternal
         {
             get => _isNew;
@@ -63,6 +66,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
         }
 
         [JsonIgnore]
+        [SdmIgnore]
         public bool IsNew => _isNew;
 
         // PUBLIC API: Simple properties
@@ -162,71 +166,85 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
         // INTERNAL: Change tracking fields (validation handler uses these)
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<string> NameField => FieldHandler.GetOrCreateField(
             nameof(Name),
             () => new ChangeTrackingStringField(null));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<string> ModelField => FieldHandler.GetOrCreateField(
             nameof(Model),
             () => new ChangeTrackingStringField(null));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<SlcFacility_Management.Enums.RackpositionenumEnum> PositionField => FieldHandler.GetOrCreateField(
             nameof(Position),
             () => new ChangeTrackingField<SlcFacility_Management.Enums.RackpositionenumEnum>(default));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<double> WidthField => FieldHandler.GetOrCreateField(
             nameof(Width),
             () => new ChangeTrackingField<double>(0));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<double> HeightField => FieldHandler.GetOrCreateField(
             nameof(Height),
             () => new ChangeTrackingField<double>(0));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<double> DepthField => FieldHandler.GetOrCreateField(
             nameof(Depth),
             () => new ChangeTrackingField<double>(0));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<string> DescriptionField => FieldHandler.GetOrCreateField(
             nameof(Description),
             () => new ChangeTrackingStringField(null));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<bool> BookableField => FieldHandler.GetOrCreateField(
             nameof(Bookable),
             () => new ChangeTrackingField<bool>(false));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<SlcFacility_Management.Enums.CoolingflowenumEnum> CoolingFlowField => FieldHandler.GetOrCreateField(
             nameof(CoolingFlow),
             () => new ChangeTrackingField<SlcFacility_Management.Enums.CoolingflowenumEnum>(default));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<double> XPositionField => FieldHandler.GetOrCreateField(
             nameof(XPosition),
             () => new ChangeTrackingField<double>(0));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<double> YPositionField => FieldHandler.GetOrCreateField(
             nameof(YPosition),
             () => new ChangeTrackingField<double>(0));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<string> LabelField => FieldHandler.GetOrCreateField(
             nameof(Label),
             () => new ChangeTrackingStringField(null));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<SlcFacility_Management.Enums.Placementorientationenum> OrientationField => FieldHandler.GetOrCreateField(
             nameof(Orientation),
             () => new ChangeTrackingField<SlcFacility_Management.Enums.Placementorientationenum>(default));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<string> RackIdField => FieldHandler.GetOrCreateField(
             nameof(RackId),
             () => new ChangeTrackingStringField(null));

@@ -11,6 +11,8 @@
   <Project Path="SDM.FacilityManagement.Common/SDM.FacilityManagement.Common.csproj" Id="43129b6d-34c1-4d71-8900-8836dcc2cdcc" />
   <Project Path="SDM.FacilityManagement.GQI/SDM.FacilityManagement.GQI.csproj" Id="fa02bb09-b0ca-4888-a9be-afb648c59199" />
   <Project Path="SDM.FacilityManagement.Protocol/SDM.FacilityManagement.Protocol.csproj" Id="9450733d-d8ec-430e-8403-6dc440537c73" />
+  <Project Path="SDM.InfraOpsProperties.Common/SDM.InfraOpsProperties.Common.csproj" />
+  <Project Path="SDM.PlanAndBuild.Common/SDM.PlanAndBuild.Common.csproj" />
   <Project Path="SharedMappers/SharedMappers.shproj" Id="4a22402e-e149-417d-9777-f79bb1002566" />
   <Project Path="SharedValidation/SharedCommonLibrary.shproj" Id="c89d184b-e9af-41e0-9a33-4d218a04bcf7" />
 </Solution>

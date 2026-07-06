@@ -1,4 +1,4 @@
-﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
+namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
     using System;
     using Newtonsoft.Json;
@@ -58,42 +58,50 @@
         }
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<SdmObjectReference<Asset>> ParentAssetField => FieldHandler.GetOrCreateField(
             nameof(ParentAsset),
             () => new ChangeTrackingField<SdmObjectReference<Asset>>(default));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<long?> HolderNumberField => FieldHandler.GetOrCreateField(
             nameof(HolderNumber),
             () => new ChangeTrackingField<long?>(null));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<SdmObjectReference<Rack>> RackIdField => FieldHandler.GetOrCreateField(
             nameof(RackId),
             () => new ChangeTrackingField<SdmObjectReference<Rack>>(default));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<long?> RackPositionField => FieldHandler.GetOrCreateField(
             nameof(RackPosition),
             () => new ChangeTrackingField<long?>(null));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<SlcAsset_Management.Enums.SideEnum?> SideField => FieldHandler.GetOrCreateField(
             nameof(Side),
             () => new ChangeTrackingField<SlcAsset_Management.Enums.SideEnum?>(default));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<Guid?> DeskIdField => FieldHandler.GetOrCreateField(
             nameof(DeskId),
             () => new ChangeTrackingField<Guid?>(null));
 
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<SdmObjectReference<Facility>> ContainerIdField => FieldHandler.GetOrCreateField(
             nameof(ContainerId),
             () => new ChangeTrackingField<SdmObjectReference<Facility>>(default));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<SdmObjectReference<FacilityManagement.Models.Room>> RoomIdField => FieldHandler.GetOrCreateField(
             nameof(RoomId),
             () => new ChangeTrackingField<SdmObjectReference<FacilityManagement.Models.Room>>(default));

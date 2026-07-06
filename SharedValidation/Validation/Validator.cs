@@ -1,7 +1,6 @@
 namespace Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations
 {
     using System;
-    using System.Collections.Generic;
 
     /// <summary>
     /// Composable validator with error handling capabilities.

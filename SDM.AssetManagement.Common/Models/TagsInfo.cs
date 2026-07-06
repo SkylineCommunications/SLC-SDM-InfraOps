@@ -1,9 +1,11 @@
-﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
+namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
     using System.Collections.Generic;
+
     using Newtonsoft.Json;
+
     using SharedMappers.DomIds;
-    using Skyline.DataMiner.SDM;
+
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     public class TagsInfo : IChangeTracking
@@ -17,6 +19,7 @@
         }
 
         [JsonIgnore]
+        [SdmIgnore]
         private ChangeTrackingFieldHandler FieldHandler
         {
             get
@@ -30,6 +33,7 @@
         }
 
         [JsonIgnore]
+        [SdmIgnore]
         public bool Changed => FieldHandler.HasChanges;
 
         public List<SlcAsset_Management.Enums.TagOption> Tags
@@ -39,6 +43,7 @@
         }
 
         [JsonIgnore]
+        [SdmIgnore]
         internal ChangeTrackingArrayField<SlcAsset_Management.Enums.TagOption> TagsField => FieldHandler.GetOrCreateArrayField(
             nameof(Tags),
             () => new ChangeTrackingArrayField<SlcAsset_Management.Enums.TagOption>(new List<SlcAsset_Management.Enums.TagOption>()));

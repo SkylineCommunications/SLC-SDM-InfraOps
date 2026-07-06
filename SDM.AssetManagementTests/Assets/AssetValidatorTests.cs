@@ -5,7 +5,6 @@
     using System.Linq;
 
     using FluentAssertions;
-    using FluentAssertions.Execution;
 
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -13,7 +12,6 @@
 
     using SharedMappers.DomIds;
 
-    using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;

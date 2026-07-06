@@ -19,7 +19,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Validation\IChangeTracking.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Validation\ValidationResultExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\SDMObjectReferenceExtensions.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Extensions\NullableExposerExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Validation\InfraOpsException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Validation\NumericValidator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Validation\ValidationException.cs" />

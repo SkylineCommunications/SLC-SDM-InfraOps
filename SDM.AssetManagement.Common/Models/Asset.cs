@@ -1,4 +1,4 @@
-﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
+namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
     using System;
     using System.Collections.Generic;
@@ -26,6 +26,7 @@
         }
 
         [JsonIgnore]
+        [SdmIgnore]
         private ChangeTrackingFieldHandler FieldHandler
         {
             get
@@ -39,9 +40,11 @@
         }
 
         [JsonIgnore]
+        [SdmIgnore]
         public Guid Id { get; set; }
 
         [JsonIgnore]
+        [SdmIgnore]
         public bool Changed =>
             FieldHandler.HasChanges ||
             Location?.Changed == true ||
@@ -56,12 +59,14 @@
         /// Gets a value indicating whether the current object has not been assigned an identifier.
         /// </summary>
         [JsonIgnore]
+        [SdmIgnore]
         public bool IsNew => _isNew;
 
         /// <summary>
         /// Sets the IsNew flag. Used internally when loading from database.
         /// </summary>
         [JsonIgnore]
+        [SdmIgnore]
         internal bool IsNewInternal
         {
             get => _isNew;
@@ -226,41 +231,49 @@
         #region Info Tracking Fields
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<string> NameField => FieldHandler.GetOrCreateField(
             nameof(Name),
             () => new ChangeTrackingStringField(null));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<string> AssetIDField => FieldHandler.GetOrCreateField(
             nameof(AssetID),
             () => new ChangeTrackingStringField(null));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<SdmObjectReference<AssetClass>> AssetClassIdField => FieldHandler.GetOrCreateField(
             nameof(AssetClassId),
             () => new ChangeTrackingField<SdmObjectReference<AssetClass>>(default));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<string> SerialNumberField => FieldHandler.GetOrCreateField(
             nameof(SerialNumber),
             () => new ChangeTrackingStringField(null));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<string> DescriptionField => FieldHandler.GetOrCreateField(
             nameof(Description),
             () => new ChangeTrackingStringField(null));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<string> FwOSField => FieldHandler.GetOrCreateField(
             nameof(FW_OS),
             () => new ChangeTrackingStringField(null));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<string> HardwareVersionField => FieldHandler.GetOrCreateField(
            nameof(HardwareVersion),
            () => new ChangeTrackingStringField(null));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<long> OperationalFlagsField => FieldHandler.GetOrCreateField(
             nameof(OperationalFlags),
             () => new ChangeTrackingField<long>(0));
@@ -270,6 +283,7 @@
         #region Network Tracking Fields
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<string> MacAddressField => FieldHandler.GetOrCreateField(
             nameof(MacAddress),
             () => new ChangeTrackingStringField(null));
@@ -279,46 +293,55 @@
         #region Lifecycle Tracking Fields
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<Guid> InstallationUserIdField => FieldHandler.GetOrCreateField(
             nameof(InstallationUserId),
             () => new ChangeTrackingField<Guid>(Guid.Empty));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<DateTime?> InstallationDateField => FieldHandler.GetOrCreateField(
             nameof(InstallationDate),
             () => new ChangeTrackingField<DateTime?>(null));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<DateTime?> FirstUseDateField => FieldHandler.GetOrCreateField(
             nameof(FirstUseDate),
             () => new ChangeTrackingField<DateTime?>(null));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<DateTime?> PurchaseDateField => FieldHandler.GetOrCreateField(
             nameof(PurchaseDate),
             () => new ChangeTrackingField<DateTime?>(null));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<Guid> ModificationUserIdField => FieldHandler.GetOrCreateField(
             nameof(ModificationUserId),
             () => new ChangeTrackingField<Guid>(Guid.Empty));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<DateTime?> ModificationDateField => FieldHandler.GetOrCreateField(
             nameof(ModificationDate),
             () => new ChangeTrackingField<DateTime?>(null));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<DateTime?> EndOfLifeDateField => FieldHandler.GetOrCreateField(
             nameof(EndOfLifeDate),
             () => new ChangeTrackingField<DateTime?>(null));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<DateTime?> EndOfWarrantyDateField => FieldHandler.GetOrCreateField(
           nameof(EndOfWarrantyDate),
           () => new ChangeTrackingField<DateTime?>(null));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum> StateField => FieldHandler.GetOrCreateField(
             nameof(State),
             () => new ChangeTrackingField<SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum>(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable));
@@ -328,11 +351,13 @@
         #region Collection Tracking Fields
 
         [JsonIgnore]
+        [SdmIgnore]
         internal ChangeTrackingArrayField<AssetHolder> HoldersField => FieldHandler.GetOrCreateArrayField(
             nameof(Holders),
             () => new ChangeTrackingArrayField<AssetHolder>(new List<AssetHolder>()));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal ChangeTrackingArrayField<ElementLink> ElementsField => FieldHandler.GetOrCreateArrayField(
             nameof(ElementLinks),
             () => new ChangeTrackingArrayField<ElementLink>(new List<ElementLink>()));
