@@ -1,5 +1,7 @@
 namespace Skyline.DataMiner.SDM.InfraOpsProperties.Validation
 {
+    using System.Linq;
+
     using SharedMappers.DomIds;
 
     using Skyline.DataMiner.SDM.InfraOpsProperties.Models;
@@ -102,10 +104,26 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Validation
             if (isDiscrete && !hasOptions)
             {
                 result.AddFailReason(PropertyValidationField.Options, "Property Options cannot be empty when Property Type is 'Discrete'.");
+                return result.IsValid;
             }
             else if (!isDiscrete && hasOptions)
             {
                 result.AddFailReason(PropertyValidationField.Options, "Property Options must be empty when Property Type is not 'Discrete'.");
+                return result.IsValid;
+            }
+
+            if (isDiscrete)
+            {
+                var duplicateOptions = property.Options
+                    .GroupBy(option => option, System.StringComparer.OrdinalIgnoreCase)
+                    .Where(group => group.Count() > 1)
+                    .Select(group => group.Key)
+                    .ToList();
+
+                if (duplicateOptions.Count > 0)
+                {
+                    result.AddFailReason(PropertyValidationField.Options, $"Duplicate Property Option(s) found: {string.Join(", ", duplicateOptions)}.");
+                }
             }
 
             return result.IsValid;

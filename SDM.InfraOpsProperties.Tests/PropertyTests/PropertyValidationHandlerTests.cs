@@ -237,16 +237,48 @@
 		}
 
 		[TestMethod]
-		public void IsOptionsValid_DiscreteWithDuplicateOptions_ShouldBeValid_KnownGap()
+		public void IsOptionsValid_DiscreteWithDuplicateOptions_ShouldBeInvalid()
 		{
-			// Corner case: IsOptionsValid only checks that Options is non-empty for Discrete
-			// properties - it does NOT check uniqueness. Duplicate option strings (e.g. "Low"
-			// twice) currently pass validation. This test pins the current behavior; if
-			// uniqueness enforcement is later added, this test should be updated to expect BeFalse().
+			// Uniqueness is now enforced: duplicate option strings ("Low" twice) must fail validation,
+			// case-insensitively, mirroring the duplicate-name check in PropertyValuesValidationHandler.
 			var property = new Property
 			{
 				PropertyType = InfraopsProperties.Enums.PropertyTypeEnum.Discrete,
 				Options = new List<string> { "Low", "Low", "High" },
+			};
+
+			var isValid = PropertyValidationHandler.IsOptionsValid(property, out var result);
+
+			using (new AssertionScope())
+			{
+				isValid.Should().BeFalse();
+				result.TryGetFailReason(PropertyValidationHandler.PropertyValidationField.Options, out var reason).Should().BeTrue();
+				reason.Should().Contain("Duplicate Property Option");
+				reason.Should().Contain("Low");
+			}
+		}
+
+		[TestMethod]
+		public void IsOptionsValid_DiscreteWithCaseInsensitiveDuplicateOptions_ShouldBeInvalid()
+		{
+			var property = new Property
+			{
+				PropertyType = InfraopsProperties.Enums.PropertyTypeEnum.Discrete,
+				Options = new List<string> { "Low", "low", "High" },
+			};
+
+			var isValid = PropertyValidationHandler.IsOptionsValid(property, out var result);
+
+			isValid.Should().BeFalse();
+		}
+
+		[TestMethod]
+		public void IsOptionsValid_DiscreteWithUniqueOptions_ShouldBeValid()
+		{
+			var property = new Property
+			{
+				PropertyType = InfraopsProperties.Enums.PropertyTypeEnum.Discrete,
+				Options = new List<string> { "Low", "Medium", "High" },
 			};
 
 			var isValid = PropertyValidationHandler.IsOptionsValid(property, out var result);
