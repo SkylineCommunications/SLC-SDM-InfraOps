@@ -2,6 +2,7 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Validation
 {
     using System;
 
+    using Skyline.DataMiner.SDM.InfraOps.Common.Validation;
     using Skyline.DataMiner.SDM.InfraOpsProperties.Models;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
@@ -81,12 +82,12 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Validation
         {
             var result = new ValidationResult();
 
-            if (property.NameField.Changed && !PropertyValidationHandler.IsNameValid(property, out var nameResult))
+            if (property.ShouldValidate(property.NameField) && !PropertyValidationHandler.IsNameValid(property, out var nameResult))
             {
                 result.AddFailuresFrom(nameResult);
             }
 
-            if (property.ScopeField.Changed && !PropertyValidationHandler.IsScopeValid(property, out var scopeResult))
+            if (property.ShouldValidate(property.ScopeField) && !PropertyValidationHandler.IsScopeValid(property, out var scopeResult))
             {
                 result.AddFailuresFrom(scopeResult);
             }
@@ -98,7 +99,7 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Validation
         {
             var result = new ValidationResult();
 
-            if (property.StringSizeLimitField.Changed && !PropertyValidationHandler.IsStringSizeLimitValid(property, out var sizeLimitResult))
+            if (property.ShouldValidate(property.StringSizeLimitField) && !PropertyValidationHandler.IsStringSizeLimitValid(property, out var sizeLimitResult))
             {
                 result.AddFailuresFrom(sizeLimitResult);
             }
@@ -110,7 +111,7 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Validation
         {
             var result = new ValidationResult();
 
-            if ((property.PropertyTypeField.Changed || property.OptionsField.Changed) && !PropertyValidationHandler.IsOptionsValid(property, out var optionsResult))
+            if (property.ShouldValidateAny(property.PropertyTypeField, property.OptionsField) && !PropertyValidationHandler.IsOptionsValid(property, out var optionsResult))
             {
                 result.AddFailuresFrom(optionsResult);
             }

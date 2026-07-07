@@ -510,7 +510,8 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
         {
             var obj = new Property
             {
-                Identifier = instance.ID.Id.ToString()
+                Identifier = instance.ID.Id.ToString(),
+                IsNewInternal = false,
             };
             var _propertypropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyDomMapper.PropertyProperties.SectionDefinitionId));
             if (_propertypropertiesSection != default)
@@ -569,6 +570,8 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
                     obj.Options = _options.Values;
                 }
             }
+
+            obj.ResetChangeTracking();
 
             return obj;
         }

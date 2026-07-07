@@ -2,6 +2,7 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Validation
 {
     using System;
 
+    using Skyline.DataMiner.SDM.InfraOps.Common.Validation;
     using Skyline.DataMiner.SDM.InfraOpsProperties.Models;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
@@ -80,12 +81,12 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Validation
         {
             var result = new ValidationResult();
 
-            if (propertyValues.LinkedObjectIDField.Changed && !PropertyValuesValidationHandler.IsLinkedObjectIDValid(propertyValues, out var linkedObjectIdResult))
+            if (propertyValues.ShouldValidate(propertyValues.LinkedObjectIDField) && !PropertyValuesValidationHandler.IsLinkedObjectIDValid(propertyValues, out var linkedObjectIdResult))
             {
                 result.AddFailuresFrom(linkedObjectIdResult);
             }
 
-            if (propertyValues.ScopeField.Changed && !PropertyValuesValidationHandler.IsScopeValid(propertyValues, out var scopeResult))
+            if (propertyValues.ShouldValidate(propertyValues.ScopeField) && !PropertyValuesValidationHandler.IsScopeValid(propertyValues, out var scopeResult))
             {
                 result.AddFailuresFrom(scopeResult);
             }
@@ -97,7 +98,7 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Validation
         {
             var result = new ValidationResult();
 
-            if (propertyValues.ValuesField.Changed && !PropertyValuesValidationHandler.IsValuesValid(propertyValues, out var valuesResult))
+            if (propertyValues.ShouldValidate(propertyValues.ValuesField) && !PropertyValuesValidationHandler.IsValuesValid(propertyValues, out var valuesResult))
             {
                 result.AddFailuresFrom(valuesResult);
             }

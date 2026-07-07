@@ -1,4 +1,4 @@
-﻿namespace Skyline.DataMiner.SDM.AssetManagement.Common.Validation
+﻿namespace Skyline.DataMiner.SDM.InfraOps.Common.Validation
 {
     using System.Linq;
 
