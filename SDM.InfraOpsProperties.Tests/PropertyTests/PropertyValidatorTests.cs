@@ -69,7 +69,7 @@
 				Scope = "Asset",
 				StringSizeLimit = -5,
 				PropertyType = InfraopsProperties.Enums.PropertyTypeEnum.Discrete,
-				Options = new List<string>(),
+				Discreets = new List<PropertyOption>(),
 			};
 
 			var result = _validator.Validate(property);
@@ -114,7 +114,7 @@
 				Name = "Criticality",
 				Scope = "Asset",
 				PropertyType = InfraopsProperties.Enums.PropertyTypeEnum.Discrete,
-				Options = new List<string> { "Low", "High" },
+				Discreets = new List<PropertyOption> { new PropertyOption { Option = "Low" }, new PropertyOption { Option = "High" } },
 			};
 
 			var result = _validator.Validate(property);
@@ -137,7 +137,7 @@
 			using (new AssertionScope())
 			{
 				result.IsValid.Should().BeFalse();
-				result.TryGetFailReason(PropertyValidationHandler.PropertyValidationField.Options, out var reason).Should().BeTrue();
+				result.TryGetFailReason(PropertyValidationHandler.PropertyValidationField.Discreets, out var reason).Should().BeTrue();
 				reason.Should().Contain("cannot be empty");
 			}
 		}

@@ -35,8 +35,7 @@ namespace SDM.InfraOpsProperties.Tests.Properties
 				Default = "N/A",
 				StringSizeLimit = 256,
 				IsMultiLineString = true,
-				SectionName = "General",
-				Order = 7,
+				Layout = new PropertyLayout { SectionName = "General", Order = 7 },
 			};
 
 			Helper.Properties.Create(original);
@@ -52,9 +51,9 @@ namespace SDM.InfraOpsProperties.Tests.Properties
 				roundTripped.Default.Should().Be(original.Default);
 				roundTripped.StringSizeLimit.Should().Be(original.StringSizeLimit);
 				roundTripped.IsMultiLineString.Should().Be(original.IsMultiLineString);
-				roundTripped.SectionName.Should().Be(original.SectionName);
-				roundTripped.Order.Should().Be(original.Order);
-				roundTripped.Options.Should().BeEmpty();
+				roundTripped.Layout.SectionName.Should().Be(original.Layout.SectionName);
+				roundTripped.Layout.Order.Should().Be(original.Layout.Order);
+				roundTripped.Discreets.Should().BeEmpty();
 			}
 		}
 
@@ -70,8 +69,7 @@ namespace SDM.InfraOpsProperties.Tests.Properties
 				Default = string.Empty,
 				StringSizeLimit = null,
 				IsMultiLineString = true,
-				SectionName = "General",
-				Order = 1,
+				Layout = new PropertyLayout { SectionName = "General", Order = 1 },
 			};
 
 			Helper.Properties.Create(original);
@@ -92,16 +90,15 @@ namespace SDM.InfraOpsProperties.Tests.Properties
 				PropertyType = InfraopsProperties.Enums.PropertyTypeEnum.Discrete,
 				Scope = "Asset",
 				Default = "Low",
-				Options = options,
-				SectionName = "General",
-				Order = 3,
+				Discreets = options.Select(o => new PropertyOption { Option = o }).ToList(),
+				Layout = new PropertyLayout { SectionName = "General", Order = 3 },
 			};
 
 			Helper.Properties.Create(original);
 
 			var roundTripped = Helper.Properties.Read(PropertyExposers.Identifier.Equal(original.Identifier)).Single();
 
-			roundTripped.Options.Should().Equal(options);
+			roundTripped.Discreets.Select(o => o.Option).Should().Equal(options);
 		}
 
 		[TestMethod]
@@ -115,8 +112,7 @@ namespace SDM.InfraOpsProperties.Tests.Properties
 				PropertyType = InfraopsProperties.Enums.PropertyTypeEnum.String,
 				Scope = "Facility",
 				Default = string.Empty,
-				SectionName = "General",
-				Order = 1,
+				Layout = new PropertyLayout { SectionName = "General", Order = 1 },
 			};
 
 			Helper.Properties.Create(original);

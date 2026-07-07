@@ -168,7 +168,7 @@
 			var property = new Property
 			{
 				PropertyType = InfraopsProperties.Enums.PropertyTypeEnum.Discrete,
-				Options = new List<string> { "A", "B" },
+				Discreets = new List<PropertyOption> { new PropertyOption { Option = "A" }, new PropertyOption { Option = "B" } },
 			};
 
 			var isValid = PropertyValidationHandler.IsOptionsValid(property, out var result);
@@ -182,7 +182,7 @@
 			var property = new Property
 			{
 				PropertyType = InfraopsProperties.Enums.PropertyTypeEnum.Discrete,
-				Options = new List<string>(),
+				Discreets = new List<PropertyOption>(),
 			};
 
 			var isValid = PropertyValidationHandler.IsOptionsValid(property, out var result);
@@ -190,7 +190,7 @@
 			using (new AssertionScope())
 			{
 				isValid.Should().BeFalse();
-				result.TryGetFailReason(PropertyValidationHandler.PropertyValidationField.Options, out var reason).Should().BeTrue();
+				result.TryGetFailReason(PropertyValidationHandler.PropertyValidationField.Discreets, out var reason).Should().BeTrue();
 				reason.Should().Contain("cannot be empty");
 			}
 		}
@@ -201,7 +201,7 @@
 			var property = new Property
 			{
 				PropertyType = InfraopsProperties.Enums.PropertyTypeEnum.String,
-				Options = new List<string> { "A" },
+				Discreets = new List<PropertyOption> { new PropertyOption { Option = "A" } },
 			};
 
 			var isValid = PropertyValidationHandler.IsOptionsValid(property, out var result);
@@ -209,7 +209,7 @@
 			using (new AssertionScope())
 			{
 				isValid.Should().BeFalse();
-				result.TryGetFailReason(PropertyValidationHandler.PropertyValidationField.Options, out var reason).Should().BeTrue();
+				result.TryGetFailReason(PropertyValidationHandler.PropertyValidationField.Discreets, out var reason).Should().BeTrue();
 				reason.Should().Contain("must be empty");
 			}
 		}
@@ -220,7 +220,7 @@
 			var property = new Property
 			{
 				PropertyType = InfraopsProperties.Enums.PropertyTypeEnum.Boolean,
-				Options = new List<string>(),
+				Discreets = new List<PropertyOption>(),
 			};
 
 			var isValid = PropertyValidationHandler.IsOptionsValid(property, out var result);
@@ -244,7 +244,7 @@
 			var property = new Property
 			{
 				PropertyType = InfraopsProperties.Enums.PropertyTypeEnum.Discrete,
-				Options = new List<string> { "Low", "Low", "High" },
+				Discreets = new List<PropertyOption> { new PropertyOption { Option = "Low" }, new PropertyOption { Option = "Low" }, new PropertyOption { Option = "High" } },
 			};
 
 			var isValid = PropertyValidationHandler.IsOptionsValid(property, out var result);
@@ -252,8 +252,8 @@
 			using (new AssertionScope())
 			{
 				isValid.Should().BeFalse();
-				result.TryGetFailReason(PropertyValidationHandler.PropertyValidationField.Options, out var reason).Should().BeTrue();
-				reason.Should().Contain("Duplicate Property Option");
+				result.TryGetFailReason(PropertyValidationHandler.PropertyValidationField.Discreets, out var reason).Should().BeTrue();
+				reason.Should().Contain("Duplicate Property Discreet");
 				reason.Should().Contain("Low");
 			}
 		}
@@ -264,7 +264,7 @@
 			var property = new Property
 			{
 				PropertyType = InfraopsProperties.Enums.PropertyTypeEnum.Discrete,
-				Options = new List<string> { "Low", "low", "High" },
+				Discreets = new List<PropertyOption> { new PropertyOption { Option = "Low" }, new PropertyOption { Option = "low" }, new PropertyOption { Option = "High" } },
 			};
 
 			var isValid = PropertyValidationHandler.IsOptionsValid(property, out var result);
@@ -278,7 +278,7 @@
 			var property = new Property
 			{
 				PropertyType = InfraopsProperties.Enums.PropertyTypeEnum.Discrete,
-				Options = new List<string> { "Low", "Medium", "High" },
+				Discreets = new List<PropertyOption> { new PropertyOption { Option = "Low" }, new PropertyOption { Option = "Medium" }, new PropertyOption { Option = "High" } },
 			};
 
 			var isValid = PropertyValidationHandler.IsOptionsValid(property, out var result);

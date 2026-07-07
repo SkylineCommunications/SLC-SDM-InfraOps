@@ -551,28 +551,40 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
                 {
                     obj.IsMultiLineString = _ismultilinestring.Value;
                 }
+            }
 
-                var _sectionname = _propertypropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyDomMapper.PropertyProperties.SectionName);
-                if (_sectionname != null)
+            var _layoutSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyDomMapper.Layout.SectionDefinitionId));
+            if (_layoutSection != default)
+            {
+                obj.Layout = new Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyLayout();
+                var _layoutsectionname = _layoutSection.GetValue<string>(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyDomMapper.Layout.SectionName);
+                if (_layoutsectionname != null)
                 {
-                    obj.SectionName = _sectionname.Value;
+                    obj.Layout.SectionName = _layoutsectionname.Value;
                 }
 
-                var _order = _propertypropertiesSection.GetValue<long>(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyDomMapper.PropertyProperties.Order);
-                if (_order != null)
+                var _layoutorder = _layoutSection.GetValue<long>(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyDomMapper.Layout.Order);
+                if (_layoutorder != null)
                 {
-                    obj.Order = _order.Value;
-                }
-
-                var _options = _propertypropertiesSection.GetListValue<string>(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyDomMapper.PropertyProperties.Options);
-                if (_options != null)
-                {
-                    obj.Options = _options.Values;
+                    obj.Layout.Order = _layoutorder.Value;
                 }
             }
 
-            obj.ResetChangeTracking();
+            var _discreetsList = new System.Collections.Generic.List<Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyOption>();
+            foreach (var _discreetsSection in instance.Sections.Where(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyDomMapper.Discreets.SectionDefinitionId)))
+            {
+                var discreets = new Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyOption();
+                var _discreetsoption = _discreetsSection.GetValue<string>(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyDomMapper.Discreets.Option);
+                if (_discreetsoption != null)
+                {
+                    discreets.Option = _discreetsoption.Value;
+                }
 
+                _discreetsList.Add(discreets);
+            }
+
+            obj.Discreets = _discreetsList;
+            obj.ResetChangeTracking();
             return obj;
         }
 
@@ -623,22 +635,34 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
                 _propertyproperties.AddOrUpdateValue<bool>(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyDomMapper.PropertyProperties.IsMultiLineString, (bool)obj.IsMultiLineString);
             }
 
-            if (obj.SectionName != default)
-            {
-                _propertyproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyDomMapper.PropertyProperties.SectionName, Convert.ToString(obj.SectionName));
-            }
-
-            if (obj.Order != default)
-            {
-                _propertyproperties.AddOrUpdateValue<long>(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyDomMapper.PropertyProperties.Order, (long)(obj.Order).Value);
-            }
-
-            if (obj.Options != default)
-            {
-                _propertyproperties.AddOrUpdateListValue<string>(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyDomMapper.PropertyProperties.Options, obj.Options);
-            }
-
             instance.Sections.Add(_propertyproperties);
+            if (obj.Layout != null)
+            {
+                var _layout = new Section(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyDomMapper.Layout.SectionDefinitionId);
+                if (obj.Layout.SectionName != default)
+                {
+                    _layout.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyDomMapper.Layout.SectionName, Convert.ToString(obj.Layout.SectionName));
+                }
+
+                if (obj.Layout.Order != default)
+                {
+                    _layout.AddOrUpdateValue<long>(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyDomMapper.Layout.Order, (long)(obj.Layout.Order).Value);
+                }
+
+                instance.Sections.Add(_layout);
+            }
+
+            foreach (var discreets in obj.Discreets)
+            {
+                var _discreetsSection = new Section(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyDomMapper.Discreets.SectionDefinitionId);
+                if (discreets.Option != default)
+                {
+                    _discreetsSection.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyDomMapper.Discreets.Option, Convert.ToString(discreets.Option));
+                }
+
+                instance.Sections.Add(_discreetsSection);
+            }
+
             return instance;
         }
 
@@ -668,18 +692,18 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyDomMapper.PropertyProperties.StringSizeLimit), comparer, (long)((long?)value).Value);
                 case "IsMultiLineString":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyDomMapper.PropertyProperties.IsMultiLineString), comparer, (bool)value);
-                case "SectionName" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
-                    return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyDomMapper.PropertyProperties.SectionName.Id.ToString()).Equal(comparer == Comparer.NotEquals);
-                case "SectionName":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyDomMapper.PropertyProperties.SectionName), comparer, (string)value);
-                case "Order" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
-                    return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyDomMapper.PropertyProperties.Order.Id.ToString()).Equal(comparer == Comparer.NotEquals);
-                case "Order":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyDomMapper.PropertyProperties.Order), comparer, (long)((long?)value).Value);
-                case "Options" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
-                    return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyDomMapper.PropertyProperties.Options.Id.ToString()).Equal(comparer == Comparer.NotEquals);
-                case "Options":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyDomMapper.PropertyProperties.Options), comparer, (string)value);
+                case "Layout.SectionName" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyDomMapper.Layout.SectionName.Id.ToString()).Equal(comparer == Comparer.NotEquals);
+                case "Layout.SectionName":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyDomMapper.Layout.SectionName), comparer, (string)value);
+                case "Layout.Order" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyDomMapper.Layout.Order.Id.ToString()).Equal(comparer == Comparer.NotEquals);
+                case "Layout.Order":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyDomMapper.Layout.Order), comparer, (long)((long?)value).Value);
+                case "Discreets.Option" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyDomMapper.Discreets.Option.Id.ToString()).Equal(comparer == Comparer.NotEquals);
+                case "Discreets.Option":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyDomMapper.Discreets.Option), comparer, (string)value);
                 default:
                     throw new NotImplementedException();
             }
@@ -703,12 +727,12 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyDomMapper.PropertyProperties.StringSizeLimit), sortOrder, naturalSort);
                 case "IsMultiLineString":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyDomMapper.PropertyProperties.IsMultiLineString), sortOrder, naturalSort);
-                case "SectionName":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyDomMapper.PropertyProperties.SectionName), sortOrder, naturalSort);
-                case "Order":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyDomMapper.PropertyProperties.Order), sortOrder, naturalSort);
-                case "Options":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyDomMapper.PropertyProperties.Options), sortOrder, naturalSort);
+                case "Layout.SectionName":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyDomMapper.Layout.SectionName), sortOrder, naturalSort);
+                case "Layout.Order":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyDomMapper.Layout.Order), sortOrder, naturalSort);
+                case "Discreets.Option":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyDomMapper.Discreets.Option), sortOrder, naturalSort);
                 default:
                     throw new NotImplementedException();
             }

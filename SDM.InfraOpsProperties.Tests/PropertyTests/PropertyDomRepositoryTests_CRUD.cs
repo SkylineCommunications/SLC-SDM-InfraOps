@@ -31,8 +31,7 @@
 				Default = string.Empty,
 				StringSizeLimit = 64,
 				IsMultiLineString = false,
-				SectionName = "General",
-				Order = 1,
+				Layout = new PropertyLayout { SectionName = "General", Order = 1 },
 			};
 		}
 
@@ -64,9 +63,8 @@
 				PropertyType = InfraopsProperties.Enums.PropertyTypeEnum.Discrete,
 				Scope = "Facility",
 				Default = "N/A",
-				Options = new System.Collections.Generic.List<string> { "N/A", "Assigned" },
-				SectionName = "Updated Section",
-				Order = 2,
+				Discreets = new System.Collections.Generic.List<PropertyOption> { new PropertyOption { Option = "N/A" }, new PropertyOption { Option = "Assigned" } },
+				Layout = new PropertyLayout { SectionName = "Updated Section", Order = 2 },
 			};
 
 			Helper.Properties.CreateOrUpdate([updatedProperty]);
@@ -129,9 +127,9 @@
 				updated.PropertyType.Should().Be(InfraopsProperties.Enums.PropertyTypeEnum.Discrete);
 				updated.Scope.Should().Be("Facility");
 				updated.Default.Should().Be("N/A");
-				updated.Options.Should().BeEquivalentTo(new[] { "N/A", "Assigned" });
-				updated.SectionName.Should().Be("Updated Section");
-				updated.Order.Should().Be(2);
+				updated.Discreets.Select(o => o.Option).Should().BeEquivalentTo(new[] { "N/A", "Assigned" });
+				updated.Layout.SectionName.Should().Be("Updated Section");
+				updated.Layout.Order.Should().Be(2);
 			}
 		}
 
@@ -148,8 +146,8 @@
 				createdProperty.Scope.Should().Be("Asset");
 				createdProperty.StringSizeLimit.Should().Be(64);
 				createdProperty.IsMultiLineString.Should().BeFalse();
-				createdProperty.SectionName.Should().Be("General");
-				createdProperty.Order.Should().Be(1);
+				createdProperty.Layout.SectionName.Should().Be("General");
+				createdProperty.Layout.Order.Should().Be(1);
 			}
 		}
 	}

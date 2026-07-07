@@ -138,8 +138,8 @@
 			Helper.PopulateProperties();
 
 			var sectionName = "General";
-			var filter = PropertyExposers.SectionName.Equal(sectionName);
-			var expected = DemoData.Properties.Where(p => p.SectionName == sectionName).ToArray();
+			var filter = PropertyExposers.Layout.SectionName.Equal(sectionName);
+			var expected = DemoData.Properties.Where(p => p.Layout?.SectionName == sectionName).ToArray();
 
 			var propertiesRetrieved = Helper.Properties.Read(filter);
 
@@ -156,8 +156,8 @@
 			Helper.PopulateProperties();
 
 			long threshold = 1;
-			var filter = PropertyExposers.Order.LessThanOrEqual(threshold);
-			var expected = DemoData.Properties.Where(p => p.Order != null && p.Order <= threshold).ToArray();
+			var filter = PropertyExposers.Layout.Order.LessThanOrEqual(threshold);
+			var expected = DemoData.Properties.Where(p => p.Layout?.Order != null && p.Layout.Order <= threshold).ToArray();
 
 			var propertiesRetrieved = Helper.Properties.Read(filter);
 
@@ -194,8 +194,8 @@
 		{
 			Helper.PopulateProperties();
 
-			var filter = PropertyExposers.Options.Contains("APAC");
-			var expected = DemoData.Properties.Where(p => p.Options != null && p.Options.Contains("APAC")).ToArray();
+			var filter = PropertyExposers.Discreets.Option.Contains("APAC");
+			var expected = DemoData.Properties.Where(p => p.Discreets != null && p.Discreets.Any(o => o.Option == "APAC")).ToArray();
 
 			var propertiesRetrieved = Helper.Properties.Read(filter);
 
@@ -203,7 +203,7 @@
 			{
 				propertiesRetrieved.Should().NotBeNull();
 				propertiesRetrieved.Count().Should().Be(expected.Length);
-				propertiesRetrieved.Should().OnlyContain(p => p.Options.Contains("APAC"));
+				propertiesRetrieved.Should().OnlyContain(p => p.Discreets.Any(o => o.Option == "APAC"));
 			}
 		}
 

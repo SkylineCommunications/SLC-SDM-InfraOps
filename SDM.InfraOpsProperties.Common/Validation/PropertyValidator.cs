@@ -111,7 +111,7 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Validation
         {
             var result = new ValidationResult();
 
-            if (property.ShouldValidateAny(property.PropertyTypeField, property.OptionsField) && !PropertyValidationHandler.IsOptionsValid(property, out var optionsResult))
+            if (property.ShouldValidateAny(property.PropertyTypeField, property.DiscreetsField) && !PropertyValidationHandler.IsOptionsValid(property, out var optionsResult))
             {
                 result.AddFailuresFrom(optionsResult);
             }

@@ -90,12 +90,12 @@ namespace SDM.InfraOpsProperties.Tests.Setup
 			var properties = DemoData.Properties.ToList();
 
 			var invalid = properties
-				.Where(p => (p.PropertyType == InfraopsProperties.Enums.PropertyTypeEnum.Discrete) != (p.Options?.Any() == true))
+				.Where(p => (p.PropertyType == InfraopsProperties.Enums.PropertyTypeEnum.Discrete) != (p.Discreets?.Any() == true))
 				.ToList();
 
 			if (invalid.Any())
 			{
-				var invalidList = string.Join(", ", invalid.Select(p => $"'{p.Scope}/{p.Name}' (Type: {p.PropertyType}, OptionsCount: {p.Options?.Count ?? 0})"));
+				var invalidList = string.Join(", ", invalid.Select(p => $"'{p.Scope}/{p.Name}' (Type: {p.PropertyType}, OptionsCount: {p.Discreets?.Count ?? 0})"));
 				Assert.Fail($"Found {invalid.Count} Property(ies) with inconsistent PropertyType/Options: {invalidList}");
 			}
 		}

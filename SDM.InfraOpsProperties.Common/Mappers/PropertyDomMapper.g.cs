@@ -36,9 +36,29 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
             public static readonly FieldDescriptorID Default = new FieldDescriptorID(new Guid("47e8b102-fc0b-4592-b9fc-3032c0bbc706"));
             public static readonly FieldDescriptorID StringSizeLimit = new FieldDescriptorID(new Guid("aec58746-1499-4032-aa3a-d1ae139154ad"));
             public static readonly FieldDescriptorID IsMultiLineString = new FieldDescriptorID(new Guid("841d9711-8bed-4356-9a17-cf51ca8e15af"));
-            public static readonly FieldDescriptorID SectionName = new FieldDescriptorID(new Guid("17440207-fde5-467c-a105-69ba200bd59a"));
-            public static readonly FieldDescriptorID Order = new FieldDescriptorID(new Guid("e1b6028d-5157-4aeb-8fdb-7ced521f3993"));
-            public static readonly FieldDescriptorID Options = new FieldDescriptorID(new Guid("037650b0-b09d-43e4-8652-6ae2c8847a96"));
+        }
+
+        public static class Layout
+        {
+            private static readonly SectionDefinitionID sectionDefinitionId = new SectionDefinitionID(new Guid("7de682dd-0077-414c-9287-0adee68ebddf"))
+            {
+                ModuleId = ModuleId
+            };
+            internal static SectionDefinitionID SectionDefinitionId => sectionDefinitionId;
+
+            public static readonly FieldDescriptorID SectionName = new FieldDescriptorID(new Guid("cba17338-5128-4d92-97f8-07b0e370bb55"));
+            public static readonly FieldDescriptorID Order = new FieldDescriptorID(new Guid("0aa422d8-31fe-4745-89f0-ff224e48a4a4"));
+        }
+
+        public static class Discreets
+        {
+            private static readonly SectionDefinitionID sectionDefinitionId = new SectionDefinitionID(new Guid("4fcc9149-55cf-45c2-a6ee-f742c9d37359"))
+            {
+                ModuleId = ModuleId
+            };
+            internal static SectionDefinitionID SectionDefinitionId => sectionDefinitionId;
+
+            public static readonly FieldDescriptorID Option = new FieldDescriptorID(new Guid("8428fc89-be4c-4926-84c1-66d6fa008895"));
         }
     }
 }

@@ -19,7 +19,7 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Validation
             Name,
             Scope,
             StringSizeLimit,
-            Options,
+            Discreets,
         }
 
         #region Info Validation
@@ -99,30 +99,30 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Validation
             }
 
             var isDiscrete = property.PropertyType == InfraopsProperties.Enums.PropertyTypeEnum.Discrete;
-            var hasOptions = property.Options != null && property.Options.Count > 0;
+            var hasOptions = property.Discreets != null && property.Discreets.Count > 0;
 
             if (isDiscrete && !hasOptions)
             {
-                result.AddFailReason(PropertyValidationField.Options, "Property Options cannot be empty when Property Type is 'Discrete'.");
+                result.AddFailReason(PropertyValidationField.Discreets, "Property Discreets cannot be empty when Property Type is 'Discrete'.");
                 return result.IsValid;
             }
             else if (!isDiscrete && hasOptions)
             {
-                result.AddFailReason(PropertyValidationField.Options, "Property Options must be empty when Property Type is not 'Discrete'.");
+                result.AddFailReason(PropertyValidationField.Discreets, "Property Discreets must be empty when Property Type is not 'Discrete'.");
                 return result.IsValid;
             }
 
             if (isDiscrete)
             {
-                var duplicateOptions = property.Options
-                    .GroupBy(option => option, System.StringComparer.OrdinalIgnoreCase)
+                var duplicateOptions = property.Discreets
+                    .GroupBy(option => option?.Option, System.StringComparer.OrdinalIgnoreCase)
                     .Where(group => group.Count() > 1)
                     .Select(group => group.Key)
                     .ToList();
 
                 if (duplicateOptions.Count > 0)
                 {
-                    result.AddFailReason(PropertyValidationField.Options, $"Duplicate Property Option(s) found: {string.Join(", ", duplicateOptions)}.");
+                    result.AddFailReason(PropertyValidationField.Discreets, $"Duplicate Property Discreet(s) found: {string.Join(", ", duplicateOptions)}.");
                 }
             }
 

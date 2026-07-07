@@ -1,5 +1,8 @@
 namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
 {
+    using System.Collections.Generic;
+    using System.Linq;
+
     using Newtonsoft.Json;
 
     using SharedMappers.DomIds;
@@ -55,7 +58,10 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
 
         [JsonIgnore]
         [SdmIgnore]
-        public bool Changed => FieldHandler.HasChanges;
+        public bool Changed =>
+            FieldHandler.HasChanges ||
+            Layout?.Changed == true ||
+            DiscreetsField?.Changed == true;
 
         #region PropertyInfo
 
@@ -99,26 +105,16 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
 
         #region Layout
 
-        public string SectionName
-        {
-            get => SectionNameField.Value;
-            set => SectionNameField.Value = value;
-        }
-
-        public long? Order
-        {
-            get => OrderField.Value;
-            set => OrderField.Value = value;
-        }
+        public PropertyLayout Layout { get; set; }
 
         #endregion
 
         #region Discrete
 
-        public System.Collections.Generic.List<string> Options
+        public List<PropertyOption> Discreets
         {
-            get => OptionsField.Value ?? new System.Collections.Generic.List<string>();
-            set => OptionsField.Value = value;
+            get => DiscreetsField.Value ?? new List<PropertyOption>();
+            set => DiscreetsField.Value = value;
         }
 
         #endregion
@@ -163,35 +159,29 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
 
         #endregion
 
-        #region Layout Tracking Fields
-
-        [JsonIgnore]
-        [SdmIgnore]
-        internal IChangeTrackingField<string> SectionNameField => FieldHandler.GetOrCreateField(
-            nameof(SectionName),
-            () => new ChangeTrackingStringField(null));
-
-        [JsonIgnore]
-        [SdmIgnore]
-        internal IChangeTrackingField<long?> OrderField => FieldHandler.GetOrCreateField(
-            nameof(Order),
-            () => new ChangeTrackingField<long?>(null));
-
-        #endregion
-
         #region Discrete Tracking Fields
 
         [JsonIgnore]
         [SdmIgnore]
-        internal ChangeTrackingArrayField<string> OptionsField => FieldHandler.GetOrCreateArrayField(
-            nameof(Options),
-            () => new ChangeTrackingArrayField<string>(new System.Collections.Generic.List<string>()));
+        internal ChangeTrackingArrayField<PropertyOption> DiscreetsField => FieldHandler.GetOrCreateArrayField(
+            nameof(Discreets),
+            () => new ChangeTrackingArrayField<PropertyOption>(new List<PropertyOption>()));
 
         #endregion
 
         public void ResetChangeTracking()
         {
             FieldHandler?.ApplyChanges();
+            Layout?.ResetChangeTracking();
+
+            // Cascade to list items if they implement IChangeTracking
+            if (Discreets != null)
+            {
+                foreach (var option in Discreets.OfType<IChangeTracking>())
+                {
+                    option?.ResetChangeTracking();
+                }
+            }
         }
     }
 }

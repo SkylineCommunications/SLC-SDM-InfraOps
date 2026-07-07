@@ -19,8 +19,7 @@
 				Default = "Unassigned",
 				StringSizeLimit = 128,
 				IsMultiLineString = false,
-				SectionName = "General",
-				Order = 1,
+				Layout = new PropertyLayout { SectionName = "General", Order = 1 },
 			},
 			new Property
 			{
@@ -31,8 +30,7 @@
 				Default = string.Empty,
 				StringSizeLimit = 2000,
 				IsMultiLineString = true,
-				SectionName = "Maintenance",
-				Order = 2,
+				Layout = new PropertyLayout { SectionName = "Maintenance", Order = 2 },
 			},
 			new Property
 			{
@@ -41,9 +39,8 @@
 				PropertyType = InfraopsProperties.Enums.PropertyTypeEnum.Discrete,
 				Scope = "Asset",
 				Default = "Low",
-				Options = new List<string> { "Low", "Medium", "High" },
-				SectionName = "General",
-				Order = 3,
+				Discreets = new List<PropertyOption> { new PropertyOption { Option = "Low" }, new PropertyOption { Option = "Medium" }, new PropertyOption { Option = "High" } },
+				Layout = new PropertyLayout { SectionName = "General", Order = 3 },
 			},
 			new Property
 			{
@@ -52,8 +49,7 @@
 				PropertyType = InfraopsProperties.Enums.PropertyTypeEnum.Boolean,
 				Scope = "Facility",
 				Default = "false",
-				SectionName = "Booking",
-				Order = 1,
+				Layout = new PropertyLayout { SectionName = "Booking", Order = 1 },
 			},
 			new Property
 			{
@@ -62,9 +58,8 @@
 				PropertyType = InfraopsProperties.Enums.PropertyTypeEnum.Discrete,
 				Scope = "Facility",
 				Default = "EMEA",
-				Options = new List<string> { "EMEA", "APAC", "AMER" },
-				SectionName = "General",
-				Order = 2,
+				Discreets = new List<PropertyOption> { new PropertyOption { Option = "EMEA" }, new PropertyOption { Option = "APAC" }, new PropertyOption { Option = "AMER" } },
+				Layout = new PropertyLayout { SectionName = "General", Order = 2 },
 			},
 		];
 

@@ -28,8 +28,21 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
         public static readonly Exposer<Skyline.DataMiner.SDM.InfraOpsProperties.Models.Property, string> Default = new Exposer<Skyline.DataMiner.SDM.InfraOpsProperties.Models.Property, string>((obj) => obj.Default, "Default");
         public static readonly Exposer<Skyline.DataMiner.SDM.InfraOpsProperties.Models.Property, long?> StringSizeLimit = new Exposer<Skyline.DataMiner.SDM.InfraOpsProperties.Models.Property, long?>((obj) => obj.StringSizeLimit, "StringSizeLimit");
         public static readonly Exposer<Skyline.DataMiner.SDM.InfraOpsProperties.Models.Property, bool> IsMultiLineString = new Exposer<Skyline.DataMiner.SDM.InfraOpsProperties.Models.Property, bool>((obj) => obj.IsMultiLineString, "IsMultiLineString");
-        public static readonly Exposer<Skyline.DataMiner.SDM.InfraOpsProperties.Models.Property, string> SectionName = new Exposer<Skyline.DataMiner.SDM.InfraOpsProperties.Models.Property, string>((obj) => obj.SectionName, "SectionName");
-        public static readonly Exposer<Skyline.DataMiner.SDM.InfraOpsProperties.Models.Property, long?> Order = new Exposer<Skyline.DataMiner.SDM.InfraOpsProperties.Models.Property, long?>((obj) => obj.Order, "Order");
-        public static readonly CollectionExposer<Skyline.DataMiner.SDM.InfraOpsProperties.Models.Property, string> Options = new CollectionExposer<Skyline.DataMiner.SDM.InfraOpsProperties.Models.Property, string>((obj) => obj.Options.Where(x => x != null), "Options");
+        static PropertyExposers()
+        {
+            RuntimeHelpers.RunClassConstructor(typeof(Layout).TypeHandle);
+            RuntimeHelpers.RunClassConstructor(typeof(Discreets).TypeHandle);
+        }
+
+        public static partial class Layout
+        {
+            public static readonly Exposer<Skyline.DataMiner.SDM.InfraOpsProperties.Models.Property, string> SectionName = new Exposer<Skyline.DataMiner.SDM.InfraOpsProperties.Models.Property, string>((obj) => obj.Layout.SectionName, "Layout.SectionName");
+            public static readonly Exposer<Skyline.DataMiner.SDM.InfraOpsProperties.Models.Property, long?> Order = new Exposer<Skyline.DataMiner.SDM.InfraOpsProperties.Models.Property, long?>((obj) => obj.Layout.Order, "Layout.Order");
+        }
+
+        public static partial class Discreets
+        {
+            public static readonly CollectionExposer<Skyline.DataMiner.SDM.InfraOpsProperties.Models.Property, string> Option = new CollectionExposer<Skyline.DataMiner.SDM.InfraOpsProperties.Models.Property, string>((obj) => obj.Discreets.Where(x => x != null).Select(x => x.Option).Where(x => x != null), "Discreets.Option");
+        }
     }
 }

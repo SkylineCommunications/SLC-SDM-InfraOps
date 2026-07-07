@@ -1,20 +1,17 @@
 ﻿namespace SDM.InfraOpsProperties.Tests.Extensions
 {
-	using FluentAssertions;
+    using FluentAssertions;
 
-	using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-	using SDM.InfraOpsProperties.Tests.Setup;
+    using SDM.InfraOpsProperties.Tests.Setup;
 
-	using SharedMappers.DomIds;
+    using Skyline.DataMiner.SDM.InfraOpsProperties.Extensions;
 
-	using Skyline.DataMiner.SDM.InfraOpsProperties.Extensions;
-	using Skyline.DataMiner.SDM.InfraOpsProperties.Models;
-
-	/// <summary>
-	/// Tests for <see cref="PropertyRepositoryExtensions"/>.
-	/// </summary>
-	[TestClass]
+    /// <summary>
+    /// Tests for <see cref="PropertyRepositoryExtensions"/>.
+    /// </summary>
+    [TestClass]
 	public class PropertyRepositoryExtensionsTests : BaseRepositoryTest
 	{
 		[TestInitialize]

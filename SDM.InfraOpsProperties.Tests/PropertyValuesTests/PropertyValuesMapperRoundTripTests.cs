@@ -66,6 +66,13 @@
 				// round-trip as null - it comes back as a non-null SdmObjectReference wrapping a null
 				// Identifier. This is a generated-code issue, out of scope for this branch; pinned here
 				// so a future regeneration/fix is caught by this test failing.
+				//
+				// Attempted fix: swapping to GetValue<Guid?>() was tried and reverted - it did not
+				// restore a proper null contract, it broke round-tripping in both directions instead
+				// (real PropertyId came back null, null PropertyId came back non-null). The wrapper's
+				// handling of nullable value-type generics does not mirror the reference-type behavior
+				// used by the string-typed fields above. A real fix needs the actual generator/API
+				// author, not a local hand-patch.
 				region.PropertyId.Should().NotBeNull();
 				region.PropertyId!.Identifier.Should().BeNull();
 			}

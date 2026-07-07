@@ -41,10 +41,6 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 
         [JsonIgnore]
         [SdmIgnore]
-        public Guid Id { get; set; }
-
-        [JsonIgnore]
-        [SdmIgnore]
         public bool Changed =>
             FieldHandler.HasChanges ||
             StateField?.Changed == true ||
