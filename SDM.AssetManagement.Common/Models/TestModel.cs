@@ -4,7 +4,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Common.Models
     using System;
 
     [GenerateExposers]
-    [SdmDomStorage("dod")]
+    //[SdmDomStorage("dod")]
     public class TestModel : SdmObject<TestModel>
     {
         public int? MyInteger { get; set; }
@@ -14,6 +14,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Common.Models
         public Guid? MyGuid { get; set; }
 
         public DateTime? MyDateTime { get; set; }
+
+        public SdmObjectReference<TestModel> ChildModel { get; set; }
     }
 
     public enum GuardStatus

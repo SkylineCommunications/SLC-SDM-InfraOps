@@ -10,12 +10,14 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 	using System.Collections;
 	using System.Collections.Generic;
 	using System.Linq;
+    using System.Runtime.CompilerServices;
 
     using SharedMappers.DomIds;
 
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.SDM;
 	using Skyline.DataMiner.SDM.Exposers;
+
 	using SLDataGateway.API.Querying;
 	using SLDataGateway.API.Types.Querying;
 
@@ -23,7 +25,14 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 	{
 		public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort, string> Identifier = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort, string>((obj) => obj.Identifier, "Identifier");
 		public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.Asset>> Asset = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.Asset>>((obj) => obj.Asset, "Asset");
-		public static partial class PowerPortInfo
+
+        static PowerPortExposers()
+        {
+            RuntimeHelpers.RunClassConstructor(typeof(PowerPortInfo).TypeHandle);
+        }
+
+
+        public static partial class PowerPortInfo
 		{
 			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort, string> Name = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort, string>((obj) => obj.PowerPortInfo.Name, "PowerPortInfo.Name");
 			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort, long?> PortNumber = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort, long?>((obj) => obj.PowerPortInfo.PortNumber, "PowerPortInfo.PortNumber");

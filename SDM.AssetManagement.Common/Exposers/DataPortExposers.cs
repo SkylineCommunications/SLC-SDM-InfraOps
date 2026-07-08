@@ -10,12 +10,14 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 	using System.Collections;
 	using System.Collections.Generic;
 	using System.Linq;
+    using System.Runtime.CompilerServices;
 
     using SharedMappers.DomIds;
 
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.SDM;
 	using Skyline.DataMiner.SDM.Exposers;
+
 	using SLDataGateway.API.Querying;
 	using SLDataGateway.API.Types.Querying;
 
@@ -23,7 +25,15 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 	{
 		public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort, string> Identifier = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort, string>((obj) => obj.Identifier, "Identifier");
 		public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.Asset>> Asset = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.Asset>>((obj) => obj.Asset, "Asset");
-		public static partial class DataPortInfo
+
+        static DataPortExposers()
+        {
+            RuntimeHelpers.RunClassConstructor(typeof(DataPortInfo).TypeHandle);
+            RuntimeHelpers.RunClassConstructor(typeof(AddressInfo).TypeHandle);
+            RuntimeHelpers.RunClassConstructor(typeof(PrimaryPortRelation).TypeHandle);
+        }
+
+        public static partial class DataPortInfo
 		{
 			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort, string> Name = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort, string>((obj) => obj.DataPortInfo.Name, "DataPortInfo.Name");
 			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort, long?> PortNumber = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort, long?>((obj) => obj.DataPortInfo.PortNumber, "DataPortInfo.PortNumber");
