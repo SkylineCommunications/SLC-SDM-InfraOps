@@ -30,7 +30,6 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             };
             internal static SectionDefinitionID SectionDefinitionId => sectionDefinitionId;
 
-            public static readonly FieldDescriptorID State = new FieldDescriptorID(new Guid("1d566cb2-30c1-46cb-ae66-94563cb467ef"));
             public static readonly FieldDescriptorID JobID = new FieldDescriptorID(new Guid("538464f4-3481-4bb8-abdc-afd2896f8040"));
             public static readonly FieldDescriptorID JobName = new FieldDescriptorID(new Guid("a7db68aa-b4dd-4cc9-8d46-896de5ab41d5"));
             public static readonly FieldDescriptorID Start = new FieldDescriptorID(new Guid("901481df-741d-4a24-a389-f508e7cc1bfd"));

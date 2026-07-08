@@ -49,6 +49,20 @@
 
     internal partial class PlanAndBuildJobDomRepository : IPlanAndBuildJobRepository
     {
+        /// <summary>
+        /// Optional validator used to enforce business-rule validation (e.g. JobName uniqueness) on the field
+        /// updates performed by <see cref="UpdateAndTransitionTo"/> and <see cref="TransitionAndUpdate"/>.
+        /// </summary>
+        /// <remarks>
+        /// These methods call this repository's own internal <see cref="Update(PlanAndBuildJob)"/> directly, which
+        /// bypasses <c>PlanAndBuildJobValidationMiddleware</c> (that middleware only wraps the decorator exposed
+        /// through <see cref="Skyline.DataMiner.SDM.PlanAndBuild.Helpers.IPlanAndBuildApiHelper.Jobs"/>). Wiring
+        /// this property (done by <see cref="Skyline.DataMiner.SDM.PlanAndBuild.Helpers.PlanAndBuildApiHelper"/>)
+        /// restores validation for the combined transition+update operations. It is intentionally nullable so this
+        /// repository remains usable standalone (e.g. in tests) without validation.
+        /// </remarks>
+        internal Skyline.DataMiner.SDM.PlanAndBuild.Validation.PlanAndBuildJobValidator Validator { get; set; }
+
         public PlanAndBuildJob TransitionTo(PlanAndBuildJob job, SlcPlan_And_Build.Behaviors.Job_Behavior.StatusesEnum newState)
         {
             if (job == null) throw new ArgumentNullException(nameof(job));
@@ -70,6 +84,10 @@
                 throw new InvalidOperationException($"State transition from {job.State} to {newState} is not allowed.");
             }
 
+            // Validate before mutating anything, so an invalid job is rejected atomically: neither the field
+            // update nor the transition is applied.
+            Validator?.ValidateAndThrow(job);
+
             var updated = Update(job);
 
             return ExecuteStateTransition(updated, newState);
@@ -88,6 +106,10 @@
             {
                 throw new InvalidOperationException($"State transition from {job.State} to {newState} is not allowed.");
             }
+
+            // Validate before mutating anything, so an invalid job is rejected atomically: the transition is
+            // never executed if the pending field values wouldn't pass validation.
+            Validator?.ValidateAndThrow(job);
 
             var transitioned = ExecuteStateTransition(job, newState);
 

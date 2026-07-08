@@ -12,6 +12,18 @@
 		}
 
 		/// <summary>
+		/// Initializes empty repositories, additionally registering the Job <see cref="Skyline.DataMiner.Net.Apps.DataMinerObjectModel.DomDefinition"/>
+		/// and <see cref="Skyline.DataMiner.Net.Apps.DataMinerObjectModel.DomBehaviorDefinition"/> on the mocked DOM
+		/// engine, so that <see cref="IPlanAndBuildJobRepository"/> status transition methods (<c>TransitionTo</c>,
+		/// <c>UpdateAndTransitionTo</c>, <c>TransitionAndUpdate</c>) can be exercised.
+		/// </summary>
+		/// <returns><see cref="IPlanAndBuildApiHelper"/> API helper interface with the Job behavior registered.</returns>
+		public static IPlanAndBuildApiHelper InitializeWithJobBehavior()
+		{
+			return ConnectionHelper.CreateConnectionWithJobBehavior().GetMockedHelper();
+		}
+
+		/// <summary>
 		/// Populates the Jobs repository with the provided <paramref name="jobs"/> test data.
 		/// </summary>
 		/// <param name="helper">Mocked API helper.</param>

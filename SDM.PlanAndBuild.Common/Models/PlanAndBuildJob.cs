@@ -69,6 +69,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
         /// <summary>
         /// Gets or sets the current status of the job.
         /// </summary>
+        [SdmIgnore]
         public SlcPlan_And_Build.Behaviors.Job_Behavior.StatusesEnum State
         {
             get => StateField.Value; internal set => StateField.Value = value;

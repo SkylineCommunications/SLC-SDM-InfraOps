@@ -22,7 +22,6 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
     public static partial class PlanAndBuildJobExposers
     {
         public static readonly Exposer<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob, string> Identifier = new Exposer<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob, string>((obj) => obj.Identifier, "Identifier");
-        public static readonly Exposer<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob, SharedMappers.DomIds.SlcPlan_And_Build.Behaviors.Job_Behavior.StatusesEnum> State = new Exposer<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob, SharedMappers.DomIds.SlcPlan_And_Build.Behaviors.Job_Behavior.StatusesEnum>((obj) => obj.State, "State");
         public static readonly Exposer<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob, string> JobID = new Exposer<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob, string>((obj) => obj.JobID, "JobID");
         public static readonly Exposer<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob, string> JobName = new Exposer<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob, string>((obj) => obj.JobName, "JobName");
         public static readonly Exposer<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob, System.DateTime?> Start = new Exposer<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob, System.DateTime?>((obj) => obj.Start, "Start");

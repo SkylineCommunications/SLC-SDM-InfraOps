@@ -20,6 +20,11 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Helpers
             var jobTypeValidator = new JobTypeValidator(this);
             var appSettingsValidator = new PlanAndBuildAppSettingsValidator();
 
+            // Wired so UpdateAndTransitionTo/TransitionAndUpdate (which call this repository's own internal
+            // Update() directly, bypassing PlanAndBuildJobValidationMiddleware) still enforce business-rule
+            // validation on the field updates they persist.
+            jobRepository.Validator = jobValidator;
+
             Jobs = jobRepository
                 .WithMiddleware(new PlanAndBuildJobValidationMiddleware(jobValidator))
                 .WithMiddleware(new IdentifierMiddleware<PlanAndBuildJob>());

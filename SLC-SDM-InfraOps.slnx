@@ -3,6 +3,7 @@
     <Project Path="SDM.AssetManagementTests/SDM.AssetManagement.Tests.csproj" />
     <Project Path="SDM.FacilityManagement.Tests/SDM.FacilityManagement.Tests.csproj" />
     <Project Path="SDM.InfraOpsProperties.Tests/SDM.InfraOpsProperties.Tests.csproj" />
+    <Project Path="SDM.PlanAndBuild.Tests/SDM.PlanAndBuild.Tests.csproj" />
   </Folder>
   <Project Path="SDM.AssetManagement.Automation/SDM.AssetManagement.Automation.csproj" Id="51016b20-9524-44df-b4b1-a2e16ae70603" />
   <Project Path="SDM.AssetManagement.Common/SDM.AssetManagement.Common.csproj" />

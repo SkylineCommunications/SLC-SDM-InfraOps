@@ -2,6 +2,8 @@
 {
 	using Moq;
 
+	using SDM.PlanAndBuild.Tests.Setup;
+
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Messages;
 	using Skyline.DataMiner.SDM.PlanAndBuild.Helpers;
@@ -12,6 +14,20 @@
 		internal static IConnection CreateConnection()
 		{
 			var messageHandler = new DomSLNetMessageHandler();
+			return CreateConnection(messageHandler);
+		}
+
+		/// <summary>
+		/// Creates a mocked <see cref="IConnection"/> with the Job <see cref="DomDefinition"/> and
+		/// <see cref="DomBehaviorDefinition"/> registered on the underlying <see cref="DomSLNetMessageHandler"/>,
+		/// so that <c>DoStatusTransition</c> calls against <see cref="PlanAndBuildJob"/> instances can be resolved.
+		/// </summary>
+		internal static IConnection CreateConnectionWithJobBehavior()
+		{
+			var messageHandler = new DomSLNetMessageHandler();
+			messageHandler.SetDefinitions(JobBehaviorFixture.ModuleId, new[] { JobBehaviorFixture.BuildJobDefinition() });
+			messageHandler.SetBehaviorDefinitions(JobBehaviorFixture.ModuleId, new[] { JobBehaviorFixture.BuildJobBehaviorDefinition() });
+
 			return CreateConnection(messageHandler);
 		}
 

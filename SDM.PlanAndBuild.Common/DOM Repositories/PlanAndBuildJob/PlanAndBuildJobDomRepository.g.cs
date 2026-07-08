@@ -511,17 +511,12 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             var obj = new PlanAndBuildJob
             {
                 Identifier = instance.ID.Id.ToString(),
+                State = SharedMappers.DomIds.SlcPlan_And_Build.Behaviors.Job_Behavior.Statuses.ToEnum(instance.StatusId),
                 IsNewInternal = false,
             };
             var _planandbuildjobpropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.SectionDefinitionId));
             if (_planandbuildjobpropertiesSection != default)
             {
-                var _state = _planandbuildjobpropertiesSection.GetValue<int>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.State);
-                if (_state != null)
-                {
-                    obj.State = (SharedMappers.DomIds.SlcPlan_And_Build.Behaviors.Job_Behavior.StatusesEnum)_state.Value;
-                }
-
                 var _jobid = _planandbuildjobpropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.JobID);
                 if (_jobid != null)
                 {
@@ -659,6 +654,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
         private DomInstance ToInstance(PlanAndBuildJob obj)
         {
             Guid id = default(Guid);
+
             if (!String.IsNullOrEmpty(obj.Identifier))
             {
                 id = Guid.Parse(obj.Identifier);
@@ -674,10 +670,18 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
                 ID = new DomInstanceId(id)
                 {
                     ModuleId = Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.ModuleId
-                }
+                },
+
+                // Always sync the engine-level behavior status from the in-memory object's State. This is safe on
+                // both create and update: on create, obj.State carries the caller's requested initial status (or
+                // the model's default); on update, obj.State was populated from the engine's own StatusId when the
+                // object was originally read (see FromInstance), so this never overwrites it with stale/blank data.
+                // Unlike a plain field update, the mocked engine replaces the whole DomInstance on Update, so
+                // omitting this would silently wipe the behavior status.
+                StatusId = SharedMappers.DomIds.SlcPlan_And_Build.Behaviors.Job_Behavior.Statuses.ToValue(obj.State),
             };
+
             var _planandbuildjobproperties = new Section(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.SectionDefinitionId);
-            _planandbuildjobproperties.AddOrUpdateValue<int>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.State, (int)obj.State);
             if (obj.JobID != default)
             {
                 _planandbuildjobproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.JobID, Convert.ToString(obj.JobID));
@@ -784,8 +788,6 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             {
                 case "Identifier":
                     return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.Id, comparer, Guid.Parse((string)value));
-                case "State":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.State), comparer, (int)(SharedMappers.DomIds.SlcPlan_And_Build.Behaviors.Job_Behavior.StatusesEnum)value);
                 case "Ownership.AssignedTo" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
                     return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.Ownership.AssignedTo.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Ownership.AssignedTo":
@@ -859,8 +861,6 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             {
                 case "Identifier":
                     return OrderByElementFactory.Create(DomInstanceExposers.Id, sortOrder, naturalSort);
-                case "State":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.State), sortOrder, naturalSort);
                 case "Ownership.AssignedTo":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.Ownership.AssignedTo), sortOrder, naturalSort);
                 case "Ownership.AssignmentGroup":
