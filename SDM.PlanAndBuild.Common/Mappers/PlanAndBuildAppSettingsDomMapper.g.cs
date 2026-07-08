@@ -4,30 +4,37 @@
 //     Changes to this file will be lost if the code is regenerated.
 // </auto-generated>
 //------------------------------------------------------------------------------
+using System;
+
+using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+using Skyline.DataMiner.Net.Sections;
+using Skyline.DataMiner.SDM;
+
 namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 {
-    using System;
-
-    using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-    using Skyline.DataMiner.Net.Sections;
-    using Skyline.DataMiner.SDM;
-
     [SdmDomMapper]
-    internal static class PlanAndBuildAppSettingsDomMapper
+    public static class PlanAndBuildAppSettingsDomMapper
     {
-        internal const string ModuleId = SharedMappers.DomIds.SlcPlan_And_Build.ModuleId;
-        internal static DomDefinitionId DomDefinitionId = new DomDefinitionId(SharedMappers.DomIds.SlcPlan_And_Build.Definitions.AppSettings.Id)
-        { ModuleId = ModuleId };
-        internal static class JobSettings
+        internal const string ModuleId = "(slc)plan_and_build";
+        private static readonly DomDefinitionId PlanAndBuildAppSettingsDomDefinitionId = new DomDefinitionId(new Guid("d4d69ebf-ee9b-4213-88ae-8ef03d833dda"))
         {
-            internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(SharedMappers.DomIds.SlcPlan_And_Build.Sections.JobSettings.Id.Id)
-            { ModuleId = ModuleId };
+            ModuleId = ModuleId
+        };
+        internal static DomDefinitionId DomDefinitionId => PlanAndBuildAppSettingsDomDefinitionId;
 
-            internal static FieldDescriptorID JobIDPrefix = SharedMappers.DomIds.SlcPlan_And_Build.Sections.JobSettings.JobIDPrefix;
-            internal static FieldDescriptorID JobIDNextSequence = SharedMappers.DomIds.SlcPlan_And_Build.Sections.JobSettings.JobIDNextSequence;
-            internal static FieldDescriptorID JobIDIncrement = SharedMappers.DomIds.SlcPlan_And_Build.Sections.JobSettings.JobIDIncrement;
-            internal static FieldDescriptorID JobIDStartingSeed = SharedMappers.DomIds.SlcPlan_And_Build.Sections.JobSettings.JobIDStartingSeed;
-            internal static FieldDescriptorID JobIDMinimumDigits = SharedMappers.DomIds.SlcPlan_And_Build.Sections.JobSettings.JobIDMinimumDigits;
+        public static class PlanAndBuildAppSettingsProperties
+        {
+            private static readonly SectionDefinitionID sectionDefinitionId = new SectionDefinitionID(new Guid("29c632e9-3152-457c-9b1a-99527d9b59c7"))
+            {
+                ModuleId = ModuleId
+            };
+            internal static SectionDefinitionID SectionDefinitionId => sectionDefinitionId;
+
+            public static readonly FieldDescriptorID JobIDPrefix = new FieldDescriptorID(new Guid("4b49d897-02b6-4d10-a9cc-3f9051e3e0c9"));
+            public static readonly FieldDescriptorID JobIDNextSequence = new FieldDescriptorID(new Guid("da5b8510-52c1-4ab6-a480-bd17cb04b020"));
+            public static readonly FieldDescriptorID JobIDIncrement = new FieldDescriptorID(new Guid("0c8edb1f-59d1-4fbf-a6ad-cafb348105e8"));
+            public static readonly FieldDescriptorID JobIDStartingSeed = new FieldDescriptorID(new Guid("feb28eca-1bbf-47c3-a6f5-7dbc72c4900e"));
+            public static readonly FieldDescriptorID JobIDMinimumDigits = new FieldDescriptorID(new Guid("f783d98e-31e7-4226-9b53-4b7ad1279b87"));
         }
     }
 }

@@ -5,8 +5,8 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
-    [GenerateExposers]
-    [SdmDomStorage("(slc)plan_and_build")]
+    //[GenerateExposers]
+    //[SdmDomStorage("(slc)plan_and_build")]
     public class JobType : SdmObject<JobType>, IEntityTracking
     {
         [JsonIgnore]

@@ -11,8 +11,8 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
-    [GenerateExposers]
-    [SdmDomStorage("(slc)plan_and_build")]
+    //[GenerateExposers]
+    //[SdmDomStorage("(slc)plan_and_build")]
     public class PlanAndBuildJob : SdmObject<PlanAndBuildJob>, IEntityTracking
     {
         [JsonIgnore]
@@ -44,7 +44,9 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
         public bool Changed =>
             FieldHandler.HasChanges ||
             StateField?.Changed == true ||
-            AssetsUsedField?.Changed == true;
+            Ownership?.Changed == true ||
+            AssetsUsedField?.Changed == true ||
+            AttachmentsField?.Changed == true;
 
         /// <summary>
         /// Gets a value indicating whether the current object has not been assigned an identifier.
@@ -74,17 +76,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 
         #region Ownership Properties
 
-        public Guid? AssignedTo
-        {
-            get => AssignedToField.Value;
-            set => AssignedToField.Value = value;
-        }
-
-        public Guid? AssignmentGroup
-        {
-            get => AssignmentGroupField.Value;
-            set => AssignmentGroupField.Value = value;
-        }
+        public JobOwnership Ownership { get; set; } = new JobOwnership();
 
         #endregion
 
@@ -150,10 +142,20 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             set => SubStateField.Value = value;
         }
 
-        public List<Guid> Locations
+        internal List<string> Locations
         {
-            get => LocationsField.Value ?? new List<Guid>();
+            get => LocationsField.Value ?? new List<string>();
             set => LocationsField.Value = value;
+        }
+
+        /// <summary>
+        /// Gets or sets the <see cref="Locations"/> values as <see cref="Guid"/>. Not mapped by the SDM generator.
+        /// </summary>
+        [SdmIgnore]
+        public List<Guid> LocationGuids
+        {
+            get => Locations.Select(Guid.Parse).ToList();
+            set => Locations = value?.Select(v => v.ToString()).ToList() ?? new List<string>();
         }
 
         #endregion
@@ -166,21 +168,11 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             set => AssetsUsedField.Value = value;
         }
 
-        #endregion
-
-        #region Ownership Tracking Fields
-
-        [JsonIgnore]
-        [SdmIgnore]
-        internal IChangeTrackingField<Guid?> AssignedToField => FieldHandler.GetOrCreateField(
-            nameof(AssignedTo),
-            () => new ChangeTrackingField<Guid?>(null));
-
-        [JsonIgnore]
-        [SdmIgnore]
-        internal IChangeTrackingField<Guid?> AssignmentGroupField => FieldHandler.GetOrCreateField(
-            nameof(AssignmentGroup),
-            () => new ChangeTrackingField<Guid?>(null));
+        public List<JobAttachment> Attachments
+        {
+            get => AttachmentsField.Value ?? new List<JobAttachment>();
+            set => AttachmentsField.Value = value;
+        }
 
         #endregion
 
@@ -248,9 +240,9 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 
         [JsonIgnore]
         [SdmIgnore]
-        internal ChangeTrackingArrayField<Guid> LocationsField => FieldHandler.GetOrCreateArrayField(
+        internal ChangeTrackingArrayField<string> LocationsField => FieldHandler.GetOrCreateArrayField(
             nameof(Locations),
-            () => new ChangeTrackingArrayField<Guid>(new List<Guid>()));
+            () => new ChangeTrackingArrayField<string>(new List<string>()));
 
         #endregion
 
@@ -272,11 +264,18 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             nameof(AssetsUsed),
             () => new ChangeTrackingArrayField<JobAsset>(new List<JobAsset>()));
 
+        [JsonIgnore]
+        [SdmIgnore]
+        internal ChangeTrackingArrayField<JobAttachment> AttachmentsField => FieldHandler.GetOrCreateArrayField(
+            nameof(Attachments),
+            () => new ChangeTrackingArrayField<JobAttachment>(new List<JobAttachment>()));
+
         #endregion
 
         public void ResetChangeTracking()
         {
             FieldHandler?.ApplyChanges();
+            Ownership?.ResetChangeTracking();
 
             // Cascade to list items if they implement IChangeTracking
             if (AssetsUsed != null)
@@ -284,6 +283,14 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
                 foreach (var jobAsset in AssetsUsed.OfType<IChangeTracking>())
                 {
                     jobAsset?.ResetChangeTracking();
+                }
+            }
+
+            if (Attachments != null)
+            {
+                foreach (var attachment in Attachments.OfType<IChangeTracking>())
+                {
+                    attachment?.ResetChangeTracking();
                 }
             }
         }

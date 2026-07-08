@@ -4,28 +4,35 @@
 //     Changes to this file will be lost if the code is regenerated.
 // </auto-generated>
 //------------------------------------------------------------------------------
+using System;
+
+using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+using Skyline.DataMiner.Net.Sections;
+using Skyline.DataMiner.SDM;
+
 namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 {
-    using System;
-
-    using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-    using Skyline.DataMiner.Net.Sections;
-    using Skyline.DataMiner.SDM;
-
     [SdmDomMapper]
-    internal static class JobTypeDomMapper
+    public static class JobTypeDomMapper
     {
-        internal const string ModuleId = SharedMappers.DomIds.SlcPlan_And_Build.ModuleId;
-        internal static DomDefinitionId DomDefinitionId = new DomDefinitionId(SharedMappers.DomIds.SlcPlan_And_Build.Definitions.JobType.Id)
-        { ModuleId = ModuleId };
-        internal static class JobTypeInfo
+        internal const string ModuleId = "(slc)plan_and_build";
+        private static readonly DomDefinitionId JobTypeDomDefinitionId = new DomDefinitionId(new Guid("755de055-9746-4c51-a9df-4ae3013e76c0"))
         {
-            internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(SharedMappers.DomIds.SlcPlan_And_Build.Sections.JobTypeInfo.Id.Id)
-            { ModuleId = ModuleId };
+            ModuleId = ModuleId
+        };
+        internal static DomDefinitionId DomDefinitionId => JobTypeDomDefinitionId;
 
-            internal static FieldDescriptorID Name = SharedMappers.DomIds.SlcPlan_And_Build.Sections.JobTypeInfo.Name;
-            internal static FieldDescriptorID Description = SharedMappers.DomIds.SlcPlan_And_Build.Sections.JobTypeInfo.Description;
-            internal static FieldDescriptorID Icon = SharedMappers.DomIds.SlcPlan_And_Build.Sections.JobTypeInfo.Icon;
+        public static class JobTypeProperties
+        {
+            private static readonly SectionDefinitionID sectionDefinitionId = new SectionDefinitionID(new Guid("49a5b1c3-e6d1-4c6b-b3b4-18fe7373d9cf"))
+            {
+                ModuleId = ModuleId
+            };
+            internal static SectionDefinitionID SectionDefinitionId => sectionDefinitionId;
+
+            public static readonly FieldDescriptorID Name = new FieldDescriptorID(new Guid("4d2a89e0-ae8e-4a70-9dde-0dd909a1cc00"));
+            public static readonly FieldDescriptorID Description = new FieldDescriptorID(new Guid("38b7ed5c-f071-42e4-a36d-a0f0c33d7a27"));
+            public static readonly FieldDescriptorID Icon = new FieldDescriptorID(new Guid("4522def1-ae47-49e6-a1a0-7485481003e7"));
         }
     }
 }

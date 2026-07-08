@@ -15,50 +15,34 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
     [SdmDomMapper]
     public static class PropertyDomMapper
     {
-        internal const string ModuleId = "(infraops)properties";
-        private static readonly DomDefinitionId PropertyDomDefinitionId = new DomDefinitionId(new Guid("d7e4ecb9-dc79-496e-90c7-310b340a248b"))
-        {
-            ModuleId = ModuleId
-        };
-        internal static DomDefinitionId DomDefinitionId => PropertyDomDefinitionId;
+        internal const string ModuleId = SharedMappers.DomIds.InfraopsProperties.ModuleId;
+        internal static DomDefinitionId DomDefinitionId => SharedMappers.DomIds.InfraopsProperties.Definitions.Property;
 
         public static class PropertyProperties
         {
-            private static readonly SectionDefinitionID sectionDefinitionId = new SectionDefinitionID(new Guid("8cdc30f6-1f27-4830-a9a0-d178fbda4166"))
-            {
-                ModuleId = ModuleId
-            };
-            internal static SectionDefinitionID SectionDefinitionId => sectionDefinitionId;
+            internal static SectionDefinitionID SectionDefinitionId => SharedMappers.DomIds.InfraopsProperties.Sections.PropertyInfo.Id;
 
-            public static readonly FieldDescriptorID Name = new FieldDescriptorID(new Guid("086afc7f-ba0d-4568-a4f0-0f9deca9b6be"));
-            public static readonly FieldDescriptorID PropertyType = new FieldDescriptorID(new Guid("0f9b9c96-0be9-42f8-8abc-775cc92bd9dd"));
-            public static readonly FieldDescriptorID Scope = new FieldDescriptorID(new Guid("40aad301-8d7b-4df8-9d25-a04deef1ce79"));
-            public static readonly FieldDescriptorID Default = new FieldDescriptorID(new Guid("47e8b102-fc0b-4592-b9fc-3032c0bbc706"));
-            public static readonly FieldDescriptorID StringSizeLimit = new FieldDescriptorID(new Guid("aec58746-1499-4032-aa3a-d1ae139154ad"));
-            public static readonly FieldDescriptorID IsMultiLineString = new FieldDescriptorID(new Guid("841d9711-8bed-4356-9a17-cf51ca8e15af"));
+            public static readonly FieldDescriptorID Name = SharedMappers.DomIds.InfraopsProperties.Sections.PropertyInfo.Name;
+            public static readonly FieldDescriptorID PropertyType = SharedMappers.DomIds.InfraopsProperties.Sections.PropertyInfo.PropertyType;
+            public static readonly FieldDescriptorID Scope = SharedMappers.DomIds.InfraopsProperties.Sections.PropertyInfo.Scope;
+            public static readonly FieldDescriptorID Default = SharedMappers.DomIds.InfraopsProperties.Sections.PropertyInfo.Default;
+            public static readonly FieldDescriptorID StringSizeLimit = SharedMappers.DomIds.InfraopsProperties.Sections.PropertyInfo.StringSizeLimit;
+            public static readonly FieldDescriptorID IsMultiLineString = SharedMappers.DomIds.InfraopsProperties.Sections.PropertyInfo.IsMultiLineString;
         }
 
         public static class Layout
         {
-            private static readonly SectionDefinitionID sectionDefinitionId = new SectionDefinitionID(new Guid("7de682dd-0077-414c-9287-0adee68ebddf"))
-            {
-                ModuleId = ModuleId
-            };
-            internal static SectionDefinitionID SectionDefinitionId => sectionDefinitionId;
+            internal static SectionDefinitionID SectionDefinitionId => SharedMappers.DomIds.InfraopsProperties.Sections.Layout.Id;
 
-            public static readonly FieldDescriptorID SectionName = new FieldDescriptorID(new Guid("cba17338-5128-4d92-97f8-07b0e370bb55"));
-            public static readonly FieldDescriptorID Order = new FieldDescriptorID(new Guid("0aa422d8-31fe-4745-89f0-ff224e48a4a4"));
+            public static readonly FieldDescriptorID SectionName = SharedMappers.DomIds.InfraopsProperties.Sections.Layout.SectionName;
+            public static readonly FieldDescriptorID Order = SharedMappers.DomIds.InfraopsProperties.Sections.Layout.Order;
         }
 
         public static class Discreets
         {
-            private static readonly SectionDefinitionID sectionDefinitionId = new SectionDefinitionID(new Guid("4fcc9149-55cf-45c2-a6ee-f742c9d37359"))
-            {
-                ModuleId = ModuleId
-            };
-            internal static SectionDefinitionID SectionDefinitionId => sectionDefinitionId;
+            internal static SectionDefinitionID SectionDefinitionId => SharedMappers.DomIds.InfraopsProperties.Sections.Discrete.Id;
 
-            public static readonly FieldDescriptorID Option = new FieldDescriptorID(new Guid("8428fc89-be4c-4926-84c1-66d6fa008895"));
+            public static readonly FieldDescriptorID Option = SharedMappers.DomIds.InfraopsProperties.Sections.Discrete.Option;
         }
     }
 }

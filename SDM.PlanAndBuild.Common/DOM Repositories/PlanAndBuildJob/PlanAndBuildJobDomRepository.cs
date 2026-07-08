@@ -1,0 +1,140 @@
+﻿namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
+{
+    using System;
+
+    using SharedCommonLibrary.PlanAndBuild.State_Management;
+
+    using SharedMappers.DomIds;
+
+    using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+
+    /// <summary>
+    /// Defines methods for managing <see cref="PlanAndBuildJob"/> state transitions in a repository. Extends bulk
+    /// operations for jobs.
+    /// </summary>
+    /// <remarks>This interface provides operations to change a job's workflow state, supporting scenarios
+    /// where field updates and state transitions must occur in a specific order. Implementations should ensure
+    /// that combined operations are performed atomically to maintain data consistency. The interface is intended
+    /// for use in Plan &amp; Build where jobs have lifecycle states and validation rules that may depend on the
+    /// current state.</remarks>
+    [AllowSdmMiddleware]
+    public interface IPlanAndBuildJobRepository : IBulkRepository<PlanAndBuildJob>
+    {
+        /// <summary>
+        /// Transitions the job to a new state.
+        /// Use this AFTER updating fields if the new state has different validation rules.
+        /// </summary>
+        /// <param name="job">The job to transition.</param>
+        /// <param name="newState">The new state to transition the job to.</param>
+        PlanAndBuildJob TransitionTo(PlanAndBuildJob job, SlcPlan_And_Build.Behaviors.Job_Behavior.StatusesEnum newState);
+
+        /// <summary>
+        /// Updates fields and transitions state in a single atomic operation.
+        /// Order: Fields are updated first, then state transition occurs.
+        /// Use when you need to prepare the job for the new state.
+        /// </summary>
+        /// <param name="job">The job to update and transition.</param>
+        /// <param name="newState">The new state to transition the job to.</param>
+        PlanAndBuildJob UpdateAndTransitionTo(PlanAndBuildJob job, SlcPlan_And_Build.Behaviors.Job_Behavior.StatusesEnum newState);
+
+        /// <summary>
+        /// Transitions state first, then updates fields.
+        /// Order: State transition occurs, then fields are updated.
+        /// Use when the new state enables certain field changes.
+        /// </summary>
+        /// <param name="job">The job to transition and update.</param>
+        /// <param name="newState">The new state to transition the job to.</param>
+        PlanAndBuildJob TransitionAndUpdate(PlanAndBuildJob job, SlcPlan_And_Build.Behaviors.Job_Behavior.StatusesEnum newState);
+    }
+
+    internal partial class PlanAndBuildJobDomRepository : IPlanAndBuildJobRepository
+    {
+        public PlanAndBuildJob TransitionTo(PlanAndBuildJob job, SlcPlan_And_Build.Behaviors.Job_Behavior.StatusesEnum newState)
+        {
+            if (job == null) throw new ArgumentNullException(nameof(job));
+
+            if (!StateMachine.IsTransitionAllowed(job.State, newState))
+            {
+                throw new InvalidOperationException($"State transition from {job.State} to {newState} is not allowed.");
+            }
+
+            return ExecuteStateTransition(job, newState);
+        }
+
+        public PlanAndBuildJob UpdateAndTransitionTo(PlanAndBuildJob job, SlcPlan_And_Build.Behaviors.Job_Behavior.StatusesEnum newState)
+        {
+            if (job == null) throw new ArgumentNullException(nameof(job));
+
+            if (!StateMachine.IsTransitionAllowed(job.State, newState))
+            {
+                throw new InvalidOperationException($"State transition from {job.State} to {newState} is not allowed.");
+            }
+
+            var updated = Update(job);
+
+            return ExecuteStateTransition(updated, newState);
+        }
+
+        /// <summary>
+        /// Transitions state first, then updates fields.
+        /// Order: State transition occurs, then fields are updated.
+        /// Use when the new state enables certain field changes.
+        /// </summary>
+        public PlanAndBuildJob TransitionAndUpdate(PlanAndBuildJob job, SlcPlan_And_Build.Behaviors.Job_Behavior.StatusesEnum newState)
+        {
+            if (job == null) throw new ArgumentNullException(nameof(job));
+
+            if (!StateMachine.IsTransitionAllowed(job.State, newState))
+            {
+                throw new InvalidOperationException($"State transition from {job.State} to {newState} is not allowed.");
+            }
+
+            var transitioned = ExecuteStateTransition(job, newState);
+
+            return Update(transitioned);
+        }
+
+        private PlanAndBuildJob ExecuteStateTransition(
+            PlanAndBuildJob job,
+            SlcPlan_And_Build.Behaviors.Job_Behavior.StatusesEnum toState)
+        {
+            if (job == null) throw new ArgumentNullException(nameof(job));
+
+            try
+            {
+                var transitions = StateMachine.GetTransitionPath(job.State, toState);
+
+                if (transitions.Count == 0)
+                {
+                    throw new InvalidOperationException($"No valid transition path found from {job.State} to {toState}.");
+                }
+
+                var instanceId = new DomInstanceId(Guid.Parse(job.Identifier))
+                {
+                    ModuleId = PlanAndBuildJobDomMapper.ModuleId
+                };
+
+                DomInstance currentInstance = null;
+                foreach (var transitionId in transitions)
+                {
+                    currentInstance = helper.DomInstances.DoStatusTransition(instanceId, SlcPlan_And_Build.Behaviors.Job_Behavior.Transitions.ToValue(transitionId));
+                }
+
+                if (currentInstance == null)
+                {
+                    throw new InvalidOperationException($"State transition failed for job '{job.Identifier}' to {toState}.");
+                }
+
+                // return back Job with updated state
+                job.State = SlcPlan_And_Build.Behaviors.Job_Behavior.Statuses.ToEnum(currentInstance.StatusId);
+                return job;
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException(
+                    $"Failed to transition job '{job.Identifier}' from {job.State} to {toState}: {ex.Message}",
+                    ex);
+            }
+        }
+    }
+}

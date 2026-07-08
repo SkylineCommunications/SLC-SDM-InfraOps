@@ -4,54 +4,81 @@
 //     Changes to this file will be lost if the code is regenerated.
 // </auto-generated>
 //------------------------------------------------------------------------------
+using System;
+
+using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+using Skyline.DataMiner.Net.Sections;
+using Skyline.DataMiner.SDM;
+
 namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 {
-    using System;
-
-    using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-    using Skyline.DataMiner.Net.Sections;
-    using Skyline.DataMiner.SDM;
-
     [SdmDomMapper]
-    internal static class PlanAndBuildJobDomMapper
+    public static class PlanAndBuildJobDomMapper
     {
-        internal const string ModuleId = SharedMappers.DomIds.SlcPlan_And_Build.ModuleId;
-        internal static DomDefinitionId DomDefinitionId = new DomDefinitionId(SharedMappers.DomIds.SlcPlan_And_Build.Definitions.Job.Id)
-        { ModuleId = ModuleId };
-        internal static class Ownership
+        internal const string ModuleId = "(slc)plan_and_build";
+        private static readonly DomDefinitionId PlanAndBuildJobDomDefinitionId = new DomDefinitionId(new Guid("2be8006e-1565-4c6d-9597-9a657d66ea46"))
         {
-            internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(SharedMappers.DomIds.SlcPlan_And_Build.Sections.JobOwnership.Id.Id)
-            { ModuleId = ModuleId };
+            ModuleId = ModuleId
+        };
+        internal static DomDefinitionId DomDefinitionId => PlanAndBuildJobDomDefinitionId;
 
-            internal static FieldDescriptorID AssignedTo = SharedMappers.DomIds.SlcPlan_And_Build.Sections.JobOwnership.AssignedTo;
-            internal static FieldDescriptorID AssignmentGroup = SharedMappers.DomIds.SlcPlan_And_Build.Sections.JobOwnership.AssignmentGroup;
+        public static class PlanAndBuildJobProperties
+        {
+            private static readonly SectionDefinitionID sectionDefinitionId = new SectionDefinitionID(new Guid("54609101-f01d-41ff-a241-ce410108c8e9"))
+            {
+                ModuleId = ModuleId
+            };
+            internal static SectionDefinitionID SectionDefinitionId => sectionDefinitionId;
+
+            public static readonly FieldDescriptorID State = new FieldDescriptorID(new Guid("1d566cb2-30c1-46cb-ae66-94563cb467ef"));
+            public static readonly FieldDescriptorID JobID = new FieldDescriptorID(new Guid("538464f4-3481-4bb8-abdc-afd2896f8040"));
+            public static readonly FieldDescriptorID JobName = new FieldDescriptorID(new Guid("a7db68aa-b4dd-4cc9-8d46-896de5ab41d5"));
+            public static readonly FieldDescriptorID Start = new FieldDescriptorID(new Guid("901481df-741d-4a24-a389-f508e7cc1bfd"));
+            public static readonly FieldDescriptorID End = new FieldDescriptorID(new Guid("331c6ecc-a5f1-41ba-b4a9-47787c77d6fc"));
+            public static readonly FieldDescriptorID JobType = new FieldDescriptorID(new Guid("44c1cab1-9ab2-4c4d-8714-d584cc3a21a1"));
+            public static readonly FieldDescriptorID Type = new FieldDescriptorID(new Guid("b6f22177-a0cd-4362-aabf-688107249028"));
+            public static readonly FieldDescriptorID JobDescription = new FieldDescriptorID(new Guid("78f335be-e4d2-4279-85b8-65c4c00a73b6"));
+            public static readonly FieldDescriptorID Remarks = new FieldDescriptorID(new Guid("f6062df4-9f39-43d2-b974-fc98d688d950"));
+            public static readonly FieldDescriptorID Priority = new FieldDescriptorID(new Guid("5be904a4-d11b-41da-9efb-dbcbd3d23cd8"));
+            public static readonly FieldDescriptorID SubState = new FieldDescriptorID(new Guid("c8fc59a4-57df-4520-9c76-f63bc2fc1edb"));
+            public static readonly FieldDescriptorID Locations = new FieldDescriptorID(new Guid("0b8beaa1-fa9a-4feb-b871-af4c5052424b"));
         }
 
-        internal static class Information
+        public static class Ownership
         {
-            internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(SharedMappers.DomIds.SlcPlan_And_Build.Sections.JobInformation.Id.Id)
-            { ModuleId = ModuleId };
+            private static readonly SectionDefinitionID sectionDefinitionId = new SectionDefinitionID(new Guid("0aafbe66-5a20-401a-9800-9b1506c5ad3b"))
+            {
+                ModuleId = ModuleId
+            };
+            internal static SectionDefinitionID SectionDefinitionId => sectionDefinitionId;
 
-            internal static FieldDescriptorID JobID = SharedMappers.DomIds.SlcPlan_And_Build.Sections.JobInformation.JobID;
-            internal static FieldDescriptorID JobName = SharedMappers.DomIds.SlcPlan_And_Build.Sections.JobInformation.JobName;
-            internal static FieldDescriptorID Start = SharedMappers.DomIds.SlcPlan_And_Build.Sections.JobInformation.Start;
-            internal static FieldDescriptorID End = SharedMappers.DomIds.SlcPlan_And_Build.Sections.JobInformation.End;
-            internal static FieldDescriptorID JobType = SharedMappers.DomIds.SlcPlan_And_Build.Sections.JobInformation.JobType;
-            internal static FieldDescriptorID Type = SharedMappers.DomIds.SlcPlan_And_Build.Sections.JobInformation.Type;
-            internal static FieldDescriptorID JobDescription = SharedMappers.DomIds.SlcPlan_And_Build.Sections.JobInformation.JobDescription;
-            internal static FieldDescriptorID Remarks = SharedMappers.DomIds.SlcPlan_And_Build.Sections.JobInformation.Remarks;
-            internal static FieldDescriptorID Priority = SharedMappers.DomIds.SlcPlan_And_Build.Sections.JobInformation.Priority;
-            internal static FieldDescriptorID SubState = SharedMappers.DomIds.SlcPlan_And_Build.Sections.JobInformation.SubState;
-            internal static FieldDescriptorID Locations = SharedMappers.DomIds.SlcPlan_And_Build.Sections.JobInformation.Locations;
+            public static readonly FieldDescriptorID AssignedTo = new FieldDescriptorID(new Guid("664f4e96-1349-4c60-ba3e-449032affadf"));
+            public static readonly FieldDescriptorID AssignmentGroup = new FieldDescriptorID(new Guid("560debfc-d3b4-480b-95f1-a4dd67de24ac"));
         }
 
-        internal static class AssetsUsed
+        public static class AssetsUsed
         {
-            internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(SharedMappers.DomIds.SlcPlan_And_Build.Sections.AssetsUsed.Id.Id)
-            { ModuleId = ModuleId };
+            private static readonly SectionDefinitionID sectionDefinitionId = new SectionDefinitionID(new Guid("5f7e7b7a-4307-4346-aa77-68f0e65df5ce"))
+            {
+                ModuleId = ModuleId
+            };
+            internal static SectionDefinitionID SectionDefinitionId => sectionDefinitionId;
 
-            internal static FieldDescriptorID AssetID = SharedMappers.DomIds.SlcPlan_And_Build.Sections.AssetsUsed.AssetID;
-            internal static FieldDescriptorID Action = SharedMappers.DomIds.SlcPlan_And_Build.Sections.AssetsUsed.Action;
+            public static readonly FieldDescriptorID AssetId = new FieldDescriptorID(new Guid("44b25c90-d31a-4b13-ab10-20c1998a361d"));
+            public static readonly FieldDescriptorID Action = new FieldDescriptorID(new Guid("7b289c96-c449-4859-92f8-fa91c730947d"));
+        }
+
+        public static class Attachments
+        {
+            private static readonly SectionDefinitionID sectionDefinitionId = new SectionDefinitionID(new Guid("5249f06f-db4e-4aea-ac5a-7b2636b9a159"))
+            {
+                ModuleId = ModuleId
+            };
+            internal static SectionDefinitionID SectionDefinitionId => sectionDefinitionId;
+
+            public static readonly FieldDescriptorID FilePath = new FieldDescriptorID(new Guid("690e2316-01e3-4909-af92-4081209a4c5a"));
+            public static readonly FieldDescriptorID AttachedAt = new FieldDescriptorID(new Guid("071baa5a-6f42-44cc-8928-13db57e9d3d0"));
+            public static readonly FieldDescriptorID AttachedBy = new FieldDescriptorID(new Guid("505f2061-5dbe-49f9-8f1f-f10397a29364"));
         }
     }
 }
