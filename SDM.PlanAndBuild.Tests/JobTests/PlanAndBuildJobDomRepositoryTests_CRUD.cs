@@ -24,6 +24,8 @@
 		[TestInitialize]
 		public void TestInitialize()
 		{
+			Helper.PopulateAppSettings();
+
 			referenceJobType = new JobType { Name = "Installation" };
 
 			referenceJob = new PlanAndBuildJob

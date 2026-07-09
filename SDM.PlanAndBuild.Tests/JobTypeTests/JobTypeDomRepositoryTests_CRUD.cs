@@ -23,6 +23,8 @@
 		[TestInitialize]
 		public void TestInitialize()
 		{
+			Helper.PopulateAppSettings();
+
 			var id = Guid.NewGuid();
 			referenceJobType = new JobType
 			{

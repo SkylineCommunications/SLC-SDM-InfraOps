@@ -26,6 +26,7 @@
 		[TestInitialize]
 		public void Setup()
 		{
+			Helper.PopulateAppSettings();
 			_validator = new PlanAndBuildJobValidator(Helper);
 			_jobType = Helper.JobTypes.Create(new JobType { Name = "Installation" });
 		}

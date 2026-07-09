@@ -26,7 +26,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Helpers
             jobRepository.Validator = jobValidator;
 
             Jobs = jobRepository
-                .WithMiddleware(new PlanAndBuildJobValidationMiddleware(jobValidator))
+                .WithMiddleware(new PlanAndBuildJobValidationMiddleware(jobValidator, this))
                 .WithMiddleware(new IdentifierMiddleware<PlanAndBuildJob>());
 
             JobTypes = jobTypeRepository

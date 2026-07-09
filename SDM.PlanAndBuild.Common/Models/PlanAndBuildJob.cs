@@ -83,10 +83,18 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 
         #region Info Properties
 
+        /// <summary>
+        /// Gets the system-generated Job ID.
+        /// </summary>
+        /// <remarks>
+        /// This is allocated once at creation time by <see cref="Skyline.DataMiner.SDM.PlanAndBuild.Helpers.JobIdAllocator"/>
+        /// (mirroring the legacy JobIdManager) and must never be changed afterwards. The setter is internal so that
+        /// only the allocator and the DOM mapper (both within this assembly) can assign it.
+        /// </remarks>
         public string JobID
         {
             get => JobIDField.Value;
-            set => JobIDField.Value = value;
+            internal set => JobIDField.Value = value;
         }
 
         public string JobName

@@ -28,6 +28,7 @@
 		[TestMethod]
 		public void RoundTrip_JobWithAllFieldsPopulated_ShouldPreserveEveryField()
 		{
+			Helper.PopulateAppSettings();
 			var jobType = Helper.JobTypes.Create(new JobType { Name = "Installation" });
 
 			var original = new PlanAndBuildJob
@@ -84,6 +85,7 @@
 		[TestMethod]
 		public void RoundTrip_JobWithNoEndDate_ShouldPreserveNullEnd()
 		{
+			Helper.PopulateAppSettings();
 			var jobType = Helper.JobTypes.Create(new JobType { Name = "Decommissioning" });
 
 			var original = new PlanAndBuildJob
@@ -105,6 +107,7 @@
 		[TestMethod]
 		public void RoundTrip_AfterFetch_ShouldNotBeNewAndShouldHaveNoPendingChanges()
 		{
+			Helper.PopulateAppSettings();
 			var jobType = Helper.JobTypes.Create(new JobType { Name = "Maintenance" });
 
 			var original = new PlanAndBuildJob

@@ -25,6 +25,7 @@
 		[TestInitialize]
 		public void Setup()
 		{
+			Helper.PopulateAppSettings();
 			_validator = new JobTypeValidator(Helper);
 		}
 

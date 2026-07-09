@@ -23,8 +23,8 @@
 		{
 			// Act - This will throw if validation middleware fails.
 			Helper.PopulateJobTypes();
-			Helper.PopulateJobs();
 			Helper.PopulateAppSettings();
+			Helper.PopulateJobs();
 
 			// Assert
 			Assert.IsTrue(Helper.JobTypes.Read(new TRUEFilterElement<JobType>()).Any(), "JobTypes should be populated");

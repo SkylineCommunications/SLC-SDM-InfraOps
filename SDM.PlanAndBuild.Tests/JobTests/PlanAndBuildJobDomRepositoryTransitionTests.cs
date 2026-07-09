@@ -33,6 +33,7 @@ namespace SDM.PlanAndBuild.Tests.JobTests
 		public void TestInitialize()
 		{
 			_helper = RepositoryInitialize.InitializeWithJobBehavior();
+			_helper.PopulateAppSettings();
 		}
 
 		private JobType _sharedJobType;

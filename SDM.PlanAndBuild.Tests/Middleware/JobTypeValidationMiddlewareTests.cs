@@ -29,6 +29,7 @@
 		[TestInitialize]
 		public void Setup()
 		{
+			Helper.PopulateAppSettings();
 			_middleware = new JobTypeValidationMiddleware(new JobTypeValidator(Helper));
 		}
 

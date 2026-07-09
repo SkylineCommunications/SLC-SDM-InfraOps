@@ -30,7 +30,8 @@
 		[TestInitialize]
 		public void Setup()
 		{
-			_middleware = new PlanAndBuildJobValidationMiddleware(new PlanAndBuildJobValidator(Helper));
+			Helper.PopulateAppSettings();
+			_middleware = new PlanAndBuildJobValidationMiddleware(new PlanAndBuildJobValidator(Helper), Helper);
 			_jobType = Helper.JobTypes.Create(new JobType { Name = "Installation" });
 		}
 

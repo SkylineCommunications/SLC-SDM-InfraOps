@@ -5,6 +5,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Middleware
     using System.Linq;
 
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
+    using Skyline.DataMiner.SDM.PlanAndBuild.Helpers;
     using Skyline.DataMiner.SDM.PlanAndBuild.Models;
     using Skyline.DataMiner.SDM.PlanAndBuild.Validation;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
@@ -14,10 +15,23 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Middleware
     internal class PlanAndBuildJobValidationMiddleware : IBulkRepositoryMiddleware<PlanAndBuildJob>
     {
         private readonly PlanAndBuildJobValidator _validator;
+        private readonly IPlanAndBuildApiHelper _helper;
 
-        internal PlanAndBuildJobValidationMiddleware(PlanAndBuildJobValidator validator)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PlanAndBuildJobValidationMiddleware"/> class.
+        /// </summary>
+        /// <param name="validator">The PlanAndBuildJob validator.</param>
+        /// <param name="helper">
+        /// The Plan &amp; Build API helper used to allocate a system-generated JobID (via <see cref="JobIdAllocator"/>)
+        /// on every create. Note: this is captured by reference during <see cref="PlanAndBuildApiHelper"/>
+        /// construction, before its repositories are wired up. Only <see cref="OnCreate(PlanAndBuildJob, Func{PlanAndBuildJob, PlanAndBuildJob})"/>
+        /// / <see cref="OnCreate(IEnumerable{PlanAndBuildJob}, Func{IEnumerable{PlanAndBuildJob}, IReadOnlyCollection{PlanAndBuildJob}})"/>
+        /// (called after construction completes) access <paramref name="helper"/>'s repositories.
+        /// </param>
+        internal PlanAndBuildJobValidationMiddleware(PlanAndBuildJobValidator validator, IPlanAndBuildApiHelper helper)
         {
             _validator = validator ?? throw new ArgumentNullException(nameof(validator));
+            _helper = helper ?? throw new ArgumentNullException(nameof(helper));
         }
 
         public long OnCount(FilterElement<PlanAndBuildJob> filter, Func<FilterElement<PlanAndBuildJob>, long> next)
@@ -43,6 +57,12 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Middleware
         public IReadOnlyCollection<PlanAndBuildJob> OnCreate(IEnumerable<PlanAndBuildJob> oToCreate, Func<IEnumerable<PlanAndBuildJob>, IReadOnlyCollection<PlanAndBuildJob>> next)
         {
             var jobs = oToCreate.ToList();
+
+            foreach (var job in jobs)
+            {
+                job.JobID = JobIdAllocator.AllocateNextJobId(_helper);
+            }
+
             var results = ValidateBulk(jobs);
 
             if (results.AnyInvalid())
@@ -50,11 +70,13 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Middleware
                 throw BuildBulkValidationException(jobs, results);
             }
 
-            return next(oToCreate);
+            return next(jobs);
         }
 
         public PlanAndBuildJob OnCreate(PlanAndBuildJob oToCreate, Func<PlanAndBuildJob, PlanAndBuildJob> next)
         {
+            oToCreate.JobID = JobIdAllocator.AllocateNextJobId(_helper);
+
             var result = Validate(oToCreate);
             if (!result.IsValid)
             {
@@ -67,6 +89,12 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Middleware
         public IReadOnlyCollection<PlanAndBuildJob> OnCreateOrUpdate(IEnumerable<PlanAndBuildJob> oToCreateOrUpdate, Func<IEnumerable<PlanAndBuildJob>, IReadOnlyCollection<PlanAndBuildJob>> next)
         {
             var jobs = oToCreateOrUpdate.ToList();
+
+            foreach (var job in jobs.Where(j => j.IsNew))
+            {
+                job.JobID = JobIdAllocator.AllocateNextJobId(_helper);
+            }
+
             var results = ValidateBulk(jobs);
 
             if (results.AnyInvalid())
