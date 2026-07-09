@@ -203,7 +203,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
         [SdmIgnore]
         internal IChangeTrackingField<DateTime?> StartField => FieldHandler.GetOrCreateField(
             nameof(Start),
-            () => new ChangeTrackingField<DateTime?>(null));
+            () => new ChangeTrackingField<DateTime?>(DateTime.UtcNow));
 
         [JsonIgnore]
         [SdmIgnore]
@@ -245,7 +245,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
         [SdmIgnore]
         internal IChangeTrackingField<SlcPlan_And_Build.Enums.SubStateEnum?> SubStateField => FieldHandler.GetOrCreateField(
             nameof(SubState),
-            () => new ChangeTrackingField<SlcPlan_And_Build.Enums.SubStateEnum?>(null));
+            () => new ChangeTrackingField<SlcPlan_And_Build.Enums.SubStateEnum?>(SlcPlan_And_Build.Enums.SubStateEnum.Draft));
 
         [JsonIgnore]
         [SdmIgnore]
