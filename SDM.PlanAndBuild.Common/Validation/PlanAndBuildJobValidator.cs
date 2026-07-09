@@ -1,6 +1,8 @@
 namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
 
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM.InfraOps.Common.Validation;
@@ -64,6 +66,88 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
         public ValidationResult ValidateWithHandler(PlanAndBuildJob job, Action<ValidationResult> onError)
         {
             return _validationPipeline.ValidateWithHandler(job, onError);
+        }
+
+        /// <summary>
+        /// Validates multiple Jobs in bulk. Results are returned in the same order as the input jobs.
+        /// In addition to the per-job checks, this also detects JobName conflicts <em>within the batch itself</em>
+        /// (i.e. two jobs being saved together that share the same JobName), which a single-job DB uniqueness
+        /// query cannot catch since none of the batch's entries are persisted yet.
+        /// Mirrors InfraOpsShared.DOM_Classes.DOM.Applications.Plan_And_Build.Validation.JobValidationHandler's
+        /// OtherChangedEntries check.
+        /// </summary>
+        public List<ValidationResult> ValidateBulk(List<PlanAndBuildJob> jobs)
+        {
+            if (jobs == null || !jobs.Any())
+            {
+                return new List<ValidationResult>();
+            }
+
+            // Initialize results - same order as input
+            var results = jobs.Select(j => new ValidationResult()).ToList();
+
+            // ============================================================
+            // PHASE 1: NO DATABASE ACCESS CHECKS (BUSINESS RULES)
+            // ============================================================
+            for (int i = 0; i < jobs.Count; i++)
+            {
+                results[i].AddFailuresFrom(ValidateInfo(jobs[i]));
+            }
+
+            // Fast-fail if business rules fail
+            if (results.AnyInvalid())
+            {
+                return results;
+            }
+
+            // ============================================================
+            // PHASE 2: IN-MEMORY BATCH CONFLICT DETECTION (NO DATABASE)
+            // ============================================================
+            var batchConflicts = ValidateBatchConflicts(jobs);
+            results.MergeFrom(batchConflicts);
+
+            // Fast-fail if batch conflicts exist
+            if (results.AnyInvalid())
+            {
+                return results;
+            }
+
+            // ============================================================
+            // PHASE 3: DATABASE ACCESS CHECKS (UNIQUENESS) + REMAINING RULES
+            // ============================================================
+            for (int i = 0; i < jobs.Count; i++)
+            {
+                results[i].AddFailuresFrom(ValidateJobNameUniqueness(jobs[i]));
+                results[i].AddFailuresFrom(ValidateJobTypeAndDates(jobs[i]));
+            }
+
+            return results;
+        }
+
+        /// <summary>
+        /// Detects JobName conflicts among the jobs of a single batch (in-memory only, no database access).
+        /// Result at index i corresponds to job at index i.
+        /// </summary>
+        public List<ValidationResult> ValidateBatchConflicts(List<PlanAndBuildJob> jobs)
+        {
+            var results = jobs.Select(j => new ValidationResult()).ToList();
+
+            var nameGroups = jobs
+                .Select((job, index) => new { job, index })
+                .Where(x => x.job.ShouldValidate(x.job.JobNameField) && !string.IsNullOrWhiteSpace(x.job.JobName))
+                .GroupBy(x => x.job.JobName, StringComparer.OrdinalIgnoreCase)
+                .Where(g => g.Count() > 1);
+
+            foreach (var group in nameGroups)
+            {
+                foreach (var item in group)
+                {
+                    results[item.index].AddFailReason(PlanAndBuildJobValidationField.JobName,
+                        $"Job Name '{item.job.JobName}' is duplicated within the validation batch.");
+                }
+            }
+
+            return results;
         }
 
         #endregion

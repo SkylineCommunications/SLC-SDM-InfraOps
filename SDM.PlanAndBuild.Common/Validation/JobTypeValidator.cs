@@ -1,6 +1,8 @@
 namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
 
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM.InfraOps.Common.Validation;
@@ -86,6 +88,88 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Validates multiple JobTypes in bulk. Results are returned in the same order as the input JobTypes.
+        /// In addition to the per-JobType checks, this also detects Name conflicts <em>within the batch itself</em>
+        /// (i.e. two JobTypes being saved together that share the same Name), which a single-JobType DB uniqueness
+        /// query cannot catch since none of the batch's entries are persisted yet.
+        /// Mirrors InfraOpsShared.DOM_Classes.DOM.Applications.Plan_And_Build.Validation.JobTypeValidationHandler's
+        /// OtherChangedEntries check.
+        /// </summary>
+        public List<ValidationResult> ValidateBulk(List<JobType> jobTypes)
+        {
+            if (jobTypes == null || !jobTypes.Any())
+            {
+                return new List<ValidationResult>();
+            }
+
+            // Initialize results - same order as input
+            var results = jobTypes.Select(j => new ValidationResult()).ToList();
+
+            // ============================================================
+            // PHASE 1: NO DATABASE ACCESS CHECKS (BUSINESS RULES)
+            // ============================================================
+            for (int i = 0; i < jobTypes.Count; i++)
+            {
+                results[i].AddFailuresFrom(ValidateInfo(jobTypes[i]));
+            }
+
+            // Fast-fail if business rules fail
+            if (results.AnyInvalid())
+            {
+                return results;
+            }
+
+            // ============================================================
+            // PHASE 2: IN-MEMORY BATCH CONFLICT DETECTION (NO DATABASE)
+            // ============================================================
+            var batchConflicts = ValidateBatchConflicts(jobTypes);
+            results.MergeFrom(batchConflicts);
+
+            // Fast-fail if batch conflicts exist
+            if (results.AnyInvalid())
+            {
+                return results;
+            }
+
+            // ============================================================
+            // PHASE 3: DATABASE ACCESS CHECKS (UNIQUENESS) + REMAINING RULES
+            // ============================================================
+            for (int i = 0; i < jobTypes.Count; i++)
+            {
+                results[i].AddFailuresFrom(ValidateNameUniqueness(jobTypes[i]));
+                results[i].AddFailuresFrom(ValidateNotInUseWhenRenamed(jobTypes[i]));
+            }
+
+            return results;
+        }
+
+        /// <summary>
+        /// Detects Name conflicts among the JobTypes of a single batch (in-memory only, no database access).
+        /// Result at index i corresponds to JobType at index i.
+        /// </summary>
+        public List<ValidationResult> ValidateBatchConflicts(List<JobType> jobTypes)
+        {
+            var results = jobTypes.Select(j => new ValidationResult()).ToList();
+
+            var nameGroups = jobTypes
+                .Select((jobType, index) => new { jobType, index })
+                .Where(x => x.jobType.ShouldValidate(x.jobType.NameField) && !string.IsNullOrWhiteSpace(x.jobType.Name))
+                .GroupBy(x => x.jobType.Name, StringComparer.OrdinalIgnoreCase)
+                .Where(g => g.Count() > 1);
+
+            foreach (var group in nameGroups)
+            {
+                foreach (var item in group)
+                {
+                    results[item.index].AddFailReason(JobTypeValidationField.Name,
+                        $"Job Type Name '{item.jobType.Name}' is duplicated within the validation batch.");
+                }
+            }
+
+            return results;
         }
 
         #endregion

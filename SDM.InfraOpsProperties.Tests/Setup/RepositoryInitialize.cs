@@ -12,6 +12,17 @@
 		}
 
 		/// <summary>
+		/// Initializes an empty set of repositories using an API helper with a specific cascade-delete-on-Property setting.
+		/// </summary>
+		/// <param name="cascadeDeleteOnProperty">
+		/// When <c>false</c>, deleting a Property will not cascade-remove referencing PropertyValue entries.
+		/// </param>
+		public static IInfraOpsPropertiesApiHelper InitializeEmptyRepositories(bool cascadeDeleteOnProperty)
+		{
+			return ConnectionHelper.CreateConnection().GetMockedHelper(cascadeDeleteOnProperty);
+		}
+
+		/// <summary>
 		/// Populates the Properties repository with the provided <paramref name="properties"/> test data.
 		/// </summary>
 		/// <param name="helper">Mocked API helper.</param>

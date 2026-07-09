@@ -8,6 +8,8 @@
 
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+	using SDM.InfraOpsProperties.Tests.Setup;
+
 	using SharedMappers.DomIds;
 
 	using Skyline.DataMiner.SDM.InfraOpsProperties.Models;
@@ -17,14 +19,14 @@
 	/// Tests for PropertyValidator which validates Property business rules.
 	/// </summary>
 	[TestClass]
-	public class PropertyValidatorTests
+	public class PropertyValidatorTests : BaseRepositoryTest
 	{
 		private PropertyValidator _validator = null!;
 
 		[TestInitialize]
 		public void Setup()
 		{
-			_validator = new PropertyValidator();
+			_validator = new PropertyValidator(Helper);
 		}
 
 		#region Validate - Happy Path
@@ -171,6 +173,206 @@
 			var result = _validator.Validate(property);
 
 			result.IsValid.Should().BeTrue("Scope error should not be reported since it wasn't changed after the reset");
+		}
+
+		#endregion
+
+		#region Name Uniqueness
+
+		[TestMethod]
+		public void Validate_WithDuplicateNameInSameScope_ShouldReturnInvalid()
+		{
+			Helper.Properties.Create(new Property { Name = "Serial Number", Scope = "Asset" });
+
+			var newProperty = new Property { Name = "Serial Number", Scope = "Asset" };
+
+			var result = _validator.Validate(newProperty);
+
+			using (new AssertionScope())
+			{
+				result.IsValid.Should().BeFalse();
+				result.TryGetFailReason(PropertyValidationHandler.PropertyValidationField.Name, out var reason).Should().BeTrue();
+				reason.Should().Contain("already in use");
+			}
+		}
+
+		[TestMethod]
+		public void Validate_WithSameNameInDifferentScope_ShouldReturnValid()
+		{
+			// (Scope, Name) is the natural key - the same Name may be reused across different Scopes.
+			Helper.Properties.Create(new Property { Name = "Description", Scope = "Asset" });
+
+			var newProperty = new Property { Name = "Description", Scope = "Facility" };
+
+			var result = _validator.Validate(newProperty);
+
+			result.IsValid.Should().BeTrue();
+		}
+
+		[TestMethod]
+		public void Validate_ExistingPropertyUnchanged_ShouldNotConflictWithItself()
+		{
+			var created = Helper.Properties.Create(new Property { Name = "Serial Number", Scope = "Asset" });
+
+			var result = _validator.Validate(created);
+
+			result.IsValid.Should().BeTrue("the uniqueness check must exclude the Property's own identifier");
+		}
+
+		#endregion
+
+		#region ValidateBulk
+
+		[TestMethod]
+		public void ValidateBulk_WithNullList_ShouldReturnEmptyResults()
+		{
+			var results = _validator.ValidateBulk(null!);
+
+			results.Should().BeEmpty();
+		}
+
+		[TestMethod]
+		public void ValidateBulk_WithEmptyList_ShouldReturnEmptyResults()
+		{
+			var results = _validator.ValidateBulk(new List<Property>());
+
+			results.Should().BeEmpty();
+		}
+
+		[TestMethod]
+		public void ValidateBulk_WithAllValidProperties_ShouldReturnAllValid()
+		{
+			var properties = new List<Property>
+			{
+				new Property { Name = "Property One", Scope = "Asset" },
+				new Property { Name = "Property Two", Scope = "Asset" },
+			};
+
+			var results = _validator.ValidateBulk(properties);
+
+			using (new AssertionScope())
+			{
+				results.Should().HaveCount(2);
+				results.Should().OnlyContain(r => r.IsValid);
+			}
+		}
+
+		[TestMethod]
+		public void ValidateBulk_WithDuplicateScopeAndNameWithinBatch_ShouldFlagBothAsInvalid()
+		{
+			// Two Properties being created together share (Scope, Name). Neither is persisted yet, so a
+			// single-Property DB uniqueness query alone would miss this - the in-memory batch check must catch it.
+			var properties = new List<Property>
+			{
+				new Property { Name = "Serial Number", Scope = "Asset" },
+				new Property { Name = "Serial Number", Scope = "Asset" },
+			};
+
+			var results = _validator.ValidateBulk(properties);
+
+			using (new AssertionScope())
+			{
+				results.Should().HaveCount(2);
+				results[0].IsValid.Should().BeFalse();
+				results[1].IsValid.Should().BeFalse();
+				results[0].TryGetFailReason(PropertyValidationHandler.PropertyValidationField.Name, out var reason0).Should().BeTrue();
+				reason0.Should().Contain("duplicated within the validation batch");
+				results[1].TryGetFailReason(PropertyValidationHandler.PropertyValidationField.Name, out var reason1).Should().BeTrue();
+				reason1.Should().Contain("duplicated within the validation batch");
+			}
+		}
+
+		[TestMethod]
+		public void ValidateBulk_WithSameNameDifferentScopeWithinBatch_ShouldNotFlagBatchConflict()
+		{
+			var properties = new List<Property>
+			{
+				new Property { Name = "Description", Scope = "Asset" },
+				new Property { Name = "Description", Scope = "Facility" },
+			};
+
+			var results = _validator.ValidateBulk(properties);
+
+			results.Should().OnlyContain(r => r.IsValid);
+		}
+
+		[TestMethod]
+		public void ValidateBulk_WithDuplicateNamesDifferentCasing_ShouldFlagBothAsInvalid()
+		{
+			var properties = new List<Property>
+			{
+				new Property { Name = "Serial Number", Scope = "Asset" },
+				new Property { Name = "SERIAL NUMBER", Scope = "ASSET" },
+			};
+
+			var results = _validator.ValidateBulk(properties);
+
+			results.Should().OnlyContain(r => !r.IsValid);
+		}
+
+		[TestMethod]
+		public void ValidateBulk_WithBatchNameDuplicatingExistingDomProperty_ShouldFlagOnlyThatEntry()
+		{
+			// One of the batch entries collides with an already-persisted Property (DB check), while the batch
+			// itself has no in-memory duplicates - only the DB-colliding entry should be invalid.
+			Helper.Properties.Create(new Property { Name = "Serial Number", Scope = "Asset" });
+
+			var properties = new List<Property>
+			{
+				new Property { Name = "Serial Number", Scope = "Asset" },
+				new Property { Name = "Brand New Property", Scope = "Asset" },
+			};
+
+			var results = _validator.ValidateBulk(properties);
+
+			using (new AssertionScope())
+			{
+				results.Should().HaveCount(2);
+				results[0].IsValid.Should().BeFalse();
+				results[0].TryGetFailReason(PropertyValidationHandler.PropertyValidationField.Name, out var reason).Should().BeTrue();
+				reason.Should().Contain("already in use");
+				results[1].IsValid.Should().BeTrue();
+			}
+		}
+
+		#endregion
+
+		#region ValidateBatchConflicts
+
+		[TestMethod]
+		public void ValidateBatchConflicts_WithDuplicateScopeAndName_ShouldFlagBothEntries()
+		{
+			var properties = new List<Property>
+			{
+				new Property { Name = "Duplicate Name", Scope = "Asset" },
+				new Property { Name = "Duplicate Name", Scope = "Asset" },
+				new Property { Name = "Unique Name", Scope = "Asset" },
+			};
+
+			var results = _validator.ValidateBatchConflicts(properties);
+
+			using (new AssertionScope())
+			{
+				results.Should().HaveCount(3);
+				results[0].IsValid.Should().BeFalse();
+				results[1].IsValid.Should().BeFalse();
+				results[2].IsValid.Should().BeTrue();
+			}
+		}
+
+		[TestMethod]
+		public void ValidateBatchConflicts_WithBlankNameOrScope_ShouldIgnoreThem()
+		{
+			// Blank names/scopes are covered by the info/presence check, not the batch-duplicate check.
+			var properties = new List<Property>
+			{
+				new Property { Name = string.Empty, Scope = "Asset" },
+				new Property { Name = "Some Name", Scope = string.Empty },
+			};
+
+			var results = _validator.ValidateBatchConflicts(properties);
+
+			results.Should().OnlyContain(r => r.IsValid);
 		}
 
 		#endregion

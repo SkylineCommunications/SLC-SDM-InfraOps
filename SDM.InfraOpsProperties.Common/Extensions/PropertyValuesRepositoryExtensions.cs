@@ -16,6 +16,17 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Extensions
         /// <summary>
         /// Gets the PropertyValues linked to a given object, within a given scope, optionally scoped further by SubID.
         /// </summary>
+        /// <param name="repository">The PropertyValues repository.</param>
+        /// <param name="linkedObjectId">The linked object identifier.</param>
+        /// <param name="scope">The scope to filter by.</param>
+        /// <param name="subId">
+        /// Controls how the SubID is filtered, matching the legacy PropertyValuesDefinitionHandler behavior:
+        /// <list type="bullet">
+        /// <item><description><c>null</c> (default) - only matches PropertyValues that have <b>no</b> SubID set.</description></item>
+        /// <item><description><c>"*"</c> - wildcard, matches PropertyValues regardless of their SubID (no SubID filter applied).</description></item>
+        /// <item><description>any other value - matches PropertyValues with that exact SubID.</description></item>
+        /// </list>
+        /// </param>
         public static IEnumerable<PropertyValues> GetByLinkedObjectID(this IBulkRepository<PropertyValues> repository, Guid linkedObjectId, string scope, string subId = null)
         {
             if (repository == null)
@@ -35,8 +46,11 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Extensions
 
             var filter = PropertyValuesExposers.LinkedObjectID.Equal(linkedObjectId).AND(PropertyValuesExposers.Scope.Equal(scope));
 
-            if (subId != null)
+            if (subId != "*")
             {
+                // subId == null resolves to "no SubID set" (the generated repository translates a null Equal
+                // filter into a KeyExists(...) == false check), and any other value is an exact SubID match.
+                // Only "*" is treated as a wildcard that skips the SubID filter entirely.
                 filter = filter.AND(PropertyValuesExposers.SubID.Equal(subId));
             }
 
@@ -44,7 +58,8 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Extensions
         }
 
         /// <summary>
-        /// Gets the single PropertyValues linked to a given object, within a given scope, optionally scoped further by SubID.
+        /// Gets the single PropertyValues linked to a given object, within a given scope, optionally scoped further
+        /// by SubID. See <see cref="GetByLinkedObjectID"/> for the SubID matching semantics.
         /// </summary>
         public static PropertyValues GetSingleOrDefaultByLinkedObjectID(this IBulkRepository<PropertyValues> repository, Guid linkedObjectId, string scope, string subId = null)
         {

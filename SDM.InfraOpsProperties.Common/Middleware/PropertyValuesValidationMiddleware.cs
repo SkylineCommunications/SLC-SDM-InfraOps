@@ -199,8 +199,7 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Middleware
 
         private List<ValidationResult> ValidateBulk(List<PropertyValues> propertyValues)
         {
-            // Validate each property values individually
-            return propertyValues.Select(pv => _validator.Validate(pv)).ToList();
+            return _validator.ValidateBulk(propertyValues);
         }
 
         /// <summary>

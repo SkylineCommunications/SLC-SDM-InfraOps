@@ -69,6 +69,39 @@
 		}
 
 		[TestMethod]
+		public void GetByLinkedObjectID_WithDefaultSubID_ShouldOnlyMatchEntriesWithNoSubID()
+		{
+			// Regression test: passing no subId must filter for the "no SubID" bucket only, matching the
+			// legacy PropertyValuesDefinitionHandler behavior (subId == null => KeyExists(SubID) == false).
+			// It must NOT behave as a wildcard matching any SubID.
+			var linkedObjectId = Guid.NewGuid();
+			Helper.PropertyValues.Create(new PropertyValues { LinkedObjectID = linkedObjectId, Scope = "Asset" });
+			Helper.PropertyValues.Create(new PropertyValues { LinkedObjectID = linkedObjectId, Scope = "Asset", SubID = "Port1" });
+
+			var result = Helper.PropertyValues.GetByLinkedObjectID(linkedObjectId, "Asset").ToList();
+
+			using (new FluentAssertions.Execution.AssertionScope())
+			{
+				result.Should().HaveCount(1, "only the entry without a SubID should match");
+				result[0].SubID.Should().BeNull();
+			}
+		}
+
+		[TestMethod]
+		public void GetByLinkedObjectID_WithWildcardSubID_ShouldMatchAllEntriesRegardlessOfSubID()
+		{
+			// "*" is the explicit wildcard, distinct from the default (null) "no SubID" behavior.
+			var linkedObjectId = Guid.NewGuid();
+			Helper.PropertyValues.Create(new PropertyValues { LinkedObjectID = linkedObjectId, Scope = "Asset" });
+			Helper.PropertyValues.Create(new PropertyValues { LinkedObjectID = linkedObjectId, Scope = "Asset", SubID = "Port1" });
+			Helper.PropertyValues.Create(new PropertyValues { LinkedObjectID = linkedObjectId, Scope = "Asset", SubID = "Port2" });
+
+			var result = Helper.PropertyValues.GetByLinkedObjectID(linkedObjectId, "Asset", "*").ToList();
+
+			result.Should().HaveCount(3, "the wildcard SubID must match every entry regardless of its SubID");
+		}
+
+		[TestMethod]
 		public void GetByLinkedObjectID_WithEmptyLinkedObjectID_ShouldThrowArgumentException()
 		{
 			Action act = () => Helper.PropertyValues.GetByLinkedObjectID(Guid.Empty, "Asset");
@@ -111,6 +144,25 @@
 			var result = Helper.PropertyValues.GetSingleOrDefaultByLinkedObjectID(Guid.NewGuid(), "Asset");
 
 			result.Should().BeNull();
+		}
+
+		[TestMethod]
+		public void GetSingleOrDefaultByLinkedObjectID_WithDefaultSubIDAndOtherSubIDsPresent_ShouldReturnOnlyNoSubIDEntry()
+		{
+			// Regression test: previously the default (null) subId behaved as a wildcard and this would throw
+			// InvalidOperationException from SingleOrDefault() once more than one SubID existed for the same
+			// LinkedObjectID/Scope. It must now resolve to exactly the "no SubID" entry.
+			var linkedObjectId = Guid.NewGuid();
+			var noSubIdEntry = Helper.PropertyValues.Create(new PropertyValues { LinkedObjectID = linkedObjectId, Scope = "Asset" });
+			Helper.PropertyValues.Create(new PropertyValues { LinkedObjectID = linkedObjectId, Scope = "Asset", SubID = "Port1" });
+
+			var result = Helper.PropertyValues.GetSingleOrDefaultByLinkedObjectID(linkedObjectId, "Asset");
+
+			using (new FluentAssertions.Execution.AssertionScope())
+			{
+				result.Should().NotBeNull();
+				result!.Identifier.Should().Be(noSubIdEntry.Identifier);
+			}
 		}
 
 		#endregion

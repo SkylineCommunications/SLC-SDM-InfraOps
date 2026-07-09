@@ -83,6 +83,24 @@
 			exception.FailedCount.Should().Be(1);
 		}
 
+		[TestMethod]
+		public void OnCreate_Bulk_WithDuplicateNamesInBatch_ShouldThrowBulkValidationException()
+		{
+			// Regression test: two brand-new JobTypes sharing a Name in the same bulk create call must be
+			// rejected even though neither exists in the DOM yet (in-memory batch conflict detection).
+			var jobTypes = new List<JobType> { new JobType { Name = "Duplicate Type" }, new JobType { Name = "Duplicate Type" } };
+			var nextCalled = false;
+
+			Action act = () => _middleware.OnCreate(jobTypes, jt => { nextCalled = true; return jt.ToList(); });
+
+			using (new AssertionScope())
+			{
+				var exception = act.Should().Throw<BulkValidationException<JobType>>().Which;
+				exception.FailedCount.Should().Be(2);
+				nextCalled.Should().BeFalse();
+			}
+		}
+
 		#endregion
 
 		#region Delete Guard

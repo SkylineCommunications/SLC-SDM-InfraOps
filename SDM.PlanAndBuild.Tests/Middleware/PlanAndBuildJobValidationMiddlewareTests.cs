@@ -125,6 +125,28 @@
 			exception.FailedCount.Should().Be(2);
 		}
 
+		[TestMethod]
+		public void OnCreate_Bulk_WithDuplicateJobNamesInBatch_ShouldThrowBulkValidationException()
+		{
+			// Regression test: two brand-new jobs sharing a JobName in the same bulk create call must be
+			// rejected even though neither exists in the DOM yet (in-memory batch conflict detection).
+			var jobs = new List<PlanAndBuildJob>
+			{
+				new PlanAndBuildJob { JobName = "Duplicate Job Name", JobType = new SdmObjectReference<JobType>(_jobType.Identifier) },
+				new PlanAndBuildJob { JobName = "Duplicate Job Name", JobType = new SdmObjectReference<JobType>(_jobType.Identifier) },
+			};
+			var nextCalled = false;
+
+			Action act = () => _middleware.OnCreate(jobs, j => { nextCalled = true; return j.ToList(); });
+
+			using (new AssertionScope())
+			{
+				var exception = act.Should().Throw<BulkValidationException<PlanAndBuildJob>>().Which;
+				exception.FailedCount.Should().Be(2);
+				nextCalled.Should().BeFalse();
+			}
+		}
+
 		#endregion
 
 		#region Pass-through operations

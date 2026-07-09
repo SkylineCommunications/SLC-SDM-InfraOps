@@ -30,9 +30,9 @@
 			return connectionMock.Object;
 		}
 
-		internal static IInfraOpsPropertiesApiHelper GetMockedHelper(this IConnection connection)
+		internal static IInfraOpsPropertiesApiHelper GetMockedHelper(this IConnection connection, bool cascadeDeleteOnProperty = true)
 		{
-			return new InfraOpsPropertiesApiHelper(connection);
+			return new InfraOpsPropertiesApiHelper(connection, cascadeDeleteOnProperty);
 		}
 
 		private static DMSMessage[] HandleSLNetMessages(DomSLNetMessageHandler messageHandler, DMSMessage[] messages)

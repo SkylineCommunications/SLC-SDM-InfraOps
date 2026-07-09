@@ -1,7 +1,6 @@
 namespace Skyline.DataMiner.SDM.InfraOpsProperties.Extensions
 {
     using System;
-    using System.Linq;
 
     using Skyline.DataMiner.SDM.InfraOpsProperties.Helpers;
     using Skyline.DataMiner.SDM.InfraOpsProperties.Models;
@@ -15,8 +14,14 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Extensions
         /// <summary>
         /// Deletes a Property and cascades the deletion by removing any PropertyValue entries
         /// referencing it from all PropertyValues instances.
-        /// Note: does not create any audit history entries.
         /// </summary>
+        /// <remarks>
+        /// Kept for backward compatibility. Cascading is now built into <c>Properties.Delete(...)</c> itself
+        /// (see <see cref="Skyline.DataMiner.SDM.InfraOpsProperties.Middleware.PropertyValidationMiddleware"/>),
+        /// enabled by default. This method simply delegates to it and no longer duplicates the cascade logic.
+        /// If the helper was constructed with cascading disabled, calling this method still performs a plain
+        /// delete without cascading. Note: does not create any audit history entries.
+        /// </remarks>
         public static void DeletePropertyWithCascade(this IInfraOpsPropertiesApiHelper helper, Property property)
         {
             if (helper == null)
@@ -32,23 +37,6 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Extensions
             if (property.IsNew)
             {
                 throw new ArgumentException("Property can't be new", nameof(property));
-            }
-
-            var affectedPropertyValues = helper.PropertyValues.GetByPropertyID(property).ToList();
-
-            foreach (var propertyValues in affectedPropertyValues)
-            {
-                var remainingValues = propertyValues.Values
-                    .Where(v => v == null || v.PropertyId == null || v.PropertyId.Identifier != property.Identifier)
-                    .ToList();
-
-                if (remainingValues.Count == propertyValues.Values.Count)
-                {
-                    continue;
-                }
-
-                propertyValues.Values = remainingValues;
-                helper.PropertyValues.Update(propertyValues);
             }
 
             helper.Properties.Delete(property);

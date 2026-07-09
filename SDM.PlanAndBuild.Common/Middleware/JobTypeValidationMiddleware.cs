@@ -213,8 +213,8 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Middleware
 
         private List<ValidationResult> ValidateBulk(List<JobType> jobTypes)
         {
-            // Validate each job type individually
-            return jobTypes.Select(jt => _validator.Validate(jt)).ToList();
+            // Validates each job type individually and detects Name conflicts within the batch itself.
+            return _validator.ValidateBulk(jobTypes);
         }
 
         /// <summary>

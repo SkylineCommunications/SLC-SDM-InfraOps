@@ -8,6 +8,8 @@
 
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+	using SDM.InfraOpsProperties.Tests.Setup;
+
 	using Skyline.DataMiner.SDM.InfraOpsProperties.Middleware;
 	using Skyline.DataMiner.SDM.InfraOpsProperties.Models;
 	using Skyline.DataMiner.SDM.InfraOpsProperties.Validation;
@@ -18,14 +20,14 @@
 	/// Tests for <see cref="PropertyValuesValidationMiddleware"/>.
 	/// </summary>
 	[TestClass]
-	public class PropertyValuesValidationMiddlewareTests
+	public class PropertyValuesValidationMiddlewareTests : BaseRepositoryTest
 	{
 		private PropertyValuesValidationMiddleware _middleware = null!;
 
 		[TestInitialize]
 		public void Setup()
 		{
-			_middleware = new PropertyValuesValidationMiddleware(new PropertyValuesValidator());
+			_middleware = new PropertyValuesValidationMiddleware(new PropertyValuesValidator(Helper));
 		}
 
 		private static PropertyValues ValidPropertyValues() => new PropertyValues
@@ -128,6 +130,30 @@
 			_middleware.OnUpdate(propertyValuesList, p => { nextCalled = true; return p.ToList(); });
 
 			nextCalled.Should().BeTrue();
+		}
+
+		[TestMethod]
+		public void OnCreate_Bulk_WithDuplicateComboInBatch_ShouldThrowBulkValidationException()
+		{
+			// Regression test: two brand-new PropertyValues sharing a (LinkedObjectID, Scope, SubID) combo in the
+			// same bulk create call must be rejected even though neither exists in the DOM yet (in-memory batch
+			// conflict detection).
+			var linkedObjectId = Guid.NewGuid();
+			var propertyValuesList = new List<PropertyValues>
+			{
+				new PropertyValues { LinkedObjectID = linkedObjectId, Scope = "Asset" },
+				new PropertyValues { LinkedObjectID = linkedObjectId, Scope = "Asset" },
+			};
+			var nextCalled = false;
+
+			Action act = () => _middleware.OnCreate(propertyValuesList, p => { nextCalled = true; return p.ToList(); });
+
+			using (new FluentAssertions.Execution.AssertionScope())
+			{
+				var exception = act.Should().Throw<BulkValidationException<PropertyValues>>().Which;
+				exception.FailedCount.Should().Be(2);
+				nextCalled.Should().BeFalse();
+			}
 		}
 
 		#endregion
