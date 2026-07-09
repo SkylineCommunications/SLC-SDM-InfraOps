@@ -8,6 +8,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
     using Skyline.DataMiner.SDM.InfraOps.Common.Validation;
     using Skyline.DataMiner.SDM.PlanAndBuild.Helpers;
     using Skyline.DataMiner.SDM.PlanAndBuild.Models;
+    using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
     using static Skyline.DataMiner.SDM.PlanAndBuild.Validation.PlanAndBuildJobValidationHandler;
@@ -119,6 +120,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
             {
                 results[i].AddFailuresFrom(ValidateJobNameUniqueness(jobs[i]));
                 results[i].AddFailuresFrom(ValidateJobTypeAndDates(jobs[i]));
+                results[i].AddFailuresFrom(ValidatePeopleAndOrganizations(jobs[i]));
             }
 
             return results;
@@ -164,7 +166,8 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
             // Standard validations - collect all errors
             var standardValidations = Validator<PlanAndBuildJob>
                 .Create(ValidateJobNameUniqueness)
-                .AndThen(ValidateJobTypeAndDates);
+                .AndThen(ValidateJobTypeAndDates)
+                .AndThen(ValidatePeopleAndOrganizations);
 
             // Combine: critical first, then standard
             return criticalValidations.AndThen(standardValidations);
@@ -230,6 +233,56 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
             }
 
             return _helper.Jobs.Count(filter) > 0;
+        }
+
+        /// <summary>
+        /// Validates that <see cref="JobOwnership.AssignedTo"/> and <see cref="JobOwnership.AssignmentGroup"/>
+        /// (when set) reference an existing Person/Team in the People &amp; Organizations solution, and that each
+        /// <see cref="JobAttachment.AttachedBy"/> (when set) references an existing Person.
+        /// Since a literal <c>SdmObjectReference&lt;Person&gt;</c> is not possible (Person is defined in an
+        /// external, already-compiled assembly, so the SDM source generator cannot recognize it as an SdmObject),
+        /// these fields are plain <see cref="Guid"/>s validated here via lightweight existence (Count) checks.
+        /// </summary>
+        private ValidationResult ValidatePeopleAndOrganizations(PlanAndBuildJob job)
+        {
+            var result = new ValidationResult();
+
+            if (job.ShouldValidate(job.Ownership.AssignedToField) &&
+                job.Ownership.AssignedTo.HasValue &&
+                !IsPersonValid(job.Ownership.AssignedTo.Value))
+            {
+                result.AddFailReason(PlanAndBuildJobValidationField.AssignedTo, $"AssignedTo Person '{job.Ownership.AssignedTo}' does not exist.");
+            }
+
+            if (job.ShouldValidate(job.Ownership.AssignmentGroupField) &&
+                job.Ownership.AssignmentGroup.HasValue &&
+                !IsTeamValid(job.Ownership.AssignmentGroup.Value))
+            {
+                result.AddFailReason(PlanAndBuildJobValidationField.AssignmentGroup, $"AssignmentGroup Team '{job.Ownership.AssignmentGroup}' does not exist.");
+            }
+
+            if (job.ShouldValidateAny(job.AttachmentsField) && job.Attachments != null)
+            {
+                foreach (var attachment in job.Attachments)
+                {
+                    if (attachment?.AttachedBy.HasValue == true && !IsPersonValid(attachment.AttachedBy.Value))
+                    {
+                        result.AddFailReason(PlanAndBuildJobValidationField.Attachments, $"AttachedBy Person '{attachment.AttachedBy}' does not exist.");
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        private bool IsPersonValid(Guid personId)
+        {
+            return _helper.People.People.Count(PersonExposers.Id.Equal(personId)) > 0;
+        }
+
+        private bool IsTeamValid(Guid teamId)
+        {
+            return _helper.People.Teams.Count(TeamExposers.Id.Equal(teamId)) > 0;
         }
 
         #endregion

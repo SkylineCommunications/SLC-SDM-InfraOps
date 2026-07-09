@@ -6,12 +6,13 @@
     <!-- Add your package versions here -->
     <!-- Example: -->
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.4" />
-    <PackageVersion Include="Skyline.DataMiner.SDM" Version="1.0.2" />
+    <PackageVersion Include="Skyline.DataMiner.SDM" Version="1.0.3" />
     <PackageVersion Include="Skyline.DataMiner.SDM.Linq" Version="1.0.1" />
-    <PackageVersion Include="Skyline.DataMiner.Utils.DOM" Version="10.5.2.4" />
+    <PackageVersion Include="Skyline.DataMiner.Utils.DOM" Version="10.5.2.6" />
     <PackageVersion Include="Skyline.DataMiner.Utils.PerformanceAnalyzer" Version="3.0.2" />
     <PackageVersion Include="Skyline.DataMiner.Utils.SecureCoding" Version="2.2.1" />
     <PackageVersion Include="Skyline.DataMiner.Utils.SecureCoding.Analyzers" Version="2.2.1" />
+    <PackageVersion Include="Skyline.DataMiner.Dev.Utils.Solutions.PeopleAndOrganizations" Version="1.0.0" />
     <PackageVersion Include="FluentAssertions" Version="7.2.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
     <PackageVersion Include="Moq" Version="4.20.72" />

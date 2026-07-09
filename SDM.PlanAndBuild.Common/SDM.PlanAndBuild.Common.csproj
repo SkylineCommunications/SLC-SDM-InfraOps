@@ -34,6 +34,7 @@
     <PackageReference Include="Skyline.DataMiner.SDM" />
     <PackageReference Include="Skyline.DataMiner.SDM.Linq" />
     <PackageReference Include="Skyline.DataMiner.Utils.DOM" />
+    <PackageReference Include="Skyline.DataMiner.Dev.Utils.Solutions.PeopleAndOrganizations" />
     <PackageReference Include="Skyline.DataMiner.Utils.SecureCoding.Analyzers">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

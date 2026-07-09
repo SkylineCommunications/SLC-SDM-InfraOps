@@ -386,5 +386,128 @@
 		}
 
 		#endregion
+
+		#region People & Organizations (AssignedTo / AssignmentGroup / AttachedBy)
+
+		[TestMethod]
+		public void Validate_WithAssignedToExistingPerson_ShouldReturnValid()
+		{
+			var job = new PlanAndBuildJob
+			{
+				JobName = "Some Job",
+				JobType = new SdmObjectReference<JobType>(_jobType.Identifier),
+			};
+			job.Ownership.AssignedTo = Guid.NewGuid();
+
+			// Base test Helper is wired with the default People API mock, where any Guid "exists".
+			var result = _validator.Validate(job);
+
+			result.IsValid.Should().BeTrue();
+		}
+
+		[TestMethod]
+		public void Validate_WithAssignedToUnknownPerson_ShouldReturnInvalid()
+		{
+			var helper = ConnectionHelper.CreateConnection()
+				.GetMockedHelperWithPeopleApi(exists: false)
+				.PopulateAppSettings();
+			var jobType = helper.JobTypes.Create(new JobType { Name = "Installation" });
+			var validator = new PlanAndBuildJobValidator(helper);
+
+			var job = new PlanAndBuildJob
+			{
+				JobName = "Some Job",
+				JobType = new SdmObjectReference<JobType>(jobType.Identifier),
+			};
+			job.Ownership.AssignedTo = Guid.NewGuid();
+
+			var result = validator.Validate(job);
+
+			using (new AssertionScope())
+			{
+				result.IsValid.Should().BeFalse();
+				result.TryGetFailReason(PlanAndBuildJobValidationHandler.PlanAndBuildJobValidationField.AssignedTo, out var reason).Should().BeTrue();
+				reason.Should().Contain("does not exist");
+			}
+		}
+
+		[TestMethod]
+		public void Validate_WithAssignmentGroupUnknownTeam_ShouldReturnInvalid()
+		{
+			var helper = ConnectionHelper.CreateConnection()
+				.GetMockedHelperWithPeopleApi(exists: false)
+				.PopulateAppSettings();
+			var jobType = helper.JobTypes.Create(new JobType { Name = "Installation" });
+			var validator = new PlanAndBuildJobValidator(helper);
+
+			var job = new PlanAndBuildJob
+			{
+				JobName = "Some Job",
+				JobType = new SdmObjectReference<JobType>(jobType.Identifier),
+			};
+			job.Ownership.AssignmentGroup = Guid.NewGuid();
+
+			var result = validator.Validate(job);
+
+			using (new AssertionScope())
+			{
+				result.IsValid.Should().BeFalse();
+				result.TryGetFailReason(PlanAndBuildJobValidationHandler.PlanAndBuildJobValidationField.AssignmentGroup, out var reason).Should().BeTrue();
+				reason.Should().Contain("does not exist");
+			}
+		}
+
+		[TestMethod]
+		public void Validate_WithAttachmentAttachedByUnknownPerson_ShouldReturnInvalid()
+		{
+			var helper = ConnectionHelper.CreateConnection()
+				.GetMockedHelperWithPeopleApi(exists: false)
+				.PopulateAppSettings();
+			var jobType = helper.JobTypes.Create(new JobType { Name = "Installation" });
+			var validator = new PlanAndBuildJobValidator(helper);
+
+			var job = new PlanAndBuildJob
+			{
+				JobName = "Some Job",
+				JobType = new SdmObjectReference<JobType>(jobType.Identifier),
+				Attachments = new System.Collections.Generic.List<JobAttachment>
+				{
+					new JobAttachment { FilePath = @"C:\attachments\plan.pdf", AttachedBy = Guid.NewGuid() },
+				},
+			};
+
+			var result = validator.Validate(job);
+
+			using (new AssertionScope())
+			{
+				result.IsValid.Should().BeFalse();
+				result.TryGetFailReason(PlanAndBuildJobValidationHandler.PlanAndBuildJobValidationField.Attachments, out var reason).Should().BeTrue();
+				reason.Should().Contain("does not exist");
+			}
+		}
+
+		[TestMethod]
+		public void Validate_WithNoAssignedToOrAttachments_ShouldNotQueryPeopleApi()
+		{
+			// When AssignedTo/AssignmentGroup/Attachments are left unset, validation must not fail
+			// even against a People API mock where nothing "exists".
+			var helper = ConnectionHelper.CreateConnection()
+				.GetMockedHelperWithPeopleApi(exists: false)
+				.PopulateAppSettings();
+			var jobType = helper.JobTypes.Create(new JobType { Name = "Installation" });
+			var validator = new PlanAndBuildJobValidator(helper);
+
+			var job = new PlanAndBuildJob
+			{
+				JobName = "Some Job",
+				JobType = new SdmObjectReference<JobType>(jobType.Identifier),
+			};
+
+			var result = validator.Validate(job);
+
+			result.IsValid.Should().BeTrue();
+		}
+
+		#endregion
 	}
 }

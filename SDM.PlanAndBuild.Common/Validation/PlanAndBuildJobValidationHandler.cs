@@ -17,6 +17,9 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
             JobName,
             JobType,
             End,
+            AssignedTo,
+            AssignmentGroup,
+            Attachments,
         }
 
         #region Info Validation
