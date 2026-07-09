@@ -11,16 +11,12 @@
         public void BaseTestInitialize()
         {
             Helper = RepositoryInitialize.InitializeEmptyRepositories();
-
-            // ✅ PRIMARY cleanup - runs even if previous test crashed
             Helper.CleanupAllTestData();
         }
 
         [TestCleanup]
         public void BaseTestCleanup()
         {
-            // ✅ OPTIONAL cleanup - nice to have for manual test runs
-            // Not critical since TestInitialize will clean up anyway
             Helper?.CleanupAllTestData();
         }
     }

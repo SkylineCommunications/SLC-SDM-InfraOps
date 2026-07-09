@@ -184,10 +184,9 @@
             // Arrange
             Helper.PopulateWithDemoData(upTo: DemoDataLayer.AssetClasses);
 
-            // Simulating a small rack with size constraints
-            const double maxHeight = 2 * 4.45; // 2U height in cm
-            const double maxWidth = 40.0;      // 40 cm
-            const double maxDepth = 40.0;      // 40 cm
+            const double maxHeight = 2 * 4.45;
+            const double maxWidth = 40.0;
+            const double maxDepth = 40.0;
 
             var filter = AssetClassExposers.Height.LessThanOrEqual(maxHeight)
                 .AND(AssetClassExposers.Width.LessThanOrEqual(maxWidth))

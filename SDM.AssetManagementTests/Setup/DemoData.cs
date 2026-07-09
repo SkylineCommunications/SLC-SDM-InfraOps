@@ -362,7 +362,7 @@
         {
             return new AssetClass
             {
-                DeviceTypeId = new SdmObjectReference<DeviceType>(deviceTypeName), // Will be updated at runtime to reference the correct DeviceType
+                DeviceTypeId = new SdmObjectReference<DeviceType>(deviceTypeName),
                 Name = deviceName,
                 // DeviceTypeId will be set at runtime
                 Description = deviceDescription,
@@ -441,7 +441,7 @@
             return new Asset
             {
                 State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available,
-                AssetClassId = new SdmObjectReference<AssetClass>(assetClassName), // Will be updated at runtime to reference the correct AssetClass
+                AssetClassId = new SdmObjectReference<AssetClass>(assetClassName),
                 AssetID = assetId.ToString(),
                 Name = $"Test Asset {orderNo}",
                 Description = $"Sample asset {orderNo}",

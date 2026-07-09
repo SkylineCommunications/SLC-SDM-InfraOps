@@ -6,9 +6,9 @@
     <Nullable>disable</Nullable>
     <AssemblyName>Skyline.DataMiner.SDM.FacilityManagement.Common</AssemblyName>
     <RootNamespace>Skyline.DataMiner.SDM.FacilityManagement.Common</RootNamespace>
-    <VersionSuffix Condition="'$(Configuration)' == 'Debug'">dev-023</VersionSuffix>
+    <VersionSuffix Condition="'$(Configuration)' == 'Debug'">dev-025</VersionSuffix>
     <VersionPrefix>1.0.1</VersionPrefix>
-    <AssemblyVersion>0.2.3.23</AssemblyVersion>
+    <AssemblyVersion>0.2.3.25</AssemblyVersion>
     <PackageTags>Skyline;DataMiner</PackageTags>
     <PackageProjectUrl>https://skyline.be</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -38,10 +38,6 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-  </ItemGroup>
-  
-  <ItemGroup>
-    <Folder Include="Enums\" />
   </ItemGroup>
   
   <Import Project="..\SharedMappers\SharedMappers.projitems" Label="Shared" />

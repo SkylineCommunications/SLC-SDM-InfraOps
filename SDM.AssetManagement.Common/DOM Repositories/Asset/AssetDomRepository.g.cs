@@ -1184,15 +1184,15 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				case "Location.Side":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Side), comparer, Convert.ToString(((SlcAsset_Management.Enums.SideEnum?)value).Value));
 				case "Location.RackId":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Rack), comparer, (string)value);
+						return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Rack), comparer, System.Guid.Parse(Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.FacilityManagement.Models.Rack>.Convert(value).Identifier));
 				case "Location.DeskId" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
 					return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Desk.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "Location.DeskId":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Desk), comparer, ((System.Guid?)value).Value);
 				case "Location.ContainerId":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Container), comparer, Guid.Parse((string)value));
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Container), comparer, System.Guid.Parse(Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.FacilityManagement.Models.Facility>.Convert(value).Identifier));
 				case "Location.RoomId":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Room), comparer, Guid.Parse((string)value));
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Room), comparer, System.Guid.Parse(Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.FacilityManagement.Models.Room>.Convert(value).Identifier));
 				case "DestinationLocation.HolderNumber" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
 					return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.HolderNumber.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "DestinationLocation.HolderNumber":
@@ -1208,15 +1208,15 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				case "DestinationLocation.Side":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.Side), comparer, Convert.ToString(((SharedMappers.DomIds.SlcAsset_Management.Enums.SideEnum?)value).Value));
 				case "DestinationLocation.RackId":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.Rack), comparer, Guid.Parse((string)value));
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.Rack), comparer, System.Guid.Parse(Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.FacilityManagement.Models.Rack>.Convert(value).Identifier));
 				case "DestinationLocation.DeskId" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
 					return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.Desk.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "DestinationLocation.DeskId":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.Desk), comparer, ((System.Guid?)value).Value);
 				case "DestinationLocation.ContainerId":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.Container), comparer, Guid.Parse((string)value));
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.Container), comparer, System.Guid.Parse(Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.FacilityManagement.Models.Facility>.Convert(value).Identifier));
 				case "DestinationLocation.RoomId":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.Room), comparer, Guid.Parse((string)value));
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.Room), comparer, System.Guid.Parse(Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.FacilityManagement.Models.Room>.Convert(value).Identifier));
 				case "Lifecycle.PurchaseDate":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Lifecycle.PurchaseDate), comparer, (DateTime)(DateTime)value);
 				case "Lifecycle.FirstUseDate":

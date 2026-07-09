@@ -12,7 +12,6 @@
 
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
-    using Skyline.DataMiner.SDM.AssetManagement.Helpers;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.Extensions;
 
@@ -127,12 +126,14 @@
     ""EndOfService"": ""1997-11-29T06:35:16.473Z""
   }
 }";
-
             var assetClassFromJson = Newtonsoft.Json.JsonConvert.DeserializeObject<AssetClass>(json);
 
-            // Act & Assert - Should throw ValidationException because DeviceTypeId doesn't exist
-            var action = () => Helper.AssetManagement.AssetClasses.Create(assetClassFromJson);
+            // Act
             
+            var action = () => Helper.AssetManagement.AssetClasses.Create(assetClassFromJson);
+
+            //Assert
+
             action.Should().Throw<Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Exceptions.ValidationException>()
                 .WithMessage("*Device Type not found*");
         }
@@ -164,9 +165,12 @@
                 }
             };
 
-            // Act & Assert - Should throw ValidationException because DeviceTypeId doesn't exist
+            // Act
+
             var action = () => Helper.AssetManagement.AssetClasses.Create(assetClass);
-            
+
+            //Assert
+
             action.Should().Throw<Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Exceptions.ValidationException>()
                 .WithMessage("*Device Type not found*");
         }
@@ -176,7 +180,6 @@
         {
             // Arrange
             Helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
-
             var deviceType = Helper.TestData.DeviceTypes.First();
             referenceAssetClass.DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier);
 

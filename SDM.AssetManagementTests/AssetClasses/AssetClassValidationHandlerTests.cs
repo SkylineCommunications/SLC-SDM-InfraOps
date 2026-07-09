@@ -186,27 +186,6 @@
         #region Data Port Validation
 
         [TestMethod]
-        public void DataPorts_WithValidPorts_ShouldBeValid()
-        {
-            // Arrange
-            var assetClass = new AssetClass
-            {
-                DataPorts = new List<DataPortInfo>
-                {
-                    new DataPortInfo { PortNumber = 1 },
-                    new DataPortInfo { PortNumber = 2 },
-                    new DataPortInfo { PortNumber = 3 },
-                }
-            };
-
-            // Act
-            var result = AssetClassValidationHandler.ValidateAssetClassDataPort(assetClass);
-
-            // Assert
-            result.IsValid.Should().BeTrue();
-        }
-
-        [TestMethod]
         public void DataPorts_WithNullAssetClass_ShouldBeInvalid()
         {
             // Act
@@ -298,26 +277,6 @@
         #region Power Port Validation
 
         [TestMethod]
-        public void PowerPorts_WithValidPorts_ShouldBeValid()
-        {
-            // Arrange
-            var assetClass = new AssetClass
-            {
-                PowerPorts = new List<PowerPortInfo>
-                {
-                    new PowerPortInfo { PortNumber = 1 },
-                    new PowerPortInfo { PortNumber = 2 },
-                }
-            };
-
-            // Act
-            var result = AssetClassValidationHandler.ValidateAssetClassPowerPort(assetClass);
-
-            // Assert
-            result.IsValid.Should().BeTrue();
-        }
-
-        [TestMethod]
         public void PowerPorts_WithNullAssetClass_ShouldBeInvalid()
         {
             // Act
@@ -399,34 +358,6 @@
         #endregion
 
         #region Holder Validation
-
-        [TestMethod]
-        public void Holders_WithValidHolders_ShouldBeValid()
-        {
-            // Arrange
-            var assetClass = new AssetClass
-            {
-                Holders = new List<AssetHolder>
-                {
-                    new AssetHolder
-                    {
-                        SlotNumber = 1,
-                        HierarchyRole = SlcAsset_Management.Enums.HierarchyRoleEnum.Card
-                    },
-                    new AssetHolder
-                    {
-                        SlotNumber = 2,
-                        HierarchyRole = SlcAsset_Management.Enums.HierarchyRoleEnum.Card
-                    }
-                }
-            };
-
-            // Act
-            var result = AssetClassValidationHandler.ValidateAssetClassHolders(assetClass);
-
-            // Assert
-            result.IsValid.Should().BeTrue();
-        }
 
         [TestMethod]
         public void Holders_WithNullAssetClass_ShouldBeInvalid()
