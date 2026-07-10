@@ -9,6 +9,7 @@
 
 	using Skyline.DataMiner.SDM;
 	using Skyline.DataMiner.SDM.AssetManagement.Models;
+	using Skyline.DataMiner.SDM.PlanAndBuild.Extensions;
 	using Skyline.DataMiner.SDM.PlanAndBuild.Models;
 
 	/// <summary>

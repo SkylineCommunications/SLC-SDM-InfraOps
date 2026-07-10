@@ -14,6 +14,106 @@
 	public class PropertyValuesExtensionsTests
 	{
 		[TestMethod]
+		public void GetPropertyValue_ExistingProperty_ShouldReturnMatchingValue()
+		{
+			var property = new Property { Identifier = Guid.NewGuid().ToString(), Name = "Owner" };
+			var reference = new Skyline.DataMiner.SDM.SdmObjectReference<Property>(property.Identifier);
+			var propertyValue = new PropertyValue { PropertyName = "Owner", Value = "Alice", PropertyId = reference };
+			var source = new PropertyValues { Values = new List<PropertyValue> { propertyValue } };
+
+			var found = source.GetPropertyValue(property);
+
+			found.Should().Be(propertyValue);
+		}
+
+		[TestMethod]
+		public void GetPropertyValue_NoMatch_ShouldReturnNull()
+		{
+			var property = new Property { Name = "Owner" };
+			var source = new PropertyValues { Values = new List<PropertyValue>() };
+
+			var found = source.GetPropertyValue(property);
+
+			found.Should().BeNull();
+		}
+
+		[TestMethod]
+		public void GetPropertyValue_NullProperty_ShouldThrow()
+		{
+			var source = new PropertyValues();
+
+			Action act = () => source.GetPropertyValue(null);
+
+			act.Should().Throw<ArgumentNullException>();
+		}
+
+		[TestMethod]
+		public void AddPropertyValue_NewValue_ShouldBeAdded()
+		{
+			var source = new PropertyValues();
+			var propertyValue = new PropertyValue { PropertyName = "Owner", Value = "Alice", PropertyId = new Skyline.DataMiner.SDM.SdmObjectReference<Property>(Guid.NewGuid().ToString()) };
+
+			source.AddPropertyValue(propertyValue);
+
+			source.Values.Should().ContainSingle().Which.Should().Be(propertyValue);
+		}
+
+		[TestMethod]
+		public void AddPropertyValue_Null_ShouldThrow()
+		{
+			var source = new PropertyValues();
+
+			Action act = () => source.AddPropertyValue(null);
+
+			act.Should().Throw<ArgumentNullException>();
+		}
+
+		[TestMethod]
+		public void AddPropertyValue_DuplicatePropertyId_ShouldThrow()
+		{
+			var source = new PropertyValues();
+			var reference = new Skyline.DataMiner.SDM.SdmObjectReference<Property>(Guid.NewGuid().ToString());
+			source.AddPropertyValue(new PropertyValue { PropertyName = "Owner", Value = "Alice", PropertyId = reference });
+
+			Action act = () => source.AddPropertyValue(new PropertyValue { PropertyName = "Owner", Value = "Bob", PropertyId = reference });
+
+			act.Should().Throw<InvalidOperationException>();
+		}
+
+		[TestMethod]
+		public void RemovePropertyValue_ExistingValue_ShouldBeRemoved()
+		{
+			var source = new PropertyValues();
+			var propertyValue = new PropertyValue { PropertyName = "Owner", Value = "Alice", PropertyId = new Skyline.DataMiner.SDM.SdmObjectReference<Property>(Guid.NewGuid().ToString()) };
+			source.AddPropertyValue(propertyValue);
+
+			source.RemovePropertyValue(propertyValue);
+
+			source.Values.Should().BeEmpty();
+		}
+
+		[TestMethod]
+		public void RemovePropertyValue_Null_ShouldThrow()
+		{
+			var source = new PropertyValues();
+
+			Action act = () => source.RemovePropertyValue(null);
+
+			act.Should().Throw<ArgumentNullException>();
+		}
+
+		[TestMethod]
+		public void RemovePropertyValue_NotFound_ShouldThrow()
+		{
+			var source = new PropertyValues();
+			var propertyValue = new PropertyValue { PropertyName = "Owner", Value = "Alice", PropertyId = new Skyline.DataMiner.SDM.SdmObjectReference<Property>(Guid.NewGuid().ToString()) };
+
+			Action act = () => source.RemovePropertyValue(propertyValue);
+
+			act.Should().Throw<ArgumentException>();
+		}
+
+		[TestMethod]
 		public void Duplicate_WithValidSource_ShouldCopyScopeAndValuesToNewLinkedObject()
 		{
 			var propertyIdentifier = Guid.NewGuid().ToString();
