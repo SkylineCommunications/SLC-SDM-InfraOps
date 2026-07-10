@@ -746,8 +746,8 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
                 _planandbuildjobproperties.AddOrUpdateValue<DateTime>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.End, (DateTime)(obj.End).Value);
             }
 
-            _planandbuildjobproperties.AddOrUpdateValue<int>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.JobType, (int)obj.JobType);
-
+            // JobType (soft deleted, replaced by Type) is intentionally never written back, matching legacy's
+            // ApplyChanges(), which excludes the obsolete field from persistence entirely.
             if (obj.Type != default)
             {
                 _planandbuildjobproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.Type, obj.Type.Identifier);

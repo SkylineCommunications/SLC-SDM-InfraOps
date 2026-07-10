@@ -118,14 +118,22 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 
         /// <summary>
         /// Soft-deleted field, mirroring legacy's <c>JobtypeEnum</c>. Superseded by <see cref="Type"/>
-        /// (a DOM reference to the JobType definition). Kept only because the underlying DOM field can't
-        /// be removed; not read or written by any business logic.
+        /// (a DOM reference to the JobType definition). Get-only to match legacy: legacy's equivalent
+        /// property has no setter, and its DOM persistence path never writes this field back. Kept only
+        /// for backward-compat reads of old data; not written by any business logic.
+        /// </summary>
+        /// <summary>
+        /// Soft-deleted field, mirroring legacy's <c>JobtypeEnum</c>. Superseded by <see cref="Type"/>
+        /// (a DOM reference to the JobType definition). Setter is internal to match legacy: legacy's
+        /// wrapper-facing equivalent property is get-only, and its DOM persistence path never writes this
+        /// field back. The internal setter exists only so the repository can populate it from old DOM data
+        /// on read; not written by any business logic.
         /// </summary>
         [Obsolete("Soft deleted field. Replaced with 'Type'.")]
         public SlcPlan_And_Build.Enums.JobtypeEnum JobType
         {
             get => JobTypeField.Value;
-            set => JobTypeField.Value = value;
+            internal set => JobTypeField.Value = value;
         }
 
         public SdmObjectReference<JobType> Type
