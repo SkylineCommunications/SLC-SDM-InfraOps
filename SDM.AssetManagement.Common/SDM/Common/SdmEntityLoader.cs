@@ -33,8 +33,8 @@ namespace Skyline.DataMiner.SDM.Common.Services
             IAssetManagementApiHelper assetManagerApiHelper = null,
             IFacilityManagementApiHelper facilityManagerApiHelper = null)
         {
-            assetManagerApiHelper = assetManagerApiHelper;
-            facilityManagerApiHelper = facilityManagerApiHelper;
+            this.assetManagerApiHelper = assetManagerApiHelper;
+            this.facilityManagerApiHelper = facilityManagerApiHelper;
         }
 
         #region Single Entity Loaders

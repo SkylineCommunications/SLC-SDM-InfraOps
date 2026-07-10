@@ -26,16 +26,7 @@ namespace SDM.AssetManagement.Tests.Setup
                 throw new ArgumentNullException(nameof(helper));
             }
 
-            var entityLoader = new SdmEntityLoader(
-                assetRepository: helper.AssetManagement.Assets,
-                assetClassRepository: helper.AssetManagement.AssetClasses,
-                deviceTypeRepository: helper.AssetManagement.DeviceTypes,
-                dataPortRepository: helper.AssetManagement.DataPorts,
-                powerPortRepository: helper.AssetManagement.PowerPorts,
-                rackRepository: helper.FacilityManagement.Racks,
-                reservationRepository: null,
-                portTypeRepository: null
-            );
+            var entityLoader = new SdmEntityLoader(helper.AssetManagement, helper.FacilityManagement);
 
             return new AssetValidator(entityLoader);
         }
@@ -51,16 +42,7 @@ namespace SDM.AssetManagement.Tests.Setup
                 throw new ArgumentNullException(nameof(helper));
             }
 
-            var entityLoader = new SdmEntityLoader(
-                assetRepository: helper.AssetManagement.Assets,
-                assetClassRepository: helper.AssetManagement.AssetClasses,
-                deviceTypeRepository: helper.AssetManagement.DeviceTypes,
-                dataPortRepository: helper.AssetManagement.DataPorts,
-                powerPortRepository: helper.AssetManagement.PowerPorts,
-                rackRepository: helper.FacilityManagement.Racks,
-                reservationRepository: null,
-                portTypeRepository: null
-            );
+            var entityLoader = new SdmEntityLoader(helper.AssetManagement, helper.FacilityManagement);
 
             return new AssetClassValidator(entityLoader);
         }
@@ -76,16 +58,7 @@ namespace SDM.AssetManagement.Tests.Setup
                 throw new ArgumentNullException(nameof(helper));
             }
 
-            return new SdmEntityLoader(
-                assetRepository: helper.AssetManagement.Assets,
-                assetClassRepository: helper.AssetManagement.AssetClasses,
-                deviceTypeRepository: helper.AssetManagement.DeviceTypes,
-                dataPortRepository: helper.AssetManagement.DataPorts,
-                powerPortRepository: helper.AssetManagement.PowerPorts,
-                rackRepository: helper.FacilityManagement.Racks,
-                reservationRepository: null,
-                portTypeRepository: null
-            );
+            return new SdmEntityLoader(helper.AssetManagement, helper.FacilityManagement);
         }
 
         #endregion
