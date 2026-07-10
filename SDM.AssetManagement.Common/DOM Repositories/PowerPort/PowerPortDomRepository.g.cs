@@ -549,7 +549,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				var _powerportinfoporttype = _powerportinfoSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.PortType);
 				if (_powerportinfoporttype != null)
 				{
-					obj.PowerPortInfo.PortType = System.Guid.Parse(Convert.ToString(_powerportinfoporttype.Value));
+					obj.PowerPortInfo.PortType = new SdmObjectReference<PortType>(Convert.ToString(_powerportinfoporttype.Value));
 				}
 
 				var _powerportinfolabel = _powerportinfoSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.Label);

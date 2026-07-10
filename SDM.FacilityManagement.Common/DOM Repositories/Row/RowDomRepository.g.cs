@@ -625,7 +625,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
             if (obj.YPosition != default)
             {
-                _rowproperties.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.FacilityManagement.Models.RowDomMapper.RowProperties.YPosition, (double)obj.YPosition);
+                _rowproperties.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.FacilityManagement.Models.RowDomMapper.RowProperties.YPosition, (double)(obj.YPosition).Value);
             }
 
             instance.Sections.Add(_rowproperties);
@@ -670,8 +670,10 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RowDomMapper.RowProperties.Label), comparer, (string)value);
                 case "RowProperties.RowId":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RowDomMapper.RowProperties.RowId), comparer, (string)value);
+                case "RowProperties.YPosition" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.FacilityManagement.Models.RowDomMapper.RowProperties.YPosition.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "RowProperties.YPosition":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RowDomMapper.RowProperties.YPosition), comparer, (double)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RowDomMapper.RowProperties.YPosition), comparer, (double)((double?)value).Value);
                 case "RoomFk.Room":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RowDomMapper.RoomFk.Room), comparer, System.Guid.Parse(Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.FacilityManagement.Models.Room>.Convert(value).Identifier));
                 case "Resource.ResourceId":

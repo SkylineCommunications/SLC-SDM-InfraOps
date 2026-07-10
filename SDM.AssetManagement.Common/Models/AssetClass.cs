@@ -61,7 +61,7 @@
             set => DescriptionField.Value = value;
         }
 
-        public Guid? Manufacturer
+        public Guid Manufacturer
         {
             get => ManufacturerField.Value;
             set => ManufacturerField.Value = value;
@@ -190,9 +190,9 @@
             () => new ChangeTrackingStringField(null));
 
         [JsonIgnore]
-        internal IChangeTrackingField<Guid?> ManufacturerField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<Guid> ManufacturerField => FieldHandler.GetOrCreateField(
             nameof(Manufacturer),
-            () => new ChangeTrackingField<Guid?>(null));
+            () => new ChangeTrackingField<Guid>(Guid.Empty));
 
         [JsonIgnore]
         internal IChangeTrackingField<double?> DepthField => FieldHandler.GetOrCreateField(

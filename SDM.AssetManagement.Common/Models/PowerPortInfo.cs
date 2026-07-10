@@ -14,7 +14,7 @@
 
 		public SlcAsset_Management.Enums.PortExposureEnum PortExposure { get; set; }
 
-		public Guid PortType { get; set; } = Guid.Empty; // resolve the SdmObjectReference
+        public SdmObjectReference<PortType> PortType { get; set; }
 
 		public string Label { get; set; }
 

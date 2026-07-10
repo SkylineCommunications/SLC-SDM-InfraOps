@@ -363,9 +363,9 @@
                 updated.Name.Should().Be("Updated Class Name");
                 updated.Description.Should().Be("Updated asset class description.");
 
-                updated.Manufacturer.Should().NotBeNull();
-                original.Manufacturer.Should().HaveValue("original Manufacturer must be set");
-                updated.Manufacturer.Should().NotBe(original.Manufacturer.Value);
+                updated.Manufacturer.Should().NotBe(Guid.Empty);
+                original.Manufacturer.Should().NotBe(Guid.Empty, "original Manufacturer must be set");
+                updated.Manufacturer.Should().NotBe(original.Manufacturer);
 
                 // Physical dimensions
                 updated.Height.Should().Be(30.0);

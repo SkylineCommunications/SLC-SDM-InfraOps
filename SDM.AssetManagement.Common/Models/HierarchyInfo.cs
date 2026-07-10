@@ -7,15 +7,15 @@
 
     public class HierarchyInfo : ChangeTrackingBase
     {
-        public SlcAsset_Management.Enums.HierarchyRoleEnum HierarchyRole
+        public SlcAsset_Management.Enums.HierarchyRoleEnum? HierarchyRole
         {
             get => HierarchyRoleField.Value;
             set => HierarchyRoleField.Value = value;
         }
 
         [JsonIgnore]
-        internal IChangeTrackingField<SlcAsset_Management.Enums.HierarchyRoleEnum> HierarchyRoleField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<SlcAsset_Management.Enums.HierarchyRoleEnum?> HierarchyRoleField => FieldHandler.GetOrCreateField(
             nameof(HierarchyRole),
-            () => new ChangeTrackingField<SlcAsset_Management.Enums.HierarchyRoleEnum>(default));
+            () => new ChangeTrackingField<SlcAsset_Management.Enums.HierarchyRoleEnum?>(null));
     }
 }

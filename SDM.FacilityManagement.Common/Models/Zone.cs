@@ -14,13 +14,15 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
         public string Description { get; set; }
 
-        public SlcFacility_Management.Enums.ThermalType ThermalType { get; set; }
+        public SlcFacility_Management.Enums.ThermalType? ThermalType { get; set; }
 
-        public double XPosition { get; set; }
+        public double? XPosition { get; set; }
 
-        public double YPosition { get; set; }
+        public double? YPosition { get; set; }
 
-        public double Width { get; set; }
+        public double? Width { get; set; }
+
+        public double? Depth { get; set; }
 
         public string ZoneId { get; set; }
 

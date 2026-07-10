@@ -761,7 +761,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				var _powerportsporttype = _powerportsSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.PowerPorts.PortType);
 				if (_powerportsporttype != null)
 				{
-					powerports.PortType = System.Guid.Parse(Convert.ToString(_powerportsporttype.Value));
+					powerports.PortType = new SdmObjectReference<PortType>(Convert.ToString(_powerportsporttype.Value));
 				}
 
 				var _powerportslabel = _powerportsSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.PowerPorts.Label);
@@ -837,9 +837,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				_assetclassproperties.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.DeviceType, System.Guid.Parse(obj.DeviceTypeId.Identifier));
 			}
 
-			if (obj.Manufacturer.HasValue)
+			if (obj.Manufacturer != default)
 			{
-				_assetclassproperties.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Manufacturer, obj.Manufacturer.Value);
+				_assetclassproperties.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Manufacturer, obj.Manufacturer);
 			}
 
 			if (obj.Description != default)

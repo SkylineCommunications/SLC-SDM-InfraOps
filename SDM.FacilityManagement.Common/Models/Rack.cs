@@ -78,25 +78,25 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             set => ModelField.Value = value;
         }
 
-        public SlcFacility_Management.Enums.RackpositionenumEnum Position
+        public SlcFacility_Management.Enums.RackpositionenumEnum? Position
         {
             get => PositionField.Value;
             set => PositionField.Value = value;
         }
 
-        public double Width
+        public double? Width
         {
             get => WidthField.Value;
             set => WidthField.Value = value;
         }
 
-        public double Height
+        public double? Height
         {
             get => HeightField.Value;
             set => HeightField.Value = value;
         }
 
-        public double Depth
+        public double? Depth
         {
             get => DepthField.Value;
             set => DepthField.Value = value;
@@ -108,25 +108,25 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             set => DescriptionField.Value = value;
         }
 
-        public bool Bookable
+        public bool? Bookable
         {
             get => BookableField.Value;
             set => BookableField.Value = value;
         }
 
-        public SlcFacility_Management.Enums.CoolingflowenumEnum CoolingFlow
+        public SlcFacility_Management.Enums.CoolingflowenumEnum? CoolingFlow
         {
             get => CoolingFlowField.Value;
             set => CoolingFlowField.Value = value;
         }
 
-        public double XPosition
+        public double? XPosition
         {
             get => XPositionField.Value;
             set => XPositionField.Value = value;
         }
 
-        public double YPosition
+        public double? YPosition
         {
             get => YPositionField.Value;
             set => YPositionField.Value = value;
@@ -138,7 +138,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             set => LabelField.Value = value;
         }
 
-        public SlcFacility_Management.Enums.Placementorientationenum Orientation
+        public SlcFacility_Management.Enums.Placementorientationenum? Orientation
         {
             get => OrientationField.Value;
             set => OrientationField.Value = value;
@@ -172,24 +172,24 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             () => new ChangeTrackingStringField(null));
 
         [JsonIgnore]
-        internal IChangeTrackingField<SlcFacility_Management.Enums.RackpositionenumEnum> PositionField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<SlcFacility_Management.Enums.RackpositionenumEnum?> PositionField => FieldHandler.GetOrCreateField(
             nameof(Position),
-            () => new ChangeTrackingField<SlcFacility_Management.Enums.RackpositionenumEnum>(default));
+            () => new ChangeTrackingField<SlcFacility_Management.Enums.RackpositionenumEnum?>(null));
 
         [JsonIgnore]
-        internal IChangeTrackingField<double> WidthField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<double?> WidthField => FieldHandler.GetOrCreateField(
             nameof(Width),
-            () => new ChangeTrackingField<double>(0));
+            () => new ChangeTrackingField<double?>(null));
 
         [JsonIgnore]
-        internal IChangeTrackingField<double> HeightField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<double?> HeightField => FieldHandler.GetOrCreateField(
             nameof(Height),
-            () => new ChangeTrackingField<double>(0));
+            () => new ChangeTrackingField<double?>(null));
 
         [JsonIgnore]
-        internal IChangeTrackingField<double> DepthField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<double?> DepthField => FieldHandler.GetOrCreateField(
             nameof(Depth),
-            () => new ChangeTrackingField<double>(0));
+            () => new ChangeTrackingField<double?>(null));
 
         [JsonIgnore]
         internal IChangeTrackingField<string> DescriptionField => FieldHandler.GetOrCreateField(
@@ -197,24 +197,24 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             () => new ChangeTrackingStringField(null));
 
         [JsonIgnore]
-        internal IChangeTrackingField<bool> BookableField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<bool?> BookableField => FieldHandler.GetOrCreateField(
             nameof(Bookable),
-            () => new ChangeTrackingField<bool>(false));
+            () => new ChangeTrackingField<bool?>(null));
 
         [JsonIgnore]
-        internal IChangeTrackingField<SlcFacility_Management.Enums.CoolingflowenumEnum> CoolingFlowField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<SlcFacility_Management.Enums.CoolingflowenumEnum?> CoolingFlowField => FieldHandler.GetOrCreateField(
             nameof(CoolingFlow),
-            () => new ChangeTrackingField<SlcFacility_Management.Enums.CoolingflowenumEnum>(default));
+            () => new ChangeTrackingField<SlcFacility_Management.Enums.CoolingflowenumEnum?>(null));
 
         [JsonIgnore]
-        internal IChangeTrackingField<double> XPositionField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<double?> XPositionField => FieldHandler.GetOrCreateField(
             nameof(XPosition),
-            () => new ChangeTrackingField<double>(0));
+            () => new ChangeTrackingField<double?>(null));
 
         [JsonIgnore]
-        internal IChangeTrackingField<double> YPositionField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<double?> YPositionField => FieldHandler.GetOrCreateField(
             nameof(YPosition),
-            () => new ChangeTrackingField<double>(0));
+            () => new ChangeTrackingField<double?>(null));
 
         [JsonIgnore]
         internal IChangeTrackingField<string> LabelField => FieldHandler.GetOrCreateField(
@@ -222,9 +222,9 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             () => new ChangeTrackingStringField(null));
 
         [JsonIgnore]
-        internal IChangeTrackingField<SlcFacility_Management.Enums.Placementorientationenum> OrientationField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<SlcFacility_Management.Enums.Placementorientationenum?> OrientationField => FieldHandler.GetOrCreateField(
             nameof(Orientation),
-            () => new ChangeTrackingField<SlcFacility_Management.Enums.Placementorientationenum>(default));
+            () => new ChangeTrackingField<SlcFacility_Management.Enums.Placementorientationenum?>(null));
 
         [JsonIgnore]
         internal IChangeTrackingField<string> RackIdField => FieldHandler.GetOrCreateField(

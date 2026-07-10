@@ -40,7 +40,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
 		public static partial class HierarchyInfo
 		{
-			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType, SlcAsset_Management.Enums.HierarchyRoleEnum> HierarchyRole = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType, SlcAsset_Management.Enums.HierarchyRoleEnum>((obj) => obj.HierarchyInfo.HierarchyRole, "HierarchyInfo.HierarchyRole");
+			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType, SlcAsset_Management.Enums.HierarchyRoleEnum?> HierarchyRole = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType, SlcAsset_Management.Enums.HierarchyRoleEnum?>((obj) => obj.HierarchyInfo.HierarchyRole, "HierarchyInfo.HierarchyRole");
 		}
 	}
 }

@@ -35,8 +35,8 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Room, string> Name = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Room, string>((obj) => obj.Name, "Name");
             public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Room, string> Plan = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Room, string>((obj) => obj.Plan, "Plan");
             public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Room, string> Description = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Room, string>((obj) => obj.Description, "Description");
-            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Room, long> Width = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Room, long>((obj) => obj.Width, "Width");
-            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Room, long> Depth = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Room, long>((obj) => obj.Depth, "Depth");
+            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Room, long?> Width = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Room, long?>((obj) => obj.Width, "Width");
+            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Room, long?> Depth = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Room, long?>((obj) => obj.Depth, "Depth");
             public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Room, string> RoomId = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Room, string>((obj) => obj.RoomId, "RoomId");
         }
 

@@ -626,7 +626,10 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 _facilityproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityDomMapper.FacilityProperties.Description, Convert.ToString(obj.Description));
             }
 
-            _facilityproperties.AddOrUpdateValue<int>(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityDomMapper.FacilityProperties.FacilityType, (int)obj.FacilityType);
+            if (obj.FacilityType != default)
+            {
+                _facilityproperties.AddOrUpdateValue<int>(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityDomMapper.FacilityProperties.FacilityType, (int)(obj.FacilityType).Value);
+            }
             if (obj.Address != default)
             {
                 _facilityproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityDomMapper.FacilityProperties.Address, Convert.ToString(obj.Address));
@@ -649,12 +652,12 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
             if (obj.Latitude != default)
             {
-                _facilityproperties.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityDomMapper.FacilityProperties.Latitude, (double)obj.Latitude);
+                _facilityproperties.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityDomMapper.FacilityProperties.Latitude, (double)(obj.Latitude).Value);
             }
 
             if (obj.Longitude != default)
             {
-                _facilityproperties.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityDomMapper.FacilityProperties.Longitude, (double)obj.Longitude);
+                _facilityproperties.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityDomMapper.FacilityProperties.Longitude, (double)(obj.Longitude).Value);
             }
 
             instance.Sections.Add(_facilityproperties);
@@ -684,8 +687,10 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityDomMapper.FacilityProperties.Name), comparer, (string)value);
                 case "Description":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityDomMapper.FacilityProperties.Description), comparer, (string)value);
+                case "FacilityType" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityDomMapper.FacilityProperties.FacilityType.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "FacilityType":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityDomMapper.FacilityProperties.FacilityType), comparer, (int)(SharedMappers.DomIds.SlcFacility_Management.Enums.FacilityTypeEnum)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityDomMapper.FacilityProperties.FacilityType), comparer, (int)((SharedMappers.DomIds.SlcFacility_Management.Enums.FacilityTypeEnum?)value).Value);
                 case "Address":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityDomMapper.FacilityProperties.Address), comparer, (string)value);
                 case "City":
@@ -694,10 +699,14 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityDomMapper.FacilityProperties.ZipCode), comparer, (string)value);
                 case "Country":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityDomMapper.FacilityProperties.Country), comparer, (string)value);
+                case "Latitude" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityDomMapper.FacilityProperties.Latitude.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Latitude":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityDomMapper.FacilityProperties.Latitude), comparer, (double)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityDomMapper.FacilityProperties.Latitude), comparer, (double)((double?)value).Value);
+                case "Longitude" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityDomMapper.FacilityProperties.Longitude.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Longitude":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityDomMapper.FacilityProperties.Longitude), comparer, (double)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityDomMapper.FacilityProperties.Longitude), comparer, (double)((double?)value).Value);
                 case "SiteFk.Site":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityDomMapper.SiteFk.Site), comparer, System.Guid.Parse(Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.FacilityManagement.Models.Site>.Convert(value).Identifier));
                 default:

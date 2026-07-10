@@ -11,6 +11,8 @@
     {
         public string Description { get; set; }
 
+        public JobRelation JobFk { get; set; }
+
         public RackRelation RackFk { get; set; }
 
         public List<InfraopsReservationBounderies> ReservedPositions { get; set; }

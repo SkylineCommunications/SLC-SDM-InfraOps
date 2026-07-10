@@ -39,7 +39,7 @@
             set => SideField.Value = value;
         }
 
-        public Guid? DeskId
+        public Guid DeskId
         {
             get => DeskIdField.Value;
             set => DeskIdField.Value = value;
@@ -83,9 +83,9 @@
             () => new ChangeTrackingField<SlcAsset_Management.Enums.SideEnum?>(default));
 
         [JsonIgnore]
-        internal IChangeTrackingField<Guid?> DeskIdField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<Guid> DeskIdField => FieldHandler.GetOrCreateField(
             nameof(DeskId),
-            () => new ChangeTrackingField<Guid?>(null));
+            () => new ChangeTrackingField<Guid>(Guid.Empty));
 
 
         [JsonIgnore]

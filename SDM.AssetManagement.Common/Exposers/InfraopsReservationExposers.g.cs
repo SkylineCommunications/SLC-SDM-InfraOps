@@ -37,8 +37,8 @@ namespace SharedCommonLibrary.AssetManagement.Models
 
         public static partial class ReservedPositions
         {
-            public static readonly CollectionExposer<SharedCommonLibrary.AssetManagement.Models.InfraopsReservation, long> LowerBound = new CollectionExposer<SharedCommonLibrary.AssetManagement.Models.InfraopsReservation, long>((obj) => obj.ReservedPositions.Where(x => x != null).Select(x => x.LowerBound).Where(x => x != null), "ReservedPositions.LowerBound");
-            public static readonly CollectionExposer<SharedCommonLibrary.AssetManagement.Models.InfraopsReservation, long> UpperBound = new CollectionExposer<SharedCommonLibrary.AssetManagement.Models.InfraopsReservation, long>((obj) => obj.ReservedPositions.Where(x => x != null).Select(x => x.UpperBound).Where(x => x != null), "ReservedPositions.UpperBound");
+            public static readonly CollectionExposer<SharedCommonLibrary.AssetManagement.Models.InfraopsReservation, long?> LowerBound = new CollectionExposer<SharedCommonLibrary.AssetManagement.Models.InfraopsReservation, long?>((obj) => obj.ReservedPositions.Where(x => x != null).Select(x => x.LowerBound), "ReservedPositions.LowerBound");
+            public static readonly CollectionExposer<SharedCommonLibrary.AssetManagement.Models.InfraopsReservation, long?> UpperBound = new CollectionExposer<SharedCommonLibrary.AssetManagement.Models.InfraopsReservation, long?>((obj) => obj.ReservedPositions.Where(x => x != null).Select(x => x.UpperBound), "ReservedPositions.UpperBound");
         }
     }
 }

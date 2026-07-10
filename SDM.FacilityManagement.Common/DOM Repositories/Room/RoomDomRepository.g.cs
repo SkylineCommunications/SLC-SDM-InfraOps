@@ -632,12 +632,12 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
             if (obj.Width != default)
             {
-                _roomproperties.AddOrUpdateValue<long>(Skyline.DataMiner.SDM.FacilityManagement.Models.RoomDomMapper.RoomProperties.Width, (long)obj.Width);
+                _roomproperties.AddOrUpdateValue<long>(Skyline.DataMiner.SDM.FacilityManagement.Models.RoomDomMapper.RoomProperties.Width, (long)(obj.Width).Value);
             }
 
             if (obj.Depth != default)
             {
-                _roomproperties.AddOrUpdateValue<long>(Skyline.DataMiner.SDM.FacilityManagement.Models.RoomDomMapper.RoomProperties.Depth, (long)obj.Depth);
+                _roomproperties.AddOrUpdateValue<long>(Skyline.DataMiner.SDM.FacilityManagement.Models.RoomDomMapper.RoomProperties.Depth, (long)(obj.Depth).Value);
             }
 
             if (obj.RoomId != default)
@@ -699,10 +699,14 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RoomDomMapper.RoomProperties.Plan), comparer, (string)value);
                 case "Description":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RoomDomMapper.RoomProperties.Description), comparer, (string)value);
+                case "Width" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.FacilityManagement.Models.RoomDomMapper.RoomProperties.Width.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Width":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RoomDomMapper.RoomProperties.Width), comparer, (long)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RoomDomMapper.RoomProperties.Width), comparer, (long)((long?)value).Value);
+                case "Depth" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.FacilityManagement.Models.RoomDomMapper.RoomProperties.Depth.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Depth":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RoomDomMapper.RoomProperties.Depth), comparer, (long)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RoomDomMapper.RoomProperties.Depth), comparer, (long)((long?)value).Value);
                 case "RoomId":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RoomDomMapper.RoomProperties.RoomId), comparer, (string)value);
                 case "Onwership.Team":

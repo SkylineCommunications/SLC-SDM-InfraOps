@@ -12,6 +12,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Converters\InfraOpsContractResolver.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\InfraOpsSerialization.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\SdmObjectReferenceConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Extensions\SdmFilterExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Validation\IEntityTracking.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Validation\BulkValidationException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Validation\ChangeTrackingBase.cs" />

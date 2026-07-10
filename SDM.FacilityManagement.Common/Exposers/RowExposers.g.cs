@@ -36,7 +36,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Row, string> Description = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Row, string>((obj) => obj.Description, "Description");
             public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Row, string> Label = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Row, string>((obj) => obj.Label, "Label");
             public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Row, string> RowId = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Row, string>((obj) => obj.RowId, "RowId");
-            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Row, double> YPosition = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Row, double>((obj) => obj.YPosition, "YPosition");
+            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Row, double?> YPosition = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Row, double?>((obj) => obj.YPosition, "YPosition");
         }
 
         public static partial class RoomFk
