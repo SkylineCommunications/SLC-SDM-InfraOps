@@ -5,9 +5,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Common.Middleware
     using System.Linq;
 
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
-    using Skyline.DataMiner.SDM.AssetManagement.Models;
-    using Skyline.DataMiner.SDM.AssetManagement.Validation;
-    using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
     using SLDataGateway.API.Types.Querying;
 
