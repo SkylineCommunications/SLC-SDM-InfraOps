@@ -16,5 +16,11 @@
         IBulkRepository<Rack> Racks { get; }
 
         IBulkRepository<Room> Rooms { get; }
+
+        IBulkRepository<Floor> Floors { get; }
+
+        IBulkRepository<Zone> Zones { get; }
+
+        IBulkRepository<Row> Rows { get; }
     }
 }

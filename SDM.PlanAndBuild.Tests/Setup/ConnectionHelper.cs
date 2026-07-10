@@ -7,6 +7,7 @@
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Messages;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+	using Skyline.DataMiner.SDM.FacilityManagement.Helpers;
 	using Skyline.DataMiner.SDM.PlanAndBuild.Helpers;
 	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
 	using Skyline.DataMiner.Utils.DOM.UnitTesting;
@@ -51,6 +52,16 @@
 		internal static IPlanAndBuildApiHelper GetMockedHelper(this IConnection connection)
 		{
 			return new PlanAndBuildApiHelper(connection, CreateDefaultPeopleApiMock());
+		}
+
+		/// <summary>
+		/// Creates a mocked <see cref="IFacilityManagementApiHelper"/> against the given connection, so tests
+		/// resolving <see cref="Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob.Locations"/> can share
+		/// the same underlying mocked DOM store as the Plan &amp; Build helper.
+		/// </summary>
+		internal static IFacilityManagementApiHelper GetMockedFacilityManagementHelper(this IConnection connection)
+		{
+			return new FacilityManagementApiHelper(connection);
 		}
 
 		/// <summary>

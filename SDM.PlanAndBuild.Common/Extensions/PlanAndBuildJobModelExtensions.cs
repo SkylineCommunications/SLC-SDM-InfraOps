@@ -4,6 +4,9 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Extensions
     using System.Collections.Generic;
     using System.Linq;
 
+    using Skyline.DataMiner.Net.Messages.SLDataGateway;
+    using Skyline.DataMiner.SDM.FacilityManagement.Helpers;
+    using Skyline.DataMiner.SDM.FacilityManagement.Models;
     using Skyline.DataMiner.SDM.PlanAndBuild.Models;
 
     /// <summary>
@@ -304,6 +307,147 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Extensions
         public static void SetLocations(this PlanAndBuildJob job, IEnumerable<Guid> locations)
         {
             job.Locations = locations?.ToList() ?? new List<Guid>();
+        }
+
+        #endregion
+
+        #region Locations Resolution
+
+        /// <summary>
+        /// Resolves <see cref="PlanAndBuildJob.Locations"/> to their concrete Facility Management DOM instances
+        /// (Facility, Floor, Room, Zone, Row, Desk or Rack). Performs live DOM reads against
+        /// <paramref name="facilityHelper"/> - up to 7, one per Facility Management type. A location Guid that
+        /// doesn't match any of the 7 known types resolves to <see cref="FacilityLocationKind.Unknown"/> with all
+        /// typed properties left <c>null</c>.
+        /// </summary>
+        /// <param name="job">The job whose <see cref="PlanAndBuildJob.Locations"/> should be resolved.</param>
+        /// <param name="facilityHelper">Facility Management API helper used to read the Facility, Floor, Room,
+        /// Zone, Row, Desk and Rack repositories.</param>
+        /// <returns>One <see cref="JobLocation"/> per entry in <see cref="PlanAndBuildJob.Locations"/>.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="facilityHelper"/> is <c>null</c>.</exception>
+        /// <exception cref="InvalidOperationException">A location Guid matched more than one Facility Management type.</exception>
+        public static IReadOnlyCollection<JobLocation> ResolveLocations(this PlanAndBuildJob job, IFacilityManagementApiHelper facilityHelper)
+        {
+            if (facilityHelper == null)
+            {
+                throw new ArgumentNullException(nameof(facilityHelper));
+            }
+
+            var locations = job?.Locations;
+            if (locations == null || locations.Count == 0)
+            {
+                return Array.Empty<JobLocation>();
+            }
+
+            return ResolveLocationsCore(locations, facilityHelper);
+        }
+
+        /// <summary>
+        /// Resolves <see cref="PlanAndBuildJob.Locations"/> for multiple jobs at once. All Guids across
+        /// <paramref name="jobs"/> are resolved together (at most 7 DOM reads total, one per Facility Management
+        /// type, regardless of how many jobs are supplied), instead of re-querying per job.
+        /// </summary>
+        /// <param name="jobs">Jobs whose <see cref="PlanAndBuildJob.Locations"/> should be resolved.</param>
+        /// <param name="facilityHelper">Facility Management API helper used to read the Facility, Floor, Room,
+        /// Zone, Row, Desk and Rack repositories.</param>
+        /// <returns>
+        /// A list, in the same order as <paramref name="jobs"/>, pairing each job with its resolved
+        /// <see cref="JobLocation"/> collection. A list (not a dictionary keyed by job) is used deliberately:
+        /// <see cref="PlanAndBuildJob"/> may compare equal by <c>Identifier</c> (e.g. two unsaved jobs with no
+        /// Identifier yet), which would make a job-keyed dictionary silently collapse distinct jobs.
+        /// </returns>
+        /// <exception cref="ArgumentNullException"><paramref name="jobs"/> or <paramref name="facilityHelper"/> is <c>null</c>.</exception>
+        /// <exception cref="InvalidOperationException">A location Guid matched more than one Facility Management type.</exception>
+        public static IReadOnlyList<KeyValuePair<PlanAndBuildJob, IReadOnlyCollection<JobLocation>>> ResolveLocations(this IEnumerable<PlanAndBuildJob> jobs, IFacilityManagementApiHelper facilityHelper)
+        {
+            if (jobs == null)
+            {
+                throw new ArgumentNullException(nameof(jobs));
+            }
+
+            if (facilityHelper == null)
+            {
+                throw new ArgumentNullException(nameof(facilityHelper));
+            }
+
+            var jobList = jobs.Where(j => j != null).ToList();
+            var allGuids = jobList.SelectMany(j => j.Locations ?? new List<Guid>()).Distinct().ToList();
+
+            var resolvedById = allGuids.Count == 0
+                ? new Dictionary<Guid, JobLocation>()
+                : ResolveLocationsCore(allGuids, facilityHelper).ToDictionary(jl => jl.Id);
+
+            var result = new List<KeyValuePair<PlanAndBuildJob, IReadOnlyCollection<JobLocation>>>(jobList.Count);
+            foreach (var job in jobList)
+            {
+                var jobLocations = (job.Locations ?? new List<Guid>())
+                    .Select(id => resolvedById.TryGetValue(id, out var jl) ? jl : new JobLocation { Id = id, Kind = FacilityLocationKind.Unknown })
+                    .ToList();
+
+                result.Add(new KeyValuePair<PlanAndBuildJob, IReadOnlyCollection<JobLocation>>(job, jobLocations));
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Reads the Facility, Floor, Room, Zone, Row, Desk and Rack repositories (one <c>Read</c> call each,
+        /// filtered to <paramref name="guids"/>) and builds the corresponding <see cref="JobLocation"/> entries.
+        /// </summary>
+        private static IReadOnlyCollection<JobLocation> ResolveLocationsCore(IReadOnlyCollection<Guid> guids, IFacilityManagementApiHelper facilityHelper)
+        {
+            var byId = guids.ToDictionary(g => g, g => new JobLocation { Id = g, Kind = FacilityLocationKind.Unknown });
+            var identifiers = guids.Select(g => g.ToString()).ToArray();
+
+            void Apply<T>(IEnumerable<T> matches, FacilityLocationKind kind, Func<T, string> getIdentifier, Action<JobLocation, T> assign)
+            {
+                foreach (var match in matches)
+                {
+                    var id = Guid.Parse(getIdentifier(match));
+                    if (!byId.TryGetValue(id, out var jobLocation))
+                    {
+                        continue;
+                    }
+
+                    if (jobLocation.Kind != FacilityLocationKind.Unknown)
+                    {
+                        throw new InvalidOperationException($"Location '{id}' matched more than one Facility Management type ({jobLocation.Kind} and {kind}).");
+                    }
+
+                    jobLocation.Kind = kind;
+                    assign(jobLocation, match);
+                }
+            }
+
+            Apply(
+                facilityHelper.Facilities.Read(new ORFilterElement<Facility>(identifiers.Select(FacilityExposers.Identifier.Equal).ToArray())),
+                FacilityLocationKind.Facility, obj => obj.Identifier, (jl, obj) => jl.Facility = obj);
+
+            Apply(
+                facilityHelper.Floors.Read(new ORFilterElement<Floor>(identifiers.Select(FloorExposers.Identifier.Equal).ToArray())),
+                FacilityLocationKind.Floor, obj => obj.Identifier, (jl, obj) => jl.Floor = obj);
+
+            Apply(
+                facilityHelper.Rooms.Read(new ORFilterElement<Room>(identifiers.Select(RoomExposers.Identifier.Equal).ToArray())),
+                FacilityLocationKind.Room, obj => obj.Identifier, (jl, obj) => jl.Room = obj);
+
+            Apply(
+                facilityHelper.Zones.Read(new ORFilterElement<Zone>(identifiers.Select(ZoneExposers.Identifier.Equal).ToArray())),
+                FacilityLocationKind.Zone, obj => obj.Identifier, (jl, obj) => jl.Zone = obj);
+
+            Apply(
+                facilityHelper.Rows.Read(new ORFilterElement<Row>(identifiers.Select(RowExposers.Identifier.Equal).ToArray())),
+                FacilityLocationKind.Row, obj => obj.Identifier, (jl, obj) => jl.Row = obj);
+
+            Apply(
+                facilityHelper.Desks.Read(new ORFilterElement<Desk>(identifiers.Select(DeskExposers.Identifier.Equal).ToArray())),
+                FacilityLocationKind.Desk, obj => obj.Identifier, (jl, obj) => jl.Desk = obj);
+
+            Apply(
+                facilityHelper.Racks.Read(new ORFilterElement<Rack>(identifiers.Select(RackExposers.Identifier.Equal).ToArray())),
+                FacilityLocationKind.Rack, obj => obj.Identifier, (jl, obj) => jl.Rack = obj);
+
+            return byId.Values.ToList();
         }
 
         #endregion
