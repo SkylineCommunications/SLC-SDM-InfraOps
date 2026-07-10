@@ -166,20 +166,13 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             set => SubStateField.Value = value;
         }
 
-        internal List<string> Locations
-        {
-            get => LocationsField.Value ?? new List<string>();
-            set => LocationsField.Value = value;
-        }
-
         /// <summary>
-        /// Gets or sets the <see cref="Locations"/> values as <see cref="Guid"/>. Not mapped by the SDM generator.
+        /// Gets or sets the DOM instance identifiers (Facility, Floor, Room, Zone, Row, Desk or Rack) linked to this job.
         /// </summary>
-        [SdmIgnore]
-        public List<Guid> LocationGuids
+        public List<Guid> Locations
         {
-            get => Locations.Select(Guid.Parse).ToList();
-            set => Locations = value?.Select(v => v.ToString()).ToList() ?? new List<string>();
+            get => LocationsField.Value ?? new List<Guid>();
+            set => LocationsField.Value = value;
         }
 
         #endregion
@@ -271,9 +264,9 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 
         [JsonIgnore]
         [SdmIgnore]
-        internal ChangeTrackingArrayField<string> LocationsField => FieldHandler.GetOrCreateArrayField(
+        internal ChangeTrackingArrayField<Guid> LocationsField => FieldHandler.GetOrCreateArrayField(
             nameof(Locations),
-            () => new ChangeTrackingArrayField<string>(new List<string>()));
+            () => new ChangeTrackingArrayField<Guid>(new List<Guid>(), list => list.Cast<object>().ToList()));
 
         #endregion
 

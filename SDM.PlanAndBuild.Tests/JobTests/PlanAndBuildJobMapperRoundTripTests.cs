@@ -46,7 +46,7 @@
 				Remarks = "Bring spare parts",
 				Priority = SlcPlan_And_Build.Enums.PriorityEnum.High,
 				SubState = SlcPlan_And_Build.Enums.SubStateEnum.Scheduled,
-				LocationGuids = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() },
+				Locations = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() },
 			};
 			original.Ownership.AssignedTo = Guid.NewGuid();
 			original.Ownership.AssignmentGroup = Guid.NewGuid();
@@ -90,7 +90,7 @@
 				roundTripped.Remarks.Should().Be(original.Remarks);
 				roundTripped.Priority.Should().Be(original.Priority);
 				roundTripped.SubState.Should().Be(original.SubState);
-				roundTripped.LocationGuids.Should().BeEquivalentTo(original.LocationGuids);
+				roundTripped.Locations.Should().BeEquivalentTo(original.Locations);
 				roundTripped.Ownership.AssignedTo.Should().Be(original.Ownership.AssignedTo);
 				roundTripped.Ownership.AssignmentGroup.Should().Be(original.Ownership.AssignmentGroup);
 				roundTripped.AssetsUsed.Should().BeEquivalentTo(original.AssetsUsed);

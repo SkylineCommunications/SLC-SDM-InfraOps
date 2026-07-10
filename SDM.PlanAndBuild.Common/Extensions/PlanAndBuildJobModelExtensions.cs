@@ -266,12 +266,12 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Extensions
         #region Locations Convenience Methods
 
         /// <summary>
-        /// Adds a location to <see cref="PlanAndBuildJob.LocationGuids"/>.
+        /// Adds a location to <see cref="PlanAndBuildJob.Locations"/>.
         /// </summary>
         /// <exception cref="InvalidOperationException">The location already exists.</exception>
         public static void AddLocation(this PlanAndBuildJob job, Guid newLocation)
         {
-            var list = job.LocationGuids;
+            var list = job.Locations;
 
             if (list.Contains(newLocation))
             {
@@ -279,31 +279,31 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Extensions
             }
 
             list.Add(newLocation);
-            job.LocationGuids = list;
+            job.Locations = list;
         }
 
         /// <summary>
-        /// Removes a location from <see cref="PlanAndBuildJob.LocationGuids"/>.
+        /// Removes a location from <see cref="PlanAndBuildJob.Locations"/>.
         /// </summary>
         /// <exception cref="ArgumentException">No matching location was found.</exception>
         public static void RemoveLocation(this PlanAndBuildJob job, Guid location)
         {
-            var list = job.LocationGuids;
+            var list = job.Locations;
 
             if (!list.Remove(location))
             {
                 throw new ArgumentException("The specified Location was not found.");
             }
 
-            job.LocationGuids = list;
+            job.Locations = list;
         }
 
         /// <summary>
-        /// Replaces <see cref="PlanAndBuildJob.LocationGuids"/> with <paramref name="locations"/>.
+        /// Replaces <see cref="PlanAndBuildJob.Locations"/> with <paramref name="locations"/>.
         /// </summary>
         public static void SetLocations(this PlanAndBuildJob job, IEnumerable<Guid> locations)
         {
-            job.LocationGuids = locations?.ToList() ?? new List<Guid>();
+            job.Locations = locations?.ToList() ?? new List<Guid>();
         }
 
         #endregion
