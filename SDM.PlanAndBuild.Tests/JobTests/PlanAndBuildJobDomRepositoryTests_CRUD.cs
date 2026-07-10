@@ -41,7 +41,7 @@
 		public void PlanAndBuildJobDomRepository_EmptyDOM_Create()
 		{
 			referenceJobType = Helper.JobTypes.Create(referenceJobType);
-			referenceJob.JobType = new SdmObjectReference<JobType>(referenceJobType.Identifier);
+			referenceJob.Type = new SdmObjectReference<JobType>(referenceJobType.Identifier);
 
 			Helper.Jobs.Create(referenceJob);
 
@@ -52,7 +52,7 @@
 		public void PlanAndBuildJobDomRepository_EmptyDOM_CreateOrUpdate_Create()
 		{
 			referenceJobType = Helper.JobTypes.Create(referenceJobType);
-			referenceJob.JobType = new SdmObjectReference<JobType>(referenceJobType.Identifier);
+			referenceJob.Type = new SdmObjectReference<JobType>(referenceJobType.Identifier);
 
 			Helper.Jobs.CreateOrUpdate([referenceJob]);
 
@@ -63,14 +63,14 @@
 		public void PlanAndBuildJobDomRepository_EmptyDOM_CreateOrUpdate_Update()
 		{
 			referenceJobType = Helper.JobTypes.Create(referenceJobType);
-			referenceJob.JobType = new SdmObjectReference<JobType>(referenceJobType.Identifier);
+			referenceJob.Type = new SdmObjectReference<JobType>(referenceJobType.Identifier);
 			Helper.Jobs.Create(referenceJob);
 
 			var updatedJob = new PlanAndBuildJob
 			{
 				Identifier = referenceJob.Identifier,
 				JobName = "Install Rack 1 Equipment - Updated",
-				JobType = new SdmObjectReference<JobType>(referenceJobType.Identifier),
+				Type = new SdmObjectReference<JobType>(referenceJobType.Identifier),
 				Remarks = "Updated remarks",
 			};
 
@@ -105,7 +105,7 @@
 		public void PlanAndBuildJobDomRepository_DeleteSingle()
 		{
 			referenceJobType = Helper.JobTypes.Create(referenceJobType);
-			referenceJob.JobType = new SdmObjectReference<JobType>(referenceJobType.Identifier);
+			referenceJob.Type = new SdmObjectReference<JobType>(referenceJobType.Identifier);
 			Helper.Jobs.Create(referenceJob);
 
 			Helper.Jobs.Delete(referenceJob);
@@ -133,13 +133,13 @@
 		public void PlanAndBuildJobDomRepository_Create_WithDuplicateJobName_ShouldThrow()
 		{
 			referenceJobType = Helper.JobTypes.Create(referenceJobType);
-			referenceJob.JobType = new SdmObjectReference<JobType>(referenceJobType.Identifier);
+			referenceJob.Type = new SdmObjectReference<JobType>(referenceJobType.Identifier);
 			Helper.Jobs.Create(referenceJob);
 
 			var duplicate = new PlanAndBuildJob
 			{
 				JobName = referenceJob.JobName,
-				JobType = new SdmObjectReference<JobType>(referenceJobType.Identifier),
+				Type = new SdmObjectReference<JobType>(referenceJobType.Identifier),
 			};
 
 			Action act = () => Helper.Jobs.Create(duplicate);
@@ -153,7 +153,7 @@
 			var jobWithoutType = new PlanAndBuildJob
 			{
 				JobName = "Job Without Type",
-				JobType = null,
+				Type = null,
 			};
 
 			Action act = () => Helper.Jobs.Create(jobWithoutType);
@@ -170,7 +170,7 @@
 				var createdJob = Helper.Jobs.Read(new TRUEFilterElement<PlanAndBuildJob>()).First();
 				createdJob.Should().NotBeNull();
 				createdJob.JobName.Should().Be("Install Rack 1 Equipment");
-				createdJob.JobType.Should().Be(new SdmObjectReference<JobType>(referenceJobType.Identifier));
+				createdJob.Type.Should().Be(new SdmObjectReference<JobType>(referenceJobType.Identifier));
 				createdJob.Start.Should().Be(new DateTime(2026, 1, 10));
 				createdJob.End.Should().Be(new DateTime(2026, 1, 15));
 			}

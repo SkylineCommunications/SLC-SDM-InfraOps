@@ -124,7 +124,7 @@
 			Helper.Jobs.Create(new PlanAndBuildJob
 			{
 				JobName = "Some Job",
-				JobType = new SdmObjectReference<JobType>(jobType.Identifier),
+				Type = new SdmObjectReference<JobType>(jobType.Identifier),
 			});
 			var nextCalled = false;
 
@@ -153,7 +153,7 @@
 			Helper.Jobs.Create(new PlanAndBuildJob
 			{
 				JobName = "Some Job",
-				JobType = new SdmObjectReference<JobType>(inUseJobType.Identifier),
+				Type = new SdmObjectReference<JobType>(inUseJobType.Identifier),
 			});
 
 			Action act = () => _middleware.OnDelete(new List<JobType> { freeJobType, inUseJobType }, jts => { });

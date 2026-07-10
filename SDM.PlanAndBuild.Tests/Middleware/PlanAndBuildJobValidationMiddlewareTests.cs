@@ -38,13 +38,13 @@
 		private PlanAndBuildJob ValidJob() => new PlanAndBuildJob
 		{
 			JobName = "Valid Job",
-			JobType = new SdmObjectReference<JobType>(_jobType.Identifier),
+			Type = new SdmObjectReference<JobType>(_jobType.Identifier),
 		};
 
 		private static PlanAndBuildJob InvalidJob() => new PlanAndBuildJob
 		{
 			JobName = string.Empty,
-			JobType = null,
+			Type = null,
 		};
 
 		#region Single Create/Update
@@ -96,7 +96,7 @@
 		[TestMethod]
 		public void OnCreate_Bulk_WithAllValidJobs_ShouldCallNext()
 		{
-			var jobs = new List<PlanAndBuildJob> { ValidJob(), new PlanAndBuildJob { JobName = "Another Valid Job", JobType = new SdmObjectReference<JobType>(_jobType.Identifier) } };
+			var jobs = new List<PlanAndBuildJob> { ValidJob(), new PlanAndBuildJob { JobName = "Another Valid Job", Type = new SdmObjectReference<JobType>(_jobType.Identifier) } };
 			var nextCalled = false;
 
 			_middleware.OnCreate(jobs, j => { nextCalled = true; return j.ToList(); });
@@ -133,8 +133,8 @@
 			// rejected even though neither exists in the DOM yet (in-memory batch conflict detection).
 			var jobs = new List<PlanAndBuildJob>
 			{
-				new PlanAndBuildJob { JobName = "Duplicate Job Name", JobType = new SdmObjectReference<JobType>(_jobType.Identifier) },
-				new PlanAndBuildJob { JobName = "Duplicate Job Name", JobType = new SdmObjectReference<JobType>(_jobType.Identifier) },
+				new PlanAndBuildJob { JobName = "Duplicate Job Name", Type = new SdmObjectReference<JobType>(_jobType.Identifier) },
+				new PlanAndBuildJob { JobName = "Duplicate Job Name", Type = new SdmObjectReference<JobType>(_jobType.Identifier) },
 			};
 			var nextCalled = false;
 

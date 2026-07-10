@@ -58,7 +58,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
                 return result.IsValid;
             }
 
-            if (job.JobType == null)
+            if (job.Type == null)
             {
                 result.AddFailReason(PlanAndBuildJobValidationField.JobType, "A Job Type must be selected.");
             }

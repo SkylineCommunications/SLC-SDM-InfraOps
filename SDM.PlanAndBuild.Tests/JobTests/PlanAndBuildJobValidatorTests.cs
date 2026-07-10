@@ -39,7 +39,7 @@
 			var job = new PlanAndBuildJob
 			{
 				JobName = "Install Rack 1 Equipment",
-				JobType = new SdmObjectReference<JobType>(_jobType.Identifier),
+				Type = new SdmObjectReference<JobType>(_jobType.Identifier),
 				Start = new DateTime(2026, 1, 10),
 				End = new DateTime(2026, 1, 15),
 			};
@@ -70,7 +70,7 @@
 			var job = new PlanAndBuildJob
 			{
 				JobName = string.Empty,
-				JobType = new SdmObjectReference<JobType>(_jobType.Identifier),
+				Type = new SdmObjectReference<JobType>(_jobType.Identifier),
 			};
 
 			var result = _validator.Validate(job);
@@ -88,13 +88,13 @@
 			Helper.Jobs.Create(new PlanAndBuildJob
 			{
 				JobName = "Install Rack 1 Equipment",
-				JobType = new SdmObjectReference<JobType>(_jobType.Identifier),
+				Type = new SdmObjectReference<JobType>(_jobType.Identifier),
 			});
 
 			var newJob = new PlanAndBuildJob
 			{
 				JobName = "Install Rack 1 Equipment",
-				JobType = new SdmObjectReference<JobType>(_jobType.Identifier),
+				Type = new SdmObjectReference<JobType>(_jobType.Identifier),
 			};
 
 			var result = _validator.Validate(newJob);
@@ -113,7 +113,7 @@
 			var created = Helper.Jobs.Create(new PlanAndBuildJob
 			{
 				JobName = "Install Rack 1 Equipment",
-				JobType = new SdmObjectReference<JobType>(_jobType.Identifier),
+				Type = new SdmObjectReference<JobType>(_jobType.Identifier),
 			});
 
 			var result = _validator.Validate(created);
@@ -128,7 +128,7 @@
 		[TestMethod]
 		public void Validate_WithNoJobTypeSelected_ShouldReturnInvalid()
 		{
-			var job = new PlanAndBuildJob { JobName = "Some Job", JobType = null };
+			var job = new PlanAndBuildJob { JobName = "Some Job", Type = null };
 
 			var result = _validator.Validate(job);
 
@@ -150,7 +150,7 @@
 			var job = new PlanAndBuildJob
 			{
 				JobName = "Some Job",
-				JobType = new SdmObjectReference<JobType>(_jobType.Identifier),
+				Type = new SdmObjectReference<JobType>(_jobType.Identifier),
 				Start = start,
 				End = start.AddDays(-1),
 			};
@@ -170,7 +170,7 @@
 			var job = new PlanAndBuildJob
 			{
 				JobName = "Some Job",
-				JobType = new SdmObjectReference<JobType>(_jobType.Identifier),
+				Type = new SdmObjectReference<JobType>(_jobType.Identifier),
 				Start = DateTime.UtcNow,
 				End = null,
 			};
@@ -192,7 +192,7 @@
 			var created = Helper.Jobs.Create(new PlanAndBuildJob
 			{
 				JobName = "Install Rack 1 Equipment",
-				JobType = new SdmObjectReference<JobType>(_jobType.Identifier),
+				Type = new SdmObjectReference<JobType>(_jobType.Identifier),
 			});
 
 			created.Remarks = "Updated remarks only";
@@ -227,8 +227,8 @@
 		{
 			var jobs = new System.Collections.Generic.List<PlanAndBuildJob>
 			{
-				new PlanAndBuildJob { JobName = "Job One", JobType = new SdmObjectReference<JobType>(_jobType.Identifier) },
-				new PlanAndBuildJob { JobName = "Job Two", JobType = new SdmObjectReference<JobType>(_jobType.Identifier) },
+				new PlanAndBuildJob { JobName = "Job One", Type = new SdmObjectReference<JobType>(_jobType.Identifier) },
+				new PlanAndBuildJob { JobName = "Job Two", Type = new SdmObjectReference<JobType>(_jobType.Identifier) },
 			};
 
 			var results = _validator.ValidateBulk(jobs);
@@ -247,8 +247,8 @@
 			// single-job DB uniqueness query alone would miss this - the in-memory batch check must catch it.
 			var jobs = new System.Collections.Generic.List<PlanAndBuildJob>
 			{
-				new PlanAndBuildJob { JobName = "Install Rack 1 Equipment", JobType = new SdmObjectReference<JobType>(_jobType.Identifier) },
-				new PlanAndBuildJob { JobName = "Install Rack 1 Equipment", JobType = new SdmObjectReference<JobType>(_jobType.Identifier) },
+				new PlanAndBuildJob { JobName = "Install Rack 1 Equipment", Type = new SdmObjectReference<JobType>(_jobType.Identifier) },
+				new PlanAndBuildJob { JobName = "Install Rack 1 Equipment", Type = new SdmObjectReference<JobType>(_jobType.Identifier) },
 			};
 
 			var results = _validator.ValidateBulk(jobs);
@@ -270,8 +270,8 @@
 		{
 			var jobs = new System.Collections.Generic.List<PlanAndBuildJob>
 			{
-				new PlanAndBuildJob { JobName = "Install Rack 1 Equipment", JobType = new SdmObjectReference<JobType>(_jobType.Identifier) },
-				new PlanAndBuildJob { JobName = "INSTALL RACK 1 EQUIPMENT", JobType = new SdmObjectReference<JobType>(_jobType.Identifier) },
+				new PlanAndBuildJob { JobName = "Install Rack 1 Equipment", Type = new SdmObjectReference<JobType>(_jobType.Identifier) },
+				new PlanAndBuildJob { JobName = "INSTALL RACK 1 EQUIPMENT", Type = new SdmObjectReference<JobType>(_jobType.Identifier) },
 			};
 
 			var results = _validator.ValidateBulk(jobs);
@@ -284,9 +284,9 @@
 		{
 			var jobs = new System.Collections.Generic.List<PlanAndBuildJob>
 			{
-				new PlanAndBuildJob { JobName = "Job One", JobType = new SdmObjectReference<JobType>(_jobType.Identifier) },
-				new PlanAndBuildJob { JobName = "Job Two", JobType = new SdmObjectReference<JobType>(_jobType.Identifier) },
-				new PlanAndBuildJob { JobName = "Job Three", JobType = new SdmObjectReference<JobType>(_jobType.Identifier) },
+				new PlanAndBuildJob { JobName = "Job One", Type = new SdmObjectReference<JobType>(_jobType.Identifier) },
+				new PlanAndBuildJob { JobName = "Job Two", Type = new SdmObjectReference<JobType>(_jobType.Identifier) },
+				new PlanAndBuildJob { JobName = "Job Three", Type = new SdmObjectReference<JobType>(_jobType.Identifier) },
 			};
 
 			var results = _validator.ValidateBulk(jobs);
@@ -302,13 +302,13 @@
 			Helper.Jobs.Create(new PlanAndBuildJob
 			{
 				JobName = "Existing Job",
-				JobType = new SdmObjectReference<JobType>(_jobType.Identifier),
+				Type = new SdmObjectReference<JobType>(_jobType.Identifier),
 			});
 
 			var jobs = new System.Collections.Generic.List<PlanAndBuildJob>
 			{
-				new PlanAndBuildJob { JobName = "Existing Job", JobType = new SdmObjectReference<JobType>(_jobType.Identifier) },
-				new PlanAndBuildJob { JobName = "Brand New Job", JobType = new SdmObjectReference<JobType>(_jobType.Identifier) },
+				new PlanAndBuildJob { JobName = "Existing Job", Type = new SdmObjectReference<JobType>(_jobType.Identifier) },
+				new PlanAndBuildJob { JobName = "Brand New Job", Type = new SdmObjectReference<JobType>(_jobType.Identifier) },
 			};
 
 			var results = _validator.ValidateBulk(jobs);
@@ -330,8 +330,8 @@
 			// batch conflict detection or DB uniqueness checks even run.
 			var jobs = new System.Collections.Generic.List<PlanAndBuildJob>
 			{
-				new PlanAndBuildJob { JobName = string.Empty, JobType = new SdmObjectReference<JobType>(_jobType.Identifier) },
-				new PlanAndBuildJob { JobName = "Valid Job", JobType = new SdmObjectReference<JobType>(_jobType.Identifier) },
+				new PlanAndBuildJob { JobName = string.Empty, Type = new SdmObjectReference<JobType>(_jobType.Identifier) },
+				new PlanAndBuildJob { JobName = "Valid Job", Type = new SdmObjectReference<JobType>(_jobType.Identifier) },
 			};
 
 			var results = _validator.ValidateBulk(jobs);
@@ -395,7 +395,7 @@
 			var job = new PlanAndBuildJob
 			{
 				JobName = "Some Job",
-				JobType = new SdmObjectReference<JobType>(_jobType.Identifier),
+				Type = new SdmObjectReference<JobType>(_jobType.Identifier),
 			};
 			job.Ownership.AssignedTo = Guid.NewGuid();
 
@@ -417,7 +417,7 @@
 			var job = new PlanAndBuildJob
 			{
 				JobName = "Some Job",
-				JobType = new SdmObjectReference<JobType>(jobType.Identifier),
+				Type = new SdmObjectReference<JobType>(jobType.Identifier),
 			};
 			job.Ownership.AssignedTo = Guid.NewGuid();
 
@@ -443,7 +443,7 @@
 			var job = new PlanAndBuildJob
 			{
 				JobName = "Some Job",
-				JobType = new SdmObjectReference<JobType>(jobType.Identifier),
+				Type = new SdmObjectReference<JobType>(jobType.Identifier),
 			};
 			job.Ownership.AssignmentGroup = Guid.NewGuid();
 
@@ -469,7 +469,7 @@
 			var job = new PlanAndBuildJob
 			{
 				JobName = "Some Job",
-				JobType = new SdmObjectReference<JobType>(jobType.Identifier),
+				Type = new SdmObjectReference<JobType>(jobType.Identifier),
 				Attachments = new System.Collections.Generic.List<JobAttachment>
 				{
 					new JobAttachment { FilePath = @"C:\attachments\plan.pdf", AttachedBy = Guid.NewGuid() },
@@ -500,7 +500,7 @@
 			var job = new PlanAndBuildJob
 			{
 				JobName = "Some Job",
-				JobType = new SdmObjectReference<JobType>(jobType.Identifier),
+				Type = new SdmObjectReference<JobType>(jobType.Identifier),
 			};
 
 			var result = validator.Validate(job);

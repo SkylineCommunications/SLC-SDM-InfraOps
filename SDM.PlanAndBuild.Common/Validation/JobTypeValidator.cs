@@ -260,7 +260,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
 
         private bool IsJobTypeInUse(string jobTypeIdentifier)
         {
-            FilterElement<PlanAndBuildJob> filter = PlanAndBuildJobExposers.JobType.Equal(new SdmObjectReference<JobType>(jobTypeIdentifier));
+            FilterElement<PlanAndBuildJob> filter = PlanAndBuildJobExposers.Type.Equal(new SdmObjectReference<JobType>(jobTypeIdentifier));
             return _helper.Jobs.Count(filter) > 0;
         }
 

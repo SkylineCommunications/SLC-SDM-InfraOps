@@ -86,7 +86,7 @@
 		[TestMethod]
 		public void IsJobTypeValid_WithNoJobTypeSelected_ShouldReturnInvalid()
 		{
-			var job = new PlanAndBuildJob { JobName = "Some Job", JobType = null };
+			var job = new PlanAndBuildJob { JobName = "Some Job", Type = null };
 
 			var isValid = IsJobTypeValid(job, out var result);
 
@@ -101,7 +101,7 @@
 		[TestMethod]
 		public void IsJobTypeValid_WithJobTypeSelected_ShouldReturnValid()
 		{
-			var job = new PlanAndBuildJob { JobName = "Some Job", JobType = new SdmObjectReference<JobType>(Guid.NewGuid().ToString()) };
+			var job = new PlanAndBuildJob { JobName = "Some Job", Type = new SdmObjectReference<JobType>(Guid.NewGuid().ToString()) };
 
 			var isValid = IsJobTypeValid(job, out var result);
 

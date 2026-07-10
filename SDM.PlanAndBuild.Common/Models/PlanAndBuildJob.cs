@@ -116,13 +116,19 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             set => EndField.Value = value;
         }
 
-        public SdmObjectReference<JobType> JobType
+        /// <summary>
+        /// Soft-deleted field, mirroring legacy's <c>JobtypeEnum</c>. Superseded by <see cref="Type"/>
+        /// (a DOM reference to the JobType definition). Kept only because the underlying DOM field can't
+        /// be removed; not read or written by any business logic.
+        /// </summary>
+        [Obsolete("Soft deleted field. Replaced with 'Type'.")]
+        public SlcPlan_And_Build.Enums.JobtypeEnum JobType
         {
             get => JobTypeField.Value;
             set => JobTypeField.Value = value;
         }
 
-        public SlcPlan_And_Build.Enums.JobtypeEnum Type
+        public SdmObjectReference<JobType> Type
         {
             get => TypeField.Value;
             set => TypeField.Value = value;
@@ -220,15 +226,16 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 
         [JsonIgnore]
         [SdmIgnore]
-        internal IChangeTrackingField<SdmObjectReference<JobType>> JobTypeField => FieldHandler.GetOrCreateField(
+        [Obsolete("Soft deleted field. Replaced with 'TypeField'.")]
+        internal IChangeTrackingField<SlcPlan_And_Build.Enums.JobtypeEnum> JobTypeField => FieldHandler.GetOrCreateField(
             nameof(JobType),
-            () => new ChangeTrackingField<SdmObjectReference<JobType>>(default));
+            () => new ChangeTrackingField<SlcPlan_And_Build.Enums.JobtypeEnum>(SlcPlan_And_Build.Enums.JobtypeEnum.Add));
 
         [JsonIgnore]
         [SdmIgnore]
-        internal IChangeTrackingField<SlcPlan_And_Build.Enums.JobtypeEnum> TypeField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<SdmObjectReference<JobType>> TypeField => FieldHandler.GetOrCreateField(
             nameof(Type),
-            () => new ChangeTrackingField<SlcPlan_And_Build.Enums.JobtypeEnum>(SlcPlan_And_Build.Enums.JobtypeEnum.Add));
+            () => new ChangeTrackingField<SdmObjectReference<JobType>>(default));
 
         [JsonIgnore]
         [SdmIgnore]

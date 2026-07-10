@@ -1,4 +1,4 @@
-﻿namespace SDM.PlanAndBuild.Tests.Setup
+namespace SDM.PlanAndBuild.Tests.Setup
 {
 	using System;
 	using System.Collections.Generic;
@@ -44,8 +44,10 @@
 				JobName = "Install Rack 1 Equipment",
 				Start = new DateTime(2026, 1, 10),
 				End = new DateTime(2026, 1, 15),
-				JobType = new SdmObjectReference<JobType>(JobTypes[0].Identifier),
-				Type = SlcPlan_And_Build.Enums.JobtypeEnum.Add,
+				Type = new SdmObjectReference<JobType>(JobTypes[0].Identifier),
+#pragma warning disable CS0618 // Soft deleted field, populated here for legacy-shaped demo data only.
+				JobType = SlcPlan_And_Build.Enums.JobtypeEnum.Add,
+#pragma warning restore CS0618
 				JobDescription = "Install new equipment in Rack 1",
 				Remarks = string.Empty,
 				Priority = SlcPlan_And_Build.Enums.PriorityEnum.High,
@@ -58,8 +60,10 @@
 				JobName = "Quarterly Maintenance Check",
 				Start = new DateTime(2026, 2, 1),
 				End = new DateTime(2026, 2, 2),
-				JobType = new SdmObjectReference<JobType>(JobTypes[1].Identifier),
-				Type = SlcPlan_And_Build.Enums.JobtypeEnum.Update,
+				Type = new SdmObjectReference<JobType>(JobTypes[1].Identifier),
+#pragma warning disable CS0618 // Soft deleted field, populated here for legacy-shaped demo data only.
+				JobType = SlcPlan_And_Build.Enums.JobtypeEnum.Update,
+#pragma warning restore CS0618
 				JobDescription = "Routine maintenance check",
 				Remarks = "Bring spare fans",
 				Priority = SlcPlan_And_Build.Enums.PriorityEnum.Normal,
@@ -72,8 +76,10 @@
 				JobName = "Decommission Legacy Server",
 				Start = new DateTime(2026, 3, 5),
 				End = null,
-				JobType = new SdmObjectReference<JobType>(JobTypes[2].Identifier),
-				Type = SlcPlan_And_Build.Enums.JobtypeEnum.Remove,
+				Type = new SdmObjectReference<JobType>(JobTypes[2].Identifier),
+#pragma warning disable CS0618 // Soft deleted field, populated here for legacy-shaped demo data only.
+				JobType = SlcPlan_And_Build.Enums.JobtypeEnum.Remove,
+#pragma warning restore CS0618
 				JobDescription = "Remove legacy server from Rack 2",
 				Remarks = string.Empty,
 				Priority = SlcPlan_And_Build.Enums.PriorityEnum.Low,
@@ -86,8 +92,10 @@
 				JobName = "Emergency Cabling Fix",
 				Start = new DateTime(2026, 1, 20),
 				End = new DateTime(2026, 1, 21),
-				JobType = new SdmObjectReference<JobType>(JobTypes[0].Identifier),
-				Type = SlcPlan_And_Build.Enums.JobtypeEnum.Update,
+				Type = new SdmObjectReference<JobType>(JobTypes[0].Identifier),
+#pragma warning disable CS0618 // Soft deleted field, populated here for legacy-shaped demo data only.
+				JobType = SlcPlan_And_Build.Enums.JobtypeEnum.Update,
+#pragma warning restore CS0618
 				JobDescription = "Fix damaged cabling",
 				Remarks = "Customer escalation",
 				Priority = SlcPlan_And_Build.Enums.PriorityEnum.Critical,

@@ -118,7 +118,7 @@
 			Helper.Jobs.Create(new PlanAndBuildJob
 			{
 				JobName = "Some Job",
-				JobType = new SdmObjectReference<JobType>(jobType.Identifier),
+				Type = new SdmObjectReference<JobType>(jobType.Identifier),
 			});
 
 			jobType.Name = "Renamed Installation";
@@ -141,7 +141,7 @@
 			Helper.Jobs.Create(new PlanAndBuildJob
 			{
 				JobName = "Some Job",
-				JobType = new SdmObjectReference<JobType>(jobType.Identifier),
+				Type = new SdmObjectReference<JobType>(jobType.Identifier),
 			});
 
 			jobType.Description = "Updated description only";
@@ -172,7 +172,7 @@
 			Helper.Jobs.Create(new PlanAndBuildJob
 			{
 				JobName = "Some Job",
-				JobType = new SdmObjectReference<JobType>(jobType.Identifier),
+				Type = new SdmObjectReference<JobType>(jobType.Identifier),
 			});
 
 			var result = _validator.ValidateDeletion(jobType);

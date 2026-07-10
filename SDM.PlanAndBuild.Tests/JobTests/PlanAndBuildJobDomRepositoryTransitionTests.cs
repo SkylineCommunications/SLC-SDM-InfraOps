@@ -48,7 +48,7 @@ namespace SDM.PlanAndBuild.Tests.JobTests
 			// Reuse a single JobType across calls within a test so multiple CreateJobAt calls in the same test
 			// don't collide with JobTypeValidator's name-uniqueness check.
 			_sharedJobType ??= _helper.JobTypes.Create(new JobType { Name = "TestType" });
-			return _helper.Jobs.Create(new PlanAndBuildJob { JobName = jobName, JobType = _sharedJobType, State = status });
+			return _helper.Jobs.Create(new PlanAndBuildJob { JobName = jobName, Type = new SdmObjectReference<JobType>(_sharedJobType.Identifier), State = status });
 		}
 
 		#region TransitionTo - valid single-hop and multi-hop transitions

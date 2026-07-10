@@ -38,8 +38,10 @@
 				JobName = "Install Rack 1 Equipment",
 				Start = new DateTime(2026, 1, 10),
 				End = new DateTime(2026, 1, 15),
-				JobType = new SdmObjectReference<JobType>(jobType.Identifier),
-				Type = SlcPlan_And_Build.Enums.JobtypeEnum.Add,
+				Type = new SdmObjectReference<JobType>(jobType.Identifier),
+#pragma warning disable CS0618 // Soft deleted field, exercised here for round-trip coverage only.
+				JobType = SlcPlan_And_Build.Enums.JobtypeEnum.Add,
+#pragma warning restore CS0618
 				JobDescription = "Install new equipment in Rack 1",
 				Remarks = "Bring spare parts",
 				Priority = SlcPlan_And_Build.Enums.PriorityEnum.High,
@@ -80,8 +82,10 @@
 				roundTripped.JobName.Should().Be(original.JobName);
 				roundTripped.Start.Should().Be(original.Start);
 				roundTripped.End.Should().Be(original.End);
-				roundTripped.JobType.Should().Be(original.JobType);
 				roundTripped.Type.Should().Be(original.Type);
+#pragma warning disable CS0618 // Soft deleted field, exercised here for round-trip coverage only.
+				roundTripped.JobType.Should().Be(original.JobType);
+#pragma warning restore CS0618
 				roundTripped.JobDescription.Should().Be(original.JobDescription);
 				roundTripped.Remarks.Should().Be(original.Remarks);
 				roundTripped.Priority.Should().Be(original.Priority);
@@ -105,7 +109,7 @@
 			{
 				Identifier = Guid.NewGuid().ToString(),
 				JobName = "Decommission Legacy Server",
-				JobType = new SdmObjectReference<JobType>(jobType.Identifier),
+				Type = new SdmObjectReference<JobType>(jobType.Identifier),
 				Start = new DateTime(2026, 3, 5),
 				End = null,
 			};
@@ -127,7 +131,7 @@
 			{
 				Identifier = Guid.NewGuid().ToString(),
 				JobName = "Quarterly Maintenance Check",
-				JobType = new SdmObjectReference<JobType>(jobType.Identifier),
+				Type = new SdmObjectReference<JobType>(jobType.Identifier),
 			};
 
 			Helper.Jobs.Create(original);

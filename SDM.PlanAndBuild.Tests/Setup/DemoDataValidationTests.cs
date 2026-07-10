@@ -92,7 +92,7 @@
 			{
 				var job = jobs[i];
 				Assert.IsFalse(string.IsNullOrWhiteSpace(job.JobName), $"Job at index {i}: JobName should not be empty");
-				Assert.IsNotNull(job.JobType, $"Job at index {i}: JobType should not be null");
+				Assert.IsNotNull(job.Type, $"Job at index {i}: JobType should not be null");
 			}
 		}
 
@@ -129,8 +129,8 @@
 			var jobs = DemoData.Jobs.ToList();
 
 			var errors = jobs
-				.Where(j => j.JobType == null || !jobTypeIds.Contains(j.JobType.Identifier))
-				.Select(j => $"Job '{j.JobName}' references unknown JobType '{j.JobType.Identifier}'")
+				.Where(j => j.Type == null || !jobTypeIds.Contains(j.Type.Identifier))
+				.Select(j => $"Job '{j.JobName}' references unknown JobType '{j.Type.Identifier}'")
 				.ToList();
 
 			if (errors.Any())

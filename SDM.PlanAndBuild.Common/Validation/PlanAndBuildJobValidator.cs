@@ -193,7 +193,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
         {
             var result = new ValidationResult();
 
-            if (job.ShouldValidate(job.JobTypeField) && !IsJobTypeValid(job, out var jobTypeResult))
+            if (job.ShouldValidate(job.TypeField) && !IsJobTypeValid(job, out var jobTypeResult))
             {
                 result.AddFailuresFrom(jobTypeResult);
             }

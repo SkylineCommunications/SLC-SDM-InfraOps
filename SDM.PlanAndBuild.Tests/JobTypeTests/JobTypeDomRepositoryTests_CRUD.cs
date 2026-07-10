@@ -125,7 +125,7 @@
 			Helper.Jobs.Create(new PlanAndBuildJob
 			{
 				JobName = "Job referencing type",
-				JobType = new SdmObjectReference<JobType>(jobTypeInUse.Identifier),
+				Type = new SdmObjectReference<JobType>(jobTypeInUse.Identifier),
 			});
 
 			Action act = () => Helper.JobTypes.Delete(jobTypeInUse);

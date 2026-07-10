@@ -1,4 +1,4 @@
-﻿namespace SDM.PlanAndBuild.Tests.JobTests
+namespace SDM.PlanAndBuild.Tests.JobTests
 {
 	using System.Linq;
 
@@ -43,8 +43,8 @@
 			Helper.PopulateJobs();
 
 			var jobTypeReference = new SdmObjectReference<JobType>(DemoData.JobTypes[0].Identifier);
-			var filter = PlanAndBuildJobExposers.JobType.Equal(jobTypeReference);
-			var expected = DemoData.Jobs.Where(j => j.JobType == jobTypeReference).ToArray();
+			var filter = PlanAndBuildJobExposers.Type.Equal(jobTypeReference);
+			var expected = DemoData.Jobs.Where(j => j.Type == jobTypeReference).ToArray();
 
 			var results = Helper.Jobs.Read(filter);
 
@@ -52,7 +52,7 @@
 			{
 				results.Should().NotBeNull();
 				results.Count().Should().Be(expected.Length);
-				results.Should().OnlyContain(j => j.JobType == jobTypeReference);
+				results.Should().OnlyContain(j => j.Type == jobTypeReference);
 			}
 		}
 
@@ -137,10 +137,10 @@
 			Helper.PopulateJobs();
 
 			var jobTypeReference = new SdmObjectReference<JobType>(DemoData.JobTypes[0].Identifier);
-			var combinedFilter = PlanAndBuildJobExposers.JobType.Equal(jobTypeReference)
+			var combinedFilter = PlanAndBuildJobExposers.Type.Equal(jobTypeReference)
 				.AND(PlanAndBuildJobExposers.Priority.Equal(SlcPlan_And_Build.Enums.PriorityEnum.High));
 
-			var expected = DemoData.Jobs.Where(j => j.JobType == jobTypeReference && j.Priority == SlcPlan_And_Build.Enums.PriorityEnum.High).ToArray();
+			var expected = DemoData.Jobs.Where(j => j.Type == jobTypeReference && j.Priority == SlcPlan_And_Build.Enums.PriorityEnum.High).ToArray();
 
 			var results = Helper.Jobs.Read(combinedFilter);
 

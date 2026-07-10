@@ -17,11 +17,13 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Extensions
         #region JobType / Ownership checks
 
         /// <summary>
-        /// Gets a value indicating whether <see cref="PlanAndBuildJob.JobType"/> has been assigned.
+        /// Gets a value indicating whether <see cref="PlanAndBuildJob.Type"/> (the JobType DOM reference)
+        /// has been assigned. Note: <see cref="PlanAndBuildJob.JobType"/> is the soft-deleted legacy enum
+        /// field and is intentionally not checked here.
         /// </summary>
         public static bool HasJobType(this PlanAndBuildJob job)
         {
-            return job != null && job.JobType != null;
+            return job != null && job.Type != null;
         }
 
         /// <summary>

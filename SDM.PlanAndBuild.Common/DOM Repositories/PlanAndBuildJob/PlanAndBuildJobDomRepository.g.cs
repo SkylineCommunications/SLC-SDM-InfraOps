@@ -541,16 +541,16 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
                     obj.End = (System.DateTime)_end.Value;
                 }
 
-                var _jobtype = _planandbuildjobpropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.JobType);
+                var _jobtype = _planandbuildjobpropertiesSection.GetValue<int>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.JobType);
                 if (_jobtype != null)
                 {
-                    obj.JobType = new Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.PlanAndBuild.Models.JobType>(Convert.ToString(_jobtype.Value));
+                    obj.JobType = (SharedMappers.DomIds.SlcPlan_And_Build.Enums.JobtypeEnum)_jobtype.Value;
                 }
 
-                var _type = _planandbuildjobpropertiesSection.GetValue<int>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.Type);
+                var _type = _planandbuildjobpropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.Type);
                 if (_type != null)
                 {
-                    obj.Type = (SharedMappers.DomIds.SlcPlan_And_Build.Enums.JobtypeEnum)_type.Value;
+                    obj.Type = new Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.PlanAndBuild.Models.JobType>(Convert.ToString(_type.Value));
                 }
 
                 var _jobdescription = _planandbuildjobpropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.JobDescription);
@@ -746,12 +746,12 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
                 _planandbuildjobproperties.AddOrUpdateValue<DateTime>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.End, (DateTime)(obj.End).Value);
             }
 
-            if (obj.JobType != default)
-            {
-                _planandbuildjobproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.JobType, obj.JobType.Identifier);
-            }
+            _planandbuildjobproperties.AddOrUpdateValue<int>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.JobType, (int)obj.JobType);
 
-            _planandbuildjobproperties.AddOrUpdateValue<int>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.Type, (int)obj.Type);
+            if (obj.Type != default)
+            {
+                _planandbuildjobproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.Type, obj.Type.Identifier);
+            }
             if (obj.JobDescription != default)
             {
                 _planandbuildjobproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.JobDescription, Convert.ToString(obj.JobDescription));
@@ -893,9 +893,9 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
                 case "End":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.End), comparer, (DateTime)((System.DateTime?)value).Value);
                 case "JobType":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.JobType), comparer, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.PlanAndBuild.Models.JobType>.Convert(value).Identifier);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.JobType), comparer, (int)(SharedMappers.DomIds.SlcPlan_And_Build.Enums.JobtypeEnum)value);
                 case "Type":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.Type), comparer, (int)(SharedMappers.DomIds.SlcPlan_And_Build.Enums.JobtypeEnum)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.Type), comparer, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.PlanAndBuild.Models.JobType>.Convert(value).Identifier);
                 case "JobDescription" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
                     return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.JobDescription.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "JobDescription":
