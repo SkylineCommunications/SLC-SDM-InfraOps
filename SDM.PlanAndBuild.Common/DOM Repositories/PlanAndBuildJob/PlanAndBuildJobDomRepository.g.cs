@@ -541,10 +541,10 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
                     obj.End = (System.DateTime)_end.Value;
                 }
 
-                var _jobtype = _planandbuildjobpropertiesSection.GetValue<int>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.JobType);
+                var _jobtype = _planandbuildjobpropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.JobType);
                 if (_jobtype != null)
                 {
-                    obj.JobType = (SharedMappers.DomIds.SlcPlan_And_Build.Enums.JobtypeEnum)_jobtype.Value;
+                    obj.JobType = SharedMappers.DomIds.SlcPlan_And_Build.Enums.Jobtype.ToEnum(_jobtype.Value);
                 }
 
                 var _type = _planandbuildjobpropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.Type);
@@ -565,16 +565,16 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
                     obj.Remarks = _remarks.Value;
                 }
 
-                var _priority = _planandbuildjobpropertiesSection.GetValue<int>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.Priority);
+                var _priority = _planandbuildjobpropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.Priority);
                 if (_priority != null)
                 {
-                    obj.Priority = (SharedMappers.DomIds.SlcPlan_And_Build.Enums.PriorityEnum)_priority.Value;
+                    obj.Priority = SharedMappers.DomIds.SlcPlan_And_Build.Enums.Priority.ToEnum(_priority.Value);
                 }
 
-                var _substate = _planandbuildjobpropertiesSection.GetValue<int>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.SubState);
+                var _substate = _planandbuildjobpropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.SubState);
                 if (_substate != null)
                 {
-                    obj.SubState = (SharedMappers.DomIds.SlcPlan_And_Build.Enums.SubStateEnum)_substate.Value;
+                    obj.SubState = SharedMappers.DomIds.SlcPlan_And_Build.Enums.Substate.ToEnum(_substate.Value);
                 }
 
                 var _locations = _planandbuildjobpropertiesSection.GetListValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.Locations);
@@ -611,10 +611,10 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
                     assetsused.AssetId = new Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.Asset>(Convert.ToString(_assetsusedassetid.Value));
                 }
 
-                var _assetsusedaction = _assetsusedSection.GetValue<int>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.AssetsUsed.Action);
+                var _assetsusedaction = _assetsusedSection.GetValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.AssetsUsed.Action);
                 if (_assetsusedaction != null)
                 {
-                    assetsused.Action = (SharedMappers.DomIds.SlcPlan_And_Build.Enums.ActionforassetenumEnum)_assetsusedaction.Value;
+                    assetsused.Action = SharedMappers.DomIds.SlcPlan_And_Build.Enums.Actionforassetenum.ToEnum(_assetsusedaction.Value);
                 }
 
                 _assetsusedList.Add(assetsused);
@@ -762,10 +762,10 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
                 _planandbuildjobproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.Remarks, Convert.ToString(obj.Remarks));
             }
 
-            _planandbuildjobproperties.AddOrUpdateValue<int>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.Priority, (int)obj.Priority);
+            _planandbuildjobproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.Priority, SharedMappers.DomIds.SlcPlan_And_Build.Enums.Priority.ToValue(obj.Priority));
             if (obj.SubState != default)
             {
-                _planandbuildjobproperties.AddOrUpdateValue<int>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.SubState, (int)(obj.SubState).Value);
+                _planandbuildjobproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.SubState, SharedMappers.DomIds.SlcPlan_And_Build.Enums.Substate.ToValue((obj.SubState).Value));
             }
 
             if (obj.Locations != default)
@@ -798,7 +798,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
                     _assetsusedSection.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.AssetsUsed.AssetId, assetsused.AssetId.Identifier);
                 }
 
-                _assetsusedSection.AddOrUpdateValue<int>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.AssetsUsed.Action, (int)assetsused.Action);
+                _assetsusedSection.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.AssetsUsed.Action, SharedMappers.DomIds.SlcPlan_And_Build.Enums.Actionforassetenum.ToValue(assetsused.Action));
                 instance.Sections.Add(_assetsusedSection);
             }
 
@@ -893,7 +893,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
                 case "End":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.End), comparer, (DateTime)((System.DateTime?)value).Value);
                 case "JobType":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.JobType), comparer, (int)(SharedMappers.DomIds.SlcPlan_And_Build.Enums.JobtypeEnum)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.JobType), comparer, SharedMappers.DomIds.SlcPlan_And_Build.Enums.Jobtype.ToValue((SharedMappers.DomIds.SlcPlan_And_Build.Enums.JobtypeEnum)value));
                 case "Type":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.Type), comparer, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.PlanAndBuild.Models.JobType>.Convert(value).Identifier);
                 case "JobDescription" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
@@ -905,11 +905,11 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
                 case "Remarks":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.Remarks), comparer, (string)value);
                 case "Priority":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.Priority), comparer, (int)(SharedMappers.DomIds.SlcPlan_And_Build.Enums.PriorityEnum)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.Priority), comparer, SharedMappers.DomIds.SlcPlan_And_Build.Enums.Priority.ToValue((SharedMappers.DomIds.SlcPlan_And_Build.Enums.PriorityEnum)value));
                 case "SubState" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
                     return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.SubState.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "SubState":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.SubState), comparer, (int)((SharedMappers.DomIds.SlcPlan_And_Build.Enums.SubStateEnum?)value).Value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.SubState), comparer, SharedMappers.DomIds.SlcPlan_And_Build.Enums.Substate.ToValue(((SharedMappers.DomIds.SlcPlan_And_Build.Enums.SubStateEnum?)value).Value));
                 case "Locations" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
                     return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.Locations.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Locations":
@@ -917,7 +917,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
                 case "AssetsUsed.AssetId":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.AssetsUsed.AssetId), comparer, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.Asset>.Convert(value).Identifier);
                 case "AssetsUsed.Action":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.AssetsUsed.Action), comparer, (int)(SharedMappers.DomIds.SlcPlan_And_Build.Enums.ActionforassetenumEnum)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.AssetsUsed.Action), comparer, SharedMappers.DomIds.SlcPlan_And_Build.Enums.Actionforassetenum.ToValue((SharedMappers.DomIds.SlcPlan_And_Build.Enums.ActionforassetenumEnum)value));
                 case "Attachments.FilePath" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
                     return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.Attachments.FilePath.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Attachments.FilePath":

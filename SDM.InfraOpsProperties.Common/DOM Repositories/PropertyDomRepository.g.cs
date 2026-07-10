@@ -522,10 +522,10 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
                     obj.Name = _name.Value;
                 }
 
-                var _propertytype = _propertypropertiesSection.GetValue<int>(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyDomMapper.PropertyProperties.PropertyType);
+                var _propertytype = _propertypropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyDomMapper.PropertyProperties.PropertyType);
                 if (_propertytype != null)
                 {
-                    obj.PropertyType = (SharedMappers.DomIds.InfraopsProperties.Enums.PropertyTypeEnum)_propertytype.Value;
+                    obj.PropertyType = SharedMappers.DomIds.InfraopsProperties.Enums.Propertytype.ToEnum(_propertytype.Value);
                 }
 
                 var _scope = _propertypropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyDomMapper.PropertyProperties.Scope);
@@ -614,7 +614,7 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
                 _propertyproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyDomMapper.PropertyProperties.Name, Convert.ToString(obj.Name));
             }
 
-            _propertyproperties.AddOrUpdateValue<int>(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyDomMapper.PropertyProperties.PropertyType, (int)obj.PropertyType);
+            _propertyproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyDomMapper.PropertyProperties.PropertyType, SharedMappers.DomIds.InfraopsProperties.Enums.Propertytype.ToValue(obj.PropertyType));
             if (obj.Scope != default)
             {
                 _propertyproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyDomMapper.PropertyProperties.Scope, Convert.ToString(obj.Scope));
@@ -677,7 +677,7 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
                 case "Name":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyDomMapper.PropertyProperties.Name), comparer, (string)value);
                 case "PropertyType":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyDomMapper.PropertyProperties.PropertyType), comparer, (int)(SharedMappers.DomIds.InfraopsProperties.Enums.PropertyTypeEnum)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyDomMapper.PropertyProperties.PropertyType), comparer, SharedMappers.DomIds.InfraopsProperties.Enums.Propertytype.ToValue((SharedMappers.DomIds.InfraopsProperties.Enums.PropertyTypeEnum)value));
                 case "Scope" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
                     return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyDomMapper.PropertyProperties.Scope.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Scope":
