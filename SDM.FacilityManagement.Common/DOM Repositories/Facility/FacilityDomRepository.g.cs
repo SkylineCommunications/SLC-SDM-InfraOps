@@ -533,10 +533,10 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     obj.Description = _description.Value;
                 }
 
-                var _facilitytype = _facilitypropertiesSection.GetValue<int>(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityDomMapper.FacilityProperties.FacilityType);
+                var _facilitytype = _facilitypropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityDomMapper.FacilityProperties.FacilityType);
                 if (_facilitytype != null)
                 {
-                    obj.FacilityType = (SharedMappers.DomIds.SlcFacility_Management.Enums.FacilityTypeEnum)_facilitytype.Value;
+                    obj.FacilityType = SharedMappers.DomIds.SlcFacility_Management.Enums.Facilitytype.ToEnum(_facilitytype.Value);
                 }
 
                 var _address = _facilitypropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityDomMapper.FacilityProperties.Address);
@@ -628,7 +628,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
             if (obj.FacilityType != default)
             {
-                _facilityproperties.AddOrUpdateValue<int>(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityDomMapper.FacilityProperties.FacilityType, (int)(obj.FacilityType).Value);
+                _facilityproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityDomMapper.FacilityProperties.FacilityType, SharedMappers.DomIds.SlcFacility_Management.Enums.Facilitytype.ToValue((obj.FacilityType).Value));
             }
             if (obj.Address != default)
             {
@@ -690,7 +690,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 case "FacilityType" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
                     return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityDomMapper.FacilityProperties.FacilityType.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "FacilityType":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityDomMapper.FacilityProperties.FacilityType), comparer, (int)((SharedMappers.DomIds.SlcFacility_Management.Enums.FacilityTypeEnum?)value).Value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityDomMapper.FacilityProperties.FacilityType), comparer, SharedMappers.DomIds.SlcFacility_Management.Enums.Facilitytype.ToValue(((SharedMappers.DomIds.SlcFacility_Management.Enums.FacilityTypeEnum?)value).Value));
                 case "Address":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityDomMapper.FacilityProperties.Address), comparer, (string)value);
                 case "City":

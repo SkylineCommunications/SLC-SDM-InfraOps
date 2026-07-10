@@ -529,10 +529,10 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     obj.Model = _rackpropertiesmodel.Value;
                 }
 
-                var _rackpropertiesposition = _rackpropertiesSection.GetValue<int>(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.Position);
+                var _rackpropertiesposition = _rackpropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.Position);
                 if (_rackpropertiesposition != null)
                 {
-                    obj.Position = (SharedMappers.DomIds.SlcFacility_Management.Enums.RackpositionenumEnum)_rackpropertiesposition.Value;
+                    obj.Position = SharedMappers.DomIds.SlcFacility_Management.Enums.Rackpositionenum.ToEnum(_rackpropertiesposition.Value);
                 }
 
                 var _rackpropertieswidth = _rackpropertiesSection.GetValue<double>(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.Width);
@@ -565,10 +565,10 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     obj.Bookable = _rackpropertiesbookable.Value;
                 }
 
-                var _rackpropertiescoolingflow = _rackpropertiesSection.GetValue<int>(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.CoolingFlow);
+                var _rackpropertiescoolingflow = _rackpropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.CoolingFlow);
                 if (_rackpropertiescoolingflow != null)
                 {
-                    obj.CoolingFlow = (SharedMappers.DomIds.SlcFacility_Management.Enums.CoolingflowenumEnum)_rackpropertiescoolingflow.Value;
+                    obj.CoolingFlow = SharedMappers.DomIds.SlcFacility_Management.Enums.Coolingflowenum.ToEnum(_rackpropertiescoolingflow.Value);
                 }
 
                 var _rackpropertiesxposition = _rackpropertiesSection.GetValue<double>(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.XPosition);
@@ -708,7 +708,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
             if (obj.Position != default)
             {
-                _rackproperties.AddOrUpdateValue<int>(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.Position, (int)(obj.Position).Value);
+                _rackproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.Position, SharedMappers.DomIds.SlcFacility_Management.Enums.Rackpositionenum.ToValue((obj.Position).Value));
             }
             if (obj.Width != default)
             {
@@ -737,7 +737,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
             if (obj.CoolingFlow != default)
             {
-                _rackproperties.AddOrUpdateValue<int>(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.CoolingFlow, (int)(obj.CoolingFlow).Value);
+                _rackproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.CoolingFlow, SharedMappers.DomIds.SlcFacility_Management.Enums.Coolingflowenum.ToValue((obj.CoolingFlow).Value));
             }
             if (obj.XPosition != default)
             {
@@ -845,7 +845,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 case "Position" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
                     return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.Position.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Position":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.Position), comparer, (int)((SharedMappers.DomIds.SlcFacility_Management.Enums.RackpositionenumEnum?)value).Value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.Position), comparer, SharedMappers.DomIds.SlcFacility_Management.Enums.Rackpositionenum.ToValue(((SharedMappers.DomIds.SlcFacility_Management.Enums.RackpositionenumEnum?)value).Value));
                 case "Width" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
                     return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.Width.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Width":
@@ -867,7 +867,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 case "CoolingFlow" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
                     return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.CoolingFlow.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "CoolingFlow":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.CoolingFlow), comparer, (int)((SharedMappers.DomIds.SlcFacility_Management.Enums.CoolingflowenumEnum?)value).Value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.CoolingFlow), comparer, SharedMappers.DomIds.SlcFacility_Management.Enums.Coolingflowenum.ToValue(((SharedMappers.DomIds.SlcFacility_Management.Enums.CoolingflowenumEnum?)value).Value));
                 case "XPosition" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
                     return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.FacilityManagement.Models.RackDomMapper.RackProperties.XPosition.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "XPosition":

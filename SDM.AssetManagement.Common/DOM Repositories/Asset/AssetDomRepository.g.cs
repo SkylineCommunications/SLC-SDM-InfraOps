@@ -617,7 +617,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 var _locationside = _locationSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Side);
                 if (_locationside != null)
                 {
-                    obj.Location.Side = (SharedMappers.DomIds.SlcAsset_Management.Enums.SideEnum)Enum.Parse(typeof(SharedMappers.DomIds.SlcAsset_Management.Enums.SideEnum), _locationside.Value);
+                    obj.Location.Side = SharedMappers.DomIds.SlcAsset_Management.Enums.Side.ToEnum(_locationside.Value);
                 }
 
                 var _locationrack = _locationSection.GetValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Rack);
@@ -670,7 +670,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 var _locationside = _destinationlocationSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.Side);
                 if (_locationside != null)
                 {
-                    obj.DestinationLocation.Side = (SharedMappers.DomIds.SlcAsset_Management.Enums.SideEnum)Enum.Parse(typeof(SharedMappers.DomIds.SlcAsset_Management.Enums.SideEnum), _locationside.Value);
+                    obj.DestinationLocation.Side = SharedMappers.DomIds.SlcAsset_Management.Enums.Side.ToEnum(_locationside.Value);
                 }
 
                 var _locationrack = _destinationlocationSection.GetValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.Rack);
@@ -964,7 +964,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
                 if (obj.Location.Side != default)
                 {
-                    _location.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Side, Convert.ToString((obj.Location.Side).Value));
+                    _location.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Side, SharedMappers.DomIds.SlcAsset_Management.Enums.Side.ToValue((obj.Location.Side).Value));
                 }
 
                 instance.Sections.Add(_location);
@@ -1010,7 +1010,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
                 if (obj.DestinationLocation.Side != default)
                 {
-                    _destinationlocation.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.Side, Convert.ToString((obj.DestinationLocation.Side).Value));
+                    _destinationlocation.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.Side, SharedMappers.DomIds.SlcAsset_Management.Enums.Side.ToValue((obj.DestinationLocation.Side).Value));
                 }
 
                 instance.Sections.Add(_destinationlocation);
@@ -1182,7 +1182,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				case "Location.Side" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
 					return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Side.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "Location.Side":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Side), comparer, Convert.ToString(((SlcAsset_Management.Enums.SideEnum?)value).Value));
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Side), comparer, SharedMappers.DomIds.SlcAsset_Management.Enums.Side.ToValue(((SlcAsset_Management.Enums.SideEnum?)value).Value));
 				case "Location.RackId":
 						return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Rack), comparer, System.Guid.Parse(Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.FacilityManagement.Models.Rack>.Convert(value).Identifier));
 				case "Location.DeskId" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
@@ -1206,7 +1206,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				case "DestinationLocation.Side" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
 					return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.Side.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "DestinationLocation.Side":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.Side), comparer, Convert.ToString(((SharedMappers.DomIds.SlcAsset_Management.Enums.SideEnum?)value).Value));
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.Side), comparer, SharedMappers.DomIds.SlcAsset_Management.Enums.Side.ToValue(((SharedMappers.DomIds.SlcAsset_Management.Enums.SideEnum?)value).Value));
 				case "DestinationLocation.RackId":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.Rack), comparer, System.Guid.Parse(Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.FacilityManagement.Models.Rack>.Convert(value).Identifier));
 				case "DestinationLocation.DeskId" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
