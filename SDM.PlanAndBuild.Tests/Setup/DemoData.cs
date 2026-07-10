@@ -10,6 +10,8 @@ namespace SDM.PlanAndBuild.Tests.Setup
 
 	public static class DemoData
 	{
+		public static readonly Guid SharedLocation = Guid.NewGuid();
+
 		public static readonly List<JobType> JobTypes =
 		[
 			new JobType
@@ -52,6 +54,7 @@ namespace SDM.PlanAndBuild.Tests.Setup
 				Remarks = string.Empty,
 				Priority = SlcPlan_And_Build.Enums.PriorityEnum.High,
 				SubState = SlcPlan_And_Build.Enums.SubStateEnum.Scheduled,
+				Locations = new List<Guid> { SharedLocation, Guid.NewGuid() },
 			},
 			new PlanAndBuildJob
 			{
@@ -100,6 +103,7 @@ namespace SDM.PlanAndBuild.Tests.Setup
 				Remarks = "Customer escalation",
 				Priority = SlcPlan_And_Build.Enums.PriorityEnum.Critical,
 				SubState = SlcPlan_And_Build.Enums.SubStateEnum.PendingKickoff,
+				Locations = new List<Guid> { SharedLocation },
 			},
 		];
 

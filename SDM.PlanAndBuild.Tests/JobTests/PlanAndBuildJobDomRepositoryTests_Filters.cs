@@ -131,6 +131,25 @@ namespace SDM.PlanAndBuild.Tests.JobTests
 		}
 
 		[TestMethod]
+		public void PlanAndBuildJobDomRepository_ReadFilter_Locations_Equal()
+		{
+			Helper.PopulateJobTypes();
+			Helper.PopulateJobs();
+
+			var filter = PlanAndBuildJobExposers.Locations.Equal(DemoData.SharedLocation);
+			var expected = DemoData.Jobs.Where(j => j.Locations.Contains(DemoData.SharedLocation)).ToArray();
+
+			var results = Helper.Jobs.Read(filter);
+
+			using (new AssertionScope())
+			{
+				results.Should().NotBeNull();
+				results.Count().Should().Be(expected.Length);
+				results.Should().OnlyContain(j => j.Locations.Contains(DemoData.SharedLocation));
+			}
+		}
+
+		[TestMethod]
 		public void PlanAndBuildJobDomRepository_ReadFilter_JobTypeAndPriority_Combined()
 		{
 			Helper.PopulateJobTypes();

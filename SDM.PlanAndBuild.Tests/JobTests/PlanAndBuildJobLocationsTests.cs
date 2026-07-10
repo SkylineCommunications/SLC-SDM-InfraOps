@@ -25,7 +25,7 @@
 
 			job.AddLocation(location);
 
-			job.LocationGuids.Should().ContainSingle().Which.Should().Be(location);
+			job.Locations.Should().ContainSingle().Which.Should().Be(location);
 		}
 
 		[TestMethod]
@@ -49,7 +49,7 @@
 
 			job.RemoveLocation(location);
 
-			job.LocationGuids.Should().BeEmpty();
+			job.Locations.Should().BeEmpty();
 		}
 
 		[TestMethod]
@@ -71,7 +71,7 @@
 			var replacement = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() };
 			job.SetLocations(replacement);
 
-			job.LocationGuids.Should().BeEquivalentTo(replacement);
+			job.Locations.Should().BeEquivalentTo(replacement);
 		}
 
 		[TestMethod]

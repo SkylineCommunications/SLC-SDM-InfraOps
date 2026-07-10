@@ -580,7 +580,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
                 var _locations = _planandbuildjobpropertiesSection.GetListValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.Locations);
                 if (_locations != null)
                 {
-                    obj.Locations = _locations.Values;
+                    obj.Locations = _locations.Values.Select(Guid.Parse).ToList();
                 }
             }
 
@@ -770,7 +770,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 
             if (obj.Locations != default)
             {
-                _planandbuildjobproperties.AddOrUpdateListValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.Locations, obj.Locations);
+                _planandbuildjobproperties.AddOrUpdateListValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.Locations, obj.Locations.Select(v => v.ToString()).ToList());
             }
 
             instance.Sections.Add(_planandbuildjobproperties);
@@ -913,7 +913,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
                 case "Locations" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
                     return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.Locations.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Locations":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.Locations), comparer, (string)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.Locations), comparer, ((Guid)value).ToString());
                 case "AssetsUsed.AssetId":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.AssetsUsed.AssetId), comparer, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.Asset>.Convert(value).Identifier);
                 case "AssetsUsed.Action":

@@ -32,7 +32,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
         public static readonly Exposer<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob, string> Remarks = new Exposer<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob, string>((obj) => obj.Remarks, "Remarks");
         public static readonly Exposer<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob, SharedMappers.DomIds.SlcPlan_And_Build.Enums.PriorityEnum> Priority = new Exposer<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob, SharedMappers.DomIds.SlcPlan_And_Build.Enums.PriorityEnum>((obj) => obj.Priority, "Priority");
         public static readonly Exposer<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob, SharedMappers.DomIds.SlcPlan_And_Build.Enums.SubStateEnum?> SubState = new Exposer<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob, SharedMappers.DomIds.SlcPlan_And_Build.Enums.SubStateEnum?>((obj) => obj.SubState, "SubState");
-        public static readonly CollectionExposer<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob, string> Locations = new CollectionExposer<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob, string>((obj) => obj.Locations.Where(x => x != null), "Locations");
+        public static readonly CollectionExposer<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob, Guid> Locations = new CollectionExposer<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob, Guid>((obj) => obj.Locations, "Locations");
         static PlanAndBuildJobExposers()
         {
             RuntimeHelpers.RunClassConstructor(typeof(Ownership).TypeHandle);
