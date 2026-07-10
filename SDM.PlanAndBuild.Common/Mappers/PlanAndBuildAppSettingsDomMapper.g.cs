@@ -15,8 +15,8 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
     [SdmDomMapper]
     public static class PlanAndBuildAppSettingsDomMapper
     {
-        internal const string ModuleId = "(slc)plan_and_build";
-        private static readonly DomDefinitionId PlanAndBuildAppSettingsDomDefinitionId = new DomDefinitionId(new Guid("d4d69ebf-ee9b-4213-88ae-8ef03d833dda"))
+        internal const string ModuleId = SharedMappers.DomIds.SlcPlan_And_Build.ModuleId;
+        private static readonly DomDefinitionId PlanAndBuildAppSettingsDomDefinitionId = new DomDefinitionId(SharedMappers.DomIds.SlcPlan_And_Build.Definitions.AppSettings.Id)
         {
             ModuleId = ModuleId
         };
@@ -24,17 +24,17 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 
         public static class PlanAndBuildAppSettingsProperties
         {
-            private static readonly SectionDefinitionID sectionDefinitionId = new SectionDefinitionID(new Guid("29c632e9-3152-457c-9b1a-99527d9b59c7"))
+            private static readonly SectionDefinitionID sectionDefinitionId = new SectionDefinitionID(SharedMappers.DomIds.SlcPlan_And_Build.Sections.JobSettings.Id.Id)
             {
                 ModuleId = ModuleId
             };
             internal static SectionDefinitionID SectionDefinitionId => sectionDefinitionId;
 
-            public static readonly FieldDescriptorID JobIDPrefix = new FieldDescriptorID(new Guid("4b49d897-02b6-4d10-a9cc-3f9051e3e0c9"));
-            public static readonly FieldDescriptorID JobIDNextSequence = new FieldDescriptorID(new Guid("da5b8510-52c1-4ab6-a480-bd17cb04b020"));
-            public static readonly FieldDescriptorID JobIDIncrement = new FieldDescriptorID(new Guid("0c8edb1f-59d1-4fbf-a6ad-cafb348105e8"));
-            public static readonly FieldDescriptorID JobIDStartingSeed = new FieldDescriptorID(new Guid("feb28eca-1bbf-47c3-a6f5-7dbc72c4900e"));
-            public static readonly FieldDescriptorID JobIDMinimumDigits = new FieldDescriptorID(new Guid("f783d98e-31e7-4226-9b53-4b7ad1279b87"));
+            public static readonly FieldDescriptorID JobIDPrefix = SharedMappers.DomIds.SlcPlan_And_Build.Sections.JobSettings.JobIDPrefix;
+            public static readonly FieldDescriptorID JobIDNextSequence = SharedMappers.DomIds.SlcPlan_And_Build.Sections.JobSettings.JobIDNextSequence;
+            public static readonly FieldDescriptorID JobIDIncrement = SharedMappers.DomIds.SlcPlan_And_Build.Sections.JobSettings.JobIDIncrement;
+            public static readonly FieldDescriptorID JobIDStartingSeed = SharedMappers.DomIds.SlcPlan_And_Build.Sections.JobSettings.JobIDStartingSeed;
+            public static readonly FieldDescriptorID JobIDMinimumDigits = SharedMappers.DomIds.SlcPlan_And_Build.Sections.JobSettings.JobIDMinimumDigits;
         }
     }
 }

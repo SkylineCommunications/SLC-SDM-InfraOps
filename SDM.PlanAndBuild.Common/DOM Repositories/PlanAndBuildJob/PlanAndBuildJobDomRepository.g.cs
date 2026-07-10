@@ -647,6 +647,50 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             }
 
             obj.Attachments = _attachmentsList;
+            var _connectionsonjobList = new System.Collections.Generic.List<Skyline.DataMiner.SDM.PlanAndBuild.Models.JobConnection>();
+            foreach (var _connectionsonjobSection in instance.Sections.Where(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.SectionDefinitionId)))
+            {
+                var connectionsonjob = new Skyline.DataMiner.SDM.PlanAndBuild.Models.JobConnection();
+                var _connectionsonjobconnectionid = _connectionsonjobSection.GetValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.ConnectionId);
+                if (_connectionsonjobconnectionid != null)
+                {
+                    connectionsonjob.ConnectionId = new Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.Connection>(Convert.ToString(_connectionsonjobconnectionid.Value));
+                }
+
+                var _connectionsonjobsource = _connectionsonjobSection.GetValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.Source);
+                if (_connectionsonjobsource != null)
+                {
+                    connectionsonjob.Source = _connectionsonjobsource.Value;
+                }
+
+                var _connectionsonjobdestination = _connectionsonjobSection.GetValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.Destination);
+                if (_connectionsonjobdestination != null)
+                {
+                    connectionsonjob.Destination = _connectionsonjobdestination.Value;
+                }
+
+                var _connectionsonjobstatus = _connectionsonjobSection.GetValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.Status);
+                if (_connectionsonjobstatus != null)
+                {
+                    connectionsonjob.Status = _connectionsonjobstatus.Value;
+                }
+
+                var _connectionsonjobcabletype = _connectionsonjobSection.GetValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.CableType);
+                if (_connectionsonjobcabletype != null)
+                {
+                    connectionsonjob.CableType = new Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.CableType>(Convert.ToString(_connectionsonjobcabletype.Value));
+                }
+
+                var _connectionsonjobcablelength = _connectionsonjobSection.GetValue<double>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.CableLength);
+                if (_connectionsonjobcablelength != null)
+                {
+                    connectionsonjob.CableLength = _connectionsonjobcablelength.Value;
+                }
+
+                _connectionsonjobList.Add(connectionsonjob);
+            }
+
+            obj.ConnectionsOnJob = _connectionsonjobList;
             obj.ResetChangeTracking();
             return obj;
         }
@@ -779,6 +823,42 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
                 instance.Sections.Add(_attachmentsSection);
             }
 
+            foreach (var connectionsonjob in obj.ConnectionsOnJob)
+            {
+                var _connectionsonjobSection = new Section(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.SectionDefinitionId);
+                if (connectionsonjob.ConnectionId != default)
+                {
+                    _connectionsonjobSection.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.ConnectionId, connectionsonjob.ConnectionId.Identifier);
+                }
+
+                if (connectionsonjob.Source != default)
+                {
+                    _connectionsonjobSection.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.Source, Convert.ToString(connectionsonjob.Source));
+                }
+
+                if (connectionsonjob.Destination != default)
+                {
+                    _connectionsonjobSection.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.Destination, Convert.ToString(connectionsonjob.Destination));
+                }
+
+                if (connectionsonjob.Status != default)
+                {
+                    _connectionsonjobSection.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.Status, Convert.ToString(connectionsonjob.Status));
+                }
+
+                if (connectionsonjob.CableType != default)
+                {
+                    _connectionsonjobSection.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.CableType, connectionsonjob.CableType.Identifier);
+                }
+
+                if (connectionsonjob.CableLength != default)
+                {
+                    _connectionsonjobSection.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.CableLength, (double)(connectionsonjob.CableLength).Value);
+                }
+
+                instance.Sections.Add(_connectionsonjobSection);
+            }
+
             return instance;
         }
 
@@ -850,6 +930,26 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
                     return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.Attachments.AttachedBy.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Attachments.AttachedBy":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.Attachments.AttachedBy), comparer, Convert.ToString(((System.Guid?)value).Value));
+                case "ConnectionsOnJob.ConnectionId":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.ConnectionId), comparer, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.Connection>.Convert(value).Identifier);
+                case "ConnectionsOnJob.Source" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.Source.Id.ToString()).Equal(comparer == Comparer.NotEquals);
+                case "ConnectionsOnJob.Source":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.Source), comparer, (string)value);
+                case "ConnectionsOnJob.Destination" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.Destination.Id.ToString()).Equal(comparer == Comparer.NotEquals);
+                case "ConnectionsOnJob.Destination":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.Destination), comparer, (string)value);
+                case "ConnectionsOnJob.Status" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.Status.Id.ToString()).Equal(comparer == Comparer.NotEquals);
+                case "ConnectionsOnJob.Status":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.Status), comparer, (string)value);
+                case "ConnectionsOnJob.CableType":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.CableType), comparer, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.CableType>.Convert(value).Identifier);
+                case "ConnectionsOnJob.CableLength" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.CableLength.Id.ToString()).Equal(comparer == Comparer.NotEquals);
+                case "ConnectionsOnJob.CableLength":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.CableLength), comparer, (double)((System.Double?)value).Value);
                 default:
                     throw new NotImplementedException();
             }
@@ -897,6 +997,18 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.Attachments.AttachedAt), sortOrder, naturalSort);
                 case "Attachments.AttachedBy":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.Attachments.AttachedBy), sortOrder, naturalSort);
+                case "ConnectionsOnJob.ConnectionId":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.ConnectionId), sortOrder, naturalSort);
+                case "ConnectionsOnJob.Source":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.Source), sortOrder, naturalSort);
+                case "ConnectionsOnJob.Destination":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.Destination), sortOrder, naturalSort);
+                case "ConnectionsOnJob.Status":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.Status), sortOrder, naturalSort);
+                case "ConnectionsOnJob.CableType":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.CableType), sortOrder, naturalSort);
+                case "ConnectionsOnJob.CableLength":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.CableLength), sortOrder, naturalSort);
                 default:
                     throw new NotImplementedException();
             }

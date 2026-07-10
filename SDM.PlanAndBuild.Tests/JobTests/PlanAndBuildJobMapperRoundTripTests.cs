@@ -20,7 +20,7 @@
 
 	/// <summary>
 	/// Round-trip tests for the PlanAndBuildJob DOM mapper (ToInstance/FromInstance), exercising every mapped
-	/// field including the Ownership section and the AssetsUsed/Attachments collections.
+	/// field including the Ownership section and the AssetsUsed/Attachments/ConnectionsOnJob collections.
 	/// </summary>
 	[TestClass]
 	public class PlanAndBuildJobMapperRoundTripTests : BaseRepositoryTest
@@ -56,6 +56,18 @@
 			{
 				new JobAttachment { FilePath = @"C:\attachments\plan.pdf", AttachedAt = new DateTime(2026, 1, 9), AttachedBy = Guid.NewGuid() },
 			};
+			original.ConnectionsOnJob = new List<JobConnection>
+			{
+				new JobConnection
+				{
+					ConnectionId = new SdmObjectReference<Connection>(Guid.NewGuid().ToString()),
+					Source = "Patch Panel A - Port 1",
+					Destination = "Switch B - Port 12",
+					Status = "Installed",
+					CableType = new SdmObjectReference<CableType>(Guid.NewGuid().ToString()),
+					CableLength = 12.5,
+				},
+			};
 
 			Helper.Jobs.Create(original);
 
@@ -79,6 +91,7 @@
 				roundTripped.Ownership.AssignmentGroup.Should().Be(original.Ownership.AssignmentGroup);
 				roundTripped.AssetsUsed.Should().BeEquivalentTo(original.AssetsUsed);
 				roundTripped.Attachments.Should().BeEquivalentTo(original.Attachments);
+				roundTripped.ConnectionsOnJob.Should().BeEquivalentTo(original.ConnectionsOnJob);
 			}
 		}
 

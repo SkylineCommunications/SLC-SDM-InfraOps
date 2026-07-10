@@ -46,7 +46,8 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             StateField?.Changed == true ||
             Ownership?.Changed == true ||
             AssetsUsedField?.Changed == true ||
-            AttachmentsField?.Changed == true;
+            AttachmentsField?.Changed == true ||
+            ConnectionsOnJobField?.Changed == true;
 
         /// <summary>
         /// Gets a value indicating whether the current object has not been assigned an identifier.
@@ -183,6 +184,12 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             set => AttachmentsField.Value = value;
         }
 
+        public List<JobConnection> ConnectionsOnJob
+        {
+            get => ConnectionsOnJobField.Value ?? new List<JobConnection>();
+            set => ConnectionsOnJobField.Value = value;
+        }
+
         #endregion
 
         #region Info Tracking Fields
@@ -279,6 +286,12 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             nameof(Attachments),
             () => new ChangeTrackingArrayField<JobAttachment>(new List<JobAttachment>()));
 
+        [JsonIgnore]
+        [SdmIgnore]
+        internal ChangeTrackingArrayField<JobConnection> ConnectionsOnJobField => FieldHandler.GetOrCreateArrayField(
+            nameof(ConnectionsOnJob),
+            () => new ChangeTrackingArrayField<JobConnection>(new List<JobConnection>()));
+
         #endregion
 
         public void ResetChangeTracking()
@@ -302,6 +315,87 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
                     attachment?.ResetChangeTracking();
                 }
             }
+
+            if (ConnectionsOnJob != null)
+            {
+                foreach (var connection in ConnectionsOnJob.OfType<IChangeTracking>())
+                {
+                    connection?.ResetChangeTracking();
+                }
+            }
         }
+
+        #region ConnectionsOnJob Convenience Methods
+
+        /// <summary>
+        /// Adds a <see cref="JobConnection"/> to <see cref="ConnectionsOnJob"/>.
+        /// </summary>
+        /// <exception cref="ArgumentNullException"><paramref name="connectionOnJob"/> is <c>null</c>.</exception>
+        /// <exception cref="InvalidOperationException">A connection with the same <see cref="JobConnection.ConnectionId"/> already exists.</exception>
+        public void AddConnectionsOnJobItem(JobConnection connectionOnJob)
+        {
+            if (connectionOnJob == null)
+            {
+                throw new ArgumentNullException(nameof(connectionOnJob));
+            }
+
+            var list = ConnectionsOnJob;
+
+            if (list.Any(connection => connection.ConnectionId == connectionOnJob.ConnectionId))
+            {
+                throw new InvalidOperationException("A Connection with the same Connection Id already exists.");
+            }
+
+            list.Add(connectionOnJob);
+            ConnectionsOnJob = list;
+        }
+
+        /// <summary>
+        /// Removes the <see cref="JobConnection"/> matching <paramref name="connectionOnJob"/>'s
+        /// <see cref="JobConnection.ConnectionId"/> from <see cref="ConnectionsOnJob"/>.
+        /// </summary>
+        /// <exception cref="ArgumentNullException"><paramref name="connectionOnJob"/> is <c>null</c>.</exception>
+        /// <exception cref="ArgumentException">No matching connection was found.</exception>
+        public void RemoveItemFromConnectionsOnJob(JobConnection connectionOnJob)
+        {
+            if (connectionOnJob == null)
+            {
+                throw new ArgumentNullException(nameof(connectionOnJob));
+            }
+
+            var list = ConnectionsOnJob;
+            var found = list.FirstOrDefault(connection => connection.ConnectionId == connectionOnJob.ConnectionId);
+
+            if (found == null)
+            {
+                throw new ArgumentException("The specified Connection was not found.");
+            }
+
+            list.Remove(found);
+            ConnectionsOnJob = list;
+        }
+
+        /// <summary>
+        /// Replaces <see cref="ConnectionsOnJob"/> with <paramref name="connectionsOnJob"/>.
+        /// </summary>
+        public void SetConnectionsOnJob(List<JobConnection> connectionsOnJob)
+        {
+            ConnectionsOnJob = connectionsOnJob ?? new List<JobConnection>();
+        }
+
+        /// <summary>
+        /// Clears all entries from <see cref="ConnectionsOnJob"/>.
+        /// </summary>
+        public void ClearConnectionsOnJob()
+        {
+            if (ConnectionsOnJob.Count == 0)
+            {
+                return;
+            }
+
+            ConnectionsOnJob = new List<JobConnection>();
+        }
+
+        #endregion
     }
 }
