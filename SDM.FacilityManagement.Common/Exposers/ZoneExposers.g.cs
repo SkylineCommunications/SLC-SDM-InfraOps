@@ -35,16 +35,16 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, string> Name = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, string>((obj) => obj.Name, "Name");
             public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, string> Plan = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, string>((obj) => obj.Plan, "Plan");
             public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, string> Description = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, string>((obj) => obj.Description, "Description");
-            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, SharedMappers.DomIds.SlcFacility_Management.Enums.ThermalType> ThermalType = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, SharedMappers.DomIds.SlcFacility_Management.Enums.ThermalType>((obj) => obj.ThermalType, "ThermalType");
-            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, double> XPosition = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, double>((obj) => obj.XPosition, "XPosition");
-            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, double> YPosition = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, double>((obj) => obj.YPosition, "YPosition");
-            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, double> Width = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, double>((obj) => obj.Width, "Width");
+            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, SharedMappers.DomIds.SlcFacility_Management.Enums.ThermalType> ThermalType = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, SharedMappers.DomIds.SlcFacility_Management.Enums.ThermalType>((obj) => obj.ThermalType ?? default, "ThermalType");
+            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, double?> XPosition = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, double?>((obj) => obj.XPosition, "XPosition");
+            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, double?> YPosition = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, double?>((obj) => obj.YPosition, "YPosition");
+            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, double?> Width = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, double?>((obj) => obj.Width, "Width");
             public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, string> ZoneId = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, string>((obj) => obj.ZoneId, "ZoneId");
         }
 
         public static partial class ZoneCapacity
         {
-            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, double> CoolingCapacity = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, double>((obj) => obj.ZoneCapacity.CoolingCapacity, "ZoneCapacity.CoolingCapacity");
+            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, double?> CoolingCapacity = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, double?>((obj) => obj.ZoneCapacity.CoolingCapacity, "ZoneCapacity.CoolingCapacity");
         }
 
         public static partial class RoomFk

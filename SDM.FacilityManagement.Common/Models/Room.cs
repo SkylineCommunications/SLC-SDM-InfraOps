@@ -12,9 +12,9 @@
 
         public string Description { get; set; }
 
-        public long Width { get; set; }
+        public long? Width { get; set; }
 
-        public long Depth { get; set; }
+        public long? Depth { get; set; }
 
         public string RoomId { get; set; }
 

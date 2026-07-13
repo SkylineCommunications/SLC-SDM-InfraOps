@@ -1,5 +1,6 @@
 ﻿namespace SDM.AssetManagement.Tests.DeviceTypes
 {
+    using System;
     using System.Linq;
 
     using FluentAssertions;
@@ -12,9 +13,10 @@
     using SharedMappers.DomIds;
 
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
-
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
+    using Skyline.DataMiner.SDM.Extensions;
+
 
     /// <summary>
     /// Filter and query tests for DeviceType repository operations.

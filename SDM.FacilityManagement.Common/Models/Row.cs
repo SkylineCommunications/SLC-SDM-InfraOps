@@ -14,7 +14,7 @@
 
         public string RowId { get; set; }
 
-        public double YPosition { get; set; }
+        public double? YPosition { get; set; }
 
         public RoomRelation RoomFk { get; set; }
 

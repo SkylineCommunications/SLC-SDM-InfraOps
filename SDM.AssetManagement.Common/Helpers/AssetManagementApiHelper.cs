@@ -11,6 +11,8 @@ using Skyline.DataMiner.SDM.FacilityManagement.Helpers;
 
 using Connection = Skyline.DataMiner.SDM.AssetManagement.Models.Connection;
 
+using SharedCommonLibrary.AssetManagement.Models;
+
 public class AssetManagementApiHelper : IAssetManagementApiHelper
 {
     private readonly AssetValidator _assetValidator;
@@ -40,26 +42,16 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
         var dataPortRepository = new DataPortDomRepository(connection);
         var powerPortRepository = new PowerPortDomRepository(connection);
         var portTypeRepository = new PortTypeDomRepository(connection);
+        var cableTypeRepository = new CableTypeDomRepository(connection);   
         var connectionDomRepository = new ConnectionDomRepository(connection);
+        var reservationRepository = new InfraopsReservationDomRepository(connection);
 
-        var entityLoader = new SdmEntityLoader(
-           assetRepository: assetRepository,
-           assetClassRepository: assetClassRepository,
-           deviceTypeRepository: deviceTypeRepository,
-           rackRepository: facilityManagementHelper.Racks,
-           dataPortRepository: dataPortRepository,
-           powerPortRepository: powerPortRepository,
-           portTypeRepository: portTypeRepository);
+        var entityLoader = new SdmEntityLoader(this, facilityManagementHelper);
 
         // Initialize validators
         _assetValidator = new AssetValidator(entityLoader);
 
         _assetClassValidator = new AssetClassValidator(entityLoader);
-
-        //_deviceTypeValidator = new DeviceTypeValidator(
-        //    _deviceTypeRepository,
-        //    _assetRepository);
-
         // Wrap with middleware
         Assets = assetRepository
             .WithMiddleware(new AssetValidationMiddleware(_assetValidator))
@@ -70,15 +62,13 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
         AssetClasses = assetClassRepository.WithMiddleware(new AssetClassValidationMiddleware(_assetClassValidator))
             .WithMiddleware(new IdentifierMiddleware<AssetClass>());
 
-        //DeviceTypes = _deviceTypeRepository.WithMiddleware(
-        //    new DeviceTypeValidationMiddleware(_deviceTypeValidator));
-
-        // Expose repositories directly (or wrap with middleware later)
         PowerPorts = powerPortRepository;
         DataPorts = dataPortRepository;
         DeviceTypes = deviceTypeRepository;
         PortTypes = portTypeRepository;
         Connections = connectionDomRepository;
+        CableTypes = cableTypeRepository;
+        Reservations = reservationRepository;
     }
 
     public IAssetRepository Assets { get; }
@@ -89,9 +79,10 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
     public IBulkRepository<DeviceType> DeviceTypes { get; }
     public IBulkRepository<PortType> PortTypes { get; }
     public IBulkRepository<Connection> Connections { get; }
+    public IBulkRepository<CableType> CableTypes { get; }
+    public IBulkRepository<InfraopsReservation> Reservations { get; }
 
     public AssetValidator AssetValidator => _assetValidator;
 
     public AssetClassValidator AssetClassValidator => _assetClassValidator;
-    
 }

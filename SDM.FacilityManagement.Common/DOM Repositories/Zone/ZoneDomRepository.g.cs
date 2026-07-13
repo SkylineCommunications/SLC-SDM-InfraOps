@@ -636,20 +636,23 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 _zoneproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Description, Convert.ToString(obj.Description));
             }
 
-            _zoneproperties.AddOrUpdateValue<int>(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.ThermalType, (int)obj.ThermalType);
+            if (obj.ThermalType != default)
+            {
+                _zoneproperties.AddOrUpdateValue<int>(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.ThermalType, (int)(obj.ThermalType).Value);
+            }
             if (obj.XPosition != default)
             {
-                _zoneproperties.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.XPosition, (double)obj.XPosition);
+                _zoneproperties.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.XPosition, (double)(obj.XPosition).Value);
             }
 
             if (obj.YPosition != default)
             {
-                _zoneproperties.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.YPosition, (double)obj.YPosition);
+                _zoneproperties.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.YPosition, (double)(obj.YPosition).Value);
             }
 
             if (obj.Width != default)
             {
-                _zoneproperties.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Width, (double)obj.Width);
+                _zoneproperties.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Width, (double)(obj.Width).Value);
             }
 
             if (obj.ZoneId != default)
@@ -663,7 +666,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 var _zonecapacity = new Section(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneCapacity.SectionDefinitionId);
                 if (obj.ZoneCapacity.CoolingCapacity != default)
                 {
-                    _zonecapacity.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneCapacity.CoolingCapacity, (double)obj.ZoneCapacity.CoolingCapacity);
+                    _zonecapacity.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneCapacity.CoolingCapacity, (double)(obj.ZoneCapacity.CoolingCapacity).Value);
                 }
 
                 instance.Sections.Add(_zonecapacity);
@@ -706,18 +709,28 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Plan), comparer, (string)value);
                 case "ZoneProperties.Description":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Description), comparer, (string)value);
+                case "ZoneProperties.ThermalType" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.ThermalType.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "ZoneProperties.ThermalType":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.ThermalType), comparer, (int)(SharedMappers.DomIds.SlcFacility_Management.Enums.ThermalType)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.ThermalType), comparer, (int)((SharedMappers.DomIds.SlcFacility_Management.Enums.ThermalType?)value).Value);
+                case "ZoneProperties.XPosition" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.XPosition.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "ZoneProperties.XPosition":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.XPosition), comparer, (double)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.XPosition), comparer, (double)((double?)value).Value);
+                case "ZoneProperties.YPosition" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.YPosition.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "ZoneProperties.YPosition":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.YPosition), comparer, (double)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.YPosition), comparer, (double)((double?)value).Value);
+                case "ZoneProperties.Width" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Width.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "ZoneProperties.Width":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Width), comparer, (double)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Width), comparer, (double)((double?)value).Value);
                 case "ZoneProperties.ZoneId":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.ZoneId), comparer, (string)value);
+                case "ZoneCapacity.CoolingCapacity" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneCapacity.CoolingCapacity.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "ZoneCapacity.CoolingCapacity":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneCapacity.CoolingCapacity), comparer, (double)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneCapacity.CoolingCapacity), comparer, (double)((double?)value).Value);
                 case "RoomFk.Room":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.RoomFk.Room), comparer, System.Guid.Parse(Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.FacilityManagement.Models.Room>.Convert(value).Identifier));
                 case "Resource.ResourceId":

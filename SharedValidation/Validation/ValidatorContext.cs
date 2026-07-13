@@ -20,16 +20,20 @@
 		{
 			this._baseEntry = baseEntry;
 			this._otherChangedEntries = new List<T1>();
-			_allChangedEntries = new List<T1>();
-			_allChangedEntries.Add(baseEntry);
+			_allChangedEntries = new List<T1>
+            {
+                baseEntry
+            };
 		}
 
 		public ValidatorContext(T1 baseEntry, List<T1> otherChangedEntries)
 		{
 			_baseEntry = baseEntry;
 			_otherChangedEntries = otherChangedEntries.Except(new List<T1> { baseEntry }).ToList();
-			_allChangedEntries = new List<T1>();
-			_allChangedEntries.Add(baseEntry);
+			_allChangedEntries = new List<T1>
+            {
+                baseEntry
+            };
 			_allChangedEntries.AddRange(_otherChangedEntries);
 		}
 
@@ -58,8 +62,5 @@
 		}
 
 		public bool ReturnWhenInvalid { get; set; } = true;
-
-		// TODO: Add Status Transition information in order to perform validactions considering the end status of the entry (e.g. when validating a change from Not Avaiable to Avaiable, consider the entry as Avaiable for validation purposes)
-
 	}
 }

@@ -561,8 +561,7 @@
                 State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit,
                 DestinationLocation = new AssetLocation
                 {
-                    HolderNumber = 5,
-                    // ParentAsset not set
+                    ParentAsset = new SdmObjectReference<Asset>(Guid.NewGuid().ToString()),
                 },
             };
 
@@ -571,7 +570,7 @@
 
             // Assert
             act.Should().Throw<Exception>()
-                .WithMessage("*Holder Number cannot be set when there is no Parent Asset*");
+                .WithMessage("*Holder Number must be set when Parent Asset is provided*");
         }
 
         [TestMethod]
@@ -617,8 +616,7 @@
                 State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit,
                 DestinationLocation = new AssetLocation
                 {
-                    RackPosition = 10,
-                    // RackId not set
+                    RackId = new SdmObjectReference<Rack>(Guid.NewGuid().ToString())
                 },
             };
 
@@ -627,7 +625,7 @@
 
             // Assert
             act.Should().Throw<Exception>()
-                .WithMessage("*Rack Position cannot be set when there is no Rack*");
+                .WithMessage("*Rack Position must be set when Rack is provided*");
         }
 
         [TestMethod]
@@ -1298,7 +1296,7 @@
 
             // Assert
             act.Should().Throw<Exception>()
-                .WithMessage("*Invalid Position. Extends beyond rack boundaries*");
+                .WithMessage("*Invalid Position*. Extends beyond rack boundaries*");
         }
 
         [TestMethod]
@@ -1345,7 +1343,7 @@
 
             // Assert
             act.Should().Throw<Exception>()
-                .WithMessage("*Invalid Position. Extends beyond rack boundaries*");
+                .WithMessage("*Invalid Position*. Extends beyond rack boundaries*");
         }
 
         [TestMethod]
@@ -1422,7 +1420,7 @@
                     new AssetHolder
                     {
                         SlotNumber = 1,
-                        HierarchyRole = deviceType.HierarchyInfo.HierarchyRole,
+                        HierarchyRole = deviceType.HierarchyInfo.HierarchyRole.Value,
                     },
                     new AssetHolder
                     {

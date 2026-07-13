@@ -149,12 +149,12 @@
                 return result.IsValid;
             }
 
-            var (startPos, endPos) = CalculateOccupiedRange(rack.Position, position, heightU);
+            var (startPos, endPos) = CalculateOccupiedRange(rack.Position.Value, position, heightU);
 
             if (startPos < 0 || endPos > rack.Capacity.MaximumRackCapacity)
             {
                 result.AddFailReason(RackValidationField.RackSpacePosition,
-                    $"Invalid Position. Extends beyond rack boundaries (Rack has {rack.Capacity.MaximumRackCapacity} units).");
+                    $"Invalid Position {position}. Extends beyond rack boundaries (Rack has {rack.Capacity.MaximumRackCapacity} units).");
                 return result.IsValid;
             }
 
@@ -187,10 +187,10 @@
                 return result.IsValid;
             }
 
-            var (startPos, endPos) = CalculateOccupiedRange(rack.Position, assetPosition, assetHeightU);
+            var (startPos, endPos) = CalculateOccupiedRange(rack.Position.Value, assetPosition, assetHeightU);
 
             // Check asset conflicts
-            if (!CheckAssetConflicts(rack.Position, startPos, endPos, currentAsset, occupiedAssets, out var assetConflict))
+            if (!CheckAssetConflicts(rack.Position.Value, startPos, endPos, currentAsset, occupiedAssets, out var assetConflict))
             {
                 result = assetConflict;
                 return result.IsValid;
@@ -239,10 +239,10 @@
                     return result.IsValid;
                 }
 
-                var (startPos, endPos) = CalculateOccupiedRange(rack.Position, position, heightU);
+                var (startPos, endPos) = CalculateOccupiedRange(rack.Position.Value, position, heightU);
 
                 // Check asset conflicts
-                if (!CheckAssetConflicts(rack.Position, startPos, endPos, null, occupiedAssets, out var assetConflict))
+                if (!CheckAssetConflicts(rack.Position.Value, startPos, endPos, null, occupiedAssets, out var assetConflict))
                 {
                     result.AddFailuresFrom(assetConflict);
                     return result.IsValid;

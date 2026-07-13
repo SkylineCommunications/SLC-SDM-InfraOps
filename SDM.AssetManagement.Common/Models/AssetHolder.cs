@@ -8,7 +8,9 @@
 	{
 		public long SlotNumber { get; set; }
 
-		public SlcAsset_Management.Enums.HierarchyRoleEnum HierarchyRole { get; set; }
+        public string Label { get; set; }
+
+        public SlcAsset_Management.Enums.HierarchyRoleEnum HierarchyRole { get; set; }
 
 		public static bool operator ==(AssetHolder left, AssetHolder right)
 		{

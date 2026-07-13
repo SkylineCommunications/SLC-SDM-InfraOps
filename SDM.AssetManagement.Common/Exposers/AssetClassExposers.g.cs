@@ -10,12 +10,14 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 	using System.Collections;
 	using System.Collections.Generic;
 	using System.Linq;
+    using System.Runtime.CompilerServices;
 
     using SharedMappers.DomIds;
 
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.SDM;
 	using Skyline.DataMiner.SDM.Exposers;
+
 	using SLDataGateway.API.Querying;
 	using SLDataGateway.API.Types.Querying;
 
@@ -37,7 +39,17 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 		public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, double?> MaximumPowerConsumption = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, double?>((obj) => obj.MaximumPowerConsumption, "MaximumPowerConsumption");
 		public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, SlcAsset_Management.Enums.PowerSupplyEnum?> PowerSupply = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, SlcAsset_Management.Enums.PowerSupplyEnum?>((obj) => obj.PowerSupply, "PowerSupply");
 		public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum> State = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum>((obj) => obj.State, "State");
-		public static partial class Lifecycle
+
+        static AssetClassExposers()
+        {
+            RuntimeHelpers.RunClassConstructor(typeof(Lifecycle).TypeHandle);
+            RuntimeHelpers.RunClassConstructor(typeof(DataPorts).TypeHandle);
+            RuntimeHelpers.RunClassConstructor(typeof(PowerPorts).TypeHandle);
+            RuntimeHelpers.RunClassConstructor(typeof(Holders).TypeHandle);
+            RuntimeHelpers.RunClassConstructor(typeof(Holders).TypeHandle);
+        }
+
+        public static partial class Lifecycle
 		{
 			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, DateTime?> EndOfLife = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, DateTime?>((obj) => obj.Lifecycle.EndOfLife, "Lifecycle.EndOfLife");
 			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, DateTime?> EndOfService = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, DateTime?>((obj) => obj.Lifecycle.EndOfService, "Lifecycle.EndOfService");
@@ -60,7 +72,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			public static readonly CollectionExposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, long?> PortNumber = new CollectionExposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, long?>((obj) => obj.PowerPorts.Where(x => x != null).Select(x => x.PortNumber), "PowerPorts.PortNumber");
 			public static readonly CollectionExposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, SlcAsset_Management.Enums.Outputtype?> OutputType = new CollectionExposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, SlcAsset_Management.Enums.Outputtype?>((obj) => obj.PowerPorts.Where(x => x != null).Select(x => x.OutputType), "PowerPorts.OutputType");
 			public static readonly CollectionExposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, SlcAsset_Management.Enums.PortExposureEnum> PortExposure = new CollectionExposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, SlcAsset_Management.Enums.PortExposureEnum>((obj) => obj.PowerPorts.Where(x => x != null).Select(x => x.PortExposure), "PowerPorts.PortExposure");
-			public static readonly CollectionExposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, System.Guid> PortType = new CollectionExposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, System.Guid>((obj) => obj.PowerPorts.Where(x => x != null).Select(x => x.PortType).Where(x => x != null), "PowerPorts.PortType");
+			public static readonly CollectionExposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.PortType>> PortType = new CollectionExposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.PortType>>((obj) => obj.PowerPorts.Where(x => x != null).Select(x => x.PortType).Where(x => x != null), "PowerPorts.PortType");
 			public static readonly CollectionExposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, string> Label = new CollectionExposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass, string>((obj) => obj.PowerPorts.Where(x => x != null).Select(x => x.Label).Where(x => x != null), "PowerPorts.Label");
 		}
 

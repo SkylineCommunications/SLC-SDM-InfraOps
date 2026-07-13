@@ -39,7 +39,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             set => SideField.Value = value;
         }
 
-        public Guid? DeskId
+        public Guid DeskId
         {
             get => DeskIdField.Value;
             set => DeskIdField.Value = value;
@@ -91,7 +91,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         [SdmIgnore]
         internal IChangeTrackingField<Guid?> DeskIdField => FieldHandler.GetOrCreateField(
             nameof(DeskId),
-            () => new ChangeTrackingField<Guid?>(null));
+            () => new ChangeTrackingField<Guid>(Guid.Empty));
 
 
         [JsonIgnore]

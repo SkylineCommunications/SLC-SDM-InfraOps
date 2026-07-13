@@ -629,7 +629,11 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			{
                 var _hierarchyinfo = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.HierarchyInfo.SectionDefinitionId);
 
-				_hierarchyinfo.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.HierarchyInfo.HierarchyRole, ToDomHierarchyRole(obj.HierarchyInfo.HierarchyRole));
+                if (obj.HierarchyInfo.HierarchyRole != null)
+                {
+                    _hierarchyinfo.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.HierarchyInfo.HierarchyRole, ToDomHierarchyRole(obj.HierarchyInfo.HierarchyRole.Value)); 
+                }
+
 				instance.Sections.Add(_hierarchyinfo);
 			}
 

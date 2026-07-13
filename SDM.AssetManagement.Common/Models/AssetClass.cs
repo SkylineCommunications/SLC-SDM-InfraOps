@@ -61,7 +61,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             set => DescriptionField.Value = value;
         }
 
-        public Guid? Manufacturer
+        public Guid Manufacturer
         {
             get => ManufacturerField.Value;
             set => ManufacturerField.Value = value;
@@ -198,7 +198,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         [SdmIgnore]
         internal IChangeTrackingField<Guid?> ManufacturerField => FieldHandler.GetOrCreateField(
             nameof(Manufacturer),
-            () => new ChangeTrackingField<Guid?>(null));
+            () => new ChangeTrackingField<Guid>(Guid.Empty));
 
         [JsonIgnore]
         [SdmIgnore]

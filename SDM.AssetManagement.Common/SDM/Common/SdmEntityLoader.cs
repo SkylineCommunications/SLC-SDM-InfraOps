@@ -9,8 +9,10 @@ namespace Skyline.DataMiner.SDM.Common.Services
     using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.AssetManagement.Helpers;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.Extensions;
+    using Skyline.DataMiner.SDM.FacilityManagement.Helpers;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
 
     /// <summary>
@@ -24,43 +26,22 @@ namespace Skyline.DataMiner.SDM.Common.Services
     /// </summary>
     public class SdmEntityLoader
     {
-        private readonly IBulkRepository<Asset> _assetRepository;
-        private readonly IBulkRepository<AssetClass> _assetClassRepository;
-        private readonly IBulkRepository<DeviceType> _deviceTypeRepository;
-        private readonly IBulkRepository<Rack> _rackRepository;
-        private readonly IBulkRepository<DataPort> _dataPortRepository;
-        private readonly IBulkRepository<PowerPort> _powerPortRepository;
-        private readonly IBulkRepository<InfraopsReservation> _reservationRepository;
-        private readonly IBulkRepository<PortType> _portTypeRepository;
-        private readonly IBulkRepository<CableType> _cableTypeRepository;
+        private readonly IAssetManagementApiHelper assetManagerApiHelper;
+        private readonly IFacilityManagementApiHelper facilityManagerApiHelper;
 
-        public SdmEntityLoader( // NOSONAR S107 - all params are optional repository dependencies; splitting would reduce clarity
-            IBulkRepository<Asset> assetRepository = null,
-            IBulkRepository<AssetClass> assetClassRepository = null,
-            IBulkRepository<DeviceType> deviceTypeRepository = null,
-            IBulkRepository<Rack> rackRepository = null,
-            IBulkRepository<DataPort> dataPortRepository = null,
-            IBulkRepository<PowerPort> powerPortRepository = null,
-            IBulkRepository<InfraopsReservation> reservationRepository = null,
-            IBulkRepository<PortType> portTypeRepository = null,
-            IBulkRepository<CableType> cableTypeRepository = null)
+        public SdmEntityLoader(
+            IAssetManagementApiHelper assetManagerApiHelper = null,
+            IFacilityManagementApiHelper facilityManagerApiHelper = null)
         {
-            _assetRepository = assetRepository;
-            _assetClassRepository = assetClassRepository;
-            _deviceTypeRepository = deviceTypeRepository;
-            _rackRepository = rackRepository;
-            _dataPortRepository = dataPortRepository;
-            _powerPortRepository = powerPortRepository;
-            _reservationRepository = reservationRepository;
-            _portTypeRepository = portTypeRepository;
-            _cableTypeRepository = cableTypeRepository;
+            this.assetManagerApiHelper = assetManagerApiHelper;
+            this.facilityManagerApiHelper = facilityManagerApiHelper;
         }
 
         #region Single Entity Loaders
 
         public Asset LoadAsset(SdmObjectReference<Asset> reference)
         {
-            if (_assetRepository == null || reference == null || !reference.HasValue())
+            if (assetManagerApiHelper?.Assets == null || reference == null || !reference.HasValue())
             {
                 return null;
             }
@@ -68,7 +49,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
             try
             {
                 var filter = AssetExposers.Identifier.Equal(reference.Identifier);
-                return _assetRepository.Read(filter).FirstOrDefault();
+                return assetManagerApiHelper.Assets.Read(filter).FirstOrDefault();
             }
             catch (Exception ex)
             {
@@ -78,7 +59,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
 
         public AssetClass LoadAssetClass(SdmObjectReference<AssetClass> reference)
         {
-            if (_assetClassRepository == null || reference == null || !reference.HasValue())
+            if (assetManagerApiHelper?.AssetClasses == null || reference == null || !reference.HasValue())
             {
                 return null;
             }
@@ -86,7 +67,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
             try
             {
                 var filter = AssetClassExposers.Identifier.Equal(reference.Identifier);
-                return _assetClassRepository.Read(filter).FirstOrDefault();
+                return assetManagerApiHelper.AssetClasses.Read(filter).FirstOrDefault();
             }
             catch (Exception ex)
             {
@@ -96,7 +77,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
 
         public DeviceType LoadDeviceType(SdmObjectReference<DeviceType> reference)
         {
-            if (_deviceTypeRepository == null || reference == null || !reference.HasValue())
+            if (assetManagerApiHelper?.DeviceTypes == null || reference == null || !reference.HasValue())
             {
                 return null;
             }
@@ -104,7 +85,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
             try
             {
                 var filter = DeviceTypeExposers.Identifier.Equal(reference.Identifier);
-                return _deviceTypeRepository.Read(filter).FirstOrDefault();
+                return assetManagerApiHelper.DeviceTypes.Read(filter).FirstOrDefault();
             }
             catch (Exception ex)
             {
@@ -114,7 +95,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
 
         public Rack LoadRack(SdmObjectReference<Rack> rack)
         {
-            if (_rackRepository == null || !rack.HasValue())
+            if (!rack.HasValue())
             {
                 return null;
             }
@@ -124,7 +105,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
 
         public Rack LoadRack(string rackId)
         {
-            if (_rackRepository == null || string.IsNullOrEmpty(rackId))
+            if (facilityManagerApiHelper?.Racks == null || string.IsNullOrEmpty(rackId))
             {
                 return null;
             }
@@ -132,7 +113,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
             try
             {
                 var filter = RackExposers.Identifier.Equal(rackId.ToString());
-                return _rackRepository.Read(filter).FirstOrDefault();
+                return facilityManagerApiHelper.Racks.Read(filter).FirstOrDefault();
             }
             catch (Exception ex)
             {
@@ -142,7 +123,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
 
         public List<DataPort> LoadDataPorts(Asset asset)
         {
-            if (_dataPortRepository == null || asset == null || string.IsNullOrEmpty(asset.Identifier))
+            if (assetManagerApiHelper?.DataPorts == null || asset == null || string.IsNullOrEmpty(asset.Identifier))
             {
                 return new List<DataPort>();
             }
@@ -150,7 +131,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
             try
             {
                 var filter = DataPortExposers.Asset.Equal(asset);
-                return _dataPortRepository.Read(filter).ToList();
+                return assetManagerApiHelper.DataPorts.Read(filter).ToList();
             }
             catch (Exception ex)
             {
@@ -160,7 +141,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
 
         public List<PowerPort> LoadPowerPorts(Asset asset)
         {
-            if (_powerPortRepository == null || asset == null || string.IsNullOrEmpty(asset.Identifier))
+            if (assetManagerApiHelper?.PowerPorts == null || asset == null || string.IsNullOrEmpty(asset.Identifier))
             {
                 return new List<PowerPort>();
             }
@@ -168,7 +149,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
             try
             {
                 var filter = PowerPortExposers.Asset.Equal(asset);
-                return _powerPortRepository.Read(filter).ToList();
+                return assetManagerApiHelper.PowerPorts.Read(filter).ToList();
             }
             catch (Exception ex)
             {
@@ -220,7 +201,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
         /// <returns>The PortType instance, or null if not found.</returns>
         public PortType LoadPortType(SdmObjectReference<PortType> portTypeRef)
         {
-            if (_portTypeRepository == null || portTypeRef == null || !portTypeRef.HasValue())
+            if (assetManagerApiHelper?.PortTypes == null || portTypeRef == null || !portTypeRef.HasValue())
             {
                 return null;
             }
@@ -228,7 +209,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
             try
             {
                 var filter = PortTypeExposers.Identifier.Equal(portTypeRef.Identifier);
-                return _portTypeRepository.Read(filter).FirstOrDefault();
+                return assetManagerApiHelper.PortTypes.Read(filter).FirstOrDefault();
             }
             catch (Exception ex)
             {
@@ -243,7 +224,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
         /// <returns>The PortType instance, or null if not found.</returns>
         public PortType LoadPortType(string portTypeId)
         {
-            if (_portTypeRepository == null || string.IsNullOrWhiteSpace(portTypeId))
+            if (assetManagerApiHelper?.PortTypes == null || string.IsNullOrWhiteSpace(portTypeId))
             {
                 return null;
             }
@@ -251,7 +232,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
             try
             {
                 var filter = PortTypeExposers.Identifier.Equal(portTypeId);
-                return _portTypeRepository.Read(filter).FirstOrDefault();
+                return assetManagerApiHelper.PortTypes.Read(filter).FirstOrDefault();
             }
             catch (Exception ex)
             {
@@ -268,7 +249,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
         /// </summary>
         public long CountAssetsByName(string name, List<string> exceptIdentifiers = null)
         {
-            if (_assetRepository == null || string.IsNullOrWhiteSpace(name))
+            if (assetManagerApiHelper?.Assets == null || string.IsNullOrWhiteSpace(name))
             {
                 return 0;
             }
@@ -290,7 +271,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
                 }
             }
 
-            return _assetRepository.Count(filter);
+            return assetManagerApiHelper.Assets.Count(filter);
         }
 
         /// <summary>
@@ -298,7 +279,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
         /// </summary>
         public long CountAssetsByAssetId(string assetId, List<string> exceptIdentifiers = null)
         {
-            if (_assetRepository == null || string.IsNullOrWhiteSpace(assetId))
+            if (assetManagerApiHelper?.Assets == null || string.IsNullOrWhiteSpace(assetId))
             {
                 return 0;
             }
@@ -320,7 +301,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
                 }
             }
 
-            return _assetRepository.Count(filter);
+            return assetManagerApiHelper.Assets.Count(filter);
         }
 
         /// <summary>
@@ -331,7 +312,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
             SdmObjectReference<AssetClass> assetClassId,
             List<string> exceptIdentifiers = null)
         {
-            if (_assetRepository == null ||
+            if (assetManagerApiHelper?.Assets == null ||
                 string.IsNullOrWhiteSpace(serialNumber) ||
                 assetClassId == null ||
                 !assetClassId.HasValue())
@@ -357,7 +338,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
                 }
             }
 
-            return _assetRepository.Count(filter);
+            return assetManagerApiHelper.Assets.Count(filter);
         }
 
         /// <summary>
@@ -365,7 +346,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
         /// </summary>
         public long CountCableTypesByName(string name, List<string> exceptIdentifiers = null)
         {
-            if (_cableTypeRepository == null || string.IsNullOrWhiteSpace(name))
+            if (assetManagerApiHelper?.CableTypes == null || string.IsNullOrWhiteSpace(name))
             {
                 return 0;
             }
@@ -386,7 +367,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
                 }
             }
 
-            return _cableTypeRepository.Count(filter);
+            return assetManagerApiHelper.CableTypes.Count(filter);
         }
 
         /// <summary>
@@ -394,7 +375,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
         /// </summary>
         public long CountAssetClassesByName(string name, List<string> exceptIdentifiers = null)
         {
-            if (_assetClassRepository == null || string.IsNullOrWhiteSpace(name))
+            if (assetManagerApiHelper?.AssetClasses == null || string.IsNullOrWhiteSpace(name))
             {
                 return 0;
             }
@@ -416,7 +397,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
                 }
             }
 
-            return _assetClassRepository.Count(filter);
+            return assetManagerApiHelper.AssetClasses.Count(filter);
         }
 
 
@@ -425,7 +406,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
         /// </summary>
         public List<Asset> FindAssetsInRack(string rackIdentifier, List<string> excludeAssetIds = null)
         {
-            if (_assetRepository == null || string.IsNullOrEmpty(rackIdentifier))
+            if (assetManagerApiHelper?.Assets == null || string.IsNullOrEmpty(rackIdentifier))
             {
                 return new List<Asset>();
             }
@@ -448,7 +429,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
                     }
                 }
 
-                var allAssets = _assetRepository.Read(filter);
+                var allAssets = assetManagerApiHelper.Assets.Read(filter);
 
                 // Filter in memory for assets in this rack
                 return allAssets
@@ -465,7 +446,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
         /// </summary>
         public List<Asset> FindChildAssets(string parentAssetIdentifier, List<string> excludeAssetIds = null)
         {
-            if (_assetRepository == null || string.IsNullOrEmpty(parentAssetIdentifier))
+            if (assetManagerApiHelper?.Assets == null || string.IsNullOrEmpty(parentAssetIdentifier))
             {
                 return new List<Asset>();
             }
@@ -488,7 +469,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
                     }
                 }
 
-                var allAssets = _assetRepository.Read(filter.AND(AssetExposers.Location.ParentAsset.Equal(new SdmObjectReference<Asset>(parentAssetIdentifier))));
+                var allAssets = assetManagerApiHelper.Assets.Read(filter.AND(AssetExposers.Location.ParentAsset.Equal(new SdmObjectReference<Asset>(parentAssetIdentifier))));
 
                 return allAssets.ToList();
             }
@@ -503,7 +484,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
         /// </summary>
         public List<InfraopsReservation> FindReservationsInRack(Rack rack)
         {
-            if (_reservationRepository == null || rack == null)
+            if (assetManagerApiHelper?.Reservations == null || rack == null)
             {
                 return new List<InfraopsReservation>();
             }
@@ -512,7 +493,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
             {
                 // Query reservations for this rack
                 var filter = InfraopsReservationExposers.RackFk.Rack.Equal(rack);
-                return _reservationRepository.Read(filter).ToList();
+                return assetManagerApiHelper.Reservations.Read(filter).ToList();
             }
             catch (Exception ex)
             {

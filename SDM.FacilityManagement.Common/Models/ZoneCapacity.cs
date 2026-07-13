@@ -2,6 +2,6 @@
 {
     public class ZoneCapacity
     {
-        public double CoolingCapacity { get; set; }
+        public double? CoolingCapacity { get; set; }
     }
 }

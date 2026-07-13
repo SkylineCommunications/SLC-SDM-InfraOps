@@ -126,12 +126,14 @@
     ""EndOfService"": ""1997-11-29T06:35:16.473Z""
   }
 }";
-
             var assetClassFromJson = Newtonsoft.Json.JsonConvert.DeserializeObject<AssetClass>(json);
 
-            // Act & Assert - Should throw ValidationException because DeviceTypeId doesn't exist
-            var action = () => Helper.AssetManagement.AssetClasses.Create(assetClassFromJson);
+            // Act
             
+            var action = () => Helper.AssetManagement.AssetClasses.Create(assetClassFromJson);
+
+            //Assert
+
             action.Should().Throw<Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Exceptions.ValidationException>()
                 .WithMessage("*Device Type not found*");
         }
@@ -163,9 +165,12 @@
                 }
             };
 
-            // Act & Assert - Should throw ValidationException because DeviceTypeId doesn't exist
+            // Act
+
             var action = () => Helper.AssetManagement.AssetClasses.Create(assetClass);
-            
+
+            //Assert
+
             action.Should().Throw<Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Exceptions.ValidationException>()
                 .WithMessage("*Device Type not found*");
         }
@@ -175,7 +180,6 @@
         {
             // Arrange
             Helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
-
             var deviceType = Helper.TestData.DeviceTypes.First();
             referenceAssetClass.DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier);
 
@@ -359,9 +363,9 @@
                 updated.Name.Should().Be("Updated Class Name");
                 updated.Description.Should().Be("Updated asset class description.");
 
-                updated.Manufacturer.Should().NotBeNull();
-                original.Manufacturer.Should().HaveValue("original Manufacturer must be set");
-                updated.Manufacturer.Should().NotBe(original.Manufacturer.Value);
+                updated.Manufacturer.Should().NotBe(Guid.Empty);
+                original.Manufacturer.Should().NotBe(Guid.Empty, "original Manufacturer must be set");
+                updated.Manufacturer.Should().NotBe(original.Manufacturer);
 
                 // Physical dimensions
                 updated.Height.Should().Be(30.0);

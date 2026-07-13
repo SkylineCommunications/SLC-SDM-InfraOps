@@ -321,7 +321,7 @@
                     r,
                     r.ReservedPositions?
                         .Where(p => p.LowerBound != default && p.UpperBound != default)
-                        .Select(p => (p.LowerBound, p.UpperBound))
+                        .Select(p => (p.LowerBound.Value, p.UpperBound.Value))
                         .ToList() ?? new List<(long, long)>()
                 ))
                 .ToList();

@@ -553,7 +553,7 @@
 
             var rackGroups = assets
                 .Select((asset, index) => (asset, index))
-                .Where(x => x.asset.Location != null && x.asset.Location.RackId.HasValue() && x.asset.Location.RackPosition > 0)
+                .Where(x => x.asset.Location != null && x.asset.Location.RackId.HasValue() && x.asset.Location.RackPosition.HasValue && x.asset.Location.RackPosition.Value > 0)
                 .GroupBy(x => x.asset.Location.RackId);
 
             foreach (var rackGroup in rackGroups)
@@ -587,9 +587,8 @@
             var assetClass2 = _entityLoader.LoadAssetClass(item2.asset.AssetClassId);
             if (assetClass2 == null || assetClass2.HeightU <= 0) return;
 
-            // Use the unified asset overlap check
             if (!RackPlacementValidation.DoAssetsOverlap(
-                rack.Position,
+                rack.Position.Value,
                 (int)item1.asset.Location.RackPosition,
                 (int)assetClass1.HeightU,
                 (int)item2.asset.Location.RackPosition,
@@ -928,10 +927,10 @@
                 return boundsResult;
             }
 
-            var (startPos, endPos) = RackPlacementValidation.CalculateOccupiedRange(rack.Position, position, heightU);
+            var (startPos, endPos) = RackPlacementValidation.CalculateOccupiedRange(rack.Position.Value, position, heightU);
 
             // Check asset conflicts
-            if (!RackPlacementValidation.CheckAssetConflicts(rack.Position, startPos, endPos, currentAsset, occupiedAssets, out var assetConflict))
+            if (!RackPlacementValidation.CheckAssetConflicts(rack.Position.Value, startPos, endPos, currentAsset, occupiedAssets, out var assetConflict))
             {
                 return assetConflict;
             }
@@ -988,7 +987,7 @@
                     Reservation: r,
                     Ranges: r.ReservedPositions?
                         .Where(p => p.LowerBound != default && p.UpperBound != default)
-                        .Select(p => (p.LowerBound, p.UpperBound))
+                        .Select(p => (p.LowerBound.Value, p.UpperBound.Value))
                         .ToList() ?? new List<(long, long)>()
                 ))
                 .ToList();

@@ -629,7 +629,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             {
                 _connectionproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.ConnectionDomMapper.ConnectionProperties.Description, Convert.ToString(obj.Description));
             }
-            _connectionproperties.AddOrUpdateValue<int>(Skyline.DataMiner.SDM.AssetManagement.Models.ConnectionDomMapper.ConnectionProperties.ConnectionType, (int)obj.ConnectionType);
+
+            if (obj.ConnectionType != default)
+            {
+                _connectionproperties.AddOrUpdateValue<int>(Skyline.DataMiner.SDM.AssetManagement.Models.ConnectionDomMapper.ConnectionProperties.ConnectionType, (int)(obj.ConnectionType));
+            }
+
             instance.Sections.Add(_connectionproperties);
 
             var _cableinformation = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.ConnectionDomMapper.CableInformation.SectionDefinitionId);
@@ -640,7 +645,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
             if (obj.CableLength != default)
             {
-                _cableinformation.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.AssetManagement.Models.ConnectionDomMapper.CableInformation.CableLength, obj.CableLength);
+                _cableinformation.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.AssetManagement.Models.ConnectionDomMapper.CableInformation.CableLength, obj.CableLength.Value);
             }
             instance.Sections.Add(_cableinformation);
 

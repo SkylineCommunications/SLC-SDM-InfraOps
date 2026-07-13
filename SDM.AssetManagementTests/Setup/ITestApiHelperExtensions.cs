@@ -20,16 +20,7 @@ namespace SDM.AssetManagement.Tests.Setup
                 throw new ArgumentNullException(nameof(helper));
             }
 
-            var entityLoader = new SdmEntityLoader(
-                assetRepository: helper.AssetManagement.Assets,
-                assetClassRepository: helper.AssetManagement.AssetClasses,
-                deviceTypeRepository: helper.AssetManagement.DeviceTypes,
-                dataPortRepository: helper.AssetManagement.DataPorts,
-                powerPortRepository: helper.AssetManagement.PowerPorts,
-                rackRepository: helper.FacilityManagement.Racks,
-                reservationRepository: null,
-                portTypeRepository: null
-            );
+            var entityLoader = new SdmEntityLoader(helper.AssetManagement, helper.FacilityManagement);
 
             return new AssetValidator(entityLoader);
         }
@@ -45,16 +36,7 @@ namespace SDM.AssetManagement.Tests.Setup
                 throw new ArgumentNullException(nameof(helper));
             }
 
-            var entityLoader = new SdmEntityLoader(
-                assetRepository: helper.AssetManagement.Assets,
-                assetClassRepository: helper.AssetManagement.AssetClasses,
-                deviceTypeRepository: helper.AssetManagement.DeviceTypes,
-                dataPortRepository: helper.AssetManagement.DataPorts,
-                powerPortRepository: helper.AssetManagement.PowerPorts,
-                rackRepository: helper.FacilityManagement.Racks,
-                reservationRepository: null,
-                portTypeRepository: null
-            );
+            var entityLoader = new SdmEntityLoader(helper.AssetManagement, helper.FacilityManagement);
 
             return new AssetClassValidator(entityLoader);
         }
@@ -70,16 +52,7 @@ namespace SDM.AssetManagement.Tests.Setup
                 throw new ArgumentNullException(nameof(helper));
             }
 
-            return new SdmEntityLoader(
-                assetRepository: helper.AssetManagement.Assets,
-                assetClassRepository: helper.AssetManagement.AssetClasses,
-                deviceTypeRepository: helper.AssetManagement.DeviceTypes,
-                dataPortRepository: helper.AssetManagement.DataPorts,
-                powerPortRepository: helper.AssetManagement.PowerPorts,
-                rackRepository: helper.FacilityManagement.Racks,
-                reservationRepository: null,
-                portTypeRepository: null
-            );
+            return new SdmEntityLoader(helper.AssetManagement, helper.FacilityManagement);
         }
 
         #endregion
@@ -98,7 +71,28 @@ namespace SDM.AssetManagement.Tests.Setup
                 throw new ArgumentNullException(nameof(helper));
             }
 
-            // Delete in reverse dependency order
+            CleanupRepos(helper);
+            CleanupCache(helper);
+        }
+
+        private static void CleanupCache(ITestApiHelper helper)
+        {
+            // Clear the test data cache
+            var cache = helper.TestData as TestDataCache;
+            if (cache != null)
+            {
+                cache.DeviceTypes = Array.Empty<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType>();
+                cache.AssetClasses = Array.Empty<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass>();
+                cache.Assets = Array.Empty<Skyline.DataMiner.SDM.AssetManagement.Models.Asset>();
+                cache.DataPorts = Array.Empty<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort>();
+                cache.PowerPorts = Array.Empty<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort>();
+                cache.PortTypes = Array.Empty<Skyline.DataMiner.SDM.AssetManagement.Models.PortType>();
+                cache.Racks = Array.Empty<Skyline.DataMiner.SDM.FacilityManagement.Models.Rack>();
+            }
+        }
+
+        private static void CleanupRepos(ITestApiHelper helper)
+        {
             SafeDelete(() =>
             {
                 var portTypes = helper.AssetManagement.PortTypes.Read(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.PortType>());
@@ -170,19 +164,6 @@ namespace SDM.AssetManagement.Tests.Setup
                     helper.AssetManagement.DeviceTypes.Delete(deviceTypes);
                 }
             });
-
-            // Clear the test data cache
-            var cache = helper.TestData as TestDataCache;
-            if (cache != null)
-            {
-                cache.DeviceTypes = Array.Empty<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType>();
-                cache.AssetClasses = Array.Empty<Skyline.DataMiner.SDM.AssetManagement.Models.AssetClass>();
-                cache.Assets = Array.Empty<Skyline.DataMiner.SDM.AssetManagement.Models.Asset>();
-                cache.DataPorts = Array.Empty<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort>();
-                cache.PowerPorts = Array.Empty<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort>();
-                cache.PortTypes = Array.Empty<Skyline.DataMiner.SDM.AssetManagement.Models.PortType>();
-                cache.Racks = Array.Empty<Skyline.DataMiner.SDM.FacilityManagement.Models.Rack>();
-            }
         }
 
         private static void SafeDelete(Action deleteAction)
