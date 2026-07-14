@@ -37,6 +37,11 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Extensions
         /// </summary>
         /// <exception cref="ArgumentNullException"><paramref name="propertyValue"/> is <c>null</c>.</exception>
         /// <exception cref="InvalidOperationException">A value for the same <see cref="PropertyValue.PropertyId"/> already exists.</exception>
+        /// <remarks>
+        /// This only updates the in-memory <see cref="PropertyValues"/> instance. It is not persisted
+        /// to the DOM/database until the instance is saved (e.g. via <c>CreateOrUpdate</c>/<c>Update</c>
+        /// on the repository or helper).
+        /// </remarks>
         public static void AddPropertyValue(this PropertyValues source, PropertyValue propertyValue)
         {
             if (source == null)
@@ -66,6 +71,11 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Extensions
         /// </summary>
         /// <exception cref="ArgumentNullException"><paramref name="propertyValue"/> is <c>null</c>.</exception>
         /// <exception cref="ArgumentException">No matching value was found.</exception>
+        /// <remarks>
+        /// This only updates the in-memory <see cref="PropertyValues"/> instance. It is not persisted
+        /// to the DOM/database until the instance is saved (e.g. via <c>CreateOrUpdate</c>/<c>Update</c>
+        /// on the repository or helper).
+        /// </remarks>
         public static void RemovePropertyValue(this PropertyValues source, PropertyValue propertyValue)
         {
             if (source == null)

@@ -175,7 +175,7 @@
 			// "Asset Owner" is referenced by PropertyValuesList[0] and [1]; fetch via repository so IsNew is false.
 			var assetOwnerProperty = Helper.Properties.GetByScopeAndName("Asset", "Asset Owner")!;
 
-			var result = Helper.PropertyValues.GetByPropertyID(assetOwnerProperty).ToList();
+			var result = Helper.PropertyValues.GetByPropertyID(Guid.Parse(assetOwnerProperty.Identifier)).ToList();
 
 			result.Should().HaveCount(2);
 		}
@@ -186,7 +186,7 @@
 			// "Maintenance Notes" is not referenced by any demo PropertyValues.
 			var unusedProperty = Helper.Properties.GetByScopeAndName("Asset", "Maintenance Notes")!;
 
-			var result = Helper.PropertyValues.GetByPropertyID(unusedProperty).ToList();
+			var result = Helper.PropertyValues.GetByPropertyID(Guid.Parse(unusedProperty.Identifier)).ToList();
 
 			result.Should().BeEmpty();
 		}
@@ -194,25 +194,15 @@
 		[TestMethod]
 		public void GetByPropertyID_WithNullRepository_ShouldThrowArgumentNullException()
 		{
-			Action act = () => PropertyValuesRepositoryExtensions.GetByPropertyID(null!, DemoData.Properties[0]);
+			Action act = () => PropertyValuesRepositoryExtensions.GetByPropertyID(null!, Guid.Parse(DemoData.Properties[0].Identifier));
 
 			act.Should().Throw<ArgumentNullException>();
 		}
 
 		[TestMethod]
-		public void GetByPropertyID_WithNullProperty_ShouldThrowArgumentNullException()
+		public void GetByPropertyID_WithEmptyGuid_ShouldThrowArgumentException()
 		{
-			Action act = () => Helper.PropertyValues.GetByPropertyID(null!);
-
-			act.Should().Throw<ArgumentNullException>();
-		}
-
-		[TestMethod]
-		public void GetByPropertyID_WithNewProperty_ShouldThrowArgumentException()
-		{
-			var newProperty = new Property { Name = "New", Scope = "Asset" };
-
-			Action act = () => Helper.PropertyValues.GetByPropertyID(newProperty);
+			Action act = () => Helper.PropertyValues.GetByPropertyID(Guid.Empty);
 
 			act.Should().Throw<ArgumentException>();
 		}
@@ -257,7 +247,7 @@
 		}
 
 		[TestMethod]
-		public void CopyPropertyValues_WithNoSource_ShouldReturnNullAndDeleteExistingTarget()
+		public void CopyPropertyValues_WithNoSource_ShouldReturnNullAndLeaveExistingTargetUntouched()
 		{
 			var existingTarget = DemoData.PropertyValuesList[1];
 
@@ -268,7 +258,8 @@
 			using (new FluentAssertions.Execution.AssertionScope())
 			{
 				result.Should().BeNull();
-				afterCopy.Should().BeEmpty();
+				afterCopy.Should().HaveCount(1, "a non-existent source must leave the target's existing PropertyValues untouched");
+				afterCopy[0].Identifier.Should().Be(existingTarget.Identifier);
 			}
 		}
 
@@ -308,11 +299,11 @@
 		}
 
 		[TestMethod]
-		public void CopyPropertyValues_WithSourceAndTargetSame_ShouldStillSucceedButMintNewIdentifier()
+		public void CopyPropertyValues_WithSourceAndTargetSame_ShouldStillSucceedAndKeepIdentifier()
 		{
 			// Corner case: copying an object's PropertyValues onto itself (objectIdA == objectIdB).
-			// The existing record is deleted first, then re-created from the stale in-memory
-			// reference, so the operation succeeds and data is preserved, but the Identifier changes.
+			// Source and existing target resolve to the same record, so it's updated in place -
+			// the operation succeeds, data is preserved, and the Identifier stays stable.
 			var source = DemoData.PropertyValuesList[0];
 			var originalIdentifier = source.Identifier;
 
@@ -326,7 +317,7 @@
 				result!.LinkedObjectID.Should().Be(source.LinkedObjectID);
 				result.Scope.Should().Be(source.Scope);
 				result.Values.Should().HaveCount(source.Values.Count);
-				result.Identifier.Should().NotBe(originalIdentifier, "self-copy re-creates the record with a brand new Identifier");
+				result.Identifier.Should().Be(originalIdentifier, "self-copy updates the existing record in place instead of recreating it");
 				afterCopy.Should().HaveCount(1);
 				afterCopy[0].Identifier.Should().Be(result.Identifier);
 			}

@@ -18,6 +18,11 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Extensions
         /// </summary>
         /// <exception cref="ArgumentNullException"><paramref name="discrete"/> is <c>null</c>.</exception>
         /// <exception cref="InvalidOperationException">An option with the same <see cref="PropertyOption.Option"/> already exists.</exception>
+        /// <remarks>
+        /// This only updates the in-memory <see cref="Property"/> instance. It is not persisted to the
+        /// DOM/database until the instance is saved (e.g. via <c>CreateOrUpdate</c>/<c>Update</c> on the
+        /// repository or helper).
+        /// </remarks>
         public static void AddDiscrete(this Property property, PropertyOption discrete)
         {
             if (discrete == null)
@@ -42,6 +47,11 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Extensions
         /// </summary>
         /// <exception cref="ArgumentNullException"><paramref name="discrete"/> is <c>null</c>.</exception>
         /// <exception cref="ArgumentException">No matching option was found.</exception>
+        /// <remarks>
+        /// This only updates the in-memory <see cref="Property"/> instance. It is not persisted to the
+        /// DOM/database until the instance is saved (e.g. via <c>CreateOrUpdate</c>/<c>Update</c> on the
+        /// repository or helper).
+        /// </remarks>
         public static void RemoveDiscrete(this Property property, PropertyOption discrete)
         {
             if (discrete == null)
@@ -64,6 +74,11 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Extensions
         /// <summary>
         /// Clears all entries from <see cref="Property.Discreets"/>.
         /// </summary>
+        /// <remarks>
+        /// This only updates the in-memory <see cref="Property"/> instance. It is not persisted to the
+        /// DOM/database until the instance is saved (e.g. via <c>CreateOrUpdate</c>/<c>Update</c> on the
+        /// repository or helper).
+        /// </remarks>
         public static void ClearDiscretes(this Property property)
         {
             if (property.Discreets.Count == 0)

@@ -254,7 +254,9 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Middleware
                 return;
             }
 
-            var affectedPropertyValues = _helper.PropertyValues.GetByPropertyID(property).ToList();
+            var affectedPropertyValues = _helper.PropertyValues.GetByPropertyID(Guid.Parse(property.Identifier)).ToList();
+
+            var toUpdate = new List<PropertyValues>();
 
             foreach (var propertyValues in affectedPropertyValues)
             {
@@ -268,7 +270,12 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Middleware
                 }
 
                 propertyValues.Values = remainingValues;
-                _helper.PropertyValues.Update(propertyValues);
+                toUpdate.Add(propertyValues);
+            }
+
+            if (toUpdate.Count > 0)
+            {
+                _helper.PropertyValues.Update(toUpdate);
             }
         }
 

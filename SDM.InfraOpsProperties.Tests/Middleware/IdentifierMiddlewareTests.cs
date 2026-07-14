@@ -9,8 +9,8 @@
 
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-	using Skyline.DataMiner.SDM.InfraOpsProperties.Middleware;
 	using Skyline.DataMiner.SDM.InfraOpsProperties.Models;
+	using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Middleware;
 
 	/// <summary>
 	/// Tests for <see cref="IdentifierMiddleware{T}"/> using <see cref="Property"/> as the target type.

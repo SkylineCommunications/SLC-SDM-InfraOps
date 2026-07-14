@@ -1,10 +1,11 @@
-namespace Skyline.DataMiner.SDM.InfraOpsProperties.Middleware
+namespace Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Middleware
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
 
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
+    using Skyline.DataMiner.SDM;
 
     using SLDataGateway.API.Types.Querying;
 

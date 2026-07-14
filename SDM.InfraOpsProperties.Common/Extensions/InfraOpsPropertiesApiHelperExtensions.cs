@@ -21,6 +21,8 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Extensions
         /// enabled by default. This method simply delegates to it and no longer duplicates the cascade logic.
         /// If the helper was constructed with cascading disabled, calling this method still performs a plain
         /// delete without cascading. Note: does not create any audit history entries.
+        /// Persists directly to the DOM/database: the Property (and, when cascading, any referencing
+        /// PropertyValue entries) is deleted immediately, without requiring a separate save call.
         /// </remarks>
         public static void DeletePropertyWithCascade(this IInfraOpsPropertiesApiHelper helper, Property property)
         {

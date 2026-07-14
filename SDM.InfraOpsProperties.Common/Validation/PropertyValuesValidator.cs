@@ -79,13 +79,17 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Validation
                 .Create(ValidateInfo)
                 .StopOnFailure();
 
-            // Standard validations - collect all errors
-            var standardValidations = Validator<PropertyValues>
-                .Create(ValidateUniqueness)
-                .AndThen(ValidateValues);
+            // No database access checks - fail fast before hitting the database
+            var noDatabaseChecks = Validator<PropertyValues>
+                .Create(ValidateValues)
+                .StopOnFailure();
 
-            // Combine: critical first, then standard
-            return criticalValidations.AndThen(standardValidations);
+            // Database access checks (uniqueness)
+            var databaseChecks = Validator<PropertyValues>
+                .Create(ValidateUniqueness);
+
+            // Combine: critical first, then no-database checks, then database checks
+            return criticalValidations.AndThen(noDatabaseChecks.AndThen(databaseChecks));
         }
 
         #endregion
@@ -213,8 +217,8 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Validation
             // ============================================================
             for (int i = 0; i < propertyValuesList.Count; i++)
             {
-                results[i].AddFailuresFrom(ValidateUniqueness(propertyValuesList[i]));
                 results[i].AddFailuresFrom(ValidateValues(propertyValuesList[i]));
+                results[i].AddFailuresFrom(ValidateUniqueness(propertyValuesList[i]));
             }
 
             return results;

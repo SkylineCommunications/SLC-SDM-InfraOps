@@ -53,7 +53,14 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Extensions
             }
 
             var filter = PropertyExposers.Scope.Equal(scope).AND(PropertyExposers.Name.Equal(propertyName));
-            return repository.Read(filter).SingleOrDefault();
+            var matches = repository.Read(filter).ToList();
+
+            if (matches.Count > 1)
+            {
+                throw new InvalidOperationException($"Found {matches.Count} Properties with scope '{scope}' and name '{propertyName}', expected at most one.");
+            }
+
+            return matches.SingleOrDefault();
         }
     }
 }

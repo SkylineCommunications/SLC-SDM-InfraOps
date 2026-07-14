@@ -4,6 +4,7 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Helpers
 	using Skyline.DataMiner.SDM.InfraOpsProperties.Middleware;
 	using Skyline.DataMiner.SDM.InfraOpsProperties.Models;
 	using Skyline.DataMiner.SDM.InfraOpsProperties.Validation;
+	using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Middleware;
 
 	public class InfraOpsPropertiesApiHelper : IInfraOpsPropertiesApiHelper
 	{

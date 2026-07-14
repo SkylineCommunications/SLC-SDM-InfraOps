@@ -117,9 +117,9 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
             // PHASE 3: DATABASE ACCESS CHECKS (UNIQUENESS) + REMAINING RULES
             // ============================================================
             for (int i = 0; i < jobs.Count; i++)
-            {
-                results[i].AddFailuresFrom(ValidateJobNameUniqueness(jobs[i]));
+            {// change this to do bulk for uniqueness check instead of per-job DB query, same for people/orgs check
                 results[i].AddFailuresFrom(ValidateJobTypeAndDates(jobs[i]));
+                results[i].AddFailuresFrom(ValidateJobNameUniqueness(jobs[i]));
                 results[i].AddFailuresFrom(ValidatePeopleAndOrganizations(jobs[i]));
             }
 
@@ -163,14 +163,18 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
                 .Create(ValidateInfo)
                 .StopOnFailure();
 
-            // Standard validations - collect all errors
-            var standardValidations = Validator<PlanAndBuildJob>
+            // No database access checks - fail fast before hitting the database
+            var noDatabaseChecks = Validator<PlanAndBuildJob>
+                .Create(ValidateJobTypeAndDates)
+                .StopOnFailure();
+
+            // Database access checks (uniqueness, People/Team existence)
+            var databaseChecks = Validator<PlanAndBuildJob>
                 .Create(ValidateJobNameUniqueness)
-                .AndThen(ValidateJobTypeAndDates)
                 .AndThen(ValidatePeopleAndOrganizations);
 
-            // Combine: critical first, then standard
-            return criticalValidations.AndThen(standardValidations);
+            // Combine: critical first, then no-database checks, then database checks
+            return criticalValidations.AndThen(noDatabaseChecks.AndThen(databaseChecks));
         }
 
         #endregion

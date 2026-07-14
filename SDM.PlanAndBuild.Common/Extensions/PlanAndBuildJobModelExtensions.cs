@@ -54,6 +54,11 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Extensions
         /// </summary>
         /// <exception cref="ArgumentNullException"><paramref name="connectionOnJob"/> is <c>null</c>.</exception>
         /// <exception cref="InvalidOperationException">A connection with the same <see cref="JobConnection.ConnectionId"/> already exists.</exception>
+        /// <remarks>
+        /// This only updates the in-memory <see cref="PlanAndBuildJob"/> instance. It is not persisted
+        /// to the DOM/database until the job is saved (e.g. via <c>CreateOrUpdate</c>/<c>Update</c> on
+        /// the repository or helper).
+        /// </remarks>
         public static void AddConnectionsOnJobItem(this PlanAndBuildJob job, JobConnection connectionOnJob)
         {
             if (connectionOnJob == null)
@@ -78,6 +83,11 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Extensions
         /// </summary>
         /// <exception cref="ArgumentNullException"><paramref name="connectionOnJob"/> is <c>null</c>.</exception>
         /// <exception cref="ArgumentException">No matching connection was found.</exception>
+        /// <remarks>
+        /// This only updates the in-memory <see cref="PlanAndBuildJob"/> instance. It is not persisted
+        /// to the DOM/database until the job is saved (e.g. via <c>CreateOrUpdate</c>/<c>Update</c> on
+        /// the repository or helper).
+        /// </remarks>
         public static void RemoveItemFromConnectionsOnJob(this PlanAndBuildJob job, JobConnection connectionOnJob)
         {
             if (connectionOnJob == null)
@@ -100,6 +110,11 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Extensions
         /// <summary>
         /// Replaces <see cref="PlanAndBuildJob.ConnectionsOnJob"/> with <paramref name="connectionsOnJob"/>.
         /// </summary>
+        /// <remarks>
+        /// This only updates the in-memory <see cref="PlanAndBuildJob"/> instance. It is not persisted
+        /// to the DOM/database until the job is saved (e.g. via <c>CreateOrUpdate</c>/<c>Update</c> on
+        /// the repository or helper).
+        /// </remarks>
         public static void SetConnectionsOnJob(this PlanAndBuildJob job, List<JobConnection> connectionsOnJob)
         {
             job.ConnectionsOnJob = connectionsOnJob ?? new List<JobConnection>();
@@ -108,6 +123,11 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Extensions
         /// <summary>
         /// Clears all entries from <see cref="PlanAndBuildJob.ConnectionsOnJob"/>.
         /// </summary>
+        /// <remarks>
+        /// This only updates the in-memory <see cref="PlanAndBuildJob"/> instance. It is not persisted
+        /// to the DOM/database until the job is saved (e.g. via <c>CreateOrUpdate</c>/<c>Update</c> on
+        /// the repository or helper).
+        /// </remarks>
         public static void ClearConnectionsOnJob(this PlanAndBuildJob job)
         {
             if (job.ConnectionsOnJob.Count == 0)
@@ -127,6 +147,11 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Extensions
         /// </summary>
         /// <exception cref="ArgumentNullException"><paramref name="assetUsed"/> is <c>null</c>.</exception>
         /// <exception cref="InvalidOperationException">An asset with the same <see cref="JobAsset.AssetId"/> already exists.</exception>
+        /// <remarks>
+        /// This only updates the in-memory <see cref="PlanAndBuildJob"/> instance. It is not persisted
+        /// to the DOM/database until the job is saved (e.g. via <c>CreateOrUpdate</c>/<c>Update</c> on
+        /// the repository or helper).
+        /// </remarks>
         public static void AddAssetsUsedItem(this PlanAndBuildJob job, JobAsset assetUsed)
         {
             if (assetUsed == null)
@@ -151,6 +176,11 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Extensions
         /// </summary>
         /// <exception cref="ArgumentNullException"><paramref name="assetUsed"/> is <c>null</c>.</exception>
         /// <exception cref="ArgumentException">No matching asset was found.</exception>
+        /// <remarks>
+        /// This only updates the in-memory <see cref="PlanAndBuildJob"/> instance. It is not persisted
+        /// to the DOM/database until the job is saved (e.g. via <c>CreateOrUpdate</c>/<c>Update</c> on
+        /// the repository or helper).
+        /// </remarks>
         public static void RemoveItemFromAssetsUsed(this PlanAndBuildJob job, JobAsset assetUsed)
         {
             if (assetUsed == null)
@@ -173,6 +203,11 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Extensions
         /// <summary>
         /// Replaces <see cref="PlanAndBuildJob.AssetsUsed"/> with <paramref name="assetsUsed"/>.
         /// </summary>
+        /// <remarks>
+        /// This only updates the in-memory <see cref="PlanAndBuildJob"/> instance. It is not persisted
+        /// to the DOM/database until the job is saved (e.g. via <c>CreateOrUpdate</c>/<c>Update</c> on
+        /// the repository or helper).
+        /// </remarks>
         public static void SetAssetsUsed(this PlanAndBuildJob job, List<JobAsset> assetsUsed)
         {
             job.AssetsUsed = assetsUsed ?? new List<JobAsset>();
@@ -181,6 +216,11 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Extensions
         /// <summary>
         /// Clears all entries from <see cref="PlanAndBuildJob.AssetsUsed"/>.
         /// </summary>
+        /// <remarks>
+        /// This only updates the in-memory <see cref="PlanAndBuildJob"/> instance. It is not persisted
+        /// to the DOM/database until the job is saved (e.g. via <c>CreateOrUpdate</c>/<c>Update</c> on
+        /// the repository or helper).
+        /// </remarks>
         public static void ClearAssetsUsed(this PlanAndBuildJob job)
         {
             if (job.AssetsUsed.Count == 0)
@@ -200,6 +240,11 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Extensions
         /// </summary>
         /// <exception cref="ArgumentNullException"><paramref name="jobAttachment"/> is <c>null</c>.</exception>
         /// <exception cref="InvalidOperationException">An attachment with the same <see cref="JobAttachment.FilePath"/> already exists.</exception>
+        /// <remarks>
+        /// This only updates the in-memory <see cref="PlanAndBuildJob"/> instance. It is not persisted
+        /// to the DOM/database until the job is saved (e.g. via <c>CreateOrUpdate</c>/<c>Update</c> on
+        /// the repository or helper).
+        /// </remarks>
         public static void AddJobAttachment(this PlanAndBuildJob job, JobAttachment jobAttachment)
         {
             if (jobAttachment == null)
@@ -224,6 +269,11 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Extensions
         /// </summary>
         /// <exception cref="ArgumentNullException"><paramref name="jobAttachment"/> is <c>null</c>.</exception>
         /// <exception cref="ArgumentException">No matching attachment was found.</exception>
+        /// <remarks>
+        /// This only updates the in-memory <see cref="PlanAndBuildJob"/> instance. It is not persisted
+        /// to the DOM/database until the job is saved (e.g. via <c>CreateOrUpdate</c>/<c>Update</c> on
+        /// the repository or helper).
+        /// </remarks>
         public static void RemoveItemFromJobAttachments(this PlanAndBuildJob job, JobAttachment jobAttachment)
         {
             if (jobAttachment == null)
@@ -246,6 +296,11 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Extensions
         /// <summary>
         /// Replaces <see cref="PlanAndBuildJob.Attachments"/> with <paramref name="jobAttachments"/>.
         /// </summary>
+        /// <remarks>
+        /// This only updates the in-memory <see cref="PlanAndBuildJob"/> instance. It is not persisted
+        /// to the DOM/database until the job is saved (e.g. via <c>CreateOrUpdate</c>/<c>Update</c> on
+        /// the repository or helper).
+        /// </remarks>
         public static void SetJobAttachments(this PlanAndBuildJob job, List<JobAttachment> jobAttachments)
         {
             job.Attachments = jobAttachments ?? new List<JobAttachment>();
@@ -254,6 +309,11 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Extensions
         /// <summary>
         /// Clears all entries from <see cref="PlanAndBuildJob.Attachments"/>.
         /// </summary>
+        /// <remarks>
+        /// This only updates the in-memory <see cref="PlanAndBuildJob"/> instance. It is not persisted
+        /// to the DOM/database until the job is saved (e.g. via <c>CreateOrUpdate</c>/<c>Update</c> on
+        /// the repository or helper).
+        /// </remarks>
         public static void ClearJobAttachments(this PlanAndBuildJob job)
         {
             if (job.Attachments.Count == 0)
@@ -272,6 +332,11 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Extensions
         /// Adds a location to <see cref="PlanAndBuildJob.Locations"/>.
         /// </summary>
         /// <exception cref="InvalidOperationException">The location already exists.</exception>
+        /// <remarks>
+        /// This only updates the in-memory <see cref="PlanAndBuildJob"/> instance. It is not persisted
+        /// to the DOM/database until the job is saved (e.g. via <c>CreateOrUpdate</c>/<c>Update</c> on
+        /// the repository or helper).
+        /// </remarks>
         public static void AddLocation(this PlanAndBuildJob job, Guid newLocation)
         {
             var list = job.Locations;
@@ -289,6 +354,11 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Extensions
         /// Removes a location from <see cref="PlanAndBuildJob.Locations"/>.
         /// </summary>
         /// <exception cref="ArgumentException">No matching location was found.</exception>
+        /// <remarks>
+        /// This only updates the in-memory <see cref="PlanAndBuildJob"/> instance. It is not persisted
+        /// to the DOM/database until the job is saved (e.g. via <c>CreateOrUpdate</c>/<c>Update</c> on
+        /// the repository or helper).
+        /// </remarks>
         public static void RemoveLocation(this PlanAndBuildJob job, Guid location)
         {
             var list = job.Locations;
@@ -304,6 +374,11 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Extensions
         /// <summary>
         /// Replaces <see cref="PlanAndBuildJob.Locations"/> with <paramref name="locations"/>.
         /// </summary>
+        /// <remarks>
+        /// This only updates the in-memory <see cref="PlanAndBuildJob"/> instance. It is not persisted
+        /// to the DOM/database until the job is saved (e.g. via <c>CreateOrUpdate</c>/<c>Update</c> on
+        /// the repository or helper).
+        /// </remarks>
         public static void SetLocations(this PlanAndBuildJob job, IEnumerable<Guid> locations)
         {
             job.Locations = locations?.ToList() ?? new List<Guid>();

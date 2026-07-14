@@ -9,8 +9,8 @@
 
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-	using Skyline.DataMiner.SDM.PlanAndBuild.Middleware;
 	using Skyline.DataMiner.SDM.PlanAndBuild.Models;
+	using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Middleware;
 
 	/// <summary>
 	/// Tests for <see cref="IdentifierMiddleware{T}"/> using <see cref="JobType"/> as the target type.
