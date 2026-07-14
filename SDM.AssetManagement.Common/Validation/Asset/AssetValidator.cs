@@ -69,9 +69,9 @@
         /// <summary>
         /// Validates name uniqueness - used for real-time UI validation.
         /// </summary>
-        public ValidationResult IsAssetNameValid(string name, List<string> exceptIdentifiers = null)
+        public ValidationResult IsAssetNameValid(string name, string exceptIdentifier = null)
         {
-            return _validationCore.ValidateNameUniqueness(name, exceptIdentifiers);
+            return _validationCore.ValidateNameUniqueness(name, exceptIdentifier);
         }
 
         /// <summary>
@@ -80,15 +80,15 @@
         /// </summary>
         public ValidationResult IsAssetNameValid(Asset asset)
         {
-            return IsAssetNameValid(asset.Name, new List<string> { asset.Identifier });
+            return _validationCore.ValidateNameUniqueness(asset.Name, asset.Identifier);
         }
 
         /// <summary>
         /// Validates asset ID uniqueness - used for real-time UI validation.
         /// </summary>
-        public ValidationResult IsAssetIdValid(string assetId, List<string> exceptIdentifiers = null)
+        public ValidationResult IsAssetIdValid(string assetId, string exceptIdentifier = null)
         {
-            return _validationCore.ValidateAssetIdUniqueness(assetId, exceptIdentifiers);
+            return _validationCore.ValidateAssetIdUniqueness(assetId, exceptIdentifier);
         }
 
         /// <summary>
@@ -118,11 +118,6 @@
             {
                 return new List<ValidationResult>();
             }
-
-            var context = new AssetValidationContext
-            {
-                AssetsBeingValidated = assets
-            };
 
             // Initialize results - same order as input
             var results = assets.Select(a => new ValidationResult()).ToList();
@@ -155,12 +150,17 @@
             }
 
             // ============================================================
-            // PHASE 3: DATABASE ACCESS CHECKS (UNIQUENESS)
+            // PHASE 2.5: BULK UNIQUENESS CHECKS AGAINST DATABASE
+            // One OR query per field via Tools.RetrieveBigOrFilter.
+            // All three fields checked; results merged before fast-fail.
             // ============================================================
-            for (int i = 0; i < assets.Count; i++)
+            results.MergeFrom(_validationCore.ValidateBulkNameUniquenessAgainstDatabase(assets));
+            results.MergeFrom(_validationCore.ValidateBulkAssetIdUniquenessAgainstDatabase(assets));
+            results.MergeFrom(_validationCore.ValidateBulkSerialNumberUniquenessAgainstDatabase(assets));
+
+            if (results.AnyInvalid())
             {
-                results[i].AddFailuresFrom(
-                    _validationCore.ValidateWithDatabaseAccess(assets[i], context));
+                return results;
             }
 
             // ============================================================
@@ -260,7 +260,7 @@
 
             // Phase 2: Database access checks (uniqueness, placement)
             var databaseChecks = Validator<Asset>
-                .Create(a => _validationCore.ValidateWithDatabaseAccess(a, null));
+                .Create(a => _validationCore.ValidateWithDatabaseAccess(a));
 
             return noDatabaseChecks.AndThen(databaseChecks);
         }

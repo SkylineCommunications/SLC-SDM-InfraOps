@@ -5,7 +5,6 @@
     using System.Linq;
 
     using SharedCommonLibrary.AssetManagement.Models;
-    using SharedCommonLibrary.AssetManagement.State_Management;
 
     using SharedMappers.DomIds;
 
@@ -14,7 +13,6 @@
     using Skyline.DataMiner.SDM.Common.Services;
     using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
-    using Skyline.DataMiner.SDM.FacilityManagement.Validation;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
     using static Skyline.DataMiner.SDM.AssetManagement.Common.Validation.AssetValidationHandler;
@@ -285,19 +283,13 @@
         /// Only called after no-database checks pass.
         /// Uses a pipeline pattern organized by validation concern.
         /// </summary>
-        public ValidationResult ValidateWithDatabaseAccess(Asset asset, AssetValidationContext context)
+        public ValidationResult ValidateWithDatabaseAccess(Asset asset)
         {
             var validations = new List<ValidationResult>
             {
-                ValidateUniquenessChecks(asset, context),
+                ValidateUniquenessChecks(asset),
+                ValidateLocationPlacement(asset),
             };
-
-            // Only run placement checks in single validation mode (context == null)
-            // Bulk validation uses optimized PlacementValidator instead
-            if (context == null)
-            {
-                validations.Add(ValidateLocationPlacement(asset));
-            }
 
             return validations.MergeAll();
         }
@@ -306,28 +298,26 @@
         /// Validates uniqueness constraints (Name, Asset ID, Serial Number).
         /// Queries database to ensure values are not already in use.
         /// </summary>
-        private ValidationResult ValidateUniquenessChecks(Asset asset, AssetValidationContext context)
+        private ValidationResult ValidateUniquenessChecks(Asset asset)
         {
             var validations = new List<ValidationResult>();
-            var exceptIds = GetExceptIdentifiers(asset, context);
 
             // Name uniqueness
             if (asset.ShouldValidate(asset.NameField))
             {
-                validations.Add(ValidateNameUniqueness(asset.Name, exceptIds));
+                validations.Add(ValidateNameUniqueness(asset.Name, asset.Identifier));
             }
 
             // Asset ID uniqueness
             if (asset.ShouldValidate(asset.AssetIDField))
             {
-                validations.Add(ValidateAssetIdUniqueness(asset.AssetID, exceptIds));
+                validations.Add(ValidateAssetIdUniqueness(asset.AssetID, asset.Identifier));
             }
 
             // Serial number uniqueness
             if (asset.ShouldValidate(asset.SerialNumberField))
             {
-                validations.Add(ValidateSerialNumberUniqueness(
-                    asset.SerialNumber, asset.AssetClassId, exceptIds));
+                validations.Add(ValidateSerialNumberUniqueness(asset.SerialNumber, asset.AssetClassId, asset.Identifier));
             }
 
             return validations.MergeAll();
@@ -354,7 +344,7 @@
                 if (assetClass != null)
                 {
                     validations.Add(ValidateParentAssetHolderAvailability(
-                        asset, assetClass, context: null));
+                        asset, assetClass));
                 }
             }
 
@@ -370,7 +360,7 @@
             return validations.MergeAll();
         }
 
-        public ValidationResult ValidateNameUniqueness(string name, List<string> exceptIdentifiers = null)
+        public ValidationResult ValidateNameUniqueness(string name, string exceptIdentifier = null)
         {
             var result = new ValidationResult();
 
@@ -381,7 +371,7 @@
                 return result;
             }
 
-            if (_entityLoader.CountAssetsByName(name, exceptIdentifiers) > 0)
+            if (_entityLoader.CountAssetsByName(name, exceptIdentifier) > 0)
             {
                 result.AddFailReason(AssetValidationField.Name,
                     $"Asset Name '{name}' is already in use.");
@@ -390,7 +380,7 @@
             return result;
         }
 
-        public ValidationResult ValidateAssetIdUniqueness(string assetId, List<string> exceptIdentifiers = null)
+        public ValidationResult ValidateAssetIdUniqueness(string assetId, string exceptIdentifier = null)
         {
             var result = new ValidationResult();
 
@@ -401,7 +391,7 @@
                 return result;
             }
 
-            if (_entityLoader.CountAssetsByAssetId(assetId, exceptIdentifiers) > 0)
+            if (_entityLoader.CountAssetsByAssetId(assetId, exceptIdentifier) > 0)
             {
                 result.AddFailReason(AssetValidationField.AssetId,
                     $"Asset ID '{assetId}' is already in use.");
@@ -411,7 +401,7 @@
         }
 
         private ValidationResult ValidateSerialNumberUniqueness(string serialNumber,
-            SdmObjectReference<AssetClass> assetClassId, List<string> exceptIdentifiers = null)
+            SdmObjectReference<AssetClass> assetClassId, string exceptIdentifier = null)
         {
             var result = new ValidationResult();
 
@@ -420,7 +410,7 @@
                 return result;
             }
 
-            if (_entityLoader.CountAssetsBySerialNumber(serialNumber, assetClassId, exceptIdentifiers) > 0)
+            if (_entityLoader.CountAssetsBySerialNumber(serialNumber, assetClassId, exceptIdentifier) > 0)
             {
                 result.AddFailReason(AssetValidationField.SerialNumber,
                     "Serial Number is already in use for this Asset Class.");
@@ -432,6 +422,130 @@
         #endregion
 
         #region Bulk-Specific Validation
+
+        /// <summary>
+        /// Phase 2.5a: Bulk Asset Name uniqueness check against the database.
+        /// Uses a single OR query via <see cref="Tools.RetrieveBigOrFilter"/>; batch IDs excluded in memory.
+        /// </summary>
+        public List<ValidationResult> ValidateBulkNameUniquenessAgainstDatabase(List<Asset> assets)
+        {
+            var batchIds = new HashSet<string>(
+                assets.Select(a => a.Identifier).Where(id => !string.IsNullOrWhiteSpace(id)));
+            return ValidateBulkSimpleFieldUniquenessAgainstDatabase(
+                assets,
+                batchIds,
+                a => a.Name,
+                _entityLoader.GetAssetsByNames,
+                AssetValidationField.Name,
+                "Asset Name '{0}' is already in use.");
+        }
+
+        /// <summary>
+        /// Phase 2.5b: Bulk Asset ID uniqueness check against the database.
+        /// Uses a single OR query via <see cref="Tools.RetrieveBigOrFilter"/>; batch IDs excluded in memory.
+        /// </summary>
+        public List<ValidationResult> ValidateBulkAssetIdUniquenessAgainstDatabase(List<Asset> assets)
+        {
+            var batchIds = new HashSet<string>(
+                assets.Select(a => a.Identifier).Where(id => !string.IsNullOrWhiteSpace(id)));
+            return ValidateBulkSimpleFieldUniquenessAgainstDatabase(
+                assets,
+                batchIds,
+                a => a.AssetID,
+                _entityLoader.GetAssetsByAssetIds,
+                AssetValidationField.AssetId,
+                "Asset ID '{0}' is already in use.");
+        }
+
+        /// <summary>
+        /// Phase 2.5c: Bulk Serial Number uniqueness check against the database, scoped per AssetClass.
+        /// Groups assets by AssetClass and runs one OR query per class via <see cref="Tools.RetrieveBigOrFilter"/>.
+        /// Batch IDs excluded in memory.
+        /// </summary>
+        public List<ValidationResult> ValidateBulkSerialNumberUniquenessAgainstDatabase(List<Asset> assets)
+        {
+            var results = assets.Select(_ => new ValidationResult()).ToList();
+
+            var batchIds = new HashSet<string>(
+                assets.Select(a => a.Identifier).Where(id => !string.IsNullOrWhiteSpace(id)));
+
+            var assetsByClass = assets
+                .Select((a, idx) => new { Asset = a, Index = idx })
+                .Where(x => !string.IsNullOrWhiteSpace(x.Asset.SerialNumber) && x.Asset.AssetClassId.HasValue())
+                .GroupBy(x => x.Asset.AssetClassId.Identifier);
+
+            foreach (var classGroup in assetsByClass)
+            {
+                var assetClassRef = classGroup.First().Asset.AssetClassId;
+
+                var uniqueSerials = classGroup
+                    .Select(x => x.Asset.SerialNumber)
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
+                var dbSerialMatches = _entityLoader.GetAssetsBySerialNumbers(assetClassRef, uniqueSerials);
+
+                var externalSerialConflicts = dbSerialMatches
+                    .Where(a => !batchIds.Contains(a.Identifier))
+                    .Select(a => a.SerialNumber)
+                    .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+                foreach (var item in classGroup)
+                {
+                    if (externalSerialConflicts.Contains(item.Asset.SerialNumber))
+                    {
+                        results[item.Index].AddFailReason(AssetValidationField.SerialNumber,
+                            "Serial Number is already in use for this Asset Class.");
+                    }
+                }
+            }
+
+            return results;
+        }
+
+        /// <summary>
+        /// Generic helper for bulk single-field string uniqueness checks.
+        /// Extracts unique non-empty values, queries DB via OR filter, excludes batch IDs in memory.
+        /// Covers Name and AssetId; SerialNumber uses its own implementation due to AssetClass scoping.
+        /// </summary>
+        private List<ValidationResult> ValidateBulkSimpleFieldUniquenessAgainstDatabase(
+            List<Asset> assets,
+            HashSet<string> batchIds,
+            Func<Asset, string> getValue,
+            Func<List<string>, List<Asset>> dbQuery,
+            AssetValidationField field,
+            string errorMessageTemplate)
+        {
+            var results = assets.Select(_ => new ValidationResult()).ToList();
+
+            var uniqueValues = assets
+                .Select(getValue)
+                .Where(v => !string.IsNullOrWhiteSpace(v))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            if (!uniqueValues.Any())
+            {
+                return results;
+            }
+
+            var dbMatches = dbQuery(uniqueValues);
+            var externalConflicts = dbMatches
+                .Where(a => !batchIds.Contains(a.Identifier))
+                .Select(getValue)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            for (int i = 0; i < assets.Count; i++)
+            {
+                var value = getValue(assets[i]);
+                if (!string.IsNullOrWhiteSpace(value) && externalConflicts.Contains(value))
+                {
+                    results[i].AddFailReason(field, string.Format(errorMessageTemplate, value));
+                }
+            }
+
+            return results;
+        }
 
         /// <summary>
         /// Phase 2: In-memory batch conflict detection (optimized with GroupBy).
@@ -717,13 +831,8 @@
 
         #region Helper Methods (Database Access)
 
-        private List<string> GetExceptIdentifiers(Asset asset, AssetValidationContext context)
-        {
-            return context?.GetValidatedAssetIdentifiers() ?? new List<string> { asset.Identifier };
-        }
-
         private ValidationResult ValidateParentAssetHolderAvailability(
-            Asset asset, AssetClass assetClass, AssetValidationContext context)
+            Asset asset, AssetClass assetClass)
         {
             var result = new ValidationResult();
 
@@ -762,7 +871,7 @@
                     return result;
                 }
 
-                var exceptIds = GetExceptIdentifiers(asset, context);
+                var exceptIds = new List<string> { asset.Identifier };
                 var childAssets = _entityLoader.FindChildAssets(parentAsset.Identifier, exceptIds);
 
                 var occupyingAssets = childAssets

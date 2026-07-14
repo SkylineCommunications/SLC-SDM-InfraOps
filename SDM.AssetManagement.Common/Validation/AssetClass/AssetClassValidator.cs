@@ -6,10 +6,8 @@
 
     using SharedMappers.DomIds;
 
-    using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM.AssetManagement.Common.Validation;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
-    using Skyline.DataMiner.SDM.AssetManagement.Repositories;
     using Skyline.DataMiner.SDM.Common.Services;
     using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
@@ -36,6 +34,7 @@
         /// <summary>
         /// Validates an AssetClass and returns ValidationResult.
         /// Collects all errors without throwing exceptions.
+        /// <para><b>Not suitable for bulk scenarios</b>: issues one DB query per item. Use <see cref="ValidateBulk"/> instead.</para>
         /// </summary>
         public ValidationResult Validate(AssetClass assetClass)
         {
@@ -50,6 +49,7 @@
         /// <summary>
         /// Validates an AssetClass and throws ValidationException if invalid.
         /// Use this when you want fail-fast behavior.
+        /// <para><b>Not suitable for bulk scenarios</b>: issues one DB query per item. Use <see cref="ValidateBulk"/> instead.</para>
         /// </summary>
         public void ValidateAndThrow(AssetClass assetClass)
         {
@@ -58,6 +58,7 @@
 
         /// <summary>
         /// Validates with custom error handling callback.
+        /// <para><b>Not suitable for bulk scenarios</b>: issues one DB query per item. Use <see cref="ValidateBulk"/> instead.</para>
         /// </summary>
         public ValidationResult ValidateWithHandler(AssetClass assetClass, Action<ValidationResult> onError)
         {
@@ -65,9 +66,76 @@
         }
 
         /// <summary>
-        /// Validates name uniqueness - used for real-time UI validation.
+        /// Validates a batch of AssetClasses in three phases:
+        /// 1. Non-database checks per item (fast-fail on business rule violations).
+        /// 2. In-memory batch conflict detection (name uniqueness within batch).
+        /// 3. Database checks per item (name uniqueness vs DB, power supply against device type).
+        /// Results are returned in the same order as the input list.
         /// </summary>
-        public ValidationResult IsAssetClassNameValid(string name, List<string> exceptIdentifiers = null)
+        public List<ValidationResult> ValidateBulk(List<AssetClass> assetClasses)
+        {
+            if (assetClasses == null || !assetClasses.Any())
+            {
+                return new List<ValidationResult>();
+            }
+
+            var deviceTypeCache = new Dictionary<string, DeviceType>();
+
+            var results = assetClasses.Select(_ => new ValidationResult()).ToList();
+
+            // ============================================================
+            // PHASE 1: NO DATABASE ACCESS CHECKS (BUSINESS RULES)
+            // ============================================================
+            for (int i = 0; i < assetClasses.Count; i++)
+            {
+                results[i].AddFailuresFrom(ValidateWithoutDatabaseAccess(assetClasses[i]));
+            }
+
+            if (results.AnyInvalid())
+            {
+                return results;
+            }
+
+            // ============================================================
+            // PHASE 2: IN-MEMORY BATCH CONFLICT DETECTION
+            // ============================================================
+            var batchConflicts = ValidateNameDuplicatesInBatch(assetClasses);
+            results.MergeFrom(batchConflicts);
+
+            if (results.AnyInvalid())
+            {
+                return results;
+            }
+
+            // ============================================================
+            // PHASE 2.5: BULK NAME UNIQUENESS CHECK AGAINST DATABASE
+            // One OR-based query via Tools.RetrieveBigOrFilter — no large AND filter.
+            // Phase 3 per-item check skips name when context is present.
+            // ============================================================
+            var nameDbConflicts = ValidateBulkNamesAgainstDatabase(assetClasses);
+            results.MergeFrom(nameDbConflicts);
+
+            if (results.AnyInvalid())
+            {
+                return results;
+            }
+
+            // ============================================================
+            // PHASE 3: DATABASE ACCESS CHECKS (POWER SUPPLY ONLY IN BULK)
+            // ============================================================
+            for (int i = 0; i < assetClasses.Count; i++)
+            {
+                results[i].AddFailuresFrom(ValidateWithDatabaseAccess(assetClasses[i], deviceTypeCache));
+            }
+
+            return results;
+        }
+
+        /// <summary>
+        /// Validates name uniqueness — used for real-time UI validation.
+        /// <para><b>Not suitable for bulk scenarios</b>: issues one DB query per call. Use <see cref="ValidateBulk"/> instead.</para>
+        /// </summary>
+        public ValidationResult IsAssetClassNameValid(string name, string exceptIdentifier = null)
         {
             var result = new ValidationResult();
 
@@ -78,7 +146,7 @@
                 return result;
             }
 
-            if (IsNameInUse(name, exceptIdentifiers))
+            if (IsNameInUse(name, exceptIdentifier))
             {
                 result.AddFailReason(AssetClassValidationHandler.AssetClassValidationField.Name,
                     $"Asset Class Name '{name}' is already in use.");
@@ -90,49 +158,54 @@
         /// <summary>
         /// Validates the uniqueness of the AssetClass name for the specified <see cref="AssetClass"/> instance.
         /// Excludes the current asset class identifier from the uniqueness check.
+        /// <para><b>Not suitable for bulk scenarios</b>: issues one DB query per call. Use <see cref="ValidateBulk"/> instead.</para>
         /// </summary>
         /// <param name="assetClass">The asset class to validate.</param>
         /// <returns>A <see cref="ValidationResult"/> indicating whether the asset class name is valid.</returns>
         public ValidationResult IsAssetClassNameValid(AssetClass assetClass)
         {
-            return IsAssetClassNameValid(assetClass.Name, new List<string> { assetClass.Identifier });
+            return IsAssetClassNameValid(assetClass.Name, assetClass.Identifier);
         }
 
         #region Pipeline Construction
 
         private Validator<AssetClass> BuildValidationPipeline()
         {
-            // Critical validations - stop on failure
-            var criticalValidations = Validator<AssetClass>
-                .Create(ValidateCriticalFields)
+            // Phase 1: No database access checks (fail fast on business rules)
+            var noDatabaseChecks = Validator<AssetClass>
+                .Create(ValidateWithoutDatabaseAccess)
                 .StopOnFailure();
 
-            // Standard validations - collect all errors
-            var standardValidations = Validator<AssetClass>
-                .Create(ValidateInfo)
-                .AndThen(ValidateDimensions)
-                .AndThen(ValidatePowerConsumption)
-                .AndThen(ValidateCollections);
+            // Phase 2: Database access checks (uniqueness, relationships)
+            var databaseChecks = Validator<AssetClass>
+                .Create(ac => ValidateWithDatabaseAccess(ac));
 
-            // Combine: critical first, then standard
-            return criticalValidations.AndThen(standardValidations);
+            return noDatabaseChecks.AndThen(databaseChecks);
         }
 
         #endregion
 
         #region Validation Methods
 
-        private ValidationResult ValidateCriticalFields(AssetClass assetClass)
+        private ValidationResult ValidateWithoutDatabaseAccess(AssetClass assetClass)
+        {
+            // DeviceTypeId format is critical - stop if invalid
+            var criticalCheck = Validator<AssetClass>
+                .Create(ValidateNonDbCriticalFields)
+                .StopOnFailure();
+
+            var standardChecks = Validator<AssetClass>
+                .Create(ValidateDimensions)
+                .AndThen(ValidatePowerConsumption)
+                .AndThen(ValidateCollections);
+
+            return criticalCheck.AndThen(standardChecks).Validate(assetClass);
+        }
+
+        private ValidationResult ValidateNonDbCriticalFields(AssetClass assetClass)
         {
             var result = new ValidationResult();
 
-            // Name is critical - must be valid before other checks
-            if (assetClass.ShouldValidate(assetClass.NameField))
-            {
-                result.AddFailuresFrom(IsAssetClassNameValid(assetClass));
-            }
-
-            // Device Type is critical
             if (assetClass.ShouldValidate(assetClass.DeviceTypeIdField)
                 && !AssetClassValidationHandler.IsAssetClassDeviceTypeValid(assetClass, out var deviceTypeResult))
             {
@@ -142,29 +215,40 @@
             return result;
         }
 
-        private ValidationResult ValidateInfo(AssetClass assetClass)
+        private ValidationResult ValidateWithDatabaseAccess(AssetClass assetClass, Dictionary<string, DeviceType> deviceTypeCache = null)
         {
-            var result = new ValidationResult();
+            var validations = new List<ValidationResult>();
 
-            // Power Supply validation (if device type or power supply changed)
+            bool isBulkValidation = deviceTypeCache != null;    
+
+            // Name uniqueness: in bulk mode it was already resolved in Phase 2.5 via bulk DB query.
+            // In single mode, use the standard per-item check (1 exclude ID — safe).
+            if (!isBulkValidation && assetClass.ShouldValidate(assetClass.NameField))
+            {
+                validations.Add(IsAssetClassNameValid(assetClass.Name, assetClass.Identifier));
+            }
+
+            // Power Supply validation (requires loading device type from DB)
             if ((assetClass.DeviceTypeIdField.Changed || assetClass.PowerSupplyField.Changed)
                 && assetClass.DeviceTypeId.HasValue())
             {
                 try
                 {
-                    result.AddFailuresFrom(ValidatePowerSupply(assetClass));
+                    validations.Add(ValidatePowerSupply(assetClass, deviceTypeCache));
                 }
                 catch (Exception ex)
                 {
-                    result.AddFailReason(AssetClassValidationHandler.AssetClassValidationField.PowerSupply,
+                    var r = new ValidationResult();
+                    r.AddFailReason(AssetClassValidationHandler.AssetClassValidationField.PowerSupply,
                         $"Error validating power supply: {ex.Message}");
+                    validations.Add(r);
                 }
             }
 
-            return result;
+            return validations.MergeAll();
         }
 
-        private ValidationResult ValidatePowerSupply(AssetClass assetClass)
+        private ValidationResult ValidatePowerSupply(AssetClass assetClass, Dictionary<string, DeviceType> deviceTypeCache = null)
         {
             var result = new ValidationResult();
 
@@ -173,7 +257,19 @@
                 return result;
             }
 
-            var deviceType = _entityLoader.LoadDeviceType(assetClass.DeviceTypeId);
+            DeviceType deviceType;
+            if (deviceTypeCache != null && deviceTypeCache.TryGetValue(assetClass.DeviceTypeId, out var cached))
+            {
+                deviceType = cached;
+            }
+            else
+            {
+                deviceType = _entityLoader.LoadDeviceType(assetClass.DeviceTypeId);
+                if (deviceTypeCache != null)
+                {
+                    deviceTypeCache[assetClass.DeviceTypeId] = deviceType;
+                }
+            }
 
             if (deviceType == null)
             {
@@ -182,13 +278,11 @@
                 return result;
             }
 
-#pragma warning disable CS0472 // The result of the expression is always the same since a value of this type is never equal to 'null'
             if (deviceType.TagsInfo.Tags.Contains(SlcAsset_Management.Enums.TagOption.PowerProvider) && assetClass.PowerSupply == null)
             {
                 result.AddFailReason(AssetClassValidationHandler.AssetClassValidationField.PowerSupply,
                     "Asset Class with 'Power Provider' Device Type must have a Power Supply.");
             }
-#pragma warning restore CS0472 // The result of the expression is always the same since a value of this type is never equal to 'null'
 
             return result;
         }
@@ -261,9 +355,73 @@
 
         #region Helper Methods
 
-        private bool IsNameInUse(string name, List<string> exceptIdentifiers = null)
+        private bool IsNameInUse(string name, string exceptIdentifier = null)
         {
-            return _entityLoader.CountAssetClassesByName(name, exceptIdentifiers) > 0;
+            return _entityLoader.CountAssetClassesByName(name, exceptIdentifier) > 0;
+        }
+
+        private List<ValidationResult> ValidateBulkNamesAgainstDatabase(List<AssetClass> assetClasses)
+        {
+            var results = assetClasses.Select(_ => new ValidationResult()).ToList();
+
+            var uniqueNames = assetClasses
+                .Select(a => a.Name)
+                .Where(n => !string.IsNullOrWhiteSpace(n))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            if (!uniqueNames.Any())
+            {
+                return results;
+            }
+
+            var batchIds = new HashSet<string>(
+                assetClasses.Select(a => a.Identifier).Where(id => !string.IsNullOrWhiteSpace(id)));
+
+            // Single bulk query via Tools.RetrieveBigOrFilter — no large AND filter
+            var dbMatches = _entityLoader.GetAssetClassesByNames(uniqueNames);
+
+            // External conflicts: DB records whose identifier is NOT in the current batch
+            var externalConflictNames = dbMatches
+                .Where(r => !batchIds.Contains(r.Identifier))
+                .Select(r => r.Name)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            for (int i = 0; i < assetClasses.Count; i++)
+            {
+                var name = assetClasses[i].Name;
+                if (!string.IsNullOrWhiteSpace(name) && externalConflictNames.Contains(name))
+                {
+                    results[i].AddFailReason(
+                        AssetClassValidationHandler.AssetClassValidationField.Name,
+                        $"Asset Class Name '{name}' is already in use.");
+                }
+            }
+
+            return results;
+        }
+
+        private static List<ValidationResult> ValidateNameDuplicatesInBatch(List<AssetClass> assetClasses)
+        {
+            var results = assetClasses.Select(_ => new ValidationResult()).ToList();
+
+            var duplicateNames = assetClasses
+                .Select((ac, idx) => new { ac.Name, Index = idx })
+                .Where(x => !string.IsNullOrWhiteSpace(x.Name))
+                .GroupBy(x => x.Name, StringComparer.OrdinalIgnoreCase)
+                .Where(g => g.Count() > 1);
+
+            foreach (var group in duplicateNames)
+            {
+                foreach (var item in group)
+                {
+                    results[item.Index].AddFailReason(
+                        AssetClassValidationHandler.AssetClassValidationField.Name,
+                        $"Asset Class Name '{item.Name}' is duplicated within the batch.");
+                }
+            }
+
+            return results;
         }
 
         #endregion
