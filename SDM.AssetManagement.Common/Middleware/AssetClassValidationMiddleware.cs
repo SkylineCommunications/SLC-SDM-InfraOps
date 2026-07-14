@@ -43,7 +43,7 @@
         public IReadOnlyCollection<AssetClass> OnCreate(IEnumerable<AssetClass> oToCreate, Func<IEnumerable<AssetClass>, IReadOnlyCollection<AssetClass>> next)
         {
             var assetClasses = oToCreate.ToList();
-            var results = ValidateBulk(assetClasses);
+            var results = _validator.ValidateBulk(assetClasses);
 
             if (results.AnyInvalid())
             {
@@ -55,7 +55,7 @@
 
         public AssetClass OnCreate(AssetClass oToCreate, Func<AssetClass, AssetClass> next)
         {
-            var result = Validate(oToCreate);
+            var result = _validator.Validate(oToCreate);
             if (!result.IsValid)
             {
                 throw result.ToException();
@@ -67,7 +67,7 @@
         public IReadOnlyCollection<AssetClass> OnCreateOrUpdate(IEnumerable<AssetClass> oToCreateOrUpdate, Func<IEnumerable<AssetClass>, IReadOnlyCollection<AssetClass>> next)
         {
             var assetClasses = oToCreateOrUpdate.ToList();
-            var results = ValidateBulk(assetClasses);
+            var results = _validator.ValidateBulk(assetClasses);
 
             if (results.AnyInvalid())
             {
@@ -170,7 +170,7 @@
         public IReadOnlyCollection<AssetClass> OnUpdate(IEnumerable<AssetClass> oToUpdate, Func<IEnumerable<AssetClass>, IReadOnlyCollection<AssetClass>> next)
         {
             var assetClasses = oToUpdate.ToList();
-            var results = ValidateBulk(assetClasses);
+            var results = _validator.ValidateBulk(assetClasses);
 
             if (results.AnyInvalid())
             {
@@ -182,25 +182,14 @@
 
         public AssetClass OnUpdate(AssetClass oToUpdate, Func<AssetClass, AssetClass> next)
         {
-            var result = Validate(oToUpdate);
-            
+            var result = _validator.Validate(oToUpdate);
+
             if (!result.IsValid)
             {
                 throw result.ToException();
             }
 
             return next(oToUpdate);
-        }
-
-        private ValidationResult Validate(AssetClass assetClass)
-        {
-            return _validator.Validate(assetClass);
-        }
-
-        private List<ValidationResult> ValidateBulk(List<AssetClass> assetClasses)
-        {
-            // Validate each asset class individually
-            return assetClasses.Select(ac => _validator.Validate(ac)).ToList();
         }
 
         /// <summary>
@@ -210,10 +199,10 @@
         private Exception BuildBulkValidationException(List<AssetClass> assetClasses, List<ValidationResult> results)
         {
             return new BulkValidationException<AssetClass>(
-                assetClasses, 
-                results, 
-                assetClass => string.IsNullOrEmpty(assetClass.Name) 
-                    ? $"AssetClass '{assetClass.Identifier}'" 
+                assetClasses,
+                results,
+                assetClass => string.IsNullOrEmpty(assetClass.Name)
+                    ? $"AssetClass '{assetClass.Identifier}'"
                     : $"AssetClass '{assetClass.Name}'");
         }
     }

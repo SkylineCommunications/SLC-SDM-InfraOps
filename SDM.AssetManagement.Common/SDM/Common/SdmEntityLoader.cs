@@ -6,6 +6,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
 
     using SharedCommonLibrary.AssetManagement.Models;
 
+    using Skyline.DataMiner.Net;
     using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
@@ -245,9 +246,10 @@ namespace Skyline.DataMiner.SDM.Common.Services
         #region Query Methods (Count/Filter Operations)
 
         /// <summary>
-        /// Counts assets with the specified name, excluding given identifiers.
+        /// Counts assets with the specified name, excluding a single identifier (e.g. the current asset on edit).
+        /// <para><b>Not suitable for bulk scenarios</b>: use <see cref="GetAssetsByNames"/> for bulk uniqueness checks.</para>
         /// </summary>
-        public long CountAssetsByName(string name, List<string> exceptIdentifiers = null)
+        public long CountAssetsByName(string name, string exceptIdentifier = null)
         {
             if (assetManagerApiHelper?.Assets == null || string.IsNullOrWhiteSpace(name))
             {
@@ -256,28 +258,19 @@ namespace Skyline.DataMiner.SDM.Common.Services
 
             FilterElement<Asset> filter = AssetExposers.AssetName.Equal(name);
 
-            // Filter out null/empty identifiers (happens with new, unsaved entities)
-            if (exceptIdentifiers != null && exceptIdentifiers.Any())
+            if (!string.IsNullOrWhiteSpace(exceptIdentifier))
             {
-                var validIdentifiers = exceptIdentifiers.Where(id => !string.IsNullOrWhiteSpace(id)).ToList();
-                
-                if (validIdentifiers.Any())
-                {
-                    var clauses = validIdentifiers
-                        .Select(id => AssetExposers.Identifier.NotEqual(id))
-                        .Cast<FilterElement<Asset>>()
-                        .ToArray();
-                    filter = filter.AND(new ANDFilterElement<Asset>(clauses));
-                }
+                filter = filter.AND(AssetExposers.Identifier.NotEqual(exceptIdentifier));
             }
 
             return assetManagerApiHelper.Assets.Count(filter);
         }
 
         /// <summary>
-        /// Counts assets with the specified AssetID, excluding given identifiers.
+        /// Counts assets with the specified AssetID, excluding a single identifier (e.g. the current asset on edit).
+        /// <para><b>Not suitable for bulk scenarios</b>: use <see cref="GetAssetsByAssetIds"/> for bulk uniqueness checks.</para>
         /// </summary>
-        public long CountAssetsByAssetId(string assetId, List<string> exceptIdentifiers = null)
+        public long CountAssetsByAssetId(string assetId, string exceptIdentifier = null)
         {
             if (assetManagerApiHelper?.Assets == null || string.IsNullOrWhiteSpace(assetId))
             {
@@ -286,31 +279,22 @@ namespace Skyline.DataMiner.SDM.Common.Services
 
             FilterElement<Asset> filter = AssetExposers.AssetId.Equal(assetId);
 
-            // Filter out null/empty identifiers (happens with new, unsaved entities)
-            if (exceptIdentifiers != null && exceptIdentifiers.Any())
+            if (!string.IsNullOrWhiteSpace(exceptIdentifier))
             {
-                var validIdentifiers = exceptIdentifiers.Where(id => !string.IsNullOrWhiteSpace(id)).ToList();
-                
-                if (validIdentifiers.Any())
-                {
-                    var clauses = validIdentifiers
-                        .Select(id => AssetExposers.Identifier.NotEqual(id))
-                        .Cast<FilterElement<Asset>>()
-                        .ToArray();
-                    filter = filter.AND(new ANDFilterElement<Asset>(clauses));
-                }
+                filter = filter.AND(AssetExposers.Identifier.NotEqual(exceptIdentifier));
             }
 
             return assetManagerApiHelper.Assets.Count(filter);
         }
 
         /// <summary>
-        /// Counts assets with the specified Serial Number and AssetClass, excluding given identifiers.
+        /// Counts assets with the specified Serial Number and AssetClass, excluding a single identifier (e.g. the current asset on edit).
+        /// <para><b>Not suitable for bulk scenarios</b>: use <see cref="GetAssetsBySerialNumbers"/> for bulk uniqueness checks.</para>
         /// </summary>
         public long CountAssetsBySerialNumber(
             string serialNumber,
             SdmObjectReference<AssetClass> assetClassId,
-            List<string> exceptIdentifiers = null)
+            string exceptIdentifier = null)
         {
             if (assetManagerApiHelper?.Assets == null ||
                 string.IsNullOrWhiteSpace(serialNumber) ||
@@ -323,28 +307,19 @@ namespace Skyline.DataMiner.SDM.Common.Services
             FilterElement<Asset> filter = AssetExposers.SerialNumber.Equal(serialNumber)
                 .AND(AssetExposers.AssetClass.Equal(assetClassId));
 
-            // Filter out null/empty identifiers (happens with new, unsaved entities)
-            if (exceptIdentifiers != null && exceptIdentifiers.Any())
+            if (!string.IsNullOrWhiteSpace(exceptIdentifier))
             {
-                var validIdentifiers = exceptIdentifiers.Where(id => !string.IsNullOrWhiteSpace(id)).ToList();
-                
-                if (validIdentifiers.Any())
-                {
-                    var clauses = validIdentifiers
-                        .Select(id => AssetExposers.Identifier.NotEqual(id))
-                        .Cast<FilterElement<Asset>>()
-                        .ToArray();
-                    filter = filter.AND(new ANDFilterElement<Asset>(clauses));
-                }
+                filter = filter.AND(AssetExposers.Identifier.NotEqual(exceptIdentifier));
             }
 
             return assetManagerApiHelper.Assets.Count(filter);
         }
 
         /// <summary>
-        /// Counts CableTypes with the specified name, excluding given identifiers.
+        /// Counts CableTypes with the specified name, excluding a single identifier (e.g. the current cable type on edit).
+        /// <para><b>Not suitable for bulk scenarios</b>: use <see cref="GetCableTypesByNames"/> when checking multiple names at once.</para>
         /// </summary>
-        public long CountCableTypesByName(string name, List<string> exceptIdentifiers = null)
+        public long CountCableTypesByName(string name, string exceptIdentifier = null)
         {
             if (assetManagerApiHelper?.CableTypes == null || string.IsNullOrWhiteSpace(name))
             {
@@ -353,27 +328,19 @@ namespace Skyline.DataMiner.SDM.Common.Services
 
             FilterElement<CableType> filter = CableTypeExposers.Name.Equal(name);
 
-            if (exceptIdentifiers != null && exceptIdentifiers.Any())
+            if (!string.IsNullOrWhiteSpace(exceptIdentifier))
             {
-                var validIdentifiers = exceptIdentifiers.Where(id => !string.IsNullOrWhiteSpace(id)).ToList();
-
-                if (validIdentifiers.Any())
-                {
-                    var clauses = validIdentifiers
-                        .Select(id => CableTypeExposers.Identifier.NotEqual(id))
-                        .Cast<FilterElement<CableType>>()
-                        .ToArray();
-                    filter = filter.AND(new ANDFilterElement<CableType>(clauses));
-                }
+                filter = filter.AND(CableTypeExposers.Identifier.NotEqual(exceptIdentifier));
             }
 
             return assetManagerApiHelper.CableTypes.Count(filter);
         }
 
         /// <summary>
-        /// Counts AssetClasses with the specified name, excluding given identifiers.
+        /// Counts AssetClasses with the specified name, excluding a single identifier (e.g. the current asset class on edit).
+        /// <para><b>Not suitable for bulk scenarios</b>: use <see cref="GetAssetClassesByNames"/> when checking multiple names at once.</para>
         /// </summary>
-        public long CountAssetClassesByName(string name, List<string> exceptIdentifiers = null)
+        public long CountAssetClassesByName(string name, string exceptIdentifier = null)
         {
             if (assetManagerApiHelper?.AssetClasses == null || string.IsNullOrWhiteSpace(name))
             {
@@ -382,27 +349,129 @@ namespace Skyline.DataMiner.SDM.Common.Services
 
             FilterElement<AssetClass> filter = AssetClassExposers.DeviceName.Equal(name);
 
-            // Filter out null/empty identifiers (happens with new, unsaved entities)
-            if (exceptIdentifiers != null && exceptIdentifiers.Any())
+            if (!string.IsNullOrWhiteSpace(exceptIdentifier))
             {
-                var validIdentifiers = exceptIdentifiers.Where(id => !string.IsNullOrWhiteSpace(id)).ToList();
-                
-                if (validIdentifiers.Any())
-                {
-                    var clauses = validIdentifiers
-                        .Select(id => AssetClassExposers.Identifier.NotEqual(id))
-                        .Cast<FilterElement<AssetClass>>()
-                        .ToArray();
-                    filter = filter.AND(new ANDFilterElement<AssetClass>(clauses));
-                }
+                filter = filter.AND(AssetClassExposers.Identifier.NotEqual(exceptIdentifier));
             }
 
             return assetManagerApiHelper.AssetClasses.Count(filter);
         }
 
+        /// <summary>
+        /// Retrieves all AssetClasses whose Name matches any of the provided names.
+        /// Uses <see cref="Tools.RetrieveBigOrFilter"/> to safely handle large sets without
+        /// creating an oversized OR filter in a single call.
+        /// </summary>
+        public List<AssetClass> GetAssetClassesByNames(List<string> names)
+        {
+            if (assetManagerApiHelper?.AssetClasses == null || names == null || !names.Any())
+            {
+                return new List<AssetClass>();
+            }
+
+            return Tools.RetrieveBigOrFilter(
+                names,
+                name => AssetClassExposers.DeviceName.Equal(name),
+                filter => assetManagerApiHelper.AssetClasses.Read(filter).ToList());
+        }
 
         /// <summary>
-        /// Finds assets in a specific rack, excluding specified asset identifiers.
+        /// Retrieves all Assets whose Name matches any of the provided names.
+        /// Uses <see cref="Tools.RetrieveBigOrFilter"/> to safely handle large sets without
+        /// creating an oversized OR filter in a single call.
+        /// </summary>
+        public List<Asset> GetAssetsByNames(List<string> names)
+        {
+            if (assetManagerApiHelper?.Assets == null || names == null || !names.Any())
+            {
+                return new List<Asset>();
+            }
+
+            return Tools.RetrieveBigOrFilter(
+                names,
+                name => AssetExposers.AssetName.Equal(name),
+                filter => assetManagerApiHelper.Assets.Read(filter).ToList());
+        }
+
+        /// <summary>
+        /// Retrieves all Assets whose AssetID matches any of the provided IDs.
+        /// Uses <see cref="Tools.RetrieveBigOrFilter"/> to safely handle large sets without
+        /// creating an oversized OR filter in a single call.
+        /// </summary>
+        public List<Asset> GetAssetsByAssetIds(List<string> assetIds)
+        {
+            if (assetManagerApiHelper?.Assets == null || assetIds == null || !assetIds.Any())
+            {
+                return new List<Asset>();
+            }
+
+            return Tools.RetrieveBigOrFilter(
+                assetIds,
+                id => AssetExposers.AssetId.Equal(id),
+                filter => assetManagerApiHelper.Assets.Read(filter).ToList());
+        }
+
+        /// <summary>
+        /// Retrieves all Assets whose SerialNumber matches any of the provided serial numbers,
+        /// scoped to the given AssetClass.
+        /// Uses <see cref="Tools.RetrieveBigOrFilter"/> to safely handle large sets without
+        /// creating an oversized OR filter in a single call.
+        /// </summary>
+        public List<Asset> GetAssetsBySerialNumbers(
+            SdmObjectReference<AssetClass> assetClassId, List<string> serialNumbers)
+        {
+            if (assetManagerApiHelper?.Assets == null ||
+                serialNumbers == null || !serialNumbers.Any() ||
+                assetClassId == null || !assetClassId.HasValue())
+            {
+                return new List<Asset>();
+            }
+
+            return Tools.RetrieveBigOrFilter(
+                serialNumbers,
+                sn => AssetExposers.SerialNumber.Equal(sn)
+                          .AND(AssetExposers.AssetClass.Equal(assetClassId)),
+                filter => assetManagerApiHelper.Assets.Read(filter).ToList());
+        }
+        /// <summary>
+        /// Retrieves all Assets whose DOM identifier matches any of the provided identifiers.
+        /// Uses <see cref="Tools.RetrieveBigOrFilter"/> to safely handle large sets without
+        /// creating an oversized OR filter in a single call.
+        /// </summary>
+        public List<Asset> GetAssetsByDomIds(List<string> identifiers)
+        {
+            if (assetManagerApiHelper?.Assets == null || identifiers == null || !identifiers.Any())
+            {
+                return new List<Asset>();
+            }
+
+            return Tools.RetrieveBigOrFilter(
+                identifiers,
+                id => AssetExposers.Identifier.Equal(id),
+                filter => assetManagerApiHelper.Assets.Read(filter).ToList());
+        }
+
+        /// <summary>
+        /// Retrieves all CableTypes whose Name matches any of the provided names.
+        /// Uses <see cref="Tools.RetrieveBigOrFilter"/> to safely handle large sets without
+        /// creating an oversized OR filter in a single call.
+        /// </summary>
+        public List<CableType> GetCableTypesByNames(List<string> names)
+        {
+            if (assetManagerApiHelper?.CableTypes == null || names == null || !names.Any())
+            {
+                return new List<CableType>();
+            }
+
+            return Tools.RetrieveBigOrFilter(
+                names,
+                name => CableTypeExposers.Name.Equal(name),
+                filter => assetManagerApiHelper.CableTypes.Read(filter).ToList());
+        }
+
+
+
+        /// <para><b>Not suitable for bulk scenarios</b>: builds an AND clause per excluded identifier.</para>
         /// </summary>
         public List<Asset> FindAssetsInRack(string rackIdentifier, List<string> excludeAssetIds = null)
         {
@@ -443,6 +512,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
 
         /// <summary>
         /// Finds child assets of a specific parent asset, excluding specified asset identifiers.
+        /// <para><b>Not suitable for bulk scenarios</b>: builds an AND clause per excluded identifier.</para>
         /// </summary>
         public List<Asset> FindChildAssets(string parentAssetIdentifier, List<string> excludeAssetIds = null)
         {

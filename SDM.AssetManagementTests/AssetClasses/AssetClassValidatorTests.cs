@@ -209,10 +209,8 @@
             _helper.PopulateWithDemoData(upTo: DemoDataLayer.AssetClasses);
             var existingAssetClass = _helper.TestData.AssetClasses.First();
 
-            var exceptIdentifiers = new List<string> { existingAssetClass.Identifier };
-
             // Act
-            var result = _validator.IsAssetClassNameValid(existingAssetClass.Name, exceptIdentifiers);
+            var result = _validator.IsAssetClassNameValid(existingAssetClass.Name, existingAssetClass.Identifier);
 
             // Assert
             result.IsValid.Should().BeTrue("the name belongs to the excluded identifier");
