@@ -1,194 +1,243 @@
-﻿namespace SDM.AssetManagement.Tests
+﻿namespace SDM.AssetManagement.Tests.PowerPorts
 {
-	using System;
-	using System.Diagnostics;
-	using System.Linq;
-	using FluentAssertions;
-	using FluentAssertions.Execution;
-	using Microsoft.VisualStudio.TestTools.UnitTesting;
-	using Newtonsoft.Json;
-	using SDM.AssetManagement.Tests.Setup;
-	//using Skyline.DataMiner.Analytics.GenericInterface.JoinFilter;
-	using Skyline.DataMiner.Net.Messages.SLDataGateway;
-	using Skyline.DataMiner.SDM;
-	using Skyline.DataMiner.SDM.AssetManagement;
-	using Skyline.DataMiner.SDM.AssetManagement.Helpers;
-	using Skyline.DataMiner.SDM.AssetManagement.Models;
+    using System;
+    using System.Linq;
 
-	[TestClass]
-	public partial class PowerPortDomStorageProviderTests
-	{
-		private PowerPort referencePowerPort;
+    using FluentAssertions;
+    using FluentAssertions.Execution;
 
-		[TestInitialize]
-		public void Init()
-		{
-			referencePowerPort = new PowerPort
-			{
-				Identifier = Guid.NewGuid().ToString(),
-				PowerPortInfo = new PowerPortInfo
-				{
-					Identifier = Guid.NewGuid().ToString(),
-					Name = "Test PowerPort",
-					PortNumber = 1,
-					OutputType = SlcAssetManagement.Enums.Outputtype.IO,
-					PortExposure = SlcAssetManagement.Enums.PortExposure.Front,
-					Label = "Power Port 1",
-				},
-				Asset = new SdmObjectReference<Asset>(Guid.NewGuid().ToString()),
-			};
-		}
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-		[TestMethod]
-		public void PowerPortDomStorageProvider_EmptyDOM_Create()
-		{
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
+    using SDM.AssetManagement.Tests.Setup;
 
-			helper.PowerPorts.Create(referencePowerPort);
+    using SharedMappers.DomIds;
 
-			AssertCreated(helper);
-		}
+    using Skyline.DataMiner.Net.Messages.SLDataGateway;
+    using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.AssetManagement.Models;
 
-		[TestMethod]
-		public void PowerPortDomStorageProvider_EmptyDOM_CreateOrUpdate_Create()
-		{
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PowerPorts.CreateOrUpdate([referencePowerPort]);
+    /// <summary>
+    /// CRUD tests for PowerPort repository operations.
+    /// </summary>
+    [TestClass]
+    public class PowerPortDomStorageProvider_CRUDTests : BaseRepositoryTest
+    {
+        private PowerPort referencePowerPort = null!;
 
-			AssertCreated(helper);
-		}
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            referencePowerPort = new PowerPort
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                PowerPortInfo = new PowerPortInfo
+                {
+                    Name = "Test PowerPort",
+                    PortNumber = 1,
+                    OutputType = SlcAsset_Management.Enums.Outputtype.IO,
+                    PortExposure = SlcAsset_Management.Enums.PortExposureEnum.Front,
+                    Label = "Power Port 1",
+                },
+                Asset = new SdmObjectReference<Asset>(Guid.NewGuid().ToString()),
+            };
+        }
 
-		[TestMethod]
-		public void PowerPortDomStorageProvider_EmptyDOM_CreateOrUpdate_Update()
-		{
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PowerPorts.Create(referencePowerPort);
+        #region Create Tests
 
-			var updatedPowerPort = new PowerPort
-			{
-				Identifier = referencePowerPort.Identifier,
-				PowerPortInfo = new PowerPortInfo
-				{
-					Identifier = referencePowerPort.PowerPortInfo.Identifier,
-					Name = "Updated PowerPort Name",
-					PortNumber = 2,
-					OutputType = SlcAssetManagement.Enums.Outputtype.Out,
-					PortExposure = SlcAssetManagement.Enums.PortExposure.Back,
-					Label = "Power Port 2",
-				},
-				Asset = referencePowerPort.Asset,
-			};
+        [TestMethod]
+        public void Create_WithValidData_ShouldPersistPowerPort()
+        {
+            // Arrange
+           
 
-			helper.PowerPorts.CreateOrUpdate([updatedPowerPort]);
+            // Act
+            Helper.AssetManagement.PowerPorts.Create(referencePowerPort);
 
-			AssertPowerPortUpdateDifferences(referencePowerPort, updatedPowerPort);
-		}
+            // Assert
+            AssertCreated();
+        }
 
-		[TestMethod]
-		public void PowerPortDomStorageProvider_ReadPaged()
-		{
-			const int pageCount = 3;
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulatePowerPorts();
+        [TestMethod]
+        public void CreateOrUpdate_WithNewPowerPort_ShouldCreate()
+        {
+            // Arrange
+           
 
-			FilterElement<PowerPort> allFilter = new TRUEFilterElement<PowerPort>();
-			var pagedResult = helper.PowerPorts.ReadPaged(allFilter, pageCount);
-			var powerPortCount = helper.PowerPorts.Count(allFilter);
+            // Act
+            Helper.AssetManagement.PowerPorts.CreateOrUpdate([referencePowerPort]);
 
-			using (new AssertionScope())
-			{
-				pagedResult.Should().NotBeNull();
-				pagedResult.Should().HaveCountGreaterThanOrEqualTo((int)(powerPortCount / pageCount));
-				pagedResult.Should().AllSatisfy(page => page.Should().HaveCountLessThanOrEqualTo(pageCount));
-			}
-		}
+            // Assert
+            AssertCreated();
+        }
 
-		[TestMethod]
-		public void PowerPortDomStorageProvider_DeleteBulk()
-		{
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulatePowerPorts();
+        [TestMethod]
+        public void CreateOrUpdate_WithExistingPowerPort_ShouldUpdate()
+        {
+            // Arrange
+           
+            Helper.AssetManagement.PowerPorts.Create(referencePowerPort);
 
-			var filter = new ORFilterElement<PowerPort>(
-				PowerPortExposers.PowerPortInfo.Name.Equal("Power Port 3"),
-				PowerPortExposers.PowerPortInfo.Label.Equal("Power Port Label 7"),
-				PowerPortExposers.Asset.UncheckedEqual(DemoData.Assets[9]));
+            var updatedPowerPort = new PowerPort
+            {
+                Identifier = referencePowerPort.Identifier,
+                PowerPortInfo = new PowerPortInfo
+                {
+                    Name = "Updated PowerPort Name",
+                    PortNumber = 2,
+                    OutputType = SlcAsset_Management.Enums.Outputtype.Out,
+                    PortExposure = SlcAsset_Management.Enums.PortExposureEnum.Back,
+                    Label = "Power Port 2",
+                },
+                Asset = referencePowerPort.Asset,
+            };
 
-			var powerPortsToDelete = helper.PowerPorts.Read(filter);
+            // Act
+            Helper.AssetManagement.PowerPorts.CreateOrUpdate([updatedPowerPort]);
 
-			helper.PowerPorts.Delete(powerPortsToDelete);
+            // Assert
+            var persisted = Helper.AssetManagement.PowerPorts.Read(new TRUEFilterElement<PowerPort>()).First();
+            AssertPowerPortUpdateDifferences(referencePowerPort, persisted);
+        }
 
-			using (new AssertionScope())
-			{
-				helper.PowerPorts.Count(new TRUEFilterElement<PowerPort>()).Should().Be(DemoData.PowerPorts.Count - powerPortsToDelete.Count());
-				helper.PowerPorts.Count(PowerPortExposers.PowerPortInfo.Name.Equal("Power Port 3")).Should().Be(0);
-				helper.PowerPorts.Count(PowerPortExposers.PowerPortInfo.Label.Equal("Power Port Label 7")).Should().Be(0);
-			}
-		}
+        #endregion
 
-		[TestMethod]
-		public void PowerPortDomStorageProvider_EmptyDOM_DeleteSingle()
-		{
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulatePowerPorts();
+        #region Read Tests
 
-			var powerPortToDelete = helper.PowerPorts.Read(PowerPortExposers.PowerPortInfo.Name.Equal("Power Port 3")).First();
+        [TestMethod]
+        public void ReadPaged_WithValidFilter_ShouldReturnPages()
+        {
+            // Arrange
+            const int pageSize = 3;
+           
+            Helper.PopulateWithDemoData(upTo: DemoDataLayer.PowerPorts);
 
-			helper.PowerPorts.Delete(powerPortToDelete);
+            var allFilter = new TRUEFilterElement<PowerPort>();
+            var totalCount = Helper.TestData.PowerPorts.Count;
 
-			helper.PowerPorts.Count(new TRUEFilterElement<PowerPort>()).Should().Be(DemoData.PowerPorts.Count - 1);
-			helper.PowerPorts.Count(PowerPortExposers.Identifier.Equal(powerPortToDelete.Identifier)).Should().Be(0);
-		}
+            // Act
+            var pagedResult = Helper.AssetManagement.PowerPorts.ReadPaged(allFilter, pageSize);
 
-		private static void AssertPowerPortUpdateDifferences(PowerPort original, PowerPort updated)
-		{
-			using (new AssertionScope())
-			{
-				updated.Identifier.Should().Be(original.Identifier);
+            // Assert
+            using (new AssertionScope())
+            {
+                pagedResult.Should().NotBeNull();
+                pagedResult.Should().HaveCountGreaterOrEqualTo((int)(totalCount / pageSize), 
+                    "should have at least the expected number of pages");
+                pagedResult.Should().AllSatisfy(page => 
+                    page.Should().HaveCountLessOrEqualTo(pageSize), 
+                    "each page should not exceed page size");
+            }
+        }
 
-				// Name
-				updated.PowerPortInfo.Name.Should().NotBe(original.PowerPortInfo.Name);
-				updated.PowerPortInfo.Name.Should().Be("Updated PowerPort Name");
+        #endregion
 
-				// PortNumber
-				updated.PowerPortInfo.PortNumber.Should().NotBe(original.PowerPortInfo.PortNumber);
-				updated.PowerPortInfo.PortNumber.Should().Be(2);
+        #region Delete Tests
 
-				// OutputType
-				updated.PowerPortInfo.OutputType.Should().NotBe(original.PowerPortInfo.OutputType);
-				updated.PowerPortInfo.OutputType.Should().Be(SlcAssetManagement.Enums.Outputtype.Out);
+        [TestMethod]
+        public void Delete_Single_ShouldRemovePowerPort()
+        {
+            // Arrange
+           
+            Helper.PopulateWithDemoData(upTo: DemoDataLayer.PowerPorts);
 
-				// PortExposure
-				updated.PowerPortInfo.PortExposure.Should().NotBe(original.PowerPortInfo.PortExposure);
-				updated.PowerPortInfo.PortExposure.Should().Be(SlcAssetManagement.Enums.PortExposure.Back);
+            var initialCount = Helper.TestData.PowerPorts.Count;
+            var powerPortToDelete = Helper.AssetManagement.PowerPorts
+                .Read(PowerPortExposers.PowerPortInfo.Name.Equal("Power Port 3"))
+                .First();
 
-				// PortType
-				updated.PowerPortInfo.PortType.Should().Be(original.PowerPortInfo.PortType);
+            // Act
+            Helper.AssetManagement.PowerPorts.Delete(powerPortToDelete);
 
-				// Label
-				updated.PowerPortInfo.Label.Should().NotBe(original.PowerPortInfo.Label);
-				updated.PowerPortInfo.Label.Should().Be("Power Port 2");
+            // Assert
+            using (new AssertionScope())
+            {
+                Helper.AssetManagement.PowerPorts.Count(new TRUEFilterElement<PowerPort>())
+                    .Should().Be(initialCount - 1, "one power port should be deleted");
 
-				// Asset
-				updated.Asset.Should().Be(original.Asset);
-			}
-		}
+                Helper.AssetManagement.PowerPorts.Count(PowerPortExposers.Identifier.Equal(powerPortToDelete.Identifier))
+                    .Should().Be(0, "deleted power port should not exist");
+            }
+        }
 
-		private void AssertCreated(IAssetManagementApiHelper helper)
-		{
-			using (new AssertionScope())
-			{
-				helper.PowerPorts.Count(new TRUEFilterElement<PowerPort>()).Should().Be(1);
+        [TestMethod]
+        public void Delete_Bulk_ShouldRemoveMultiplePowerPorts()
+        {
+            // Arrange
+           
+            Helper.PopulateWithDemoData(upTo: DemoDataLayer.PowerPorts);
 
-				var createdPowerPort = helper.PowerPorts.Read(new TRUEFilterElement<PowerPort>()).First();
-				createdPowerPort.Should().NotBeNull();
+            var initialCount = Helper.TestData.PowerPorts.Count;
 
-				createdPowerPort.PowerPortInfo.Equals(referencePowerPort.PowerPortInfo).Should().BeTrue();
+            var filter = new ORFilterElement<PowerPort>(
+                PowerPortExposers.PowerPortInfo.Name.Equal("Power Port 3"),
+                PowerPortExposers.PowerPortInfo.Label.Equal("Power Port Label 7"));
 
-				createdPowerPort.Asset.Should().NotBeNull();
-				createdPowerPort.Asset.Should().BeAssignableTo<SdmObjectReference<Asset>>();
+            var powerPortsToDelete = Helper.AssetManagement.PowerPorts.Read(filter).ToList();
+            var deleteCount = powerPortsToDelete.Count;
 
-			}
-		}
-	}
+            // Act
+            Helper.AssetManagement.PowerPorts.Delete(powerPortsToDelete);
+
+            // Assert
+            using (new AssertionScope())
+            {
+                Helper.AssetManagement.PowerPorts.Count(new TRUEFilterElement<PowerPort>())
+                    .Should().Be(initialCount - deleteCount, $"{deleteCount} power ports should be deleted");
+
+                Helper.AssetManagement.PowerPorts.Count(PowerPortExposers.PowerPortInfo.Name.Equal("Power Port 3"))
+                    .Should().Be(0, "Power Port 3 should be deleted");
+
+                Helper.AssetManagement.PowerPorts.Count(PowerPortExposers.PowerPortInfo.Label.Equal("Power Port Label 7"))
+                    .Should().Be(0, "power port with label 'Power Port Label 7' should be deleted");
+            }
+        }
+
+        #endregion
+
+        #region Assertion Helpers
+
+        private static void AssertPowerPortUpdateDifferences(PowerPort original, PowerPort updated)
+        {
+            using (new AssertionScope())
+            {
+                // Identifiers remain the same
+                updated.Identifier.Should().Be(original.Identifier);
+
+                // PowerPortInfo changes
+                updated.PowerPortInfo.Name.Should().Be("Updated PowerPort Name");
+                updated.PowerPortInfo.PortNumber.Should().Be(2);
+                updated.PowerPortInfo.OutputType.Should().Be(SlcAsset_Management.Enums.Outputtype.Out);
+                updated.PowerPortInfo.PortExposure.Should().Be(SlcAsset_Management.Enums.PortExposureEnum.Back);
+                updated.PowerPortInfo.Label.Should().Be("Power Port 2");
+                updated.PowerPortInfo.PortType.Should().Be(original.PowerPortInfo.PortType);
+
+                // Asset reference remains the same
+                updated.Asset.Should().Be(original.Asset);
+            }
+        }
+
+        private void AssertCreated()
+        {
+            using (new AssertionScope())
+            {
+                Helper.AssetManagement.PowerPorts.Count(new TRUEFilterElement<PowerPort>()).Should().Be(1);
+
+                var created = Helper.AssetManagement.PowerPorts.Read(new TRUEFilterElement<PowerPort>()).First();
+
+                // Basic properties
+                created.Should().NotBeNull();
+                created.PowerPortInfo.Name.Should().Be(referencePowerPort.PowerPortInfo.Name);
+                created.PowerPortInfo.PortNumber.Should().Be(referencePowerPort.PowerPortInfo.PortNumber);
+                created.PowerPortInfo.OutputType.Should().Be(referencePowerPort.PowerPortInfo.OutputType);
+                created.PowerPortInfo.PortExposure.Should().Be(referencePowerPort.PowerPortInfo.PortExposure);
+                created.PowerPortInfo.Label.Should().Be(referencePowerPort.PowerPortInfo.Label);
+
+                // Asset reference
+                created.Asset.Should().NotBeNull();
+                created.Asset.Should().BeAssignableTo<SdmObjectReference<Asset>>();
+            }
+        }
+
+        #endregion
+    }
 }

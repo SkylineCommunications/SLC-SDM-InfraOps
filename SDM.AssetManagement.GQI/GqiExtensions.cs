@@ -6,20 +6,17 @@
     using Skyline.DataMiner.SDM.AssetManagement.Helpers;
 
     /// <summary>
-    /// Provides extension methods for the <see cref="GQIDMS"/> related to IpAddressApiHelper.
+    /// Provides extension methods for obtaining an asset management API helper from GQIDMS and OnInitInputArgs
+    /// instances.
     /// </summary>
     public static class GqiExtensions
     {
         /// <summary>
-        /// Creates a new <see cref="IpAddressApiHelper"/> instance using the specified <see cref="GQIDMS"/>.
+        /// 
         /// </summary>
-        /// <param name="dms">The GQI DataMiner System (DMS) instance.</param>
-        /// <returns>
-        /// A new <see cref="IpAddressApiHelper"/> initialized with the DMS connection.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        /// Thrown when <paramref name="dms"/> is <c>null</c>.
-        /// </exception>
+        /// <param name="dms"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
         public static IAssetManagementApiHelper GetAssetManagementApiHelper(this GQIDMS dms)
         {
             if (dms is null)
@@ -31,15 +28,11 @@
         }
 
         /// <summary>
-        /// Creates a new <see cref="IpAddressApiHelper"/> instance using the <see cref="GQIDMS"/> from the specified <see cref="OnInitInputArgs"/>.
+        /// 
         /// </summary>
-        /// <param name="args">The initialization arguments containing the DMS instance.</param>
-        /// <returns>
-        /// A new <see cref="IpAddressApiHelper"/> initialized with the DMS connection from <paramref name="args"/>.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        /// Thrown when <paramref name="args"/> is <c>null</c>.
-        /// </exception>
+        /// <param name="args"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
         public static IAssetManagementApiHelper GetAssetManagementApiHelper(this OnInitInputArgs args)
         {
             if (args is null)

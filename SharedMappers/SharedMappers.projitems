@@ -9,12 +9,15 @@
     <Import_RootNamespace>SharedMappers</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)Asset Management\Mappers\AssetClassDomMapper.g.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Asset Management\Mappers\AssetDomMapper.g.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Asset Management\Mappers\DataPortDomMapper.g.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Asset Management\Mappers\DeviceTypeDomMapper.g.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Asset Management\Mappers\PowerPortDomMapper.g.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DomIds.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Facility Management\Mappers\FacilityDomMapper.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Facility Management\Mappers\FacilityManagerAppSettingsDomMapper.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Facility Management\Mappers\DeskDomMapper.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Facility Management\Mappers\FloorDomMapper.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Facility Management\Mappers\RackDomMapper.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Facility Management\Mappers\RoomDomMapper.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Facility Management\Mappers\RowDomMapper.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Facility Management\Mappers\SiteDomMapper.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Facility Management\Mappers\ZoneDomMapper.g.cs" />
   </ItemGroup>
 </Project>

@@ -10,12 +10,12 @@
     /// </summary>
     public static class EngineExtensions
     {
-        /// <summary>
-        /// Gets an <see cref="IpAddressApiHelper"/> instance for the specified <see cref="IEngine"/>.
-        /// </summary>
-        /// <param name="engine">The engine to retrieve the IpAddressApiHelper for.</param>
-        /// <returns>An <see cref="IpAddressApiHelper"/> instance associated with the engine's user connection.</returns>
-        /// <exception cref="ArgumentNullException">Thrown when <paramref name="engine"/> is <c>null</c>.</exception>
+       /// <summary>
+       /// Creates and returns an instance of IFacilityManagementApiHelper for the specified engine.
+       /// </summary>
+       /// <param name="engine">The engine instance used to obtain the user connection. Cannot be null.</param>
+       /// <returns>An IFacilityManagementApiHelper instance associated with the provided engine.</returns>
+       /// <exception cref="ArgumentNullException">Thrown if engine is null.</exception>
         public static IFacilityManagementApiHelper GetFacilityManagementApiHelper(this IEngine engine)
         {
             if (engine is null)

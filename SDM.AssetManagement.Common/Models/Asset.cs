@@ -1,268 +1,394 @@
-﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
+namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
-	using System;
-	using System.Collections.Generic;
-	using Skyline.DataMiner.SDM;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
 
-	// [GenerateExposers]
-	// [SdmDomStorage("(slc)asset_management")]
-	public class Asset : SdmObject<Asset>
-	{
-		public string AssetId { get; set; }
+    using Newtonsoft.Json;
 
-		public string AssetName { get; set; }
+    using SharedMappers.DomIds;
 
-		public SdmObjectReference<AssetClass> AssetClass { get; set; }
+    using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
-		public string AssetDescription { get; set; }
+    //[GenerateExposers]
+    //[SdmDomStorage("(slc)asset_management")]
+    public class Asset : SdmObject<Asset>, IEntityTracking
+    {
+        [JsonIgnore]
+        private ChangeTrackingFieldHandler _fieldHandler;
+        [JsonIgnore]
+        private bool _isNew = true;
 
-		public string FwOs { get; set; }
+        public Asset()
+        {
+            _fieldHandler = new ChangeTrackingFieldHandler();
+        }
 
-		public string SerialNumber { get; set; }
+        [JsonIgnore]
+        [SdmIgnore]
+        private ChangeTrackingFieldHandler FieldHandler
+        {
+            get
+            {
+                if (_fieldHandler == null)
+                {
+                    _fieldHandler = new ChangeTrackingFieldHandler();
+                }
+                return _fieldHandler;
+            }
+        }
 
-		public string HardwareVersion { get; set; }
+        [JsonIgnore]
+        [SdmIgnore]
+        public Guid Id { get; set; }
 
-		/// <summary>
-		/// Gets or sets the network details of the asset.
-		/// </summary>
-		public AssetNetworkDetails NetworkDetails { get; set; } = new AssetNetworkDetails();
+        [JsonIgnore]
+        [SdmIgnore]
+        public bool Changed =>
+            FieldHandler.HasChanges ||
+            Location?.Changed == true ||
+            DestinationLocation?.Changed == true ||
+            Ownership?.Changed == true ||
+            Custody?.Changed == true ||
+            HoldersField?.Changed == true ||
+            ElementsField?.Changed == true ||
+            StateField?.Changed == true;
 
-		/// <summary>
-		/// Gets or sets the location details of the asset.
-		/// </summary>
-		public AssetLocation Location { get; set; } = new AssetLocation();
+        /// <summary>
+        /// Gets a value indicating whether the current object has not been assigned an identifier.
+        /// </summary>
+        [JsonIgnore]
+        [SdmIgnore]
+        public bool IsNew => _isNew;
 
-		/// <summary>
-		/// Gets or sets the lifecycle information of the asset.
-		/// </summary>
-		public AssetLifecycle Lifecycle { get; set; } = new AssetLifecycle();
+        /// <summary>
+        /// Sets the IsNew flag. Used internally when loading from database.
+        /// </summary>
+        [JsonIgnore]
+        [SdmIgnore]
+        internal bool IsNewInternal
+        {
+            get => _isNew;
+            set => _isNew = value;
+        }
 
-		/// <summary>
-		/// Gets or sets the ownership information of the asset.
-		/// </summary>
-		public AssetOwnership Ownership { get; set; } = new AssetOwnership();
+        /// <summary>
+        /// Gets or sets the current status of the asset.
+        /// </summary>
+        [SdmIgnore]
+        public SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum State
+        {
+            get => StateField.Value; internal set => StateField.Value = value;
+        }
+        
 
-		/// <summary>
-		/// Gets or sets the custody information of the asset.
-		/// </summary>
-		public AssetCustody Custody { get; set; } = new AssetCustody();
+        #region Info Properties
 
-		/// <summary>
-		/// Gets or sets the list of holders (slots) associated with the asset.
-		/// </summary>
-		public List<AssetHolder> Holders { get; set; } = new List<AssetHolder>();
+        public string Name
+        {
+            get => NameField.Value;
+            set => NameField.Value = value;
+        }
 
-		/// <summary>
-		/// Gets or sets the list of DataMiner element links.
-		/// </summary>
-		public List<ElementLink> ElementLinks { get; set; } = new List<ElementLink>();
-	}
+        public string AssetID
+        {
+            get => AssetIDField.Value;
+            set => AssetIDField.Value = value;
+        }
 
-	public sealed class AssetLifecycle : IEquatable<AssetLifecycle>
-	{
-		public DateTime PurchaseDate { get; set; }
+        public SdmObjectReference<AssetClass> AssetClassId
+        {
+            get => AssetClassIdField.Value;
+            set => AssetClassIdField.Value = value;
+        }
 
-		public DateTime FirstUseDate { get; set; }
+        public string SerialNumber
+        {
+            get => SerialNumberField.Value;
+            set => SerialNumberField.Value = value;
+        }
 
-		public DateTime EndOfWarrantyDate { get; set; }
+        public string Description
+        {
+            get => DescriptionField.Value;
+            set => DescriptionField.Value = value;
+        }
 
-		public DateTime InstallationDate { get; set; }
+        public string FW_OS
+        {
+            get => FwOSField.Value;
+            set => FwOSField.Value = value;
+        }
 
-		public Guid InstallationUserId { get; set; }
+        public string HardwareVersion
+        {
+            get => HardwareVersionField.Value;
+            set => HardwareVersionField.Value = value;
+        }
 
-		public DateTime ModificationDate { get; set; }
+        public long OperationalFlags
+        {
+            get => OperationalFlagsField.Value;
+            set => OperationalFlagsField.Value = value;
+        }
 
-		public Guid ModificationUserId { get; set; }
+        #endregion
 
-		public DateTime EndOfLife { get; set; }
+        #region Network Properties
 
-		public override bool Equals(object obj)
-		{
-			return Equals(obj as AssetLifecycle);
-		}
+        public string MacAddress
+        {
+            get => MacAddressField.Value;
+            set => MacAddressField.Value = value;
+        }
 
-		public bool Equals(AssetLifecycle other)
-		{
-			if (other is null)
-			{
-				return false;
-			}
+        #endregion
 
-			if (ReferenceEquals(this, other))
-			{
-				return true;
-			}
+        #region Location Properties
 
-			return
-				PurchaseDate.Equals(other.PurchaseDate) &&
-				FirstUseDate.Equals(other.FirstUseDate) &&
-				EndOfWarrantyDate.Equals(other.EndOfWarrantyDate) &&
-				InstallationDate.Equals(other.InstallationDate) &&
-				InstallationUserId.Equals(other.InstallationUserId) &&
-				ModificationDate.Equals(other.ModificationDate) &&
-				ModificationUserId.Equals(other.ModificationUserId) &&
-				EndOfLife.Equals(other.EndOfLife);
-		}
+        public AssetLocation Location { get; set; }
 
-		public override int GetHashCode()
-		{
-			unchecked
-			{
-				int hash = 17;
-				hash = (hash * 23) + PurchaseDate.GetHashCode();
-				hash = (hash * 23) + FirstUseDate.GetHashCode();
-				hash = (hash * 23) + EndOfWarrantyDate.GetHashCode();
-				hash = (hash * 23) + InstallationDate.GetHashCode();
-				hash = (hash * 23) + InstallationUserId.GetHashCode();
-				hash = (hash * 23) + ModificationDate.GetHashCode();
-				hash = (hash * 23) + ModificationUserId.GetHashCode();
-				hash = (hash * 23) + EndOfLife.GetHashCode();
-				return hash;
-			}
-		}
-	}
+        public AssetLocation DestinationLocation { get; set; }
 
-	public sealed class AssetOwnership : IEquatable<AssetOwnership>
-	{
-		public Guid Organization { get; set; }
+        #endregion
 
-		public Guid ContactPersonId { get; set; } // Linked to People DOM Definition in P&O
+        #region Lifecycle Properties
 
-		public Guid ContactPersonRoleId { get; set; } // Linked to Roles DOM Definition in P&O
+        public Guid InstallationUserId
+        {
+            get => InstallationUserIdField.Value;
+            set => InstallationUserIdField.Value = value;
+        }
 
-		public Guid TeamId { get; set; } // Linked to Teams DOM Definition in P&O
+        public DateTime? InstallationDate
+        {
+            get => InstallationDateField.Value;
+            set => InstallationDateField.Value = value;
+        }
 
-		public static bool operator ==(AssetOwnership left, AssetOwnership right)
-		{
-			if (ReferenceEquals(left, right))
-			{
-				return true;
-			}
+        public DateTime? FirstUseDate
+        {
+            get => FirstUseDateField.Value;
+            set => FirstUseDateField.Value = value;
+        }
 
-			if (left is null || right is null)
-			{
-				return false;
-			}
+        public DateTime? PurchaseDate
+        {
+            get => PurchaseDateField.Value;
+            set => PurchaseDateField.Value = value;
+        }
 
-			return left.Equals(right);
-		}
+        public Guid ModificationUserId
+        {
+            get => ModificationUserIdField.Value;
+            set => ModificationUserIdField.Value = value;
+        }
 
-		public static bool operator !=(AssetOwnership left, AssetOwnership right)
-		{
-			return !(left == right);
-		}
+        public DateTime? ModificationDate
+        {
+            get => ModificationDateField.Value;
+            set => ModificationDateField.Value = value;
+        }
 
-		public override bool Equals(object obj)
-		{
-			return Equals(obj as AssetOwnership);
-		}
+        public DateTime? EndOfLifeDate
+        {
+            get => EndOfLifeDateField.Value;
+            set => EndOfLifeDateField.Value = value;
+        }
 
-		public bool Equals(AssetOwnership other)
-		{
-			if (other is null)
-			{
-				return false;
-			}
+        public DateTime? EndOfWarrantyDate
+        {
+            get => EndOfWarrantyDateField.Value;
+            set => EndOfWarrantyDateField.Value = value;
+        }
 
-			if (ReferenceEquals(this, other))
-			{
-				return true;
-			}
+        #endregion
 
-			return
-				Organization.Equals(other.Organization) &&
-				ContactPersonId.Equals(other.ContactPersonId) &&
-				ContactPersonRoleId.Equals(other.ContactPersonRoleId) &&
-				TeamId.Equals(other.TeamId);
-		}
+        #region Ownership Properties
 
-		public override int GetHashCode()
-		{
-			unchecked
-			{
-				int hash = 17;
-				hash = (hash * 23) + Organization.GetHashCode();
-				hash = (hash * 23) + ContactPersonId.GetHashCode();
-				hash = (hash * 23) + ContactPersonRoleId.GetHashCode();
-				hash = (hash * 23) + TeamId.GetHashCode();
-				return hash;
-			}
-		}
-	}
+        public AssetOwnership Ownership { get; set; }
 
-	public sealed class AssetCustody : IEquatable<AssetCustody>
-	{
-		public DateTime From { get; set; }
+        public AssetCustody Custody { get; set; }
 
-		public DateTime Till { get; set; }
+        #endregion
 
-		public Guid ContactPersonId { get; set; }
+        #region Collection Properties
 
-		public Guid TeamId { get; set; }
+        public List<AssetHolder> Holders
+        {
+            get => HoldersField.Value ?? new List<AssetHolder>();
+            set => HoldersField.Value = value;
+        }
 
-		public Guid OrganizationId { get; set; }
+        public List<ElementLink> ElementLinks
+        {
+            get => ElementsField.Value ?? new List<ElementLink>();
+            set => ElementsField.Value = value;
+        }
 
-		public Guid ContactPersonRoleId { get; set; }
+        #endregion
 
-		public static bool operator ==(AssetCustody left, AssetCustody right)
-		{
-			if (ReferenceEquals(left, right))
-			{
-				return true;
-			}
+        #region Info Tracking Fields
 
-			if (left is null || right is null)
-			{
-				return false;
-			}
+        [JsonIgnore]
+        [SdmIgnore]
+        internal IChangeTrackingField<string> NameField => FieldHandler.GetOrCreateField(
+            nameof(Name),
+            () => new ChangeTrackingStringField(null));
 
-			return left.Equals(right);
-		}
+        [JsonIgnore]
+        [SdmIgnore]
+        internal IChangeTrackingField<string> AssetIDField => FieldHandler.GetOrCreateField(
+            nameof(AssetID),
+            () => new ChangeTrackingStringField(null));
 
-		public static bool operator !=(AssetCustody left, AssetCustody right)
-		{
-			return !(left == right);
-		}
+        [JsonIgnore]
+        [SdmIgnore]
+        internal IChangeTrackingField<SdmObjectReference<AssetClass>> AssetClassIdField => FieldHandler.GetOrCreateField(
+            nameof(AssetClassId),
+            () => new ChangeTrackingField<SdmObjectReference<AssetClass>>(default));
 
-		public override bool Equals(object obj)
-		{
-			return Equals(obj as AssetCustody);
-		}
+        [JsonIgnore]
+        [SdmIgnore]
+        internal IChangeTrackingField<string> SerialNumberField => FieldHandler.GetOrCreateField(
+            nameof(SerialNumber),
+            () => new ChangeTrackingStringField(null));
 
-		public bool Equals(AssetCustody other)
-		{
-			if (other is null)
-			{
-				return false;
-			}
+        [JsonIgnore]
+        [SdmIgnore]
+        internal IChangeTrackingField<string> DescriptionField => FieldHandler.GetOrCreateField(
+            nameof(Description),
+            () => new ChangeTrackingStringField(null));
 
-			if (ReferenceEquals(this, other))
-			{
-				return true;
-			}
+        [JsonIgnore]
+        [SdmIgnore]
+        internal IChangeTrackingField<string> FwOSField => FieldHandler.GetOrCreateField(
+            nameof(FW_OS),
+            () => new ChangeTrackingStringField(null));
 
-			return
-				From.Equals(other.From) &&
-				Till.Equals(other.Till) &&
-				ContactPersonId.Equals(other.ContactPersonId) &&
-				TeamId.Equals(other.TeamId) &&
-				OrganizationId.Equals(other.OrganizationId) &&
-				ContactPersonRoleId.Equals(other.ContactPersonRoleId);
-		}
+        [JsonIgnore]
+        [SdmIgnore]
+        internal IChangeTrackingField<string> HardwareVersionField => FieldHandler.GetOrCreateField(
+           nameof(HardwareVersion),
+           () => new ChangeTrackingStringField(null));
 
-		public override int GetHashCode()
-		{
-			unchecked
-			{
-				int hash = 17;
-				hash = (hash * 23) + From.GetHashCode();
-				hash = (hash * 23) + Till.GetHashCode();
-				hash = (hash * 23) + ContactPersonId.GetHashCode();
-				hash = (hash * 23) + TeamId.GetHashCode();
-				hash = (hash * 23) + OrganizationId.GetHashCode();
-				hash = (hash * 23) + ContactPersonRoleId.GetHashCode();
-				return hash;
-			}
-		}
-	}
+        [JsonIgnore]
+        [SdmIgnore]
+        internal IChangeTrackingField<long> OperationalFlagsField => FieldHandler.GetOrCreateField(
+            nameof(OperationalFlags),
+            () => new ChangeTrackingField<long>(0));
+
+        #endregion
+
+        #region Network Tracking Fields
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal IChangeTrackingField<string> MacAddressField => FieldHandler.GetOrCreateField(
+            nameof(MacAddress),
+            () => new ChangeTrackingStringField(null));
+
+        #endregion
+
+        #region Lifecycle Tracking Fields
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal IChangeTrackingField<Guid> InstallationUserIdField => FieldHandler.GetOrCreateField(
+            nameof(InstallationUserId),
+            () => new ChangeTrackingField<Guid>(Guid.Empty));
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal IChangeTrackingField<DateTime?> InstallationDateField => FieldHandler.GetOrCreateField(
+            nameof(InstallationDate),
+            () => new ChangeTrackingField<DateTime?>(null));
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal IChangeTrackingField<DateTime?> FirstUseDateField => FieldHandler.GetOrCreateField(
+            nameof(FirstUseDate),
+            () => new ChangeTrackingField<DateTime?>(null));
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal IChangeTrackingField<DateTime?> PurchaseDateField => FieldHandler.GetOrCreateField(
+            nameof(PurchaseDate),
+            () => new ChangeTrackingField<DateTime?>(null));
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal IChangeTrackingField<Guid> ModificationUserIdField => FieldHandler.GetOrCreateField(
+            nameof(ModificationUserId),
+            () => new ChangeTrackingField<Guid>(Guid.Empty));
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal IChangeTrackingField<DateTime?> ModificationDateField => FieldHandler.GetOrCreateField(
+            nameof(ModificationDate),
+            () => new ChangeTrackingField<DateTime?>(null));
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal IChangeTrackingField<DateTime?> EndOfLifeDateField => FieldHandler.GetOrCreateField(
+            nameof(EndOfLifeDate),
+            () => new ChangeTrackingField<DateTime?>(null));
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal IChangeTrackingField<DateTime?> EndOfWarrantyDateField => FieldHandler.GetOrCreateField(
+          nameof(EndOfWarrantyDate),
+          () => new ChangeTrackingField<DateTime?>(null));
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal IChangeTrackingField<SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum> StateField => FieldHandler.GetOrCreateField(
+            nameof(State),
+            () => new ChangeTrackingField<SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum>(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable));
+
+        #endregion
+
+        #region Collection Tracking Fields
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal ChangeTrackingArrayField<AssetHolder> HoldersField => FieldHandler.GetOrCreateArrayField(
+            nameof(Holders),
+            () => new ChangeTrackingArrayField<AssetHolder>(new List<AssetHolder>()));
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal ChangeTrackingArrayField<ElementLink> ElementsField => FieldHandler.GetOrCreateArrayField(
+            nameof(ElementLinks),
+            () => new ChangeTrackingArrayField<ElementLink>(new List<ElementLink>()));
+
+        #endregion
+
+        public void ResetChangeTracking()
+        {
+            FieldHandler?.ApplyChanges();
+            Location?.ResetChangeTracking();
+            DestinationLocation?.ResetChangeTracking();
+            Ownership?.ResetChangeTracking();
+            Custody?.ResetChangeTracking();
+
+            // Cascade to list items if they implement IChangeTracking
+            if (Holders != null)
+            {
+                foreach (var holder in Holders.OfType<IChangeTracking>())
+                {
+                    holder?.ResetChangeTracking();
+                }
+            }
+
+            if (ElementLinks != null)
+            {
+                foreach (var link in ElementLinks.OfType<IChangeTracking>())
+                {
+                    link?.ResetChangeTracking();
+                }
+            }
+        }
+    }
 }

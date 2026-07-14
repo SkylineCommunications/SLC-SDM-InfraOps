@@ -14,12 +14,13 @@
     <PackageReference Include="MSTest.TestAdapter" />
     <PackageReference Include="MSTest.TestFramework" />
     <PackageReference Include="Newtonsoft.Json" />
-    <PackageReference Include="Skyline.DataMiner.Dev.Utils.SDM.Abstractions" />
+    <PackageReference Include="Skyline.DataMiner.SDM" />
     <PackageReference Include="Skyline.DataMiner.Utils.DOM" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\SDM.AssetManagement.Common\SDM.AssetManagement.Common.csproj" />
+    <ProjectReference Include="..\SDM.FacilityManagement.Common\SDM.FacilityManagement.Common.csproj" />
   </ItemGroup>
 
   <ItemGroup>

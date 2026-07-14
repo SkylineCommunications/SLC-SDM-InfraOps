@@ -1,359 +1,414 @@
-﻿namespace SDM.AssetManagement.Tests
+﻿namespace SDM.AssetManagement.Tests.Assets
 {
-	using FluentAssertions;
-	using FluentAssertions.Execution;
-	using Microsoft.VisualStudio.TestTools.UnitTesting;
-	using SDM.AssetManagement.Tests.Setup;
-	//using Skyline.DataMiner.Analytics.GenericInterface.JoinFilter;
-	using Skyline.DataMiner.Net.Messages.SLDataGateway;
-	using Skyline.DataMiner.SDM;
-	using Skyline.DataMiner.SDM.AssetManagement;
-	using Skyline.DataMiner.SDM.AssetManagement.Helpers;
-	using Skyline.DataMiner.SDM.AssetManagement.Models;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
 
-	[TestClass]
-	public partial class AssetDomStorageProviderTests
-	{
-		private Asset referenceAsset;
+    using FluentAssertions;
+    using FluentAssertions.Execution;
 
-		[TestInitialize]
-		public void Init()
-		{
-			Guid assetId = Guid.NewGuid();
-			referenceAsset = new Asset
-			{
-				Identifier = assetId.ToString(),
-				AssetId = assetId.ToString(),
-				AssetName = "Test Asset",
-				AssetClass = null, // Set if you have a valid AssetClass reference
-				AssetDescription = "Sample asset for unit test",
-				FwOs = "FW1.0",
-				SerialNumber = "SN123456",
-				HardwareVersion = "HW1.0",
-				NetworkDetails = new AssetNetworkDetails
-				{
-					MACAddress = "00-14-22-01-23-45",
-				},
-				Location = new AssetLocation
-				{
-					// Set ParentAsset if needed
-					ParentAsset = new SdmObjectReference<Asset>(assetId.ToString()),
-					RoomId = Guid.NewGuid(),
-					RackId = Guid.NewGuid(),
-					RackPosition = 6,
-					ContainerId = Guid.NewGuid(),
-					DeskId = Guid.NewGuid(),
-					Side = SlcAssetManagement.Enums.Side.Back,
-				},
-				Lifecycle = new AssetLifecycle
-				{
-					PurchaseDate = DateTime.UtcNow.AddYears(-1),
-					FirstUseDate = DateTime.UtcNow.AddMonths(-11),
-					EndOfWarrantyDate = DateTime.UtcNow.AddYears(1),
-					InstallationDate = DateTime.UtcNow.AddMonths(-10),
-					InstallationUserId = Guid.NewGuid(),
-					ModificationDate = DateTime.UtcNow,
-					ModificationUserId = Guid.NewGuid(),
-					EndOfLife = DateTime.UtcNow.AddYears(5),
-				},
-				Ownership = new AssetOwnership
-				{
-					Organization = Guid.NewGuid(),
-					ContactPersonId = Guid.NewGuid(),
-					ContactPersonRoleId = Guid.NewGuid(),
-					TeamId = Guid.NewGuid(),
-				},
-				Custody = new AssetCustody
-				{
-					From = DateTime.UtcNow.AddMonths(-6),
-					Till = DateTime.UtcNow.AddMonths(6),
-					ContactPersonId = Guid.NewGuid(),
-					TeamId = Guid.NewGuid(),
-					OrganizationId = Guid.NewGuid(),
-					ContactPersonRoleId = Guid.NewGuid(),
-				},
-				Holders =
-				[
-					new AssetHolder
-					{
-						Identifier = assetId.ToString(),
-						SlotNumber = 4,
-						HierarchyRole = SlcAssetManagement.Enums.HierarchyRole.Chassis,
-					},
-					new AssetHolder
-					{
-						Identifier = assetId.ToString(),
-						SlotNumber = 1,
-						HierarchyRole = SlcAssetManagement.Enums.HierarchyRole.Card,
-					},
-					new AssetHolder
-					{
-						Identifier = assetId.ToString(),
-						SlotNumber = 3,
-						HierarchyRole = SlcAssetManagement.Enums.HierarchyRole.Fan,
-					},
-				],
-				ElementLinks =
-				[
-					new ElementLink
-					{
-						Identifier = assetId.ToString(),
-						ElementID = "123/456",
-						IsPrimary = false,
-					},
-					new ElementLink
-					{
-						Identifier = assetId.ToString(),
-						ElementID = "1845/2",
-					},
-				],
-			};
-		}
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-		[TestMethod]
-		public void AssetDomStorageProvider_EmptyDOM_Create()
-		{
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
+    using SDM.AssetManagement.Tests.Setup;
 
-			helper.Assets.Create(referenceAsset);
+    using SharedMappers.DomIds;
 
-			AssertCreated(helper);
-		}
+    using Skyline.DataMiner.Net.Messages.SLDataGateway;
+    using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.AssetManagement.Models;
+    using Skyline.DataMiner.SDM.Extensions;
+    using Skyline.DataMiner.SDM.FacilityManagement.Models;
 
-		[TestMethod]
-		public void AssetDomStorageProvider_EmptyDOM_CreateOrUpdate_Create()
-		{
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.Assets.CreateOrUpdate([referenceAsset]);
+    /// <summary>
+    /// CRUD tests for Asset repository operations.
+    /// </summary>
+    [TestClass]
+    public class AssetDomStorageProvider_CRUDTests : BaseRepositoryTest
+    {
+        private Asset referenceAsset = null!;
 
-			AssertCreated(helper);
-		}
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            referenceAsset = new Asset
+            {
+                AssetID = Guid.NewGuid().ToString(),
+                Name = "Test Asset",
+                AssetClassId = null, // Will be set in tests
+                Description = "Sample asset for unit test",
+                FW_OS = "FW1.0",
+                SerialNumber = "SN123456",
+                HardwareVersion = "HW1.0",
+                MacAddress = "00-14-22-01-23-45",
+                PurchaseDate = DateTime.UtcNow.AddYears(-1),
+                FirstUseDate = DateTime.UtcNow.AddMonths(-11),
+                EndOfWarrantyDate = DateTime.UtcNow.AddYears(1),
+                InstallationDate = DateTime.UtcNow.AddMonths(-10),
+                InstallationUserId = Guid.NewGuid(),
+                ModificationDate = DateTime.UtcNow,
+                ModificationUserId = Guid.NewGuid(),
+                EndOfLifeDate = DateTime.UtcNow.AddYears(5),
+                Ownership = new AssetOwnership
+                {
+                    Organization = Guid.NewGuid(),
+                    ContactPerson = Guid.NewGuid(),
+                    ContactPersonRole = Guid.NewGuid(),
+                    Team = Guid.NewGuid(),
+                },
+                Custody = new AssetCustody
+                {
+                    From = DateTime.UtcNow.AddMonths(-6),
+                    Till = DateTime.UtcNow.AddMonths(6),
+                    ContactPerson = Guid.NewGuid(),
+                    Team = Guid.NewGuid(),
+                    Organization = Guid.NewGuid(),
+                    ContactPersonRole = Guid.NewGuid(),
+                },
+                Holders = new List<AssetHolder>
+                {
+                    new AssetHolder
+                    {
+                        SlotNumber = 4,
+                        HierarchyRole = SlcAsset_Management.Enums.HierarchyRoleEnum.Chassis,
+                    },
+                    new AssetHolder
+                    {
+                        SlotNumber = 1,
+                        HierarchyRole = SlcAsset_Management.Enums.HierarchyRoleEnum.Card,
+                    },
+                    new AssetHolder
+                    {
+                        SlotNumber = 3,
+                        HierarchyRole = SlcAsset_Management.Enums.HierarchyRoleEnum.Fan,
+                    },
+                },
+                ElementLinks = new List<ElementLink>
+                {
+                    new ElementLink
+                    {
+                        ElementID = "123/456",
+                        IsPrimary = false,
+                    },
+                    new ElementLink
+                    {
+                        ElementID = "1845/2",
+                    },
+                },
+            };
+        }
 
-		[TestMethod]
-		public void AssetDomStorageProvider_EmptyDOM_CreateOrUpdate_Update()
-		{
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.Assets.Create(referenceAsset);
+        /// <summary>
+        /// Ensures AssetClasses are populated and assigns the first one to the reference asset.
+        /// </summary>
+        private void PrepareReferenceAssetWithAssetClass()
+        {
+            Helper.PopulateWithDemoData(DemoDataLayer.AssetClasses);
+            var assetClass = Helper.TestData.AssetClasses.First();
+            referenceAsset.AssetClassId = new SdmObjectReference<AssetClass>(assetClass.Identifier);
+        }
 
-			var updatedAsset = new Asset
-			{
-				Identifier = referenceAsset.Identifier,
-				AssetId = referenceAsset.AssetId, // using the same ID
-				AssetName = "Updated Asset Name",
-				AssetDescription = "Updated description",
-				HardwareVersion = "HW2.0",
-				NetworkDetails = new AssetNetworkDetails(), // MAC Address is removed
-				Location = new AssetLocation // most of the properties were changed here
-				{
-					ParentAsset = referenceAsset.Location.ParentAsset,
-					RoomId = referenceAsset.Location.RoomId,
-					RackId = referenceAsset.Location.RackId,
-					RackPosition = 12,
-					ContainerId = referenceAsset.Location.ContainerId,
-					DeskId = referenceAsset.Location.DeskId,
-					Side = SlcAssetManagement.Enums.Side.Front,
-				},
-				Lifecycle = new AssetLifecycle
-				{
-					PurchaseDate = DateTime.UtcNow.AddYears(-1),
-					FirstUseDate = DateTime.UtcNow.AddMonths(-11),
-					EndOfWarrantyDate = DateTime.UtcNow.AddYears(1),
-					InstallationDate = DateTime.UtcNow.AddMonths(-10),
-					InstallationUserId = Guid.NewGuid(),
-					ModificationDate = DateTime.UtcNow,
-					ModificationUserId = Guid.NewGuid(),
-					EndOfLife = DateTime.UtcNow.AddYears(5),
-				},
-				Ownership = new AssetOwnership
-				{
-					Organization = Guid.NewGuid(),
-				},
-				Custody = new AssetCustody
-				{
-					From = DateTime.UtcNow.AddMonths(-6),
-					Till = DateTime.UtcNow.AddMonths(6),
-					ContactPersonId = Guid.NewGuid(),
-					TeamId = Guid.NewGuid(),
-					OrganizationId = Guid.NewGuid(),
-					ContactPersonRoleId = Guid.NewGuid(),
-				},
+        #region Create Tests
 
-				Holders = new List<AssetHolder>(),
-				ElementLinks =
-				[
-					new ElementLink
-					{
-						Identifier = Guid.NewGuid().ToString(),
-						ElementID = "100546/34",
-					},
-				],
-			};
+        [TestMethod]
+        public void Create_WithValidData_ShouldPersistAsset()
+        {
+            // Arrange
+            PrepareReferenceAssetWithAssetClass();
 
-			helper.Assets.CreateOrUpdate([updatedAsset]);
+            // Act
+            Helper.AssetManagement.Assets.Create(referenceAsset);
 
-			AssertAssetUpdateDifferences(referenceAsset, updatedAsset);
-		}
+            // Assert
+            AssertCreated();
+        }
 
-		[TestMethod]
-		public void AssetDomStorageProvider_ReadPaged()
-		{
-			const int pageCount = 2;
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulateAssets();
+        [TestMethod]
+        public void CreateOrUpdate_WithNewAsset_ShouldCreate()
+        {
+            // Arrange
+            PrepareReferenceAssetWithAssetClass();
 
-			FilterElement<Asset> allFilter = new TRUEFilterElement<Asset>();
-			var pagedResult = helper.Assets.ReadPaged(allFilter, pageCount);
-			var assetCount = helper.Assets.Count(allFilter);
+            // Act
+            Helper.AssetManagement.Assets.CreateOrUpdate([referenceAsset]);
 
-			using (new AssertionScope())
-			{
-				pagedResult.Should().NotBeNull();
-				pagedResult.Should().HaveCount((int)(assetCount / pageCount));
-				pagedResult.Should().AllSatisfy(page => page.Should().HaveCount(pageCount));
-			}
-		}
+            // Assert
+            AssertCreated();
+        }
 
-		[TestMethod]
-		public void AssetDomStorageProvider_DeleteBulk()
-		{
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulateAssets();
+        [TestMethod]
+        public void CreateOrUpdate_WithExistingAsset_ShouldUpdate()
+        {
+            // Arrange
+            PrepareReferenceAssetWithAssetClass();
+            var created = Helper.AssetManagement.Assets.Create(referenceAsset);
 
-			var filter = new ORFilterElement<Asset>(
-				AssetExposers.AssetName.Equal("Test Asset 3"),
-				AssetExposers.AssetDescription.Equal("Sample asset 7"));
-			var assetToDelete = helper.Assets.Read(filter);
+            var updatedAsset = new Asset
+            {
+                AssetClassId = created.AssetClassId,
+                Identifier = created.Identifier,
+                AssetID = created.AssetID,
+                Name = "Updated Asset Name",
+                Description = "Updated description",
+                HardwareVersion = "HW2.0",
+                MacAddress = null,
+                PurchaseDate = DateTime.UtcNow.AddYears(-1),
+                FirstUseDate = DateTime.UtcNow.AddMonths(-11),
+                EndOfWarrantyDate = DateTime.UtcNow.AddYears(1),
+                InstallationDate = DateTime.UtcNow.AddMonths(-10),
+                InstallationUserId = Guid.NewGuid(),
+                ModificationDate = DateTime.UtcNow,
+                ModificationUserId = Guid.NewGuid(),
+                EndOfLifeDate = DateTime.UtcNow.AddYears(5),
+                Ownership = new AssetOwnership
+                {
+                    Organization = Guid.NewGuid(),
+                },
+                Custody = new AssetCustody
+                {
+                    From = DateTime.UtcNow.AddMonths(-6),
+                    Till = DateTime.UtcNow.AddMonths(6),
+                    ContactPerson = Guid.NewGuid(),
+                    Team = Guid.NewGuid(),
+                    Organization = Guid.NewGuid(),
+                    ContactPersonRole = Guid.NewGuid(),
+                },
+                Holders = new List<AssetHolder>(),
+                ElementLinks = new List<ElementLink>
+                {
+                    new ElementLink
+                    {
+                        ElementID = "100546/34",
+                    },
+                },
+            };
 
-			helper.Assets.Delete(assetToDelete);
+            // Act
+            Helper.AssetManagement.Assets.CreateOrUpdate([updatedAsset]);
 
-			using (new AssertionScope())
-			{
-				helper.Assets.Count(new TRUEFilterElement<Asset>()).Should().Be(DemoData.Assets.Count - 2); // 8 records
-				helper.Assets.Count(AssetExposers.AssetName.Equal("Test Asset 3")).Should().Be(0);
-				helper.Assets.Count(AssetExposers.AssetDescription.Equal("Sample asset 7")).Should().Be(0);
-			}
-		}
+            // Assert
+            var persisted = Helper.AssetManagement.Assets.Read(new TRUEFilterElement<Asset>()).First();
+            AssertAssetUpdateDifferences(referenceAsset, persisted);
+        }
 
-		[TestMethod]
-		public void AssetDomStorageProvider_EmptyDOM_DeleteSingle()
-		{
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulateAssets();
+        #endregion
 
-			var assetToDelete = helper.Assets.Read(AssetExposers.AssetName.Equal("Test Asset 3")).First();
+        #region Read Tests
 
-			helper.Assets.Delete(assetToDelete);
+        [TestMethod]
+        public void ReadPaged_WithValidFilter_ShouldReturnPages()
+        {
+            // Arrange
+            const int pageSize = 2;
+            ;
+            Helper.PopulateWithDemoData(upTo: DemoDataLayer.Assets);
 
-			helper.Assets.Count(new TRUEFilterElement<Asset>()).Should().Be(DemoData.Assets.Count - 1);
-			helper.Assets.Count(AssetExposers.AssetId.Equal(assetToDelete.AssetId)).Should().Be(0);
-		}
+            var allFilter = new TRUEFilterElement<Asset>();
+            var totalCount = Helper.TestData.Assets.Count;
 
-		private static void AssertAssetUpdateDifferences(Asset original, Asset updated)
-		{
-			using (new AssertionScope())
-			{
-				updated.AssetId.Should().BeEquivalentTo(original.AssetId);
+            // Act
+            var pagedResult = Helper.AssetManagement.Assets.ReadPaged(allFilter, pageSize);
 
-				// AssetName
-				updated.AssetName.Should().NotBe(original.AssetName);
-				updated.AssetName.Should().Be("Updated Asset Name");
+            // Assert
+            using (new AssertionScope())
+            {
+                pagedResult.Should().NotBeNull();
+                pagedResult.Should().HaveCount((int)(totalCount / pageSize), "should have correct number of pages");
+                pagedResult.Should().AllSatisfy(page => page.Should().HaveCount(pageSize), "each page should have correct size");
+            }
+        }
 
-				// AssetDescription
-				updated.AssetDescription.Should().NotBe(original.AssetDescription);
-				updated.AssetDescription.Should().Be("Updated description");
+        #endregion
 
-				// HardwareVersion
-				updated.HardwareVersion.Should().NotBe(original.HardwareVersion);
-				updated.HardwareVersion.Should().Be("HW2.0");
+        #region Delete Tests
 
-				// NetworkDetails
-				updated.NetworkDetails.Should().NotBeNull();
-				updated.NetworkDetails.MACAddress.Should().BeNullOrEmpty();
+        [TestMethod]
+        public void Delete_Single_ShouldRemoveAsset()
+        {
+            // Arrange
+            Helper.PopulateWithDemoData(upTo: DemoDataLayer.Assets);
 
-				// Location
-				updated.Location.Should().NotBeNull();
-				updated.Location.ParentAsset.Should().Be(original.Location.ParentAsset);
-				updated.Location.RoomId.Should().Be(original.Location.RoomId);
-				updated.Location.RackId.Should().Be(original.Location.RackId);
-				updated.Location.RackPosition.Should().Be(12);
-				updated.Location.ContainerId.Should().Be(original.Location.ContainerId);
-				updated.Location.DeskId.Should().Be(original.Location.DeskId);
-				updated.Location.Side.Should().Be(SlcAssetManagement.Enums.Side.Front);
+            var initialCount = Helper.TestData.Assets.Count;
+            var assetToDelete = Helper.AssetManagement.Assets
+                .Read(AssetExposers.AssetName.Equal("Test Asset 3"))
+                .First();
 
-				// Lifecycle
-				updated.Lifecycle.Should().NotBeNull();
+            // Act
+            Helper.AssetManagement.Assets.Delete(assetToDelete);
 
-				// Ownership
-				updated.Ownership.Should().NotBeNull();
-				updated.Ownership.Organization.Should().NotBe(original.Ownership.Organization);
-				updated.Ownership.ContactPersonId.Should().Be(Guid.Empty);
-				updated.Ownership.ContactPersonRoleId.Should().Be(Guid.Empty);
-				updated.Ownership.TeamId.Should().Be(Guid.Empty);
+            // Assert
+            using (new AssertionScope())
+            {
+                Helper.AssetManagement.Assets.Count(new TRUEFilterElement<Asset>())
+                    .Should().Be(initialCount - 1, "one asset should be deleted");
 
-				// Custody
-				updated.Custody.Should().NotBeNull();
-				updated.Custody.ContactPersonId.Should().NotBe(original.Custody.ContactPersonId);
-				updated.Custody.TeamId.Should().NotBe(original.Custody.TeamId);
-				updated.Custody.OrganizationId.Should().NotBe(original.Custody.OrganizationId);
-				updated.Custody.ContactPersonRoleId.Should().NotBe(original.Custody.ContactPersonRoleId);
+                Helper.AssetManagement.Assets.Count(AssetExposers.AssetId.Equal(assetToDelete.AssetID))
+                    .Should().Be(0, "deleted asset should not exist");
+            }
+        }
 
-				// Holders
-				updated.Holders.Should().BeEmpty();
+        [TestMethod]
+        public void Delete_Bulk_ShouldRemoveMultipleAssets()
+        {
+            // Arrange
+            Helper.PopulateWithDemoData(upTo: DemoDataLayer.Assets);
 
-				updated.ElementLinks.Should().HaveCount(1);
-				updated.ElementLinks[0].ElementID.Should().Be("100546/34");
-			}
-		}
+            var initialCount = Helper.TestData.Assets.Count;
 
-		private void AssertCreated(IAssetManagementApiHelper helper)
-		{
-			using (new AssertionScope())
-			{
-				helper.Assets.Count(new TRUEFilterElement<Asset>()).Should().Be(1);
+            var filter = new ORFilterElement<Asset>(
+                AssetExposers.AssetName.Equal("Test Asset 3"),
+                AssetExposers.AssetDescription.Equal("Sample asset 7"));
 
-				var createdAsset = helper.Assets.Read(new TRUEFilterElement<Asset>()).First();
-				createdAsset.Should().NotBeNull();
-				createdAsset.AssetName.Should().Be("Test Asset");
-				createdAsset.AssetDescription.Should().Be("Sample asset for unit test");
+            var assetsToDelete = Helper.AssetManagement.Assets.Read(filter).ToList();
+            var deleteCount = assetsToDelete.Count;
 
-				createdAsset.HardwareVersion.Should().Be("HW1.0");
-				createdAsset.NetworkDetails.Should().NotBeNull();
+            // Act
+            Helper.AssetManagement.Assets.Delete(assetsToDelete);
 
-				createdAsset.Location.Should().NotBeNull();
-				createdAsset.Location.ParentAsset.Should().BeAssignableTo<SdmObjectReference<Asset>>();
-				createdAsset.Location.Side.Should().Be(SlcAssetManagement.Enums.Side.Back);
+            // Assert
+            using (new AssertionScope())
+            {
+                Helper.AssetManagement.Assets.Count(new TRUEFilterElement<Asset>())
+                    .Should().Be(initialCount - deleteCount, $"{deleteCount} assets should be deleted");
 
-				createdAsset.Lifecycle.Should().NotBeNull();
-				createdAsset.Lifecycle.PurchaseDate.Should().BeBefore(createdAsset.Lifecycle.EndOfWarrantyDate);
-				createdAsset.Lifecycle.PurchaseDate.Should().BeBefore(createdAsset.Lifecycle.InstallationDate);
-				createdAsset.Lifecycle.FirstUseDate.Should().BeBefore(createdAsset.Lifecycle.EndOfLife);
-				createdAsset.Lifecycle.EndOfLife.Should().BeAfter(createdAsset.Lifecycle.FirstUseDate);
+                Helper.AssetManagement.Assets.Count(AssetExposers.AssetName.Equal("Test Asset 3"))
+                    .Should().Be(0, "Test Asset 3 should be deleted");
 
-				createdAsset.Ownership.Should().NotBeNull();
-				createdAsset.Ownership.Organization.Should().NotBe(Guid.Empty);
+                Helper.AssetManagement.Assets.Count(AssetExposers.AssetDescription.Equal("Sample asset 7"))
+                    .Should().Be(0, "asset with description 'Sample asset 7' should be deleted");
+            }
+        }
 
-				createdAsset.Custody.Should().NotBeNull();
-				createdAsset.Custody.From.Should().BeBefore(createdAsset.Custody.Till);
+        #endregion
 
-				createdAsset.Holders.Should().NotBeNull();
-				createdAsset.Holders.Should().NotBeEmpty();
+        #region Regression Tests
 
-				createdAsset.Holders[0].HierarchyRole.Should().Be(SlcAssetManagement.Enums.HierarchyRole.Chassis);
-				createdAsset.Holders[0].SlotNumber.Should().Be(4);
+        [TestMethod]
+        public void Create_WithRoomOnlyLocation_ShouldPersistAndReadBackCorrectly()
+        {
+            // Arrange — asset with a Room location but no Rack or Container (Facility).
+            // Regression: AssetDomRepository.FromInstance was reading _locationcontainer.Value
+            // instead of _locationroom.Value, causing NullReferenceException when ContainerId was absent.
+            PrepareReferenceAssetWithAssetClass();
+            var roomId = Guid.NewGuid();
+            referenceAsset.Location = new AssetLocation
+            {
+                RoomId = new SdmObjectReference<Room>(roomId.ToString()),
+            };
 
-				createdAsset.Holders[1].HierarchyRole.Should().Be(SlcAssetManagement.Enums.HierarchyRole.Card);
-				createdAsset.Holders[1].SlotNumber.Should().Be(1);
+            // Act
+            Helper.AssetManagement.Assets.Create(referenceAsset);
+            var readBack = Helper.AssetManagement.Assets
+                .Read(AssetExposers.AssetName.Equal(referenceAsset.Name))
+                .Single();
 
-				createdAsset.Holders[2].HierarchyRole.Should().Be(SlcAssetManagement.Enums.HierarchyRole.Fan);
-				createdAsset.Holders[2].SlotNumber.Should().Be(3);
+            // Assert
+            using (new AssertionScope())
+            {
+                readBack.Should().NotBeNull();
+                readBack.Location.Should().NotBeNull();
+                readBack.Location.RoomId.Should().NotBeNull();
+                readBack.Location.RoomId.Identifier.Should().Be(roomId.ToString());
+                readBack.Location.RackId.HasValue().Should().BeFalse();
+                readBack.Location.ContainerId.HasValue().Should().BeFalse();
+            }
+        }
 
-				createdAsset.ElementLinks.Should().HaveCount(2);
-				createdAsset.ElementLinks[0].ElementID.Should().Be("123/456");
-				createdAsset.ElementLinks[0].IsPrimary.Should().BeFalse();
+        #endregion
 
-				createdAsset.ElementLinks[1].ElementID.Should().Be("1845/2");
-				createdAsset.ElementLinks[1].IsPrimary.Should().BeFalse();
-			}
-		}
-	}
+        #region Assertion Helpers
+
+        private static void AssertAssetUpdateDifferences(Asset original, Asset updated)
+        {
+            using (new AssertionScope())
+            {
+                // Identifiers remain the same
+                updated.AssetID.Should().BeEquivalentTo(original.AssetID);
+
+                // Updated fields
+                updated.Name.Should().Be("Updated Asset Name");
+                updated.Description.Should().Be("Updated description");
+                updated.HardwareVersion.Should().Be("HW2.0");
+                updated.MacAddress.Should().BeNullOrEmpty();
+
+                // Location changes
+                updated.Location.Should().BeNull();
+
+                // Ownership changes
+                updated.Ownership.Should().NotBeNull();
+                updated.Ownership.Organization.Should().NotBe(original.Ownership.Organization);
+                updated.Ownership.ContactPerson.Should().Be(Guid.Empty);
+                updated.Ownership.ContactPersonRole.Should().Be(Guid.Empty);
+                updated.Ownership.Team.Should().Be(Guid.Empty);
+
+                // Custody changes
+                updated.Custody.Should().NotBeNull();
+                updated.Custody.ContactPerson.Should().NotBe(original.Custody.ContactPerson);
+                updated.Custody.Team.Should().NotBe(original.Custody.Team);
+                updated.Custody.Organization.Should().NotBe(original.Custody.Organization);
+                updated.Custody.ContactPersonRole.Should().NotBe(original.Custody.ContactPersonRole);
+
+                // Collections
+                updated.Holders.Should().BeEmpty();
+                updated.ElementLinks.Should().HaveCount(1);
+                updated.ElementLinks[0].ElementID.Should().Be("100546/34");
+            }
+        }
+
+        private void AssertCreated()
+        {
+            using (new AssertionScope())
+            {
+                Helper.AssetManagement.Assets.Count(new TRUEFilterElement<Asset>()).Should().Be(1);
+
+                var created = Helper.AssetManagement.Assets.Read(new TRUEFilterElement<Asset>()).First();
+
+                // Basic properties
+                created.Should().NotBeNull();
+                created.Name.Should().Be("Test Asset");
+                created.Description.Should().Be("Sample asset for unit test");
+                created.HardwareVersion.Should().Be("HW1.0");
+                created.MacAddress.Should().NotBeNull();
+
+                // Lifecycle dates
+
+                created.EndOfWarrantyDate.Should().NotBe(null);
+                created.InstallationDate.Should().NotBe(null);
+                created.EndOfLifeDate.Should().NotBe(null);
+                created.FirstUseDate.Should().NotBe(null);
+                created.PurchaseDate.Should().BeBefore(created.EndOfWarrantyDate.Value);
+                created.PurchaseDate.Should().BeBefore(created.InstallationDate.Value);
+                created.FirstUseDate.Should().BeBefore(created.EndOfLifeDate.Value);
+                created.EndOfLifeDate.Should().BeAfter(created.FirstUseDate.Value);
+
+                // Ownership
+                created.Ownership.Should().NotBeNull();
+                created.Ownership.Organization.Should().NotBe(Guid.Empty);
+
+                // Custody
+                created.Custody.Should().NotBeNull();
+                created.Custody.Till.Should().NotBeNull();
+                created.Custody.From.Should().BeBefore(created.Custody.Till.Value);
+
+
+                // Holders
+                created.Holders.Should().NotBeNull();
+                created.Holders.Should().HaveCount(3);
+                created.Holders[0].HierarchyRole.Should().Be(SlcAsset_Management.Enums.HierarchyRoleEnum.Chassis);
+                created.Holders[0].SlotNumber.Should().Be(4);
+                created.Holders[1].HierarchyRole.Should().Be(SlcAsset_Management.Enums.HierarchyRoleEnum.Card);
+                created.Holders[1].SlotNumber.Should().Be(1);
+                created.Holders[2].HierarchyRole.Should().Be(SlcAsset_Management.Enums.HierarchyRoleEnum.Fan);
+                created.Holders[2].SlotNumber.Should().Be(3);
+
+                // Element Links
+                created.ElementLinks.Should().HaveCount(2);
+                created.ElementLinks[0].ElementID.Should().Be("123/456");
+                created.ElementLinks[0].IsPrimary.Should().BeFalse();
+                created.ElementLinks[1].ElementID.Should().Be("1845/2");
+                created.ElementLinks[1].IsPrimary.Should().BeFalse();
+            }
+        }
+
+        #endregion
+    }
 }

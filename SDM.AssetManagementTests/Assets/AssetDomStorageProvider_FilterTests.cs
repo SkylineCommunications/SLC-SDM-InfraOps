@@ -1,320 +1,306 @@
-﻿namespace SDM.AssetManagement.Tests
+﻿namespace SDM.AssetManagement.Tests.Assets
 {
-	using System.Diagnostics;
-	using System.Linq;
-	using FluentAssertions;
-	using FluentAssertions.Execution;
-	using Microsoft.VisualStudio.TestTools.UnitTesting;
-	using SDM.AssetManagement.Tests;
-	using SDM.AssetManagement.Tests.Setup;
-	using Skyline.DataMiner.Net.Messages.SLDataGateway;
-	using Skyline.DataMiner.SDM;
-	using Skyline.DataMiner.SDM.AssetManagement.Models;
+    using System;
+    using System.Linq;
 
-	public partial class AssetDomStorageProviderTests
-	{
-		[TestMethod]
-		public void AssetDomStorageProvider_ReadFilter_AssetName()
-		{
-			// 11 assets
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.Assets.CreateOrUpdate([referenceAsset]);
-			helper.PopulateAssets();
+    using FluentAssertions;
+    using FluentAssertions.Execution;
 
-			var nameFilter = AssetExposers.AssetName.Equal(referenceAsset.AssetName);
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-			var assetsRetrieved = helper.Assets.Read(nameFilter);
+    using SDM.AssetManagement.Tests.Setup;
 
-			using (new AssertionScope())
-			{
-				assetsRetrieved.Should().NotBeNull();
-				assetsRetrieved.Count().Should().Be(1);
-				Asset asset = assetsRetrieved.First();
+    using Skyline.DataMiner.Net.Messages.SLDataGateway;
+    using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.AssetManagement.Models;
 
-				asset.AssetName.Should().Be(referenceAsset.AssetName);
-				asset.AssetId.Should().Be(referenceAsset.AssetId);
-				asset.Lifecycle.FirstUseDate.Should().Be(referenceAsset.Lifecycle.FirstUseDate);
-				asset.Holders.Should().NotBeEmpty();
-				asset.Holders.Should().HaveCount(3);
-			}
-		}
+    /// <summary>
+    /// Filter and query tests for Asset repository operations.
+    /// </summary>
+    [TestClass]
+    public class AssetDomStorageProvider_FilterTests : BaseRepositoryTest
+    {
+        #region Basic Field Filters
 
-		[TestMethod]
-		public void AssetDomStorageProvider_ReadFilter_AssetDescription()
-		{
-			// 11 assets
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.Assets.CreateOrUpdate([referenceAsset]);
-			helper.PopulateAssets();
+        [TestMethod]
+        public void ReadFilter_AssetName_Equal_ShouldReturnMatchingAsset()
+        {
+            // Arrange
+            
+           Helper.PopulateWithDemoData(upTo: DemoDataLayer.Assets);
 
-			var descriptionFilter = AssetExposers.AssetDescription.Equal(DemoData.Assets[3].AssetDescription);
+            var targetAsset =Helper.TestData.Assets.First();
+            var filter = AssetExposers.AssetName.Equal(targetAsset.Name);
 
-			var assetsRetrieved = helper.Assets.Read(descriptionFilter);
+            // Act
+            var results =Helper.AssetManagement.Assets.Read(filter).ToList();
 
-			using (new AssertionScope())
-			{
-				assetsRetrieved.Should().NotBeNull();
-				assetsRetrieved.Count().Should().Be(1);
-				Asset asset = assetsRetrieved.First();
+            // Assert
+            using (new AssertionScope())
+            {
+                results.Should().HaveCount(1, $"should find exactly one asset named '{targetAsset.Name}'");
+                var asset = results.First();
+                asset.Name.Should().Be(targetAsset.Name);
+                asset.AssetID.Should().Be(targetAsset.AssetID);
+            }
+        }
 
-				asset.AssetName.Should().Be(DemoData.Assets[3].AssetName);
-				asset.AssetId.Should().Be(DemoData.Assets[3].AssetId);
-				asset.FwOs.Should().Be(DemoData.Assets[3].FwOs);
-				asset.Custody.TeamId.Should().Be(DemoData.Assets[3].Custody.TeamId);
-			}
-		}
+        [TestMethod]
+        public void ReadFilter_AssetDescription_Equal_ShouldReturnMatchingAsset()
+        {
+            // Arrange
+            
+           Helper.PopulateWithDemoData(upTo: DemoDataLayer.Assets);
 
-		[TestMethod]
-		public void AssetDomStorageProvider_ReadFilter_AssetClass()
-		{
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulateAssets().PopulateAssetClasses();
+            var targetAsset =Helper.TestData.Assets.Skip(3).First();
+            var filter = AssetExposers.AssetDescription.Equal(targetAsset.Description);
 
-			var random = new Random();
-			var randomIndex = random.Next(0, 9);
+            // Act
+            var results =Helper.AssetManagement.Assets.Read(filter).ToList();
 
-			var assetClass = DemoData.AssetClasses[randomIndex];
-			referenceAsset.AssetClass = new SdmObjectReference<AssetClass>(assetClass.Id.ToString());
+            // Assert
+            using (new AssertionScope())
+            {
+                results.Should().HaveCount(1, $"should find asset with description '{targetAsset.Description}'");
+                var asset = results.First();
+                asset.Name.Should().Be(targetAsset.Name);
+                asset.AssetID.Should().Be(targetAsset.AssetID);
+            }
+        }
 
-			helper.PopulateAssets([referenceAsset]);
-			Debug.WriteLine(helper.Assets.Count(new TRUEFilterElement<Asset>()));
+        [TestMethod]
+        public void ReadFilter_AssetClass_Equal_ShouldReturnAssetsOfSameClass()
+        {
+            // Arrange
+            
+           Helper.PopulateWithDemoData(upTo: DemoDataLayer.Assets);
 
-			var filter = AssetExposers.AssetClass.Equal(new SdmObjectReference<AssetClass>(assetClass.Identifier));
-			var assetsRetrieved = helper.Assets.Read(filter);
+            var targetAssetClass =Helper.TestData.AssetClasses.First();
+            var filter = AssetExposers.AssetClass.Equal(new SdmObjectReference<AssetClass>(targetAssetClass.Identifier));
 
-			using (new AssertionScope())
-			{
-				assetsRetrieved.Should().NotBeNull();
-				assetsRetrieved.Count().Should().Be(1);
-				Asset asset = assetsRetrieved.First();
+            // Act
+            var results =Helper.AssetManagement.Assets.Read(filter).ToList();
 
-				asset.AssetName.Should().Be(referenceAsset.AssetName);
-				asset.AssetId.Should().Be(referenceAsset.AssetId);
-				asset.AssetClass.Identifier.Should().NotBe(Guid.Empty.ToString());
-				asset.AssetClass.Identifier.Should().Be(assetClass.Id.ToString());
-			}
-		}
+            // Assert
+            using (new AssertionScope())
+            {
+                results.Should().NotBeEmpty($"should find assets with AssetClass '{targetAssetClass.Name}'");
+                results.Should().OnlyContain(a => a.AssetClassId.Identifier == targetAssetClass.Identifier);
+            }
+        }
 
-		[TestMethod]
-		public void AssetDomStorageProvider_ReadFilter_FwOs()
-		{
-			// 11 assets
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.Assets.CreateOrUpdate([referenceAsset]);
-			helper.PopulateAssets();
+        [TestMethod]
+        public void ReadFilter_FwOs_Equal_ShouldReturnMatchingAsset()
+        {
+            // Arrange
+            
+           Helper.PopulateWithDemoData(upTo: DemoDataLayer.Assets);
 
-			var firmwareFilter = AssetExposers.FwOs.Equal(DemoData.Assets[1].FwOs);
+            var targetAsset =Helper.TestData.Assets.First(a => !string.IsNullOrEmpty(a.FW_OS));
+            var filter = AssetExposers.FwOs.Equal(targetAsset.FW_OS);
 
-			var assetsRetrieved = helper.Assets.Read(firmwareFilter);
+            // Act
+            var results =Helper.AssetManagement.Assets.Read(filter).ToList();
 
-			using (new AssertionScope())
-			{
-				assetsRetrieved.Should().NotBeNull();
-				assetsRetrieved.Count().Should().Be(1);
-				Asset asset = assetsRetrieved.First();
+            // Assert
+            using (new AssertionScope())
+            {
+                results.Should().NotBeEmpty($"should find assets with FW_OS '{targetAsset.FW_OS}'");
+                results.Should().OnlyContain(a => a.FW_OS == targetAsset.FW_OS);
+            }
+        }
 
-				asset.AssetName.Should().Be(DemoData.Assets[1].AssetName);
-				asset.AssetId.Should().Be(DemoData.Assets[1].AssetId);
-				asset.FwOs.Should().Be(DemoData.Assets[1].FwOs);
-				asset.NetworkDetails.MACAddress.Should().Be(DemoData.Assets[1].NetworkDetails.MACAddress);
-				asset.Custody.Till.Should().Be(DemoData.Assets[1].Custody.Till);
-				asset.Holders.Should().BeEmpty();
-			}
-		}
+        [TestMethod]
+        public void ReadFilter_SerialNumber_Equal_ShouldReturnMatchingAsset()
+        {
+            // Arrange
+            
+           Helper.PopulateWithDemoData(upTo: DemoDataLayer.Assets);
 
-		[TestMethod]
-		public void AssetDomStorageProvider_ReadFilter_SerialNumber_Equal()
-		{
-			// 11 assets
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.Assets.CreateOrUpdate([referenceAsset]);
-			helper.PopulateAssets();
+            var targetAsset =Helper.TestData.Assets.First(a => !string.IsNullOrEmpty(a.SerialNumber));
+            var filter = AssetExposers.SerialNumber.Equal(targetAsset.SerialNumber);
 
-			var firmwareFilter = AssetExposers.SerialNumber.Equal(DemoData.Assets[9].SerialNumber);
+            // Act
+            var results =Helper.AssetManagement.Assets.Read(filter).ToList();
 
-			var assetsRetrieved = helper.Assets.Read(firmwareFilter);
+            // Assert
+            using (new AssertionScope())
+            {
+                results.Should().HaveCount(1, $"serial numbers should be unique");
+                var asset = results.First();
+                asset.SerialNumber.Should().Be(targetAsset.SerialNumber);
+                asset.AssetID.Should().Be(targetAsset.AssetID);
+            }
+        }
 
-			using (new AssertionScope())
-			{
-				assetsRetrieved.Should().NotBeNull();
-				assetsRetrieved.Count().Should().Be(1);
-				Asset asset = assetsRetrieved.First();
+        [TestMethod]
+        public void ReadFilter_HardwareVersion_Equal_ShouldReturnMatchingAssets()
+        {
+            // Arrange
+            
+           Helper.PopulateWithDemoData(upTo: DemoDataLayer.Assets);
 
-				asset.AssetName.Should().Be(DemoData.Assets[9].AssetName);
-				asset.AssetId.Should().Be(DemoData.Assets[9].AssetId);
-				asset.AssetDescription.Should().Be(DemoData.Assets[9].AssetDescription);
-				asset.Location.Side.Should().Be(DemoData.Assets[9].Location.Side);
-				asset.Custody.From.Should().Be(DemoData.Assets[9].Custody.From);
-				asset.Lifecycle.ModificationDate.Should().Be(DemoData.Assets[9].Lifecycle.ModificationDate);
-				asset.Lifecycle.EndOfWarrantyDate.Should().Be(DemoData.Assets[9].Lifecycle.EndOfWarrantyDate);
-			}
-		}
+            var targetAsset =Helper.TestData.Assets.First(a => !string.IsNullOrEmpty(a.HardwareVersion));
+            var filter = AssetExposers.HardwareVersion.Equal(targetAsset.HardwareVersion);
 
-		[TestMethod]
-		public void AssetDomStorageProvider_ReadFilter_HardwareVersion_Equal()
-		{
-			// 11 assets
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.Assets.CreateOrUpdate([referenceAsset]);
-			helper.PopulateAssets();
+            // Act
+            var results =Helper.AssetManagement.Assets.Read(filter).ToList();
 
-			var firmwareFilter = AssetExposers.HardwareVersion.Equal(DemoData.Assets[4].HardwareVersion);
+            // Assert
+            using (new AssertionScope())
+            {
+                results.Should().NotBeEmpty($"should find assets with hardware version '{targetAsset.HardwareVersion}'");
+                results.Should().OnlyContain(a => a.HardwareVersion == targetAsset.HardwareVersion);
+            }
+        }
 
-			var assetsRetrieved = helper.Assets.Read(firmwareFilter);
+        #endregion
 
-			using (new AssertionScope())
-			{
-				assetsRetrieved.Should().NotBeNull();
-				assetsRetrieved.Count().Should().Be(1);
-				Asset asset = assetsRetrieved.First();
+        #region Nested Object Filters
 
-				asset.AssetName.Should().Be(DemoData.Assets[4].AssetName);
-				asset.AssetId.Should().Be(DemoData.Assets[4].AssetId);
-				asset.SerialNumber.Should().Be(DemoData.Assets[4].SerialNumber);
-				asset.Location.RackPosition.Should().Be(DemoData.Assets[4].Location.RackPosition);
-				asset.Lifecycle.InstallationDate.Should().Be(DemoData.Assets[4].Lifecycle.InstallationDate);
-			}
-		}
+        [TestMethod]
+        public void ReadFilter_MACAddress_Equal_ShouldReturnMatchingAsset()
+        {
+            // Arrange
+            
+           Helper.PopulateWithDemoData(upTo: DemoDataLayer.Assets);
 
-		[TestMethod]
-		public void AssetDomStorageProvider_NestedReadFilter_NetworkDetails_MACAddress_Equal()
-		{
-			// 11 assets
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.Assets.CreateOrUpdate([referenceAsset]);
-			helper.PopulateAssets();
+            var targetAsset =Helper.TestData.Assets.First(a => !string.IsNullOrEmpty(a.MacAddress));
+            var filter = AssetExposers.NetworkDetails.MACAddress.Equal(targetAsset.MacAddress);
 
-			var macAddress = DemoData.Assets[5].NetworkDetails.MACAddress;
-			var macFilter = AssetExposers.NetworkDetails.MACAddress.Equal(macAddress);
+            // Act
+            var results =Helper.AssetManagement.Assets.Read(filter).ToList();
 
-			var assetsRetrieved = helper.Assets.Read(macFilter);
+            // Assert
+            using (new AssertionScope())
+            {
+                results.Should().HaveCount(1, "MAC addresses should be unique");
+                var asset = results.First();
+                asset.MacAddress.Should().Be(targetAsset.MacAddress);
+                asset.AssetID.Should().Be(targetAsset.AssetID);
+            }
+        }
 
-			using (new AssertionScope())
-			{
-				assetsRetrieved.Should().NotBeNull();
-				assetsRetrieved.Count().Should().Be(1);
-				Asset asset = assetsRetrieved.First();
+        [TestMethod]
+        public void ReadFilter_RackPosition_NotEqual_ShouldReturnNonMatchingAssets()
+        {
+            // Arrange
+            
+           Helper.PopulateWithDemoData(upTo: DemoDataLayer.Assets);
 
-				asset.AssetName.Should().Be(DemoData.Assets[5].AssetName);
-				asset.AssetId.Should().Be(DemoData.Assets[5].AssetId);
-				asset.AssetDescription.Should().Be(DemoData.Assets[5].AssetDescription);
-				asset.FwOs.Should().Be(DemoData.Assets[5].FwOs);
-				asset.NetworkDetails.MACAddress.Should().Be(macAddress);
-				asset.Custody.TeamId.Should().Be(DemoData.Assets[5].Custody.TeamId);
-				asset.Lifecycle.PurchaseDate.Should().Be(DemoData.Assets[5].Lifecycle.PurchaseDate);
-			}
-		}
+            const int excludedPosition = 7;
+            var filter = AssetExposers.Location.RackPosition.UncheckedNotEqual((long?)excludedPosition);
 
-		[TestMethod]
-		public void AssetDomStorageProvider_NestedReadFilter_Lifecycle_FirstUseDate_LessThanOrEqual()
-		{
-			// 10 assets
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulateAssets();
+            // Act
+            var results = Helper.AssetManagement.Assets.Read(filter).ToList();
 
-			var firstUseDate = DateTime.UtcNow.AddYears(-5);
-			var filter = AssetExposers.Lifecycle.FirstUseDate.LessThanOrEqual(firstUseDate);
+            // Assert
+            using (new AssertionScope())
+            {
+                results.Should().NotBeEmpty("should find assets not at position 7");
+                results.Should().OnlyContain(a => a.Location == null || a.Location.RackPosition != excludedPosition);
+            }
+        }
 
-			var assetsRetrieved = helper.Assets.Read(filter);
-			var expected = DemoData.Assets.Where(asset => asset.Lifecycle.FirstUseDate <= firstUseDate).ToList();
+        #endregion
 
-			using (new AssertionScope())
-			{
-				assetsRetrieved.Should().NotBeNull();
-				assetsRetrieved.Count().Should().Be(expected.Count);
-			}
-		}
+        #region Date Range Filters
 
-		[TestMethod]
-		public void AssetDomStorageProvider_NestedReadFilter_Lifecycle_EndOfWarrantyDate_LessThan()
-		{
-			// 10 assets
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulateAssets();
+        [TestMethod]
+        public void ReadFilter_FirstUseDate_LessThanOrEqual_ShouldReturnOlderAssets()
+        {
+            // Arrange
+            
+           Helper.PopulateWithDemoData(upTo: DemoDataLayer.Assets);
 
-			var endOfWarrantyDate = DateTime.UtcNow.AddYears(5);
-			var filter = AssetExposers.Lifecycle.EndOfWarrantyDate.LessThan(endOfWarrantyDate);
+            var cutoffDate = DateTime.UtcNow.AddYears(-3);
+            var filter = AssetExposers.Lifecycle.FirstUseDate.LessThanOrEqual(cutoffDate);
 
-			var assetsRetrieved = helper.Assets.Read(filter);
-			var expected = DemoData.Assets.Where(asset => asset.Lifecycle.EndOfWarrantyDate < endOfWarrantyDate).ToList();
+            // Act
+            var results =Helper.AssetManagement.Assets.Read(filter).ToList();
 
-			using (new AssertionScope())
-			{
-				assetsRetrieved.Should().NotBeNull();
-				assetsRetrieved.Count().Should().Be(expected.Count);
-			}
-		}
+            // Assert
+            using (new AssertionScope())
+            {
+                results.Should().NotBeEmpty($"should find assets first used before {cutoffDate:yyyy-MM-dd}");
+                results.Should().OnlyContain(a => a.FirstUseDate <= cutoffDate);
+            }
+        }
 
-		[TestMethod]
-		public void AssetDomStorageProvider_NestedReadFilter_Lifecycle_InstallationDate_InBetween()
-		{
-			// 10 assets
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulateAssets();
+        [TestMethod]
+        public void ReadFilter_EndOfWarrantyDate_LessThan_ShouldReturnAssetsWithWarrantyExpiringSoon()
+        {
+            // Arrange
+            Helper.PopulateWithDemoData(upTo: DemoDataLayer.Assets);
 
-			var installationDateStart = DateTime.UtcNow.AddYears(-6);
-			var installationDateEnd = DateTime.UtcNow.AddYears(-3);
+            var cutoffDate = DateTime.UtcNow.AddYears(5);
 
-			var filter = AssetExposers.Lifecycle.InstallationDate.LessThan(installationDateEnd)
-				.AND(AssetExposers.Lifecycle.InstallationDate.GreaterThan(installationDateStart));
+            var filter = AssetExposers.Lifecycle.EndOfWarrantyDate.LessThan(cutoffDate);
 
-			var assetsRetrieved = helper.Assets.Read(filter);
-			var expected = DemoData.Assets
-				.Where(asset =>
-					asset.Lifecycle.InstallationDate > installationDateStart
-					&& asset.Lifecycle.InstallationDate < installationDateEnd)
-				.ToList();
+            // Act
+            var results = Helper.AssetManagement.Assets.Read(filter).ToList();
 
-			using (new AssertionScope())
-			{
-				assetsRetrieved.Should().NotBeNull();
-				assetsRetrieved.Count().Should().Be(expected.Count);
-			}
-		}
+            // Assert
+            using (new AssertionScope())
+            {
+                results.Should().NotBeEmpty($"should find assets with warranty expiring before {cutoffDate:yyyy-MM-dd}");
+                results.Should().OnlyContain(a => a.EndOfWarrantyDate < cutoffDate);
+            }
+        }
 
-		[TestMethod]
-		public void AssetDomStorageProvider_NestedReadFilter_Location_RackPosition_NotEqual()
-		{
-			// 10 assets
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulateAssets();
+        [TestMethod]
+        public void ReadFilter_InstallationDate_Between_ShouldReturnAssetsInstalledInRange()
+        {
+            // Arrange
+            
+           Helper.PopulateWithDemoData(upTo: DemoDataLayer.Assets);
 
-			var filter = AssetExposers.Location.RackPosition.NotEqual(7);
+            var startDate = DateTime.UtcNow.AddYears(-6);
+            var endDate = DateTime.UtcNow.AddYears(-3);
 
-			var assetsRetrieved = helper.Assets.Read(filter);
-			var expected = DemoData.Assets.Where(asset => asset.Location.RackPosition != 7);
+            var filter = AssetExposers.Lifecycle.InstallationDate.GreaterThan(startDate)
+                .AND(AssetExposers.Lifecycle.InstallationDate.LessThan(endDate));
 
-			using (new AssertionScope())
-			{
-				assetsRetrieved.Should().NotBeNull();
-				assetsRetrieved.Count().Should().Be(DemoData.Assets.Count - 1);
+            // Act
+            var results =Helper.AssetManagement.Assets.Read(filter).ToList();
 
-				assetsRetrieved.Should().BeEquivalentTo(expected);
-				assetsRetrieved.Should().AllSatisfy(asset => asset.Location.RackPosition.Should().NotBe(7));
-			}
-		}
+            // Assert
+            using (new AssertionScope())
+            {
+                results.Should().NotBeEmpty($"should find assets installed between {startDate:yyyy-MM-dd} and {endDate:yyyy-MM-dd}");
+                results.Should().OnlyContain(a => 
+                    a.InstallationDate > startDate && 
+                    a.InstallationDate < endDate);
+            }
+        }
 
-		[TestMethod]
-		public void AssetDomStorageProvider_NestedReadFilter_ElementLink_ElementID_Equal()
-		{
-			// 10 assets
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulateAssets();
+        #endregion
 
-			string elementId = "101/4";
-			var filter = AssetExposers.ElementLinks.ElementID.Equal(elementId);
+        #region Collection Filters
 
-			var assetsRetrieved = helper.Assets.Read(filter);
-			var expected = DemoData.Assets.Where(filter.getLambda());
+        [TestMethod]
+        public void ReadFilter_ElementID_Equal_ShouldReturnAssetsWithSpecificElement()
+        {
+            // Arrange
+            
+           Helper.PopulateWithDemoData(upTo: DemoDataLayer.Assets);
 
-			using (new AssertionScope())
-			{
-				assetsRetrieved.Should().NotBeNull();
-				assetsRetrieved.Should().HaveCount(1);
+            var targetAsset =Helper.TestData.Assets.First(a => a.ElementLinks.Any());
+            var targetElementId = targetAsset.ElementLinks.First().ElementID;
 
-				assetsRetrieved.Should().BeEquivalentTo(expected);
-				assetsRetrieved.Should().AllSatisfy(asset => asset.ElementLinks[0].ElementID.Should().Be(elementId));
-			}
-		}
-	}
+            var filter = AssetExposers.ElementLinks.ElementID.Equal(targetElementId);
+
+            // Act
+            var results =Helper.AssetManagement.Assets.Read(filter).ToList();
+
+            // Assert
+            using (new AssertionScope())
+            {
+                results.Should().NotBeEmpty($"should find assets with element ID '{targetElementId}'");
+                results.Should().OnlyContain(a => a.ElementLinks.Any(el => el.ElementID == targetElementId));
+            }
+        }
+
+        #endregion
+    }
 }

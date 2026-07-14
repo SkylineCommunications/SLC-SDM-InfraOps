@@ -9,7 +9,10 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-	using Skyline.DataMiner.Net;
+
+    using SharedMappers.DomIds;
+
+    using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Apps.Sections.Sections;
 	using Skyline.DataMiner.Net.Helper;
@@ -19,7 +22,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 	using Skyline.DataMiner.Net.Sections;
 	using Skyline.DataMiner.Net.SubscriptionFilters;
 	using Skyline.DataMiner.SDM;
-	using SLDataGateway.API.Querying;
+
+    using SLDataGateway.API.Querying;
 	using SLDataGateway.API.Types.Querying;
 
 	internal partial class DeviceTypeDomRepository : IBulkRepository<DeviceType>
@@ -55,14 +59,14 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			var existing = new HashSet<string>();
 			foreach (var batch in createObjects.Batch(500))
 			{
-				existing.UnionWith(Read(new ORFilterElement<DeviceType>(batch.Select(obj => DeviceTypeExposers.Identifier.Equal(obj.Identifier)).ToArray())).Select(obj => obj.Identifier));
+				existing.UnionWith(Read(new ORFilterElement<DeviceType>(batch.Where(obj => !String.IsNullOrWhiteSpace(obj.Identifier)).Select(obj => DeviceTypeExposers.Identifier.Equal(obj.Identifier)).ToArray())).Select(obj => obj.Identifier));
 			}
 
 			// Create the remainder
 			var SuccessfulItems = new List<DeviceType>();
 			var failures = new Dictionary<string, Exception>();
-			var objects = createObjects.Where(obj => !existing.Contains(obj.Identifier)).ToDictionary(obj => obj.Identifier);
-			foreach (var batch in createObjects.Select(ToInstance).Batch(helper.DomInstances.MaxAmountBulkOperation))
+
+            foreach (var batch in createObjects.Select(ToInstance).Batch(helper.DomInstances.MaxAmountBulkOperation))
 			{
 				helper.DomInstances.TryCreateOrUpdate(batch.ToList(), out var result);
 				foreach (var failure in result.UnsuccessfulIds)
@@ -508,8 +512,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 		{
 			var obj = new DeviceType
 			{
-				Identifier = instance.ID.Id.ToString()
-			};
+				Identifier = instance.ID.Id.ToString(),
+                IsNewInternal = false,
+            };
 			var _devicetypepropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.DeviceTypeProperties.SectionDefinitionId));
 			if (_devicetypepropertiesSection != default)
 			{
@@ -529,25 +534,20 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			var _tagsinfoSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.TagsInfo.SectionDefinitionId));
 			if (_tagsinfoSection != default)
 			{
-				obj.TagsInfo = new Skyline.DataMiner.SDM.AssetManagement.Models.TagsInfo()
-				{
-					Identifier = _tagsinfoSection.ID.Id.ToString()
-				};
+                obj.TagsInfo = new Skyline.DataMiner.SDM.AssetManagement.Models.TagsInfo();
 
 				var _tags = _tagsinfoSection.GetListValue<int>(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.TagsInfo.Tags);
 				if (_tags != null)
 				{
-					obj.TagsInfo.Tags = _tags.Values.Select(v => (SlcAssetManagement.Enums.TagOption)v).ToList();
+					obj.TagsInfo.Tags = _tags.Values.Select(v => (SlcAsset_Management.Enums.TagOption)v).ToList();
 				}
 			}
 
 			var _hierarchyinfoSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.HierarchyInfo.SectionDefinitionId));
 			if (_hierarchyinfoSection != default)
 			{
-				obj.HierarchyInfo = new Skyline.DataMiner.SDM.AssetManagement.Models.HierarchyInfo()
-				{
-					Identifier = _hierarchyinfoSection.ID.Id.ToString()
-				};
+                obj.HierarchyInfo = new Skyline.DataMiner.SDM.AssetManagement.Models.HierarchyInfo();
+
 				var _hierarchyinfohierarchyrole = _hierarchyinfoSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.HierarchyInfo.HierarchyRole);
 				if (_hierarchyinfohierarchyrole != null)
 				{
@@ -558,19 +558,20 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			return obj;
 		}
 
-		private static SlcAssetManagement.Enums.HierarchyRole FromDomHierarchyRole(string value)
+		private static SlcAsset_Management.Enums.HierarchyRoleEnum FromDomHierarchyRole(string value)
+
 		{
 			switch (value)
 			{
 				case "Sub-Card":
-					return SlcAssetManagement.Enums.HierarchyRole.SubCard;
+					return SlcAsset_Management.Enums.HierarchyRoleEnum.SubCard;
 
 				case "Power Supply":
-					return SlcAssetManagement.Enums.HierarchyRole.PowerSupply;
+					return SlcAsset_Management.Enums.HierarchyRoleEnum.PowerSupply;
 
 				default:
-					return (SlcAssetManagement.Enums.HierarchyRole)
-						Enum.Parse(typeof(SlcAssetManagement.Enums.HierarchyRole), value);
+					return (SlcAsset_Management.Enums.HierarchyRoleEnum)
+						Enum.Parse(typeof(SlcAsset_Management.Enums.HierarchyRoleEnum), value);
 			}
 		}
 
@@ -585,6 +586,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			{
 				id = Guid.NewGuid();
 			}
+
+            Asset a = new Asset
+            {
+                Identifier = Guid.NewGuid().ToString(),
+
+            };
 
 			var instance = new DomInstance
 			{
@@ -608,10 +615,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			instance.Sections.Add(_devicetypeproperties);
 			if (obj.TagsInfo != null)
 			{
-				var _tagsinfo = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.TagsInfo.SectionDefinitionId)
-				{
-					ID = new SectionID(System.Guid.Parse(obj.TagsInfo.Identifier))
-				};
+                var _tagsinfo = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.TagsInfo.SectionDefinitionId);
 
 				if (obj.TagsInfo.Tags != null)
 				{
@@ -623,25 +627,27 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
 			if (obj.HierarchyInfo != null)
 			{
-				var _hierarchyinfo = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.HierarchyInfo.SectionDefinitionId)
-				{
-					ID = new SectionID(System.Guid.Parse(obj.HierarchyInfo.Identifier))
-				};
-				_hierarchyinfo.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.HierarchyInfo.HierarchyRole, ToDomHierarchyRole(obj.HierarchyInfo.HierarchyRole));
+                var _hierarchyinfo = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.HierarchyInfo.SectionDefinitionId);
+
+                if (obj.HierarchyInfo.HierarchyRole != null)
+                {
+                    _hierarchyinfo.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.HierarchyInfo.HierarchyRole, ToDomHierarchyRole(obj.HierarchyInfo.HierarchyRole.Value)); 
+                }
+
 				instance.Sections.Add(_hierarchyinfo);
 			}
 
 			return instance;
 		}
 
-		private static string ToDomHierarchyRole(SlcAssetManagement.Enums.HierarchyRole role)
+		private static string ToDomHierarchyRole(SlcAsset_Management.Enums.HierarchyRoleEnum role)
 		{
 			switch (role)
 			{
-				case SlcAssetManagement.Enums.HierarchyRole.SubCard:
+				case SlcAsset_Management.Enums.HierarchyRoleEnum.SubCard:
 					return "Sub-Card";
 
-				case SlcAssetManagement.Enums.HierarchyRole.PowerSupply:
+				case SlcAsset_Management.Enums.HierarchyRoleEnum.PowerSupply:
 					return "Power Supply";
 
 				default:
@@ -666,7 +672,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				case "HierarchyInfo.Identifier":
 					return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.SectionIds, comparer, Guid.Parse((string)value));
 				case "HierarchyInfo.HierarchyRole":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.HierarchyInfo.HierarchyRole), comparer, ToDomHierarchyRole((SlcAssetManagement.Enums.HierarchyRole)(int)value));
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.HierarchyInfo.HierarchyRole), comparer, ToDomHierarchyRole((SlcAsset_Management.Enums.HierarchyRoleEnum)(int)value));
 				default:
 					throw new NotImplementedException();
 			}

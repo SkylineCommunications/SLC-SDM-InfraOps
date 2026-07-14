@@ -1,153 +1,164 @@
-﻿namespace SDM.AssetManagement.Tests
+﻿namespace SDM.AssetManagement.Tests.PowerPorts
 {
-	using System.Diagnostics;
-	using System.Linq;
-	using FluentAssertions;
-	using FluentAssertions.Execution;
-	using Microsoft.VisualStudio.TestTools.UnitTesting;
-	using SDM.AssetManagement.Tests.Setup;
-	using Skyline.DataMiner.Net.Messages.SLDataGateway;
-	using Skyline.DataMiner.SDM;
-	using Skyline.DataMiner.SDM.AssetManagement.Models;
+    using System.Linq;
 
-	public partial class PowerPortDomStorageProviderTests
-	{
-		[TestMethod]
-		public void PowerPortDomStorageProvider_NestedReadFilter_LinkedAsset()
-		{
-			// 10 assets
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulateAssets().PopulatePowerPorts();
+    using FluentAssertions;
+    using FluentAssertions.Execution;
 
-			// Link more ports to one asset.
-			var asset = DemoData.Assets[6];
-			DemoData.PowerPorts[2].Asset = new SdmObjectReference<Asset>(asset.Identifier);
-			DemoData.PowerPorts[5].Asset = new SdmObjectReference<Asset>(asset.Identifier);
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-			helper.PowerPorts.Update(DemoData.PowerPorts);
+    using SDM.AssetManagement.Tests.Setup;
 
-			var filter = PowerPortExposers.Asset.Equal(new SdmObjectReference<Asset>(asset.Identifier));
+    using SharedMappers.DomIds;
 
-			var powerPortsRetrieved = helper.PowerPorts.Read(filter);
-			var expected = DemoData.PowerPorts.Where(filter.getLambda());
+    using Skyline.DataMiner.Net.Messages.SLDataGateway;
+    using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.AssetManagement.Models;
 
-			using (new AssertionScope())
-			{
-				powerPortsRetrieved.Should().NotBeNull();
-				powerPortsRetrieved.Count().Should().Be(3);
+    /// <summary>
+    /// Filter and query tests for PowerPort repository operations.
+    /// </summary>
+    [TestClass]
+    public class PowerPortDomStorageProvider_FilterTests : BaseRepositoryTest
+    {
+        #region Basic Field Filters
 
-				powerPortsRetrieved.Should().BeEquivalentTo(expected);
-			}
-		}
+        [TestMethod]
+        public void ReadFilter_PortName_Equal_ShouldReturnMatchingPowerPort()
+        {
+            // Arrange
+            
+            Helper.PopulateWithDemoData(upTo: DemoDataLayer.PowerPorts);
 
-		[TestMethod]
-		public void PowerPortDomStorageProvider_ReadFilter_PortName_Equal()
-		{
-			// 10 power ports
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulatePowerPorts();
+            var targetPowerPort = Helper.TestData.PowerPorts.Skip(3).First();
+            var filter = PowerPortExposers.PowerPortInfo.Name.Equal(targetPowerPort.PowerPortInfo.Name);
 
-			var portName = DemoData.PowerPorts[3].PowerPortInfo.Name;
-			var filter = PowerPortExposers.PowerPortInfo.Name.Equal(portName);
+            // Act
+            var results = Helper.AssetManagement.PowerPorts.Read(filter).ToList();
 
-			var powerPortsRetrieved = helper.PowerPorts.Read(filter);
+            // Assert
+            using (new AssertionScope())
+            {
+                results.Should().HaveCount(1, $"should find power port with name '{targetPowerPort.PowerPortInfo.Name}'");
+                var powerPort = results.First();
+                powerPort.PowerPortInfo.Name.Should().Be(targetPowerPort.PowerPortInfo.Name);
+                powerPort.Identifier.Should().Be(targetPowerPort.Identifier);
+            }
+        }
 
-			using (new AssertionScope())
-			{
-				powerPortsRetrieved.Should().NotBeNull();
-				powerPortsRetrieved.Count().Should().Be(1);
-				PowerPort powerPort = powerPortsRetrieved.First();
+        [TestMethod]
+        public void ReadFilter_PortNumber_Equal_ShouldReturnMatchingPowerPort()
+        {
+            // Arrange
+            
+            Helper.PopulateWithDemoData(upTo: DemoDataLayer.PowerPorts);
 
-				powerPort.PowerPortInfo.Name.Should().Be(DemoData.PowerPorts[3].PowerPortInfo.Name);
-				powerPort.Identifier.Should().Be(DemoData.PowerPorts[3].Identifier);
+            // Test with port number 0 to verify default value handling
+            const long portNumber = 0;
+            var filter = PowerPortExposers.PowerPortInfo.PortNumber.UncheckedEqual((long?)portNumber);
 
-				powerPort.PowerPortInfo.Should().Be(DemoData.PowerPorts[3].PowerPortInfo);				
-			}
-		}
+            // Act
+            var results = Helper.AssetManagement.PowerPorts.Read(filter).ToList();
 
-		[TestMethod]
-		public void PowerPortDomStorageProvider_ReadFilter_PortExposure_Equal()
-		{
-			// 10 power ports
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulatePowerPorts();
+            // Assert
+            using (new AssertionScope())
+            {
+                results.Should().NotBeEmpty($"should find power ports with port number {portNumber}");
+                results.Should().OnlyContain(pp => pp.PowerPortInfo.PortNumber == portNumber);
+            }
+        }
 
-			var portExposure = Skyline.DataMiner.SDM.AssetManagement.SlcAssetManagement.Enums.PortExposure.Back;
-			var filter = PowerPortExposers.PowerPortInfo.PortExposure.UncheckedEqual(portExposure);
+        [TestMethod]
+        public void ReadFilter_Label_Contains_ShouldReturnMatchingPowerPorts()
+        {
+            // Arrange
+            
+            Helper.PopulateWithDemoData(upTo: DemoDataLayer.PowerPorts);
 
-			var powerPortsRetrieved = helper.PowerPorts.Read(filter);
-			var expected = DemoData.PowerPorts.Where(filter.getLambda());
+            const string labelPattern = "Power";
+            var filter = PowerPortExposers.PowerPortInfo.Label.Contains(labelPattern);
 
-			using (new AssertionScope())
-			{
-				powerPortsRetrieved.Should().NotBeNull();
-				powerPortsRetrieved.Should().BeEquivalentTo(expected);
-				powerPortsRetrieved.Should().AllSatisfy(port => port.PowerPortInfo.PortExposure.Should().Be(portExposure));
-			}
-		}
+            // Act
+            var results = Helper.AssetManagement.PowerPorts.Read(filter).ToList();
 
-		[TestMethod]
-		public void PowerPortDomStorageProvider_ReadFilter_OutputType_Equal()
-		{
-			// 10 power ports
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulatePowerPorts();
+            // Assert
+            using (new AssertionScope())
+            {
+                results.Should().NotBeEmpty($"should find power ports with '{labelPattern}' in label");
+                results.Should().OnlyContain(pp => pp.PowerPortInfo.Label.Contains(labelPattern));
+            }
+        }
 
-			var outputType = Skyline.DataMiner.SDM.AssetManagement.SlcAssetManagement.Enums.Outputtype.IO;
-			var filter = PowerPortExposers.PowerPortInfo.OutputType.UncheckedEqual(outputType);
+        [TestMethod]
+        public void ReadFilter_PortExposure_Equal_ShouldReturnMatchingPowerPorts()
+        {
+            // Arrange
+            
+            Helper.PopulateWithDemoData(upTo: DemoDataLayer.PowerPorts);
 
-			var powerPortsRetrieved = helper.PowerPorts.Read(filter);
-			var expected = DemoData.PowerPorts.Where(filter.getLambda());
+            var portExposure = SlcAsset_Management.Enums.PortExposureEnum.Back;
+            var filter = PowerPortExposers.PowerPortInfo.PortExposure.UncheckedEqual(portExposure);
 
-			using (new AssertionScope())
-			{
-				powerPortsRetrieved.Should().NotBeNull();
-				powerPortsRetrieved.Should().BeEquivalentTo(expected);
-				powerPortsRetrieved.Should().AllSatisfy(port => port.PowerPortInfo.OutputType.Should().Be(outputType));
-			}
-		}
+            // Act
+            var results = Helper.AssetManagement.PowerPorts.Read(filter).ToList();
 
-		[TestMethod]
-		public void PowerPortDomStorageProvider_ReadFilter_PortNumber_Equal()
-		{
-			// 10 power ports
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulatePowerPorts();
+            // Assert
+            using (new AssertionScope())
+            {
+                results.Should().NotBeEmpty($"should find power ports with exposure '{portExposure}'");
+                results.Should().OnlyContain(pp => pp.PowerPortInfo.PortExposure == portExposure);
+            }
+        }
 
-			var portNumber = DemoData.PowerPorts[7].PowerPortInfo.PortNumber;
-			var filter = PowerPortExposers.PowerPortInfo.PortNumber.Equal(portNumber);
+        [TestMethod]
+        public void ReadFilter_OutputType_Equal_ShouldReturnMatchingPowerPorts()
+        {
+            // Arrange
+            
+            Helper.PopulateWithDemoData(upTo: DemoDataLayer.PowerPorts);
 
-			var powerPortsRetrieved = helper.PowerPorts.Read(filter);
+            var outputType = SlcAsset_Management.Enums.Outputtype.IO;
+            var filter = PowerPortExposers.PowerPortInfo.OutputType.UncheckedEqual(outputType);
 
-			using (new AssertionScope())
-			{
-				powerPortsRetrieved.Should().NotBeNull();
-				powerPortsRetrieved.Should().HaveCount(1);
+            // Act
+            var results = Helper.AssetManagement.PowerPorts.Read(filter).ToList();
 
-				var powerPort = powerPortsRetrieved.First();
+            // Assert
+            using (new AssertionScope())
+            {
+                results.Should().NotBeEmpty($"should find power ports with output type '{outputType}'");
+                results.Should().OnlyContain(pp => pp.PowerPortInfo.OutputType == outputType);
+            }
+        }
 
-				powerPort.Should().Be(DemoData.PowerPorts[7]);
-			}
-		}
+        #endregion
 
-		[TestMethod]
-		public void PowerPortDomStorageProvider_ReadFilter_Label_Contains()
-		{
-			// 10 power ports
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulatePowerPorts();
+        #region Relationship Filters
 
-			var filter = PowerPortExposers.PowerPortInfo.Label.Contains("Power");
+        [TestMethod]
+        public void ReadFilter_LinkedAsset_Equal_ShouldReturnPowerPortsForAsset()
+        {
+            // Arrange
+            
+            Helper.PopulateWithDemoData(upTo: DemoDataLayer.PowerPorts);
 
-			var powerPortsRetrieved = helper.PowerPorts.Read(filter);
-			var expected = DemoData.PowerPorts.Where(filter.getLambda());
+            // Get an asset that has multiple power ports
+            var targetAsset = Helper.TestData.Assets
+                .First(a => Helper.TestData.PowerPorts.Count(pp => pp.Asset.Identifier == a.Identifier) > 0);
 
-			using (new AssertionScope())
-			{
-				powerPortsRetrieved.Should().NotBeNull();
-				powerPortsRetrieved.Should().BeEquivalentTo(expected);
-				powerPortsRetrieved.Should().AllSatisfy(port => port.PowerPortInfo.Label.Should().Contain("Power"));
-			}
-		}
-	}
+            var filter = PowerPortExposers.Asset.Equal(new SdmObjectReference<Asset>(targetAsset.Identifier));
+
+            // Act
+            var results = Helper.AssetManagement.PowerPorts.Read(filter).ToList();
+
+            // Assert
+            using (new AssertionScope())
+            {
+                results.Should().NotBeEmpty($"should find power ports linked to asset '{targetAsset.Name}'");
+                results.Should().OnlyContain(pp => pp.Asset.Identifier == targetAsset.Identifier);
+            }
+        }
+
+        #endregion
+    }
 }

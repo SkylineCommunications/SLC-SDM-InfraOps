@@ -10,6 +10,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.Linq;
+
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Apps.Sections.Sections;
@@ -20,21 +21,24 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 	using Skyline.DataMiner.Net.Sections;
 	using Skyline.DataMiner.Net.SubscriptionFilters;
 	using Skyline.DataMiner.SDM;
-	using SLDataGateway.API.Querying;
+    using Skyline.DataMiner.SDM.AssetManagement.Validation;
+
+    using SLDataGateway.API.Querying;
 	using SLDataGateway.API.Types.Querying;
-	using static Skyline.DataMiner.SDM.AssetManagement.SlcAssetManagement.Enums;
+    using SharedMappers.DomIds;
 
 	internal partial class AssetClassDomRepository : IBulkRepository<AssetClass>
-	{
+    {
 		private readonly IConnection connection;
 		private readonly DomHelper helper;
-		public AssetClassDomRepository(IConnection connection)
+
+        public AssetClassDomRepository(IConnection connection)
 		{
 			this.connection = connection;
 			this.helper = new DomHelper(connection.HandleMessages, Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.ModuleId);
 		}
 
-		public AssetClass Create(AssetClass createObject)
+        public AssetClass Create(AssetClass createObject)
 		{
 			if (createObject is null)
 			{
@@ -46,101 +50,130 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			return FromInstance(instance);
 		}
 
-		public IReadOnlyCollection<AssetClass> Create(IEnumerable<AssetClass> createObjects)
-		{
-			if (createObjects is null || !createObjects.Any())
-			{
-				return Array.Empty<AssetClass>();
-			}
+        public IReadOnlyCollection<AssetClass> Create(IEnumerable<AssetClass> createObjects)
+        {
+            if (createObjects is null || !createObjects.Any())
+            {
+                return Array.Empty<AssetClass>();
+            }
 
-			// Check if some of the objects already exist
-			var existing = new HashSet<string>();
-			foreach (var batch in createObjects.Batch(500))
-			{
-				existing.UnionWith(Read(new ORFilterElement<AssetClass>(batch.Select(obj => AssetClassExposers.Identifier.Equal(obj.Identifier)).ToArray())).Select(obj => obj.Identifier));
-			}
+            // Check if some of the objects already exist
+            // Only check objects that have an Identifier (new objects with empty identifiers can't exist yet)
+            var existing = new HashSet<string>();
+            var objectsWithIdentifier = createObjects.Where(obj => !string.IsNullOrWhiteSpace(obj.Identifier)).ToList();
 
-			// Create the remainder
-			var SuccessfulItems = new List<AssetClass>();
-			var failures = new Dictionary<string, Exception>();
-			var objects = createObjects.Where(obj => !existing.Contains(obj.Identifier)).ToDictionary(obj => obj.Identifier);
-			foreach (var batch in createObjects.Select(ToInstance).Batch(helper.DomInstances.MaxAmountBulkOperation))
-			{
-				helper.DomInstances.TryCreateOrUpdate(batch.ToList(), out var result);
-				foreach (var failure in result.UnsuccessfulIds)
-				{
-					failures.Add(failure.Id.ToString(), new CrudFailedException(result.TraceDataPerItem[failure]));
-				}
+            if (objectsWithIdentifier.Any())
+            {
+                foreach (var batch in objectsWithIdentifier.Batch(500))
+                {
+                    existing.UnionWith(Read(new ORFilterElement<AssetClass>(
+                        batch.Select(obj => AssetClassExposers.Identifier.Equal(obj.Identifier))
+                            .ToArray()
+                    )).Select(obj => obj.Identifier));
+                }
+            }
 
-				foreach (var success in result.SuccessfulItems)
-				{
-					SuccessfulItems.Add(FromInstance(success));
-				}
-			}
+            // Create the remainder (objects not already existing)
+            var SuccessfulItems = new List<AssetClass>();
+            var failures = new Dictionary<string, Exception>();
+            var objects = createObjects.Where(obj => string.IsNullOrWhiteSpace(obj.Identifier) || !existing.Contains(obj.Identifier))
+                .ToDictionary(obj => string.IsNullOrWhiteSpace(obj.Identifier) ? Guid.NewGuid().ToString() : obj.Identifier);
 
-			// If everything went fine, return the successful creations
-			if (!existing.Any() && !failures.Any())
-			{
-				return SuccessfulItems;
-			}
+            foreach (var batch in createObjects.Select(ToInstance).Batch(helper.DomInstances.MaxAmountBulkOperation))
+            {
+                helper.DomInstances.TryCreateOrUpdate(batch.ToList(), out var result);
+                foreach (var failure in result.UnsuccessfulIds)
+                {
+                    failures.Add(failure.Id.ToString(), new CrudFailedException(result.TraceDataPerItem[failure]));
+                }
 
-			// Otherwise, build and throw an exception
-			var exceptionBuilder = new SdmBulkCrudException<AssetClass>.Builder();
-			foreach (var obj in createObjects)
-			{
-				if (existing.Contains(obj.Identifier))
-				{
-					exceptionBuilder.AddFailed(obj, new SdmCrudException<AssetClass>(obj, $"Could not create AssetClass with guid: '{obj.Identifier}', it already exists."));
-					continue;
-				}
+                foreach (var success in result.SuccessfulItems)
+                {
+                    SuccessfulItems.Add(FromInstance(success));
+                }
+            }
 
-				if (failures.ContainsKey(obj.Identifier))
-				{
-					exceptionBuilder.AddFailed(obj, failures[obj.Identifier]);
-					continue;
-				}
+            // If everything went fine, return the successful creations
+            if (!existing.Any() && !failures.Any())
+            {
+                return SuccessfulItems;
+            }
 
-				exceptionBuilder.AddSuccessful(obj);
-			}
+            // Otherwise, build and throw an exception
+            var exceptionBuilder = new SdmBulkCrudException<AssetClass>.Builder();
+            foreach (var obj in createObjects)
+            {
+                var objId = string.IsNullOrWhiteSpace(obj.Identifier)
+                    ? SuccessfulItems.FirstOrDefault(s => s.Name == obj.Name)?.Identifier
+                    : obj.Identifier;
 
-			throw exceptionBuilder.Build();
-		}
+                if (!string.IsNullOrWhiteSpace(obj.Identifier) && existing.Contains(obj.Identifier))
+                {
+                    exceptionBuilder.AddFailed(obj, new SdmCrudException<AssetClass>(obj, $"Could not create AssetClass with guid: '{obj.Identifier}', it already exists."));
+                    continue;
+                }
 
-		public IReadOnlyCollection<AssetClass> CreateOrUpdate(IEnumerable<AssetClass> items)
-		{
-			if (items is null || !items.Any())
-			{
-				return Array.Empty<AssetClass>();
-			}
+                if (objId != null && failures.ContainsKey(objId))
+                {
+                    exceptionBuilder.AddFailed(obj, failures[objId]);
+                    continue;
+                }
 
-			var successful = new List<AssetClass>();
-			var exceptionBuilder = new SdmBulkCrudException<AssetClass>.Builder();
-			var objects = items.ToDictionary(obj => obj.Identifier);
-			foreach (var batch in items.Select(ToInstance).Batch(helper.DomInstances.MaxAmountBulkOperation))
-			{
-				helper.DomInstances.TryCreateOrUpdate(batch.ToList(), out var result);
-				foreach (var failure in result.UnsuccessfulIds)
-				{
-					exceptionBuilder.AddFailed(objects[failure.Id.ToString()], new CrudFailedException(result.TraceDataPerItem[failure]));
-				}
+                exceptionBuilder.AddSuccessful(obj);
+            }
 
-				foreach (var success in result.SuccessfulItems)
-				{
-					var item = FromInstance(success);
-					exceptionBuilder.AddSuccessful(item);
-					successful.Add(item);
-				}
-			}
+            throw exceptionBuilder.Build();
+        }
 
-			if (exceptionBuilder.HasFailure)
-			{
-				throw exceptionBuilder.Build();
-			}
+        public IReadOnlyCollection<AssetClass> CreateOrUpdate(IEnumerable<AssetClass> items)
+        {
+            if (items is null || !items.Any())
+            {
+                return Array.Empty<AssetClass>();
+            }
 
-			return successful;
-		}
+            // Validate all objects that are not new have identifiers
+            var invalidObjects = items.Where(obj => !obj.IsNew && string.IsNullOrWhiteSpace(obj.Identifier)).ToList();
+            if (invalidObjects.Any())
+            {
+                throw new ArgumentException($"Cannot update {invalidObjects.Count} object(s) without identifiers.", nameof(items));
+            }
 
-		public long Count(FilterElement<AssetClass> filter)
+            var successful = new List<AssetClass>();
+            var exceptionBuilder = new SdmBulkCrudException<AssetClass>.Builder();
+            var objects = items
+                .Where(obj => !string.IsNullOrWhiteSpace(obj.Identifier))
+                .ToDictionary(obj => obj.Identifier);
+
+            foreach (var batch in items.Select(ToInstance).Batch(helper.DomInstances.MaxAmountBulkOperation))
+            {
+                helper.DomInstances.TryCreateOrUpdate(batch.ToList(), out var result);
+                foreach (var failure in result.UnsuccessfulIds)
+                {
+                    var failedId = failure.Id.ToString();
+                    if (objects.ContainsKey(failedId))
+                    {
+                        exceptionBuilder.AddFailed(objects[failedId], new CrudFailedException(result.TraceDataPerItem[failure]));
+                    }
+                }
+
+                foreach (var success in result.SuccessfulItems)
+                {
+                    var item = FromInstance(success);
+                    exceptionBuilder.AddSuccessful(item);
+                    successful.Add(item);
+                }
+            }
+
+            if (exceptionBuilder.HasFailure)
+            {
+                throw exceptionBuilder.Build();
+            }
+
+            return successful;
+        }
+
+        public long Count(FilterElement<AssetClass> filter)
 		{
 			if (filter is null)
 			{
@@ -261,111 +294,135 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				throw new ArgumentNullException(nameof(updateObject));
 			}
 
+			if (string.IsNullOrWhiteSpace(updateObject.Identifier))
+			{
+				throw new ArgumentException("Cannot update an object without an identifier.", nameof(updateObject));
+			}
+
 			var instance = ToInstance(updateObject);
 			instance = helper.DomInstances.Update(instance);
 			return FromInstance(instance);
 		}
 
-		public IReadOnlyCollection<AssetClass> Update(IEnumerable<AssetClass> updateObjects)
-		{
-			if (updateObjects is null || !updateObjects.Any())
-			{
-				return Array.Empty<AssetClass>();
-			}
+        public IReadOnlyCollection<AssetClass> Update(IEnumerable<AssetClass> updateObjects)
+        {
+            if (updateObjects is null || !updateObjects.Any())
+            {
+                return Array.Empty<AssetClass>();
+            }
 
-			// Check if which objects already exist
-			var existing = new HashSet<string>();
-			foreach (var batch in updateObjects.Batch(500))
-			{
-				existing.UnionWith(Read(new ORFilterElement<AssetClass>(batch.Select(obj => AssetClassExposers.Identifier.Equal(obj.Identifier)).ToArray())).Select(obj => obj.Identifier));
-			}
+            // Validate all objects have identifiers
+            var objectsWithoutId = updateObjects.Where(obj => string.IsNullOrWhiteSpace(obj.Identifier)).ToList();
+            if (objectsWithoutId.Any())
+            {
+                throw new ArgumentException($"Cannot update {objectsWithoutId.Count} object(s) without identifiers.", nameof(updateObjects));
+            }
 
-			// Update the existing objects
-			var successfulItems = new List<AssetClass>();
-			var failures = new Dictionary<string, Exception>();
-			var objects = updateObjects.Where(obj => existing.Contains(obj.Identifier)).ToDictionary(obj => obj.Identifier);
-			foreach (var batch in updateObjects.Select(ToInstance).Batch(helper.DomInstances.MaxAmountBulkOperation))
-			{
-				helper.DomInstances.TryCreateOrUpdate(batch.ToList(), out var result);
-				foreach (var failure in result.UnsuccessfulIds)
-				{
-					failures.Add(failure.Id.ToString(), new CrudFailedException(result.TraceDataPerItem[failure]));
-				}
+            // Check which objects already exist
+            var existing = new HashSet<string>();
+            foreach (var batch in updateObjects.Batch(500))
+            {
+                existing.UnionWith(Read(new ORFilterElement<AssetClass>(batch.Select(obj => AssetClassExposers.Identifier.Equal(obj.Identifier)).ToArray())).Select(obj => obj.Identifier));
+            }
 
-				foreach (var success in result.SuccessfulItems)
-				{
-					successfulItems.Add(FromInstance(success));
-				}
-			}
+            // Update the existing objects
+            var successfulItems = new List<AssetClass>();
+            var failures = new Dictionary<string, Exception>();
+            var objects = updateObjects.Where(obj => existing.Contains(obj.Identifier)).ToDictionary(obj => obj.Identifier);
+            foreach (var batch in updateObjects.Select(ToInstance).Batch(helper.DomInstances.MaxAmountBulkOperation))
+            {
+                helper.DomInstances.TryCreateOrUpdate(batch.ToList(), out var result);
+                foreach (var failure in result.UnsuccessfulIds)
+                {
+                    failures.Add(failure.Id.ToString(), new CrudFailedException(result.TraceDataPerItem[failure]));
+                }
 
-			// Check for failures and build exception if needed
-			var exceptionBuilder = new SdmBulkCrudException<AssetClass>.Builder();
-			foreach (var obj in updateObjects)
-			{
-				if (!existing.Contains(obj.Identifier))
-				{
-					exceptionBuilder.AddFailed(obj, new SdmCrudException<AssetClass>(obj, "Could not update a non existing AssetClass"));
-					continue;
-				}
+                foreach (var success in result.SuccessfulItems)
+                {
+                    successfulItems.Add(FromInstance(success));
+                }
+            }
 
-				if (failures.ContainsKey(obj.Identifier))
-				{
-					exceptionBuilder.AddFailed(obj, failures[obj.Identifier]);
-					continue;
-				}
+            // Check for failures and build exception if needed
+            var exceptionBuilder = new SdmBulkCrudException<AssetClass>.Builder();
+            foreach (var obj in updateObjects)
+            {
+                if (!existing.Contains(obj.Identifier))
+                {
+                    exceptionBuilder.AddFailed(obj, new SdmCrudException<AssetClass>(obj, "Could not update a non existing AssetClass"));
+                    continue;
+                }
 
-				exceptionBuilder.AddSuccessful(obj);
-			}
+                if (failures.ContainsKey(obj.Identifier))
+                {
+                    exceptionBuilder.AddFailed(obj, failures[obj.Identifier]);
+                    continue;
+                }
 
-			if (exceptionBuilder.HasFailure)
-			{
-				throw exceptionBuilder.Build();
-			}
+                exceptionBuilder.AddSuccessful(obj);
+            }
 
-			return successfulItems;
-		}
+            if (exceptionBuilder.HasFailure)
+            {
+                throw exceptionBuilder.Build();
+            }
 
-		public void Delete(AssetClass deleteObject)
-		{
-			if (deleteObject is null)
-			{
-				throw new ArgumentNullException(nameof(deleteObject));
-			}
+            return successfulItems;
+        }
 
-			var instance = ToInstance(deleteObject);
-			helper.DomInstances.Delete(instance);
-		}
+        public void Delete(AssetClass deleteObject)
+        {
+            if (deleteObject is null)
+            {
+                throw new ArgumentNullException(nameof(deleteObject));
+            }
 
-		public void Delete(IEnumerable<AssetClass> deleteObjects)
-		{
-			if (deleteObjects is null || !deleteObjects.Any())
-			{
-				return;
-			}
+            if (string.IsNullOrWhiteSpace(deleteObject.Identifier))
+            {
+                throw new ArgumentException("Cannot delete an object without an identifier.", nameof(deleteObject));
+            }
 
-			var exceptionBuilder = new SdmBulkCrudException<AssetClass>.Builder();
-			var objects = deleteObjects.ToDictionary(obj => obj.Identifier);
-			foreach (var batch in deleteObjects.Select(ToInstance).Batch(helper.DomInstances.MaxAmountBulkOperation))
-			{
-				helper.DomInstances.TryDelete(batch.ToList(), out var result);
-				foreach (var failure in result.UnsuccessfulIds)
-				{
-					exceptionBuilder.AddFailed(objects[failure.Id.ToString()], new CrudFailedException(result.TraceDataPerItem[failure]));
-				}
+            var instance = ToInstance(deleteObject);
+            helper.DomInstances.Delete(instance);
+        }
 
-				foreach (var success in result.SuccessfulIds)
-				{
-					exceptionBuilder.AddSuccessful(objects[success.Id.ToString()]);
-				}
-			}
+        public void Delete(IEnumerable<AssetClass> deleteObjects)
+        {
+            if (deleteObjects is null || !deleteObjects.Any())
+            {
+                return;
+            }
 
-			if (exceptionBuilder.HasFailure)
-			{
-				throw exceptionBuilder.Build();
-			}
-		}
+            // Validate all objects have identifiers
+            var objectsWithoutId = deleteObjects.Where(obj => string.IsNullOrWhiteSpace(obj.Identifier)).ToList();
+            if (objectsWithoutId.Any())
+            {
+                throw new ArgumentException($"Cannot delete {objectsWithoutId.Count} object(s) without identifiers.", nameof(deleteObjects));
+            }
 
-		private IEnumerable<AssetClass> Read(FilterElement<DomInstance> domFilter)
+            var exceptionBuilder = new SdmBulkCrudException<AssetClass>.Builder();
+            var objects = deleteObjects.ToDictionary(obj => obj.Identifier);
+            foreach (var batch in deleteObjects.Select(ToInstance).Batch(helper.DomInstances.MaxAmountBulkOperation))
+            {
+                helper.DomInstances.TryDelete(batch.ToList(), out var result);
+                foreach (var failure in result.UnsuccessfulIds)
+                {
+                    exceptionBuilder.AddFailed(objects[failure.Id.ToString()], new CrudFailedException(result.TraceDataPerItem[failure]));
+                }
+
+                foreach (var success in result.SuccessfulIds)
+                {
+                    exceptionBuilder.AddSuccessful(objects[success.Id.ToString()]);
+                }
+            }
+
+            if (exceptionBuilder.HasFailure)
+            {
+                throw exceptionBuilder.Build();
+            }
+        }
+
+        private IEnumerable<AssetClass> Read(FilterElement<DomInstance> domFilter)
 		{
 			if (domFilter is null)
 			{
@@ -510,15 +567,18 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 		{
 			var obj = new AssetClass
 			{
-				Identifier = instance.ID.Id.ToString()
-			};
+				Identifier = instance.ID.Id.ToString(),
+                IsNewInternal = false,
+                State = SlcAsset_Management.Behaviors.Asset_Class_Behavior.Statuses.ToEnum(instance.StatusId),
+            };
+
 			var _assetclasspropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.SectionDefinitionId));
 			if (_assetclasspropertiesSection != default)
 			{
 				var _devicename = _assetclasspropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.DeviceName);
 				if (_devicename != null)
 				{
-					obj.DeviceName = _devicename.Value;
+					obj.Name = _devicename.Value;
 				}
 
 				var _deviceType = _assetclasspropertiesSection.GetValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.DeviceType);
@@ -536,7 +596,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				var _devicedescription = _assetclasspropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.DeviceDescription);
 				if (_devicedescription != null)
 				{
-					obj.DeviceDescription = _devicedescription.Value;
+					obj.Description = _devicedescription.Value;
 				}
 
 				var _depth = _assetclasspropertiesSection.GetValue<double>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Depth);
@@ -596,7 +656,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				var _powersupply = _assetclasspropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.PowerSupply);
 				if (_powersupply != null)
 				{
-					obj.PowerSupply = (Skyline.DataMiner.SDM.AssetManagement.SlcAssetManagement.Enums.PowerSupply)Enum.Parse(typeof(Skyline.DataMiner.SDM.AssetManagement.SlcAssetManagement.Enums.PowerSupply), _powersupply.Value);
+					obj.PowerSupply = SharedMappers.DomIds.SlcAsset_Management.Enums.Powersupply.ToEnum(_powersupply.Value);
 				}
 			}
 
@@ -626,10 +686,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			var _dataportsList = new System.Collections.Generic.List<Skyline.DataMiner.SDM.AssetManagement.Models.DataPortInfo>();
 			foreach (var _dataportsSection in instance.Sections.Where(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.DataPorts.SectionDefinitionId)))
 			{
-				var dataports = new Skyline.DataMiner.SDM.AssetManagement.Models.DataPortInfo()
-				{
-					Identifier = _dataportsSection.ID.Id.ToString()
-				};
+                var dataports = new Skyline.DataMiner.SDM.AssetManagement.Models.DataPortInfo();
+
 				var _dataportsname = _dataportsSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.DataPorts.Name);
 				if (_dataportsname != null)
 				{
@@ -645,19 +703,19 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				var _dataportsoutputtype = _dataportsSection.GetValue<int>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.DataPorts.OutputType);
 				if (_dataportsoutputtype != null)
 				{
-					dataports.OutputType = (Skyline.DataMiner.SDM.AssetManagement.SlcAssetManagement.Enums.Outputtype)_dataportsoutputtype.Value;
+					dataports.OutputType = (SharedMappers.DomIds.SlcAsset_Management.Enums.Outputtype)_dataportsoutputtype.Value;
 				}
 
-				var _dataportsportexposure = _dataportsSection.GetValue<int>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.DataPorts.PortExposure);
+				var _dataportsportexposure = _dataportsSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.DataPorts.PortExposure);
 				if (_dataportsportexposure != null)
 				{
-					dataports.PortExposure = (Skyline.DataMiner.SDM.AssetManagement.SlcAssetManagement.Enums.PortExposure)_dataportsportexposure.Value;
+					dataports.PortExposure = SharedMappers.DomIds.SlcAsset_Management.Enums.Portexposure.ToEnum(_dataportsportexposure.Value);
 				}
 
-				var _dataportstype = _dataportsSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.DataPorts.Type);
+				var _dataportstype = _dataportsSection.GetValue<Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.DataPorts.Type);
 				if (_dataportstype != null)
 				{
-					dataports.Type = System.Guid.Parse(Convert.ToString(_dataportstype.Value));
+                    dataports.Type = new SdmObjectReference<PortType>(Convert.ToString(_dataportstype.Value));
 				}
 
 				var _dataportslabel = _dataportsSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.DataPorts.Label);
@@ -673,10 +731,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			var _powerportsList = new System.Collections.Generic.List<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortInfo>();
 			foreach (var _powerportsSection in instance.Sections.Where(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.PowerPorts.SectionDefinitionId)))
 			{
-				var powerports = new Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortInfo()
-				{
-					Identifier = _powerportsSection.ID.Id.ToString()
-				};
+                var powerports = new Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortInfo();
+
 				var _powerportsname = _powerportsSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.PowerPorts.Name);
 				if (_powerportsname != null)
 				{
@@ -692,19 +748,19 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				var _powerportsoutputtype = _powerportsSection.GetValue<int>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.PowerPorts.OutputType);
 				if (_powerportsoutputtype != null)
 				{
-					powerports.OutputType = (Skyline.DataMiner.SDM.AssetManagement.SlcAssetManagement.Enums.Outputtype)_powerportsoutputtype.Value;
+					powerports.OutputType = (SharedMappers.DomIds.SlcAsset_Management.Enums.Outputtype)_powerportsoutputtype.Value;
 				}
 
-				var _powerportsportexposure = _powerportsSection.GetValue<int>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.PowerPorts.PortExposure);
+				var _powerportsportexposure = _powerportsSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.PowerPorts.PortExposure);
 				if (_powerportsportexposure != null)
 				{
-					powerports.PortExposure = (Skyline.DataMiner.SDM.AssetManagement.SlcAssetManagement.Enums.PortExposure)_powerportsportexposure.Value;
+					powerports.PortExposure = SharedMappers.DomIds.SlcAsset_Management.Enums.Portexposure.ToEnum(_powerportsportexposure.Value);
 				}
 
 				var _powerportsporttype = _powerportsSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.PowerPorts.PortType);
 				if (_powerportsporttype != null)
 				{
-					powerports.PortType = System.Guid.Parse(Convert.ToString(_powerportsporttype.Value));
+					powerports.PortType = new SdmObjectReference<PortType>(Convert.ToString(_powerportsporttype.Value));
 				}
 
 				var _powerportslabel = _powerportsSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.PowerPorts.Label);
@@ -720,10 +776,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			var _holdersList = new System.Collections.Generic.List<Skyline.DataMiner.SDM.AssetManagement.Models.AssetHolder>();
 			foreach (var _holdersSection in instance.Sections.Where(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.Holders.SectionDefinitionId)))
 			{
-				var holders = new Skyline.DataMiner.SDM.AssetManagement.Models.AssetHolder()
-				{
-					Identifier = _holdersSection.ID.Id.ToString()
-				};
+                var holders = new Skyline.DataMiner.SDM.AssetManagement.Models.AssetHolder();
 				var _holdersslotnumber = _holdersSection.GetValue<long>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.Holders.SlotNumber);
 				if (_holdersslotnumber != null)
 				{
@@ -733,35 +786,23 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				var _holdershierarchyrole = _holdersSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.Holders.HierarchyRole);
 				if (_holdershierarchyrole != null)
 				{
-					holders.HierarchyRole = FromDomHierarchyRole(_holdershierarchyrole.Value);
+					holders.HierarchyRole = SlcAsset_Management.Enums.Hierarchyrole.ToEnum(_holdershierarchyrole.Value);
 				}
 
 				_holdersList.Add(holders);
 			}
 
 			obj.Holders = _holdersList;
+            obj.ResetChangeTracking();
+
 			return obj;
-		}
-
-		private static SlcAssetManagement.Enums.HierarchyRole FromDomHierarchyRole(string value)
-		{
-			switch (value)
-			{
-				case "Sub-Card":
-					return SlcAssetManagement.Enums.HierarchyRole.SubCard;
-
-				case "Power Supply":
-					return SlcAssetManagement.Enums.HierarchyRole.PowerSupply;
-
-				default:
-					return (SlcAssetManagement.Enums.HierarchyRole)
-						Enum.Parse(typeof(SlcAssetManagement.Enums.HierarchyRole), value);
-			}
 		}
 
 		private DomInstance ToInstance(AssetClass obj)
 		{
 			Guid id = default(Guid);
+			bool isNew = obj.IsNew || String.IsNullOrWhiteSpace(obj.Identifier);
+
 			if (!String.IsNullOrEmpty(obj.Identifier))
 			{
 				id = Guid.Parse(obj.Identifier);
@@ -779,10 +820,15 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 					ModuleId = Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.ModuleId
 				}
 			};
-			var _assetclassproperties = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.SectionDefinitionId);
-			if (obj.DeviceName != default)
+
+			if (isNew)
 			{
-				_assetclassproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.DeviceName, Convert.ToString(obj.DeviceName));
+				instance.StatusId = SlcAsset_Management.Behaviors.Asset_Class_Behavior.Statuses.ToValue(obj.State);
+			}
+			var _assetclassproperties = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.SectionDefinitionId);
+			if (obj.Name != default)
+			{
+				_assetclassproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.DeviceName, Convert.ToString(obj.Name));
 			}
 
 			if (obj.DeviceTypeId != default)
@@ -795,34 +841,34 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				_assetclassproperties.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Manufacturer, obj.Manufacturer);
 			}
 
-			if (obj.DeviceDescription != default)
+			if (obj.Description != default)
 			{
-				_assetclassproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.DeviceDescription, Convert.ToString(obj.DeviceDescription));
+				_assetclassproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.DeviceDescription, Convert.ToString(obj.Description));
 			}
 
 			if (obj.Depth != default)
 			{
-				_assetclassproperties.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Depth, (double)obj.Depth);
+				_assetclassproperties.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Depth, (double)(obj.Depth).Value);
 			}
 
 			if (obj.Height != default)
 			{
-				_assetclassproperties.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Height, (double)obj.Height);
+				_assetclassproperties.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Height, (double)(obj.Height).Value);
 			}
 
 			if (obj.Width != default)
 			{
-				_assetclassproperties.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Width, (double)obj.Width);
+				_assetclassproperties.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Width, (double)(obj.Width).Value);
 			}
 
 			if (obj.HeightU != default)
 			{
-				_assetclassproperties.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.HeightU, (double)obj.HeightU);
+				_assetclassproperties.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.HeightU, (double)(obj.HeightU).Value);
 			}
 
 			if (obj.Weight != default)
 			{
-				_assetclassproperties.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Weight, (double)obj.Weight);
+				_assetclassproperties.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Weight, (double)(obj.Weight).Value);
 			}
 
 			if (obj.FrontImage != default)
@@ -837,17 +883,17 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
 			if (obj.TypicalPowerConsumption != default)
 			{
-				_assetclassproperties.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.TypicalPowerConsumption, (double)obj.TypicalPowerConsumption);
+				_assetclassproperties.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.TypicalPowerConsumption, (double)(obj.TypicalPowerConsumption).Value);
 			}
 
 			if (obj.MaximumPowerConsumption != default)
 			{
-				_assetclassproperties.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.MaximumPowerConsumption, (double)obj.MaximumPowerConsumption);
+				_assetclassproperties.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.MaximumPowerConsumption, (double)(obj.MaximumPowerConsumption).Value);
 			}
 
 			if (obj.PowerSupply != default)
 			{
-				_assetclassproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.PowerSupply, Convert.ToString(obj.PowerSupply));
+				_assetclassproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.PowerSupply, SharedMappers.DomIds.SlcAsset_Management.Enums.Powersupply.ToValue((obj.PowerSupply).Value));
 			}
 
 			instance.Sections.Add(_assetclassproperties);
@@ -874,10 +920,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
 			foreach (var dataports in obj.DataPorts)
 			{
-				var _dataportsSection = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.DataPorts.SectionDefinitionId)
-				{
-					ID = new SectionID(System.Guid.Parse(dataports.Identifier))
-				};
+                var _dataportsSection = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.DataPorts.SectionDefinitionId);
+
 				if (dataports.Name != default)
 				{
 					_dataportsSection.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.DataPorts.Name, Convert.ToString(dataports.Name));
@@ -889,7 +933,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				}
 
 				_dataportsSection.AddOrUpdateValue<int>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.DataPorts.OutputType, (int)dataports.OutputType);
-				_dataportsSection.AddOrUpdateValue<int>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.DataPorts.PortExposure, (int)dataports.PortExposure);
+				_dataportsSection.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.DataPorts.PortExposure, SharedMappers.DomIds.SlcAsset_Management.Enums.Portexposure.ToValue(dataports.PortExposure));
 				if (dataports.Type != default)
 				{
 					_dataportsSection.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.DataPorts.Type, Convert.ToString(dataports.Type));
@@ -905,10 +949,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
 			foreach (var powerports in obj.PowerPorts)
 			{
-				var _powerportsSection = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.PowerPorts.SectionDefinitionId)
-				{
-					ID = new SectionID(System.Guid.Parse(powerports.Identifier))
-				};
+				var _powerportsSection = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.PowerPorts.SectionDefinitionId);
+
 				if (powerports.Name != default)
 				{
 					_powerportsSection.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.PowerPorts.Name, Convert.ToString(powerports.Name));
@@ -920,7 +962,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				}
 
 				_powerportsSection.AddOrUpdateValue<int>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.PowerPorts.OutputType, (int)powerports.OutputType);
-				_powerportsSection.AddOrUpdateValue<int>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.PowerPorts.PortExposure, (int)powerports.PortExposure);
+				_powerportsSection.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.PowerPorts.PortExposure, SharedMappers.DomIds.SlcAsset_Management.Enums.Portexposure.ToValue(powerports.PortExposure));
 				if (powerports.PortType != default)
 				{
 					_powerportsSection.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.PowerPorts.PortType, Convert.ToString(powerports.PortType));
@@ -936,35 +978,18 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
 			foreach (var holders in obj.Holders)
 			{
-				var _holdersSection = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.Holders.SectionDefinitionId)
-				{
-					ID = new SectionID(System.Guid.Parse(holders.Identifier))
-				};
+                var _holdersSection = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.Holders.SectionDefinitionId);
+
 				if (holders.SlotNumber != default)
 				{
 					_holdersSection.AddOrUpdateValue<long>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.Holders.SlotNumber, (long)holders.SlotNumber);
 				}
 
-				_holdersSection.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.Holders.HierarchyRole, ToDomHierarchyRole(holders.HierarchyRole));
+				_holdersSection.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.Holders.HierarchyRole, SlcAsset_Management.Enums.Hierarchyrole.ToValue(holders.HierarchyRole));
 				instance.Sections.Add(_holdersSection);
 			}
 
 			return instance;
-		}
-
-		private static string ToDomHierarchyRole(SlcAssetManagement.Enums.HierarchyRole role)
-		{
-			switch (role)
-			{
-				case SlcAssetManagement.Enums.HierarchyRole.SubCard:
-					return "Sub-Card";
-
-				case SlcAssetManagement.Enums.HierarchyRole.PowerSupply:
-					return "Power Supply";
-
-				default:
-					return role.ToString();
-			}
 		}
 
 		private FilterElement<DomInstance> CreateFilter(string fieldName, Comparer comparer, object value)
@@ -973,34 +998,52 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			{
 				case "Identifier":
 					return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.Id, comparer, Guid.Parse((string)value));
-				case "DeviceName":
+				case "Name":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.DeviceName), comparer, (string)value);
-				case "AssetClass.DeviceTypeId":
+				case "DeviceTypeId":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.DeviceType), comparer, System.Guid.Parse(Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType>.Convert(value).Identifier));
-				case "AssetClass.ManufacturerId":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Manufacturer), comparer, Convert.ToString((System.Guid)value));
-				case "DeviceDescription":
+				case "Manufacturer" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+					return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Manufacturer.Id.ToString()).Equal(comparer == Comparer.NotEquals);
+				case "Manufacturer":
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Manufacturer), comparer, ((System.Guid?)value).Value);
+				case "Description":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.DeviceDescription), comparer, (string)value);
+				case "Depth" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+					return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Depth.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "Depth":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Depth), comparer, (double)value);
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Depth), comparer, (double)((double?)value).Value);
+				case "Height" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+					return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Height.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "Height":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Height), comparer, (double)value);
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Height), comparer, (double)((double?)value).Value);
+				case "Width" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+					return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Width.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "Width":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Width), comparer, (double)value);
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Width), comparer, (double)((double?)value).Value);
+				case "HeightU" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+					return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.HeightU.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "HeightU":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.HeightU), comparer, (double)value);
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.HeightU), comparer, (double)((double?)value).Value);
+				case "Weight" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+					return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Weight.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "Weight":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Weight), comparer, (double)value);
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Weight), comparer, (double)((double?)value).Value);
 				case "FrontImage":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.FrontImage), comparer, (string)value);
 				case "BackImage":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.BackImage), comparer, (string)value);
+				case "TypicalPowerConsumption" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+					return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.TypicalPowerConsumption.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "TypicalPowerConsumption":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.TypicalPowerConsumption), comparer, (double)value);
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.TypicalPowerConsumption), comparer, (double)((double?)value).Value);
+				case "MaximumPowerConsumption" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+					return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.MaximumPowerConsumption.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "MaximumPowerConsumption":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.MaximumPowerConsumption), comparer, (double)value);
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.MaximumPowerConsumption), comparer, (double)((double?)value).Value);
+				case "PowerSupply" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+					return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.PowerSupply.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "PowerSupply":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.PowerSupply), comparer, Enum.Parse(typeof(Skyline.DataMiner.SDM.AssetManagement.SlcAssetManagement.Enums.PowerSupply), (string)value));
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.PowerSupply), comparer, SharedMappers.DomIds.SlcAsset_Management.Enums.Powersupply.ToValue(((SharedMappers.DomIds.SlcAsset_Management.Enums.PowerSupplyEnum?)value).Value));
 				case "Lifecycle.EndOfLife":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.Lifecycle.EndOfLife), comparer, (DateTime)(DateTime)value);
 				case "Lifecycle.EndOfService":
@@ -1011,12 +1054,16 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 					return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.SectionIds, comparer, Guid.Parse((string)value));
 				case "DataPorts.Name":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.DataPorts.Name), comparer, (string)value);
+				case "DataPorts.PortNumber" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+					return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.DataPorts.PortNumber.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "DataPorts.PortNumber":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.DataPorts.PortNumber), comparer, (long)value);
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.DataPorts.PortNumber), comparer, ((long?)value).Value);
+				case "DataPorts.OutputType" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+					return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.DataPorts.OutputType.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "DataPorts.OutputType":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.DataPorts.OutputType), comparer, (int)(Skyline.DataMiner.SDM.AssetManagement.SlcAssetManagement.Enums.Outputtype)value);
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.DataPorts.OutputType), comparer, (int)((SharedMappers.DomIds.SlcAsset_Management.Enums.Outputtype?)value).Value);
 				case "DataPorts.PortExposure":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.DataPorts.PortExposure), comparer, (int)(Skyline.DataMiner.SDM.AssetManagement.SlcAssetManagement.Enums.PortExposure)value);
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.DataPorts.PortExposure), comparer, SharedMappers.DomIds.SlcAsset_Management.Enums.Portexposure.ToValue((SharedMappers.DomIds.SlcAsset_Management.Enums.PortExposureEnum)value));
 				case "DataPorts.Type":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.DataPorts.Type), comparer, Convert.ToString((System.Guid)value));
 				case "DataPorts.Label":
@@ -1025,12 +1072,16 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 					return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.SectionIds, comparer, Guid.Parse((string)value));
 				case "PowerPorts.Name":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.PowerPorts.Name), comparer, (string)value);
+				case "PowerPorts.PortNumber" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+					return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.PowerPorts.PortNumber.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "PowerPorts.PortNumber":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.PowerPorts.PortNumber), comparer, (long)value);
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.PowerPorts.PortNumber), comparer, ((long?)value).Value);
+				case "PowerPorts.OutputType" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+					return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.PowerPorts.OutputType.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "PowerPorts.OutputType":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.PowerPorts.OutputType), comparer, (int)(Skyline.DataMiner.SDM.AssetManagement.SlcAssetManagement.Enums.Outputtype)value);
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.PowerPorts.OutputType), comparer, (int)((SharedMappers.DomIds.SlcAsset_Management.Enums.Outputtype?)value).Value);
 				case "PowerPorts.PortExposure":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.PowerPorts.PortExposure), comparer, (int)(Skyline.DataMiner.SDM.AssetManagement.SlcAssetManagement.Enums.PortExposure)value);
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.PowerPorts.PortExposure), comparer, SharedMappers.DomIds.SlcAsset_Management.Enums.Portexposure.ToValue((SlcAsset_Management.Enums.PortExposureEnum)value));
 				case "PowerPorts.PortType":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.PowerPorts.PortType), comparer, Convert.ToString((System.Guid)value));
 				case "PowerPorts.Label":
@@ -1040,7 +1091,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				case "Holders.SlotNumber":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.Holders.SlotNumber), comparer, (long)value);
 				case "Holders.HierarchyRole":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.Holders.HierarchyRole), comparer, FromDomHierarchyRole((string)value));
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.Holders.HierarchyRole), comparer, (int)(SlcAsset_Management.Enums.HierarchyRoleEnum)value);
+				case "State":
+					return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.StatusId, comparer, SlcAsset_Management.Behaviors.Asset_Class_Behavior.Statuses.ToValue((SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum)value));
 				default:
 					throw new NotImplementedException();
 			}
@@ -1052,13 +1105,13 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			{
 				case "Identifier":
 					return OrderByElementFactory.Create(DomInstanceExposers.Id, sortOrder, naturalSort);
-				case "DeviceName":
+				case "Name":
 					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.DeviceName), sortOrder, naturalSort);
-				case "AssetClass.DeviceTypeId":
+				case "DeviceTypeId":
 					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.DeviceType), sortOrder, naturalSort);
-				case "AssetClass.ManufacturerId":
+				case "Manufacturer":
 					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Manufacturer), sortOrder, naturalSort);
-				case "DeviceDescription":
+				case "Description":
 					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.DeviceDescription), sortOrder, naturalSort);
 				case "Depth":
 					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Depth), sortOrder, naturalSort);
@@ -1120,6 +1173,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.Holders.SlotNumber), sortOrder, naturalSort);
 				case "Holders.HierarchyRole":
 					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.Holders.HierarchyRole), sortOrder, naturalSort);
+				case "State":
+					return OrderByElementFactory.Create(DomInstanceExposers.StatusId, sortOrder, naturalSort);
 				default:
 					throw new NotImplementedException();
 			}

@@ -11,15 +11,12 @@
     public static class ProtocolExtensions
     {
         /// <summary>
-        /// Gets an <see cref="IpAddressApiHelper"/> instance for the specified <see cref="SLProtocol"/>.
+        /// Creates an instance of an asset management API helper for the specified SLProtocol.
         /// </summary>
-        /// <param name="protocol">The protocol instance to extend.</param>
-        /// <returns>
-        /// An <see cref="IpAddressApiHelper"/> initialized with the Protocol connection.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        /// Thrown when <paramref name="protocol"/> is <c>null</c>.
-        /// </exception>
+        /// <param name="protocol">The SLProtocol instance for which to create the asset management API helper. Cannot be null.</param>
+        /// <returns>An object that implements IAssetManagementApiHelper for interacting with the asset management API using the
+        /// provided protocol.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if protocol is null.</exception>
         public static IAssetManagementApiHelper GetAssetManagementApiHelper(this SLProtocol protocol)
         {
             if (protocol is null)

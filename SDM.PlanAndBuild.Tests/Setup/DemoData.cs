@@ -1,0 +1,123 @@
+namespace SDM.PlanAndBuild.Tests.Setup
+{
+	using System;
+	using System.Collections.Generic;
+
+	using SharedMappers.DomIds;
+
+	using Skyline.DataMiner.SDM;
+	using Skyline.DataMiner.SDM.PlanAndBuild.Models;
+
+	public static class DemoData
+	{
+		public static readonly Guid SharedLocation = Guid.NewGuid();
+
+		public static readonly List<JobType> JobTypes =
+		[
+			new JobType
+			{
+				Identifier = Guid.NewGuid().ToString(),
+				Name = "Installation",
+				Description = "New equipment installation jobs",
+				Icon = "install-icon",
+			},
+			new JobType
+			{
+				Identifier = Guid.NewGuid().ToString(),
+				Name = "Maintenance",
+				Description = "Scheduled maintenance jobs",
+				Icon = "maintenance-icon",
+			},
+			new JobType
+			{
+				Identifier = Guid.NewGuid().ToString(),
+				Name = "Decommissioning",
+				Description = "Equipment decommissioning jobs",
+				Icon = "decommission-icon",
+			},
+		];
+
+		public static readonly List<PlanAndBuildJob> Jobs =
+		[
+			new PlanAndBuildJob
+			{
+				Identifier = Guid.NewGuid().ToString(),
+				JobID = "JOB-0001",
+				JobName = "Install Rack 1 Equipment",
+				Start = new DateTime(2026, 1, 10),
+				End = new DateTime(2026, 1, 15),
+				Type = new SdmObjectReference<JobType>(JobTypes[0].Identifier),
+#pragma warning disable CS0618 // Soft deleted field, populated here for legacy-shaped demo data only.
+				JobType = SlcPlan_And_Build.Enums.JobtypeEnum.Add,
+#pragma warning restore CS0618
+				JobDescription = "Install new equipment in Rack 1",
+				Remarks = string.Empty,
+				Priority = SlcPlan_And_Build.Enums.PriorityEnum.High,
+				SubState = SlcPlan_And_Build.Enums.SubStateEnum.Scheduled,
+				Locations = new List<Guid> { SharedLocation, Guid.NewGuid() },
+			},
+			new PlanAndBuildJob
+			{
+				Identifier = Guid.NewGuid().ToString(),
+				JobID = "JOB-0002",
+				JobName = "Quarterly Maintenance Check",
+				Start = new DateTime(2026, 2, 1),
+				End = new DateTime(2026, 2, 2),
+				Type = new SdmObjectReference<JobType>(JobTypes[1].Identifier),
+#pragma warning disable CS0618 // Soft deleted field, populated here for legacy-shaped demo data only.
+				JobType = SlcPlan_And_Build.Enums.JobtypeEnum.Update,
+#pragma warning restore CS0618
+				JobDescription = "Routine maintenance check",
+				Remarks = "Bring spare fans",
+				Priority = SlcPlan_And_Build.Enums.PriorityEnum.Normal,
+				SubState = SlcPlan_And_Build.Enums.SubStateEnum.InProgress,
+			},
+			new PlanAndBuildJob
+			{
+				Identifier = Guid.NewGuid().ToString(),
+				JobID = "JOB-0003",
+				JobName = "Decommission Legacy Server",
+				Start = new DateTime(2026, 3, 5),
+				End = null,
+				Type = new SdmObjectReference<JobType>(JobTypes[2].Identifier),
+#pragma warning disable CS0618 // Soft deleted field, populated here for legacy-shaped demo data only.
+				JobType = SlcPlan_And_Build.Enums.JobtypeEnum.Remove,
+#pragma warning restore CS0618
+				JobDescription = "Remove legacy server from Rack 2",
+				Remarks = string.Empty,
+				Priority = SlcPlan_And_Build.Enums.PriorityEnum.Low,
+				SubState = SlcPlan_And_Build.Enums.SubStateEnum.Draft,
+			},
+			new PlanAndBuildJob
+			{
+				Identifier = Guid.NewGuid().ToString(),
+				JobID = "JOB-0004",
+				JobName = "Emergency Cabling Fix",
+				Start = new DateTime(2026, 1, 20),
+				End = new DateTime(2026, 1, 21),
+				Type = new SdmObjectReference<JobType>(JobTypes[0].Identifier),
+#pragma warning disable CS0618 // Soft deleted field, populated here for legacy-shaped demo data only.
+				JobType = SlcPlan_And_Build.Enums.JobtypeEnum.Update,
+#pragma warning restore CS0618
+				JobDescription = "Fix damaged cabling",
+				Remarks = "Customer escalation",
+				Priority = SlcPlan_And_Build.Enums.PriorityEnum.Critical,
+				SubState = SlcPlan_And_Build.Enums.SubStateEnum.PendingKickoff,
+				Locations = new List<Guid> { SharedLocation },
+			},
+		];
+
+		public static readonly List<PlanAndBuildAppSettings> AppSettingsList =
+		[
+			new PlanAndBuildAppSettings
+			{
+				Identifier = Guid.NewGuid().ToString(),
+				JobIDPrefix = "JOB-",
+				JobIDNextSequence = 5,
+				JobIDIncrement = 1,
+				JobIDStartingSeed = 1,
+				JobIDMinimumDigits = 4,
+			},
+		];
+	}
+}

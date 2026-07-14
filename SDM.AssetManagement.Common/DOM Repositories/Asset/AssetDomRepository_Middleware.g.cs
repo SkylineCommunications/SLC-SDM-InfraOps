@@ -203,8 +203,15 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 		}
 		public System.Collections.Generic.IReadOnlyCollection<Skyline.DataMiner.SDM.AssetManagement.Models.Asset> CreateOrUpdate(System.Collections.Generic.IEnumerable<Skyline.DataMiner.SDM.AssetManagement.Models.Asset> oToCreateOrUpdate)
 		{
-			return _inner.CreateOrUpdate(oToCreateOrUpdate);
-		}
+            if (_middleware is IBulkRepositoryMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.Asset> middleware)
+            {
+                return middleware.OnCreateOrUpdate(oToCreateOrUpdate, _inner.CreateOrUpdate);
+            }
+            else
+            {
+                return _inner.CreateOrUpdate(oToCreateOrUpdate);
+            }
+        }
 
 	}
 }

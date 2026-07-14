@@ -1,187 +1,252 @@
-﻿namespace SDM.AssetManagement.Tests
+﻿namespace SDM.AssetManagement.Tests.DeviceTypes
 {
-	using System;
-	using System.Linq;
-	using FluentAssertions;
-	using FluentAssertions.Execution;
-	using Microsoft.VisualStudio.TestTools.UnitTesting;
-	using SDM.AssetManagement.Tests.Setup;
-	using Skyline.DataMiner.Net.Messages.SLDataGateway;
-	using Skyline.DataMiner.Net.Sections;
-	using Skyline.DataMiner.SDM;
-	using Skyline.DataMiner.SDM.AssetManagement;
-	using Skyline.DataMiner.SDM.AssetManagement.Helpers;
-	using Skyline.DataMiner.SDM.AssetManagement.Models;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
 
-	[TestClass]
-	public partial class DeviceTypeRepositoryTests
-	{
-		private DeviceType referenceDeviceType;
+    using FluentAssertions;
+    using FluentAssertions.Execution;
 
-		[TestInitialize]
-		public void Init()
-		{
-			referenceDeviceType = new DeviceType
-			{
-				Identifier = Guid.NewGuid().ToString(),
-				Name = "Test DeviceType",
-				Description = "Test Description",
-				TagsInfo = new TagsInfo
-				{
-					Identifier = Guid.NewGuid().ToString(),
-					Tags = [SlcAssetManagement.Enums.TagOption.PowerProvider, SlcAssetManagement.Enums.TagOption.RackUnitConsumer],
-				},
-				HierarchyInfo = new HierarchyInfo
-				{
-					Identifier = Guid.NewGuid().ToString(),
-					HierarchyRole = SlcAssetManagement.Enums.HierarchyRole.SubCard,
-				},
-			};
-		}
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-		[TestMethod]
-		public void DeviceTypeRepository_EmptyDOM_Create()
-		{
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
+    using SDM.AssetManagement.Tests.Setup;
 
-			helper.DeviceTypes.Create(referenceDeviceType);
+    using SharedMappers.DomIds;
 
-			AssertCreated(helper);
-		}
+    using Skyline.DataMiner.Net.Messages.SLDataGateway;
+    using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.AssetManagement.Models;
 
-		[TestMethod]
-		public void DeviceTypeRepository_EmptyDOM_CreateOrUpdate_Create()
-		{
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.DeviceTypes.CreateOrUpdate([referenceDeviceType]);
+    /// <summary>
+    /// CRUD tests for DeviceType repository operations.
+    /// </summary>
+    [TestClass]
+    public class DeviceTypeRepositoryTests_CRUD : BaseRepositoryTest
+    {
+        private DeviceType referenceDeviceType = null!;
 
-			AssertCreated(helper);
-		}
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            referenceDeviceType = new DeviceType
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                Name = "Test DeviceType",
+                Description = "Test Description",
+                TagsInfo = new TagsInfo
+                {
+                    Tags = new List<SlcAsset_Management.Enums.TagOption> 
+                    { 
+                        SlcAsset_Management.Enums.TagOption.PowerProvider, 
+                        SlcAsset_Management.Enums.TagOption.RackUnitConsumer 
+                    },
+                },
+                HierarchyInfo = new HierarchyInfo
+                {
+                    HierarchyRole = SlcAsset_Management.Enums.HierarchyRoleEnum.SubCard,
+                },
+            };
+        }
 
-		[TestMethod]
-		public void DeviceTypeRepository_EmptyDOM_CreateOrUpdate_Update()
-		{
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.DeviceTypes.Create(referenceDeviceType);
+        #region Create Tests
 
-			var updatedDeviceType = new DeviceType
-			{
-				Identifier = referenceDeviceType.Identifier,
-				Name = "Updated DeviceType Name",
-				Description = "Updated Description",
-				TagsInfo = new TagsInfo
-				{
-					Identifier = referenceDeviceType.TagsInfo.Identifier,
-					Tags = new List<SlcAssetManagement.Enums.TagOption> { SlcAssetManagement.Enums.TagOption.RackUnitConsumer },
-				},
-				HierarchyInfo = new HierarchyInfo
-				{
-					Identifier = referenceDeviceType.HierarchyInfo.Identifier,
-					HierarchyRole = SlcAssetManagement.Enums.HierarchyRole.Chassis,
-				},
-			};
+        [TestMethod]
+        public void Create_WithValidData_ShouldPersistDeviceType()
+        {
 
-			helper.DeviceTypes.CreateOrUpdate([updatedDeviceType]);
+            // Act
+            Helper.AssetManagement.DeviceTypes.Create(referenceDeviceType);
 
-			AssertDeviceTypeUpdateDifferences(referenceDeviceType, updatedDeviceType);
-		}
+            // Assert
+            AssertCreated();
+        }
 
-		[TestMethod]
-		public void DeviceTypeRepository_ReadPaged()
-		{
-			const int pageCount = 3;
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulateDeviceTypes();
+        [TestMethod]
+        public void CreateOrUpdate_WithNewDeviceType_ShouldCreate()
+        {
+            // Arrange
+            
 
-			FilterElement<DeviceType> allFilter = new TRUEFilterElement<DeviceType>();
-			var pagedResult = helper.DeviceTypes.ReadPaged(allFilter, pageCount);
-			var deviceTypeCount = helper.DeviceTypes.Count(allFilter);
+            // Act
+            Helper.AssetManagement.DeviceTypes.CreateOrUpdate([referenceDeviceType]);
 
-			using (new AssertionScope())
-			{
-				pagedResult.Should().NotBeNull();
-				pagedResult.Should().HaveCountGreaterThanOrEqualTo((int)(deviceTypeCount / pageCount));
-				pagedResult.Should().AllSatisfy(page => page.Should().HaveCountLessThanOrEqualTo(pageCount));
-			}
-		}
+            // Assert
+            AssertCreated();
+        }
 
-		[TestMethod]
-		public void DeviceTypeRepository_DeleteBulk()
-		{
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulateDeviceTypes();
+        [TestMethod]
+        public void CreateOrUpdate_WithExistingDeviceType_ShouldUpdate()
+        {
+            // Arrange
+            
+            Helper.AssetManagement.DeviceTypes.Create(referenceDeviceType);
 
-			var filter = new ORFilterElement<DeviceType>(
-				DeviceTypeExposers.Name.Equal("Decoder"),
-				DeviceTypeExposers.TagsInfo.Tags.Contains(SlcAssetManagement.Enums.TagOption.PowerProvider));
+            var updatedDeviceType = new DeviceType
+            {
+                Identifier = referenceDeviceType.Identifier,
+                Name = "Updated DeviceType Name",
+                Description = "Updated Description",
+                TagsInfo = new TagsInfo
+                {
+                    Tags = new List<SlcAsset_Management.Enums.TagOption> 
+                    { 
+                        SlcAsset_Management.Enums.TagOption.RackUnitConsumer 
+                    },
+                },
+                HierarchyInfo = new HierarchyInfo
+                {
+                    HierarchyRole = SlcAsset_Management.Enums.HierarchyRoleEnum.Chassis,
+                },
+            };
 
-			var deviceTypesToDelete = helper.DeviceTypes.Read(filter);
+            // Act
+            Helper.AssetManagement.DeviceTypes.CreateOrUpdate([updatedDeviceType]);
 
-			helper.DeviceTypes.Delete(deviceTypesToDelete);
+            // Assert
+            var persisted = Helper.AssetManagement.DeviceTypes.Read(new TRUEFilterElement<DeviceType>()).First();
+            AssertDeviceTypeUpdateDifferences(referenceDeviceType, persisted);
+        }
 
-			using (new AssertionScope())
-			{
-				helper.DeviceTypes.Count(new TRUEFilterElement<DeviceType>()).Should().Be(DemoData.DeviceTypes.Count - deviceTypesToDelete.Count());
-				helper.DeviceTypes.Count(DeviceTypeExposers.Name.Equal("Decoder")).Should().Be(0);
-			}
-		}
+        #endregion
 
-		[TestMethod]
-		public void DeviceTypeRepository_EmptyDOM_DeleteSingle()
-		{
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulateDeviceTypes();
+        #region Read Tests
 
-			var deviceTypeToDelete = helper.DeviceTypes.Read(DeviceTypeExposers.Name.Equal("Optics Module")).First();
+        [TestMethod]
+        public void ReadPaged_WithValidFilter_ShouldReturnPages()
+        {
+            // Arrange
+            const int pageSize = 3;
+            
+            Helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
 
-			helper.DeviceTypes.Delete(deviceTypeToDelete);
+            var allFilter = new TRUEFilterElement<DeviceType>();
+            var totalCount = Helper.TestData.DeviceTypes.Count;
 
-			helper.DeviceTypes.Count(new TRUEFilterElement<DeviceType>()).Should().Be(DemoData.DeviceTypes.Count - 1);
-			helper.DeviceTypes.Count(DeviceTypeExposers.Identifier.Equal(deviceTypeToDelete.Identifier)).Should().Be(0);
-		}
+            // Act
+            var pagedResult = Helper.AssetManagement.DeviceTypes.ReadPaged(allFilter, pageSize);
 
-		private static void AssertDeviceTypeUpdateDifferences(DeviceType original, DeviceType updated)
-		{
-			using (new AssertionScope())
-			{
-				updated.Identifier.Should().Be(original.Identifier);
+            // Assert
+            using (new AssertionScope())
+            {
+                pagedResult.Should().NotBeNull();
+                pagedResult.Should().HaveCountGreaterOrEqualTo((int)(totalCount / pageSize), 
+                    "should have at least the expected number of pages");
+                pagedResult.Should().AllSatisfy(page => 
+                    page.Should().HaveCountLessOrEqualTo(pageSize), 
+                    "each page should not exceed page size");
+            }
+        }
 
-				// Name
-				updated.Name.Should().NotBe(original.Name);
-				updated.Name.Should().Be("Updated DeviceType Name");
+        #endregion
 
-				// Description
-				updated.Description.Should().NotBe(original.Description);
-				updated.Description.Should().Be("Updated Description");
+        #region Delete Tests
 
-				// TagsInfo.Tag
-				updated.TagsInfo.Tags.Should().NotBeEquivalentTo(original.TagsInfo.Tags);
-				updated.TagsInfo.Tags.Should().BeEquivalentTo([SlcAssetManagement.Enums.TagOption.RackUnitConsumer]);
+        [TestMethod]
+        public void Delete_Single_ShouldRemoveDeviceType()
+        {
+            // Arrange
+            
+            Helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
 
-				// HierarchyInfo.HierarchyRole
-				updated.HierarchyInfo.HierarchyRole.Should().NotBe(original.HierarchyInfo.HierarchyRole);
-				updated.HierarchyInfo.HierarchyRole.Should().Be(SlcAssetManagement.Enums.HierarchyRole.Chassis);
-			}
-		}
+            var initialCount = Helper.TestData.DeviceTypes.Count;
+            var deviceTypeToDelete = Helper.AssetManagement.DeviceTypes
+                .Read(DeviceTypeExposers.Name.Equal("Optics Module"))
+                .First();
 
-		private void AssertCreated(IAssetManagementApiHelper helper)
-		{
-			using (new AssertionScope())
-			{
-				helper.DeviceTypes.Count(new TRUEFilterElement<DeviceType>()).Should().Be(1);
+            // Act
+            Helper.AssetManagement.DeviceTypes.Delete(deviceTypeToDelete);
 
-				var createdDeviceType = helper.DeviceTypes.Read(new TRUEFilterElement<DeviceType>()).First();
-				createdDeviceType.Should().NotBeNull();
+            // Assert
+            using (new AssertionScope())
+            {
+                Helper.AssetManagement.DeviceTypes.Count(new TRUEFilterElement<DeviceType>())
+                    .Should().Be(initialCount - 1, "one device type should be deleted");
 
-				createdDeviceType.Name.Should().Be(referenceDeviceType.Name);
-				createdDeviceType.Description.Should().Be(referenceDeviceType.Description);
+                Helper.AssetManagement.DeviceTypes.Count(DeviceTypeExposers.Identifier.Equal(deviceTypeToDelete.Identifier))
+                    .Should().Be(0, "deleted device type should not exist");
+            }
+        }
 
-				createdDeviceType.TagsInfo.Should().NotBeNull();
-				createdDeviceType.TagsInfo.Equals(referenceDeviceType.TagsInfo).Should().BeTrue();
+        [TestMethod]
+        public void Delete_Bulk_ShouldRemoveMultipleDeviceTypes()
+        {
+            // Arrange
+            
+            Helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
 
-				createdDeviceType.HierarchyInfo.Should().NotBeNull();
-				createdDeviceType.HierarchyInfo.Equals(referenceDeviceType.HierarchyInfo).Should().BeTrue();
-			}
-		}
-	}
+            var initialCount = Helper.TestData.DeviceTypes.Count;
+
+            var filter = new ORFilterElement<DeviceType>(
+                DeviceTypeExposers.Name.Equal("Decoder"),
+                DeviceTypeExposers.TagsInfo.Tags.Contains(SlcAsset_Management.Enums.TagOption.PowerProvider));
+
+            var deviceTypesToDelete = Helper.AssetManagement.DeviceTypes.Read(filter).ToList();
+            var deleteCount = deviceTypesToDelete.Count;
+
+            // Act
+            Helper.AssetManagement.DeviceTypes.Delete(deviceTypesToDelete);
+
+            // Assert
+            using (new AssertionScope())
+            {
+                Helper.AssetManagement.DeviceTypes.Count(new TRUEFilterElement<DeviceType>())
+                    .Should().Be(initialCount - deleteCount, $"{deleteCount} device types should be deleted");
+
+                Helper.AssetManagement.DeviceTypes.Count(DeviceTypeExposers.Name.Equal("Decoder"))
+                    .Should().Be(0, "Decoder should be deleted");
+            }
+        }
+
+        #endregion
+
+        #region Assertion Helpers
+
+        private static void AssertDeviceTypeUpdateDifferences(DeviceType original, DeviceType updated)
+        {
+            using (new AssertionScope())
+            {
+                // Identifiers remain the same
+                updated.Identifier.Should().Be(original.Identifier);
+
+                // Updated fields
+                updated.Name.Should().Be("Updated DeviceType Name");
+                updated.Description.Should().Be("Updated Description");
+
+                // TagsInfo changes
+                updated.TagsInfo.Tags.Should().NotBeEquivalentTo(original.TagsInfo.Tags);
+                updated.TagsInfo.Tags.Should().BeEquivalentTo(new List<SlcAsset_Management.Enums.TagOption> 
+                { 
+                    SlcAsset_Management.Enums.TagOption.RackUnitConsumer 
+                });
+
+                // HierarchyInfo changes
+                updated.HierarchyInfo.HierarchyRole.Should().Be(SlcAsset_Management.Enums.HierarchyRoleEnum.Chassis);
+            }
+        }
+
+        private void AssertCreated()
+        {
+            using (new AssertionScope())
+            {
+                Helper.AssetManagement.DeviceTypes.Count(new TRUEFilterElement<DeviceType>()).Should().Be(1);
+
+                var created = Helper.AssetManagement.DeviceTypes.Read(new TRUEFilterElement<DeviceType>()).First();
+
+                // Basic properties
+                created.Should().NotBeNull();
+                created.Name.Should().Be(referenceDeviceType.Name);
+                created.Description.Should().Be(referenceDeviceType.Description);
+
+                // TagsInfo
+                created.TagsInfo.Should().NotBeNull();
+                created.TagsInfo.Tags.Should().BeEquivalentTo(referenceDeviceType.TagsInfo.Tags);
+
+                // HierarchyInfo
+                created.HierarchyInfo.Should().NotBeNull();
+                created.HierarchyInfo.HierarchyRole.Should().Be(referenceDeviceType.HierarchyInfo.HierarchyRole);
+            }
+        }
+
+        #endregion
+    }
 }

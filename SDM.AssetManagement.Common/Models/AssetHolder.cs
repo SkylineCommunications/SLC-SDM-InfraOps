@@ -1,13 +1,16 @@
 ﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
-	using System;
-	using Skyline.DataMiner.SDM.AssetManagement;
+    using System;
 
-	public sealed class AssetHolder : SdmObject<AssetHolder>, IEquatable<AssetHolder>
+    using SharedMappers.DomIds;
+
+    public sealed class AssetHolder : IEquatable<AssetHolder>
 	{
 		public long SlotNumber { get; set; }
 
-		public SlcAssetManagement.Enums.HierarchyRole HierarchyRole { get; set; }
+        public string Label { get; set; }
+
+        public SlcAsset_Management.Enums.HierarchyRoleEnum HierarchyRole { get; set; }
 
 		public static bool operator ==(AssetHolder left, AssetHolder right)
 		{

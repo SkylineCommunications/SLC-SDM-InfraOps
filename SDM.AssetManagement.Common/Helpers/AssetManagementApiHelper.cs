@@ -1,31 +1,89 @@
-﻿namespace Skyline.DataMiner.SDM.AssetManagement
+﻿using System;
+
+using Skyline.DataMiner.Net;
+using Skyline.DataMiner.SDM;
+using Skyline.DataMiner.SDM.AssetManagement.Common.Middleware;
+using Skyline.DataMiner.SDM.AssetManagement.Models;
+using Skyline.DataMiner.SDM.AssetManagement.Helpers;
+using Skyline.DataMiner.SDM.AssetManagement.Validation;
+using Skyline.DataMiner.SDM.Common.Services;
+using Skyline.DataMiner.SDM.FacilityManagement.Helpers;
+using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Middleware;
+
+using Connection = Skyline.DataMiner.SDM.AssetManagement.Models.Connection;
+
+using SharedCommonLibrary.AssetManagement.Models;
+
+public class AssetManagementApiHelper : IAssetManagementApiHelper
 {
-	using Skyline.DataMiner.Net;
-	using Skyline.DataMiner.SDM.AssetManagement.Helpers;
-	using Skyline.DataMiner.SDM.AssetManagement.Models;
+    private readonly AssetValidator _assetValidator;
+    private readonly AssetClassValidator _assetClassValidator;
+    //private readonly DeviceTypeValidator _deviceTypeValidator;
 
-	public class AssetManagementApiHelper : IAssetManagementApiHelper
-	{
-		public AssetManagementApiHelper(IConnection connection)
-		{
-			Connection = connection;
-			Assets = new AssetDomRepository(connection);
-			AssetClasses = new AssetClassDomRepository(connection);
-			PowerPorts = new PowerPortDomRepository(connection);
-			DataPorts = new DataPortDomRepository(connection);
-			DeviceTypes = new DeviceTypeDomRepository(connection);
-		}
+    // Public constructor for production use - creates its own FacilityManagementHelper
+    public AssetManagementApiHelper(IConnection connection)
+        : this(connection, new FacilityManagementApiHelper(connection))
+    {
+    }
 
-		public IConnection Connection { get; }
+    // Internal constructor for testing - allows injection of shared FacilityManagementHelper
+    internal AssetManagementApiHelper(IConnection connection, IFacilityManagementApiHelper facilityManagementHelper)
+    {
+        // DEBUG: Verify this constructor is being called
+        if (facilityManagementHelper == null)
+        {
+            throw new InvalidOperationException("INTERNAL CONSTRUCTOR CALLED BUT facilityManagementHelper IS NULL!");
+        }
 
-		public IBulkRepository<Asset> Assets { get; }
+        // Initialize repositories
+        var assetRepository = new AssetDomRepository(connection);
+        var appSettingsRepository = new AssetManagerAppSettingsDomRepository(connection);
+        var assetClassRepository = new AssetClassDomRepository(connection);
+        var deviceTypeRepository = new DeviceTypeDomRepository(connection);
+        var dataPortRepository = new DataPortDomRepository(connection);
+        var powerPortRepository = new PowerPortDomRepository(connection);
+        var portTypeRepository = new PortTypeDomRepository(connection);
+        var cableTypeRepository = new CableTypeDomRepository(connection);   
+        var connectionDomRepository = new ConnectionDomRepository(connection);
+        var reservationRepository = new InfraopsReservationDomRepository(connection);
 
-		public IBulkRepository<AssetClass> AssetClasses { get; }
+        var entityLoader = new SdmEntityLoader(this, facilityManagementHelper);
 
-		public IBulkRepository<PowerPort> PowerPorts { get; }
+        // Initialize validators
+        _assetValidator = new AssetValidator(entityLoader);
 
-		public IBulkRepository<DataPort> DataPorts { get; }
+        _assetClassValidator = new AssetClassValidator(entityLoader);
+        // Wrap with middleware
+        Assets = assetRepository
+            .WithMiddleware(new AssetValidationMiddleware(_assetValidator))
+            .WithMiddleware(new IdentifierMiddleware<Asset>());
 
-		public IBulkRepository<DeviceType> DeviceTypes { get; }
-	}
+        AppSettings = appSettingsRepository;
+
+        AssetClasses = assetClassRepository.WithMiddleware(new AssetClassValidationMiddleware(_assetClassValidator))
+            .WithMiddleware(new IdentifierMiddleware<AssetClass>());
+
+        PowerPorts = powerPortRepository;
+        DataPorts = dataPortRepository;
+        DeviceTypes = deviceTypeRepository;
+        PortTypes = portTypeRepository;
+        Connections = connectionDomRepository;
+        CableTypes = cableTypeRepository;
+        Reservations = reservationRepository;
+    }
+
+    public IAssetRepository Assets { get; }
+    public IBulkRepository<AssetManagerAppSettings> AppSettings { get; }
+    public IBulkRepository<AssetClass> AssetClasses { get; }
+    public IBulkRepository<PowerPort> PowerPorts { get; }
+    public IBulkRepository<DataPort> DataPorts { get; }
+    public IBulkRepository<DeviceType> DeviceTypes { get; }
+    public IBulkRepository<PortType> PortTypes { get; }
+    public IBulkRepository<Connection> Connections { get; }
+    public IBulkRepository<CableType> CableTypes { get; }
+    public IBulkRepository<InfraopsReservation> Reservations { get; }
+
+    public AssetValidator AssetValidator => _assetValidator;
+
+    public AssetClassValidator AssetClassValidator => _assetClassValidator;
 }

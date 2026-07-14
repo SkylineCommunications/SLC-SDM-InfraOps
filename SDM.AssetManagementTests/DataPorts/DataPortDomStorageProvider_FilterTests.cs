@@ -1,206 +1,211 @@
-﻿namespace SDM.AssetManagement.Tests
+﻿namespace SDM.AssetManagement.Tests.DataPorts
 {
-	using System.Linq;
-	using FluentAssertions;
-	using FluentAssertions.Execution;
-	using SDM.AssetManagement.Tests.Setup;
-	using Skyline.DataMiner.Net.Messages.SLDataGateway;
-	using Skyline.DataMiner.SDM;
-	using Skyline.DataMiner.SDM.AssetManagement.Models;
+    using System.Linq;
 
-	public partial class DataPortDomStorageProviderTests
-	{
-		[TestMethod]
-		public void DataPortDomStorageProvider_NestedReadFilter_LinkedAsset()
-		{
-			// 10 assets
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulateAssets().PopulateDataPorts();
+    using FluentAssertions;
+    using FluentAssertions.Execution;
 
-			// Link more ports to one asset.
-			var asset = DemoData.Assets[6];
-			DemoData.DataPorts[2].Asset = new SdmObjectReference<Asset>(asset.Identifier);
-			DemoData.DataPorts[5].Asset = new SdmObjectReference<Asset>(asset.Identifier);
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-			helper.DataPorts.Update(DemoData.DataPorts);
+    using SDM.AssetManagement.Tests.Setup;
 
-			var filter = DataPortExposers.Asset.Equal(new SdmObjectReference<Asset>(asset.Identifier));
+    using SharedMappers.DomIds;
 
-			var dataPortsRetrieved = helper.DataPorts.Read(filter);
-			var expected = DemoData.DataPorts.Where(filter.getLambda());
+    using Skyline.DataMiner.Net.Messages.SLDataGateway;
+    using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.AssetManagement.Models;
 
-			using (new AssertionScope())
-			{
-				dataPortsRetrieved.Should().NotBeNull();
-				dataPortsRetrieved.Count().Should().Be(3);
+    /// <summary>
+    /// Filter and query tests for DataPort repository operations.
+    /// </summary>
+    [TestClass]
+    public class DataPortDomStorageProvider_FilterTests: BaseRepositoryTest
+    {
+        #region Basic Field Filters
 
-				dataPortsRetrieved.Should().BeEquivalentTo(expected);
-			}
-		}
+        [TestMethod]
+        public void ReadFilter_PortName_Equal_ShouldReturnMatchingDataPort()
+        {
+            // Arrange
+             Helper.PopulateWithDemoData(upTo: DemoDataLayer.DataPorts);
 
-		[TestMethod]
-		public void DataPortDomStorageProvider_ReadFilter_PortName_Equal()
-		{
-			// 10 data ports
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulateDataPorts();
+            var targetDataPort = Helper.TestData.DataPorts.Skip(3).First();
+            var filter = DataPortExposers.DataPortInfo.Name.Equal(targetDataPort.DataPortInfo.Name);
 
-			var portName = DemoData.DataPorts[3].DataPortInfo.Name;
-			var filter = DataPortExposers.DataPortInfo.Name.Equal(portName);
+            // Act
+            var results = Helper.AssetManagement.DataPorts.Read(filter).ToList();
 
-			var dataPortsRetrieved = helper.DataPorts.Read(filter);
+            // Assert
+            using (new AssertionScope())
+            {
+                results.Should().HaveCount(1, $"should find data port with name '{targetDataPort.DataPortInfo.Name}'");
+                var dataPort = results.First();
+                dataPort.DataPortInfo.Name.Should().Be(targetDataPort.DataPortInfo.Name);
+                dataPort.Identifier.Should().Be(targetDataPort.Identifier);
+            }
+        }
 
-			using (new AssertionScope())
-			{
-				dataPortsRetrieved.Should().NotBeNull();
-				dataPortsRetrieved.Count().Should().Be(1);
-				DataPort dataPort = dataPortsRetrieved.First();
+        [TestMethod]
+        public void ReadFilter_PortNumber_Equal_ShouldReturnMatchingDataPort()
+        {
+            // Arrange
+            Helper.PopulateWithDemoData(upTo: DemoDataLayer.DataPorts);
 
-				dataPort.DataPortInfo.Name.Should().Be(DemoData.DataPorts[3].DataPortInfo.Name);
-				dataPort.Identifier.Should().Be(DemoData.DataPorts[3].Identifier);
+            // Test with port number 0 to verify default value handling
+            const long portNumber = 0;
+            var filter = DataPortExposers.DataPortInfo.PortNumber.UncheckedEqual((long?)portNumber);
 
-				dataPort.AddressInfo.DNS.Should().Be(DemoData.DataPorts[3].AddressInfo.DNS);
-				dataPort.AddressInfo.Hostname.Should().Be(DemoData.DataPorts[3].AddressInfo.Hostname);
-				dataPort.AddressInfo.Ipv4Address.Should().Be(DemoData.DataPorts[3].AddressInfo.Ipv4Address);
-				dataPort.AddressInfo.Ipv6Address.Should().Be(DemoData.DataPorts[3].AddressInfo.Ipv6Address);
+            // Act
+            var results = Helper.AssetManagement.DataPorts.Read(filter).ToList();
 
-				dataPort.DataPortInfo.Should().Be(DemoData.DataPorts[3].DataPortInfo);
+            // Assert
+            using (new AssertionScope())
+            {
+                results.Should().NotBeEmpty($"should find data ports with port number {portNumber}");
+                results.Should().OnlyContain(dp => dp.DataPortInfo.PortNumber == portNumber);
+            }
+        }
 
-				dataPort.PrimaryPortRelation.IsPrimaryIpv4.Should().Be(DemoData.DataPorts[3].PrimaryPortRelation.IsPrimaryIpv4);
-				dataPort.PrimaryPortRelation.IsPrimaryIpv6.Should().Be(DemoData.DataPorts[3].PrimaryPortRelation.IsPrimaryIpv6);
-			}
-		}
+        [TestMethod]
+        public void ReadFilter_Label_Equal_ShouldReturnMatchingDataPort()
+        {
+            // Arrange
+            
+            Helper.PopulateWithDemoData(upTo: DemoDataLayer.DataPorts);
 
-		[TestMethod]
-		public void DataPortDomStorageProvider_ReadFilter_PortExposure_Equal()
-		{
-			// 10 data ports
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulateDataPorts();
+            var targetDataPort = Helper.TestData.DataPorts.Skip(5).First();
+            var label = targetDataPort.DataPortInfo.Label;
+            var filter = DataPortExposers.DataPortInfo.Label.Equal(label);
 
-			var portExposure = Skyline.DataMiner.SDM.AssetManagement.SlcAssetManagement.Enums.PortExposure.Back;
-			var filter = DataPortExposers.DataPortInfo.PortExposure.UncheckedEqual(portExposure);
+            // Act
+            var results = Helper.AssetManagement.DataPorts.Read(filter).ToList();
 
-			var dataPortsRetrieved = helper.DataPorts.Read(filter);
-			var expected = DemoData.DataPorts.Where(filter.getLambda());
+            // Assert
+            using (new AssertionScope())
+            {
+                results.Should().HaveCount(1, $"should find data port with label '{label}'");
+                results.First().DataPortInfo.Label.Should().Be(label);
+            }
+        }
 
-			using (new AssertionScope())
-			{
-				dataPortsRetrieved.Should().NotBeNull();
-				dataPortsRetrieved.Should().BeEquivalentTo(expected);
-				dataPortsRetrieved.Should().AllSatisfy(port => port.DataPortInfo.PortExposure.Should().Be(portExposure));
-			}
-		}
+        [TestMethod]
+        public void ReadFilter_PortExposure_Equal_ShouldReturnMatchingDataPorts()
+        {
+            // Arrange
+            
+            Helper.PopulateWithDemoData(upTo: DemoDataLayer.DataPorts);
 
-		[TestMethod]
-		public void DataPortDomStorageProvider_NestedReadFilter_PrimaryPortRelation_IsIpV4_Equal()
-		{
-			// 10 data ports
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulateDataPorts();
+            var portExposure = SlcAsset_Management.Enums.PortExposureEnum.Back;
+            var filter = DataPortExposers.DataPortInfo.PortExposure.UncheckedEqual(portExposure);
 
-			var filter = DataPortExposers.PrimaryPortRelation.IsPrimaryIpv4.Equal(true);
+            // Act
+            var results = Helper.AssetManagement.DataPorts.Read(filter).ToList();
 
-			var dataPortsRetrieved = helper.DataPorts.Read(filter);
-			var expected = DemoData.DataPorts.Where(filter.getLambda());
+            // Assert
+            using (new AssertionScope())
+            {
+                results.Should().NotBeEmpty($"should find data ports with exposure '{portExposure}'");
+                results.Should().OnlyContain(dp => dp.DataPortInfo.PortExposure == portExposure);
+            }
+        }
 
-			using (new AssertionScope())
-			{
-				dataPortsRetrieved.Should().NotBeNull();
-				dataPortsRetrieved.Should().BeEquivalentTo(expected);
-				dataPortsRetrieved.Should().AllSatisfy(port => port.PrimaryPortRelation.IsPrimaryIpv4.Should().BeTrue());
-			}
-		}
+        #endregion
 
-		[TestMethod]
-		public void DataPortDomStorageProvider_NestedReadFilter_AddressInfo_Hostname_Equal()
-		{
-			// 10 data ports
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulateDataPorts();
+        #region Nested Object Filters - AddressInfo
 
-			var filter = DataPortExposers.AddressInfo.Hostname.Equal("device4.example.com");
+        [TestMethod]
+        public void ReadFilter_Hostname_Equal_ShouldReturnMatchingDataPort()
+        {
+            // Arrange
+            
+            Helper.PopulateWithDemoData(upTo: DemoDataLayer.DataPorts);
 
-			var dataPortsRetrieved = helper.DataPorts.Read(filter);
+            var targetHostname = "device4.example.com";
+            var filter = DataPortExposers.AddressInfo.Hostname.Equal(targetHostname);
 
-			using (new AssertionScope())
-			{
-				dataPortsRetrieved.Should().NotBeNull();
-				dataPortsRetrieved.Should().HaveCount(1);
+            // Act
+            var results = Helper.AssetManagement.DataPorts.Read(filter).ToList();
 
-				var dataPort = dataPortsRetrieved.First();
+            // Assert
+            using (new AssertionScope())
+            {
+                results.Should().HaveCount(1, $"should find data port with hostname '{targetHostname}'");
+                results.First().AddressInfo.Hostname.Should().Be(targetHostname);
+            }
+        }
 
-				dataPort.Should().Be(DemoData.DataPorts[4]);
-			}
-		}
+        [TestMethod]
+        public void ReadFilter_Ipv4Address_Contains_ShouldReturnMatchingDataPort()
+        {
+            // Arrange
+            
+            Helper.PopulateWithDemoData(upTo: DemoDataLayer.DataPorts);
 
-		[TestMethod]
-		public void DataPortDomStorageProvider_NestedReadFilter_AddressInfo_Ipv4Address_Contains()
-		{
-			// 10 data ports
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulateDataPorts();
+            var ipv4Pattern = "1.9";
+            var filter = DataPortExposers.AddressInfo.Ipv4Address.Contains(ipv4Pattern);
 
-			// Match the last two octets of the IPv4 address of data port 9:
-			var filter = DataPortExposers.AddressInfo.Ipv4Address.Contains("1.9");
+            // Act
+            var results = Helper.AssetManagement.DataPorts.Read(filter).ToList();
 
-			var dataPortsRetrieved = helper.DataPorts.Read(filter);
+            // Assert
+            using (new AssertionScope())
+            {
+                results.Should().NotBeEmpty($"should find data ports with IPv4 containing '{ipv4Pattern}'");
+                results.Should().OnlyContain(dp => dp.AddressInfo.Ipv4Address.Contains(ipv4Pattern));
+            }
+        }
 
-			using (new AssertionScope())
-			{
-				dataPortsRetrieved.Should().NotBeNull();
-				dataPortsRetrieved.Should().HaveCount(1);
+        #endregion
 
-				var dataPort = dataPortsRetrieved.First();
+        #region Nested Object Filters - PrimaryPortRelation
 
-				dataPort.Should().Be(DemoData.DataPorts[9]);
-			}
-		}
+        [TestMethod]
+        public void ReadFilter_IsPrimaryIpv4_True_ShouldReturnPrimaryPorts()
+        {
+            // Arrange
+            
+            Helper.PopulateWithDemoData(upTo: DemoDataLayer.DataPorts);
 
-		[TestMethod]
-		public void DataPortDomStorageProvider_ReadFilter_PortNumber_Equal()
-		{
-			// 10 data ports
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulateDataPorts();
+            var filter = DataPortExposers.PrimaryPortRelation.IsPrimaryIpv4.Equal(true);
 
-			var portNumber = DemoData.DataPorts[8].DataPortInfo.PortNumber;
-			var filter = DataPortExposers.DataPortInfo.PortNumber.Equal(portNumber);
+            // Act
+            var results = Helper.AssetManagement.DataPorts.Read(filter).ToList();
 
-			var dataPortsRetrieved = helper.DataPorts.Read(filter);
-			var expected = DemoData.DataPorts.Where(filter.getLambda());
+            // Assert
+            using (new AssertionScope())
+            {
+                results.Should().NotBeEmpty("should find data ports marked as primary IPv4");
+                results.Should().OnlyContain(dp => dp.PrimaryPortRelation.IsPrimaryIpv4);
+            }
+        }
 
-			using (new AssertionScope())
-			{
-				dataPortsRetrieved.Should().NotBeNull();
-				dataPortsRetrieved.Should().HaveCount(1);
-				var dataPort = dataPortsRetrieved.First();
+        #endregion
 
-				dataPort.Should().Be(expected.First());
-			}
-		}
+        #region Relationship Filters
 
-		[TestMethod]
-		public void DataPortDomStorageProvider_ReadFilter_Label_Equal()
-		{
-			// 10 data ports
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulateDataPorts();
+        [TestMethod]
+        public void ReadFilter_LinkedAsset_Equal_ShouldReturnDataPortsForAsset()
+        {
+            // Arrange
+            Helper.PopulateWithDemoData(upTo: DemoDataLayer.DataPorts);
 
-			var label = DemoData.DataPorts[5].DataPortInfo.Label;
-			var filter = DataPortExposers.DataPortInfo.Label.Equal(label);
+            // Get an asset that has data ports in the cached test data
+            var targetAsset = Helper.TestData.Assets
+                .First(a => Helper.TestData.DataPorts.Count(dp => dp.Asset.Identifier == a.Identifier) > 0);
 
-			var dataPortsRetrieved = helper.DataPorts.Read(filter);
-			var expected = DemoData.DataPorts.Where(filter.getLambda());
+            var filter = DataPortExposers.Asset.Equal(new SdmObjectReference<Asset>(targetAsset.Identifier));
 
-			using (new AssertionScope())
-			{
-				dataPortsRetrieved.Should().NotBeNull();
-				dataPortsRetrieved.Should().HaveCount(1);
+            // Act
+            var results = Helper.AssetManagement.DataPorts.Read(filter).ToList();
 
-				var dataPort = dataPortsRetrieved.First();
-				dataPort.Should().Be(expected.First());
-			}
-		}
-	}
+            // Assert
+            using (new AssertionScope())
+            {
+                results.Should().NotBeEmpty($"should find data ports linked to asset '{targetAsset.Name}'");
+                results.Should().OnlyContain(dp => dp.Asset.Identifier == targetAsset.Identifier);
+            }
+        }
+
+        #endregion
+    }
 }

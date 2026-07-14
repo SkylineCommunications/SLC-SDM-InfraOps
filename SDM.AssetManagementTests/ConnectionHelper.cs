@@ -1,14 +1,14 @@
 ﻿namespace SDM.AssetManagement.Tests
 {
-	using Moq;
+    using Moq;
 
-	using Skyline.DataMiner.Net;
-	using Skyline.DataMiner.Net.Messages;
-	using Skyline.DataMiner.SDM.AssetManagement;
-	using Skyline.DataMiner.SDM.AssetManagement.Helpers;
-	using Skyline.DataMiner.Utils.DOM.UnitTesting;
+    using Skyline.DataMiner.Net;
+    using Skyline.DataMiner.Net.Messages;
+    using Skyline.DataMiner.SDM.AssetManagement.Helpers;
+    using Skyline.DataMiner.SDM.FacilityManagement.Helpers;
+    using Skyline.DataMiner.Utils.DOM.UnitTesting;
 
-	internal static class ConnectionHelper
+    internal static class ConnectionHelper
 	{
 		internal static IConnection CreateConnection()
 		{
@@ -31,13 +31,21 @@
 			return connectionMock.Object;
 		}
 
-		internal static IAssetManagementApiHelper GetMockedHelper(this IConnection connection)
+		internal static IAssetManagementApiHelper GetMockedAssetManagementHelper(
+            this IConnection connection, 
+            IFacilityManagementApiHelper facilityManagementHelper)
 		{
-			return new AssetManagementApiHelper(connection);
-		}
+            return new AssetManagementApiHelper(connection, facilityManagementHelper);
+        }
+
+        internal static IFacilityManagementApiHelper GetMockedFacilityManagementHelper(this IConnection connection)
+        {
+            return new FacilityManagementApiHelper(connection);
+        }
 
 
-		private static DMSMessage[] HandleSLNetMessages(DomSLNetMessageHandler messageHandler, DMSMessage[] messages)
+
+        private static DMSMessage[] HandleSLNetMessages(DomSLNetMessageHandler messageHandler, DMSMessage[] messages)
 		{
 			if (messages is null)
 			{

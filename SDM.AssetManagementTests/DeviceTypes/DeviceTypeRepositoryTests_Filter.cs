@@ -1,132 +1,143 @@
-﻿namespace SDM.AssetManagement.Tests
+﻿namespace SDM.AssetManagement.Tests.DeviceTypes
 {
-	using System.Linq;
-	using FluentAssertions;
-	using FluentAssertions.Execution;
-	using Microsoft.VisualStudio.TestTools.UnitTesting;
-	using SDM.AssetManagement.Tests.Setup;
-	using Skyline.DataMiner.Net.Messages.SLDataGateway;
-	using Skyline.DataMiner.SDM;
-	using Skyline.DataMiner.SDM.AssetManagement.Models;
+    using System;
+    using System.Linq;
 
-	public partial class DeviceTypeRepositoryTests
-	{
-		[TestMethod]
-		public void DeviceTypeRepository_ReadFilter_Name_Equal()
-		{
-			// Arrange
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulateDeviceTypes();
+    using FluentAssertions;
+    using FluentAssertions.Execution;
 
-			var refDeviceType = DemoData.DeviceTypes[3];
-			var filter = DeviceTypeExposers.Name.Equal(refDeviceType.Name);
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-			// Act
-			var deviceTypesRetrieved = helper.DeviceTypes.Read(filter);
+    using SDM.AssetManagement.Tests.Setup;
 
-			// Assert
-			using (new AssertionScope())
-			{
-				deviceTypesRetrieved.Should().NotBeNull();
-				deviceTypesRetrieved.Count().Should().Be(1);
-				var deviceType = deviceTypesRetrieved.First();
+    using SharedMappers.DomIds;
 
-				deviceType.Name.Should().Be(refDeviceType.Name);
-				deviceType.Identifier.Should().Be(refDeviceType.Identifier);
-				deviceType.Description.Should().Be(refDeviceType.Description);
-				deviceType.HierarchyInfo.HierarchyRole.Should().Be(refDeviceType.HierarchyInfo.HierarchyRole);
-				deviceType.TagsInfo.Tags.Should().BeEmpty();
-			}
-		}
+    using Skyline.DataMiner.Net.Messages.SLDataGateway;
+    using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.AssetManagement.Models;
+    using Skyline.DataMiner.SDM.Extensions;
 
-		[TestMethod]
-		public void DeviceTypeRepository_ReadFilter_Name_Contains()
-		{
-			// Arrange
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulateDeviceTypes();
 
-			var filter = DeviceTypeExposers.Name.Contains("coder");
+    /// <summary>
+    /// Filter and query tests for DeviceType repository operations.
+    /// </summary>
+    [TestClass]
+    public class DeviceTypeRepositoryTests_Filter : BaseRepositoryTest
+    {
+        #region Basic Field Filters
 
-			// Act
-			var deviceTypesRetrieved = helper.DeviceTypes.Read(filter);
-			var expected = DemoData.DeviceTypes.Where(filter.getLambda());
+        [TestMethod]
+        public void ReadFilter_Name_Equal_ShouldReturnMatchingDeviceType()
+        {
+            // Arrange
+            
+            Helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
 
-			// Assert
-			using (new AssertionScope())
-			{
-				deviceTypesRetrieved.Should().NotBeNull();
-				deviceTypesRetrieved.Should().BeEquivalentTo(expected);
-				deviceTypesRetrieved.Should().AllSatisfy(dt => dt.Name.Should().Contain("coder")); // encoder and decoder
-			}
-		}
+            var targetDeviceType = Helper.TestData.DeviceTypes.Skip(3).First();
+            var filter = DeviceTypeExposers.Name.Equal(targetDeviceType.Name);
 
-		[TestMethod]
-		public void DeviceTypeRepository_ReadFilter_Description_Contains()
-		{
-			// Arrange
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulateDeviceTypes();
+            // Act
+            var results = Helper.AssetManagement.DeviceTypes.Read(filter).ToList();
 
-			var filter = DeviceTypeExposers.Description.Contains("UPS");
+            // Assert
+            using (new AssertionScope())
+            {
+                results.Should().HaveCount(1, $"should find device type with name '{targetDeviceType.Name}'");
+                var deviceType = results.First();
+                deviceType.Name.Should().Be(targetDeviceType.Name);
+                deviceType.Identifier.Should().Be(targetDeviceType.Identifier);
+            }
+        }
 
-			// Act
-			var deviceTypesRetrieved = helper.DeviceTypes.Read(filter);
-			var expected = DemoData.DeviceTypes.Where(filter.getLambda());
+        [TestMethod]
+        public void ReadFilter_Name_Contains_ShouldReturnMatchingDeviceTypes()
+        {
+            // Arrange
+            
+            Helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
 
-			// Assert
-			using (new AssertionScope())
-			{
-				deviceTypesRetrieved.Should().NotBeNull();
-				deviceTypesRetrieved.Should().BeEquivalentTo(expected);
-				deviceTypesRetrieved.Should().AllSatisfy(dt => dt.Description.Should().Contain("UPS"));
-			}
-		}
+            const string namePattern = "coder";
+            var filter = DeviceTypeExposers.Name.Contains(namePattern);
 
-		[TestMethod]
-		public void DeviceTypeRepository_NestedReadFilter_HierarchyRole_Equal()
-		{
-			// Arrange
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulateDeviceTypes();
+            // Act
+            var results = Helper.AssetManagement.DeviceTypes.Read(filter).ToList();
 
-			var hierarchyRole = Skyline.DataMiner.SDM.AssetManagement.SlcAssetManagement.Enums.HierarchyRole.Chassis;
-			var filter = DeviceTypeExposers.HierarchyInfo.HierarchyRole.Equal(hierarchyRole);
+            // Assert
+            using (new AssertionScope())
+            {
+                results.Should().NotBeEmpty($"should find device types with '{namePattern}' in name");
+                results.Should().OnlyContain(dt => dt.Name.Contains(namePattern), 
+                    "all results should contain 'coder' (e.g., Encoder, Decoder)");
+            }
+        }
 
-			// Act
-			var deviceTypesRetrieved = helper.DeviceTypes.Read(filter);
-			var expected = DemoData.DeviceTypes.Where(filter.getLambda());
+        [TestMethod]
+        public void ReadFilter_Description_Contains_ShouldReturnMatchingDeviceTypes()
+        {
+            // Arrange
+            
+            Helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
 
-			// Assert
-			using (new AssertionScope())
-			{
-				deviceTypesRetrieved.Should().NotBeNull();
-				deviceTypesRetrieved.Should().BeEquivalentTo(expected);
-				deviceTypesRetrieved.Should().AllSatisfy(dt => dt.HierarchyInfo.HierarchyRole.Should().Be(hierarchyRole));
-			}
-		}
+            const string descriptionPattern = "UPS";
+            var filter = DeviceTypeExposers.Description.Contains(descriptionPattern);
 
-		[TestMethod]
-		public void DeviceTypeRepository_NestedReadFilter_Tags_NotContains()
-		{
-			// Arrange
-			var helper = RepositoryInitialize.InitializeEmptyRepositories();
-			helper.PopulateDeviceTypes();
+            // Act
+            var results = Helper.AssetManagement.DeviceTypes.Read(filter).ToList();
 
-			var tag = Skyline.DataMiner.SDM.AssetManagement.SlcAssetManagement.Enums.TagOption.AcceptsDataConnection;
-			var filter = DeviceTypeExposers.TagsInfo.Tags.NotContains(tag);
+            // Assert
+            using (new AssertionScope())
+            {
+                results.Should().NotBeEmpty($"should find device types with '{descriptionPattern}' in description");
+                results.Should().OnlyContain(dt => dt.Description.Contains(descriptionPattern));
+            }
+        }
 
-			// Act
-			var deviceTypesRetrieved = helper.DeviceTypes.Read(filter);
-			var expected = DemoData.DeviceTypes.Where(filter.getLambda());
+        #endregion
 
-			// Assert
-			using (new AssertionScope())
-			{
-				deviceTypesRetrieved.Should().NotBeNull();
-				deviceTypesRetrieved.Should().BeEquivalentTo(expected);
-				deviceTypesRetrieved.Should().AllSatisfy(dt => dt.TagsInfo.Tags.Should().NotContain(tag));
-			}
-		}
-	}
+        #region Nested Object Filters
+
+        [TestMethod]
+        public void ReadFilter_HierarchyRole_Equal_ShouldReturnMatchingDeviceTypes()
+        {
+            // Arrange
+            
+            Helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
+
+            var hierarchyRole = SlcAsset_Management.Enums.HierarchyRoleEnum.Chassis;
+            var filter = DeviceTypeExposers.HierarchyInfo.HierarchyRole.Equal(hierarchyRole);
+
+            // Act
+            var results = Helper.AssetManagement.DeviceTypes.Read(filter).ToList();
+
+            // Assert
+            using (new AssertionScope())
+            {
+                results.Should().NotBeEmpty($"should find device types with hierarchy role '{hierarchyRole}'");
+                results.Should().OnlyContain(dt => dt.HierarchyInfo.HierarchyRole == hierarchyRole);
+            }
+        }
+
+        [TestMethod]
+        public void ReadFilter_Tags_NotContains_ShouldReturnDeviceTypesWithoutTag()
+        {
+            // Arrange
+            
+            Helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
+
+            var excludedTag = SlcAsset_Management.Enums.TagOption.AcceptsDataConnection;
+            var filter = DeviceTypeExposers.TagsInfo.Tags.NotContains(excludedTag);
+
+            // Act
+            var results = Helper.AssetManagement.DeviceTypes.Read(filter).ToList();
+
+            // Assert
+            using (new AssertionScope())
+            {
+                results.Should().NotBeEmpty($"should find device types without tag '{excludedTag}'");
+                results.Should().OnlyContain(dt => !dt.TagsInfo.Tags.Contains(excludedTag));
+            }
+        }
+
+        #endregion
+    }
 }
