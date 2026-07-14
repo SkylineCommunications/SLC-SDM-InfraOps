@@ -1,7 +1,9 @@
-﻿using System;
-using System.Runtime.Serialization;
+using System;
+
 using Newtonsoft.Json;
+
 using SharedMappers.DomIds;
+
 using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
 namespace Skyline.DataMiner.SDM.AssetManagement.Models
@@ -49,31 +51,37 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         }
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<string> NameField => FieldHandler.GetOrCreateField(
             nameof(Name),
             () => new ChangeTrackingStringField(null));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<long?> PortNumberField => FieldHandler.GetOrCreateField(
             nameof(PortNumber),
             () => new ChangeTrackingField<long?>(null));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<SlcAsset_Management.Enums.Outputtype?> OutputTypeField => FieldHandler.GetOrCreateField(
             nameof(OutputType),
             () => new ChangeTrackingField<SlcAsset_Management.Enums.Outputtype?>(null));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<SlcAsset_Management.Enums.PortExposureEnum> PortExposureField => FieldHandler.GetOrCreateField(
             nameof(PortExposure),
             () => new ChangeTrackingField<SlcAsset_Management.Enums.PortExposureEnum>(default));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<SdmObjectReference<PortType>> TypeField => FieldHandler.GetOrCreateField(
             nameof(Type),
             () => new ChangeTrackingField<SdmObjectReference<PortType>>(default));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<string> LabelField => FieldHandler.GetOrCreateField(
             nameof(Label),
             () => new ChangeTrackingStringField(null));

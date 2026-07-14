@@ -1,8 +1,6 @@
 ﻿namespace Skyline.DataMiner.SDM.AssetManagement.Common.Validation
 {
-    using System;
     using System.Net;
-    using System.Text.RegularExpressions;
 
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.Extensions;

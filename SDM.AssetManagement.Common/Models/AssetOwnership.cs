@@ -1,8 +1,9 @@
-﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
+namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
     using System;
-    using System.Runtime.Serialization;
+
     using Newtonsoft.Json;
+
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     public class AssetOwnership : ChangeTrackingBase
@@ -32,21 +33,25 @@
         }
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<Guid> OrganizationField => FieldHandler.GetOrCreateField(
             nameof(Organization),
             () => new ChangeTrackingField<Guid>(Guid.Empty));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<Guid> ContactPersonField => FieldHandler.GetOrCreateField(
             nameof(ContactPerson),
             () => new ChangeTrackingField<Guid>(Guid.Empty));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<Guid> ContactPersonRoleField => FieldHandler.GetOrCreateField(
             nameof(ContactPersonRole),
             () => new ChangeTrackingField<Guid>(Guid.Empty));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<Guid> TeamField => FieldHandler.GetOrCreateField(
             nameof(Team),
             () => new ChangeTrackingField<Guid>(Guid.Empty));

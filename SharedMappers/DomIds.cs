@@ -6,4850 +6,5146 @@
 //------------------------------------------------------------------------------
 namespace SharedMappers.DomIds
 {
-    using System;
-
-    using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-    using Skyline.DataMiner.Net.Sections;
-
-    public static class SlcAsset_Management
-    {
-        public const string ModuleId = "(slc)asset_management";
-        public static class Enums
-        {
-            public static class Hierarchyrole
-            {
-                public const string Chassis = "Chassis";
-                public const string Card = "Card";
-                public const string SubCard = "Sub-Card";
-                public const string Module = "Module";
-                public const string Fan = "Fan";
-                public const string PowerSupply = "Power Supply";
-                public const string None = "None";
-                public static string ToValue(HierarchyRoleEnum @enum)
-                {
-                    switch (@enum)
-                    {
-                        case HierarchyRoleEnum.Chassis:
-                            return Chassis;
-                        case HierarchyRoleEnum.Card:
-                            return Card;
-                        case HierarchyRoleEnum.SubCard:
-                            return SubCard;
-                        case HierarchyRoleEnum.Module:
-                            return Module;
-                        case HierarchyRoleEnum.Fan:
-                            return Fan;
-                        case HierarchyRoleEnum.PowerSupply:
-                            return PowerSupply;
-                        case HierarchyRoleEnum.None:
-                            return None;
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
-                    }
-                }
-
-                public static HierarchyRoleEnum ToEnum(string s)
-                {
-                    switch (s)
-                    {
-                        case Chassis:
-                            return HierarchyRoleEnum.Chassis;
-                        case Card:
-                            return HierarchyRoleEnum.Card;
-                        case SubCard:
-                            return HierarchyRoleEnum.SubCard;
-                        case Module:
-                            return HierarchyRoleEnum.Module;
-                        case Fan:
-                            return HierarchyRoleEnum.Fan;
-                        case PowerSupply:
-                            return HierarchyRoleEnum.PowerSupply;
-                        case None:
-                            return HierarchyRoleEnum.None;
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
-                    }
-                }
-            }
-
-            public enum HierarchyRoleEnum
-            {
-                Chassis,
-                Card,
-                SubCard,
-                Module,
-                Fan,
-                PowerSupply,
-                None
-            }
-
-            public static class Portexposure
-            {
-                public const string Back = "Back";
-                public const string Front = "Front";
-                public static string ToValue(PortExposureEnum @enum)
-                {
-                    switch (@enum)
-                    {
-                        case PortExposureEnum.Back:
-                            return Back;
-                        case PortExposureEnum.Front:
-                            return Front;
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
-                    }
-                }
-
-                public static PortExposureEnum ToEnum(string s)
-                {
-                    switch (s)
-                    {
-                        case Back:
-                            return PortExposureEnum.Back;
-                        case Front:
-                            return PortExposureEnum.Front;
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
-                    }
-                }
-            }
-
-            public enum PortExposureEnum
-            {
-                Back,
-                Front
-            }
-
-            public enum Outputtype
-            {
-                Out = 0,
-                In = 1,
-                IO = 2
-            }
-
-            public enum ConnectionType
-            {
-                Data = 0,
-                Power = 1
-            }
-
-            public static class Typeofhistory
-            {
-                public const string Add = "Add";
-                public const string Modification = "Modification";
-                public const string Removal = "Removal";
-                public static string ToValue(TypeOfHistoryEnum @enum)
-                {
-                    switch (@enum)
-                    {
-                        case TypeOfHistoryEnum.Add:
-                            return Add;
-                        case TypeOfHistoryEnum.Modification:
-                            return Modification;
-                        case TypeOfHistoryEnum.Removal:
-                            return Removal;
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
-                    }
-                }
-
-                public static TypeOfHistoryEnum ToEnum(string s)
-                {
-                    switch (s)
-                    {
-                        case Add:
-                            return TypeOfHistoryEnum.Add;
-                        case Modification:
-                            return TypeOfHistoryEnum.Modification;
-                        case Removal:
-                            return TypeOfHistoryEnum.Removal;
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
-                    }
-                }
-            }
-
-            public enum TypeOfHistoryEnum
-            {
-                Add,
-                Modification,
-                Removal
-            }
-
-            public static class Categories
-            {
-                public const string Networking = "Networking";
-                public const string Power = "Power";
-                public const string Audio = "Audio";
-                public const string Storage = "Storage";
-                public const string Peripheral = "Peripheral";
-                public const string Video = "Video";
-                public const string Misc = "Misc";
-                public const string Data = "Data";
-                public const string Broadcast = "Broadcast";
-                public static string ToValue(CategoriesEnum @enum)
-                {
-                    switch (@enum)
-                    {
-                        case CategoriesEnum.Networking:
-                            return Networking;
-                        case CategoriesEnum.Power:
-                            return Power;
-                        case CategoriesEnum.Audio:
-                            return Audio;
-                        case CategoriesEnum.Storage:
-                            return Storage;
-                        case CategoriesEnum.Peripheral:
-                            return Peripheral;
-                        case CategoriesEnum.Video:
-                            return Video;
-                        case CategoriesEnum.Misc:
-                            return Misc;
-                        case CategoriesEnum.Data:
-                            return Data;
-                        case CategoriesEnum.Broadcast:
-                            return Broadcast;
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
-                    }
-                }
-
-                public static CategoriesEnum ToEnum(string s)
-                {
-                    switch (s)
-                    {
-                        case Networking:
-                            return CategoriesEnum.Networking;
-                        case Power:
-                            return CategoriesEnum.Power;
-                        case Audio:
-                            return CategoriesEnum.Audio;
-                        case Storage:
-                            return CategoriesEnum.Storage;
-                        case Peripheral:
-                            return CategoriesEnum.Peripheral;
-                        case Video:
-                            return CategoriesEnum.Video;
-                        case Misc:
-                            return CategoriesEnum.Misc;
-                        case Data:
-                            return CategoriesEnum.Data;
-                        case Broadcast:
-                            return CategoriesEnum.Broadcast;
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
-                    }
-                }
-            }
-
-            public enum CategoriesEnum
-            {
-                Networking,
-                Power,
-                Audio,
-                Storage,
-                Peripheral,
-                Video,
-                Misc,
-                Data,
-                Broadcast
-            }
-
-            public enum Planandbuildjobpromptenum
-            {
-                Disabled = 0,
-                Enabled = 1
-            }
-
-            public enum TagOption
-            {
-                PowerProvider = 0,
-                AcceptsDataConnection = 1,
-                RackUnitConsumer = 2
-            }
-
-            public static class Powersupply
-            {
-                public const string AC = "AC";
-                public const string DC = "DC";
-                public static string ToValue(PowerSupplyEnum @enum)
-                {
-                    switch (@enum)
-                    {
-                        case PowerSupplyEnum.AC:
-                            return AC;
-                        case PowerSupplyEnum.DC:
-                            return DC;
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
-                    }
-                }
-
-                public static PowerSupplyEnum ToEnum(string s)
-                {
-                    switch (s)
-                    {
-                        case AC:
-                            return PowerSupplyEnum.AC;
-                        case DC:
-                            return PowerSupplyEnum.DC;
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
-                    }
-                }
-            }
-
-            public enum PowerSupplyEnum
-            {
-                AC,
-                DC
-            }
-
-            public enum Operationalflagsenum
-            {
-                Faulty = 0
-            }
-
-            public static class Side
-            {
-                public const string Front = "Front";
-                public const string Back = "Back";
-                public const string Right = "Right";
-                public const string Left = "Left";
-                public static string ToValue(SideEnum @enum)
-                {
-                    switch (@enum)
-                    {
-                        case SideEnum.Front:
-                            return Front;
-                        case SideEnum.Back:
-                            return Back;
-                        case SideEnum.Right:
-                            return Right;
-                        case SideEnum.Left:
-                            return Left;
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
-                    }
-                }
-
-                public static SideEnum ToEnum(string s)
-                {
-                    switch (s)
-                    {
-                        case Front:
-                            return SideEnum.Front;
-                        case Back:
-                            return SideEnum.Back;
-                        case Right:
-                            return SideEnum.Right;
-                        case Left:
-                            return SideEnum.Left;
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
-                    }
-                }
-            }
-
-            public enum SideEnum
-            {
-                Front,
-                Back,
-                Right,
-                Left
-            }
-        }
-
-        public static class Sections
-        {
-            public static class ReservationRack
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("5b1c5bb2-ec0e-4f65-a195-58f47eb40d61"))
-                { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID Rack
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("5cc40c75-11a0-4a88-9e0f-d05c7f2fa0dd"));
-            }
-
-            public static class Holders
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("f2048e2c-8d4a-4d18-a808-f2bff352905f"))
-                { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID SlotNumber
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("303c7d9e-7dbe-4e25-a462-e22f0d993dd8"));
-                public static FieldDescriptorID HierarchyRole
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("c25c6d3a-ef44-4f31-be9f-d81fddbd4160"));
-                public static FieldDescriptorID Label
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("fe11153b-df8b-45ae-b8a1-73be501775a8"));
-            }
-
-            public static class PowerPortInfo
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("75f703c9-dff8-44ef-9606-49c94a3f2ee4"))
-                { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID PortNumber
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("64262d36-61e5-4d51-8aef-a408d714d7ea"));
-                public static FieldDescriptorID PortName
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("9733a4a7-9d20-480d-a419-073c88a9c6db"));
-                public static FieldDescriptorID PortExposure
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("8985105e-888f-487c-ac0e-e28a3f48a0b0"));
-                public static FieldDescriptorID OutputType
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("6378c911-7cbc-4246-bd17-3343536c10af"));
-                public static FieldDescriptorID PortType
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("ca8e6205-8b15-4633-a497-202c509c0e4c"));
-                public static FieldDescriptorID Label
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("57fb12ed-907b-41d1-9f3f-c1211718f338"));
-            }
-
-            public static class ConnectionInfo
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("a8035b4d-f36e-4093-9002-b80238449b14"))
-                { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID Notes
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("448dba2b-4aa7-4081-8afb-261c8f65f32f"));
-                public static FieldDescriptorID Description
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("40eb0c0f-37ca-4bb9-bd0f-cc4e52556c04"));
-                public static FieldDescriptorID ConnectionType
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("c0e0318f-2ce7-43ff-ab69-1b48f7251fd2"));
-            }
-
-            public static class HistoryInfo
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("cec87feb-30d0-4270-8bf8-7e8282d0513c"))
-                { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID Description
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("35c9573b-699d-4b66-806e-45bde72890aa"));
-                public static FieldDescriptorID Job
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("7c2bcda4-0936-4961-ac88-5015d7e83dad"));
-                public static FieldDescriptorID UserID
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("a180d661-80a4-4f01-b525-5f33eef20f3b"));
-                public static FieldDescriptorID InstanceDefinitionID
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("cfab9a69-9d07-4012-9e44-a12e13ecd01c"));
-                public static FieldDescriptorID InstanceID
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("4d913684-12ec-4666-98a2-5e4db7fb5acf"));
-                public static FieldDescriptorID ExtraInfo
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("4a668dee-93a0-485b-ab58-a8a710e176ae"));
-                public static FieldDescriptorID TypeOfHistory
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("7bf1509d-16f6-4093-a4c3-d2ed14dcad7e"));
-            }
-
-            public static class ReservationInfo
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("2ad67f52-0826-4234-ba7e-bbf9ef046fad"))
-                { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID Description
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("c37debdc-4078-4f51-a30b-10d5c361d009"));
-            }
-
-            public static class CategoryLink
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("bda370db-b7e1-431b-991d-37044d0b9176"))
-                { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID Categories
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("33a42db3-61d2-4ccc-97a6-6c9476efc059"));
-            }
-
-            public static class CableTypeInformation
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("08974346-b8ff-4e00-8cdd-34d401774092"))
-                { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID Name
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("d4950291-0879-46d1-94f5-423c9fbdee0d"));
-                public static FieldDescriptorID Description
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("47ab4284-97fb-4c45-afcf-f4d7f851f065"));
-            }
-
-            public static class AppSettings
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("941488bf-bb5a-46e0-968c-4b96f18fcbf1"))
-                { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID EnableAssetHistory
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("9555c359-2741-46f7-9051-040bbce3ce68"));
-                public static FieldDescriptorID PlanAndBuildJobPrompt
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("be7d9f39-8b18-45bf-b9ca-67f03f048134"));
-                public static FieldDescriptorID EnableConnectionHistory
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("62a7768a-76b0-4398-bfbe-7c513a7c0a2c"));
-                public static FieldDescriptorID HistoryTTL
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("c540fb2a-18a8-4fbd-9612-8effd24873c0"));
-                public static FieldDescriptorID HistoryLimit
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("ca9c44c6-e189-4c39-b1a0-37b3ec1d8b78"));
-            }
-
-            public static class AssetNetworkDetails
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("67d996e7-d63e-4ab3-8f84-b937af51c1be"))
-                { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID MACAddress
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("188825a2-482e-4db1-a058-f539ee9d0878"));
-            }
-
-            public static class AssetClassLifecycleInformation
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("7146ed89-798f-46f9-a534-99ed91d15e29"))
-                { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID EOLDate
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("7a38322c-2409-43fc-a6a7-1fd03ac9c5c4"));
-                public static FieldDescriptorID EOSDate
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("535dedd7-4c31-4d01-b369-5d76c3661c96"));
-                public static FieldDescriptorID NominalLifetime
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("c518fadb-fd43-4c82-80ab-a5f05d067d85"));
-            }
-
-            public static class TagsInfo
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("9d0bbc4b-e0be-45e9-8280-6fe36efe12e8"))
-                { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID Tags
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("9109438c-72dc-4822-8891-4199d2dc0ed7"));
-            }
-
-            public static class LinkedJob
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("affb2069-39ff-4318-868e-f19b298477f1"))
-                { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID Job
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("c6f632ad-33d9-41e3-a8de-74c99a001143"));
-            }
-
-            public static class AssetClassInfo
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("311b421b-8c62-4fb2-b211-3740a6a17b40"))
-                { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID Name
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("64e8da13-cdfa-459c-9185-77555e874f7d"));
-                public static FieldDescriptorID DeviceType
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("e7661d39-0325-488f-a8e8-51ba18f29fba"));
-                public static FieldDescriptorID Description
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("b8adb2c5-3531-446f-8ad6-670c32dadad1"));
-                public static FieldDescriptorID Manufacturer
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("065a0dde-a9be-4021-a8a3-490ddf7987a4"));
-                public static FieldDescriptorID Height
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("84820351-6e13-4ee3-aec5-8d6e725c2194"));
-                public static FieldDescriptorID Depth
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("14a1b2f6-cccc-41cd-bfaf-eb7edcccd730"));
-                public static FieldDescriptorID Width
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("481f1010-cf0f-4fb5-947a-11accd221a79"));
-                public static FieldDescriptorID HeightU
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("c6493f31-5651-4da0-af44-d24c73511030"));
-                public static FieldDescriptorID Weight
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("df1cd95b-f534-4795-8363-08c3d2f17e9a"));
-                public static FieldDescriptorID MaximumPowerConsumption
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("28427166-97df-44f3-8651-28fd1236f566"));
-                public static FieldDescriptorID TypicalPowerConsumption
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("9c01fc26-2449-46f1-8ad1-fc32e9e18c97"));
-                public static FieldDescriptorID FrontImage
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("23edd575-f266-4444-bfc3-43a35d9b3ed0"));
-                public static FieldDescriptorID BackImage
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("2183802a-7157-41cf-b342-c18ce8623fae"));
-                public static FieldDescriptorID PowerSupply
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("cebfc16b-88d3-4d3e-8969-0ebcef5fd442"));
-                public static FieldDescriptorID Citype
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("43fe2474-b7d2-4f2b-b690-b5064e5e7786"));
-            }
-
-            public static class AssetLifecycle
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("8f8353b9-5189-468f-881a-5841595548e8"))
-                { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID PurchaseDate
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("944d7abf-31b7-4ef9-aabd-defe7cd7982f"));
-                public static FieldDescriptorID FirstUseDate
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("f6dfe8c6-a97f-4a78-b5c3-1d1872c912f5"));
-                public static FieldDescriptorID EndOfWarrantyDate
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("a35b0aeb-976e-4656-9915-4548f79bc2ca"));
-                public static FieldDescriptorID InstallationDate
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("71a78231-a686-4459-9c1a-b7dd0ac7178b"));
-                public static FieldDescriptorID InstallationUser
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("cad2081d-6c5c-4a0a-9cea-d6adcdd60b2a"));
-                public static FieldDescriptorID ModificationDate
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("7c36827c-efa2-475c-aef0-b27167c9071f"));
-                public static FieldDescriptorID ModificationUser
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("bd1fdb19-4913-4cf7-b74b-d037c5febbd7"));
-                public static FieldDescriptorID EndOfLife
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("9b70f622-1146-4239-807d-f81f63d4f46a"));
-            }
-
-            public static class AssetOwnership
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("7fc5a856-18a4-46fd-8e34-2bbe4c642982"))
-                { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID Organization
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("e0f38c9c-71ec-484b-8544-4cd162319d59"));
-                public static FieldDescriptorID ContactPerson
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("b2e98b27-a1e9-4e45-8158-cc91cf8cd0aa"));
-                public static FieldDescriptorID ContactPersonRole
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("ebd89394-006e-44b0-8839-b41f457b96de"));
-                public static FieldDescriptorID Team
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("3867d676-2d64-43cd-816b-4db25932e0ad"));
-            }
-
-            public static class ReservedPositions
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("a22f5492-2021-4eea-8d02-357f778297df"))
-                { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID ReservedPositionsLowerBound
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("ee743138-237e-43fd-8e3c-e510a46a2e69"));
-                public static FieldDescriptorID ReservedPositionsUpperBound
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("0cfa5d47-cb26-47bf-b14e-e1b394943c68"));
-            }
-
-            public static class DataPortInfo
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("7918fb83-c6de-43c7-82d1-e561aefac746"))
-                { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID PortNumber
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("46ae4b8b-4cd1-4673-909f-c8d3cd2f9298"));
-                public static FieldDescriptorID PortName
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("b697fc76-bb00-449c-b971-2f78a5b2623f"));
-                public static FieldDescriptorID PortExposure
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("603653d8-7b1d-4d04-b30d-20ca35984bb1"));
-                public static FieldDescriptorID OutputType
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("638988c3-731a-4c54-8ed7-df5281eaa8b8"));
-                public static FieldDescriptorID PortType
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("0f039e8b-aaa3-4836-a358-80a02b55f566"));
-                public static FieldDescriptorID Label
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("0ba7fcc1-dcbc-45e0-b918-1a2e1ab194e5"));
-            }
-
-            public static class AddressInfo
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("73f92de5-317d-41dc-b8c3-2563fcb13e50"))
-                { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID IPV4Address
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("3fbfbfc8-b80f-4c89-b494-218701b1cd16"));
-                public static FieldDescriptorID IPV6Address
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("d9d5c461-5076-4565-b621-ddcb208e03e6"));
-                public static FieldDescriptorID Hostname
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("956464e3-6b17-4fa2-9987-02d8241d23ce"));
-                public static FieldDescriptorID DNS
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("96f7776d-dfca-4465-9131-33448b98753d"));
-            }
-
-            public static class CableCompatibility
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("bccf76f0-1c97-4e8b-8c78-156a18ec4e2c"))
-                { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID CableTypes
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("1b8a745d-3f49-42e9-8d6f-fbc82ca36c61"));
-            }
-
-            public static class CableInformation
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("d0b3100f-6a88-4c32-b3fd-4cb7a662c75b"))
-                { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID CableLength
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("9de151de-6bfd-4a1c-9202-a059a8e2617f"));
-                public static FieldDescriptorID CableType
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("4d16487d-a173-4969-865d-145cee55e3b7"));
-            }
-
-            public static class SourceInfo
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("ea1c78c3-9670-4cf6-8752-29fa9756f275"))
-                { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID CableSourceTag
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("d6494fe8-ea1b-4afd-a257-ee89abfe6b60"));
-                public static FieldDescriptorID SourcePort
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("327393e3-d742-4b38-8bcb-f670a4dece5d"));
-                public static FieldDescriptorID SourcePortType
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("acd43af5-f224-4e07-bc16-e9bf313e95d7"));
-            }
-
-            public static class HierarchyInfo
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("ca44f3ce-2725-49f1-93f2-8eb53d1d858c"))
-                { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID HierarchyRole
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("fa9a8c23-7f13-43bf-89d5-66962f9f56f8"));
-            }
-
-            public static class AssetInformation
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("58c1a50e-d1c7-4467-8d19-54a29f985d83"))
-                { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID AssetName
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("43c3c696-03be-461b-b01b-40a47a45648f"));
-                public static FieldDescriptorID SerialNumber
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("550a8136-11f7-4a5e-a4c8-a7abd9b1afa1"));
-                public static FieldDescriptorID AssetClass
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("1b894f9c-966e-4d73-8f00-c77bb7ece1a6"));
-                public static FieldDescriptorID AssetDescription
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("243689f0-c594-4fe6-852c-bbffed9fea67"));
-                public static FieldDescriptorID FWOS
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("d5ffa4aa-c04f-4bca-a9bd-25b009cc3f50"));
-                public static FieldDescriptorID AssetID
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("e014bef3-1a42-4e5b-979b-d7dcce5af177"));
-                public static FieldDescriptorID HardwareVersion
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("a690819d-32b4-4709-bdc9-68299136dd37"));
-                public static FieldDescriptorID OperationalFlags
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("4085a0ba-6303-4cf9-9f0c-eb7d495c2462"));
-            }
-
-            public static class PortTypeInformation
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("7b019f7b-024c-46ec-814d-5a65b1e5fabe"))
-                { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID Name
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("42228cc4-bd6e-455f-bf9d-6b309c0fed48"));
-                public static FieldDescriptorID Description
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("c8e21874-9791-4fa9-b572-bd9028fdf367"));
-            }
-
-            public static class ElementLink
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("e711b95b-74ea-4e2a-b08a-4f05cb55a8a5"))
-                { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID ElementID
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("f2c0295b-4b49-47b3-87db-9b76b283def5"));
-                public static FieldDescriptorID IsPrimary
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("e967f1aa-3ca5-40db-b67d-7dcb8153b444"));
-            }
-
-            public static class Asset
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("45368cbd-a605-4930-8bf2-d0f649edeae0"))
-                { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID AssetID
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("71dd3307-3015-43f8-86fd-1618c31a7ab2"));
-            }
-
-            public static class AssetCustody
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("db82849f-e6da-478b-b295-dd75de94e0b6"))
-                { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID From
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("b97a40fa-30f3-480c-b0e5-dee12645bf6f"));
-                public static FieldDescriptorID Till
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("2b2d870f-4cc3-41c1-9f83-8dad85f1f8fe"));
-                public static FieldDescriptorID ContactPerson
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("a58869a6-a316-49e7-87a7-e904d74954df"));
-                public static FieldDescriptorID Team
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("a13cd67a-e7f3-4dc0-93f1-98f56a5c4e7d"));
-                public static FieldDescriptorID Organization
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("1af14e1e-ae59-48dd-b3c3-8c1b28ddeb14"));
-                public static FieldDescriptorID ContactPersonRole
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("5a70fb9e-4430-4b72-b6b1-7ed4764d4041"));
-            }
-
-            public static class AssetLocation
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("7fd5d383-b925-4d93-ac32-85f7453c8f1d"))
-                { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID RackPosition
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("a5ca6c86-5f52-4b34-99a8-3673ae3d5254"));
-                public static FieldDescriptorID Side
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("b267553c-cb6e-42cd-a07f-4fee92ca0045"));
-                public static FieldDescriptorID Rack
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("4ce12068-f564-4aa7-9cd1-2510473ae124"));
-                public static FieldDescriptorID Desk
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("220264e3-96c5-4164-aa68-5a8d60f16bf5"));
-                public static FieldDescriptorID Container
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("0b3196b5-44aa-4c0c-bf6e-6510b9c08662"));
-                public static FieldDescriptorID Room
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("9bdcf494-f6d1-4cf5-8a28-bd77ab9c712a"));
-                public static FieldDescriptorID PowerSupplyRackPosition
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("7008d2e9-3826-485b-a270-311f01054c5d"));
-                public static FieldDescriptorID ParentAsset
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("02e5b03a-ec40-406e-a828-24f02cf23777"));
-                public static FieldDescriptorID HolderNumber
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("c0c08b13-ead2-4c22-b29b-2c5c5f2ea902"));
-            }
-
-            public static class DeviceTypeInformation
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("516210a2-f739-4462-9df8-2a8146c30bf0"))
-                { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID Name
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("df767b3b-8fc4-4d3e-b4fa-5e78d4a705fa"));
-                public static FieldDescriptorID Description
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("f5f51839-3f2b-42e2-a67f-b9e34d87b129"));
-            }
-
-            public static class AssetLocationDestination
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("a4b292f2-f634-4e16-b218-783c7a2baa43"))
-                { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID RackPosition
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("0715e5ff-ab9c-477c-bb3e-55c7e9e34f2f"));
-                public static FieldDescriptorID Side
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("fc22e70b-4630-4280-a5ec-556e42e7312b"));
-                public static FieldDescriptorID Rack
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("0a004d82-02ca-41e5-9997-51b7ab965b91"));
-                public static FieldDescriptorID Desk
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("42b6d606-2f76-4148-a68d-8472f748ce99"));
-                public static FieldDescriptorID Container
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("cdc8ef56-c7de-4308-a3b2-dedc70260af9"));
-                public static FieldDescriptorID Room
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("09a567e1-b1eb-4f71-9cb7-322c4c75aa64"));
-                public static FieldDescriptorID PowerSupplyRackPosition
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("3d604a70-9cbc-4b09-a39f-a93cd5c1c904"));
-                public static FieldDescriptorID ParentAsset
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("f8ce6dcb-9e7c-49a0-8fa9-c4c03d40419b"));
-                public static FieldDescriptorID HolderNumber
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("372a2d99-a2dd-488a-b86a-9aacd0e0ed8f"));
-            }
-
-            public static class PrimaryPortRelation
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("2ad90463-9998-4df9-a068-93a13cfa2e6a"))
-                { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID Isprimaryipv4
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("884f0a95-c1e8-447c-ba1d-0061deaca70d"));
-                public static FieldDescriptorID Isprimaryipv6
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("a81dc9d7-fc3d-447d-83cb-e9a54c1df5f6"));
-            }
-
-            public static class DestinationInfo
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("cae60cfd-5a48-4e6b-8f52-e69e8e468a9c"))
-                { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID CableDestinationTag
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("1d26a6f3-bbd8-44f8-9221-4467f13fe135"));
-                public static FieldDescriptorID DestinationPort
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("b01fa755-ce22-4135-b21d-64217c0994f0"));
-                public static FieldDescriptorID DestinationPortType
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("3882369e-78ab-4985-93ef-dcb1641a08b2"));
-            }
-        }
-
-        public static class Definitions
-        {
-            public static DomDefinitionId CableType
-            {
-                get;
-            }
-
-            = new DomDefinitionId(new Guid("b2e24be2-a559-4628-bcfd-e0398644d46a"))
-            { ModuleId = "(slc)asset_management" };
-            public static DomDefinitionId PowerPort
-            {
-                get;
-            }
-
-            = new DomDefinitionId(new Guid("edfd08fd-ecae-44db-949a-8ca5d17ee22d"))
-            { ModuleId = "(slc)asset_management" };
-            public static DomDefinitionId Connections
-            {
-                get;
-            }
-
-            = new DomDefinitionId(new Guid("a7844a51-8221-48da-9a0e-7cfa20262715"))
-            { ModuleId = "(slc)asset_management" };
-            public static DomDefinitionId Asset
-            {
-                get;
-            }
-
-            = new DomDefinitionId(new Guid("9035d110-47f3-412d-ac8a-fde31bd4b00f"))
-            { ModuleId = "(slc)asset_management" };
-            public static DomDefinitionId AssetManagerAppSettings
-            {
-                get;
-            }
-
-            = new DomDefinitionId(new Guid("5372272a-65f3-43e3-9ef4-f7f879de5a26"))
-            { ModuleId = "(slc)asset_management" };
-            public static DomDefinitionId Reservations
-            {
-                get;
-            }
-
-            = new DomDefinitionId(new Guid("203aacf0-ad18-4d52-b243-9547fa8b2553"))
-            { ModuleId = "(slc)asset_management" };
-            public static DomDefinitionId DataPort
-            {
-                get;
-            }
-
-            = new DomDefinitionId(new Guid("280b26f8-7245-4b67-85c1-d42bcf3e9c41"))
-            { ModuleId = "(slc)asset_management" };
-            public static DomDefinitionId DeviceType
-            {
-                get;
-            }
-
-            = new DomDefinitionId(new Guid("f369e97b-51b2-4cdc-90b4-7a4f86fad82c"))
-            { ModuleId = "(slc)asset_management" };
-            public static DomDefinitionId AssetClass
-            {
-                get;
-            }
-
-            = new DomDefinitionId(new Guid("d6f9c4c8-9f8d-4e8c-a7e0-1e1500563416"))
-            { ModuleId = "(slc)asset_management" };
-            public static DomDefinitionId PortType
-            {
-                get;
-            }
-
-            = new DomDefinitionId(new Guid("ff930185-a380-46bf-8bfb-8c70f6933c67"))
-            { ModuleId = "(slc)asset_management" };
-            public static DomDefinitionId History
-            {
-                get;
-            }
-
-            = new DomDefinitionId(new Guid("4d4ad8f7-fe8f-48c4-a373-6d36184de4fb"))
-            { ModuleId = "(slc)asset_management" };
-        }
-
-        public static class Behaviors
-        {
-            public static class Asset_Behavior
-            {
-                public static DomBehaviorDefinitionId Id
-                {
-                    get;
-                }
-
-                = new DomBehaviorDefinitionId(new Guid("a3301105-8724-4a36-af03-aa196a6d83df"))
-                { ModuleId = "(slc)asset_management" };
-                public static class Statuses
-                {
-                    public const string NotAvailable = "2ef172ae-2905-4f4d-ac19-76417e3174cb";
-                    public const string Available = "2ef172ae-2905-4f4d-ac19-76417e3174cb (duplicate)";
-                    public const string BuildPlanReady = "2ef172ae-2905-4f4d-ac19-76417e3174cb (duplicate) (duplicate) (duplicate)";
-                    public const string Installed = "2ef172ae-2905-4f4d-ac19-76417e3174cb (duplicate) (duplicate) (duplicate) (duplicate)";
-                    public const string InService = "2ef172ae-2905-4f4d-ac19-76417e3174cb (duplicate) (duplicate) (duplicate) (duplicate) (duplicate)";
-                    public const string Disposed = "2ef172ae-2905-4f4d-ac19-76417e3174cb (duplicate) (duplicate) (duplicate) (duplicate) (duplicate) (duplicate)";
-                    public const string InPlanning = "59cd7bd7-ea07-43d4-bc64-f27cebe2b194";
-                    public const string InTransit = "f4d9841a-20b8-4918-ac48-611a50520601";
-                    public const string InRepair = "6278e82d-8681-42c6-b593-92212e15b42f";
-                    public static string ToValue(StatusesEnum @enum)
-                    {
-                        switch (@enum)
-                        {
-                            case StatusesEnum.NotAvailable:
-                                return NotAvailable;
-                            case StatusesEnum.Available:
-                                return Available;
-                            case StatusesEnum.BuildPlanReady:
-                                return BuildPlanReady;
-                            case StatusesEnum.Installed:
-                                return Installed;
-                            case StatusesEnum.InService:
-                                return InService;
-                            case StatusesEnum.Disposed:
-                                return Disposed;
-                            case StatusesEnum.InPlanning:
-                                return InPlanning;
-                            case StatusesEnum.InTransit:
-                                return InTransit;
-                            case StatusesEnum.InRepair:
-                                return InRepair;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
-                        }
-                    }
-
-                    public static StatusesEnum ToEnum(string s)
-                    {
-                        switch (s)
-                        {
-                            case NotAvailable:
-                                return StatusesEnum.NotAvailable;
-                            case Available:
-                                return StatusesEnum.Available;
-                            case BuildPlanReady:
-                                return StatusesEnum.BuildPlanReady;
-                            case Installed:
-                                return StatusesEnum.Installed;
-                            case InService:
-                                return StatusesEnum.InService;
-                            case Disposed:
-                                return StatusesEnum.Disposed;
-                            case InPlanning:
-                                return StatusesEnum.InPlanning;
-                            case InTransit:
-                                return StatusesEnum.InTransit;
-                            case InRepair:
-                                return StatusesEnum.InRepair;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
-                        }
-                    }
-                }
-
-                public enum StatusesEnum
-                {
-                    NotAvailable,
-                    Available,
-                    BuildPlanReady,
-                    Installed,
-                    InService,
-                    Disposed,
-                    InPlanning,
-                    InTransit,
-                    InRepair
-                }
-
-                public static class Transitions
-                {
-                    public const string Notavailable_To_Available = "notavailable_to_available";
-                    public const string Notavailable_To_Disposed = "notavailable_to_disposed";
-                    public const string Available_To_Notavailable = "available_to_notavailable";
-                    public const string Buildplanready_To_Installed = "buildplanready_to_installed";
-                    public const string Installed_To_Inservice = "installed_to_inservice";
-                    public const string Inservice_To_Notavailable = "inservice_to_notavailable";
-                    public const string Inservice_To_Buildplanready = "inservice_to_buildplanready";
-                    public const string Inservice_To_Available = "inservice_to_available";
-                    public const string Inservice_To_Installed = "inservice_to_installed";
-                    public const string Inplanning_To_Available = "inplanning_to_available";
-                    public const string Inplanning_To_Buildplanready = "inplanning_to_buildplanready";
-                    public const string Buildplanready_To_Inplanning = "buildplanready_to_inplanning";
-                    public const string Inservice_To_Inplanning = "inservice_to_inplanning";
-                    public const string Available_To_Inplanning = "available_to_inplanning";
-                    public const string Installed_To_Inplanning = "installed_to_inplanning";
-                    public const string Notavailable_To_Intransit = "notavailable_to_intransit";
-                    public const string Available_To_Intransit = "available_to_intransit";
-                    public const string Buildplanready_To_Intransit = "buildplanready_to_intransit";
-                    public const string Installed_To_Intransit = "installed_to_intransit";
-                    public const string Inservice_To_Intransit = "inservice_to_intransit";
-                    public const string Inplanning_To_Intransit = "inplanning_to_intransit";
-                    public const string Inrepair_To_Intransit = "inrepair_to_intransit";
-                    public const string Notavailable_To_Inrepair = "notavailable_to_inrepair";
-                    public const string Available_To_Inrepair = "available_to_inrepair";
-                    public const string Buildplanready_To_Inrepair = "buildplanready_to_inrepair";
-                    public const string Installed_To_Inrepair = "installed_to_inrepair";
-                    public const string Inservice_To_Inrepair = "inservice_to_inrepair";
-                    public const string Inplanning_To_Inrepair = "inplanning_to_inrepair";
-                    public const string Intransit_To_Inrepair = "intransit_to_inrepair";
-                    public const string Intransit_To_Notavailable = "intransit_to_notavailable";
-                    public const string Intransit_To_Available = "intransit_to_available";
-                    public const string Intransit_To_Buildplanready = "intransit_to_buildplanready";
-                    public const string Intransit_To_Installed = "intransit_to_installed";
-                    public const string Intransit_To_Disposed = "intransit_to_disposed";
-                    public const string Intransit_To_Inplanning = "intransit_to_inplanning";
-                    public const string Inrepair_To_Notavailable = "inrepair_to_notavailable";
-                    public const string Inrepair_To_Available = "inrepair_to_available";
-                    public const string Inrepair_To_Buildplanready = "inrepair_to_buildplanready";
-                    public const string Inrepair_To_Installed = "inrepair_to_installed";
-                    public const string Inrepair_To_Disposed = "inrepair_to_disposed";
-                    public const string Inrepair_To_Inplanning = "inrepair_to_inplanning";
-                    public static string ToValue(TransitionsEnum @enum)
-                    {
-                        switch (@enum)
-                        {
-                            case TransitionsEnum.Notavailable_To_Available:
-                                return Notavailable_To_Available;
-                            case TransitionsEnum.Notavailable_To_Disposed:
-                                return Notavailable_To_Disposed;
-                            case TransitionsEnum.Available_To_Notavailable:
-                                return Available_To_Notavailable;
-                            case TransitionsEnum.Buildplanready_To_Installed:
-                                return Buildplanready_To_Installed;
-                            case TransitionsEnum.Installed_To_Inservice:
-                                return Installed_To_Inservice;
-                            case TransitionsEnum.Inservice_To_Notavailable:
-                                return Inservice_To_Notavailable;
-                            case TransitionsEnum.Inservice_To_Buildplanready:
-                                return Inservice_To_Buildplanready;
-                            case TransitionsEnum.Inservice_To_Available:
-                                return Inservice_To_Available;
-                            case TransitionsEnum.Inservice_To_Installed:
-                                return Inservice_To_Installed;
-                            case TransitionsEnum.Inplanning_To_Available:
-                                return Inplanning_To_Available;
-                            case TransitionsEnum.Inplanning_To_Buildplanready:
-                                return Inplanning_To_Buildplanready;
-                            case TransitionsEnum.Buildplanready_To_Inplanning:
-                                return Buildplanready_To_Inplanning;
-                            case TransitionsEnum.Inservice_To_Inplanning:
-                                return Inservice_To_Inplanning;
-                            case TransitionsEnum.Available_To_Inplanning:
-                                return Available_To_Inplanning;
-                            case TransitionsEnum.Installed_To_Inplanning:
-                                return Installed_To_Inplanning;
-                            case TransitionsEnum.Notavailable_To_Intransit:
-                                return Notavailable_To_Intransit;
-                            case TransitionsEnum.Available_To_Intransit:
-                                return Available_To_Intransit;
-                            case TransitionsEnum.Buildplanready_To_Intransit:
-                                return Buildplanready_To_Intransit;
-                            case TransitionsEnum.Installed_To_Intransit:
-                                return Installed_To_Intransit;
-                            case TransitionsEnum.Inservice_To_Intransit:
-                                return Inservice_To_Intransit;
-                            case TransitionsEnum.Inplanning_To_Intransit:
-                                return Inplanning_To_Intransit;
-                            case TransitionsEnum.Inrepair_To_Intransit:
-                                return Inrepair_To_Intransit;
-                            case TransitionsEnum.Notavailable_To_Inrepair:
-                                return Notavailable_To_Inrepair;
-                            case TransitionsEnum.Available_To_Inrepair:
-                                return Available_To_Inrepair;
-                            case TransitionsEnum.Buildplanready_To_Inrepair:
-                                return Buildplanready_To_Inrepair;
-                            case TransitionsEnum.Installed_To_Inrepair:
-                                return Installed_To_Inrepair;
-                            case TransitionsEnum.Inservice_To_Inrepair:
-                                return Inservice_To_Inrepair;
-                            case TransitionsEnum.Inplanning_To_Inrepair:
-                                return Inplanning_To_Inrepair;
-                            case TransitionsEnum.Intransit_To_Inrepair:
-                                return Intransit_To_Inrepair;
-                            case TransitionsEnum.Intransit_To_Notavailable:
-                                return Intransit_To_Notavailable;
-                            case TransitionsEnum.Intransit_To_Available:
-                                return Intransit_To_Available;
-                            case TransitionsEnum.Intransit_To_Buildplanready:
-                                return Intransit_To_Buildplanready;
-                            case TransitionsEnum.Intransit_To_Installed:
-                                return Intransit_To_Installed;
-                            case TransitionsEnum.Intransit_To_Disposed:
-                                return Intransit_To_Disposed;
-                            case TransitionsEnum.Intransit_To_Inplanning:
-                                return Intransit_To_Inplanning;
-                            case TransitionsEnum.Inrepair_To_Notavailable:
-                                return Inrepair_To_Notavailable;
-                            case TransitionsEnum.Inrepair_To_Available:
-                                return Inrepair_To_Available;
-                            case TransitionsEnum.Inrepair_To_Buildplanready:
-                                return Inrepair_To_Buildplanready;
-                            case TransitionsEnum.Inrepair_To_Installed:
-                                return Inrepair_To_Installed;
-                            case TransitionsEnum.Inrepair_To_Disposed:
-                                return Inrepair_To_Disposed;
-                            case TransitionsEnum.Inrepair_To_Inplanning:
-                                return Inrepair_To_Inplanning;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
-                        }
-                    }
-
-                    public static TransitionsEnum ToEnum(string s)
-                    {
-                        switch (s)
-                        {
-                            case Notavailable_To_Available:
-                                return TransitionsEnum.Notavailable_To_Available;
-                            case Notavailable_To_Disposed:
-                                return TransitionsEnum.Notavailable_To_Disposed;
-                            case Available_To_Notavailable:
-                                return TransitionsEnum.Available_To_Notavailable;
-                            case Buildplanready_To_Installed:
-                                return TransitionsEnum.Buildplanready_To_Installed;
-                            case Installed_To_Inservice:
-                                return TransitionsEnum.Installed_To_Inservice;
-                            case Inservice_To_Notavailable:
-                                return TransitionsEnum.Inservice_To_Notavailable;
-                            case Inservice_To_Buildplanready:
-                                return TransitionsEnum.Inservice_To_Buildplanready;
-                            case Inservice_To_Available:
-                                return TransitionsEnum.Inservice_To_Available;
-                            case Inservice_To_Installed:
-                                return TransitionsEnum.Inservice_To_Installed;
-                            case Inplanning_To_Available:
-                                return TransitionsEnum.Inplanning_To_Available;
-                            case Inplanning_To_Buildplanready:
-                                return TransitionsEnum.Inplanning_To_Buildplanready;
-                            case Buildplanready_To_Inplanning:
-                                return TransitionsEnum.Buildplanready_To_Inplanning;
-                            case Inservice_To_Inplanning:
-                                return TransitionsEnum.Inservice_To_Inplanning;
-                            case Available_To_Inplanning:
-                                return TransitionsEnum.Available_To_Inplanning;
-                            case Installed_To_Inplanning:
-                                return TransitionsEnum.Installed_To_Inplanning;
-                            case Notavailable_To_Intransit:
-                                return TransitionsEnum.Notavailable_To_Intransit;
-                            case Available_To_Intransit:
-                                return TransitionsEnum.Available_To_Intransit;
-                            case Buildplanready_To_Intransit:
-                                return TransitionsEnum.Buildplanready_To_Intransit;
-                            case Installed_To_Intransit:
-                                return TransitionsEnum.Installed_To_Intransit;
-                            case Inservice_To_Intransit:
-                                return TransitionsEnum.Inservice_To_Intransit;
-                            case Inplanning_To_Intransit:
-                                return TransitionsEnum.Inplanning_To_Intransit;
-                            case Inrepair_To_Intransit:
-                                return TransitionsEnum.Inrepair_To_Intransit;
-                            case Notavailable_To_Inrepair:
-                                return TransitionsEnum.Notavailable_To_Inrepair;
-                            case Available_To_Inrepair:
-                                return TransitionsEnum.Available_To_Inrepair;
-                            case Buildplanready_To_Inrepair:
-                                return TransitionsEnum.Buildplanready_To_Inrepair;
-                            case Installed_To_Inrepair:
-                                return TransitionsEnum.Installed_To_Inrepair;
-                            case Inservice_To_Inrepair:
-                                return TransitionsEnum.Inservice_To_Inrepair;
-                            case Inplanning_To_Inrepair:
-                                return TransitionsEnum.Inplanning_To_Inrepair;
-                            case Intransit_To_Inrepair:
-                                return TransitionsEnum.Intransit_To_Inrepair;
-                            case Intransit_To_Notavailable:
-                                return TransitionsEnum.Intransit_To_Notavailable;
-                            case Intransit_To_Available:
-                                return TransitionsEnum.Intransit_To_Available;
-                            case Intransit_To_Buildplanready:
-                                return TransitionsEnum.Intransit_To_Buildplanready;
-                            case Intransit_To_Installed:
-                                return TransitionsEnum.Intransit_To_Installed;
-                            case Intransit_To_Disposed:
-                                return TransitionsEnum.Intransit_To_Disposed;
-                            case Intransit_To_Inplanning:
-                                return TransitionsEnum.Intransit_To_Inplanning;
-                            case Inrepair_To_Notavailable:
-                                return TransitionsEnum.Inrepair_To_Notavailable;
-                            case Inrepair_To_Available:
-                                return TransitionsEnum.Inrepair_To_Available;
-                            case Inrepair_To_Buildplanready:
-                                return TransitionsEnum.Inrepair_To_Buildplanready;
-                            case Inrepair_To_Installed:
-                                return TransitionsEnum.Inrepair_To_Installed;
-                            case Inrepair_To_Disposed:
-                                return TransitionsEnum.Inrepair_To_Disposed;
-                            case Inrepair_To_Inplanning:
-                                return TransitionsEnum.Inrepair_To_Inplanning;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
-                        }
-                    }
-                }
-
-                public enum TransitionsEnum
-                {
-                    Notavailable_To_Available,
-                    Notavailable_To_Disposed,
-                    Available_To_Notavailable,
-                    Buildplanready_To_Installed,
-                    Installed_To_Inservice,
-                    Inservice_To_Notavailable,
-                    Inservice_To_Buildplanready,
-                    Inservice_To_Available,
-                    Inservice_To_Installed,
-                    Inplanning_To_Available,
-                    Inplanning_To_Buildplanready,
-                    Buildplanready_To_Inplanning,
-                    Inservice_To_Inplanning,
-                    Available_To_Inplanning,
-                    Installed_To_Inplanning,
-                    Notavailable_To_Intransit,
-                    Available_To_Intransit,
-                    Buildplanready_To_Intransit,
-                    Installed_To_Intransit,
-                    Inservice_To_Intransit,
-                    Inplanning_To_Intransit,
-                    Inrepair_To_Intransit,
-                    Notavailable_To_Inrepair,
-                    Available_To_Inrepair,
-                    Buildplanready_To_Inrepair,
-                    Installed_To_Inrepair,
-                    Inservice_To_Inrepair,
-                    Inplanning_To_Inrepair,
-                    Intransit_To_Inrepair,
-                    Intransit_To_Notavailable,
-                    Intransit_To_Available,
-                    Intransit_To_Buildplanready,
-                    Intransit_To_Installed,
-                    Intransit_To_Disposed,
-                    Intransit_To_Inplanning,
-                    Inrepair_To_Notavailable,
-                    Inrepair_To_Available,
-                    Inrepair_To_Buildplanready,
-                    Inrepair_To_Installed,
-                    Inrepair_To_Disposed,
-                    Inrepair_To_Inplanning
-                }
-
-                public static class Actions
-                {
-                    public const string Setnotavailable = "setnotavailable";
-                    public const string Setavailable = "setavailable";
-                    public const string Install = "install";
-                    public const string Plan = "plan";
-                    public const string Dispose = "dispose";
-                    public const string Build = "build";
-                    public const string Setinservice = "setinservice";
-                    public const string Setintransit = "setintransit";
-                    public const string Setinrepair = "setinrepair";
-                    public static string ToValue(ActionsEnum @enum)
-                    {
-                        switch (@enum)
-                        {
-                            case ActionsEnum.Setnotavailable:
-                                return Setnotavailable;
-                            case ActionsEnum.Setavailable:
-                                return Setavailable;
-                            case ActionsEnum.Install:
-                                return Install;
-                            case ActionsEnum.Plan:
-                                return Plan;
-                            case ActionsEnum.Dispose:
-                                return Dispose;
-                            case ActionsEnum.Build:
-                                return Build;
-                            case ActionsEnum.Setinservice:
-                                return Setinservice;
-                            case ActionsEnum.Setintransit:
-                                return Setintransit;
-                            case ActionsEnum.Setinrepair:
-                                return Setinrepair;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
-                        }
-                    }
-
-                    public static ActionsEnum ToEnum(string s)
-                    {
-                        switch (s)
-                        {
-                            case Setnotavailable:
-                                return ActionsEnum.Setnotavailable;
-                            case Setavailable:
-                                return ActionsEnum.Setavailable;
-                            case Install:
-                                return ActionsEnum.Install;
-                            case Plan:
-                                return ActionsEnum.Plan;
-                            case Dispose:
-                                return ActionsEnum.Dispose;
-                            case Build:
-                                return ActionsEnum.Build;
-                            case Setinservice:
-                                return ActionsEnum.Setinservice;
-                            case Setintransit:
-                                return ActionsEnum.Setintransit;
-                            case Setinrepair:
-                                return ActionsEnum.Setinrepair;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
-                        }
-                    }
-                }
-
-                public enum ActionsEnum
-                {
-                    Setnotavailable,
-                    Setavailable,
-                    Install,
-                    Plan,
-                    Dispose,
-                    Build,
-                    Setinservice,
-                    Setintransit,
-                    Setinrepair
-                }
-            }
-
-            public static class Asset_Class_Behavior
-            {
-                public static DomBehaviorDefinitionId Id
-                {
-                    get;
-                }
-
-                = new DomBehaviorDefinitionId(new Guid("e9e2d567-68f4-4c3f-8154-b3862a1b277b"))
-                { ModuleId = "(slc)asset_management" };
-                public static class Statuses
-                {
-                    public const string Draft = "d749849b-9071-44e4-ba2d-64debdd94758";
-                    public const string Active = "d749849b-9071-44e4-ba2d-64debdd94758 (duplicate) (duplicate)";
-                    public const string Deprecated = "d749849b-9071-44e4-ba2d-64debdd94758 (duplicate) (duplicate) (duplicate)";
-                    public static string ToValue(StatusesEnum @enum)
-                    {
-                        switch (@enum)
-                        {
-                            case StatusesEnum.Draft:
-                                return Draft;
-                            case StatusesEnum.Active:
-                                return Active;
-                            case StatusesEnum.Deprecated:
-                                return Deprecated;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
-                        }
-                    }
-
-                    public static StatusesEnum ToEnum(string s)
-                    {
-                        switch (s)
-                        {
-                            case Draft:
-                                return StatusesEnum.Draft;
-                            case Active:
-                                return StatusesEnum.Active;
-                            case Deprecated:
-                                return StatusesEnum.Deprecated;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
-                        }
-                    }
-                }
-
-                public enum StatusesEnum
-                {
-                    Draft,
-                    Active,
-                    Deprecated
-                }
-
-                public static class Transitions
-                {
-                    public const string Draft_Active = "draft_active";
-                    public const string Active_Deprecated = "active_deprecated";
-                    public static string ToValue(TransitionsEnum @enum)
-                    {
-                        switch (@enum)
-                        {
-                            case TransitionsEnum.Draft_Active:
-                                return Draft_Active;
-                            case TransitionsEnum.Active_Deprecated:
-                                return Active_Deprecated;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
-                        }
-                    }
-
-                    public static TransitionsEnum ToEnum(string s)
-                    {
-                        switch (s)
-                        {
-                            case Draft_Active:
-                                return TransitionsEnum.Draft_Active;
-                            case Active_Deprecated:
-                                return TransitionsEnum.Active_Deprecated;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
-                        }
-                    }
-                }
-
-                public enum TransitionsEnum
-                {
-                    Draft_Active,
-                    Active_Deprecated
-                }
-
-                public static class Actions
-                {
-                    public const string Confirm = "confirm";
-                    public const string Archive = "archive";
-                    public static string ToValue(ActionsEnum @enum)
-                    {
-                        switch (@enum)
-                        {
-                            case ActionsEnum.Confirm:
-                                return Confirm;
-                            case ActionsEnum.Archive:
-                                return Archive;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
-                        }
-                    }
-
-                    public static ActionsEnum ToEnum(string s)
-                    {
-                        switch (s)
-                        {
-                            case Confirm:
-                                return ActionsEnum.Confirm;
-                            case Archive:
-                                return ActionsEnum.Archive;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
-                        }
-                    }
-                }
-
-                public enum ActionsEnum
-                {
-                    Confirm,
-                    Archive
-                }
-            }
-        }
-    }
-
-    public static class SlcFacility_Management
-    {
-        public const string ModuleId = "(slc)facility_management";
-        public static class Enums
-        {
-            public static class Facilitytype
-            {
-                public const string Truck = "Truck";
-                public const string Container = "Container";
-                public const string Building = "Building";
-                public static string ToValue(FacilityTypeEnum @enum)
-                {
-                    switch (@enum)
-                    {
-                        case FacilityTypeEnum.Truck:
-                            return Truck;
-                        case FacilityTypeEnum.Container:
-                            return Container;
-                        case FacilityTypeEnum.Building:
-                            return Building;
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
-                    }
-                }
-
-                public static FacilityTypeEnum ToEnum(string s)
-                {
-                    switch (s)
-                    {
-                        case Truck:
-                            return FacilityTypeEnum.Truck;
-                        case Container:
-                            return FacilityTypeEnum.Container;
-                        case Building:
-                            return FacilityTypeEnum.Building;
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
-                    }
-                }
-            }
-
-            public enum FacilityTypeEnum
-            {
-                Truck,
-                Container,
-                Building
-            }
-
-            public enum ThermalType
-            {
-                None = 0,
-                Warm = 1,
-                Cold = 2
-            }
-
-            public static class Rackpositionenum
-            {
-                public const string Bottom = "Bottom";
-                public const string Top = "Top";
-                public static string ToValue(RackpositionenumEnum @enum)
-                {
-                    switch (@enum)
-                    {
-                        case RackpositionenumEnum.Bottom:
-                            return Bottom;
-                        case RackpositionenumEnum.Top:
-                            return Top;
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
-                    }
-                }
-
-                public static RackpositionenumEnum ToEnum(string s)
-                {
-                    switch (s)
-                    {
-                        case Bottom:
-                            return RackpositionenumEnum.Bottom;
-                        case Top:
-                            return RackpositionenumEnum.Top;
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
-                    }
-                }
-            }
-
-            public enum RackpositionenumEnum
-            {
-                Bottom,
-                Top
-            }
-
-            public static class Coolingflowenum
-            {
-                public const string FrontToRear = "Front To Rear";
-                public const string RearToFront = "Rear To Front";
-                public const string SideToSide = "Side To Side";
-                public const string TopToBottom = "Top To Bottom";
-                public const string BottomToTop = "Bottom To Top";
-                public static string ToValue(CoolingflowenumEnum @enum)
-                {
-                    switch (@enum)
-                    {
-                        case CoolingflowenumEnum.FrontToRear:
-                            return FrontToRear;
-                        case CoolingflowenumEnum.RearToFront:
-                            return RearToFront;
-                        case CoolingflowenumEnum.SideToSide:
-                            return SideToSide;
-                        case CoolingflowenumEnum.TopToBottom:
-                            return TopToBottom;
-                        case CoolingflowenumEnum.BottomToTop:
-                            return BottomToTop;
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
-                    }
-                }
-
-                public static CoolingflowenumEnum ToEnum(string s)
-                {
-                    switch (s)
-                    {
-                        case FrontToRear:
-                            return CoolingflowenumEnum.FrontToRear;
-                        case RearToFront:
-                            return CoolingflowenumEnum.RearToFront;
-                        case SideToSide:
-                            return CoolingflowenumEnum.SideToSide;
-                        case TopToBottom:
-                            return CoolingflowenumEnum.TopToBottom;
-                        case BottomToTop:
-                            return CoolingflowenumEnum.BottomToTop;
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
-                    }
-                }
-            }
-
-            public enum CoolingflowenumEnum
-            {
-                FrontToRear,
-                RearToFront,
-                SideToSide,
-                TopToBottom,
-                BottomToTop
-            }
-
-            public enum Placementorientationenum
-            {
-                Vertical = 0,
-                Horizontal = 1
-            }
-        }
-
-        public static class Sections
-        {
-            public static class ImageInfo
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("67f72a06-cb71-4a21-9973-0ba04e966be9"))
-                { ModuleId = "(slc)facility_management" };
-                public static FieldDescriptorID ImageFilepath
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("8498450a-7200-4e7f-b750-7c57dd3a7437"));
-                public static FieldDescriptorID UploadTimestamp
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("29d8c8da-00d8-46fa-adff-d7979d3a5665"));
-            }
-
-            public static class Site
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("9a6552d4-c538-45be-93fd-a879587d25cc"))
-                { ModuleId = "(slc)facility_management" };
-                public static FieldDescriptorID Site_f08b42c7
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("f08b42c7-0c43-42f3-9c93-ec69ee99501a"));
-            }
-
-            public static class SiteInformation
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("b082f391-0fdd-4eda-b4dc-f246c5e0063f"))
-                { ModuleId = "(slc)facility_management" };
-                public static FieldDescriptorID Name
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("49e5f5af-555a-4aa6-b859-84b3d6c4016d"));
-                public static FieldDescriptorID Description
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("199e9b2a-737c-4ddf-bb9e-ae41dff3d4ba"));
-                public static FieldDescriptorID Address
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("54866065-c005-4b3e-a8af-9d73b31fbcc7"));
-                public static FieldDescriptorID City
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("a5871ad2-0caf-4d1f-9ae1-9bbd91e9e158"));
-                public static FieldDescriptorID ZipCode
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("22ea6e74-8beb-445c-9e28-c96e7d11986d"));
-                public static FieldDescriptorID Country
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("0b43ef7a-64c3-4757-ae2b-089117316738"));
-                public static FieldDescriptorID Latitude
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("fd3feeaf-9d1e-4752-a1ba-5da40ed16793"));
-                public static FieldDescriptorID Longitude
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("3f7b64ea-7cd7-4e84-8f80-ab69064a93a8"));
-                public static FieldDescriptorID SiteID
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("e9485c2b-accd-4eda-9b86-195540a9cd20"));
-            }
-
-            public static class FacilityInformation
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("125d4f2c-4d9f-4efe-9af6-1e6a5d4bcaab"))
-                { ModuleId = "(slc)facility_management" };
-                public static FieldDescriptorID Name
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("259e31ed-65e9-4a1f-b8f9-20d94e3e09b3"));
-                public static FieldDescriptorID FacilityType
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("37dbb06b-efcd-4295-a646-00ee1eb30d01"));
-                public static FieldDescriptorID Description
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("fd4dbb48-ed5a-4fc7-bf49-a1f119d09883"));
-                public static FieldDescriptorID Address
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("370f8d27-5ce8-4308-ae3e-130c9dbbf366"));
-                public static FieldDescriptorID City
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("4fa9677f-0022-4012-b371-c884840db7ea"));
-                public static FieldDescriptorID ZipCode
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("91359fc6-ffa8-47b5-a849-20036307a3d8"));
-                public static FieldDescriptorID Country
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("613d7d84-8d85-4e29-9af8-9dc752208789"));
-                public static FieldDescriptorID Latitude
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("def40fd7-3d08-4f1b-88e8-e95ce0ca2606"));
-                public static FieldDescriptorID Longitude
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("872360fb-bc51-46c6-bfd0-8282c6a913f6"));
-                public static FieldDescriptorID FacilityID
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("4ca5dc9c-4bb5-4e46-8a95-0bcf95d2265c"));
-            }
-
-            public static class RowInformation
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("12edb830-c667-4e93-9f9b-94e6992a3bf6"))
-                { ModuleId = "(slc)facility_management" };
-                public static FieldDescriptorID Name
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("12ee587f-e9bf-4be8-8ec7-2c04ac3340dd"));
-                public static FieldDescriptorID RowPlan
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("335719a3-5c1a-4a03-93f2-33fb8b13cedc"));
-                public static FieldDescriptorID RowDescription
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("73b46987-4318-4985-8694-1ef510d96ce1"));
-                public static FieldDescriptorID Y
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("3c56aa07-ba3b-4e62-b7ab-46d4d9bce19d"));
-                public static FieldDescriptorID Label
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("ca234e07-2ea4-4d69-aa94-6136a22e9047"));
-                public static FieldDescriptorID RowID
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("808a94ba-3c5b-4018-88c2-73f1bcebf0f0"));
-            }
-
-            public static class AppSettings
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("67ba4303-7c6b-4c2c-bb8b-0fb2fb4d970d"))
-                { ModuleId = "(slc)facility_management" };
-                public static FieldDescriptorID GoogleMapsAPIKey
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("b4d1d0e7-a4be-45e6-8ab8-b1922a82d21f"));
-            }
-
-            public static class RackCapacity
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("790bcbea-9659-4340-91ff-46dc8c37b251"))
-                { ModuleId = "(slc)facility_management" };
-                public static FieldDescriptorID MaximumRackCapacity
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("be8b9be1-277a-4ccc-ae10-f771900f2847"));
-                public static FieldDescriptorID MaximumPowerCapacity
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("fead1e27-0d5b-43b2-b95b-963343140e1e"));
-            }
-
-            public static class ZoneCapacity
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("136914bb-3580-450f-ad38-3bb709ddc68f"))
-                { ModuleId = "(slc)facility_management" };
-                public static FieldDescriptorID CoolingCapacity
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("814e6ce1-8cb7-4517-b8cd-1ed9e896ca6a"));
-            }
-
-            public static class Row
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("8a81a86b-7372-4c83-bde7-680004bb3eb4"))
-                { ModuleId = "(slc)facility_management" };
-                public static FieldDescriptorID Row_5d2f9bb3
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("5d2f9bb3-a00b-4372-b079-0004b184e15c"));
-            }
-
-            public static class Floor
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("cdbc1f3d-70c8-49e3-a3a3-b310d20b4b6e"))
-                { ModuleId = "(slc)facility_management" };
-                public static FieldDescriptorID Floor_6a3f0eeb
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("6a3f0eeb-018c-412e-a889-819fc83205a4"));
-            }
-
-            public static class Room
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("3ee83337-fe05-417e-b328-08a7931da62f"))
-                { ModuleId = "(slc)facility_management" };
-                public static FieldDescriptorID Room_8d904f8d
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("8d904f8d-6340-4d7e-abc8-62ac1e3fcb09"));
-            }
-
-            public static class Zone
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("785e2397-0f0e-4b82-ace6-9e372a208bf6"))
-                { ModuleId = "(slc)facility_management" };
-                public static FieldDescriptorID Zone_45922fd2
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("45922fd2-c869-46ac-a95d-012fad5adb59"));
-            }
-
-            public static class Resource
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("2f8f34af-8405-4a7e-b996-da6b9d97e61c"))
-                { ModuleId = "(slc)facility_management" };
-                public static FieldDescriptorID LinkedResource
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("af0981cf-d4c0-4016-823b-bd34a385aa2e"));
-            }
-
-            public static class DeskInformation
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("20bcc5d1-5065-4091-a5b0-82a09ecb9ddb"))
-                { ModuleId = "(slc)facility_management" };
-                public static FieldDescriptorID Name
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("bc96a0b4-a8b3-42cc-8a23-eec98f078301"));
-                public static FieldDescriptorID Plan
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("ef68805b-86c2-47d3-9b28-2a0d480b7712"));
-                public static FieldDescriptorID Description
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("2291fc00-8995-4faf-be6e-5da359d38dc7"));
-                public static FieldDescriptorID DeskID
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("488edf47-1b9f-4083-bd6d-8f47fe5bb20e"));
-            }
-
-            public static class ZoneInformation
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("8d225b1a-d69c-4efa-86c3-7f45d6ea7e92"))
-                { ModuleId = "(slc)facility_management" };
-                public static FieldDescriptorID Name
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("f1a7cc3d-634c-452c-a27e-68d704d321f7"));
-                public static FieldDescriptorID Plan
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("574e51c6-4e1a-4729-b33f-b00a8e558ed2"));
-                public static FieldDescriptorID Description
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("e72ceb4a-501b-4781-88b8-97b52b6f7a1a"));
-                public static FieldDescriptorID ThermalType
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("eabd3474-9983-4475-be2f-ddd3dca76137"));
-                public static FieldDescriptorID X
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("9b1ac3ee-18d4-44d8-8cf0-bdf6bf09f6f8"));
-                public static FieldDescriptorID Y
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("2c5edc9a-c1fd-4c9b-9118-e6f6f0e956d8"));
-                public static FieldDescriptorID Width
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("69bb8e71-81ff-4195-ab5a-427bcde57350"));
-                public static FieldDescriptorID Depth
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("d9ed302e-9752-4680-9b1e-8af3db9f9c9e"));
-                public static FieldDescriptorID ZoneID
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("10cc0744-6b35-4d9c-9158-47f0f2c9fdb7"));
-            }
-
-            public static class RoomInformation
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("45f3a9f1-93ca-486b-99f2-70c00f8f80ec"))
-                { ModuleId = "(slc)facility_management" };
-                public static FieldDescriptorID Name
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("995923a7-0220-4a0f-89c0-7f0856c18661"));
-                public static FieldDescriptorID Plan
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("bcdd4b85-0b08-4991-b351-e7d4d6165638"));
-                public static FieldDescriptorID Description
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("4c12f63d-5184-4e0b-9213-ca8ca448b23f"));
-                public static FieldDescriptorID Width
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("31249cdc-4817-46be-b288-481cbefeb2df"));
-                public static FieldDescriptorID Depth
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("11dede73-1ca8-419b-87db-1e78c50317c6"));
-                public static FieldDescriptorID RoomID
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("16beb7ef-8fde-41e3-9f84-318fd8aa68e4"));
-            }
-
-            public static class FloorInformation
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("f3b701eb-5ae6-4cb3-8207-b11c7801e136"))
-                { ModuleId = "(slc)facility_management" };
-                public static FieldDescriptorID Name
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("330ac9f6-5da1-4a3b-b1ed-99179e10d708"));
-                public static FieldDescriptorID Plan
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("1d3a2787-3c0a-4962-85c1-421969d1bbfc"));
-                public static FieldDescriptorID Description
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("eea022dd-636c-4719-ae09-7af4ad32cae7"));
-                public static FieldDescriptorID FloorID
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("3b996c01-2fa6-4443-a877-d9b2ecd0789c"));
-            }
-
-            public static class RoomOwnership
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("92517859-4d32-471f-93d6-2a41de0d94ce"))
-                { ModuleId = "(slc)facility_management" };
-                public static FieldDescriptorID Team
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("371b8e3c-1c5c-4342-81fe-2a8d60d617c5"));
-                public static FieldDescriptorID Owner
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("8ca723ed-6040-4d97-8ba6-ed05d1546071"));
-            }
-
-            public static class Facility
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("9f0aade4-5dc5-4d88-b350-15bd8fafed28"))
-                { ModuleId = "(slc)facility_management" };
-                public static FieldDescriptorID Facility_fc282509
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("fc282509-8271-4580-9ff6-ee3366d5df70"));
-            }
-
-            public static class RackInformation
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("05207b85-724c-4b96-8e50-e8419bb32696"))
-                { ModuleId = "(slc)facility_management" };
-                public static FieldDescriptorID Name
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("3bcf5f23-8178-4058-8300-6c32c1bdf066"));
-                public static FieldDescriptorID Model
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("fb2f13e8-36c0-45ec-a80e-2ccf40a1b3a3"));
-                public static FieldDescriptorID Position
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("c499cb89-b20d-41d5-8aa9-4ffdd98d6cda"));
-                public static FieldDescriptorID Width
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("cd193a69-ddd4-4a53-84a5-3456f80bc00c"));
-                public static FieldDescriptorID Depth
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("32ec429c-8099-44f6-981d-9d30bd7fe0ca"));
-                public static FieldDescriptorID Height
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("c4bc0a18-05c8-4c64-8c47-c173db032fa8"));
-                public static FieldDescriptorID Description
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("0fce02b2-8ddc-4518-900e-8f1fae8ec542"));
-                public static FieldDescriptorID Bookable
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("7369d14b-12e4-4208-a3e9-6222e086d9ce"));
-                public static FieldDescriptorID CoolingFlow
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("94fddd93-29a6-4ae3-a8a6-7ffe2e94a1ab"));
-                public static FieldDescriptorID X
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("ebb91116-270e-4350-9829-b921e86e9dc0"));
-                public static FieldDescriptorID Y
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("0f1b519b-7c8d-452e-b3f6-1b05e84f9a65"));
-                public static FieldDescriptorID Label
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("587351f7-0e2f-46d5-95d6-ef4ad5ffeb47"));
-                public static FieldDescriptorID Color
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("07a59549-3be3-4901-974c-6f81c5502c40"));
-                public static FieldDescriptorID PlacementOrientation
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("d799109e-18af-47c2-8765-82231df2dee5"));
-                public static FieldDescriptorID RackID
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("5a337cca-f388-4018-b39f-55e042a2e001"));
-            }
-        }
-
-        public static class Definitions
-        {
-            public static DomDefinitionId Room
-            {
-                get;
-            }
-
-            = new DomDefinitionId(new Guid("a09ef2ae-78b6-435a-a5b6-f4b91b3ba14f"))
-            { ModuleId = "(slc)facility_management" };
-            public static DomDefinitionId Desk
-            {
-                get;
-            }
-
-            = new DomDefinitionId(new Guid("9af0e791-b171-4b92-86e7-79dbb8282f66"))
-            { ModuleId = "(slc)facility_management" };
-            public static DomDefinitionId Site
-            {
-                get;
-            }
-
-            = new DomDefinitionId(new Guid("5320914d-ffec-486a-9950-b69276b6c13f"))
-            { ModuleId = "(slc)facility_management" };
-            public static DomDefinitionId Facility
-            {
-                get;
-            }
-
-            = new DomDefinitionId(new Guid("dab0442b-b092-4dbf-a249-19dd421c69db"))
-            { ModuleId = "(slc)facility_management" };
-            public static DomDefinitionId Row
-            {
-                get;
-            }
-
-            = new DomDefinitionId(new Guid("29eef06e-ed52-4a26-95da-fd35cc4433df"))
-            { ModuleId = "(slc)facility_management" };
-            public static DomDefinitionId Zone
-            {
-                get;
-            }
-
-            = new DomDefinitionId(new Guid("4576240b-b3da-4739-89d1-c3c5e79a26d9"))
-            { ModuleId = "(slc)facility_management" };
-            public static DomDefinitionId FacilityManagerAppSettings
-            {
-                get;
-            }
-
-            = new DomDefinitionId(new Guid("a07a6f21-b919-4903-ae76-c8442fd97f54"))
-            { ModuleId = "(slc)facility_management" };
-            public static DomDefinitionId Rack
-            {
-                get;
-            }
-
-            = new DomDefinitionId(new Guid("c7877685-0295-40b2-acb1-9aea5d7d9c21"))
-            { ModuleId = "(slc)facility_management" };
-            public static DomDefinitionId Floor
-            {
-                get;
-            }
-
-            = new DomDefinitionId(new Guid("9bbb18c2-8284-4e12-a1d1-f2ebb7e2c1fc"))
-            { ModuleId = "(slc)facility_management" };
-        }
-
-        public static class Behaviors
-        {
-            public static class Room_Behaviour
-            {
-                public static DomBehaviorDefinitionId Id
-                {
-                    get;
-                }
-
-                = new DomBehaviorDefinitionId(new Guid("cce8f754-26c5-4e5e-97fb-0e474afbec5c"))
-                { ModuleId = "(slc)facility_management" };
-                public static class Statuses
-                {
-                    public const string Draft = "4e2df2d6-7e92-46e4-be9b-66dd8bb7e827";
-                    public const string Active = "84baed08-3f7b-4cd7-9428-79b1263f6a73";
-                    public const string Deprecated = "f5d5027c-3281-44d7-aeb5-fe55fd5cf1bd";
-                    public static string ToValue(StatusesEnum @enum)
-                    {
-                        switch (@enum)
-                        {
-                            case StatusesEnum.Draft:
-                                return Draft;
-                            case StatusesEnum.Active:
-                                return Active;
-                            case StatusesEnum.Deprecated:
-                                return Deprecated;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
-                        }
-                    }
-
-                    public static StatusesEnum ToEnum(string s)
-                    {
-                        switch (s)
-                        {
-                            case Draft:
-                                return StatusesEnum.Draft;
-                            case Active:
-                                return StatusesEnum.Active;
-                            case Deprecated:
-                                return StatusesEnum.Deprecated;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
-                        }
-                    }
-                }
-
-                public enum StatusesEnum
-                {
-                    Draft,
-                    Active,
-                    Deprecated
-                }
-
-                public static class Transitions
-                {
-                    public const string Draft_Active = "draft_active";
-                    public const string Active_Deprecated = "active_deprecated";
-                    public static string ToValue(TransitionsEnum @enum)
-                    {
-                        switch (@enum)
-                        {
-                            case TransitionsEnum.Draft_Active:
-                                return Draft_Active;
-                            case TransitionsEnum.Active_Deprecated:
-                                return Active_Deprecated;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
-                        }
-                    }
-
-                    public static TransitionsEnum ToEnum(string s)
-                    {
-                        switch (s)
-                        {
-                            case Draft_Active:
-                                return TransitionsEnum.Draft_Active;
-                            case Active_Deprecated:
-                                return TransitionsEnum.Active_Deprecated;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
-                        }
-                    }
-                }
-
-                public enum TransitionsEnum
-                {
-                    Draft_Active,
-                    Active_Deprecated
-                }
-
-                public static class Actions
-                {
-                    public const string Confirm = "confirm";
-                    public const string Archive = "archive";
-                    public static string ToValue(ActionsEnum @enum)
-                    {
-                        switch (@enum)
-                        {
-                            case ActionsEnum.Confirm:
-                                return Confirm;
-                            case ActionsEnum.Archive:
-                                return Archive;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
-                        }
-                    }
-
-                    public static ActionsEnum ToEnum(string s)
-                    {
-                        switch (s)
-                        {
-                            case Confirm:
-                                return ActionsEnum.Confirm;
-                            case Archive:
-                                return ActionsEnum.Archive;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
-                        }
-                    }
-                }
-
-                public enum ActionsEnum
-                {
-                    Confirm,
-                    Archive
-                }
-            }
-
-            public static class Facility_Behaviour
-            {
-                public static DomBehaviorDefinitionId Id
-                {
-                    get;
-                }
-
-                = new DomBehaviorDefinitionId(new Guid("843615ba-3f5d-46a7-91d8-504ddabcdad4"))
-                { ModuleId = "(slc)facility_management" };
-                public static class Statuses
-                {
-                    public const string Draft = "bbdcf703-d257-45f9-8d62-13ec7adc37b3";
-                    public const string Deprecated = "43d4cef9-3d6a-41cf-83dd-5c671efde61d";
-                    public const string Active = "0350936d-9947-43ba-b4fe-362d375f4a85";
-                    public static string ToValue(StatusesEnum @enum)
-                    {
-                        switch (@enum)
-                        {
-                            case StatusesEnum.Draft:
-                                return Draft;
-                            case StatusesEnum.Deprecated:
-                                return Deprecated;
-                            case StatusesEnum.Active:
-                                return Active;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
-                        }
-                    }
-
-                    public static StatusesEnum ToEnum(string s)
-                    {
-                        switch (s)
-                        {
-                            case Draft:
-                                return StatusesEnum.Draft;
-                            case Deprecated:
-                                return StatusesEnum.Deprecated;
-                            case Active:
-                                return StatusesEnum.Active;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
-                        }
-                    }
-                }
-
-                public enum StatusesEnum
-                {
-                    Draft,
-                    Deprecated,
-                    Active
-                }
-
-                public static class Transitions
-                {
-                    public const string Draft_Active = "draft_active";
-                    public const string Active_Deprecated = "active_deprecated";
-                    public static string ToValue(TransitionsEnum @enum)
-                    {
-                        switch (@enum)
-                        {
-                            case TransitionsEnum.Draft_Active:
-                                return Draft_Active;
-                            case TransitionsEnum.Active_Deprecated:
-                                return Active_Deprecated;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
-                        }
-                    }
-
-                    public static TransitionsEnum ToEnum(string s)
-                    {
-                        switch (s)
-                        {
-                            case Draft_Active:
-                                return TransitionsEnum.Draft_Active;
-                            case Active_Deprecated:
-                                return TransitionsEnum.Active_Deprecated;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
-                        }
-                    }
-                }
-
-                public enum TransitionsEnum
-                {
-                    Draft_Active,
-                    Active_Deprecated
-                }
-
-                public static class Actions
-                {
-                    public const string Confirm = "confirm";
-                    public const string Archive = "archive";
-                    public static string ToValue(ActionsEnum @enum)
-                    {
-                        switch (@enum)
-                        {
-                            case ActionsEnum.Confirm:
-                                return Confirm;
-                            case ActionsEnum.Archive:
-                                return Archive;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
-                        }
-                    }
-
-                    public static ActionsEnum ToEnum(string s)
-                    {
-                        switch (s)
-                        {
-                            case Confirm:
-                                return ActionsEnum.Confirm;
-                            case Archive:
-                                return ActionsEnum.Archive;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
-                        }
-                    }
-                }
-
-                public enum ActionsEnum
-                {
-                    Confirm,
-                    Archive
-                }
-            }
-
-            public static class Site_Behaviour
-            {
-                public static DomBehaviorDefinitionId Id
-                {
-                    get;
-                }
-
-                = new DomBehaviorDefinitionId(new Guid("903a2ba4-5467-4e8e-b728-8f3cd1ff0e72"))
-                { ModuleId = "(slc)facility_management" };
-                public static class Statuses
-                {
-                    public const string Draft = "bbdcf703-d257-45f9-8d62-13ec7adc37b3";
-                    public const string Deprecated = "43d4cef9-3d6a-41cf-83dd-5c671efde61d";
-                    public const string Active = "0350936d-9947-43ba-b4fe-362d375f4a85";
-                    public static string ToValue(StatusesEnum @enum)
-                    {
-                        switch (@enum)
-                        {
-                            case StatusesEnum.Draft:
-                                return Draft;
-                            case StatusesEnum.Deprecated:
-                                return Deprecated;
-                            case StatusesEnum.Active:
-                                return Active;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
-                        }
-                    }
-
-                    public static StatusesEnum ToEnum(string s)
-                    {
-                        switch (s)
-                        {
-                            case Draft:
-                                return StatusesEnum.Draft;
-                            case Deprecated:
-                                return StatusesEnum.Deprecated;
-                            case Active:
-                                return StatusesEnum.Active;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
-                        }
-                    }
-                }
-
-                public enum StatusesEnum
-                {
-                    Draft,
-                    Deprecated,
-                    Active
-                }
-
-                public static class Transitions
-                {
-                    public const string Draft_Active = "draft_active";
-                    public const string Active_Deprecated = "active_deprecated";
-                    public static string ToValue(TransitionsEnum @enum)
-                    {
-                        switch (@enum)
-                        {
-                            case TransitionsEnum.Draft_Active:
-                                return Draft_Active;
-                            case TransitionsEnum.Active_Deprecated:
-                                return Active_Deprecated;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
-                        }
-                    }
-
-                    public static TransitionsEnum ToEnum(string s)
-                    {
-                        switch (s)
-                        {
-                            case Draft_Active:
-                                return TransitionsEnum.Draft_Active;
-                            case Active_Deprecated:
-                                return TransitionsEnum.Active_Deprecated;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
-                        }
-                    }
-                }
-
-                public enum TransitionsEnum
-                {
-                    Draft_Active,
-                    Active_Deprecated
-                }
-
-                public static class Actions
-                {
-                    public const string Confirm = "confirm";
-                    public const string Archive = "archive";
-                    public static string ToValue(ActionsEnum @enum)
-                    {
-                        switch (@enum)
-                        {
-                            case ActionsEnum.Confirm:
-                                return Confirm;
-                            case ActionsEnum.Archive:
-                                return Archive;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
-                        }
-                    }
-
-                    public static ActionsEnum ToEnum(string s)
-                    {
-                        switch (s)
-                        {
-                            case Confirm:
-                                return ActionsEnum.Confirm;
-                            case Archive:
-                                return ActionsEnum.Archive;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
-                        }
-                    }
-                }
-
-                public enum ActionsEnum
-                {
-                    Confirm,
-                    Archive
-                }
-            }
-
-            public static class Desk_Behaviour
-            {
-                public static DomBehaviorDefinitionId Id
-                {
-                    get;
-                }
-
-                = new DomBehaviorDefinitionId(new Guid("fa64f66c-35a8-4b32-8a68-0b0b1341886d"))
-                { ModuleId = "(slc)facility_management" };
-                public static class Statuses
-                {
-                    public const string Draft = "615ec505-7cb6-4fde-9e80-e85312a4ddd4";
-                    public const string Active = "404c20a0-26ec-4c06-a1cd-50d0246b426d";
-                    public const string Deprecated = "07efb53a-5b44-45e3-be03-5e2eafe88d8c";
-                    public static string ToValue(StatusesEnum @enum)
-                    {
-                        switch (@enum)
-                        {
-                            case StatusesEnum.Draft:
-                                return Draft;
-                            case StatusesEnum.Active:
-                                return Active;
-                            case StatusesEnum.Deprecated:
-                                return Deprecated;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
-                        }
-                    }
-
-                    public static StatusesEnum ToEnum(string s)
-                    {
-                        switch (s)
-                        {
-                            case Draft:
-                                return StatusesEnum.Draft;
-                            case Active:
-                                return StatusesEnum.Active;
-                            case Deprecated:
-                                return StatusesEnum.Deprecated;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
-                        }
-                    }
-                }
-
-                public enum StatusesEnum
-                {
-                    Draft,
-                    Active,
-                    Deprecated
-                }
-
-                public static class Transitions
-                {
-                    public const string Draft_Active = "draft_active";
-                    public const string Active_Deprecated = "active_deprecated";
-                    public static string ToValue(TransitionsEnum @enum)
-                    {
-                        switch (@enum)
-                        {
-                            case TransitionsEnum.Draft_Active:
-                                return Draft_Active;
-                            case TransitionsEnum.Active_Deprecated:
-                                return Active_Deprecated;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
-                        }
-                    }
-
-                    public static TransitionsEnum ToEnum(string s)
-                    {
-                        switch (s)
-                        {
-                            case Draft_Active:
-                                return TransitionsEnum.Draft_Active;
-                            case Active_Deprecated:
-                                return TransitionsEnum.Active_Deprecated;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
-                        }
-                    }
-                }
-
-                public enum TransitionsEnum
-                {
-                    Draft_Active,
-                    Active_Deprecated
-                }
-
-                public static class Actions
-                {
-                    public const string Confirm = "confirm";
-                    public const string Archive = "archive";
-                    public static string ToValue(ActionsEnum @enum)
-                    {
-                        switch (@enum)
-                        {
-                            case ActionsEnum.Confirm:
-                                return Confirm;
-                            case ActionsEnum.Archive:
-                                return Archive;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
-                        }
-                    }
-
-                    public static ActionsEnum ToEnum(string s)
-                    {
-                        switch (s)
-                        {
-                            case Confirm:
-                                return ActionsEnum.Confirm;
-                            case Archive:
-                                return ActionsEnum.Archive;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
-                        }
-                    }
-                }
-
-                public enum ActionsEnum
-                {
-                    Confirm,
-                    Archive
-                }
-            }
-
-            public static class Zone_Behaviour
-            {
-                public static DomBehaviorDefinitionId Id
-                {
-                    get;
-                }
-
-                = new DomBehaviorDefinitionId(new Guid("98f2c20b-c4a6-4297-9d57-291915d298c5"))
-                { ModuleId = "(slc)facility_management" };
-                public static class Statuses
-                {
-                    public const string Draft = "08607107-27f9-4eb8-8009-8f7b8661cc03";
-                    public const string Active = "471625e5-4603-433a-8218-9e61a0de6231";
-                    public const string Deprecated = "538b8fc7-cedb-4f35-9728-57d17f813967";
-                    public static string ToValue(StatusesEnum @enum)
-                    {
-                        switch (@enum)
-                        {
-                            case StatusesEnum.Draft:
-                                return Draft;
-                            case StatusesEnum.Active:
-                                return Active;
-                            case StatusesEnum.Deprecated:
-                                return Deprecated;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
-                        }
-                    }
-
-                    public static StatusesEnum ToEnum(string s)
-                    {
-                        switch (s)
-                        {
-                            case Draft:
-                                return StatusesEnum.Draft;
-                            case Active:
-                                return StatusesEnum.Active;
-                            case Deprecated:
-                                return StatusesEnum.Deprecated;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
-                        }
-                    }
-                }
-
-                public enum StatusesEnum
-                {
-                    Draft,
-                    Active,
-                    Deprecated
-                }
-
-                public static class Transitions
-                {
-                    public const string Draft_Active = "draft_active";
-                    public const string Active_Deprecated = "active_deprecated";
-                    public static string ToValue(TransitionsEnum @enum)
-                    {
-                        switch (@enum)
-                        {
-                            case TransitionsEnum.Draft_Active:
-                                return Draft_Active;
-                            case TransitionsEnum.Active_Deprecated:
-                                return Active_Deprecated;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
-                        }
-                    }
-
-                    public static TransitionsEnum ToEnum(string s)
-                    {
-                        switch (s)
-                        {
-                            case Draft_Active:
-                                return TransitionsEnum.Draft_Active;
-                            case Active_Deprecated:
-                                return TransitionsEnum.Active_Deprecated;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
-                        }
-                    }
-                }
-
-                public enum TransitionsEnum
-                {
-                    Draft_Active,
-                    Active_Deprecated
-                }
-
-                public static class Actions
-                {
-                    public const string Confirm = "confirm";
-                    public const string Archive = "archive";
-                    public static string ToValue(ActionsEnum @enum)
-                    {
-                        switch (@enum)
-                        {
-                            case ActionsEnum.Confirm:
-                                return Confirm;
-                            case ActionsEnum.Archive:
-                                return Archive;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
-                        }
-                    }
-
-                    public static ActionsEnum ToEnum(string s)
-                    {
-                        switch (s)
-                        {
-                            case Confirm:
-                                return ActionsEnum.Confirm;
-                            case Archive:
-                                return ActionsEnum.Archive;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
-                        }
-                    }
-                }
-
-                public enum ActionsEnum
-                {
-                    Confirm,
-                    Archive
-                }
-            }
-
-            public static class Row_Behaviour
-            {
-                public static DomBehaviorDefinitionId Id
-                {
-                    get;
-                }
-
-                = new DomBehaviorDefinitionId(new Guid("c620b4a2-2139-4f15-ac6f-c8235f669296"))
-                { ModuleId = "(slc)facility_management" };
-                public static class Statuses
-                {
-                    public const string Draft = "59a7afbd-47ad-4628-add3-d09c4c77e931";
-                    public const string Active = "170a16ff-15ea-44e0-a54c-f73fa4f37a5e";
-                    public const string Deprecated = "6f874cbb-71ab-4f8e-b1a4-25a52299278f";
-                    public static string ToValue(StatusesEnum @enum)
-                    {
-                        switch (@enum)
-                        {
-                            case StatusesEnum.Draft:
-                                return Draft;
-                            case StatusesEnum.Active:
-                                return Active;
-                            case StatusesEnum.Deprecated:
-                                return Deprecated;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
-                        }
-                    }
-
-                    public static StatusesEnum ToEnum(string s)
-                    {
-                        switch (s)
-                        {
-                            case Draft:
-                                return StatusesEnum.Draft;
-                            case Active:
-                                return StatusesEnum.Active;
-                            case Deprecated:
-                                return StatusesEnum.Deprecated;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
-                        }
-                    }
-                }
-
-                public enum StatusesEnum
-                {
-                    Draft,
-                    Active,
-                    Deprecated
-                }
-
-                public static class Transitions
-                {
-                    public const string Draft_Active = "draft_active";
-                    public const string Active_Deprecated = "active_deprecated";
-                    public static string ToValue(TransitionsEnum @enum)
-                    {
-                        switch (@enum)
-                        {
-                            case TransitionsEnum.Draft_Active:
-                                return Draft_Active;
-                            case TransitionsEnum.Active_Deprecated:
-                                return Active_Deprecated;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
-                        }
-                    }
-
-                    public static TransitionsEnum ToEnum(string s)
-                    {
-                        switch (s)
-                        {
-                            case Draft_Active:
-                                return TransitionsEnum.Draft_Active;
-                            case Active_Deprecated:
-                                return TransitionsEnum.Active_Deprecated;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
-                        }
-                    }
-                }
-
-                public enum TransitionsEnum
-                {
-                    Draft_Active,
-                    Active_Deprecated
-                }
-
-                public static class Actions
-                {
-                    public const string Confirm = "confirm";
-                    public const string Archive = "archive";
-                    public static string ToValue(ActionsEnum @enum)
-                    {
-                        switch (@enum)
-                        {
-                            case ActionsEnum.Confirm:
-                                return Confirm;
-                            case ActionsEnum.Archive:
-                                return Archive;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
-                        }
-                    }
-
-                    public static ActionsEnum ToEnum(string s)
-                    {
-                        switch (s)
-                        {
-                            case Confirm:
-                                return ActionsEnum.Confirm;
-                            case Archive:
-                                return ActionsEnum.Archive;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
-                        }
-                    }
-                }
-
-                public enum ActionsEnum
-                {
-                    Confirm,
-                    Archive
-                }
-            }
-
-            public static class Floor_Behaviour
-            {
-                public static DomBehaviorDefinitionId Id
-                {
-                    get;
-                }
-
-                = new DomBehaviorDefinitionId(new Guid("558627ea-71eb-4ac6-a655-dedce737649d"))
-                { ModuleId = "(slc)facility_management" };
-                public static class Statuses
-                {
-                    public const string Draft = "a9227926-67f8-4f64-97bc-bcce855c267a";
-                    public const string Active = "4b7a6778-1861-4d1f-b020-633a450beb44";
-                    public const string Deprecated = "56eded1e-32d0-4109-82b2-d07eed8380c1";
-                    public static string ToValue(StatusesEnum @enum)
-                    {
-                        switch (@enum)
-                        {
-                            case StatusesEnum.Draft:
-                                return Draft;
-                            case StatusesEnum.Active:
-                                return Active;
-                            case StatusesEnum.Deprecated:
-                                return Deprecated;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
-                        }
-                    }
-
-                    public static StatusesEnum ToEnum(string s)
-                    {
-                        switch (s)
-                        {
-                            case Draft:
-                                return StatusesEnum.Draft;
-                            case Active:
-                                return StatusesEnum.Active;
-                            case Deprecated:
-                                return StatusesEnum.Deprecated;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
-                        }
-                    }
-                }
-
-                public enum StatusesEnum
-                {
-                    Draft,
-                    Active,
-                    Deprecated
-                }
-
-                public static class Transitions
-                {
-                    public const string Draft_Active = "draft_active";
-                    public const string Active_Deprecated = "active_deprecated";
-                    public static string ToValue(TransitionsEnum @enum)
-                    {
-                        switch (@enum)
-                        {
-                            case TransitionsEnum.Draft_Active:
-                                return Draft_Active;
-                            case TransitionsEnum.Active_Deprecated:
-                                return Active_Deprecated;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
-                        }
-                    }
-
-                    public static TransitionsEnum ToEnum(string s)
-                    {
-                        switch (s)
-                        {
-                            case Draft_Active:
-                                return TransitionsEnum.Draft_Active;
-                            case Active_Deprecated:
-                                return TransitionsEnum.Active_Deprecated;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
-                        }
-                    }
-                }
-
-                public enum TransitionsEnum
-                {
-                    Draft_Active,
-                    Active_Deprecated
-                }
-
-                public static class Actions
-                {
-                    public const string Confirm = "confirm";
-                    public const string Archive = "archive";
-                    public static string ToValue(ActionsEnum @enum)
-                    {
-                        switch (@enum)
-                        {
-                            case ActionsEnum.Confirm:
-                                return Confirm;
-                            case ActionsEnum.Archive:
-                                return Archive;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
-                        }
-                    }
-
-                    public static ActionsEnum ToEnum(string s)
-                    {
-                        switch (s)
-                        {
-                            case Confirm:
-                                return ActionsEnum.Confirm;
-                            case Archive:
-                                return ActionsEnum.Archive;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
-                        }
-                    }
-                }
-
-                public enum ActionsEnum
-                {
-                    Confirm,
-                    Archive
-                }
-            }
-
-            public static class Rack_Behaviour
-            {
-                public static DomBehaviorDefinitionId Id
-                {
-                    get;
-                }
-
-                = new DomBehaviorDefinitionId(new Guid("4139c312-2b0f-40f3-b875-26cf5066b705"))
-                { ModuleId = "(slc)facility_management" };
-                public static class Statuses
-                {
-                    public const string Draft = "4ec366ed-6337-4f17-a1b3-f03b1b0b93cd";
-                    public const string Active = "5abfe850-851c-4abb-bf5d-0dc00a61c989";
-                    public const string Deprecated = "5cb06723-8588-421b-9373-f83d86a88161";
-                    public static string ToValue(StatusesEnum @enum)
-                    {
-                        switch (@enum)
-                        {
-                            case StatusesEnum.Draft:
-                                return Draft;
-                            case StatusesEnum.Active:
-                                return Active;
-                            case StatusesEnum.Deprecated:
-                                return Deprecated;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
-                        }
-                    }
-
-                    public static StatusesEnum ToEnum(string s)
-                    {
-                        switch (s)
-                        {
-                            case Draft:
-                                return StatusesEnum.Draft;
-                            case Active:
-                                return StatusesEnum.Active;
-                            case Deprecated:
-                                return StatusesEnum.Deprecated;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
-                        }
-                    }
-                }
-
-                public enum StatusesEnum
-                {
-                    Draft,
-                    Active,
-                    Deprecated
-                }
-
-                public static class Transitions
-                {
-                    public const string Draft_Active = "draft_active";
-                    public const string Active_Deprecated = "active_deprecated";
-                    public static string ToValue(TransitionsEnum @enum)
-                    {
-                        switch (@enum)
-                        {
-                            case TransitionsEnum.Draft_Active:
-                                return Draft_Active;
-                            case TransitionsEnum.Active_Deprecated:
-                                return Active_Deprecated;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
-                        }
-                    }
-
-                    public static TransitionsEnum ToEnum(string s)
-                    {
-                        switch (s)
-                        {
-                            case Draft_Active:
-                                return TransitionsEnum.Draft_Active;
-                            case Active_Deprecated:
-                                return TransitionsEnum.Active_Deprecated;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
-                        }
-                    }
-                }
-
-                public enum TransitionsEnum
-                {
-                    Draft_Active,
-                    Active_Deprecated
-                }
-
-                public static class Actions
-                {
-                    public const string Confirm = "confirm";
-                    public const string Archive = "archive";
-                    public static string ToValue(ActionsEnum @enum)
-                    {
-                        switch (@enum)
-                        {
-                            case ActionsEnum.Confirm:
-                                return Confirm;
-                            case ActionsEnum.Archive:
-                                return Archive;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
-                        }
-                    }
-
-                    public static ActionsEnum ToEnum(string s)
-                    {
-                        switch (s)
-                        {
-                            case Confirm:
-                                return ActionsEnum.Confirm;
-                            case Archive:
-                                return ActionsEnum.Archive;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
-                        }
-                    }
-                }
-
-                public enum ActionsEnum
-                {
-                    Confirm,
-                    Archive
-                }
-            }
-        }
-    }
-
-    public static class SlcPlan_And_Build
-    {
-        public const string ModuleId = "(slc)plan_and_build";
-        public static class Enums
-        {
-            public static class Jobtype
-            {
-                public const string Add = "Add";
-                public const string Update = "Update";
-                public const string Remove = "Remove";
-                public static string ToValue(JobtypeEnum @enum)
-                {
-                    switch (@enum)
-                    {
-                        case JobtypeEnum.Add:
-                            return Add;
-                        case JobtypeEnum.Update:
-                            return Update;
-                        case JobtypeEnum.Remove:
-                            return Remove;
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
-                    }
-                }
-
-                public static JobtypeEnum ToEnum(string s)
-                {
-                    switch (s)
-                    {
-                        case Add:
-                            return JobtypeEnum.Add;
-                        case Update:
-                            return JobtypeEnum.Update;
-                        case Remove:
-                            return JobtypeEnum.Remove;
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
-                    }
-                }
-            }
-
-            public enum JobtypeEnum
-            {
-                Add,
-                Update,
-                Remove
-            }
-
-            public static class Priority
-            {
-                public const string Critical = "Critical";
-                public const string High = "High";
-                public const string Normal = "Normal";
-                public const string Low = "Low";
-                public static string ToValue(PriorityEnum @enum)
-                {
-                    switch (@enum)
-                    {
-                        case PriorityEnum.Critical:
-                            return Critical;
-                        case PriorityEnum.High:
-                            return High;
-                        case PriorityEnum.Normal:
-                            return Normal;
-                        case PriorityEnum.Low:
-                            return Low;
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
-                    }
-                }
-
-                public static PriorityEnum ToEnum(string s)
-                {
-                    switch (s)
-                    {
-                        case Critical:
-                            return PriorityEnum.Critical;
-                        case High:
-                            return PriorityEnum.High;
-                        case Normal:
-                            return PriorityEnum.Normal;
-                        case Low:
-                            return PriorityEnum.Low;
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
-                    }
-                }
-            }
-
-            public enum PriorityEnum
-            {
-                Critical,
-                High,
-                Normal,
-                Low
-            }
-
-            public static class Substate
-            {
-                public const string Draft = "draft";
-                public const string PendingApproval = "PendingApproval";
-                public const string DocumentationMontage = "DocumentationMontage";
-                public const string Reviewed = "Reviewed";
-                public const string ResourceAllocation = "ResourceAllocation";
-                public const string Scheduled = "Scheduled";
-                public const string PendingKickoff = "PendingKickoff";
-                public const string InProgress = "InProgress";
-                public const string UnderReview = "UnderReview";
-                public const string OnHold = "OnHold";
-                public const string DocumentationCompleted = "DocumentationCompleted";
-                public const string Archived = "Archived";
-                public static string ToValue(SubStateEnum @enum)
-                {
-                    switch (@enum)
-                    {
-                        case SubStateEnum.Draft:
-                            return Draft;
-                        case SubStateEnum.PendingApproval:
-                            return PendingApproval;
-                        case SubStateEnum.DocumentationMontage:
-                            return DocumentationMontage;
-                        case SubStateEnum.Reviewed:
-                            return Reviewed;
-                        case SubStateEnum.ResourceAllocation:
-                            return ResourceAllocation;
-                        case SubStateEnum.Scheduled:
-                            return Scheduled;
-                        case SubStateEnum.PendingKickoff:
-                            return PendingKickoff;
-                        case SubStateEnum.InProgress:
-                            return InProgress;
-                        case SubStateEnum.UnderReview:
-                            return UnderReview;
-                        case SubStateEnum.OnHold:
-                            return OnHold;
-                        case SubStateEnum.DocumentationCompleted:
-                            return DocumentationCompleted;
-                        case SubStateEnum.Archived:
-                            return Archived;
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
-                    }
-                }
-
-                public static SubStateEnum ToEnum(string s)
-                {
-                    switch (s)
-                    {
-                        case Draft:
-                            return SubStateEnum.Draft;
-                        case PendingApproval:
-                            return SubStateEnum.PendingApproval;
-                        case DocumentationMontage:
-                            return SubStateEnum.DocumentationMontage;
-                        case Reviewed:
-                            return SubStateEnum.Reviewed;
-                        case ResourceAllocation:
-                            return SubStateEnum.ResourceAllocation;
-                        case Scheduled:
-                            return SubStateEnum.Scheduled;
-                        case PendingKickoff:
-                            return SubStateEnum.PendingKickoff;
-                        case InProgress:
-                            return SubStateEnum.InProgress;
-                        case UnderReview:
-                            return SubStateEnum.UnderReview;
-                        case OnHold:
-                            return SubStateEnum.OnHold;
-                        case DocumentationCompleted:
-                            return SubStateEnum.DocumentationCompleted;
-                        case Archived:
-                            return SubStateEnum.Archived;
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
-                    }
-                }
-            }
-
-            public enum SubStateEnum
-            {
-                Draft,
-                PendingApproval,
-                DocumentationMontage,
-                Reviewed,
-                ResourceAllocation,
-                Scheduled,
-                PendingKickoff,
-                InProgress,
-                UnderReview,
-                OnHold,
-                DocumentationCompleted,
-                Archived
-            }
-
-            public static class Actionforassetenum
-            {
-                public const string NewlyInstalled = "Newly Installed";
-                public const string Reinstalled = "Reinstalled";
-                public const string Provisioned = "Provisioned";
-                public const string Commissioned = "Commissioned";
-                public const string Removed = "Removed";
-                public const string Decommissioned = "Decommissioned";
-                public const string Uninstalled = "Uninstalled";
-                public const string Dismantled = "Dismantled";
-                public const string Modified = "Modified";
-                public const string Upgraded = "Upgraded";
-                public const string Reconfigured = "Reconfigured";
-                public const string Expanded = "Expanded";
-                public const string Relocated = "Relocated";
-                public const string Patched = "Patched";
-                public const string Repaired = "Repaired";
-                public const string Serviced = "Serviced";
-                public const string Cleaned = "Cleaned";
-                public const string Tested = "Tested";
-                public const string Audited = "Audited";
-                public const string Inspected = "Inspected";
-                public const string Tagged = "Tagged";
-                public const string Locked = "Locked";
-                public const string Unlocked = "Unlocked";
-                public const string Connected = "Connected";
-                public const string Disconnected = "Disconnected";
-                public const string Virtualized = "Virtualized";
-                public static string ToValue(ActionforassetenumEnum @enum)
-                {
-                    switch (@enum)
-                    {
-                        case ActionforassetenumEnum.NewlyInstalled:
-                            return NewlyInstalled;
-                        case ActionforassetenumEnum.Reinstalled:
-                            return Reinstalled;
-                        case ActionforassetenumEnum.Provisioned:
-                            return Provisioned;
-                        case ActionforassetenumEnum.Commissioned:
-                            return Commissioned;
-                        case ActionforassetenumEnum.Removed:
-                            return Removed;
-                        case ActionforassetenumEnum.Decommissioned:
-                            return Decommissioned;
-                        case ActionforassetenumEnum.Uninstalled:
-                            return Uninstalled;
-                        case ActionforassetenumEnum.Dismantled:
-                            return Dismantled;
-                        case ActionforassetenumEnum.Modified:
-                            return Modified;
-                        case ActionforassetenumEnum.Upgraded:
-                            return Upgraded;
-                        case ActionforassetenumEnum.Reconfigured:
-                            return Reconfigured;
-                        case ActionforassetenumEnum.Expanded:
-                            return Expanded;
-                        case ActionforassetenumEnum.Relocated:
-                            return Relocated;
-                        case ActionforassetenumEnum.Patched:
-                            return Patched;
-                        case ActionforassetenumEnum.Repaired:
-                            return Repaired;
-                        case ActionforassetenumEnum.Serviced:
-                            return Serviced;
-                        case ActionforassetenumEnum.Cleaned:
-                            return Cleaned;
-                        case ActionforassetenumEnum.Tested:
-                            return Tested;
-                        case ActionforassetenumEnum.Audited:
-                            return Audited;
-                        case ActionforassetenumEnum.Inspected:
-                            return Inspected;
-                        case ActionforassetenumEnum.Tagged:
-                            return Tagged;
-                        case ActionforassetenumEnum.Locked:
-                            return Locked;
-                        case ActionforassetenumEnum.Unlocked:
-                            return Unlocked;
-                        case ActionforassetenumEnum.Connected:
-                            return Connected;
-                        case ActionforassetenumEnum.Disconnected:
-                            return Disconnected;
-                        case ActionforassetenumEnum.Virtualized:
-                            return Virtualized;
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
-                    }
-                }
-
-                public static ActionforassetenumEnum ToEnum(string s)
-                {
-                    switch (s)
-                    {
-                        case NewlyInstalled:
-                            return ActionforassetenumEnum.NewlyInstalled;
-                        case Reinstalled:
-                            return ActionforassetenumEnum.Reinstalled;
-                        case Provisioned:
-                            return ActionforassetenumEnum.Provisioned;
-                        case Commissioned:
-                            return ActionforassetenumEnum.Commissioned;
-                        case Removed:
-                            return ActionforassetenumEnum.Removed;
-                        case Decommissioned:
-                            return ActionforassetenumEnum.Decommissioned;
-                        case Uninstalled:
-                            return ActionforassetenumEnum.Uninstalled;
-                        case Dismantled:
-                            return ActionforassetenumEnum.Dismantled;
-                        case Modified:
-                            return ActionforassetenumEnum.Modified;
-                        case Upgraded:
-                            return ActionforassetenumEnum.Upgraded;
-                        case Reconfigured:
-                            return ActionforassetenumEnum.Reconfigured;
-                        case Expanded:
-                            return ActionforassetenumEnum.Expanded;
-                        case Relocated:
-                            return ActionforassetenumEnum.Relocated;
-                        case Patched:
-                            return ActionforassetenumEnum.Patched;
-                        case Repaired:
-                            return ActionforassetenumEnum.Repaired;
-                        case Serviced:
-                            return ActionforassetenumEnum.Serviced;
-                        case Cleaned:
-                            return ActionforassetenumEnum.Cleaned;
-                        case Tested:
-                            return ActionforassetenumEnum.Tested;
-                        case Audited:
-                            return ActionforassetenumEnum.Audited;
-                        case Inspected:
-                            return ActionforassetenumEnum.Inspected;
-                        case Tagged:
-                            return ActionforassetenumEnum.Tagged;
-                        case Locked:
-                            return ActionforassetenumEnum.Locked;
-                        case Unlocked:
-                            return ActionforassetenumEnum.Unlocked;
-                        case Connected:
-                            return ActionforassetenumEnum.Connected;
-                        case Disconnected:
-                            return ActionforassetenumEnum.Disconnected;
-                        case Virtualized:
-                            return ActionforassetenumEnum.Virtualized;
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
-                    }
-                }
-            }
-
-            public enum ActionforassetenumEnum
-            {
-                NewlyInstalled,
-                Reinstalled,
-                Provisioned,
-                Commissioned,
-                Removed,
-                Decommissioned,
-                Uninstalled,
-                Dismantled,
-                Modified,
-                Upgraded,
-                Reconfigured,
-                Expanded,
-                Relocated,
-                Patched,
-                Repaired,
-                Serviced,
-                Cleaned,
-                Tested,
-                Audited,
-                Inspected,
-                Tagged,
-                Locked,
-                Unlocked,
-                Connected,
-                Disconnected,
-                Virtualized
-            }
-        }
-
-        public static class Sections
-        {
-            public static class JobOwnership
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("520a7dac-97ab-42bf-9177-32aeb7b8b9e8"))
-                { ModuleId = "(slc)plan_and_build" };
-                public static FieldDescriptorID AssignedTo
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("e90b9377-410f-4f12-9b2e-42a8036c42c3"));
-                public static FieldDescriptorID AssignmentGroup
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("30deab28-a355-488a-bc25-851cf8bd6694"));
-            }
-
-            public static class JobInformation
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("b28ce9cf-96a1-45bf-8e3d-0f3d1ddc586d"))
-                { ModuleId = "(slc)plan_and_build" };
-                public static FieldDescriptorID JobID
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("124ee700-c707-403a-8887-d0a4728baa25"));
-                public static FieldDescriptorID JobName
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("c2f4bfb8-6377-40b7-8a3f-3deac7d3257e"));
-                public static FieldDescriptorID Start
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("ae07a73c-f8a6-4da1-9aa5-be35c587b8d5"));
-                public static FieldDescriptorID JobType
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("27b85f20-9e5f-4317-bcbf-ded758400dfe"));
-                public static FieldDescriptorID End
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("a92163d0-270c-4b45-a459-90108e87c80d"));
-                public static FieldDescriptorID JobDescription
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("fe73ef98-1d9e-4a69-8aeb-1a4e5f2ecbe5"));
-                public static FieldDescriptorID Remarks
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("5176adad-e61d-4595-8500-cac331043d91"));
-                public static FieldDescriptorID Priority
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("f73d9198-013f-4944-96e9-79bf6f2db026"));
-                public static FieldDescriptorID SubState
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("2cf0ad38-4492-4824-a1ec-5e04392c073a"));
-                public static FieldDescriptorID Locations
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("8e774923-acf3-4d22-a836-d4c7db5e7182"));
-                public static FieldDescriptorID Type
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("50ff0baa-8312-4b1c-b9e0-cf4eef1367cb"));
-            }
-
-            public static class JobSettings
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("c4c6de12-bbc6-4e61-b818-f7c538369235"))
-                { ModuleId = "(slc)plan_and_build" };
-                public static FieldDescriptorID JobIDPrefix
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("b652673a-6191-4d0d-9b59-66f5b83f8421"));
-                public static FieldDescriptorID JobIDNextSequence
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("fc43e8ba-2461-4a3b-907d-2a8a8f3cbce7"));
-                public static FieldDescriptorID JobIDIncrement
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("f09791b2-5352-47db-ade9-cf913b3e4fcd"));
-                public static FieldDescriptorID JobIDStartingSeed
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("c20a2170-c81f-48f8-9136-135806cb3980"));
-                public static FieldDescriptorID JobIDMinimumDigits
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("58c275ac-ef36-4a47-9833-f78e5f1d2ca2"));
-            }
-
-            public static class JobTypeInfo
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("eba2120c-77d0-43c9-a63a-86abd42be359"))
-                { ModuleId = "(slc)plan_and_build" };
-                public static FieldDescriptorID Name
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("3eb96651-a84c-46fd-a114-593c242f17c6"));
-                public static FieldDescriptorID Description
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("0da5e09c-9246-4459-baa1-57b44b13372e"));
-                public static FieldDescriptorID Icon
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("aee7d6e1-4bc2-4f7e-988f-0d84cab0b9db"));
-            }
-
-            public static class AssetsUsed
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("c708731e-b09b-4eed-9a96-27fcc0116db6"))
-                { ModuleId = "(slc)plan_and_build" };
-                public static FieldDescriptorID AssetID
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("fec43e34-1e75-4a30-9b14-de429fa5938d"));
-                public static FieldDescriptorID Action
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("6031de2d-5af0-4486-b69a-288c62fda1f6"));
-            }
-        }
-
-        public static class Definitions
-        {
-            public static DomDefinitionId AppSettings
-            {
-                get;
-            }
-
-            = new DomDefinitionId(new Guid("529f8806-4f41-44fb-afa7-8df6e40dd509"))
-            { ModuleId = "(slc)plan_and_build" };
-            public static DomDefinitionId JobType
-            {
-                get;
-            }
-
-            = new DomDefinitionId(new Guid("447da12d-a9bc-471b-bb90-f33f140851ee"))
-            { ModuleId = "(slc)plan_and_build" };
-            public static DomDefinitionId Job
-            {
-                get;
-            }
-
-            = new DomDefinitionId(new Guid("01bfa461-bdcb-442a-b624-93658d570c9a"))
-            { ModuleId = "(slc)plan_and_build" };
-        }
-
-        public static class Behaviors
-        {
-            public static class Job_Behavior
-            {
-                public static DomBehaviorDefinitionId Id
-                {
-                    get;
-                }
-
-                = new DomBehaviorDefinitionId(new Guid("f66fbbcb-70c8-46ad-acbb-04f8e4b469e9"))
-                { ModuleId = "(slc)plan_and_build" };
-                public static class Statuses
-                {
-                    public const string New = "6c75283d-3e15-4377-8459-93ba7764cd35";
-                    public const string Active = "fac92634-798d-453e-a76f-d4630e572aaa";
-                    public const string Assigned = "2db65456-8365-4da8-b37e-c0f04227549e";
-                    public const string Canceled = "1fc95659-1f75-4e50-b6e7-7567fc6ff30b";
-                    public const string Review = "0163e48c-a9d0-4bda-9eb8-ce192942605f";
-                    public const string Resolved = "6ddd0ea7-e40a-4844-9d17-5da7cfa9056c";
-                    public static string ToValue(StatusesEnum @enum)
-                    {
-                        switch (@enum)
-                        {
-                            case StatusesEnum.New:
-                                return New;
-                            case StatusesEnum.Active:
-                                return Active;
-                            case StatusesEnum.Assigned:
-                                return Assigned;
-                            case StatusesEnum.Canceled:
-                                return Canceled;
-                            case StatusesEnum.Review:
-                                return Review;
-                            case StatusesEnum.Resolved:
-                                return Resolved;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
-                        }
-                    }
-
-                    public static StatusesEnum ToEnum(string s)
-                    {
-                        switch (s)
-                        {
-                            case New:
-                                return StatusesEnum.New;
-                            case Active:
-                                return StatusesEnum.Active;
-                            case Assigned:
-                                return StatusesEnum.Assigned;
-                            case Canceled:
-                                return StatusesEnum.Canceled;
-                            case Review:
-                                return StatusesEnum.Review;
-                            case Resolved:
-                                return StatusesEnum.Resolved;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
-                        }
-                    }
-                }
-
-                public enum StatusesEnum
-                {
-                    New,
-                    Active,
-                    Assigned,
-                    Canceled,
-                    Review,
-                    Resolved
-                }
-
-                public static class Transitions
-                {
-                    public const string New_Assigned = "new_assigned";
-                    public const string Assigned_Active = "assigned_active";
-                    public const string Active_Review = "active_review";
-                    public const string New_Canceled = "new_canceled";
-                    public const string Assigned_Canceled = "assigned_canceled";
-                    public const string Active_Canceled = "active_canceled";
-                    public const string Review_Resolved = "review_resolved";
-                    public static string ToValue(TransitionsEnum @enum)
-                    {
-                        switch (@enum)
-                        {
-                            case TransitionsEnum.New_Assigned:
-                                return New_Assigned;
-                            case TransitionsEnum.Assigned_Active:
-                                return Assigned_Active;
-                            case TransitionsEnum.Active_Review:
-                                return Active_Review;
-                            case TransitionsEnum.New_Canceled:
-                                return New_Canceled;
-                            case TransitionsEnum.Assigned_Canceled:
-                                return Assigned_Canceled;
-                            case TransitionsEnum.Active_Canceled:
-                                return Active_Canceled;
-                            case TransitionsEnum.Review_Resolved:
-                                return Review_Resolved;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
-                        }
-                    }
-
-                    public static TransitionsEnum ToEnum(string s)
-                    {
-                        switch (s)
-                        {
-                            case New_Assigned:
-                                return TransitionsEnum.New_Assigned;
-                            case Assigned_Active:
-                                return TransitionsEnum.Assigned_Active;
-                            case Active_Review:
-                                return TransitionsEnum.Active_Review;
-                            case New_Canceled:
-                                return TransitionsEnum.New_Canceled;
-                            case Assigned_Canceled:
-                                return TransitionsEnum.Assigned_Canceled;
-                            case Active_Canceled:
-                                return TransitionsEnum.Active_Canceled;
-                            case Review_Resolved:
-                                return TransitionsEnum.Review_Resolved;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
-                        }
-                    }
-                }
-
-                public enum TransitionsEnum
-                {
-                    New_Assigned,
-                    Assigned_Active,
-                    Active_Review,
-                    New_Canceled,
-                    Assigned_Canceled,
-                    Active_Canceled,
-                    Review_Resolved
-                }
-
-                public static class Actions
-                {
-                    public const string Assign = "assign";
-                    public const string Activate = "activate";
-                    public const string Complete = "complete";
-                    public const string Settoreview = "settoreview";
-                    public const string Cancel = "cancel";
-                    public static string ToValue(ActionsEnum @enum)
-                    {
-                        switch (@enum)
-                        {
-                            case ActionsEnum.Assign:
-                                return Assign;
-                            case ActionsEnum.Activate:
-                                return Activate;
-                            case ActionsEnum.Complete:
-                                return Complete;
-                            case ActionsEnum.Settoreview:
-                                return Settoreview;
-                            case ActionsEnum.Cancel:
-                                return Cancel;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
-                        }
-                    }
-
-                    public static ActionsEnum ToEnum(string s)
-                    {
-                        switch (s)
-                        {
-                            case Assign:
-                                return ActionsEnum.Assign;
-                            case Activate:
-                                return ActionsEnum.Activate;
-                            case Complete:
-                                return ActionsEnum.Complete;
-                            case Settoreview:
-                                return ActionsEnum.Settoreview;
-                            case Cancel:
-                                return ActionsEnum.Cancel;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
-                        }
-                    }
-                }
-
-                public enum ActionsEnum
-                {
-                    Assign,
-                    Activate,
-                    Complete,
-                    Settoreview,
-                    Cancel
-                }
-            }
-        }
-    }
+	using System;
+
+	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+	using Skyline.DataMiner.Net.Sections;
+
+	public static class InfraopsProperties
+	{
+		public const string ModuleId = "(infraops)properties";
+		public static class Enums
+		{
+			public static class Propertytype
+			{
+				public const string String = "string";
+				public const string Discrete = "discrete";
+				public const string Boolean = "boolean";
+				public static string ToValue(PropertyTypeEnum @enum)
+				{
+					switch (@enum)
+					{
+						case PropertyTypeEnum.String:
+							return String;
+						case PropertyTypeEnum.Discrete:
+							return Discrete;
+						case PropertyTypeEnum.Boolean:
+							return Boolean;
+						default:
+							throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+					}
+				}
+
+				public static PropertyTypeEnum ToEnum(string s)
+				{
+					switch (s)
+					{
+						case String:
+							return PropertyTypeEnum.String;
+						case Discrete:
+							return PropertyTypeEnum.Discrete;
+						case Boolean:
+							return PropertyTypeEnum.Boolean;
+						default:
+							throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+					}
+				}
+			}
+
+			public enum PropertyTypeEnum
+			{
+				String,
+				Discrete,
+				Boolean
+			}
+		}
+
+		public static class Sections
+		{
+			public static class PropertyInfo
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("a99ddb61-78b5-42c5-939d-521cd6cdc0ef"))
+				{ ModuleId = "(infraops)properties" };
+				public static FieldDescriptorID Name
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("b84045d8-6eaa-405c-9b57-abd77c5952be"));
+				public static FieldDescriptorID PropertyType
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("9936899d-9649-401c-b809-835ebb16b4d9"));
+				public static FieldDescriptorID Scope
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("5ddb4403-4800-454d-a46a-d45f803a88df"));
+				public static FieldDescriptorID Default
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("d0858913-71b9-4818-90a2-e4a4c2a232d8"));
+				public static FieldDescriptorID StringSizeLimit
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("143b59e7-f576-47b5-a0f2-46f7591c324c"));
+				public static FieldDescriptorID IsMultiLineString
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("d39ff167-7751-49e3-8053-86cc01716b61"));
+			}
+
+			public static class PropertyValueInfo
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("98c6c75e-855a-438a-b96a-ad14fafe1db7"))
+				{ ModuleId = "(infraops)properties" };
+				public static FieldDescriptorID LinkedObjectID
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("03e6c268-eb10-465e-848e-ff1cda78aca8"));
+				public static FieldDescriptorID Scope
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("1420fd59-e5f1-490d-9c39-702fceb15291"));
+				public static FieldDescriptorID SubID
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("c6949bcd-84ae-4c42-b687-1b26714c725c"));
+			}
+
+			public static class PropertyValue
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("3f0e4530-8569-4eb6-aac3-8e4306b5d3ff"))
+				{ ModuleId = "(infraops)properties" };
+				public static FieldDescriptorID PropertyName
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("17701cad-3394-4e4e-8f53-55b0d69d39ad"));
+				public static FieldDescriptorID Value
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("ce77c7ac-f031-4937-9f6c-6b01ffb28efd"));
+				public static FieldDescriptorID PropertyID
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("37ddd69c-f08f-4d7a-b845-9db72653ffd6"));
+			}
+
+			public static class Layout
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("bd33a4c7-9e7b-44f5-9048-6737ab3191e2"))
+				{ ModuleId = "(infraops)properties" };
+				public static FieldDescriptorID SectionName
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("62802953-4384-400c-92e6-46eda4f872f6"));
+				public static FieldDescriptorID Order
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("d397f123-8606-47bc-8471-d23c79d32cbd"));
+			}
+
+			public static class Discrete
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("3ca75450-2b4b-48df-a893-2ca712f521f7"))
+				{ ModuleId = "(infraops)properties" };
+				public static FieldDescriptorID Option
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("c9066d6b-2447-43b0-b8e4-367b5c378b0a"));
+			}
+		}
+
+		public static class Definitions
+		{
+			public static DomDefinitionId PropertyValues
+			{
+				get;
+			}
+
+			= new DomDefinitionId(new Guid("239ed807-3508-4f00-b950-6681cc25a332"))
+			{ ModuleId = "(infraops)properties" };
+			public static DomDefinitionId Property
+			{
+				get;
+			}
+
+			= new DomDefinitionId(new Guid("d7e4ecb9-dc79-496e-90c7-310b340a248b"))
+			{ ModuleId = "(infraops)properties" };
+		}
+
+		public static class Behaviors
+		{
+		}
+	}
+
+	public static class SlcAsset_Management
+	{
+		public const string ModuleId = "(slc)asset_management";
+		public static class Enums
+		{
+			public static class Hierarchyrole
+			{
+				public const string Chassis = "Chassis";
+				public const string Card = "Card";
+				public const string SubCard = "Sub-Card";
+				public const string Module = "Module";
+				public const string Fan = "Fan";
+				public const string PowerSupply = "Power Supply";
+				public const string None = "None";
+				public static string ToValue(HierarchyRoleEnum @enum)
+				{
+					switch (@enum)
+					{
+						case HierarchyRoleEnum.Chassis:
+							return Chassis;
+						case HierarchyRoleEnum.Card:
+							return Card;
+						case HierarchyRoleEnum.SubCard:
+							return SubCard;
+						case HierarchyRoleEnum.Module:
+							return Module;
+						case HierarchyRoleEnum.Fan:
+							return Fan;
+						case HierarchyRoleEnum.PowerSupply:
+							return PowerSupply;
+						case HierarchyRoleEnum.None:
+							return None;
+						default:
+							throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+					}
+				}
+
+				public static HierarchyRoleEnum ToEnum(string s)
+				{
+					switch (s)
+					{
+						case Chassis:
+							return HierarchyRoleEnum.Chassis;
+						case Card:
+							return HierarchyRoleEnum.Card;
+						case SubCard:
+							return HierarchyRoleEnum.SubCard;
+						case Module:
+							return HierarchyRoleEnum.Module;
+						case Fan:
+							return HierarchyRoleEnum.Fan;
+						case PowerSupply:
+							return HierarchyRoleEnum.PowerSupply;
+						case None:
+							return HierarchyRoleEnum.None;
+						default:
+							throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+					}
+				}
+			}
+
+			public enum HierarchyRoleEnum
+			{
+				Chassis,
+				Card,
+				SubCard,
+				Module,
+				Fan,
+				PowerSupply,
+				None
+			}
+
+			public static class Portexposure
+			{
+				public const string Back = "Back";
+				public const string Front = "Front";
+				public static string ToValue(PortExposureEnum @enum)
+				{
+					switch (@enum)
+					{
+						case PortExposureEnum.Back:
+							return Back;
+						case PortExposureEnum.Front:
+							return Front;
+						default:
+							throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+					}
+				}
+
+				public static PortExposureEnum ToEnum(string s)
+				{
+					switch (s)
+					{
+						case Back:
+							return PortExposureEnum.Back;
+						case Front:
+							return PortExposureEnum.Front;
+						default:
+							throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+					}
+				}
+			}
+
+			public enum PortExposureEnum
+			{
+				Back,
+				Front
+			}
+
+			public enum Outputtype
+			{
+				Out = 0,
+				In = 1,
+				IO = 2
+			}
+
+			public enum ConnectionType
+			{
+				Data = 0,
+				Power = 1
+			}
+
+			public static class Typeofhistory
+			{
+				public const string Add = "Add";
+				public const string Modification = "Modification";
+				public const string Removal = "Removal";
+				public static string ToValue(TypeOfHistoryEnum @enum)
+				{
+					switch (@enum)
+					{
+						case TypeOfHistoryEnum.Add:
+							return Add;
+						case TypeOfHistoryEnum.Modification:
+							return Modification;
+						case TypeOfHistoryEnum.Removal:
+							return Removal;
+						default:
+							throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+					}
+				}
+
+				public static TypeOfHistoryEnum ToEnum(string s)
+				{
+					switch (s)
+					{
+						case Add:
+							return TypeOfHistoryEnum.Add;
+						case Modification:
+							return TypeOfHistoryEnum.Modification;
+						case Removal:
+							return TypeOfHistoryEnum.Removal;
+						default:
+							throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+					}
+				}
+			}
+
+			public enum TypeOfHistoryEnum
+			{
+				Add,
+				Modification,
+				Removal
+			}
+
+			public static class Categories
+			{
+				public const string Networking = "Networking";
+				public const string Power = "Power";
+				public const string Audio = "Audio";
+				public const string Storage = "Storage";
+				public const string Peripheral = "Peripheral";
+				public const string Video = "Video";
+				public const string Misc = "Misc";
+				public const string Data = "Data";
+				public const string Broadcast = "Broadcast";
+				public static string ToValue(CategoriesEnum @enum)
+				{
+					switch (@enum)
+					{
+						case CategoriesEnum.Networking:
+							return Networking;
+						case CategoriesEnum.Power:
+							return Power;
+						case CategoriesEnum.Audio:
+							return Audio;
+						case CategoriesEnum.Storage:
+							return Storage;
+						case CategoriesEnum.Peripheral:
+							return Peripheral;
+						case CategoriesEnum.Video:
+							return Video;
+						case CategoriesEnum.Misc:
+							return Misc;
+						case CategoriesEnum.Data:
+							return Data;
+						case CategoriesEnum.Broadcast:
+							return Broadcast;
+						default:
+							throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+					}
+				}
+
+				public static CategoriesEnum ToEnum(string s)
+				{
+					switch (s)
+					{
+						case Networking:
+							return CategoriesEnum.Networking;
+						case Power:
+							return CategoriesEnum.Power;
+						case Audio:
+							return CategoriesEnum.Audio;
+						case Storage:
+							return CategoriesEnum.Storage;
+						case Peripheral:
+							return CategoriesEnum.Peripheral;
+						case Video:
+							return CategoriesEnum.Video;
+						case Misc:
+							return CategoriesEnum.Misc;
+						case Data:
+							return CategoriesEnum.Data;
+						case Broadcast:
+							return CategoriesEnum.Broadcast;
+						default:
+							throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+					}
+				}
+			}
+
+			public enum CategoriesEnum
+			{
+				Networking,
+				Power,
+				Audio,
+				Storage,
+				Peripheral,
+				Video,
+				Misc,
+				Data,
+				Broadcast
+			}
+
+			public enum Planandbuildjobpromptenum
+			{
+				Disabled = 0,
+				Enabled = 1
+			}
+
+			public enum TagOption
+			{
+				PowerProvider = 0,
+				AcceptsDataConnection = 1,
+				RackUnitConsumer = 2
+			}
+
+			public static class Powersupply
+			{
+				public const string AC = "AC";
+				public const string DC = "DC";
+				public static string ToValue(PowerSupplyEnum @enum)
+				{
+					switch (@enum)
+					{
+						case PowerSupplyEnum.AC:
+							return AC;
+						case PowerSupplyEnum.DC:
+							return DC;
+						default:
+							throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+					}
+				}
+
+				public static PowerSupplyEnum ToEnum(string s)
+				{
+					switch (s)
+					{
+						case AC:
+							return PowerSupplyEnum.AC;
+						case DC:
+							return PowerSupplyEnum.DC;
+						default:
+							throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+					}
+				}
+			}
+
+			public enum PowerSupplyEnum
+			{
+				AC,
+				DC
+			}
+
+			public enum Operationalflagsenum
+			{
+				Faulty = 0
+			}
+
+			public static class Side
+			{
+				public const string Front = "Front";
+				public const string Back = "Back";
+				public const string Right = "Right";
+				public const string Left = "Left";
+				public static string ToValue(SideEnum @enum)
+				{
+					switch (@enum)
+					{
+						case SideEnum.Front:
+							return Front;
+						case SideEnum.Back:
+							return Back;
+						case SideEnum.Right:
+							return Right;
+						case SideEnum.Left:
+							return Left;
+						default:
+							throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+					}
+				}
+
+				public static SideEnum ToEnum(string s)
+				{
+					switch (s)
+					{
+						case Front:
+							return SideEnum.Front;
+						case Back:
+							return SideEnum.Back;
+						case Right:
+							return SideEnum.Right;
+						case Left:
+							return SideEnum.Left;
+						default:
+							throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+					}
+				}
+			}
+
+			public enum SideEnum
+			{
+				Front,
+				Back,
+				Right,
+				Left
+			}
+		}
+
+		public static class Sections
+		{
+			public static class ReservationRack
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("5b1c5bb2-ec0e-4f65-a195-58f47eb40d61"))
+				{ ModuleId = "(slc)asset_management" };
+				public static FieldDescriptorID Rack
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("5cc40c75-11a0-4a88-9e0f-d05c7f2fa0dd"));
+			}
+
+			public static class Holders
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("f2048e2c-8d4a-4d18-a808-f2bff352905f"))
+				{ ModuleId = "(slc)asset_management" };
+				public static FieldDescriptorID SlotNumber
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("303c7d9e-7dbe-4e25-a462-e22f0d993dd8"));
+				public static FieldDescriptorID HierarchyRole
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("c25c6d3a-ef44-4f31-be9f-d81fddbd4160"));
+				public static FieldDescriptorID Label
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("fe11153b-df8b-45ae-b8a1-73be501775a8"));
+			}
+
+			public static class PowerPortInfo
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("75f703c9-dff8-44ef-9606-49c94a3f2ee4"))
+				{ ModuleId = "(slc)asset_management" };
+				public static FieldDescriptorID PortNumber
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("64262d36-61e5-4d51-8aef-a408d714d7ea"));
+				public static FieldDescriptorID PortName
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("9733a4a7-9d20-480d-a419-073c88a9c6db"));
+				public static FieldDescriptorID PortExposure
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("8985105e-888f-487c-ac0e-e28a3f48a0b0"));
+				public static FieldDescriptorID OutputType
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("6378c911-7cbc-4246-bd17-3343536c10af"));
+				public static FieldDescriptorID PortType
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("ca8e6205-8b15-4633-a497-202c509c0e4c"));
+				public static FieldDescriptorID Label
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("57fb12ed-907b-41d1-9f3f-c1211718f338"));
+			}
+
+			public static class ConnectionInfo
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("a8035b4d-f36e-4093-9002-b80238449b14"))
+				{ ModuleId = "(slc)asset_management" };
+				public static FieldDescriptorID Notes
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("448dba2b-4aa7-4081-8afb-261c8f65f32f"));
+				public static FieldDescriptorID Description
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("40eb0c0f-37ca-4bb9-bd0f-cc4e52556c04"));
+				public static FieldDescriptorID ConnectionType
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("c0e0318f-2ce7-43ff-ab69-1b48f7251fd2"));
+			}
+
+			public static class HistoryInfo
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("cec87feb-30d0-4270-8bf8-7e8282d0513c"))
+				{ ModuleId = "(slc)asset_management" };
+				public static FieldDescriptorID Description
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("35c9573b-699d-4b66-806e-45bde72890aa"));
+				public static FieldDescriptorID Job
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("7c2bcda4-0936-4961-ac88-5015d7e83dad"));
+				public static FieldDescriptorID UserID
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("a180d661-80a4-4f01-b525-5f33eef20f3b"));
+				public static FieldDescriptorID InstanceDefinitionID
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("cfab9a69-9d07-4012-9e44-a12e13ecd01c"));
+				public static FieldDescriptorID InstanceID
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("4d913684-12ec-4666-98a2-5e4db7fb5acf"));
+				public static FieldDescriptorID ExtraInfo
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("4a668dee-93a0-485b-ab58-a8a710e176ae"));
+				public static FieldDescriptorID TypeOfHistory
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("7bf1509d-16f6-4093-a4c3-d2ed14dcad7e"));
+			}
+
+			public static class ReservationInfo
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("2ad67f52-0826-4234-ba7e-bbf9ef046fad"))
+				{ ModuleId = "(slc)asset_management" };
+				public static FieldDescriptorID Description
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("c37debdc-4078-4f51-a30b-10d5c361d009"));
+			}
+
+			public static class CategoryLink
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("bda370db-b7e1-431b-991d-37044d0b9176"))
+				{ ModuleId = "(slc)asset_management" };
+				public static FieldDescriptorID Categories
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("33a42db3-61d2-4ccc-97a6-6c9476efc059"));
+			}
+
+			public static class CableTypeInformation
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("08974346-b8ff-4e00-8cdd-34d401774092"))
+				{ ModuleId = "(slc)asset_management" };
+				public static FieldDescriptorID Name
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("d4950291-0879-46d1-94f5-423c9fbdee0d"));
+				public static FieldDescriptorID Description
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("47ab4284-97fb-4c45-afcf-f4d7f851f065"));
+			}
+
+			public static class AppSettings
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("941488bf-bb5a-46e0-968c-4b96f18fcbf1"))
+				{ ModuleId = "(slc)asset_management" };
+				public static FieldDescriptorID EnableAssetHistory
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("9555c359-2741-46f7-9051-040bbce3ce68"));
+				public static FieldDescriptorID PlanAndBuildJobPrompt
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("be7d9f39-8b18-45bf-b9ca-67f03f048134"));
+				public static FieldDescriptorID EnableConnectionHistory
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("62a7768a-76b0-4398-bfbe-7c513a7c0a2c"));
+				public static FieldDescriptorID HistoryTTL
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("c540fb2a-18a8-4fbd-9612-8effd24873c0"));
+				public static FieldDescriptorID HistoryLimit
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("ca9c44c6-e189-4c39-b1a0-37b3ec1d8b78"));
+			}
+
+			public static class AssetNetworkDetails
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("67d996e7-d63e-4ab3-8f84-b937af51c1be"))
+				{ ModuleId = "(slc)asset_management" };
+				public static FieldDescriptorID MACAddress
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("188825a2-482e-4db1-a058-f539ee9d0878"));
+			}
+
+			public static class AssetClassLifecycleInformation
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("7146ed89-798f-46f9-a534-99ed91d15e29"))
+				{ ModuleId = "(slc)asset_management" };
+				public static FieldDescriptorID EOLDate
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("7a38322c-2409-43fc-a6a7-1fd03ac9c5c4"));
+				public static FieldDescriptorID EOSDate
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("535dedd7-4c31-4d01-b369-5d76c3661c96"));
+				public static FieldDescriptorID NominalLifetime
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("c518fadb-fd43-4c82-80ab-a5f05d067d85"));
+			}
+
+			public static class TagsInfo
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("9d0bbc4b-e0be-45e9-8280-6fe36efe12e8"))
+				{ ModuleId = "(slc)asset_management" };
+				public static FieldDescriptorID Tags
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("9109438c-72dc-4822-8891-4199d2dc0ed7"));
+			}
+
+			public static class LinkedJob
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("affb2069-39ff-4318-868e-f19b298477f1"))
+				{ ModuleId = "(slc)asset_management" };
+				public static FieldDescriptorID Job
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("c6f632ad-33d9-41e3-a8de-74c99a001143"));
+			}
+
+			public static class AssetLifecycle
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("8f8353b9-5189-468f-881a-5841595548e8"))
+				{ ModuleId = "(slc)asset_management" };
+				public static FieldDescriptorID PurchaseDate
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("944d7abf-31b7-4ef9-aabd-defe7cd7982f"));
+				public static FieldDescriptorID FirstUseDate
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("f6dfe8c6-a97f-4a78-b5c3-1d1872c912f5"));
+				public static FieldDescriptorID EndOfWarrantyDate
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("a35b0aeb-976e-4656-9915-4548f79bc2ca"));
+				public static FieldDescriptorID InstallationDate
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("71a78231-a686-4459-9c1a-b7dd0ac7178b"));
+				public static FieldDescriptorID InstallationUser
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("cad2081d-6c5c-4a0a-9cea-d6adcdd60b2a"));
+				public static FieldDescriptorID ModificationDate
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("7c36827c-efa2-475c-aef0-b27167c9071f"));
+				public static FieldDescriptorID ModificationUser
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("bd1fdb19-4913-4cf7-b74b-d037c5febbd7"));
+				public static FieldDescriptorID EndOfLife
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("9b70f622-1146-4239-807d-f81f63d4f46a"));
+			}
+
+			public static class AssetClassInfo
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("311b421b-8c62-4fb2-b211-3740a6a17b40"))
+				{ ModuleId = "(slc)asset_management" };
+				public static FieldDescriptorID Name
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("64e8da13-cdfa-459c-9185-77555e874f7d"));
+				public static FieldDescriptorID DeviceType
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("e7661d39-0325-488f-a8e8-51ba18f29fba"));
+				public static FieldDescriptorID Description
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("b8adb2c5-3531-446f-8ad6-670c32dadad1"));
+				public static FieldDescriptorID Manufacturer
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("065a0dde-a9be-4021-a8a3-490ddf7987a4"));
+				public static FieldDescriptorID Height
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("84820351-6e13-4ee3-aec5-8d6e725c2194"));
+				public static FieldDescriptorID Depth
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("14a1b2f6-cccc-41cd-bfaf-eb7edcccd730"));
+				public static FieldDescriptorID Width
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("481f1010-cf0f-4fb5-947a-11accd221a79"));
+				public static FieldDescriptorID HeightU
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("c6493f31-5651-4da0-af44-d24c73511030"));
+				public static FieldDescriptorID Weight
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("df1cd95b-f534-4795-8363-08c3d2f17e9a"));
+				public static FieldDescriptorID MaximumPowerConsumption
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("28427166-97df-44f3-8651-28fd1236f566"));
+				public static FieldDescriptorID TypicalPowerConsumption
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("9c01fc26-2449-46f1-8ad1-fc32e9e18c97"));
+				public static FieldDescriptorID FrontImage
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("23edd575-f266-4444-bfc3-43a35d9b3ed0"));
+				public static FieldDescriptorID BackImage
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("2183802a-7157-41cf-b342-c18ce8623fae"));
+				public static FieldDescriptorID PowerSupply
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("cebfc16b-88d3-4d3e-8969-0ebcef5fd442"));
+				public static FieldDescriptorID Citype
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("43fe2474-b7d2-4f2b-b690-b5064e5e7786"));
+			}
+
+			public static class AssetOwnership
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("7fc5a856-18a4-46fd-8e34-2bbe4c642982"))
+				{ ModuleId = "(slc)asset_management" };
+				public static FieldDescriptorID Organization
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("e0f38c9c-71ec-484b-8544-4cd162319d59"));
+				public static FieldDescriptorID ContactPerson
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("b2e98b27-a1e9-4e45-8158-cc91cf8cd0aa"));
+				public static FieldDescriptorID ContactPersonRole
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("ebd89394-006e-44b0-8839-b41f457b96de"));
+				public static FieldDescriptorID Team
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("3867d676-2d64-43cd-816b-4db25932e0ad"));
+			}
+
+			public static class ReservedPositions
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("a22f5492-2021-4eea-8d02-357f778297df"))
+				{ ModuleId = "(slc)asset_management" };
+				public static FieldDescriptorID ReservedPositionsLowerBound
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("ee743138-237e-43fd-8e3c-e510a46a2e69"));
+				public static FieldDescriptorID ReservedPositionsUpperBound
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("0cfa5d47-cb26-47bf-b14e-e1b394943c68"));
+			}
+
+			public static class DataPortInfo
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("7918fb83-c6de-43c7-82d1-e561aefac746"))
+				{ ModuleId = "(slc)asset_management" };
+				public static FieldDescriptorID PortNumber
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("46ae4b8b-4cd1-4673-909f-c8d3cd2f9298"));
+				public static FieldDescriptorID PortName
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("b697fc76-bb00-449c-b971-2f78a5b2623f"));
+				public static FieldDescriptorID PortExposure
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("603653d8-7b1d-4d04-b30d-20ca35984bb1"));
+				public static FieldDescriptorID OutputType
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("638988c3-731a-4c54-8ed7-df5281eaa8b8"));
+				public static FieldDescriptorID PortType
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("0f039e8b-aaa3-4836-a358-80a02b55f566"));
+				public static FieldDescriptorID Label
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("0ba7fcc1-dcbc-45e0-b918-1a2e1ab194e5"));
+			}
+
+			public static class AddressInfo
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("73f92de5-317d-41dc-b8c3-2563fcb13e50"))
+				{ ModuleId = "(slc)asset_management" };
+				public static FieldDescriptorID IPV4Address
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("3fbfbfc8-b80f-4c89-b494-218701b1cd16"));
+				public static FieldDescriptorID IPV6Address
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("d9d5c461-5076-4565-b621-ddcb208e03e6"));
+				public static FieldDescriptorID Hostname
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("956464e3-6b17-4fa2-9987-02d8241d23ce"));
+				public static FieldDescriptorID DNS
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("96f7776d-dfca-4465-9131-33448b98753d"));
+			}
+
+			public static class CableCompatibility
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("bccf76f0-1c97-4e8b-8c78-156a18ec4e2c"))
+				{ ModuleId = "(slc)asset_management" };
+				public static FieldDescriptorID CableTypes
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("1b8a745d-3f49-42e9-8d6f-fbc82ca36c61"));
+			}
+
+			public static class CableInformation
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("d0b3100f-6a88-4c32-b3fd-4cb7a662c75b"))
+				{ ModuleId = "(slc)asset_management" };
+				public static FieldDescriptorID CableLength
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("9de151de-6bfd-4a1c-9202-a059a8e2617f"));
+				public static FieldDescriptorID CableType
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("4d16487d-a173-4969-865d-145cee55e3b7"));
+			}
+
+			public static class SourceInfo
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("ea1c78c3-9670-4cf6-8752-29fa9756f275"))
+				{ ModuleId = "(slc)asset_management" };
+				public static FieldDescriptorID CableSourceTag
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("d6494fe8-ea1b-4afd-a257-ee89abfe6b60"));
+				public static FieldDescriptorID SourcePort
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("327393e3-d742-4b38-8bcb-f670a4dece5d"));
+				public static FieldDescriptorID SourcePortType
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("acd43af5-f224-4e07-bc16-e9bf313e95d7"));
+			}
+
+			public static class HierarchyInfo
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("ca44f3ce-2725-49f1-93f2-8eb53d1d858c"))
+				{ ModuleId = "(slc)asset_management" };
+				public static FieldDescriptorID HierarchyRole
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("fa9a8c23-7f13-43bf-89d5-66962f9f56f8"));
+			}
+
+			public static class AssetInformation
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("58c1a50e-d1c7-4467-8d19-54a29f985d83"))
+				{ ModuleId = "(slc)asset_management" };
+				public static FieldDescriptorID AssetName
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("43c3c696-03be-461b-b01b-40a47a45648f"));
+				public static FieldDescriptorID SerialNumber
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("550a8136-11f7-4a5e-a4c8-a7abd9b1afa1"));
+				public static FieldDescriptorID AssetClass
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("1b894f9c-966e-4d73-8f00-c77bb7ece1a6"));
+				public static FieldDescriptorID AssetDescription
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("243689f0-c594-4fe6-852c-bbffed9fea67"));
+				public static FieldDescriptorID FWOS
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("d5ffa4aa-c04f-4bca-a9bd-25b009cc3f50"));
+				public static FieldDescriptorID AssetID
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("e014bef3-1a42-4e5b-979b-d7dcce5af177"));
+				public static FieldDescriptorID HardwareVersion
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("a690819d-32b4-4709-bdc9-68299136dd37"));
+				public static FieldDescriptorID OperationalFlags
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("4085a0ba-6303-4cf9-9f0c-eb7d495c2462"));
+			}
+
+			public static class PortTypeInformation
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("7b019f7b-024c-46ec-814d-5a65b1e5fabe"))
+				{ ModuleId = "(slc)asset_management" };
+				public static FieldDescriptorID Name
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("42228cc4-bd6e-455f-bf9d-6b309c0fed48"));
+				public static FieldDescriptorID Description
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("c8e21874-9791-4fa9-b572-bd9028fdf367"));
+			}
+
+			public static class ElementLink
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("e711b95b-74ea-4e2a-b08a-4f05cb55a8a5"))
+				{ ModuleId = "(slc)asset_management" };
+				public static FieldDescriptorID ElementID
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("f2c0295b-4b49-47b3-87db-9b76b283def5"));
+				public static FieldDescriptorID IsPrimary
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("e967f1aa-3ca5-40db-b67d-7dcb8153b444"));
+			}
+
+			public static class Asset
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("45368cbd-a605-4930-8bf2-d0f649edeae0"))
+				{ ModuleId = "(slc)asset_management" };
+				public static FieldDescriptorID AssetID
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("71dd3307-3015-43f8-86fd-1618c31a7ab2"));
+			}
+
+			public static class AssetCustody
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("db82849f-e6da-478b-b295-dd75de94e0b6"))
+				{ ModuleId = "(slc)asset_management" };
+				public static FieldDescriptorID From
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("b97a40fa-30f3-480c-b0e5-dee12645bf6f"));
+				public static FieldDescriptorID Till
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("2b2d870f-4cc3-41c1-9f83-8dad85f1f8fe"));
+				public static FieldDescriptorID ContactPerson
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("a58869a6-a316-49e7-87a7-e904d74954df"));
+				public static FieldDescriptorID Team
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("a13cd67a-e7f3-4dc0-93f1-98f56a5c4e7d"));
+				public static FieldDescriptorID Organization
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("1af14e1e-ae59-48dd-b3c3-8c1b28ddeb14"));
+				public static FieldDescriptorID ContactPersonRole
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("5a70fb9e-4430-4b72-b6b1-7ed4764d4041"));
+			}
+
+			public static class AssetLocation
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("7fd5d383-b925-4d93-ac32-85f7453c8f1d"))
+				{ ModuleId = "(slc)asset_management" };
+				public static FieldDescriptorID RackPosition
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("a5ca6c86-5f52-4b34-99a8-3673ae3d5254"));
+				public static FieldDescriptorID Side
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("b267553c-cb6e-42cd-a07f-4fee92ca0045"));
+				public static FieldDescriptorID Rack
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("4ce12068-f564-4aa7-9cd1-2510473ae124"));
+				public static FieldDescriptorID Desk
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("220264e3-96c5-4164-aa68-5a8d60f16bf5"));
+				public static FieldDescriptorID Container
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("0b3196b5-44aa-4c0c-bf6e-6510b9c08662"));
+				public static FieldDescriptorID Room
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("9bdcf494-f6d1-4cf5-8a28-bd77ab9c712a"));
+				public static FieldDescriptorID PowerSupplyRackPosition
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("7008d2e9-3826-485b-a270-311f01054c5d"));
+				public static FieldDescriptorID ParentAsset
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("02e5b03a-ec40-406e-a828-24f02cf23777"));
+				public static FieldDescriptorID HolderNumber
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("c0c08b13-ead2-4c22-b29b-2c5c5f2ea902"));
+			}
+
+			public static class DeviceTypeInformation
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("516210a2-f739-4462-9df8-2a8146c30bf0"))
+				{ ModuleId = "(slc)asset_management" };
+				public static FieldDescriptorID Name
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("df767b3b-8fc4-4d3e-b4fa-5e78d4a705fa"));
+				public static FieldDescriptorID Description
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("f5f51839-3f2b-42e2-a67f-b9e34d87b129"));
+			}
+
+			public static class AssetLocationDestination
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("a4b292f2-f634-4e16-b218-783c7a2baa43"))
+				{ ModuleId = "(slc)asset_management" };
+				public static FieldDescriptorID RackPosition
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("0715e5ff-ab9c-477c-bb3e-55c7e9e34f2f"));
+				public static FieldDescriptorID Side
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("fc22e70b-4630-4280-a5ec-556e42e7312b"));
+				public static FieldDescriptorID Rack
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("0a004d82-02ca-41e5-9997-51b7ab965b91"));
+				public static FieldDescriptorID Desk
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("42b6d606-2f76-4148-a68d-8472f748ce99"));
+				public static FieldDescriptorID Container
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("cdc8ef56-c7de-4308-a3b2-dedc70260af9"));
+				public static FieldDescriptorID Room
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("09a567e1-b1eb-4f71-9cb7-322c4c75aa64"));
+				public static FieldDescriptorID PowerSupplyRackPosition
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("3d604a70-9cbc-4b09-a39f-a93cd5c1c904"));
+				public static FieldDescriptorID ParentAsset
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("f8ce6dcb-9e7c-49a0-8fa9-c4c03d40419b"));
+				public static FieldDescriptorID HolderNumber
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("372a2d99-a2dd-488a-b86a-9aacd0e0ed8f"));
+			}
+
+			public static class PrimaryPortRelation
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("2ad90463-9998-4df9-a068-93a13cfa2e6a"))
+				{ ModuleId = "(slc)asset_management" };
+				public static FieldDescriptorID Isprimaryipv4
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("884f0a95-c1e8-447c-ba1d-0061deaca70d"));
+				public static FieldDescriptorID Isprimaryipv6
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("a81dc9d7-fc3d-447d-83cb-e9a54c1df5f6"));
+			}
+
+			public static class DestinationInfo
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("cae60cfd-5a48-4e6b-8f52-e69e8e468a9c"))
+				{ ModuleId = "(slc)asset_management" };
+				public static FieldDescriptorID CableDestinationTag
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("1d26a6f3-bbd8-44f8-9221-4467f13fe135"));
+				public static FieldDescriptorID DestinationPort
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("b01fa755-ce22-4135-b21d-64217c0994f0"));
+				public static FieldDescriptorID DestinationPortType
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("3882369e-78ab-4985-93ef-dcb1641a08b2"));
+			}
+		}
+
+		public static class Definitions
+		{
+			public static DomDefinitionId CableType
+			{
+				get;
+			}
+
+			= new DomDefinitionId(new Guid("b2e24be2-a559-4628-bcfd-e0398644d46a"))
+			{ ModuleId = "(slc)asset_management" };
+			public static DomDefinitionId PowerPort
+			{
+				get;
+			}
+
+			= new DomDefinitionId(new Guid("edfd08fd-ecae-44db-949a-8ca5d17ee22d"))
+			{ ModuleId = "(slc)asset_management" };
+			public static DomDefinitionId Connections
+			{
+				get;
+			}
+
+			= new DomDefinitionId(new Guid("a7844a51-8221-48da-9a0e-7cfa20262715"))
+			{ ModuleId = "(slc)asset_management" };
+			public static DomDefinitionId Asset
+			{
+				get;
+			}
+
+			= new DomDefinitionId(new Guid("9035d110-47f3-412d-ac8a-fde31bd4b00f"))
+			{ ModuleId = "(slc)asset_management" };
+			public static DomDefinitionId AssetManagerAppSettings
+			{
+				get;
+			}
+
+			= new DomDefinitionId(new Guid("5372272a-65f3-43e3-9ef4-f7f879de5a26"))
+			{ ModuleId = "(slc)asset_management" };
+			public static DomDefinitionId Reservations
+			{
+				get;
+			}
+
+			= new DomDefinitionId(new Guid("203aacf0-ad18-4d52-b243-9547fa8b2553"))
+			{ ModuleId = "(slc)asset_management" };
+			public static DomDefinitionId DataPort
+			{
+				get;
+			}
+
+			= new DomDefinitionId(new Guid("280b26f8-7245-4b67-85c1-d42bcf3e9c41"))
+			{ ModuleId = "(slc)asset_management" };
+			public static DomDefinitionId DeviceType
+			{
+				get;
+			}
+
+			= new DomDefinitionId(new Guid("f369e97b-51b2-4cdc-90b4-7a4f86fad82c"))
+			{ ModuleId = "(slc)asset_management" };
+			public static DomDefinitionId AssetClass
+			{
+				get;
+			}
+
+			= new DomDefinitionId(new Guid("d6f9c4c8-9f8d-4e8c-a7e0-1e1500563416"))
+			{ ModuleId = "(slc)asset_management" };
+			public static DomDefinitionId PortType
+			{
+				get;
+			}
+
+			= new DomDefinitionId(new Guid("ff930185-a380-46bf-8bfb-8c70f6933c67"))
+			{ ModuleId = "(slc)asset_management" };
+			public static DomDefinitionId History
+			{
+				get;
+			}
+
+			= new DomDefinitionId(new Guid("4d4ad8f7-fe8f-48c4-a373-6d36184de4fb"))
+			{ ModuleId = "(slc)asset_management" };
+		}
+
+		public static class Behaviors
+		{
+			public static class Asset_Behavior
+			{
+				public static DomBehaviorDefinitionId Id
+				{
+					get;
+				}
+
+				= new DomBehaviorDefinitionId(new Guid("a3301105-8724-4a36-af03-aa196a6d83df"))
+				{ ModuleId = "(slc)asset_management" };
+				public static class Statuses
+				{
+					public const string NotAvailable = "2ef172ae-2905-4f4d-ac19-76417e3174cb";
+					public const string Available = "2ef172ae-2905-4f4d-ac19-76417e3174cb (duplicate)";
+					public const string BuildPlanReady = "2ef172ae-2905-4f4d-ac19-76417e3174cb (duplicate) (duplicate) (duplicate)";
+					public const string Installed = "2ef172ae-2905-4f4d-ac19-76417e3174cb (duplicate) (duplicate) (duplicate) (duplicate)";
+					public const string InService = "2ef172ae-2905-4f4d-ac19-76417e3174cb (duplicate) (duplicate) (duplicate) (duplicate) (duplicate)";
+					public const string Disposed = "2ef172ae-2905-4f4d-ac19-76417e3174cb (duplicate) (duplicate) (duplicate) (duplicate) (duplicate) (duplicate)";
+					public const string InPlanning = "59cd7bd7-ea07-43d4-bc64-f27cebe2b194";
+					public const string InTransit = "f4d9841a-20b8-4918-ac48-611a50520601";
+					public const string InRepair = "6278e82d-8681-42c6-b593-92212e15b42f";
+					public static string ToValue(StatusesEnum @enum)
+					{
+						switch (@enum)
+						{
+							case StatusesEnum.NotAvailable:
+								return NotAvailable;
+							case StatusesEnum.Available:
+								return Available;
+							case StatusesEnum.BuildPlanReady:
+								return BuildPlanReady;
+							case StatusesEnum.Installed:
+								return Installed;
+							case StatusesEnum.InService:
+								return InService;
+							case StatusesEnum.Disposed:
+								return Disposed;
+							case StatusesEnum.InPlanning:
+								return InPlanning;
+							case StatusesEnum.InTransit:
+								return InTransit;
+							case StatusesEnum.InRepair:
+								return InRepair;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+						}
+					}
+
+					public static StatusesEnum ToEnum(string s)
+					{
+						switch (s)
+						{
+							case NotAvailable:
+								return StatusesEnum.NotAvailable;
+							case Available:
+								return StatusesEnum.Available;
+							case BuildPlanReady:
+								return StatusesEnum.BuildPlanReady;
+							case Installed:
+								return StatusesEnum.Installed;
+							case InService:
+								return StatusesEnum.InService;
+							case Disposed:
+								return StatusesEnum.Disposed;
+							case InPlanning:
+								return StatusesEnum.InPlanning;
+							case InTransit:
+								return StatusesEnum.InTransit;
+							case InRepair:
+								return StatusesEnum.InRepair;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+						}
+					}
+				}
+
+				public enum StatusesEnum
+				{
+					NotAvailable,
+					Available,
+					BuildPlanReady,
+					Installed,
+					InService,
+					Disposed,
+					InPlanning,
+					InTransit,
+					InRepair
+				}
+
+				public static class Transitions
+				{
+					public const string Notavailable_To_Available = "notavailable_to_available";
+					public const string Notavailable_To_Disposed = "notavailable_to_disposed";
+					public const string Available_To_Notavailable = "available_to_notavailable";
+					public const string Buildplanready_To_Installed = "buildplanready_to_installed";
+					public const string Installed_To_Inservice = "installed_to_inservice";
+					public const string Inservice_To_Notavailable = "inservice_to_notavailable";
+					public const string Inservice_To_Buildplanready = "inservice_to_buildplanready";
+					public const string Inservice_To_Available = "inservice_to_available";
+					public const string Inservice_To_Installed = "inservice_to_installed";
+					public const string Inplanning_To_Available = "inplanning_to_available";
+					public const string Inplanning_To_Buildplanready = "inplanning_to_buildplanready";
+					public const string Buildplanready_To_Inplanning = "buildplanready_to_inplanning";
+					public const string Inservice_To_Inplanning = "inservice_to_inplanning";
+					public const string Available_To_Inplanning = "available_to_inplanning";
+					public const string Installed_To_Inplanning = "installed_to_inplanning";
+					public const string Notavailable_To_Intransit = "notavailable_to_intransit";
+					public const string Available_To_Intransit = "available_to_intransit";
+					public const string Buildplanready_To_Intransit = "buildplanready_to_intransit";
+					public const string Installed_To_Intransit = "installed_to_intransit";
+					public const string Inservice_To_Intransit = "inservice_to_intransit";
+					public const string Inplanning_To_Intransit = "inplanning_to_intransit";
+					public const string Inrepair_To_Intransit = "inrepair_to_intransit";
+					public const string Notavailable_To_Inrepair = "notavailable_to_inrepair";
+					public const string Available_To_Inrepair = "available_to_inrepair";
+					public const string Buildplanready_To_Inrepair = "buildplanready_to_inrepair";
+					public const string Installed_To_Inrepair = "installed_to_inrepair";
+					public const string Inservice_To_Inrepair = "inservice_to_inrepair";
+					public const string Inplanning_To_Inrepair = "inplanning_to_inrepair";
+					public const string Intransit_To_Inrepair = "intransit_to_inrepair";
+					public const string Intransit_To_Notavailable = "intransit_to_notavailable";
+					public const string Intransit_To_Available = "intransit_to_available";
+					public const string Intransit_To_Buildplanready = "intransit_to_buildplanready";
+					public const string Intransit_To_Installed = "intransit_to_installed";
+					public const string Intransit_To_Disposed = "intransit_to_disposed";
+					public const string Intransit_To_Inplanning = "intransit_to_inplanning";
+					public const string Inrepair_To_Notavailable = "inrepair_to_notavailable";
+					public const string Inrepair_To_Available = "inrepair_to_available";
+					public const string Inrepair_To_Buildplanready = "inrepair_to_buildplanready";
+					public const string Inrepair_To_Installed = "inrepair_to_installed";
+					public const string Inrepair_To_Disposed = "inrepair_to_disposed";
+					public const string Inrepair_To_Inplanning = "inrepair_to_inplanning";
+					public static string ToValue(TransitionsEnum @enum)
+					{
+						switch (@enum)
+						{
+							case TransitionsEnum.Notavailable_To_Available:
+								return Notavailable_To_Available;
+							case TransitionsEnum.Notavailable_To_Disposed:
+								return Notavailable_To_Disposed;
+							case TransitionsEnum.Available_To_Notavailable:
+								return Available_To_Notavailable;
+							case TransitionsEnum.Buildplanready_To_Installed:
+								return Buildplanready_To_Installed;
+							case TransitionsEnum.Installed_To_Inservice:
+								return Installed_To_Inservice;
+							case TransitionsEnum.Inservice_To_Notavailable:
+								return Inservice_To_Notavailable;
+							case TransitionsEnum.Inservice_To_Buildplanready:
+								return Inservice_To_Buildplanready;
+							case TransitionsEnum.Inservice_To_Available:
+								return Inservice_To_Available;
+							case TransitionsEnum.Inservice_To_Installed:
+								return Inservice_To_Installed;
+							case TransitionsEnum.Inplanning_To_Available:
+								return Inplanning_To_Available;
+							case TransitionsEnum.Inplanning_To_Buildplanready:
+								return Inplanning_To_Buildplanready;
+							case TransitionsEnum.Buildplanready_To_Inplanning:
+								return Buildplanready_To_Inplanning;
+							case TransitionsEnum.Inservice_To_Inplanning:
+								return Inservice_To_Inplanning;
+							case TransitionsEnum.Available_To_Inplanning:
+								return Available_To_Inplanning;
+							case TransitionsEnum.Installed_To_Inplanning:
+								return Installed_To_Inplanning;
+							case TransitionsEnum.Notavailable_To_Intransit:
+								return Notavailable_To_Intransit;
+							case TransitionsEnum.Available_To_Intransit:
+								return Available_To_Intransit;
+							case TransitionsEnum.Buildplanready_To_Intransit:
+								return Buildplanready_To_Intransit;
+							case TransitionsEnum.Installed_To_Intransit:
+								return Installed_To_Intransit;
+							case TransitionsEnum.Inservice_To_Intransit:
+								return Inservice_To_Intransit;
+							case TransitionsEnum.Inplanning_To_Intransit:
+								return Inplanning_To_Intransit;
+							case TransitionsEnum.Inrepair_To_Intransit:
+								return Inrepair_To_Intransit;
+							case TransitionsEnum.Notavailable_To_Inrepair:
+								return Notavailable_To_Inrepair;
+							case TransitionsEnum.Available_To_Inrepair:
+								return Available_To_Inrepair;
+							case TransitionsEnum.Buildplanready_To_Inrepair:
+								return Buildplanready_To_Inrepair;
+							case TransitionsEnum.Installed_To_Inrepair:
+								return Installed_To_Inrepair;
+							case TransitionsEnum.Inservice_To_Inrepair:
+								return Inservice_To_Inrepair;
+							case TransitionsEnum.Inplanning_To_Inrepair:
+								return Inplanning_To_Inrepair;
+							case TransitionsEnum.Intransit_To_Inrepair:
+								return Intransit_To_Inrepair;
+							case TransitionsEnum.Intransit_To_Notavailable:
+								return Intransit_To_Notavailable;
+							case TransitionsEnum.Intransit_To_Available:
+								return Intransit_To_Available;
+							case TransitionsEnum.Intransit_To_Buildplanready:
+								return Intransit_To_Buildplanready;
+							case TransitionsEnum.Intransit_To_Installed:
+								return Intransit_To_Installed;
+							case TransitionsEnum.Intransit_To_Disposed:
+								return Intransit_To_Disposed;
+							case TransitionsEnum.Intransit_To_Inplanning:
+								return Intransit_To_Inplanning;
+							case TransitionsEnum.Inrepair_To_Notavailable:
+								return Inrepair_To_Notavailable;
+							case TransitionsEnum.Inrepair_To_Available:
+								return Inrepair_To_Available;
+							case TransitionsEnum.Inrepair_To_Buildplanready:
+								return Inrepair_To_Buildplanready;
+							case TransitionsEnum.Inrepair_To_Installed:
+								return Inrepair_To_Installed;
+							case TransitionsEnum.Inrepair_To_Disposed:
+								return Inrepair_To_Disposed;
+							case TransitionsEnum.Inrepair_To_Inplanning:
+								return Inrepair_To_Inplanning;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+						}
+					}
+
+					public static TransitionsEnum ToEnum(string s)
+					{
+						switch (s)
+						{
+							case Notavailable_To_Available:
+								return TransitionsEnum.Notavailable_To_Available;
+							case Notavailable_To_Disposed:
+								return TransitionsEnum.Notavailable_To_Disposed;
+							case Available_To_Notavailable:
+								return TransitionsEnum.Available_To_Notavailable;
+							case Buildplanready_To_Installed:
+								return TransitionsEnum.Buildplanready_To_Installed;
+							case Installed_To_Inservice:
+								return TransitionsEnum.Installed_To_Inservice;
+							case Inservice_To_Notavailable:
+								return TransitionsEnum.Inservice_To_Notavailable;
+							case Inservice_To_Buildplanready:
+								return TransitionsEnum.Inservice_To_Buildplanready;
+							case Inservice_To_Available:
+								return TransitionsEnum.Inservice_To_Available;
+							case Inservice_To_Installed:
+								return TransitionsEnum.Inservice_To_Installed;
+							case Inplanning_To_Available:
+								return TransitionsEnum.Inplanning_To_Available;
+							case Inplanning_To_Buildplanready:
+								return TransitionsEnum.Inplanning_To_Buildplanready;
+							case Buildplanready_To_Inplanning:
+								return TransitionsEnum.Buildplanready_To_Inplanning;
+							case Inservice_To_Inplanning:
+								return TransitionsEnum.Inservice_To_Inplanning;
+							case Available_To_Inplanning:
+								return TransitionsEnum.Available_To_Inplanning;
+							case Installed_To_Inplanning:
+								return TransitionsEnum.Installed_To_Inplanning;
+							case Notavailable_To_Intransit:
+								return TransitionsEnum.Notavailable_To_Intransit;
+							case Available_To_Intransit:
+								return TransitionsEnum.Available_To_Intransit;
+							case Buildplanready_To_Intransit:
+								return TransitionsEnum.Buildplanready_To_Intransit;
+							case Installed_To_Intransit:
+								return TransitionsEnum.Installed_To_Intransit;
+							case Inservice_To_Intransit:
+								return TransitionsEnum.Inservice_To_Intransit;
+							case Inplanning_To_Intransit:
+								return TransitionsEnum.Inplanning_To_Intransit;
+							case Inrepair_To_Intransit:
+								return TransitionsEnum.Inrepair_To_Intransit;
+							case Notavailable_To_Inrepair:
+								return TransitionsEnum.Notavailable_To_Inrepair;
+							case Available_To_Inrepair:
+								return TransitionsEnum.Available_To_Inrepair;
+							case Buildplanready_To_Inrepair:
+								return TransitionsEnum.Buildplanready_To_Inrepair;
+							case Installed_To_Inrepair:
+								return TransitionsEnum.Installed_To_Inrepair;
+							case Inservice_To_Inrepair:
+								return TransitionsEnum.Inservice_To_Inrepair;
+							case Inplanning_To_Inrepair:
+								return TransitionsEnum.Inplanning_To_Inrepair;
+							case Intransit_To_Inrepair:
+								return TransitionsEnum.Intransit_To_Inrepair;
+							case Intransit_To_Notavailable:
+								return TransitionsEnum.Intransit_To_Notavailable;
+							case Intransit_To_Available:
+								return TransitionsEnum.Intransit_To_Available;
+							case Intransit_To_Buildplanready:
+								return TransitionsEnum.Intransit_To_Buildplanready;
+							case Intransit_To_Installed:
+								return TransitionsEnum.Intransit_To_Installed;
+							case Intransit_To_Disposed:
+								return TransitionsEnum.Intransit_To_Disposed;
+							case Intransit_To_Inplanning:
+								return TransitionsEnum.Intransit_To_Inplanning;
+							case Inrepair_To_Notavailable:
+								return TransitionsEnum.Inrepair_To_Notavailable;
+							case Inrepair_To_Available:
+								return TransitionsEnum.Inrepair_To_Available;
+							case Inrepair_To_Buildplanready:
+								return TransitionsEnum.Inrepair_To_Buildplanready;
+							case Inrepair_To_Installed:
+								return TransitionsEnum.Inrepair_To_Installed;
+							case Inrepair_To_Disposed:
+								return TransitionsEnum.Inrepair_To_Disposed;
+							case Inrepair_To_Inplanning:
+								return TransitionsEnum.Inrepair_To_Inplanning;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+						}
+					}
+				}
+
+				public enum TransitionsEnum
+				{
+					Notavailable_To_Available,
+					Notavailable_To_Disposed,
+					Available_To_Notavailable,
+					Buildplanready_To_Installed,
+					Installed_To_Inservice,
+					Inservice_To_Notavailable,
+					Inservice_To_Buildplanready,
+					Inservice_To_Available,
+					Inservice_To_Installed,
+					Inplanning_To_Available,
+					Inplanning_To_Buildplanready,
+					Buildplanready_To_Inplanning,
+					Inservice_To_Inplanning,
+					Available_To_Inplanning,
+					Installed_To_Inplanning,
+					Notavailable_To_Intransit,
+					Available_To_Intransit,
+					Buildplanready_To_Intransit,
+					Installed_To_Intransit,
+					Inservice_To_Intransit,
+					Inplanning_To_Intransit,
+					Inrepair_To_Intransit,
+					Notavailable_To_Inrepair,
+					Available_To_Inrepair,
+					Buildplanready_To_Inrepair,
+					Installed_To_Inrepair,
+					Inservice_To_Inrepair,
+					Inplanning_To_Inrepair,
+					Intransit_To_Inrepair,
+					Intransit_To_Notavailable,
+					Intransit_To_Available,
+					Intransit_To_Buildplanready,
+					Intransit_To_Installed,
+					Intransit_To_Disposed,
+					Intransit_To_Inplanning,
+					Inrepair_To_Notavailable,
+					Inrepair_To_Available,
+					Inrepair_To_Buildplanready,
+					Inrepair_To_Installed,
+					Inrepair_To_Disposed,
+					Inrepair_To_Inplanning
+				}
+
+				public static class Actions
+				{
+					public const string Setnotavailable = "setnotavailable";
+					public const string Setavailable = "setavailable";
+					public const string Install = "install";
+					public const string Plan = "plan";
+					public const string Dispose = "dispose";
+					public const string Build = "build";
+					public const string Setinservice = "setinservice";
+					public const string Setintransit = "setintransit";
+					public const string Setinrepair = "setinrepair";
+					public static string ToValue(ActionsEnum @enum)
+					{
+						switch (@enum)
+						{
+							case ActionsEnum.Setnotavailable:
+								return Setnotavailable;
+							case ActionsEnum.Setavailable:
+								return Setavailable;
+							case ActionsEnum.Install:
+								return Install;
+							case ActionsEnum.Plan:
+								return Plan;
+							case ActionsEnum.Dispose:
+								return Dispose;
+							case ActionsEnum.Build:
+								return Build;
+							case ActionsEnum.Setinservice:
+								return Setinservice;
+							case ActionsEnum.Setintransit:
+								return Setintransit;
+							case ActionsEnum.Setinrepair:
+								return Setinrepair;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+						}
+					}
+
+					public static ActionsEnum ToEnum(string s)
+					{
+						switch (s)
+						{
+							case Setnotavailable:
+								return ActionsEnum.Setnotavailable;
+							case Setavailable:
+								return ActionsEnum.Setavailable;
+							case Install:
+								return ActionsEnum.Install;
+							case Plan:
+								return ActionsEnum.Plan;
+							case Dispose:
+								return ActionsEnum.Dispose;
+							case Build:
+								return ActionsEnum.Build;
+							case Setinservice:
+								return ActionsEnum.Setinservice;
+							case Setintransit:
+								return ActionsEnum.Setintransit;
+							case Setinrepair:
+								return ActionsEnum.Setinrepair;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+						}
+					}
+				}
+
+				public enum ActionsEnum
+				{
+					Setnotavailable,
+					Setavailable,
+					Install,
+					Plan,
+					Dispose,
+					Build,
+					Setinservice,
+					Setintransit,
+					Setinrepair
+				}
+			}
+
+			public static class Asset_Class_Behavior
+			{
+				public static DomBehaviorDefinitionId Id
+				{
+					get;
+				}
+
+				= new DomBehaviorDefinitionId(new Guid("e9e2d567-68f4-4c3f-8154-b3862a1b277b"))
+				{ ModuleId = "(slc)asset_management" };
+				public static class Statuses
+				{
+					public const string Draft = "d749849b-9071-44e4-ba2d-64debdd94758";
+					public const string Active = "d749849b-9071-44e4-ba2d-64debdd94758 (duplicate) (duplicate)";
+					public const string Deprecated = "d749849b-9071-44e4-ba2d-64debdd94758 (duplicate) (duplicate) (duplicate)";
+					public static string ToValue(StatusesEnum @enum)
+					{
+						switch (@enum)
+						{
+							case StatusesEnum.Draft:
+								return Draft;
+							case StatusesEnum.Active:
+								return Active;
+							case StatusesEnum.Deprecated:
+								return Deprecated;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+						}
+					}
+
+					public static StatusesEnum ToEnum(string s)
+					{
+						switch (s)
+						{
+							case Draft:
+								return StatusesEnum.Draft;
+							case Active:
+								return StatusesEnum.Active;
+							case Deprecated:
+								return StatusesEnum.Deprecated;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+						}
+					}
+				}
+
+				public enum StatusesEnum
+				{
+					Draft,
+					Active,
+					Deprecated
+				}
+
+				public static class Transitions
+				{
+					public const string Draft_Active = "draft_active";
+					public const string Active_Deprecated = "active_deprecated";
+					public static string ToValue(TransitionsEnum @enum)
+					{
+						switch (@enum)
+						{
+							case TransitionsEnum.Draft_Active:
+								return Draft_Active;
+							case TransitionsEnum.Active_Deprecated:
+								return Active_Deprecated;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+						}
+					}
+
+					public static TransitionsEnum ToEnum(string s)
+					{
+						switch (s)
+						{
+							case Draft_Active:
+								return TransitionsEnum.Draft_Active;
+							case Active_Deprecated:
+								return TransitionsEnum.Active_Deprecated;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+						}
+					}
+				}
+
+				public enum TransitionsEnum
+				{
+					Draft_Active,
+					Active_Deprecated
+				}
+
+				public static class Actions
+				{
+					public const string Confirm = "confirm";
+					public const string Archive = "archive";
+					public static string ToValue(ActionsEnum @enum)
+					{
+						switch (@enum)
+						{
+							case ActionsEnum.Confirm:
+								return Confirm;
+							case ActionsEnum.Archive:
+								return Archive;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+						}
+					}
+
+					public static ActionsEnum ToEnum(string s)
+					{
+						switch (s)
+						{
+							case Confirm:
+								return ActionsEnum.Confirm;
+							case Archive:
+								return ActionsEnum.Archive;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+						}
+					}
+				}
+
+				public enum ActionsEnum
+				{
+					Confirm,
+					Archive
+				}
+			}
+		}
+	}
+
+	public static class SlcFacility_Management
+	{
+		public const string ModuleId = "(slc)facility_management";
+		public static class Enums
+		{
+			public static class Facilitytype
+			{
+				public const string Truck = "Truck";
+				public const string Container = "Container";
+				public const string Building = "Building";
+				public static string ToValue(FacilityTypeEnum @enum)
+				{
+					switch (@enum)
+					{
+						case FacilityTypeEnum.Truck:
+							return Truck;
+						case FacilityTypeEnum.Container:
+							return Container;
+						case FacilityTypeEnum.Building:
+							return Building;
+						default:
+							throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+					}
+				}
+
+				public static FacilityTypeEnum ToEnum(string s)
+				{
+					switch (s)
+					{
+						case Truck:
+							return FacilityTypeEnum.Truck;
+						case Container:
+							return FacilityTypeEnum.Container;
+						case Building:
+							return FacilityTypeEnum.Building;
+						default:
+							throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+					}
+				}
+			}
+
+			public enum FacilityTypeEnum
+			{
+				Truck,
+				Container,
+				Building
+			}
+
+			public enum ThermalType
+			{
+				None = 0,
+				Warm = 1,
+				Cold = 2
+			}
+
+			public static class Rackpositionenum
+			{
+				public const string Bottom = "Bottom";
+				public const string Top = "Top";
+				public static string ToValue(RackpositionenumEnum @enum)
+				{
+					switch (@enum)
+					{
+						case RackpositionenumEnum.Bottom:
+							return Bottom;
+						case RackpositionenumEnum.Top:
+							return Top;
+						default:
+							throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+					}
+				}
+
+				public static RackpositionenumEnum ToEnum(string s)
+				{
+					switch (s)
+					{
+						case Bottom:
+							return RackpositionenumEnum.Bottom;
+						case Top:
+							return RackpositionenumEnum.Top;
+						default:
+							throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+					}
+				}
+			}
+
+			public enum RackpositionenumEnum
+			{
+				Bottom,
+				Top
+			}
+
+			public static class Coolingflowenum
+			{
+				public const string FrontToRear = "Front To Rear";
+				public const string RearToFront = "Rear To Front";
+				public const string SideToSide = "Side To Side";
+				public const string TopToBottom = "Top To Bottom";
+				public const string BottomToTop = "Bottom To Top";
+				public static string ToValue(CoolingflowenumEnum @enum)
+				{
+					switch (@enum)
+					{
+						case CoolingflowenumEnum.FrontToRear:
+							return FrontToRear;
+						case CoolingflowenumEnum.RearToFront:
+							return RearToFront;
+						case CoolingflowenumEnum.SideToSide:
+							return SideToSide;
+						case CoolingflowenumEnum.TopToBottom:
+							return TopToBottom;
+						case CoolingflowenumEnum.BottomToTop:
+							return BottomToTop;
+						default:
+							throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+					}
+				}
+
+				public static CoolingflowenumEnum ToEnum(string s)
+				{
+					switch (s)
+					{
+						case FrontToRear:
+							return CoolingflowenumEnum.FrontToRear;
+						case RearToFront:
+							return CoolingflowenumEnum.RearToFront;
+						case SideToSide:
+							return CoolingflowenumEnum.SideToSide;
+						case TopToBottom:
+							return CoolingflowenumEnum.TopToBottom;
+						case BottomToTop:
+							return CoolingflowenumEnum.BottomToTop;
+						default:
+							throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+					}
+				}
+			}
+
+			public enum CoolingflowenumEnum
+			{
+				FrontToRear,
+				RearToFront,
+				SideToSide,
+				TopToBottom,
+				BottomToTop
+			}
+
+			public enum Placementorientationenum
+			{
+				Vertical = 0,
+				Horizontal = 1
+			}
+		}
+
+		public static class Sections
+		{
+			public static class ImageInfo
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("67f72a06-cb71-4a21-9973-0ba04e966be9"))
+				{ ModuleId = "(slc)facility_management" };
+				public static FieldDescriptorID ImageFilepath
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("8498450a-7200-4e7f-b750-7c57dd3a7437"));
+				public static FieldDescriptorID UploadTimestamp
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("29d8c8da-00d8-46fa-adff-d7979d3a5665"));
+			}
+
+			public static class Site
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("9a6552d4-c538-45be-93fd-a879587d25cc"))
+				{ ModuleId = "(slc)facility_management" };
+				public static FieldDescriptorID Site_f08b42c7
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("f08b42c7-0c43-42f3-9c93-ec69ee99501a"));
+			}
+
+			public static class SiteInformation
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("b082f391-0fdd-4eda-b4dc-f246c5e0063f"))
+				{ ModuleId = "(slc)facility_management" };
+				public static FieldDescriptorID Name
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("49e5f5af-555a-4aa6-b859-84b3d6c4016d"));
+				public static FieldDescriptorID Description
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("199e9b2a-737c-4ddf-bb9e-ae41dff3d4ba"));
+				public static FieldDescriptorID Address
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("54866065-c005-4b3e-a8af-9d73b31fbcc7"));
+				public static FieldDescriptorID City
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("a5871ad2-0caf-4d1f-9ae1-9bbd91e9e158"));
+				public static FieldDescriptorID ZipCode
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("22ea6e74-8beb-445c-9e28-c96e7d11986d"));
+				public static FieldDescriptorID Country
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("0b43ef7a-64c3-4757-ae2b-089117316738"));
+				public static FieldDescriptorID Latitude
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("fd3feeaf-9d1e-4752-a1ba-5da40ed16793"));
+				public static FieldDescriptorID Longitude
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("3f7b64ea-7cd7-4e84-8f80-ab69064a93a8"));
+				public static FieldDescriptorID SiteID
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("e9485c2b-accd-4eda-9b86-195540a9cd20"));
+			}
+
+			public static class FacilityInformation
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("125d4f2c-4d9f-4efe-9af6-1e6a5d4bcaab"))
+				{ ModuleId = "(slc)facility_management" };
+				public static FieldDescriptorID Name
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("259e31ed-65e9-4a1f-b8f9-20d94e3e09b3"));
+				public static FieldDescriptorID FacilityType
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("37dbb06b-efcd-4295-a646-00ee1eb30d01"));
+				public static FieldDescriptorID Description
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("fd4dbb48-ed5a-4fc7-bf49-a1f119d09883"));
+				public static FieldDescriptorID Address
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("370f8d27-5ce8-4308-ae3e-130c9dbbf366"));
+				public static FieldDescriptorID City
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("4fa9677f-0022-4012-b371-c884840db7ea"));
+				public static FieldDescriptorID ZipCode
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("91359fc6-ffa8-47b5-a849-20036307a3d8"));
+				public static FieldDescriptorID Country
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("613d7d84-8d85-4e29-9af8-9dc752208789"));
+				public static FieldDescriptorID Latitude
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("def40fd7-3d08-4f1b-88e8-e95ce0ca2606"));
+				public static FieldDescriptorID Longitude
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("872360fb-bc51-46c6-bfd0-8282c6a913f6"));
+				public static FieldDescriptorID FacilityID
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("4ca5dc9c-4bb5-4e46-8a95-0bcf95d2265c"));
+			}
+
+			public static class RowInformation
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("12edb830-c667-4e93-9f9b-94e6992a3bf6"))
+				{ ModuleId = "(slc)facility_management" };
+				public static FieldDescriptorID Name
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("12ee587f-e9bf-4be8-8ec7-2c04ac3340dd"));
+				public static FieldDescriptorID RowPlan
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("335719a3-5c1a-4a03-93f2-33fb8b13cedc"));
+				public static FieldDescriptorID RowDescription
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("73b46987-4318-4985-8694-1ef510d96ce1"));
+				public static FieldDescriptorID Y
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("3c56aa07-ba3b-4e62-b7ab-46d4d9bce19d"));
+				public static FieldDescriptorID Label
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("ca234e07-2ea4-4d69-aa94-6136a22e9047"));
+				public static FieldDescriptorID RowID
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("808a94ba-3c5b-4018-88c2-73f1bcebf0f0"));
+			}
+
+			public static class RackCapacity
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("790bcbea-9659-4340-91ff-46dc8c37b251"))
+				{ ModuleId = "(slc)facility_management" };
+				public static FieldDescriptorID MaximumRackCapacity
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("be8b9be1-277a-4ccc-ae10-f771900f2847"));
+				public static FieldDescriptorID MaximumPowerCapacity
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("fead1e27-0d5b-43b2-b95b-963343140e1e"));
+			}
+
+			public static class AppSettings
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("67ba4303-7c6b-4c2c-bb8b-0fb2fb4d970d"))
+				{ ModuleId = "(slc)facility_management" };
+				public static FieldDescriptorID GoogleMapsAPIKey
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("b4d1d0e7-a4be-45e6-8ab8-b1922a82d21f"));
+			}
+
+			public static class ZoneCapacity
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("136914bb-3580-450f-ad38-3bb709ddc68f"))
+				{ ModuleId = "(slc)facility_management" };
+				public static FieldDescriptorID CoolingCapacity
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("814e6ce1-8cb7-4517-b8cd-1ed9e896ca6a"));
+			}
+
+			public static class Row
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("8a81a86b-7372-4c83-bde7-680004bb3eb4"))
+				{ ModuleId = "(slc)facility_management" };
+				public static FieldDescriptorID Row_5d2f9bb3
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("5d2f9bb3-a00b-4372-b079-0004b184e15c"));
+			}
+
+			public static class Floor
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("cdbc1f3d-70c8-49e3-a3a3-b310d20b4b6e"))
+				{ ModuleId = "(slc)facility_management" };
+				public static FieldDescriptorID Floor_6a3f0eeb
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("6a3f0eeb-018c-412e-a889-819fc83205a4"));
+			}
+
+			public static class Room
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("3ee83337-fe05-417e-b328-08a7931da62f"))
+				{ ModuleId = "(slc)facility_management" };
+				public static FieldDescriptorID Room_8d904f8d
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("8d904f8d-6340-4d7e-abc8-62ac1e3fcb09"));
+			}
+
+			public static class Zone
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("785e2397-0f0e-4b82-ace6-9e372a208bf6"))
+				{ ModuleId = "(slc)facility_management" };
+				public static FieldDescriptorID Zone_45922fd2
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("45922fd2-c869-46ac-a95d-012fad5adb59"));
+			}
+
+			public static class Resource
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("2f8f34af-8405-4a7e-b996-da6b9d97e61c"))
+				{ ModuleId = "(slc)facility_management" };
+				public static FieldDescriptorID LinkedResource
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("af0981cf-d4c0-4016-823b-bd34a385aa2e"));
+			}
+
+			public static class DeskInformation
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("20bcc5d1-5065-4091-a5b0-82a09ecb9ddb"))
+				{ ModuleId = "(slc)facility_management" };
+				public static FieldDescriptorID Name
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("bc96a0b4-a8b3-42cc-8a23-eec98f078301"));
+				public static FieldDescriptorID Plan
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("ef68805b-86c2-47d3-9b28-2a0d480b7712"));
+				public static FieldDescriptorID Description
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("2291fc00-8995-4faf-be6e-5da359d38dc7"));
+				public static FieldDescriptorID DeskID
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("488edf47-1b9f-4083-bd6d-8f47fe5bb20e"));
+			}
+
+			public static class ZoneInformation
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("8d225b1a-d69c-4efa-86c3-7f45d6ea7e92"))
+				{ ModuleId = "(slc)facility_management" };
+				public static FieldDescriptorID Name
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("f1a7cc3d-634c-452c-a27e-68d704d321f7"));
+				public static FieldDescriptorID Plan
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("574e51c6-4e1a-4729-b33f-b00a8e558ed2"));
+				public static FieldDescriptorID Description
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("e72ceb4a-501b-4781-88b8-97b52b6f7a1a"));
+				public static FieldDescriptorID ThermalType
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("eabd3474-9983-4475-be2f-ddd3dca76137"));
+				public static FieldDescriptorID X
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("9b1ac3ee-18d4-44d8-8cf0-bdf6bf09f6f8"));
+				public static FieldDescriptorID Y
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("2c5edc9a-c1fd-4c9b-9118-e6f6f0e956d8"));
+				public static FieldDescriptorID Width
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("69bb8e71-81ff-4195-ab5a-427bcde57350"));
+				public static FieldDescriptorID Depth
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("d9ed302e-9752-4680-9b1e-8af3db9f9c9e"));
+				public static FieldDescriptorID ZoneID
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("10cc0744-6b35-4d9c-9158-47f0f2c9fdb7"));
+			}
+
+			public static class RoomInformation
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("45f3a9f1-93ca-486b-99f2-70c00f8f80ec"))
+				{ ModuleId = "(slc)facility_management" };
+				public static FieldDescriptorID Name
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("995923a7-0220-4a0f-89c0-7f0856c18661"));
+				public static FieldDescriptorID Plan
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("bcdd4b85-0b08-4991-b351-e7d4d6165638"));
+				public static FieldDescriptorID Description
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("4c12f63d-5184-4e0b-9213-ca8ca448b23f"));
+				public static FieldDescriptorID Width
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("31249cdc-4817-46be-b288-481cbefeb2df"));
+				public static FieldDescriptorID Depth
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("11dede73-1ca8-419b-87db-1e78c50317c6"));
+				public static FieldDescriptorID RoomID
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("16beb7ef-8fde-41e3-9f84-318fd8aa68e4"));
+			}
+
+			public static class FloorInformation
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("f3b701eb-5ae6-4cb3-8207-b11c7801e136"))
+				{ ModuleId = "(slc)facility_management" };
+				public static FieldDescriptorID Name
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("330ac9f6-5da1-4a3b-b1ed-99179e10d708"));
+				public static FieldDescriptorID Plan
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("1d3a2787-3c0a-4962-85c1-421969d1bbfc"));
+				public static FieldDescriptorID Description
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("eea022dd-636c-4719-ae09-7af4ad32cae7"));
+				public static FieldDescriptorID FloorID
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("3b996c01-2fa6-4443-a877-d9b2ecd0789c"));
+			}
+
+			public static class Facility
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("9f0aade4-5dc5-4d88-b350-15bd8fafed28"))
+				{ ModuleId = "(slc)facility_management" };
+				public static FieldDescriptorID Facility_fc282509
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("fc282509-8271-4580-9ff6-ee3366d5df70"));
+			}
+
+			public static class RoomOwnership
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("92517859-4d32-471f-93d6-2a41de0d94ce"))
+				{ ModuleId = "(slc)facility_management" };
+				public static FieldDescriptorID Team
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("371b8e3c-1c5c-4342-81fe-2a8d60d617c5"));
+				public static FieldDescriptorID Owner
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("8ca723ed-6040-4d97-8ba6-ed05d1546071"));
+			}
+
+			public static class RackInformation
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("05207b85-724c-4b96-8e50-e8419bb32696"))
+				{ ModuleId = "(slc)facility_management" };
+				public static FieldDescriptorID Name
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("3bcf5f23-8178-4058-8300-6c32c1bdf066"));
+				public static FieldDescriptorID Model
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("fb2f13e8-36c0-45ec-a80e-2ccf40a1b3a3"));
+				public static FieldDescriptorID Position
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("c499cb89-b20d-41d5-8aa9-4ffdd98d6cda"));
+				public static FieldDescriptorID Width
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("cd193a69-ddd4-4a53-84a5-3456f80bc00c"));
+				public static FieldDescriptorID Depth
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("32ec429c-8099-44f6-981d-9d30bd7fe0ca"));
+				public static FieldDescriptorID Height
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("c4bc0a18-05c8-4c64-8c47-c173db032fa8"));
+				public static FieldDescriptorID Description
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("0fce02b2-8ddc-4518-900e-8f1fae8ec542"));
+				public static FieldDescriptorID Bookable
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("7369d14b-12e4-4208-a3e9-6222e086d9ce"));
+				public static FieldDescriptorID CoolingFlow
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("94fddd93-29a6-4ae3-a8a6-7ffe2e94a1ab"));
+				public static FieldDescriptorID X
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("ebb91116-270e-4350-9829-b921e86e9dc0"));
+				public static FieldDescriptorID Y
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("0f1b519b-7c8d-452e-b3f6-1b05e84f9a65"));
+				public static FieldDescriptorID Label
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("587351f7-0e2f-46d5-95d6-ef4ad5ffeb47"));
+				public static FieldDescriptorID Color
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("07a59549-3be3-4901-974c-6f81c5502c40"));
+				public static FieldDescriptorID PlacementOrientation
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("d799109e-18af-47c2-8765-82231df2dee5"));
+				public static FieldDescriptorID RackID
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("5a337cca-f388-4018-b39f-55e042a2e001"));
+			}
+		}
+
+		public static class Definitions
+		{
+			public static DomDefinitionId Room
+			{
+				get;
+			}
+
+			= new DomDefinitionId(new Guid("a09ef2ae-78b6-435a-a5b6-f4b91b3ba14f"))
+			{ ModuleId = "(slc)facility_management" };
+			public static DomDefinitionId Desk
+			{
+				get;
+			}
+
+			= new DomDefinitionId(new Guid("9af0e791-b171-4b92-86e7-79dbb8282f66"))
+			{ ModuleId = "(slc)facility_management" };
+			public static DomDefinitionId Site
+			{
+				get;
+			}
+
+			= new DomDefinitionId(new Guid("5320914d-ffec-486a-9950-b69276b6c13f"))
+			{ ModuleId = "(slc)facility_management" };
+			public static DomDefinitionId Facility
+			{
+				get;
+			}
+
+			= new DomDefinitionId(new Guid("dab0442b-b092-4dbf-a249-19dd421c69db"))
+			{ ModuleId = "(slc)facility_management" };
+			public static DomDefinitionId Row
+			{
+				get;
+			}
+
+			= new DomDefinitionId(new Guid("29eef06e-ed52-4a26-95da-fd35cc4433df"))
+			{ ModuleId = "(slc)facility_management" };
+			public static DomDefinitionId Zone
+			{
+				get;
+			}
+
+			= new DomDefinitionId(new Guid("4576240b-b3da-4739-89d1-c3c5e79a26d9"))
+			{ ModuleId = "(slc)facility_management" };
+			public static DomDefinitionId FacilityManagerAppSettings
+			{
+				get;
+			}
+
+			= new DomDefinitionId(new Guid("a07a6f21-b919-4903-ae76-c8442fd97f54"))
+			{ ModuleId = "(slc)facility_management" };
+			public static DomDefinitionId Rack
+			{
+				get;
+			}
+
+			= new DomDefinitionId(new Guid("c7877685-0295-40b2-acb1-9aea5d7d9c21"))
+			{ ModuleId = "(slc)facility_management" };
+			public static DomDefinitionId Floor
+			{
+				get;
+			}
+
+			= new DomDefinitionId(new Guid("9bbb18c2-8284-4e12-a1d1-f2ebb7e2c1fc"))
+			{ ModuleId = "(slc)facility_management" };
+		}
+
+		public static class Behaviors
+		{
+			public static class Room_Behaviour
+			{
+				public static DomBehaviorDefinitionId Id
+				{
+					get;
+				}
+
+				= new DomBehaviorDefinitionId(new Guid("cce8f754-26c5-4e5e-97fb-0e474afbec5c"))
+				{ ModuleId = "(slc)facility_management" };
+				public static class Statuses
+				{
+					public const string Draft = "4e2df2d6-7e92-46e4-be9b-66dd8bb7e827";
+					public const string Active = "84baed08-3f7b-4cd7-9428-79b1263f6a73";
+					public const string Deprecated = "f5d5027c-3281-44d7-aeb5-fe55fd5cf1bd";
+					public static string ToValue(StatusesEnum @enum)
+					{
+						switch (@enum)
+						{
+							case StatusesEnum.Draft:
+								return Draft;
+							case StatusesEnum.Active:
+								return Active;
+							case StatusesEnum.Deprecated:
+								return Deprecated;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+						}
+					}
+
+					public static StatusesEnum ToEnum(string s)
+					{
+						switch (s)
+						{
+							case Draft:
+								return StatusesEnum.Draft;
+							case Active:
+								return StatusesEnum.Active;
+							case Deprecated:
+								return StatusesEnum.Deprecated;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+						}
+					}
+				}
+
+				public enum StatusesEnum
+				{
+					Draft,
+					Active,
+					Deprecated
+				}
+
+				public static class Transitions
+				{
+					public const string Draft_Active = "draft_active";
+					public const string Active_Deprecated = "active_deprecated";
+					public static string ToValue(TransitionsEnum @enum)
+					{
+						switch (@enum)
+						{
+							case TransitionsEnum.Draft_Active:
+								return Draft_Active;
+							case TransitionsEnum.Active_Deprecated:
+								return Active_Deprecated;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+						}
+					}
+
+					public static TransitionsEnum ToEnum(string s)
+					{
+						switch (s)
+						{
+							case Draft_Active:
+								return TransitionsEnum.Draft_Active;
+							case Active_Deprecated:
+								return TransitionsEnum.Active_Deprecated;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+						}
+					}
+				}
+
+				public enum TransitionsEnum
+				{
+					Draft_Active,
+					Active_Deprecated
+				}
+
+				public static class Actions
+				{
+					public const string Confirm = "confirm";
+					public const string Archive = "archive";
+					public static string ToValue(ActionsEnum @enum)
+					{
+						switch (@enum)
+						{
+							case ActionsEnum.Confirm:
+								return Confirm;
+							case ActionsEnum.Archive:
+								return Archive;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+						}
+					}
+
+					public static ActionsEnum ToEnum(string s)
+					{
+						switch (s)
+						{
+							case Confirm:
+								return ActionsEnum.Confirm;
+							case Archive:
+								return ActionsEnum.Archive;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+						}
+					}
+				}
+
+				public enum ActionsEnum
+				{
+					Confirm,
+					Archive
+				}
+			}
+
+			public static class Facility_Behaviour
+			{
+				public static DomBehaviorDefinitionId Id
+				{
+					get;
+				}
+
+				= new DomBehaviorDefinitionId(new Guid("843615ba-3f5d-46a7-91d8-504ddabcdad4"))
+				{ ModuleId = "(slc)facility_management" };
+				public static class Statuses
+				{
+					public const string Draft = "bbdcf703-d257-45f9-8d62-13ec7adc37b3";
+					public const string Deprecated = "43d4cef9-3d6a-41cf-83dd-5c671efde61d";
+					public const string Active = "0350936d-9947-43ba-b4fe-362d375f4a85";
+					public static string ToValue(StatusesEnum @enum)
+					{
+						switch (@enum)
+						{
+							case StatusesEnum.Draft:
+								return Draft;
+							case StatusesEnum.Deprecated:
+								return Deprecated;
+							case StatusesEnum.Active:
+								return Active;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+						}
+					}
+
+					public static StatusesEnum ToEnum(string s)
+					{
+						switch (s)
+						{
+							case Draft:
+								return StatusesEnum.Draft;
+							case Deprecated:
+								return StatusesEnum.Deprecated;
+							case Active:
+								return StatusesEnum.Active;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+						}
+					}
+				}
+
+				public enum StatusesEnum
+				{
+					Draft,
+					Deprecated,
+					Active
+				}
+
+				public static class Transitions
+				{
+					public const string Draft_Active = "draft_active";
+					public const string Active_Deprecated = "active_deprecated";
+					public static string ToValue(TransitionsEnum @enum)
+					{
+						switch (@enum)
+						{
+							case TransitionsEnum.Draft_Active:
+								return Draft_Active;
+							case TransitionsEnum.Active_Deprecated:
+								return Active_Deprecated;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+						}
+					}
+
+					public static TransitionsEnum ToEnum(string s)
+					{
+						switch (s)
+						{
+							case Draft_Active:
+								return TransitionsEnum.Draft_Active;
+							case Active_Deprecated:
+								return TransitionsEnum.Active_Deprecated;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+						}
+					}
+				}
+
+				public enum TransitionsEnum
+				{
+					Draft_Active,
+					Active_Deprecated
+				}
+
+				public static class Actions
+				{
+					public const string Confirm = "confirm";
+					public const string Archive = "archive";
+					public static string ToValue(ActionsEnum @enum)
+					{
+						switch (@enum)
+						{
+							case ActionsEnum.Confirm:
+								return Confirm;
+							case ActionsEnum.Archive:
+								return Archive;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+						}
+					}
+
+					public static ActionsEnum ToEnum(string s)
+					{
+						switch (s)
+						{
+							case Confirm:
+								return ActionsEnum.Confirm;
+							case Archive:
+								return ActionsEnum.Archive;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+						}
+					}
+				}
+
+				public enum ActionsEnum
+				{
+					Confirm,
+					Archive
+				}
+			}
+
+			public static class Site_Behaviour
+			{
+				public static DomBehaviorDefinitionId Id
+				{
+					get;
+				}
+
+				= new DomBehaviorDefinitionId(new Guid("903a2ba4-5467-4e8e-b728-8f3cd1ff0e72"))
+				{ ModuleId = "(slc)facility_management" };
+				public static class Statuses
+				{
+					public const string Draft = "bbdcf703-d257-45f9-8d62-13ec7adc37b3";
+					public const string Deprecated = "43d4cef9-3d6a-41cf-83dd-5c671efde61d";
+					public const string Active = "0350936d-9947-43ba-b4fe-362d375f4a85";
+					public static string ToValue(StatusesEnum @enum)
+					{
+						switch (@enum)
+						{
+							case StatusesEnum.Draft:
+								return Draft;
+							case StatusesEnum.Deprecated:
+								return Deprecated;
+							case StatusesEnum.Active:
+								return Active;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+						}
+					}
+
+					public static StatusesEnum ToEnum(string s)
+					{
+						switch (s)
+						{
+							case Draft:
+								return StatusesEnum.Draft;
+							case Deprecated:
+								return StatusesEnum.Deprecated;
+							case Active:
+								return StatusesEnum.Active;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+						}
+					}
+				}
+
+				public enum StatusesEnum
+				{
+					Draft,
+					Deprecated,
+					Active
+				}
+
+				public static class Transitions
+				{
+					public const string Draft_Active = "draft_active";
+					public const string Active_Deprecated = "active_deprecated";
+					public static string ToValue(TransitionsEnum @enum)
+					{
+						switch (@enum)
+						{
+							case TransitionsEnum.Draft_Active:
+								return Draft_Active;
+							case TransitionsEnum.Active_Deprecated:
+								return Active_Deprecated;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+						}
+					}
+
+					public static TransitionsEnum ToEnum(string s)
+					{
+						switch (s)
+						{
+							case Draft_Active:
+								return TransitionsEnum.Draft_Active;
+							case Active_Deprecated:
+								return TransitionsEnum.Active_Deprecated;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+						}
+					}
+				}
+
+				public enum TransitionsEnum
+				{
+					Draft_Active,
+					Active_Deprecated
+				}
+
+				public static class Actions
+				{
+					public const string Confirm = "confirm";
+					public const string Archive = "archive";
+					public static string ToValue(ActionsEnum @enum)
+					{
+						switch (@enum)
+						{
+							case ActionsEnum.Confirm:
+								return Confirm;
+							case ActionsEnum.Archive:
+								return Archive;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+						}
+					}
+
+					public static ActionsEnum ToEnum(string s)
+					{
+						switch (s)
+						{
+							case Confirm:
+								return ActionsEnum.Confirm;
+							case Archive:
+								return ActionsEnum.Archive;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+						}
+					}
+				}
+
+				public enum ActionsEnum
+				{
+					Confirm,
+					Archive
+				}
+			}
+
+			public static class Desk_Behaviour
+			{
+				public static DomBehaviorDefinitionId Id
+				{
+					get;
+				}
+
+				= new DomBehaviorDefinitionId(new Guid("fa64f66c-35a8-4b32-8a68-0b0b1341886d"))
+				{ ModuleId = "(slc)facility_management" };
+				public static class Statuses
+				{
+					public const string Draft = "615ec505-7cb6-4fde-9e80-e85312a4ddd4";
+					public const string Active = "404c20a0-26ec-4c06-a1cd-50d0246b426d";
+					public const string Deprecated = "07efb53a-5b44-45e3-be03-5e2eafe88d8c";
+					public static string ToValue(StatusesEnum @enum)
+					{
+						switch (@enum)
+						{
+							case StatusesEnum.Draft:
+								return Draft;
+							case StatusesEnum.Active:
+								return Active;
+							case StatusesEnum.Deprecated:
+								return Deprecated;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+						}
+					}
+
+					public static StatusesEnum ToEnum(string s)
+					{
+						switch (s)
+						{
+							case Draft:
+								return StatusesEnum.Draft;
+							case Active:
+								return StatusesEnum.Active;
+							case Deprecated:
+								return StatusesEnum.Deprecated;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+						}
+					}
+				}
+
+				public enum StatusesEnum
+				{
+					Draft,
+					Active,
+					Deprecated
+				}
+
+				public static class Transitions
+				{
+					public const string Draft_Active = "draft_active";
+					public const string Active_Deprecated = "active_deprecated";
+					public static string ToValue(TransitionsEnum @enum)
+					{
+						switch (@enum)
+						{
+							case TransitionsEnum.Draft_Active:
+								return Draft_Active;
+							case TransitionsEnum.Active_Deprecated:
+								return Active_Deprecated;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+						}
+					}
+
+					public static TransitionsEnum ToEnum(string s)
+					{
+						switch (s)
+						{
+							case Draft_Active:
+								return TransitionsEnum.Draft_Active;
+							case Active_Deprecated:
+								return TransitionsEnum.Active_Deprecated;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+						}
+					}
+				}
+
+				public enum TransitionsEnum
+				{
+					Draft_Active,
+					Active_Deprecated
+				}
+
+				public static class Actions
+				{
+					public const string Confirm = "confirm";
+					public const string Archive = "archive";
+					public static string ToValue(ActionsEnum @enum)
+					{
+						switch (@enum)
+						{
+							case ActionsEnum.Confirm:
+								return Confirm;
+							case ActionsEnum.Archive:
+								return Archive;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+						}
+					}
+
+					public static ActionsEnum ToEnum(string s)
+					{
+						switch (s)
+						{
+							case Confirm:
+								return ActionsEnum.Confirm;
+							case Archive:
+								return ActionsEnum.Archive;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+						}
+					}
+				}
+
+				public enum ActionsEnum
+				{
+					Confirm,
+					Archive
+				}
+			}
+
+			public static class Zone_Behaviour
+			{
+				public static DomBehaviorDefinitionId Id
+				{
+					get;
+				}
+
+				= new DomBehaviorDefinitionId(new Guid("98f2c20b-c4a6-4297-9d57-291915d298c5"))
+				{ ModuleId = "(slc)facility_management" };
+				public static class Statuses
+				{
+					public const string Draft = "08607107-27f9-4eb8-8009-8f7b8661cc03";
+					public const string Active = "471625e5-4603-433a-8218-9e61a0de6231";
+					public const string Deprecated = "538b8fc7-cedb-4f35-9728-57d17f813967";
+					public static string ToValue(StatusesEnum @enum)
+					{
+						switch (@enum)
+						{
+							case StatusesEnum.Draft:
+								return Draft;
+							case StatusesEnum.Active:
+								return Active;
+							case StatusesEnum.Deprecated:
+								return Deprecated;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+						}
+					}
+
+					public static StatusesEnum ToEnum(string s)
+					{
+						switch (s)
+						{
+							case Draft:
+								return StatusesEnum.Draft;
+							case Active:
+								return StatusesEnum.Active;
+							case Deprecated:
+								return StatusesEnum.Deprecated;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+						}
+					}
+				}
+
+				public enum StatusesEnum
+				{
+					Draft,
+					Active,
+					Deprecated
+				}
+
+				public static class Transitions
+				{
+					public const string Draft_Active = "draft_active";
+					public const string Active_Deprecated = "active_deprecated";
+					public static string ToValue(TransitionsEnum @enum)
+					{
+						switch (@enum)
+						{
+							case TransitionsEnum.Draft_Active:
+								return Draft_Active;
+							case TransitionsEnum.Active_Deprecated:
+								return Active_Deprecated;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+						}
+					}
+
+					public static TransitionsEnum ToEnum(string s)
+					{
+						switch (s)
+						{
+							case Draft_Active:
+								return TransitionsEnum.Draft_Active;
+							case Active_Deprecated:
+								return TransitionsEnum.Active_Deprecated;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+						}
+					}
+				}
+
+				public enum TransitionsEnum
+				{
+					Draft_Active,
+					Active_Deprecated
+				}
+
+				public static class Actions
+				{
+					public const string Confirm = "confirm";
+					public const string Archive = "archive";
+					public static string ToValue(ActionsEnum @enum)
+					{
+						switch (@enum)
+						{
+							case ActionsEnum.Confirm:
+								return Confirm;
+							case ActionsEnum.Archive:
+								return Archive;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+						}
+					}
+
+					public static ActionsEnum ToEnum(string s)
+					{
+						switch (s)
+						{
+							case Confirm:
+								return ActionsEnum.Confirm;
+							case Archive:
+								return ActionsEnum.Archive;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+						}
+					}
+				}
+
+				public enum ActionsEnum
+				{
+					Confirm,
+					Archive
+				}
+			}
+
+			public static class Row_Behaviour
+			{
+				public static DomBehaviorDefinitionId Id
+				{
+					get;
+				}
+
+				= new DomBehaviorDefinitionId(new Guid("c620b4a2-2139-4f15-ac6f-c8235f669296"))
+				{ ModuleId = "(slc)facility_management" };
+				public static class Statuses
+				{
+					public const string Draft = "59a7afbd-47ad-4628-add3-d09c4c77e931";
+					public const string Active = "170a16ff-15ea-44e0-a54c-f73fa4f37a5e";
+					public const string Deprecated = "6f874cbb-71ab-4f8e-b1a4-25a52299278f";
+					public static string ToValue(StatusesEnum @enum)
+					{
+						switch (@enum)
+						{
+							case StatusesEnum.Draft:
+								return Draft;
+							case StatusesEnum.Active:
+								return Active;
+							case StatusesEnum.Deprecated:
+								return Deprecated;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+						}
+					}
+
+					public static StatusesEnum ToEnum(string s)
+					{
+						switch (s)
+						{
+							case Draft:
+								return StatusesEnum.Draft;
+							case Active:
+								return StatusesEnum.Active;
+							case Deprecated:
+								return StatusesEnum.Deprecated;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+						}
+					}
+				}
+
+				public enum StatusesEnum
+				{
+					Draft,
+					Active,
+					Deprecated
+				}
+
+				public static class Transitions
+				{
+					public const string Draft_Active = "draft_active";
+					public const string Active_Deprecated = "active_deprecated";
+					public static string ToValue(TransitionsEnum @enum)
+					{
+						switch (@enum)
+						{
+							case TransitionsEnum.Draft_Active:
+								return Draft_Active;
+							case TransitionsEnum.Active_Deprecated:
+								return Active_Deprecated;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+						}
+					}
+
+					public static TransitionsEnum ToEnum(string s)
+					{
+						switch (s)
+						{
+							case Draft_Active:
+								return TransitionsEnum.Draft_Active;
+							case Active_Deprecated:
+								return TransitionsEnum.Active_Deprecated;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+						}
+					}
+				}
+
+				public enum TransitionsEnum
+				{
+					Draft_Active,
+					Active_Deprecated
+				}
+
+				public static class Actions
+				{
+					public const string Confirm = "confirm";
+					public const string Archive = "archive";
+					public static string ToValue(ActionsEnum @enum)
+					{
+						switch (@enum)
+						{
+							case ActionsEnum.Confirm:
+								return Confirm;
+							case ActionsEnum.Archive:
+								return Archive;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+						}
+					}
+
+					public static ActionsEnum ToEnum(string s)
+					{
+						switch (s)
+						{
+							case Confirm:
+								return ActionsEnum.Confirm;
+							case Archive:
+								return ActionsEnum.Archive;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+						}
+					}
+				}
+
+				public enum ActionsEnum
+				{
+					Confirm,
+					Archive
+				}
+			}
+
+			public static class Floor_Behaviour
+			{
+				public static DomBehaviorDefinitionId Id
+				{
+					get;
+				}
+
+				= new DomBehaviorDefinitionId(new Guid("558627ea-71eb-4ac6-a655-dedce737649d"))
+				{ ModuleId = "(slc)facility_management" };
+				public static class Statuses
+				{
+					public const string Draft = "a9227926-67f8-4f64-97bc-bcce855c267a";
+					public const string Active = "4b7a6778-1861-4d1f-b020-633a450beb44";
+					public const string Deprecated = "56eded1e-32d0-4109-82b2-d07eed8380c1";
+					public static string ToValue(StatusesEnum @enum)
+					{
+						switch (@enum)
+						{
+							case StatusesEnum.Draft:
+								return Draft;
+							case StatusesEnum.Active:
+								return Active;
+							case StatusesEnum.Deprecated:
+								return Deprecated;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+						}
+					}
+
+					public static StatusesEnum ToEnum(string s)
+					{
+						switch (s)
+						{
+							case Draft:
+								return StatusesEnum.Draft;
+							case Active:
+								return StatusesEnum.Active;
+							case Deprecated:
+								return StatusesEnum.Deprecated;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+						}
+					}
+				}
+
+				public enum StatusesEnum
+				{
+					Draft,
+					Active,
+					Deprecated
+				}
+
+				public static class Transitions
+				{
+					public const string Draft_Active = "draft_active";
+					public const string Active_Deprecated = "active_deprecated";
+					public static string ToValue(TransitionsEnum @enum)
+					{
+						switch (@enum)
+						{
+							case TransitionsEnum.Draft_Active:
+								return Draft_Active;
+							case TransitionsEnum.Active_Deprecated:
+								return Active_Deprecated;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+						}
+					}
+
+					public static TransitionsEnum ToEnum(string s)
+					{
+						switch (s)
+						{
+							case Draft_Active:
+								return TransitionsEnum.Draft_Active;
+							case Active_Deprecated:
+								return TransitionsEnum.Active_Deprecated;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+						}
+					}
+				}
+
+				public enum TransitionsEnum
+				{
+					Draft_Active,
+					Active_Deprecated
+				}
+
+				public static class Actions
+				{
+					public const string Confirm = "confirm";
+					public const string Archive = "archive";
+					public static string ToValue(ActionsEnum @enum)
+					{
+						switch (@enum)
+						{
+							case ActionsEnum.Confirm:
+								return Confirm;
+							case ActionsEnum.Archive:
+								return Archive;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+						}
+					}
+
+					public static ActionsEnum ToEnum(string s)
+					{
+						switch (s)
+						{
+							case Confirm:
+								return ActionsEnum.Confirm;
+							case Archive:
+								return ActionsEnum.Archive;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+						}
+					}
+				}
+
+				public enum ActionsEnum
+				{
+					Confirm,
+					Archive
+				}
+			}
+
+			public static class Rack_Behaviour
+			{
+				public static DomBehaviorDefinitionId Id
+				{
+					get;
+				}
+
+				= new DomBehaviorDefinitionId(new Guid("4139c312-2b0f-40f3-b875-26cf5066b705"))
+				{ ModuleId = "(slc)facility_management" };
+				public static class Statuses
+				{
+					public const string Draft = "4ec366ed-6337-4f17-a1b3-f03b1b0b93cd";
+					public const string Active = "5abfe850-851c-4abb-bf5d-0dc00a61c989";
+					public const string Deprecated = "5cb06723-8588-421b-9373-f83d86a88161";
+					public static string ToValue(StatusesEnum @enum)
+					{
+						switch (@enum)
+						{
+							case StatusesEnum.Draft:
+								return Draft;
+							case StatusesEnum.Active:
+								return Active;
+							case StatusesEnum.Deprecated:
+								return Deprecated;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+						}
+					}
+
+					public static StatusesEnum ToEnum(string s)
+					{
+						switch (s)
+						{
+							case Draft:
+								return StatusesEnum.Draft;
+							case Active:
+								return StatusesEnum.Active;
+							case Deprecated:
+								return StatusesEnum.Deprecated;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+						}
+					}
+				}
+
+				public enum StatusesEnum
+				{
+					Draft,
+					Active,
+					Deprecated
+				}
+
+				public static class Transitions
+				{
+					public const string Draft_Active = "draft_active";
+					public const string Active_Deprecated = "active_deprecated";
+					public static string ToValue(TransitionsEnum @enum)
+					{
+						switch (@enum)
+						{
+							case TransitionsEnum.Draft_Active:
+								return Draft_Active;
+							case TransitionsEnum.Active_Deprecated:
+								return Active_Deprecated;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+						}
+					}
+
+					public static TransitionsEnum ToEnum(string s)
+					{
+						switch (s)
+						{
+							case Draft_Active:
+								return TransitionsEnum.Draft_Active;
+							case Active_Deprecated:
+								return TransitionsEnum.Active_Deprecated;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+						}
+					}
+				}
+
+				public enum TransitionsEnum
+				{
+					Draft_Active,
+					Active_Deprecated
+				}
+
+				public static class Actions
+				{
+					public const string Confirm = "confirm";
+					public const string Archive = "archive";
+					public static string ToValue(ActionsEnum @enum)
+					{
+						switch (@enum)
+						{
+							case ActionsEnum.Confirm:
+								return Confirm;
+							case ActionsEnum.Archive:
+								return Archive;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+						}
+					}
+
+					public static ActionsEnum ToEnum(string s)
+					{
+						switch (s)
+						{
+							case Confirm:
+								return ActionsEnum.Confirm;
+							case Archive:
+								return ActionsEnum.Archive;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+						}
+					}
+				}
+
+				public enum ActionsEnum
+				{
+					Confirm,
+					Archive
+				}
+			}
+		}
+	}
+
+	public static class SlcPlan_And_Build
+	{
+		public const string ModuleId = "(slc)plan_and_build";
+		public static class Enums
+		{
+			public static class Jobtype
+			{
+				public const string Add = "Add";
+				public const string Update = "Update";
+				public const string Remove = "Remove";
+				public static string ToValue(JobtypeEnum @enum)
+				{
+					switch (@enum)
+					{
+						case JobtypeEnum.Add:
+							return Add;
+						case JobtypeEnum.Update:
+							return Update;
+						case JobtypeEnum.Remove:
+							return Remove;
+						default:
+							throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+					}
+				}
+
+				public static JobtypeEnum ToEnum(string s)
+				{
+					switch (s)
+					{
+						case Add:
+							return JobtypeEnum.Add;
+						case Update:
+							return JobtypeEnum.Update;
+						case Remove:
+							return JobtypeEnum.Remove;
+						default:
+							throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+					}
+				}
+			}
+
+			public enum JobtypeEnum
+			{
+				Add,
+				Update,
+				Remove
+			}
+
+			public static class Priority
+			{
+				public const string Critical = "Critical";
+				public const string High = "High";
+				public const string Normal = "Normal";
+				public const string Low = "Low";
+				public static string ToValue(PriorityEnum @enum)
+				{
+					switch (@enum)
+					{
+						case PriorityEnum.Critical:
+							return Critical;
+						case PriorityEnum.High:
+							return High;
+						case PriorityEnum.Normal:
+							return Normal;
+						case PriorityEnum.Low:
+							return Low;
+						default:
+							throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+					}
+				}
+
+				public static PriorityEnum ToEnum(string s)
+				{
+					switch (s)
+					{
+						case Critical:
+							return PriorityEnum.Critical;
+						case High:
+							return PriorityEnum.High;
+						case Normal:
+							return PriorityEnum.Normal;
+						case Low:
+							return PriorityEnum.Low;
+						default:
+							throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+					}
+				}
+			}
+
+			public enum PriorityEnum
+			{
+				Critical,
+				High,
+				Normal,
+				Low
+			}
+
+			public static class Substate
+			{
+				public const string Draft = "draft";
+				public const string PendingApproval = "PendingApproval";
+				public const string DocumentationMontage = "DocumentationMontage";
+				public const string Reviewed = "Reviewed";
+				public const string ResourceAllocation = "ResourceAllocation";
+				public const string Scheduled = "Scheduled";
+				public const string PendingKickoff = "PendingKickoff";
+				public const string InProgress = "InProgress";
+				public const string UnderReview = "UnderReview";
+				public const string OnHold = "OnHold";
+				public const string DocumentationCompleted = "DocumentationCompleted";
+				public const string Archived = "Archived";
+				public static string ToValue(SubStateEnum @enum)
+				{
+					switch (@enum)
+					{
+						case SubStateEnum.Draft:
+							return Draft;
+						case SubStateEnum.PendingApproval:
+							return PendingApproval;
+						case SubStateEnum.DocumentationMontage:
+							return DocumentationMontage;
+						case SubStateEnum.Reviewed:
+							return Reviewed;
+						case SubStateEnum.ResourceAllocation:
+							return ResourceAllocation;
+						case SubStateEnum.Scheduled:
+							return Scheduled;
+						case SubStateEnum.PendingKickoff:
+							return PendingKickoff;
+						case SubStateEnum.InProgress:
+							return InProgress;
+						case SubStateEnum.UnderReview:
+							return UnderReview;
+						case SubStateEnum.OnHold:
+							return OnHold;
+						case SubStateEnum.DocumentationCompleted:
+							return DocumentationCompleted;
+						case SubStateEnum.Archived:
+							return Archived;
+						default:
+							throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+					}
+				}
+
+				public static SubStateEnum ToEnum(string s)
+				{
+					switch (s)
+					{
+						case Draft:
+							return SubStateEnum.Draft;
+						case PendingApproval:
+							return SubStateEnum.PendingApproval;
+						case DocumentationMontage:
+							return SubStateEnum.DocumentationMontage;
+						case Reviewed:
+							return SubStateEnum.Reviewed;
+						case ResourceAllocation:
+							return SubStateEnum.ResourceAllocation;
+						case Scheduled:
+							return SubStateEnum.Scheduled;
+						case PendingKickoff:
+							return SubStateEnum.PendingKickoff;
+						case InProgress:
+							return SubStateEnum.InProgress;
+						case UnderReview:
+							return SubStateEnum.UnderReview;
+						case OnHold:
+							return SubStateEnum.OnHold;
+						case DocumentationCompleted:
+							return SubStateEnum.DocumentationCompleted;
+						case Archived:
+							return SubStateEnum.Archived;
+						default:
+							throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+					}
+				}
+			}
+
+			public enum SubStateEnum
+			{
+				Draft,
+				PendingApproval,
+				DocumentationMontage,
+				Reviewed,
+				ResourceAllocation,
+				Scheduled,
+				PendingKickoff,
+				InProgress,
+				UnderReview,
+				OnHold,
+				DocumentationCompleted,
+				Archived
+			}
+
+			public static class Actionforassetenum
+			{
+				public const string NewlyInstalled = "Newly Installed";
+				public const string Reinstalled = "Reinstalled";
+				public const string Provisioned = "Provisioned";
+				public const string Commissioned = "Commissioned";
+				public const string Removed = "Removed";
+				public const string Decommissioned = "Decommissioned";
+				public const string Uninstalled = "Uninstalled";
+				public const string Dismantled = "Dismantled";
+				public const string Modified = "Modified";
+				public const string Upgraded = "Upgraded";
+				public const string Reconfigured = "Reconfigured";
+				public const string Expanded = "Expanded";
+				public const string Relocated = "Relocated";
+				public const string Patched = "Patched";
+				public const string Repaired = "Repaired";
+				public const string Serviced = "Serviced";
+				public const string Cleaned = "Cleaned";
+				public const string Tested = "Tested";
+				public const string Audited = "Audited";
+				public const string Inspected = "Inspected";
+				public const string Tagged = "Tagged";
+				public const string Locked = "Locked";
+				public const string Unlocked = "Unlocked";
+				public const string Connected = "Connected";
+				public const string Disconnected = "Disconnected";
+				public const string Virtualized = "Virtualized";
+				public static string ToValue(ActionforassetenumEnum @enum)
+				{
+					switch (@enum)
+					{
+						case ActionforassetenumEnum.NewlyInstalled:
+							return NewlyInstalled;
+						case ActionforassetenumEnum.Reinstalled:
+							return Reinstalled;
+						case ActionforassetenumEnum.Provisioned:
+							return Provisioned;
+						case ActionforassetenumEnum.Commissioned:
+							return Commissioned;
+						case ActionforassetenumEnum.Removed:
+							return Removed;
+						case ActionforassetenumEnum.Decommissioned:
+							return Decommissioned;
+						case ActionforassetenumEnum.Uninstalled:
+							return Uninstalled;
+						case ActionforassetenumEnum.Dismantled:
+							return Dismantled;
+						case ActionforassetenumEnum.Modified:
+							return Modified;
+						case ActionforassetenumEnum.Upgraded:
+							return Upgraded;
+						case ActionforassetenumEnum.Reconfigured:
+							return Reconfigured;
+						case ActionforassetenumEnum.Expanded:
+							return Expanded;
+						case ActionforassetenumEnum.Relocated:
+							return Relocated;
+						case ActionforassetenumEnum.Patched:
+							return Patched;
+						case ActionforassetenumEnum.Repaired:
+							return Repaired;
+						case ActionforassetenumEnum.Serviced:
+							return Serviced;
+						case ActionforassetenumEnum.Cleaned:
+							return Cleaned;
+						case ActionforassetenumEnum.Tested:
+							return Tested;
+						case ActionforassetenumEnum.Audited:
+							return Audited;
+						case ActionforassetenumEnum.Inspected:
+							return Inspected;
+						case ActionforassetenumEnum.Tagged:
+							return Tagged;
+						case ActionforassetenumEnum.Locked:
+							return Locked;
+						case ActionforassetenumEnum.Unlocked:
+							return Unlocked;
+						case ActionforassetenumEnum.Connected:
+							return Connected;
+						case ActionforassetenumEnum.Disconnected:
+							return Disconnected;
+						case ActionforassetenumEnum.Virtualized:
+							return Virtualized;
+						default:
+							throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+					}
+				}
+
+				public static ActionforassetenumEnum ToEnum(string s)
+				{
+					switch (s)
+					{
+						case NewlyInstalled:
+							return ActionforassetenumEnum.NewlyInstalled;
+						case Reinstalled:
+							return ActionforassetenumEnum.Reinstalled;
+						case Provisioned:
+							return ActionforassetenumEnum.Provisioned;
+						case Commissioned:
+							return ActionforassetenumEnum.Commissioned;
+						case Removed:
+							return ActionforassetenumEnum.Removed;
+						case Decommissioned:
+							return ActionforassetenumEnum.Decommissioned;
+						case Uninstalled:
+							return ActionforassetenumEnum.Uninstalled;
+						case Dismantled:
+							return ActionforassetenumEnum.Dismantled;
+						case Modified:
+							return ActionforassetenumEnum.Modified;
+						case Upgraded:
+							return ActionforassetenumEnum.Upgraded;
+						case Reconfigured:
+							return ActionforassetenumEnum.Reconfigured;
+						case Expanded:
+							return ActionforassetenumEnum.Expanded;
+						case Relocated:
+							return ActionforassetenumEnum.Relocated;
+						case Patched:
+							return ActionforassetenumEnum.Patched;
+						case Repaired:
+							return ActionforassetenumEnum.Repaired;
+						case Serviced:
+							return ActionforassetenumEnum.Serviced;
+						case Cleaned:
+							return ActionforassetenumEnum.Cleaned;
+						case Tested:
+							return ActionforassetenumEnum.Tested;
+						case Audited:
+							return ActionforassetenumEnum.Audited;
+						case Inspected:
+							return ActionforassetenumEnum.Inspected;
+						case Tagged:
+							return ActionforassetenumEnum.Tagged;
+						case Locked:
+							return ActionforassetenumEnum.Locked;
+						case Unlocked:
+							return ActionforassetenumEnum.Unlocked;
+						case Connected:
+							return ActionforassetenumEnum.Connected;
+						case Disconnected:
+							return ActionforassetenumEnum.Disconnected;
+						case Virtualized:
+							return ActionforassetenumEnum.Virtualized;
+						default:
+							throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+					}
+				}
+			}
+
+			public enum ActionforassetenumEnum
+			{
+				NewlyInstalled,
+				Reinstalled,
+				Provisioned,
+				Commissioned,
+				Removed,
+				Decommissioned,
+				Uninstalled,
+				Dismantled,
+				Modified,
+				Upgraded,
+				Reconfigured,
+				Expanded,
+				Relocated,
+				Patched,
+				Repaired,
+				Serviced,
+				Cleaned,
+				Tested,
+				Audited,
+				Inspected,
+				Tagged,
+				Locked,
+				Unlocked,
+				Connected,
+				Disconnected,
+				Virtualized
+			}
+		}
+
+		public static class Sections
+		{
+			public static class JobOwnership
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("520a7dac-97ab-42bf-9177-32aeb7b8b9e8"))
+				{ ModuleId = "(slc)plan_and_build" };
+				public static FieldDescriptorID AssignedTo
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("e90b9377-410f-4f12-9b2e-42a8036c42c3"));
+				public static FieldDescriptorID AssignmentGroup
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("30deab28-a355-488a-bc25-851cf8bd6694"));
+			}
+
+			public static class JobInformation
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("b28ce9cf-96a1-45bf-8e3d-0f3d1ddc586d"))
+				{ ModuleId = "(slc)plan_and_build" };
+				public static FieldDescriptorID JobID
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("124ee700-c707-403a-8887-d0a4728baa25"));
+				public static FieldDescriptorID JobName
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("c2f4bfb8-6377-40b7-8a3f-3deac7d3257e"));
+				public static FieldDescriptorID Start
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("ae07a73c-f8a6-4da1-9aa5-be35c587b8d5"));
+				public static FieldDescriptorID JobType
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("27b85f20-9e5f-4317-bcbf-ded758400dfe"));
+				public static FieldDescriptorID End
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("a92163d0-270c-4b45-a459-90108e87c80d"));
+				public static FieldDescriptorID JobDescription
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("fe73ef98-1d9e-4a69-8aeb-1a4e5f2ecbe5"));
+				public static FieldDescriptorID Remarks
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("5176adad-e61d-4595-8500-cac331043d91"));
+				public static FieldDescriptorID Priority
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("f73d9198-013f-4944-96e9-79bf6f2db026"));
+				public static FieldDescriptorID SubState
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("2cf0ad38-4492-4824-a1ec-5e04392c073a"));
+				public static FieldDescriptorID Locations
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("8e774923-acf3-4d22-a836-d4c7db5e7182"));
+				public static FieldDescriptorID Type
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("50ff0baa-8312-4b1c-b9e0-cf4eef1367cb"));
+			}
+
+			public static class ConnectionsOnJob
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("8c165732-abfb-48d6-981e-6f685b7f94ba"))
+				{ ModuleId = "(slc)plan_and_build" };
+				public static FieldDescriptorID Source
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("98a49e7e-fb62-4c54-ab2f-122b333221f9"));
+				public static FieldDescriptorID Destination
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("6f226619-3f85-4868-8876-d9dfadb67124"));
+				public static FieldDescriptorID Status
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("febc028d-a269-4098-91ba-c3e1a68d0e70"));
+				public static FieldDescriptorID Cabletype
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("42d731c8-e875-4b51-b4ad-2453cc613eac"));
+				public static FieldDescriptorID CableLength
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("fa17dc0f-4926-4002-80ad-c3a3c20f3f69"));
+				public static FieldDescriptorID ConnectionID
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("eaf19fa4-73ca-4d73-95ab-c2e79d935626"));
+			}
+
+			public static class JobSettings
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("c4c6de12-bbc6-4e61-b818-f7c538369235"))
+				{ ModuleId = "(slc)plan_and_build" };
+				public static FieldDescriptorID JobIDPrefix
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("b652673a-6191-4d0d-9b59-66f5b83f8421"));
+				public static FieldDescriptorID JobIDNextSequence
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("fc43e8ba-2461-4a3b-907d-2a8a8f3cbce7"));
+				public static FieldDescriptorID JobIDIncrement
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("f09791b2-5352-47db-ade9-cf913b3e4fcd"));
+				public static FieldDescriptorID JobIDStartingSeed
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("c20a2170-c81f-48f8-9136-135806cb3980"));
+				public static FieldDescriptorID JobIDMinimumDigits
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("58c275ac-ef36-4a47-9833-f78e5f1d2ca2"));
+			}
+
+			public static class JobAttachment
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("ec7a3725-7f71-4373-9e22-e34a1ae82135"))
+				{ ModuleId = "(slc)plan_and_build" };
+				public static FieldDescriptorID FilePath
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("fe4440aa-33bf-4e91-a7ec-c1e16da831b3"));
+				public static FieldDescriptorID AttachedAt
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("f26782f6-a479-4766-add5-b100afdfdbc2"));
+				public static FieldDescriptorID AttachedBy
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("7207302f-b1e3-49c0-849a-6c7b13a2783d"));
+			}
+
+			public static class JobTypeInfo
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("eba2120c-77d0-43c9-a63a-86abd42be359"))
+				{ ModuleId = "(slc)plan_and_build" };
+				public static FieldDescriptorID Name
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("3eb96651-a84c-46fd-a114-593c242f17c6"));
+				public static FieldDescriptorID Description
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("0da5e09c-9246-4459-baa1-57b44b13372e"));
+				public static FieldDescriptorID Icon
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("aee7d6e1-4bc2-4f7e-988f-0d84cab0b9db"));
+			}
+
+			public static class AssetsUsed
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("c708731e-b09b-4eed-9a96-27fcc0116db6"))
+				{ ModuleId = "(slc)plan_and_build" };
+				public static FieldDescriptorID AssetID
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("fec43e34-1e75-4a30-9b14-de429fa5938d"));
+				public static FieldDescriptorID Action
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("6031de2d-5af0-4486-b69a-288c62fda1f6"));
+			}
+		}
+
+		public static class Definitions
+		{
+			public static DomDefinitionId AppSettings
+			{
+				get;
+			}
+
+			= new DomDefinitionId(new Guid("529f8806-4f41-44fb-afa7-8df6e40dd509"))
+			{ ModuleId = "(slc)plan_and_build" };
+			public static DomDefinitionId JobType
+			{
+				get;
+			}
+
+			= new DomDefinitionId(new Guid("447da12d-a9bc-471b-bb90-f33f140851ee"))
+			{ ModuleId = "(slc)plan_and_build" };
+			public static DomDefinitionId Job
+			{
+				get;
+			}
+
+			= new DomDefinitionId(new Guid("01bfa461-bdcb-442a-b624-93658d570c9a"))
+			{ ModuleId = "(slc)plan_and_build" };
+		}
+
+		public static class Behaviors
+		{
+			public static class Job_Behavior
+			{
+				public static DomBehaviorDefinitionId Id
+				{
+					get;
+				}
+
+				= new DomBehaviorDefinitionId(new Guid("f66fbbcb-70c8-46ad-acbb-04f8e4b469e9"))
+				{ ModuleId = "(slc)plan_and_build" };
+				public static class Statuses
+				{
+					public const string New = "6c75283d-3e15-4377-8459-93ba7764cd35";
+					public const string Active = "fac92634-798d-453e-a76f-d4630e572aaa";
+					public const string Assigned = "2db65456-8365-4da8-b37e-c0f04227549e";
+					public const string Canceled = "1fc95659-1f75-4e50-b6e7-7567fc6ff30b";
+					public const string Review = "0163e48c-a9d0-4bda-9eb8-ce192942605f";
+					public const string Resolved = "6ddd0ea7-e40a-4844-9d17-5da7cfa9056c";
+					public static string ToValue(StatusesEnum @enum)
+					{
+						switch (@enum)
+						{
+							case StatusesEnum.New:
+								return New;
+							case StatusesEnum.Active:
+								return Active;
+							case StatusesEnum.Assigned:
+								return Assigned;
+							case StatusesEnum.Canceled:
+								return Canceled;
+							case StatusesEnum.Review:
+								return Review;
+							case StatusesEnum.Resolved:
+								return Resolved;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+						}
+					}
+
+					public static StatusesEnum ToEnum(string s)
+					{
+						switch (s)
+						{
+							case New:
+								return StatusesEnum.New;
+							case Active:
+								return StatusesEnum.Active;
+							case Assigned:
+								return StatusesEnum.Assigned;
+							case Canceled:
+								return StatusesEnum.Canceled;
+							case Review:
+								return StatusesEnum.Review;
+							case Resolved:
+								return StatusesEnum.Resolved;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+						}
+					}
+				}
+
+				public enum StatusesEnum
+				{
+					New,
+					Active,
+					Assigned,
+					Canceled,
+					Review,
+					Resolved
+				}
+
+				public static class Transitions
+				{
+					public const string New_Assigned = "new_assigned";
+					public const string Assigned_Active = "assigned_active";
+					public const string Active_Review = "active_review";
+					public const string New_Canceled = "new_canceled";
+					public const string Assigned_Canceled = "assigned_canceled";
+					public const string Active_Canceled = "active_canceled";
+					public const string Review_Resolved = "review_resolved";
+					public static string ToValue(TransitionsEnum @enum)
+					{
+						switch (@enum)
+						{
+							case TransitionsEnum.New_Assigned:
+								return New_Assigned;
+							case TransitionsEnum.Assigned_Active:
+								return Assigned_Active;
+							case TransitionsEnum.Active_Review:
+								return Active_Review;
+							case TransitionsEnum.New_Canceled:
+								return New_Canceled;
+							case TransitionsEnum.Assigned_Canceled:
+								return Assigned_Canceled;
+							case TransitionsEnum.Active_Canceled:
+								return Active_Canceled;
+							case TransitionsEnum.Review_Resolved:
+								return Review_Resolved;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+						}
+					}
+
+					public static TransitionsEnum ToEnum(string s)
+					{
+						switch (s)
+						{
+							case New_Assigned:
+								return TransitionsEnum.New_Assigned;
+							case Assigned_Active:
+								return TransitionsEnum.Assigned_Active;
+							case Active_Review:
+								return TransitionsEnum.Active_Review;
+							case New_Canceled:
+								return TransitionsEnum.New_Canceled;
+							case Assigned_Canceled:
+								return TransitionsEnum.Assigned_Canceled;
+							case Active_Canceled:
+								return TransitionsEnum.Active_Canceled;
+							case Review_Resolved:
+								return TransitionsEnum.Review_Resolved;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+						}
+					}
+				}
+
+				public enum TransitionsEnum
+				{
+					New_Assigned,
+					Assigned_Active,
+					Active_Review,
+					New_Canceled,
+					Assigned_Canceled,
+					Active_Canceled,
+					Review_Resolved
+				}
+
+				public static class Actions
+				{
+					public const string Assign = "assign";
+					public const string Activate = "activate";
+					public const string Complete = "complete";
+					public const string Settoreview = "settoreview";
+					public const string Cancel = "cancel";
+					public static string ToValue(ActionsEnum @enum)
+					{
+						switch (@enum)
+						{
+							case ActionsEnum.Assign:
+								return Assign;
+							case ActionsEnum.Activate:
+								return Activate;
+							case ActionsEnum.Complete:
+								return Complete;
+							case ActionsEnum.Settoreview:
+								return Settoreview;
+							case ActionsEnum.Cancel:
+								return Cancel;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
+						}
+					}
+
+					public static ActionsEnum ToEnum(string s)
+					{
+						switch (s)
+						{
+							case Assign:
+								return ActionsEnum.Assign;
+							case Activate:
+								return ActionsEnum.Activate;
+							case Complete:
+								return ActionsEnum.Complete;
+							case Settoreview:
+								return ActionsEnum.Settoreview;
+							case Cancel:
+								return ActionsEnum.Cancel;
+							default:
+								throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
+						}
+					}
+				}
+
+				public enum ActionsEnum
+				{
+					Assign,
+					Activate,
+					Complete,
+					Settoreview,
+					Cancel
+				}
+			}
+		}
+	}
 }

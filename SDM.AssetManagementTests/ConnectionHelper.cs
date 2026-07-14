@@ -1,15 +1,14 @@
 ﻿namespace SDM.AssetManagement.Tests
 {
-	using Moq;
+    using Moq;
 
-	using Skyline.DataMiner.Net;
-	using Skyline.DataMiner.Net.Messages;
-	using Skyline.DataMiner.SDM.AssetManagement;
-	using Skyline.DataMiner.SDM.AssetManagement.Helpers;
+    using Skyline.DataMiner.Net;
+    using Skyline.DataMiner.Net.Messages;
+    using Skyline.DataMiner.SDM.AssetManagement.Helpers;
     using Skyline.DataMiner.SDM.FacilityManagement.Helpers;
     using Skyline.DataMiner.Utils.DOM.UnitTesting;
 
-	internal static class ConnectionHelper
+    internal static class ConnectionHelper
 	{
 		internal static IConnection CreateConnection()
 		{

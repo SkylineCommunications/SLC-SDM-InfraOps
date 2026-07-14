@@ -17,6 +17,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Validation\BulkValidationException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Validation\ChangeTrackingBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Validation\IChangeTracking.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Validation\ValidationExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Validation\ValidationResultExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\SDMObjectReferenceExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Validation\InfraOpsException.cs" />
@@ -31,5 +32,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)DomInstanceField\IDomInstanceFieldApplyChanges.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Validation\ValidationResult.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Validation\ValidatorContext.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Middleware\IdentifierMiddleware.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Extensions\BulkRepositoryQueryExtensions.cs" />
   </ItemGroup>
 </Project>

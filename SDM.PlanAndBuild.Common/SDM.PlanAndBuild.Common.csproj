@@ -1,0 +1,59 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <AssemblyName>Skyline.DataMiner.SDM.PlanAndBuild.Common</AssemblyName>
+    <RootNamespace>Skyline.DataMiner.SDM.PlanAndBuild.Common</RootNamespace>
+    <VersionSuffix Condition="'$(Configuration)' == 'Debug'">dev-001</VersionSuffix>
+    <VersionPrefix>1.0.1</VersionPrefix>
+    <AssemblyVersion>0.2.3.17</AssemblyVersion>
+    <PackageTags>Skyline;DataMiner</PackageTags>
+    <PackageProjectUrl>https://skyline.be</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <PackageIcon>Icon.png</PackageIcon>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <NoWarn>CS1591</NoWarn>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Authors>SkylineCommunications</Authors>
+    <Company>Skyline Communications</Company>
+    <Description>Standard API for Plan and Build operations in DataMiner</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="" />
+    <None Include="LICENSE.txt" Pack="true" PackagePath="" />
+    <None Include="nuget\Icon.png" Pack="true" PackagePath="" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" />
+    <PackageReference Include="Skyline.DataMiner.SDM" />
+    <PackageReference Include="Skyline.DataMiner.SDM.Linq" />
+    <PackageReference Include="Skyline.DataMiner.Utils.DOM" />
+    <PackageReference Include="Skyline.DataMiner.Dev.Utils.Solutions.PeopleAndOrganizations" />
+    <PackageReference Include="Skyline.DataMiner.Utils.SecureCoding.Analyzers">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SDM.AssetManagement.Common\SDM.AssetManagement.Common.csproj" />
+  </ItemGroup>
+
+  <!-- SharedMappers (DomIds) and SharedValidation are pulled in transitively through the
+       SDM.AssetManagement.Common -> SDM.FacilityManagement.Common project reference chain,
+       which already imports both shared item projects. Importing them again here would
+       recompile the shared sources into this assembly and cause CS0436 duplicate-type
+       warnings against the copies compiled into SDM.FacilityManagement.Common. -->
+
+  <!-- Can be used to set the location of your local nuget store to copy to -->
+  <Import Project="../Directory.Build.props.user" Condition="Exists('../Directory.Build.props.user')" />
+  <Target Name="CopyNuGetPackage" AfterTargets="Pack" Condition="'$(NuGetStorePath)' != '' and '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <Copy SourceFiles="$(OutputPath)..\$(PackageId).$(PackageVersion).nupkg" DestinationFolder="$(NuGetStorePath)\$(PackageId)" />
+  </Target>
+</Project>

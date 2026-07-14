@@ -11,6 +11,8 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)DomIds.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Facility Management\Mappers\FacilityDomMapper.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Facility Management\Mappers\FacilityManagerAppSettingsDomMapper.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Facility Management\Mappers\DeskDomMapper.g.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Facility Management\Mappers\FloorDomMapper.g.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Facility Management\Mappers\RackDomMapper.g.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Facility Management\Mappers\RoomDomMapper.g.cs" />

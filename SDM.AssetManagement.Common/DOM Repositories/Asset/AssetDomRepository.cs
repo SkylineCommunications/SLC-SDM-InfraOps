@@ -8,8 +8,6 @@
 
     using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 
-    using static SLDataGateway.API.Types.Tasks.TaskStatus;
-
     /// <summary>
     /// Defines methods for updating asset fields and managing asset state transitions in a repository. Extends bulk
     /// operations for assets.

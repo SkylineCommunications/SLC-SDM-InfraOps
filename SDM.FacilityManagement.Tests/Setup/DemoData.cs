@@ -251,6 +251,77 @@
 			},
 		];
 
+		public static readonly List<Desk> Desks =
+		[
+			new Desk
+			{
+				Identifier = Guid.NewGuid().ToString(),
+				DeskID = "DSK-001",
+				Name = "Desk A01",
+				Description = "Shared workstation near the entrance",
+				Plan = "Level-1-A01",
+			},
+			new Desk
+			{
+				Identifier = Guid.NewGuid().ToString(),
+				DeskID = "DSK-002",
+				Name = "Desk A02",
+				Description = "Corner desk with dual monitors",
+				Plan = "Level-1-A02",
+			},
+			new Desk
+			{
+				Identifier = Guid.NewGuid().ToString(),
+				DeskID = "DSK-003",
+				Name = "Desk B01",
+				Description = "Desk near the operations wall",
+				Plan = "Level-1-B01",
+			},
+			new Desk
+			{
+				Identifier = Guid.NewGuid().ToString(),
+				DeskID = "DSK-004",
+				Name = "Desk B02",
+				Description = "Standing desk in the collaboration area",
+				Plan = "Level-1-B02",
+			},
+			new Desk
+			{
+				Identifier = Guid.NewGuid().ToString(),
+				DeskID = "DSK-005",
+				Name = "Desk C01",
+				Description = "Quiet zone focus desk",
+				Plan = "Level-2-C01",
+			},
+			new Desk
+			{
+				Identifier = Guid.NewGuid().ToString(),
+				DeskID = "DSK-006",
+				Name = "Desk C02",
+				Description = "Hot desk beside meeting room Delta",
+				Plan = "Level-2-C02",
+			},
+		];
+
+		public static readonly List<FacilityManagerAppSettings> FacilityManagerAppSettings =
+		[
+			new FacilityManagerAppSettings
+			{
+				Identifier = Guid.NewGuid().ToString(),
+				GoogleMapsAPIKey = "key1",
+			},
+			new FacilityManagerAppSettings
+			{
+				Identifier = Guid.NewGuid().ToString(),
+				GoogleMapsAPIKey = "key2",
+			},
+			new FacilityManagerAppSettings
+			{
+				Identifier = Guid.NewGuid().ToString(),
+				GoogleMapsAPIKey = null,
+			},
+		];
+
 		public static readonly List<Room> Rooms =
 		[
 			new Room

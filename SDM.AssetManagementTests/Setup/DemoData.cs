@@ -211,6 +211,46 @@
             CreatePortType(9),
         ];
 
+        public static readonly List<AssetManagerAppSettings> AssetManagerAppSettings =
+        [
+            new AssetManagerAppSettings
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                EnableAssetHistory = true,
+                PlanAndBuildJobPrompt = 1,
+                EnableConnectionHistory = true,
+                HistoryTTL = TimeSpan.FromDays(30),
+                HistoryLimit = 1000L,
+            },
+            new AssetManagerAppSettings
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                EnableAssetHistory = false,
+                PlanAndBuildJobPrompt = 0,
+                EnableConnectionHistory = true,
+                HistoryTTL = null,
+                HistoryLimit = 1000L,
+            },
+            new AssetManagerAppSettings
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                EnableAssetHistory = true,
+                PlanAndBuildJobPrompt = 0,
+                EnableConnectionHistory = false,
+                HistoryTTL = TimeSpan.FromDays(30),
+                HistoryLimit = null,
+            },
+            new AssetManagerAppSettings
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                EnableAssetHistory = false,
+                PlanAndBuildJobPrompt = 1,
+                EnableConnectionHistory = false,
+                HistoryTTL = null,
+                HistoryLimit = null,
+            },
+        ];
+
         #region Asset Port Instances (DataPort, PowerPort)
 
         private static DataPort CreateBaseDataPort(int i)

@@ -8,6 +8,7 @@ using Skyline.DataMiner.SDM.AssetManagement.Helpers;
 using Skyline.DataMiner.SDM.AssetManagement.Validation;
 using Skyline.DataMiner.SDM.Common.Services;
 using Skyline.DataMiner.SDM.FacilityManagement.Helpers;
+using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Middleware;
 
 using Connection = Skyline.DataMiner.SDM.AssetManagement.Models.Connection;
 
@@ -36,6 +37,7 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
 
         // Initialize repositories
         var assetRepository = new AssetDomRepository(connection);
+        var appSettingsRepository = new AssetManagerAppSettingsDomRepository(connection);
         var assetClassRepository = new AssetClassDomRepository(connection);
         var deviceTypeRepository = new DeviceTypeDomRepository(connection);
         var dataPortRepository = new DataPortDomRepository(connection);
@@ -56,6 +58,7 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
             .WithMiddleware(new AssetValidationMiddleware(_assetValidator))
             .WithMiddleware(new IdentifierMiddleware<Asset>());
 
+        AppSettings = appSettingsRepository;
 
         AssetClasses = assetClassRepository.WithMiddleware(new AssetClassValidationMiddleware(_assetClassValidator))
             .WithMiddleware(new IdentifierMiddleware<AssetClass>());
@@ -70,6 +73,7 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
     }
 
     public IAssetRepository Assets { get; }
+    public IBulkRepository<AssetManagerAppSettings> AppSettings { get; }
     public IBulkRepository<AssetClass> AssetClasses { get; }
     public IBulkRepository<PowerPort> PowerPorts { get; }
     public IBulkRepository<DataPort> DataPorts { get; }

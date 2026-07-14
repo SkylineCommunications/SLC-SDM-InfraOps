@@ -1,8 +1,9 @@
-﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
+namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
-    using System.Runtime.Serialization;
     using Newtonsoft.Json;
+
     using SharedMappers.DomIds;
+
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     public class HierarchyInfo : ChangeTrackingBase

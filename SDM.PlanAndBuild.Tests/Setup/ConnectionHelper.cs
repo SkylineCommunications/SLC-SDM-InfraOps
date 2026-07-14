@@ -1,0 +1,141 @@
+﻿namespace SDM.PlanAndBuild.Tests
+{
+	using Moq;
+
+	using SDM.PlanAndBuild.Tests.Setup;
+
+	using Skyline.DataMiner.Net;
+	using Skyline.DataMiner.Net.Messages;
+	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+	using Skyline.DataMiner.SDM.FacilityManagement.Helpers;
+	using Skyline.DataMiner.SDM.PlanAndBuild.Helpers;
+	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
+	using Skyline.DataMiner.Utils.DOM.UnitTesting;
+
+	internal static class ConnectionHelper
+	{
+		internal static IConnection CreateConnection()
+		{
+			var messageHandler = new DomSLNetMessageHandler();
+			return CreateConnection(messageHandler);
+		}
+
+		/// <summary>
+		/// Creates a mocked <see cref="IConnection"/> with the Job <see cref="DomDefinition"/> and
+		/// <see cref="DomBehaviorDefinition"/> registered on the underlying <see cref="DomSLNetMessageHandler"/>,
+		/// so that <c>DoStatusTransition</c> calls against <see cref="PlanAndBuildJob"/> instances can be resolved.
+		/// </summary>
+		internal static IConnection CreateConnectionWithJobBehavior()
+		{
+			var messageHandler = new DomSLNetMessageHandler();
+			messageHandler.SetDefinitions(JobBehaviorFixture.ModuleId, new[] { JobBehaviorFixture.BuildJobDefinition() });
+			messageHandler.SetBehaviorDefinitions(JobBehaviorFixture.ModuleId, new[] { JobBehaviorFixture.BuildJobBehaviorDefinition() });
+
+			return CreateConnection(messageHandler);
+		}
+
+		internal static IConnection CreateConnection(DomSLNetMessageHandler messageHandler)
+		{
+			var connectionMock = new Mock<IConnection>();
+			connectionMock.Setup(c => c.HandleMessages(It.IsAny<DMSMessage[]>()))
+				.Returns((DMSMessage[] messages) => HandleSLNetMessages(messageHandler, messages));
+			connectionMock.Setup(c => c.HandleMessage(It.IsAny<DMSMessage>()))
+				.Returns((DMSMessage message) => HandleSLNetMessage(messageHandler, message));
+			connectionMock.Setup(c => c.HandleSingleResponseMessage(It.IsAny<DMSMessage>()))
+				.Returns((DMSMessage message) => HandleSLNetMessage(messageHandler, message)[0]);
+			connectionMock.Setup(c => c.UserDomainName)
+				.Returns("Mocked User");
+
+			return connectionMock.Object;
+		}
+
+		internal static IPlanAndBuildApiHelper GetMockedHelper(this IConnection connection)
+		{
+			return new PlanAndBuildApiHelper(connection, CreateDefaultPeopleApiMock());
+		}
+
+		/// <summary>
+		/// Creates a mocked <see cref="IFacilityManagementApiHelper"/> against the given connection, so tests
+		/// resolving <see cref="Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob.Locations"/> can share
+		/// the same underlying mocked DOM store as the Plan &amp; Build helper.
+		/// </summary>
+		internal static IFacilityManagementApiHelper GetMockedFacilityManagementHelper(this IConnection connection)
+		{
+			return new FacilityManagementApiHelper(connection);
+		}
+
+		/// <summary>
+		/// Creates a mocked <see cref="IPlanAndBuildApiHelper"/> with an explicit People API "exists" behavior,
+		/// for tests that specifically exercise People/Team existence validation.
+		/// </summary>
+		internal static IPlanAndBuildApiHelper GetMockedHelperWithPeopleApi(this IConnection connection, bool exists)
+		{
+			return new PlanAndBuildApiHelper(connection, CreatePeopleApiMock(exists));
+		}
+
+		/// <summary>
+		/// Creates a mocked <see cref="IPeopleAndOrganizationsApi"/> whose People/Teams <c>Count</c> queries always
+		/// return 1 (i.e. "exists"), so existing tests that use arbitrary Guids for
+		/// <see cref="JobOwnership.AssignedTo"/>/<see cref="JobOwnership.AssignmentGroup"/>/
+		/// <see cref="JobAttachment.AttachedBy"/> keep passing existence validation by default.
+		/// Tests that specifically exercise rejection behavior should build their own mock instead
+		/// (see <see cref="CreatePeopleApiMock(bool)"/>).
+		/// </summary>
+		internal static IPeopleAndOrganizationsApi CreateDefaultPeopleApiMock() => CreatePeopleApiMock(exists: true);
+
+		/// <summary>
+		/// Creates a mocked <see cref="IPeopleAndOrganizationsApi"/> whose People/Teams <c>Count</c> queries return
+		/// either 1 ("exists") or 0 ("does not exist"), depending on <paramref name="exists"/>.
+		/// </summary>
+		internal static IPeopleAndOrganizationsApi CreatePeopleApiMock(bool exists)
+		{
+			var peopleRepositoryMock = new Mock<IPeopleRepository>();
+			peopleRepositoryMock
+				.Setup(r => r.Count(It.IsAny<FilterElement<Person>>()))
+				.Returns(exists ? 1 : 0);
+
+			var teamsRepositoryMock = new Mock<ITeamsRepository>();
+			teamsRepositoryMock
+				.Setup(r => r.Count(It.IsAny<FilterElement<Team>>()))
+				.Returns(exists ? 1 : 0);
+
+			var peopleApiMock = new Mock<IPeopleAndOrganizationsApi>();
+			peopleApiMock.Setup(a => a.People).Returns(peopleRepositoryMock.Object);
+			peopleApiMock.Setup(a => a.Teams).Returns(teamsRepositoryMock.Object);
+
+			return peopleApiMock.Object;
+		}
+
+		private static DMSMessage[] HandleSLNetMessages(DomSLNetMessageHandler messageHandler, DMSMessage[] messages)
+		{
+			if (messages is null)
+			{
+				throw new ArgumentNullException(nameof(messages));
+			}
+
+			return messages.Select(m => HandleSLNetMessage(messageHandler, m)).SelectMany(m => m).ToArray();
+		}
+
+		private static DMSMessage[] HandleSLNetMessage(DomSLNetMessageHandler messageHandler, DMSMessage message)
+		{
+			if (!TryHandleSLNetMessage(messageHandler, message, out var response))
+			{
+				throw new NotSupportedException($"Message of type {message.GetType().Name} is not supported by the mock.");
+			}
+
+			return response;
+		}
+
+		private static bool TryHandleSLNetMessage(DomSLNetMessageHandler messageHandler, DMSMessage message, out DMSMessage[] responses)
+		{
+			responses = Array.Empty<DMSMessage>();
+			if (messageHandler.TryHandleMessage(message, out var domMessage))
+			{
+				responses = [domMessage];
+				return true;
+			}
+
+			return false;
+		}
+	}
+}

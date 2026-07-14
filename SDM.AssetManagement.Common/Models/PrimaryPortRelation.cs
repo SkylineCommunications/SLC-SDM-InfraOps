@@ -1,4 +1,4 @@
-﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
+namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
     using System;
     using Newtonsoft.Json;
@@ -19,11 +19,13 @@
         }
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<bool> IsPrimaryIpv6Field => FieldHandler.GetOrCreateField(
             nameof(IsPrimaryIpv6),
             () => new ChangeTrackingField<bool>(false));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<bool> IsPrimaryIpv4Field => FieldHandler.GetOrCreateField(
             nameof(IsPrimaryIpv4),
             () => new ChangeTrackingField<bool>(false));

@@ -11,6 +11,8 @@
 	{
 		IAssetRepository Assets { get; }
 
+        IBulkRepository<AssetManagerAppSettings> AppSettings { get; }
+
 		IBulkRepository<AssetClass> AssetClasses { get; }
 
 		IBulkRepository<PowerPort> PowerPorts { get; }

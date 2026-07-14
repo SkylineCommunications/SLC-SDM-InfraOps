@@ -24,6 +24,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
         // Ensure _fieldHandler is always initialized (handles JSON deserialization without constructor)
         [JsonIgnore]
+        [SdmIgnore]
         private ChangeTrackingFieldHandler FieldHandler
         {
             get
@@ -37,6 +38,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
         }
 
         [JsonIgnore]
+        [SdmIgnore]
         public bool Changed =>
          FieldHandler.HasChanges ||
          NameField?.Changed == true ||
@@ -56,6 +58,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
          Capacity?.Changed == true;
 
         [JsonIgnore]
+        [SdmIgnore]
         internal bool IsNewInternal
         {
             get => _isNew;
@@ -63,6 +66,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
         }
 
         [JsonIgnore]
+        [SdmIgnore]
         public bool IsNew => _isNew;
 
         // PUBLIC API: Simple properties
@@ -162,11 +166,13 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
         // INTERNAL: Change tracking fields (validation handler uses these)
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<string> NameField => FieldHandler.GetOrCreateField(
             nameof(Name),
             () => new ChangeTrackingStringField(null));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<string> ModelField => FieldHandler.GetOrCreateField(
             nameof(Model),
             () => new ChangeTrackingStringField(null));
@@ -192,6 +198,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             () => new ChangeTrackingField<double?>(null));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<string> DescriptionField => FieldHandler.GetOrCreateField(
             nameof(Description),
             () => new ChangeTrackingStringField(null));
@@ -217,6 +224,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             () => new ChangeTrackingField<double?>(null));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<string> LabelField => FieldHandler.GetOrCreateField(
             nameof(Label),
             () => new ChangeTrackingStringField(null));
@@ -227,6 +235,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             () => new ChangeTrackingField<SlcFacility_Management.Enums.Placementorientationenum?>(null));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<string> RackIdField => FieldHandler.GetOrCreateField(
             nameof(RackId),
             () => new ChangeTrackingStringField(null));

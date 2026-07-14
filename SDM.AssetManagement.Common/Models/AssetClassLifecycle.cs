@@ -1,4 +1,4 @@
-﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
+namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
     using System;
     using Newtonsoft.Json;
@@ -25,16 +25,19 @@
         }
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<DateTime?> EndOfLifeField => FieldHandler.GetOrCreateField(
             nameof(EndOfLife),
             () => new ChangeTrackingField<DateTime?>(null));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<DateTime?> EndOfServiceField => FieldHandler.GetOrCreateField(
             nameof(EndOfService),
             () => new ChangeTrackingField<DateTime?>(null));
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<TimeSpan?> NominalLifetimeField => FieldHandler.GetOrCreateField(
             nameof(NominalLifetime),
             () => new ChangeTrackingField<TimeSpan?>(null));

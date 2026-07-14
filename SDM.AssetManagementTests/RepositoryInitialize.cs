@@ -11,7 +11,6 @@
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
-    using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
 
     /// <summary>
@@ -471,6 +470,17 @@
                 .Read(new TRUEFilterElement<PortType>())
                 .ToList();
             helper.TestData.PortTypes = allPortTypes.AsReadOnly();
+        }
+
+        #endregion
+
+        #region AssetManagerAppSettings
+
+        public static ITestApiHelper PopulateAssetManagerAppSettings(this ITestApiHelper helper)
+        {
+            helper.AssetManagement.AppSettings.Create(DemoData.AssetManagerAppSettings);
+
+            return helper;
         }
 
         #endregion
