@@ -33,5 +33,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Validation\ValidationResult.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Validation\ValidatorContext.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Middleware\IdentifierMiddleware.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Extensions\BulkRepositoryQueryExtensions.cs" />
   </ItemGroup>
 </Project>

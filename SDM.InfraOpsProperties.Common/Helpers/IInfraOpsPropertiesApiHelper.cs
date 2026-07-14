@@ -7,8 +7,8 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Helpers
 	{
 		IConnection Connection { get; }
 
-		IBulkRepository<Property> Properties { get; }
+		IPropertyRepository Properties { get; }
 
-		IBulkRepository<PropertyValues> PropertyValues { get; }
+		IPropertyValuesRepository PropertyValues { get; }
 	}
 }

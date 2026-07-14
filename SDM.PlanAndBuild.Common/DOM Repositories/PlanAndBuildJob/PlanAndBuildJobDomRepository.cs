@@ -1,12 +1,16 @@
 ﻿namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
 
     using SharedCommonLibrary.PlanAndBuild.State_Management;
 
     using SharedMappers.DomIds;
 
     using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+    using Skyline.DataMiner.Net.Messages.SLDataGateway;
+    using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Extensions;
 
     /// <summary>
     /// Defines methods for managing <see cref="PlanAndBuildJob"/> state transitions in a repository. Extends bulk
@@ -45,6 +49,25 @@
         /// <param name="job">The job to transition and update.</param>
         /// <param name="newState">The new state to transition the job to.</param>
         PlanAndBuildJob TransitionAndUpdate(PlanAndBuildJob job, SlcPlan_And_Build.Behaviors.Job_Behavior.StatusesEnum newState);
+
+        /// <summary>
+        /// Reads all Jobs matching any of the given JobNames, using a single batched big-OR query (see
+        /// <see cref="BulkRepositoryQueryExtensions.ReadByBigOrFilter{T, TKey}"/>) instead of one query per
+        /// JobName. Use this for bulk JobName uniqueness checks instead of looping
+        /// <see cref="IBulkRepository{PlanAndBuildJob}.Count"/> once per candidate Job.
+        /// </summary>
+        /// <param name="jobNames">The JobNames to look up. Duplicates are handled gracefully.</param>
+        List<PlanAndBuildJob> GetByJobNames(IEnumerable<string> jobNames);
+
+        /// <summary>
+        /// Reads all Jobs referencing any of the given JobType identifiers, using a single batched big-OR query
+        /// (see <see cref="BulkRepositoryQueryExtensions.ReadByBigOrFilter{T, TKey}"/>) instead of one query per
+        /// JobType. Used by <see cref="Skyline.DataMiner.SDM.PlanAndBuild.Validation.JobTypeValidator"/> for bulk
+        /// "JobType in use" checks instead of looping <see cref="IBulkRepository{PlanAndBuildJob}.Count"/> once
+        /// per candidate JobType.
+        /// </summary>
+        /// <param name="jobTypeIdentifiers">The JobType identifiers to look up. Duplicates are handled gracefully.</param>
+        List<PlanAndBuildJob> GetByJobTypes(IEnumerable<string> jobTypeIdentifiers);
     }
 
     internal partial class PlanAndBuildJobDomRepository : IPlanAndBuildJobRepository
@@ -114,6 +137,22 @@
             var transitioned = ExecuteStateTransition(job, newState);
 
             return Update(transitioned);
+        }
+
+        public List<PlanAndBuildJob> GetByJobNames(IEnumerable<string> jobNames)
+        {
+            var keys = jobNames?.Distinct().ToList() ?? new List<string>();
+
+            return this.ReadByBigOrFilter(keys, jobName => PlanAndBuildJobExposers.JobName.Equal(jobName));
+        }
+
+        public List<PlanAndBuildJob> GetByJobTypes(IEnumerable<string> jobTypeIdentifiers)
+        {
+            var keys = jobTypeIdentifiers?.Distinct().ToList() ?? new List<string>();
+
+            return this.ReadByBigOrFilter(
+                keys,
+                jobTypeIdentifier => PlanAndBuildJobExposers.Type.Equal(new SdmObjectReference<JobType>(jobTypeIdentifier)));
         }
 
         private PlanAndBuildJob ExecuteStateTransition(

@@ -196,7 +196,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
         [JsonIgnore]
         [SdmIgnore]
-        internal IChangeTrackingField<Guid?> ManufacturerField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<Guid> ManufacturerField => FieldHandler.GetOrCreateField(
             nameof(Manufacturer),
             () => new ChangeTrackingField<Guid>(Guid.Empty));
 

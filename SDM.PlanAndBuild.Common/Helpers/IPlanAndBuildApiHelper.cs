@@ -10,7 +10,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Helpers
 
         IPlanAndBuildJobRepository Jobs { get; }
 
-        IBulkRepository<JobType> JobTypes { get; }
+        IJobTypeRepository JobTypes { get; }
 
         IBulkRepository<PlanAndBuildAppSettings> AppSettings { get; }
 

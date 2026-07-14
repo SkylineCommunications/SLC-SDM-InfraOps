@@ -6,6 +6,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
 
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM.InfraOps.Common.Validation;
+    using Skyline.DataMiner.SDM.PlanAndBuild.Extensions;
     using Skyline.DataMiner.SDM.PlanAndBuild.Helpers;
     using Skyline.DataMiner.SDM.PlanAndBuild.Models;
     using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
@@ -116,11 +117,46 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
             // ============================================================
             // PHASE 3: DATABASE ACCESS CHECKS (UNIQUENESS) + REMAINING RULES
             // ============================================================
+            // Batch-fetch every JobName that needs a uniqueness check, and every Person/Team id referenced by
+            // AssignedTo/AssignmentGroup/Attachments, in a handful of big-OR queries instead of issuing one
+            // query per Job (and, for People/Teams, one remote People &amp; Organizations call per reference).
+            var jobNames = jobs
+                .Where(j => j.ShouldValidate(j.JobNameField) && !string.IsNullOrWhiteSpace(j.JobName))
+                .Select(j => j.JobName)
+                .Distinct()
+                .ToList();
+
+            var existingByJobName = _helper.Jobs.GetByJobNames(jobNames).ToLookup(j => j.JobName);
+
+            var personIds = new List<Guid>();
+            var teamIds = new List<Guid>();
+
+            foreach (var job in jobs)
+            {
+                if (job.ShouldValidate(job.Ownership.AssignedToField) && job.Ownership.AssignedTo.HasValue)
+                {
+                    personIds.Add(job.Ownership.AssignedTo.Value);
+                }
+
+                if (job.ShouldValidate(job.Ownership.AssignmentGroupField) && job.Ownership.AssignmentGroup.HasValue)
+                {
+                    teamIds.Add(job.Ownership.AssignmentGroup.Value);
+                }
+
+                if (job.ShouldValidateAny(job.AttachmentsField) && job.Attachments != null)
+                {
+                    personIds.AddRange(job.Attachments.Where(a => a?.AttachedBy.HasValue == true).Select(a => a.AttachedBy.Value));
+                }
+            }
+
+            var existingPersonIds = _helper.People.GetExistingPersonIds(personIds);
+            var existingTeamIds = _helper.People.GetExistingTeamIds(teamIds);
+
             for (int i = 0; i < jobs.Count; i++)
-            {// change this to do bulk for uniqueness check instead of per-job DB query, same for people/orgs check
+            {
                 results[i].AddFailuresFrom(ValidateJobTypeAndDates(jobs[i]));
-                results[i].AddFailuresFrom(ValidateJobNameUniqueness(jobs[i]));
-                results[i].AddFailuresFrom(ValidatePeopleAndOrganizations(jobs[i]));
+                results[i].AddFailuresFrom(ValidateJobNameUniqueness(jobs[i], existingByJobName));
+                results[i].AddFailuresFrom(ValidatePeopleAndOrganizations(jobs[i], existingPersonIds, existingTeamIds));
             }
 
             return results;
@@ -240,6 +276,40 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
         }
 
         /// <summary>
+        /// Batch variant of <see cref="ValidateJobNameUniqueness(PlanAndBuildJob)"/>, used by
+        /// <see cref="ValidateBulk"/>. Checks the pre-fetched <paramref name="existingByJobName"/> lookup (built
+        /// once for the whole batch via <see cref="IPlanAndBuildJobRepository.GetByJobNames"/>) instead of
+        /// issuing its own DB query.
+        /// </summary>
+        private ValidationResult ValidateJobNameUniqueness(PlanAndBuildJob job, ILookup<string, PlanAndBuildJob> existingByJobName)
+        {
+            var result = new ValidationResult();
+
+            if (!job.ShouldValidate(job.JobNameField))
+            {
+                return result;
+            }
+
+            if (IsJobNameInUse(job.JobName, job.Identifier, existingByJobName))
+            {
+                result.AddFailReason(PlanAndBuildJobValidationField.JobName, $"Job Name '{job.JobName}' is already in use.");
+            }
+
+            return result;
+        }
+
+        private static bool IsJobNameInUse(string jobName, string exceptIdentifier, ILookup<string, PlanAndBuildJob> existingByJobName)
+        {
+            if (existingByJobName == null)
+            {
+                return false;
+            }
+
+            return existingByJobName[jobName ?? string.Empty]
+                .Any(j => string.IsNullOrEmpty(exceptIdentifier) || !string.Equals(j.Identifier, exceptIdentifier, StringComparison.Ordinal));
+        }
+
+        /// <summary>
         /// Validates that <see cref="JobOwnership.AssignedTo"/> and <see cref="JobOwnership.AssignmentGroup"/>
         /// (when set) reference an existing Person/Team in the People &amp; Organizations solution, and that each
         /// <see cref="JobAttachment.AttachedBy"/> (when set) references an existing Person.
@@ -270,6 +340,46 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
                 foreach (var attachment in job.Attachments)
                 {
                     if (attachment?.AttachedBy.HasValue == true && !IsPersonValid(attachment.AttachedBy.Value))
+                    {
+                        result.AddFailReason(PlanAndBuildJobValidationField.Attachments, $"AttachedBy Person '{attachment.AttachedBy}' does not exist.");
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Batch variant of <see cref="ValidatePeopleAndOrganizations(PlanAndBuildJob)"/>, used by
+        /// <see cref="ValidateBulk"/>. Checks the pre-fetched <paramref name="existingPersonIds"/>/
+        /// <paramref name="existingTeamIds"/> sets (built once for the whole batch via
+        /// <see cref="Extensions.PlanAndBuildPeopleExtensions.GetExistingPersonIds"/>/
+        /// <see cref="Extensions.PlanAndBuildPeopleExtensions.GetExistingTeamIds"/>) instead of issuing a People
+        /// &amp; Organizations query per Person/Team reference.
+        /// </summary>
+        private ValidationResult ValidatePeopleAndOrganizations(PlanAndBuildJob job, HashSet<Guid> existingPersonIds, HashSet<Guid> existingTeamIds)
+        {
+            var result = new ValidationResult();
+
+            if (job.ShouldValidate(job.Ownership.AssignedToField) &&
+                job.Ownership.AssignedTo.HasValue &&
+                existingPersonIds?.Contains(job.Ownership.AssignedTo.Value) != true)
+            {
+                result.AddFailReason(PlanAndBuildJobValidationField.AssignedTo, $"AssignedTo Person '{job.Ownership.AssignedTo}' does not exist.");
+            }
+
+            if (job.ShouldValidate(job.Ownership.AssignmentGroupField) &&
+                job.Ownership.AssignmentGroup.HasValue &&
+                existingTeamIds?.Contains(job.Ownership.AssignmentGroup.Value) != true)
+            {
+                result.AddFailReason(PlanAndBuildJobValidationField.AssignmentGroup, $"AssignmentGroup Team '{job.Ownership.AssignmentGroup}' does not exist.");
+            }
+
+            if (job.ShouldValidateAny(job.AttachmentsField) && job.Attachments != null)
+            {
+                foreach (var attachment in job.Attachments)
+                {
+                    if (attachment?.AttachedBy.HasValue == true && existingPersonIds?.Contains(attachment.AttachedBy.Value) != true)
                     {
                         result.AddFailReason(PlanAndBuildJobValidationField.Attachments, $"AttachedBy Person '{attachment.AttachedBy}' does not exist.");
                     }

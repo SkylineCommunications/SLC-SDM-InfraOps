@@ -137,10 +137,31 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
             // ============================================================
             // PHASE 3: DATABASE ACCESS CHECKS (UNIQUENESS) + REMAINING RULES
             // ============================================================
+            // Batch-fetch every Name that needs a uniqueness check, and every renamed JobType's "in use by
+            // existing Jobs" state, in two big-OR queries instead of one query per JobType in the loop below.
+            var names = jobTypes
+                .Where(j => j.ShouldValidate(j.NameField) && !string.IsNullOrWhiteSpace(j.Name))
+                .Select(j => j.Name)
+                .Distinct()
+                .ToList();
+
+            var existingByName = _helper.JobTypes.GetByNames(names).ToLookup(j => j.Name);
+
+            var renamedIdentifiers = jobTypes
+                .Where(j => !j.IsNew && j.NameField.Changed)
+                .Select(j => j.Identifier)
+                .Distinct()
+                .ToList();
+
+            var jobTypesInUse = _helper.Jobs.GetByJobTypes(renamedIdentifiers)
+                .Select(job => job.Type.Identifier)
+                .Where(identifier => identifier != null)
+                .ToHashSet();
+
             for (int i = 0; i < jobTypes.Count; i++)
             {
-                results[i].AddFailuresFrom(ValidateNameUniqueness(jobTypes[i]));
-                results[i].AddFailuresFrom(ValidateNotInUseWhenRenamed(jobTypes[i]));
+                results[i].AddFailuresFrom(ValidateNameUniqueness(jobTypes[i], existingByName));
+                results[i].AddFailuresFrom(ValidateNotInUseWhenRenamed(jobTypes[i], jobTypesInUse));
             }
 
             return results;
@@ -226,6 +247,28 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
         }
 
         /// <summary>
+        /// Batch variant of <see cref="ValidateNameUniqueness(JobType)"/>, used by <see cref="ValidateBulk"/>.
+        /// Checks a pre-fetched lookup (built once for the whole batch via <c>_helper.JobTypes.GetByNames</c>)
+        /// instead of issuing one uniqueness query per JobType.
+        /// </summary>
+        private ValidationResult ValidateNameUniqueness(JobType jobType, ILookup<string, JobType> existingByName)
+        {
+            var result = new ValidationResult();
+
+            if (!jobType.ShouldValidate(jobType.NameField))
+            {
+                return result;
+            }
+
+            if (IsNameInUse(jobType.Name, jobType.Identifier, existingByName))
+            {
+                result.AddFailReason(JobTypeValidationField.Name, $"Job Type Name '{jobType.Name}' is already in use.");
+            }
+
+            return result;
+        }
+
+        /// <summary>
         /// Mirrors production behavior: renaming an existing JobType is blocked while it is referenced by
         /// existing Jobs. Only relevant when the Name actually changed on an existing (non-new) JobType.
         /// </summary>
@@ -246,6 +289,29 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
             return result;
         }
 
+        /// <summary>
+        /// Batch variant of <see cref="ValidateNotInUseWhenRenamed(JobType)"/>, used by <see cref="ValidateBulk"/>.
+        /// Checks a pre-fetched set of JobType identifiers that are actually referenced by existing Jobs (built
+        /// once for the whole batch via <c>_helper.Jobs.GetByJobTypes</c>, restricted to renamed JobTypes only)
+        /// instead of issuing one "in use" query per renamed JobType.
+        /// </summary>
+        private ValidationResult ValidateNotInUseWhenRenamed(JobType jobType, HashSet<string> jobTypesInUse)
+        {
+            var result = new ValidationResult();
+
+            if (jobType.IsNew || !jobType.NameField.Changed)
+            {
+                return result;
+            }
+
+            if (jobTypesInUse != null && jobTypesInUse.Contains(jobType.Identifier))
+            {
+                result.AddFailReason(JobTypeValidationField.Name, "Cannot edit the name of a Job Type that is in use by existing Jobs.");
+            }
+
+            return result;
+        }
+
         private bool IsNameInUse(string name, string exceptIdentifier)
         {
             FilterElement<JobType> filter = JobTypeExposers.Name.Equal(name);
@@ -256,6 +322,17 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
             }
 
             return _helper.JobTypes.Count(filter) > 0;
+        }
+
+        private static bool IsNameInUse(string name, string exceptIdentifier, ILookup<string, JobType> existingByName)
+        {
+            if (existingByName == null)
+            {
+                return false;
+            }
+
+            return existingByName[name ?? string.Empty]
+                .Any(j => string.IsNullOrEmpty(exceptIdentifier) || !string.Equals(j.Identifier, exceptIdentifier, StringComparison.Ordinal));
         }
 
         private bool IsJobTypeInUse(string jobTypeIdentifier)

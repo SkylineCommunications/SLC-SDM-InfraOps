@@ -153,6 +153,28 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Validation
             return result;
         }
 
+        /// <summary>
+        /// Batch variant of <see cref="ValidateNameUniqueness(Property)"/>, used by <see cref="ValidateBulk"/>.
+        /// Checks the pre-fetched <paramref name="existingByScopeAndName"/> lookup (built once for the whole
+        /// batch via <see cref="IPropertyRepository.GetByScopeAndNames"/>) instead of issuing its own DB query.
+        /// </summary>
+        private ValidationResult ValidateNameUniqueness(Property property, Dictionary<(string Scope, string Name), List<Property>> existingByScopeAndName)
+        {
+            var result = new ValidationResult();
+
+            if (!property.ShouldValidateAny(property.NameField, property.ScopeField))
+            {
+                return result;
+            }
+
+            if (IsNameInUse(property.Scope, property.Name, property.Identifier, existingByScopeAndName))
+            {
+                result.AddFailReason(PropertyValidationHandler.PropertyValidationField.Name, $"Property Name '{property.Name}' is already in use within Scope '{property.Scope}'.");
+            }
+
+            return result;
+        }
+
         private bool IsNameInUse(string scope, string name, string exceptIdentifier)
         {
             FilterElement<Property> filter = PropertyExposers.Scope.Equal(scope).AND(PropertyExposers.Name.Equal(name));
@@ -163,6 +185,16 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Validation
             }
 
             return _helper.Properties.Count(filter) > 0;
+        }
+
+        private static bool IsNameInUse(string scope, string name, string exceptIdentifier, Dictionary<(string Scope, string Name), List<Property>> existingByScopeAndName)
+        {
+            if (existingByScopeAndName == null || !existingByScopeAndName.TryGetValue((scope, name), out var matches))
+            {
+                return false;
+            }
+
+            return matches.Any(p => string.IsNullOrEmpty(exceptIdentifier) || !string.Equals(p.Identifier, exceptIdentifier, StringComparison.Ordinal));
         }
 
         /// <summary>
@@ -211,11 +243,26 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Validation
             // ============================================================
             // PHASE 3: DATABASE ACCESS CHECKS (UNIQUENESS) + REMAINING RULES
             // ============================================================
+            // Batch-fetch every (Scope, Name) combination that needs a uniqueness check in a single big-OR
+            // query, instead of issuing one Count() query per Property in the loop below.
+            var scopeNameKeys = properties
+                .Where(p => p.ShouldValidateAny(p.NameField, p.ScopeField) &&
+                            !string.IsNullOrWhiteSpace(p.Scope) &&
+                            !string.IsNullOrWhiteSpace(p.Name))
+                .Select(p => (p.Scope, p.Name))
+                .Distinct()
+                .ToList();
+
+            var existingByScopeAndName = _helper.Properties
+                .GetByScopeAndNames(scopeNameKeys)
+                .GroupBy(p => (p.Scope, p.Name))
+                .ToDictionary(g => g.Key, g => g.ToList());
+
             for (int i = 0; i < properties.Count; i++)
             {
                 results[i].AddFailuresFrom(ValidateStringConstraints(properties[i]));
                 results[i].AddFailuresFrom(ValidateDiscreteConstraints(properties[i]));
-                results[i].AddFailuresFrom(ValidateNameUniqueness(properties[i]));
+                results[i].AddFailuresFrom(ValidateNameUniqueness(properties[i], existingByScopeAndName));
             }
 
             return results;

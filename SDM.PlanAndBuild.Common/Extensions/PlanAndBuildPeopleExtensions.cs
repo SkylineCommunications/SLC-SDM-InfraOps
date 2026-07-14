@@ -1,7 +1,13 @@
 namespace Skyline.DataMiner.SDM.PlanAndBuild.Extensions
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+
+    using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM.PlanAndBuild.Models;
     using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
+    using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Extensions;
 
     /// <summary>
     /// Extension methods that resolve the Person/Team referenced by <see cref="JobOwnership"/> and
@@ -51,6 +57,54 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Extensions
             }
 
             return peopleApi.People.Read(attachment.AttachedBy.Value);
+        }
+
+        /// <summary>
+        /// Reads the ids of all existing People matching any of the given <paramref name="personIds"/>, using a
+        /// single batched big-OR query (see <see cref="BulkRepositoryQueryExtensions.ReadByBigOrFilter{T, TKey}"/>)
+        /// instead of one existence-check query per id. Used for bulk validation of
+        /// <see cref="JobOwnership.AssignedTo"/>/<see cref="JobAttachment.AttachedBy"/> instead of looping
+        /// <c>peopleApi.People.Count(...)</c> once per candidate id.
+        /// </summary>
+        /// <param name="peopleApi">The People &amp; Organizations API to query.</param>
+        /// <param name="personIds">The Person ids to look up. Duplicates are handled gracefully.</param>
+        public static HashSet<Guid> GetExistingPersonIds(this IPeopleAndOrganizationsApi peopleApi, IEnumerable<Guid> personIds)
+        {
+            if (peopleApi == null)
+            {
+                throw new ArgumentNullException(nameof(peopleApi));
+            }
+
+            var keys = personIds?.Distinct().ToList() ?? new List<Guid>();
+
+            return peopleApi.People
+                .ReadByBigOrFilter(keys, id => PersonExposers.Id.Equal(id))
+                .Select(p => p.Id)
+                .ToHashSet();
+        }
+
+        /// <summary>
+        /// Reads the ids of all existing Teams matching any of the given <paramref name="teamIds"/>, using a
+        /// single batched big-OR query (see <see cref="BulkRepositoryQueryExtensions.ReadByBigOrFilter{T, TKey}"/>)
+        /// instead of one existence-check query per id. Used for bulk validation of
+        /// <see cref="JobOwnership.AssignmentGroup"/> instead of looping <c>peopleApi.Teams.Count(...)</c> once
+        /// per candidate id.
+        /// </summary>
+        /// <param name="peopleApi">The People &amp; Organizations API to query.</param>
+        /// <param name="teamIds">The Team ids to look up. Duplicates are handled gracefully.</param>
+        public static HashSet<Guid> GetExistingTeamIds(this IPeopleAndOrganizationsApi peopleApi, IEnumerable<Guid> teamIds)
+        {
+            if (peopleApi == null)
+            {
+                throw new ArgumentNullException(nameof(peopleApi));
+            }
+
+            var keys = teamIds?.Distinct().ToList() ?? new List<Guid>();
+
+            return peopleApi.Teams
+                .ReadByBigOrFilter(keys, id => TeamExposers.Id.Equal(id))
+                .Select(t => t.Id)
+                .ToHashSet();
         }
     }
 }

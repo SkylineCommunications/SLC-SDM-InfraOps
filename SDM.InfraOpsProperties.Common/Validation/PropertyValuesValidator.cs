@@ -170,6 +170,50 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Validation
         }
 
         /// <summary>
+        /// Batch variant of <see cref="ValidateUniqueness(PropertyValues)"/>, used by <see cref="ValidateBulk"/>.
+        /// Checks the pre-fetched <paramref name="existingByLinkedObjectAndScope"/> lookup (built once for the
+        /// whole batch via <see cref="IPropertyValuesRepository.GetByLinkedObjectIDsAndScopes"/>) instead of
+        /// issuing its own DB query.
+        /// </summary>
+        private ValidationResult ValidateUniqueness(PropertyValues propertyValues, Dictionary<(Guid LinkedObjectID, string Scope), List<PropertyValues>> existingByLinkedObjectAndScope)
+        {
+            var result = new ValidationResult();
+
+            if (!propertyValues.ShouldValidateAny(propertyValues.LinkedObjectIDField, propertyValues.ScopeField, propertyValues.SubIDField))
+            {
+                return result;
+            }
+
+            if (propertyValues.LinkedObjectID == Guid.Empty || string.IsNullOrWhiteSpace(propertyValues.Scope))
+            {
+                // Missing required key parts - already reported by ValidateInfo.
+                return result;
+            }
+
+            if (IsComboInUse(propertyValues.LinkedObjectID, propertyValues.Scope, propertyValues.SubID, propertyValues.Identifier, existingByLinkedObjectAndScope))
+            {
+                result.AddFailReason(PropertyValuesValidationHandler.PropertyValuesValidationField.PropertyValues,
+                    $"PropertyValues for Linked Object '{propertyValues.LinkedObjectID}', Scope '{propertyValues.Scope}'" +
+                    (propertyValues.SubID == null ? " (no SubID)" : $", SubID '{propertyValues.SubID}'") +
+                    " already exist.");
+            }
+
+            return result;
+        }
+
+        private static bool IsComboInUse(Guid linkedObjectId, string scope, string subId, string exceptIdentifier, Dictionary<(Guid LinkedObjectID, string Scope), List<PropertyValues>> existingByLinkedObjectAndScope)
+        {
+            if (existingByLinkedObjectAndScope == null || !existingByLinkedObjectAndScope.TryGetValue((linkedObjectId, scope), out var candidates))
+            {
+                return false;
+            }
+
+            return candidates.Any(pv =>
+                string.Equals(pv.SubID, subId, StringComparison.Ordinal) &&
+                (string.IsNullOrEmpty(exceptIdentifier) || !string.Equals(pv.Identifier, exceptIdentifier, StringComparison.Ordinal)));
+        }
+
+        /// <summary>
         /// Validates multiple PropertyValues in bulk. Results are returned in the same order as the input.
         /// In addition to the per-entry checks, this also detects (LinkedObjectID, Scope, SubID) conflicts
         /// <em>within the batch itself</em> (i.e. two PropertyValues being saved together that share the same
@@ -215,10 +259,25 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Validation
             // ============================================================
             // PHASE 3: DATABASE ACCESS CHECKS (UNIQUENESS) + REMAINING RULES
             // ============================================================
+            // Batch-fetch every (LinkedObjectID, Scope) combination that needs a uniqueness check in a single
+            // big-OR query, instead of issuing one Read() query per entry in the loop below.
+            var linkedObjectScopeKeys = propertyValuesList
+                .Where(pv => pv.ShouldValidateAny(pv.LinkedObjectIDField, pv.ScopeField, pv.SubIDField) &&
+                             pv.LinkedObjectID != Guid.Empty &&
+                             !string.IsNullOrWhiteSpace(pv.Scope))
+                .Select(pv => (pv.LinkedObjectID, pv.Scope))
+                .Distinct()
+                .ToList();
+
+            var existingByLinkedObjectAndScope = _helper.PropertyValues
+                .GetByLinkedObjectIDsAndScopes(linkedObjectScopeKeys)
+                .GroupBy(pv => (pv.LinkedObjectID, pv.Scope))
+                .ToDictionary(g => g.Key, g => g.ToList());
+
             for (int i = 0; i < propertyValuesList.Count; i++)
             {
                 results[i].AddFailuresFrom(ValidateValues(propertyValuesList[i]));
-                results[i].AddFailuresFrom(ValidateUniqueness(propertyValuesList[i]));
+                results[i].AddFailuresFrom(ValidateUniqueness(propertyValuesList[i], existingByLinkedObjectAndScope));
             }
 
             return results;
