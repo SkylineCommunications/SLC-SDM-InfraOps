@@ -54,7 +54,7 @@
         /// Reads all Jobs matching any of the given JobNames, using a single batched big-OR query (see
         /// <see cref="BulkRepositoryQueryExtensions.ReadByBigOrFilter{T, TKey}"/>) instead of one query per
         /// JobName. Use this for bulk JobName uniqueness checks instead of looping
-        /// <see cref="IBulkRepository{PlanAndBuildJob}.Count"/> once per candidate Job.
+        /// <see cref="ICountableRepository{PlanAndBuildJob}.Count(FilterElement{PlanAndBuildJob})"/> once per candidate Job.
         /// </summary>
         /// <param name="jobNames">The JobNames to look up. Duplicates are handled gracefully.</param>
         List<PlanAndBuildJob> GetByJobNames(IEnumerable<string> jobNames);
@@ -63,7 +63,7 @@
         /// Reads all Jobs referencing any of the given JobType identifiers, using a single batched big-OR query
         /// (see <see cref="BulkRepositoryQueryExtensions.ReadByBigOrFilter{T, TKey}"/>) instead of one query per
         /// JobType. Used by <see cref="Skyline.DataMiner.SDM.PlanAndBuild.Validation.JobTypeValidator"/> for bulk
-        /// "JobType in use" checks instead of looping <see cref="IBulkRepository{PlanAndBuildJob}.Count"/> once
+        /// "JobType in use" checks instead of looping <see cref="ICountableRepository{PlanAndBuildJob}.Count(FilterElement{PlanAndBuildJob})"/> once
         /// per candidate JobType.
         /// </summary>
         /// <param name="jobTypeIdentifiers">The JobType identifiers to look up. Duplicates are handled gracefully.</param>

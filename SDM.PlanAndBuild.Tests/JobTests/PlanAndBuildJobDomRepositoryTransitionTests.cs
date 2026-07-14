@@ -27,7 +27,7 @@ namespace SDM.PlanAndBuild.Tests.JobTests
 	[TestClass]
 	public class PlanAndBuildJobDomRepositoryTransitionTests
 	{
-		private IPlanAndBuildApiHelper _helper;
+		private IPlanAndBuildApiHelper _helper = null!;
 
 		[TestInitialize]
 		public void TestInitialize()
@@ -36,7 +36,7 @@ namespace SDM.PlanAndBuild.Tests.JobTests
 			_helper.PopulateAppSettings();
 		}
 
-		private JobType _sharedJobType;
+		private JobType _sharedJobType = null!;
 
 		private PlanAndBuildJob CreateJobAt(Statuses status)
 		{

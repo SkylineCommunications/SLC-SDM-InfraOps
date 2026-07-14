@@ -353,8 +353,8 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
         /// Batch variant of <see cref="ValidatePeopleAndOrganizations(PlanAndBuildJob)"/>, used by
         /// <see cref="ValidateBulk"/>. Checks the pre-fetched <paramref name="existingPersonIds"/>/
         /// <paramref name="existingTeamIds"/> sets (built once for the whole batch via
-        /// <see cref="Extensions.PlanAndBuildPeopleExtensions.GetExistingPersonIds"/>/
-        /// <see cref="Extensions.PlanAndBuildPeopleExtensions.GetExistingTeamIds"/>) instead of issuing a People
+        /// <see cref="PlanAndBuildPeopleExtensions.GetExistingPersonIds"/>/
+        /// <see cref="PlanAndBuildPeopleExtensions.GetExistingTeamIds"/>) instead of issuing a People
         /// &amp; Organizations query per Person/Team reference.
         /// </summary>
         private ValidationResult ValidatePeopleAndOrganizations(PlanAndBuildJob job, HashSet<Guid> existingPersonIds, HashSet<Guid> existingTeamIds)

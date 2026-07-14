@@ -286,7 +286,7 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Validation
         /// <summary>
         /// Detects (LinkedObjectID, Scope, SubID) conflicts among the PropertyValues of a single batch
         /// (in-memory only, no database access). A missing/null SubID is treated as its own distinct bucket,
-        /// consistent with <see cref="IsComboInUse"/>. Result at index i corresponds to entry at index i.
+        /// consistent with <see cref="IsComboInUse(Guid, string, string, string)"/>. Result at index i corresponds to entry at index i.
         /// </summary>
         public List<ValidationResult> ValidateBatchConflicts(List<PropertyValues> propertyValuesList)
         {

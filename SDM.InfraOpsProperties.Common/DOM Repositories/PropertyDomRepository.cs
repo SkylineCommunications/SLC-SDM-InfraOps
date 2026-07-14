@@ -18,7 +18,7 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
         /// Reads all Properties matching any of the given (Scope, Name) pairs, using a single batched big-OR
         /// query (see <see cref="BulkRepositoryQueryExtensions.ReadByBigOrFilter{T, TKey}"/>) instead of one
         /// query per pair. Use this for bulk (Scope, Name) uniqueness checks instead of looping
-        /// <see cref="IBulkRepository{Property}.Count"/> once per candidate Property.
+        /// <see cref="ICountableRepository{Property}.Count(FilterElement{Property})"/> once per candidate Property.
         /// </summary>
         /// <param name="scopeNamePairs">The (Scope, Name) pairs to look up. Duplicates are handled gracefully.</param>
         List<Property> GetByScopeAndNames(IEnumerable<(string Scope, string Name)> scopeNamePairs);
