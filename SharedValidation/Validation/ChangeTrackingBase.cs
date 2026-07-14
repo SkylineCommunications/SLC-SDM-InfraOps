@@ -2,6 +2,8 @@
 {
     using Newtonsoft.Json;
 
+    using Skyline.DataMiner.SDM;
+
     /// <summary>
     /// Provides a base class for objects that support field-level change tracking.
     /// </summary>
@@ -28,6 +30,7 @@
         /// Gets the handler responsible for tracking changes to fields in the containing object.
         /// </summary>
         [JsonIgnore]
+        [SdmIgnore]
         protected ChangeTrackingFieldHandler FieldHandler
         {
             get
@@ -44,12 +47,14 @@
         /// Gets or sets a value indicating whether the entity has not yet been persisted or saved.
         /// </summary>
         [JsonIgnore]
+        [SdmIgnore]
         public bool IsNew { get; set; } = true;
 
         /// <summary>
         /// Gets a value indicating whether any fields have been modified since the last save or initialization.
         /// </summary>
         [JsonIgnore]
+        [SdmIgnore]
         public bool Changed => FieldHandler.HasChanges;
 
         /// <summary>

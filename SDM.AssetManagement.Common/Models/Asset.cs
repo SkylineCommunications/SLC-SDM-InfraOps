@@ -76,6 +76,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         /// <summary>
         /// Gets or sets the current status of the asset.
         /// </summary>
+        [SdmIgnore]
         public SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum State
         {
             get => StateField.Value; internal set => StateField.Value = value;

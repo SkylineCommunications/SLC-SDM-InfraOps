@@ -15,6 +15,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         }
 
         [JsonIgnore]
+        [SdmIgnore]
         internal IChangeTrackingField<SlcAsset_Management.Enums.HierarchyRoleEnum?> HierarchyRoleField => FieldHandler.GetOrCreateField(
             nameof(HierarchyRole),
             () => new ChangeTrackingField<SlcAsset_Management.Enums.HierarchyRoleEnum?>(null));

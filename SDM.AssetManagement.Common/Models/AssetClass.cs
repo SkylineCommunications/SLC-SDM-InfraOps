@@ -293,11 +293,14 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         /// <summary>
         /// Gets the current status of the asset class.
         /// </summary>
+        [SdmIgnore]
         public SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum State
         {
             get => StateField.Value; internal set => StateField.Value = value;
         }
 
+        [JsonIgnore]
+        [SdmIgnore]
         public bool Changed => FieldHandler.HasChanges ||
             _lifecycle?.Changed == true ||
             StateField?.Changed == true ||

@@ -20,6 +20,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
         public ResourceLink Resource { get; set; }
 
+        [SdmIgnore]
         public SlcFacility_Management.Behaviors.Desk_Behaviour.StatusesEnum State { get; internal set; }
     }
 }

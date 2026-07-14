@@ -51,6 +51,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             set => _primaryPortRelation = value ?? new PrimaryPortRelation();
         }
 
+        [JsonIgnore]
+        [SdmIgnore]
         public bool Changed => _dataPortInfo?.Changed == true ||
         _assetFk?.Changed == true ||
         _addressInfo?.Changed == true ||
