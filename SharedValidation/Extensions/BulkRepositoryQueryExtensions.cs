@@ -1,4 +1,4 @@
-namespace Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Extensions
+﻿namespace Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Extensions
 {
     using System;
     using System.Collections.Generic;
@@ -20,7 +20,7 @@ namespace Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Extensions
     /// <c>IPropertyRepository.GetByScopeAndNames</c>) so callers don't need to build the <c>FilterElement</c>
     /// themselves.
     /// </remarks>
-    public static class BulkRepositoryQueryExtensions
+    internal static class BulkRepositoryQueryExtensions
     {
         /// <summary>
         /// Reads all entities matching any of the given <paramref name="keys"/>, using a single big-OR filter

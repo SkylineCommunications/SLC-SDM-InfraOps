@@ -3,16 +3,12 @@
   <PropertyGroup>
     <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
     <HasSharedItems>true</HasSharedItems>
-    <SharedGUID>4a22402e-e149-417d-9777-f79bb1002566</SharedGUID>
+    <SharedGUID>A0E4DCAD-7705-469C-80FD-540CFBAA0BDB</SharedGUID>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
     <Import_RootNamespace>SharedMappers</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)InfraopsPropertiesDomIds.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)SlcAsset_ManagementDomIds.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)SlcFacility_ManagementDomIds.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)SlcPlan_And_BuildDomIds.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Facility Management\Mappers\FacilityDomMapper.g.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Facility Management\Mappers\FacilityManagerAppSettingsDomMapper.g.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Facility Management\Mappers\DeskDomMapper.g.cs" />

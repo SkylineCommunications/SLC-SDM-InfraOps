@@ -40,7 +40,8 @@
     </PackageReference>
   </ItemGroup>
   
-  <Import Project="..\SharedMappers\SharedMappers.projitems" Label="Shared" />
+  <Import Project="..\SharedMappers\SharedFacilityDomIds.projitems" Label="Shared" />
+  <Import Project="..\SharedMappers\SharedFacilityMappers.projitems" Label="Shared" />
   
   <Import Project="..\SharedValidation\SharedValidation.projitems" Label="Shared" />
 

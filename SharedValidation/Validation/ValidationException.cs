@@ -1,4 +1,4 @@
-namespace Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Exceptions
+﻿namespace Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Exceptions
 {
     using System;
     using System.Runtime.Serialization;
@@ -7,7 +7,7 @@ namespace Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Exceptions
     /// Represents errors that occur during validation in the SDM registration process.
     /// </summary>
     [Serializable]
-    public class ValidationException : InfraOpsException
+    internal class ValidationException : InfraOpsException
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ValidationException"/> class.

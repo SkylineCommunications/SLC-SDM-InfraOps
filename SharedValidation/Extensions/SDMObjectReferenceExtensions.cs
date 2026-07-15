@@ -4,7 +4,7 @@
 
     using Skyline.DataMiner.SDM;
 
-    public static class SdmObjectReferenceExtensions
+    internal static class SdmObjectReferenceExtensions
     {
         /// <summary>
         /// Checks if the SdmObjectReference has a valid value (not null and identifier is not empty).

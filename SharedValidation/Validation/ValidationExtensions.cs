@@ -7,7 +7,7 @@
     /// <summary>
     /// Extension methods for validation logic across all change-tracked entities.
     /// </summary>
-    public static class ValidationExtensions
+    internal static class ValidationExtensions
     {
         /// <summary>
         /// Determines if a field should be validated based on whether the entity is new or the field has changed.

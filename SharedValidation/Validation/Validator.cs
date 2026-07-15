@@ -1,11 +1,11 @@
-namespace Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations
+﻿namespace Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations
 {
     using System;
 
     /// <summary>
     /// Composable validator with error handling capabilities.
     /// </summary>
-    public class Validator<T>
+    internal class Validator<T>
     {
         private readonly Func<T, ValidationResult> _validationFunc;
         private readonly bool _stopOnFailure;

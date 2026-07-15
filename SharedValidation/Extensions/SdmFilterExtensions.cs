@@ -2,7 +2,7 @@
 {
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
 
-    public static class SdmFilterExtensions
+    internal static class SdmFilterExtensions
     {
         /// <summary>
         /// Creates a filter that checks if the exposed nullable field equals the specified value.

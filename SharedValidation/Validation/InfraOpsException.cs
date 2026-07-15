@@ -1,4 +1,4 @@
-namespace Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Exceptions
+﻿namespace Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Exceptions
 {
     using System;
     using System.Runtime.Serialization;
@@ -7,7 +7,7 @@ namespace Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Exceptions
     /// Represents errors that occur during SDM registration operations.
     /// </summary>
     [Serializable]
-    public class InfraOpsException : Exception
+    internal class InfraOpsException : Exception
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="InfraOpsException"/> class.

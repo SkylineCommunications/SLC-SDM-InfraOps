@@ -5,7 +5,7 @@
 	using System.Collections.Generic;
 	using System.Linq;
 
-	public sealed class ChangeTrackingFieldHandler
+	internal sealed class ChangeTrackingFieldHandler
     {
 		private readonly ConcurrentDictionary<string, IDomInstanceFieldApplyChanges> _fields;
 

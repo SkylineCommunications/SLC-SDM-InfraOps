@@ -4,7 +4,7 @@
     using System.Collections.Generic;
     using System.Linq;
 
-    public class ChangeTrackingField<T1> : IChangeTrackingField<T1>, IDomInstanceFieldApplyChanges, IEquatable<ChangeTrackingField<T1>>, IEquatable<T1>, IEqualityComparer<ChangeTrackingField<T1>>
+    internal class ChangeTrackingField<T1> : IChangeTrackingField<T1>, IDomInstanceFieldApplyChanges, IEquatable<ChangeTrackingField<T1>>, IEquatable<T1>, IEqualityComparer<ChangeTrackingField<T1>>
     {
         private readonly Func<T1, object> _getChangesConverter;
 

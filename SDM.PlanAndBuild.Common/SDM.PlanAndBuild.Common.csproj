@@ -45,11 +45,11 @@
     <ProjectReference Include="..\SDM.AssetManagement.Common\SDM.AssetManagement.Common.csproj" />
   </ItemGroup>
 
-  <!-- SharedMappers (DomIds) and SharedValidation are pulled in transitively through the
-       SDM.AssetManagement.Common -> SDM.FacilityManagement.Common project reference chain,
-       which already imports both shared item projects. Importing them again here would
-       recompile the shared sources into this assembly and cause CS0436 duplicate-type
-       warnings against the copies compiled into SDM.FacilityManagement.Common. -->
+  <!-- Each project imports only its own module's DomIds file to avoid CS0433/CS0436 duplicate-type errors.
+       SlcPlan_And_Build types live exclusively in this assembly; all other module ID classes come
+       from their respective packages via the project-reference chain. -->
+  <Import Project="..\SharedMappers\SharedPlanAndBuildDomIds.projitems" Label="Shared" />
+  <Import Project="..\SharedValidation\SharedValidation.projitems" Label="Shared" />
 
   <!-- Can be used to set the location of your local nuget store to copy to -->
   <Import Project="../Directory.Build.props.user" Condition="Exists('../Directory.Build.props.user')" />

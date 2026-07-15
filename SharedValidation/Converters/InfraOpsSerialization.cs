@@ -2,7 +2,7 @@
 {
     using Newtonsoft.Json;
 
-    public class InfraOpsSerialization
+    internal class InfraOpsSerialization
     {
         public static readonly JsonSerializerSettings DefaultSettings = new JsonSerializerSettings
         {

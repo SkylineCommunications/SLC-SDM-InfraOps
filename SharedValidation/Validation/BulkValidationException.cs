@@ -12,7 +12,7 @@
     /// Contains validation results for all failed entities with their corresponding entities.
     /// </summary>
     /// <typeparam name="T">The type of entity being validated.</typeparam>
-    public class BulkValidationException<T> : InfraOpsException
+    internal class BulkValidationException<T> : InfraOpsException
     {
         /// <summary>
         /// Gets the list of failed entities with their validation results.

@@ -2,7 +2,7 @@
 {
     using System;
 
-	public class ChangeTrackingStringField : ChangeTrackingField<string>
+	internal class ChangeTrackingStringField : ChangeTrackingField<string>
 	{
 		public ChangeTrackingStringField(string value) : base(value)
 		{

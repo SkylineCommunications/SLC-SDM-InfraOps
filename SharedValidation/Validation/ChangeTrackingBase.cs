@@ -31,7 +31,7 @@
         /// </summary>
         [JsonIgnore]
         [SdmIgnore]
-        protected ChangeTrackingFieldHandler FieldHandler
+        private protected ChangeTrackingFieldHandler FieldHandler
         {
             get
             {

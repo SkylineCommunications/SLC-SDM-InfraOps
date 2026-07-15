@@ -1,4 +1,4 @@
-namespace Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Middleware
+﻿namespace Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Middleware
 {
     using System;
     using System.Collections.Generic;
@@ -13,7 +13,7 @@ namespace Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Middleware
     /// Middleware that ensures all SDM objects have identifiers before they reach the repository.
     /// Assigns GUIDs to objects with null/empty identifiers.
     /// </summary>
-    public class IdentifierMiddleware<T> : IBulkRepositoryMiddleware<T>
+    internal class IdentifierMiddleware<T> : IBulkRepositoryMiddleware<T>
         where T : SdmObject<T>
     {
         public IReadOnlyCollection<T> OnCreate(

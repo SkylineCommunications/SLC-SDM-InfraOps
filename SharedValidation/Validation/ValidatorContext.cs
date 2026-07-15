@@ -3,7 +3,7 @@
 	using System.Collections.Generic;
 	using System.Linq;
 
-	public class ValidatorContext<T1> where T1 : class
+	internal class ValidatorContext<T1> where T1 : class
 	{
 		private readonly T1 _baseEntry;
 		private readonly List<T1> _otherChangedEntries;

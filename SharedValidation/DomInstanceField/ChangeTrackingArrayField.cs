@@ -5,7 +5,7 @@
     using System.Collections.Generic;
     using System.Linq;
 
-    public sealed class ChangeTrackingArrayField<T1> : IChangeTrackingField<List<T1>>, IDomInstanceFieldApplyChanges, IList<T1>, IReadOnlyList<T1>
+    internal sealed class ChangeTrackingArrayField<T1> : IChangeTrackingField<List<T1>>, IDomInstanceFieldApplyChanges, IList<T1>, IReadOnlyList<T1>
 	{
 		//private readonly Action<List<T1>, List<T1>> _applyChanges;
 

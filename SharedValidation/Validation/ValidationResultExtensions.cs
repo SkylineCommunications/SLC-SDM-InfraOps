@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations
 {
-    public static class ValidationResultExtensions
+    internal static class ValidationResultExtensions
     {
         /// <summary>
         /// Combines two ValidationResult instances into a single result.

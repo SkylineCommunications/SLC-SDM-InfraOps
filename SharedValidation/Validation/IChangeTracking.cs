@@ -1,6 +1,6 @@
-namespace Skyline.DataMiner.Utils.InfraOps.Common.Fields
+﻿namespace Skyline.DataMiner.Utils.InfraOps.Common.Fields
 {
-    public interface IChangeTracking
+    internal interface IChangeTracking
     {
         /// <summary>
         /// Gets a value indicating whether the object has been modified since it was last saved or loaded.

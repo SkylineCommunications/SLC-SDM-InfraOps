@@ -1,4 +1,4 @@
-namespace Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations
+﻿namespace Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations
 {
     using System;
     using System.Text.RegularExpressions;
@@ -6,7 +6,7 @@ namespace Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations
     /// <summary>
     /// Provides generic validation methods for numeric values.
     /// </summary>
-    public static class NumericValidators
+    internal static class NumericValidators
     {
         /// <summary>
         /// Generic numeric validator that checks if a value satisfies a predicate.
