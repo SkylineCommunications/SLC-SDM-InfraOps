@@ -20,7 +20,7 @@
     /// <c>IPropertyRepository.GetByScopeAndNames</c>) so callers don't need to build the <c>FilterElement</c>
     /// themselves.
     /// </remarks>
-    internal static class BulkRepositoryQueryExtensions
+    public static class BulkRepositoryQueryExtensions
     {
         /// <summary>
         /// Reads all entities matching any of the given <paramref name="keys"/>, using a single big-OR filter
