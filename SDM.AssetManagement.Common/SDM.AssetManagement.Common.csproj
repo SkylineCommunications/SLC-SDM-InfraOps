@@ -49,7 +49,7 @@
   </ItemGroup>
 
   <Import Project="..\SharedMappers\SharedAssetDomIds.projitems" Label="Shared" />
-  <Import Project="..\SharedValidation\SharedValidation.projitems" Label="Shared" />
+  <Import Project="..\SharedValidation\SharedValidationNoExtensions.projitems" Label="Shared" />
 
   <!-- Can be used to set the location of your local nuget store to copy to -->
   <Import Project="../Directory.Build.props.user" Condition="Exists('../Directory.Build.props.user')" />
