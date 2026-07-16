@@ -7,7 +7,7 @@
     /// Represents errors that occur during validation in the SDM registration process.
     /// </summary>
     [Serializable]
-    internal class ValidationException : InfraOpsException
+    public class ValidationException : InfraOpsException
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ValidationException"/> class.

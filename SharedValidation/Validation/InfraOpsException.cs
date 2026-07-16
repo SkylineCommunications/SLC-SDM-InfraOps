@@ -7,7 +7,7 @@
     /// Represents errors that occur during SDM registration operations.
     /// </summary>
     [Serializable]
-    internal class InfraOpsException : Exception
+    public class InfraOpsException : Exception
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="InfraOpsException"/> class.
