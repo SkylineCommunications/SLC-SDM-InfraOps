@@ -6,8 +6,8 @@
     <Nullable>disable</Nullable>
     <AssemblyName>Skyline.DataMiner.SDM.InfraOpsProperties.Automation</AssemblyName>
     <RootNamespace>Skyline.DataMiner.SDM.InfraOpsProperties.Automation</RootNamespace>
-    <VersionSuffix Condition="'$(Configuration)' == 'Debug'">dev-030</VersionSuffix>
-    <AssemblyVersion>0.2.3.30</AssemblyVersion>
+    <VersionSuffix Condition="'$(Configuration)' == 'Debug'">dev-031</VersionSuffix>
+    <AssemblyVersion>0.2.3.31</AssemblyVersion>
     <VersionPrefix>1.0.1</VersionPrefix>
     <PackageTags>Skyline;DataMiner</PackageTags>
     <PackageProjectUrl>https://skyline.be</PackageProjectUrl>

@@ -6,9 +6,9 @@
     <Nullable>disable</Nullable>
     <AssemblyName>Skyline.DataMiner.SDM.PlanAndBuild.Automation</AssemblyName>
     <RootNamespace>Skyline.DataMiner.SDM.PlanAndBuild.Automation</RootNamespace>
-    <VersionSuffix Condition="'$(Configuration)' == 'Debug'">dev-030</VersionSuffix>
+    <VersionSuffix Condition="'$(Configuration)' == 'Debug'">dev-031</VersionSuffix>
     <VersionPrefix>1.0.1</VersionPrefix>
-    <AssemblyVersion>0.2.3.30</AssemblyVersion>
+    <AssemblyVersion>0.2.3.31</AssemblyVersion>
     <PackageTags>Skyline;DataMiner</PackageTags>
     <PackageProjectUrl>https://skyline.be</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>

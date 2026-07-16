@@ -4,7 +4,7 @@
     using System.Runtime.Serialization;
 
     /// <summary>
-    /// Represents errors that occur during validation in the SDM registration process.
+    /// Represents errors that occur during validation in the Validation process.
     /// </summary>
     [Serializable]
     public class ValidationException : InfraOpsException
