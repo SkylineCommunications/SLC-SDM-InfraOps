@@ -14,6 +14,7 @@
   <Project Path="SDM.FacilityManagement.Common/SDM.FacilityManagement.Common.csproj" Id="43129b6d-34c1-4d71-8900-8836dcc2cdcc" />
   <Project Path="SDM.FacilityManagement.GQI/SDM.FacilityManagement.GQI.csproj" Id="fa02bb09-b0ca-4888-a9be-afb648c59199" />
   <Project Path="SDM.FacilityManagement.Protocol/SDM.FacilityManagement.Protocol.csproj" Id="9450733d-d8ec-430e-8403-6dc440537c73" />
+  <Project Path="SDM.InfraOps.Core/SDM.InfraOps.Core.csproj" />
   <Project Path="SDM.InfraOpsProperties.Automation/SDM.InfraOpsProperties.Automation.csproj" Id="126580d7-878b-48ee-b7ee-b194a0b12c89" />
   <Project Path="SDM.InfraOpsProperties.Common/SDM.InfraOpsProperties.Common.csproj" />
   <Project Path="SDM.InfraOpsProperties.GQI/SDM.InfraOpsProperties.GQI.csproj" Id="88f4266b-f728-4fda-b027-b7d45ff08b4e" />

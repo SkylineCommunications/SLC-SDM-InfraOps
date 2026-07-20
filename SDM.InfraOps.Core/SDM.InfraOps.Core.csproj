@@ -4,11 +4,11 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
-    <AssemblyName>Skyline.DataMiner.SDM.PlanAndBuild.Common</AssemblyName>
-    <RootNamespace>Skyline.DataMiner.SDM.PlanAndBuild.Common</RootNamespace>
-    <VersionSuffix Condition="'$(Configuration)' == 'Debug'">dev-032</VersionSuffix>
-    <VersionPrefix>1.0.1</VersionPrefix>
-    <AssemblyVersion>0.2.3.32</AssemblyVersion>
+    <AssemblyName>Skyline.DataMiner.SDM.InfraOps.Core</AssemblyName>
+    <RootNamespace>Skyline.DataMiner.SDM.InfraOps.Core</RootNamespace>
+    <VersionSuffix Condition="'$(Configuration)' == 'Debug'">dev-001</VersionSuffix>
+    <VersionPrefix>1.0.0</VersionPrefix>
+    <AssemblyVersion>1.0.0.1</AssemblyVersion>
     <PackageTags>Skyline;DataMiner</PackageTags>
     <PackageProjectUrl>https://skyline.be</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -20,7 +20,7 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Authors>SkylineCommunications</Authors>
     <Company>Skyline Communications</Company>
-    <Description>Standard API for Plan and Build operations in DataMiner</Description>
+    <Description>Shared foundation types for Skyline DataMiner SDM InfraOps packages. Provides base classes, validation, serialization, and extension methods used across all SDM domain packages.</Description>
   </PropertyGroup>
 
   <ItemGroup>
@@ -28,28 +28,17 @@
     <None Include="LICENSE.txt" Pack="true" PackagePath="" />
     <None Include="nuget\Icon.png" Pack="true" PackagePath="" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="Skyline.DataMiner.SDM" />
     <PackageReference Include="Skyline.DataMiner.SDM.Linq" />
     <PackageReference Include="Skyline.DataMiner.Utils.DOM" />
-    <PackageReference Include="Skyline.DataMiner.Dev.Utils.Solutions.PeopleAndOrganizations" />
     <PackageReference Include="Skyline.DataMiner.Utils.SecureCoding.Analyzers">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\SDM.InfraOps.Core\SDM.InfraOps.Core.csproj" />
-    <ProjectReference Include="..\SDM.AssetManagement.Common\SDM.AssetManagement.Common.csproj" />
-  </ItemGroup>
-
-  <!-- Each project imports only its own module's DomIds file to avoid CS0433/CS0436 duplicate-type errors.
-       SlcPlan_And_Build types live exclusively in this assembly; all other module ID classes come
-       from their respective packages via the project-reference chain. -->
-  <Import Project="..\SharedMappers\SharedPlanAndBuildDomIds.projitems" Label="Shared" />
 
   <!-- Can be used to set the location of your local nuget store to copy to -->
   <Import Project="../Directory.Build.props.user" Condition="Exists('../Directory.Build.props.user')" />

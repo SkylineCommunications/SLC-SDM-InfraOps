@@ -45,6 +45,7 @@
   </ItemGroup>
   
   <ItemGroup>
+    <ProjectReference Include="..\SDM.InfraOps.Core\SDM.InfraOps.Core.csproj" />
     <ProjectReference Include="..\SDM.FacilityManagement.Common\SDM.FacilityManagement.Common.csproj" />
   </ItemGroup>
 
