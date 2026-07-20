@@ -2,6 +2,7 @@
   <Folder Name="/SDM.Tests/">
     <Project Path="SDM.AssetManagementTests/SDM.AssetManagement.Tests.csproj" />
     <Project Path="SDM.FacilityManagement.Tests/SDM.FacilityManagement.Tests.csproj" />
+    <Project Path="SDM.InfraOps.PackagingTests/SDM.InfraOps.PackagingTests.csproj" />
     <Project Path="SDM.InfraOpsProperties.Tests/SDM.InfraOpsProperties.Tests.csproj" />
     <Project Path="SDM.PlanAndBuild.Tests/SDM.PlanAndBuild.Tests.csproj" />
   </Folder>
