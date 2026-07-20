@@ -32,6 +32,7 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Extensions
 
             var list = property.Discreets;
 
+            //todo add to validation
             if (list.Any(option => option.Option == discrete.Option))
             {
                 throw new InvalidOperationException("A Discrete with the same Option already exists.");

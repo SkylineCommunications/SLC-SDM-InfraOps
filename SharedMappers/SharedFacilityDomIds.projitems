@@ -10,5 +10,14 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)SlcFacility_ManagementDomIds.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Facility Management\Mappers\FacilityDomMapper.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Facility Management\Mappers\FacilityManagerAppSettingsDomMapper.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Facility Management\Mappers\DeskDomMapper.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Facility Management\Mappers\FloorDomMapper.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Facility Management\Mappers\RackDomMapper.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Facility Management\Mappers\RoomDomMapper.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Facility Management\Mappers\RowDomMapper.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Facility Management\Mappers\SiteDomMapper.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Facility Management\Mappers\ZoneDomMapper.g.cs" />
   </ItemGroup>
 </Project>

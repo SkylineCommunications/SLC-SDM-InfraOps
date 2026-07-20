@@ -23,4 +23,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)Facility Management\Mappers\SiteDomMapper.g.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Facility Management\Mappers\ZoneDomMapper.g.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)SharedAssetDomIds.projitems" />
+    <None Include="$(MSBuildThisFileDirectory)SharedFacilityDomIds.projitems" />
+    <None Include="$(MSBuildThisFileDirectory)SharedFacilityMappers.projitems" />
+    <None Include="$(MSBuildThisFileDirectory)SharedInfraopsDomIds.projitems" />
+  </ItemGroup>
 </Project>
