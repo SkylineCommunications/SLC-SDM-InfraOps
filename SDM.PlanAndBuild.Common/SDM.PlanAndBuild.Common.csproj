@@ -6,9 +6,9 @@
     <Nullable>disable</Nullable>
     <AssemblyName>Skyline.DataMiner.SDM.PlanAndBuild.Common</AssemblyName>
     <RootNamespace>Skyline.DataMiner.SDM.PlanAndBuild.Common</RootNamespace>
-    <VersionSuffix Condition="'$(Configuration)' == 'Debug'">dev-033</VersionSuffix>
+    <VersionSuffix Condition="'$(Configuration)' == 'Debug'">dev-034</VersionSuffix>
     <VersionPrefix>1.0.1</VersionPrefix>
-    <AssemblyVersion>0.2.3.33</AssemblyVersion>
+    <AssemblyVersion>0.2.3.34</AssemblyVersion>
     <PackageTags>Skyline;DataMiner</PackageTags>
     <PackageProjectUrl>https://skyline.be</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -45,11 +45,6 @@
     <ProjectReference Include="..\SDM.InfraOps.Core\SDM.InfraOps.Core.csproj" />
     <ProjectReference Include="..\SDM.AssetManagement.Common\SDM.AssetManagement.Common.csproj" />
   </ItemGroup>
-
-  <!-- Each project imports only its own module's DomIds file to avoid CS0433/CS0436 duplicate-type errors.
-       SlcPlan_And_Build types live exclusively in this assembly; all other module ID classes come
-       from their respective packages via the project-reference chain. -->
-  <Import Project="..\SharedMappers\SharedPlanAndBuildDomIds.projitems" Label="Shared" />
 
   <!-- Can be used to set the location of your local nuget store to copy to -->
   <Import Project="../Directory.Build.props.user" Condition="Exists('../Directory.Build.props.user')" />

@@ -6,8 +6,8 @@
     <Nullable>disable</Nullable>
     <AssemblyName>Skyline.DataMiner.SDM.InfraOpsProperties.Common</AssemblyName>
     <RootNamespace>Skyline.DataMiner.SDM.InfraOpsProperties.Common</RootNamespace>
-    <VersionSuffix Condition="'$(Configuration)' == 'Debug'">dev-033</VersionSuffix>
-    <AssemblyVersion>0.2.3.33</AssemblyVersion>
+    <VersionSuffix Condition="'$(Configuration)' == 'Debug'">dev-034</VersionSuffix>
+    <AssemblyVersion>0.2.3.34</AssemblyVersion>
     <VersionPrefix>1.0.1</VersionPrefix>
     <PackageTags>Skyline;DataMiner</PackageTags>
     <PackageProjectUrl>https://skyline.be</PackageProjectUrl>
@@ -43,8 +43,6 @@
   <ItemGroup>
     <ProjectReference Include="..\SDM.InfraOps.Core\SDM.InfraOps.Core.csproj" />
   </ItemGroup>
-
-  <Import Project="..\SharedMappers\SharedInfraopsDomIds.projitems" Label="Shared" />
 
   <!-- Can be used to set the location of your local nuget store to copy to -->
   <Import Project="../Directory.Build.props.user" Condition="Exists('../Directory.Build.props.user')" />
