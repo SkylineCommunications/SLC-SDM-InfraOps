@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <!-- SharedGUID must match the ProjectGuid in SharedMappers.shproj for VS to load the shared project -->
+    <SharedGUID>4a22402e-e149-417d-9777-f79bb1002566</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>SharedMappers</Import_RootNamespace>
+  </PropertyGroup>
+  <!-- All DomIds source files — for VS browsing only.
+       Each csproj imports only its own module's sub-projitems file for compilation. -->
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)InfraopsPropertiesDomIds.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SlcAsset_ManagementDomIds.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SlcFacility_ManagementDomIds.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SlcPlan_And_BuildDomIds.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Facility Management\Mappers\FacilityDomMapper.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Facility Management\Mappers\FacilityManagerAppSettingsDomMapper.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Facility Management\Mappers\DeskDomMapper.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Facility Management\Mappers\FloorDomMapper.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Facility Management\Mappers\RackDomMapper.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Facility Management\Mappers\RoomDomMapper.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Facility Management\Mappers\RowDomMapper.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Facility Management\Mappers\SiteDomMapper.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Facility Management\Mappers\ZoneDomMapper.g.cs" />
+  </ItemGroup>
+</Project>
