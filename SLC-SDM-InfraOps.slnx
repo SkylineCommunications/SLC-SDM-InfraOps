@@ -2,6 +2,7 @@
   <Folder Name="/SDM.Tests/">
     <Project Path="SDM.AssetManagementTests/SDM.AssetManagement.Tests.csproj" />
     <Project Path="SDM.FacilityManagement.Tests/SDM.FacilityManagement.Tests.csproj" />
+    <Project Path="SDM.InfraOps.PackagingTests/SDM.InfraOps.PackagingTests.csproj" />
     <Project Path="SDM.InfraOpsProperties.Tests/SDM.InfraOpsProperties.Tests.csproj" />
     <Project Path="SDM.PlanAndBuild.Tests/SDM.PlanAndBuild.Tests.csproj" />
   </Folder>
@@ -13,6 +14,7 @@
   <Project Path="SDM.FacilityManagement.Common/SDM.FacilityManagement.Common.csproj" Id="43129b6d-34c1-4d71-8900-8836dcc2cdcc" />
   <Project Path="SDM.FacilityManagement.GQI/SDM.FacilityManagement.GQI.csproj" Id="fa02bb09-b0ca-4888-a9be-afb648c59199" />
   <Project Path="SDM.FacilityManagement.Protocol/SDM.FacilityManagement.Protocol.csproj" Id="9450733d-d8ec-430e-8403-6dc440537c73" />
+  <Project Path="SDM.InfraOps.Core/SDM.InfraOps.Core.csproj" />
   <Project Path="SDM.InfraOpsProperties.Automation/SDM.InfraOpsProperties.Automation.csproj" Id="126580d7-878b-48ee-b7ee-b194a0b12c89" />
   <Project Path="SDM.InfraOpsProperties.Common/SDM.InfraOpsProperties.Common.csproj" />
   <Project Path="SDM.InfraOpsProperties.GQI/SDM.InfraOpsProperties.GQI.csproj" Id="88f4266b-f728-4fda-b027-b7d45ff08b4e" />
@@ -21,6 +23,4 @@
   <Project Path="SDM.PlanAndBuild.Common/SDM.PlanAndBuild.Common.csproj" />
   <Project Path="SDM.PlanAndBuild.GQI/SDM.PlanAndBuild.GQI.csproj" Id="35a5ae8f-fe4d-4153-8086-f6652b4057ae" />
   <Project Path="SDM.PlanAndBuild.Protocol/SDM.PlanAndBuild.Protocol.csproj" Id="d1c52570-a88a-458d-ba0a-c0e77e07b508" />
-  <Project Path="SharedMappers/SharedMappers.shproj" Id="4a22402e-e149-417d-9777-f79bb1002566" />
-  <Project Path="SharedValidation/SharedCommonLibrary.shproj" Id="c89d184b-e9af-41e0-9a33-4d218a04bcf7" />
 </Solution>

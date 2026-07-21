@@ -4,8 +4,8 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
-    <AssemblyName>Skyline.DataMiner.SDM.PlanAndBuild.Common</AssemblyName>
-    <RootNamespace>Skyline.DataMiner.SDM.PlanAndBuild.Common</RootNamespace>
+    <AssemblyName>Skyline.DataMiner.SDM.InfraOps.Core</AssemblyName>
+    <RootNamespace>Skyline.DataMiner.SDM.InfraOps.Core</RootNamespace>
     <VersionSuffix Condition="'$(Configuration)' == 'Debug'">dev-034</VersionSuffix>
     <VersionPrefix>1.0.1</VersionPrefix>
     <AssemblyVersion>0.2.3.34</AssemblyVersion>
@@ -20,7 +20,7 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Authors>SkylineCommunications</Authors>
     <Company>Skyline Communications</Company>
-    <Description>Standard API for Plan and Build operations in DataMiner</Description>
+    <Description>Shared foundation types for Skyline DataMiner SDM InfraOps packages. Provides base classes, validation, serialization, and extension methods used across all SDM domain packages.</Description>
   </PropertyGroup>
 
   <ItemGroup>
@@ -28,22 +28,16 @@
     <None Include="LICENSE.txt" Pack="true" PackagePath="" />
     <None Include="nuget\Icon.png" Pack="true" PackagePath="" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="Skyline.DataMiner.SDM" />
     <PackageReference Include="Skyline.DataMiner.SDM.Linq" />
     <PackageReference Include="Skyline.DataMiner.Utils.DOM" />
-    <PackageReference Include="Skyline.DataMiner.Dev.Utils.Solutions.PeopleAndOrganizations" />
     <PackageReference Include="Skyline.DataMiner.Utils.SecureCoding.Analyzers">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\SDM.InfraOps.Core\SDM.InfraOps.Core.csproj" />
-    <ProjectReference Include="..\SDM.AssetManagement.Common\SDM.AssetManagement.Common.csproj" />
   </ItemGroup>
 
   <!-- Can be used to set the location of your local nuget store to copy to -->
