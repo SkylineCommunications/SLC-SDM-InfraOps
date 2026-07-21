@@ -24,5 +24,4 @@
   <Project Path="SDM.PlanAndBuild.GQI/SDM.PlanAndBuild.GQI.csproj" Id="35a5ae8f-fe4d-4153-8086-f6652b4057ae" />
   <Project Path="SDM.PlanAndBuild.Protocol/SDM.PlanAndBuild.Protocol.csproj" Id="d1c52570-a88a-458d-ba0a-c0e77e07b508" />
   <Project Path="SharedMappers/SharedMappers.shproj" Id="4a22402e-e149-417d-9777-f79bb1002566" />
-  <Project Path="SharedValidation/SharedCommonLibrary.shproj" Id="c89d184b-e9af-41e0-9a33-4d218a04bcf7" />
 </Solution>
