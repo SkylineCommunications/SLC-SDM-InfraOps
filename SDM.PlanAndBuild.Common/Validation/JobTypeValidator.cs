@@ -16,7 +16,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
     /// Public validator service for JobType validation, including data access for Name uniqueness
     /// and "in use" checks.
     /// </summary>
-    public class JobTypeValidator
+    public class JobTypeValidator : IValidator<JobType>
     {
         private readonly IPlanAndBuildApiHelper _helper;
         private readonly Validator<JobType> _validationPipeline;

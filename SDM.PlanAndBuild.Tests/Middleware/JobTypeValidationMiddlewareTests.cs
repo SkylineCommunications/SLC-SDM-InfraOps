@@ -12,25 +12,29 @@
 	using SDM.PlanAndBuild.Tests.Setup;
 
 	using Skyline.DataMiner.SDM;
-	using Skyline.DataMiner.SDM.PlanAndBuild.Middleware;
 	using Skyline.DataMiner.SDM.PlanAndBuild.Models;
 	using Skyline.DataMiner.SDM.PlanAndBuild.Validation;
 	using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Exceptions;
+	using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Middleware;
 	using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
 	/// <summary>
-	/// Tests for <see cref="JobTypeValidationMiddleware"/>, including the delete-in-use guard.
+	/// Tests for <see cref="ValidationMiddleware{T}"/> wired with <see cref="JobTypeValidator"/>, including the delete-in-use guard.
 	/// </summary>
 	[TestClass]
 	public class JobTypeValidationMiddlewareTests : BaseRepositoryTest
 	{
-		private JobTypeValidationMiddleware _middleware = null!;
+		private ValidationMiddleware<JobType> _middleware = null!;
 
 		[TestInitialize]
 		public void Setup()
 		{
 			Helper.PopulateAppSettings();
-			_middleware = new JobTypeValidationMiddleware(new JobTypeValidator(Helper));
+			var validator = new JobTypeValidator(Helper);
+			_middleware = new ValidationMiddleware<JobType>(
+				validator,
+				jt => string.IsNullOrEmpty(jt.Name) ? $"Job Type '{jt.Identifier}'" : $"Job Type '{jt.Name}'",
+				jt => validator.ValidateDeletion(jt));
 		}
 
 		private static JobType ValidJobType() => new JobType { Name = "Installation" };

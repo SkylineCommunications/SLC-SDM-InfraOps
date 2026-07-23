@@ -16,7 +16,7 @@
     /// <summary>
     /// Public validator service for Asset validation with comprehensive error handling.
     /// </summary>
-    public class AssetValidator
+    public class AssetValidator : IValidator<Asset>
     {
         private readonly SdmEntityLoader _entityLoader;
         private readonly Validator<Asset> _validationPipeline;

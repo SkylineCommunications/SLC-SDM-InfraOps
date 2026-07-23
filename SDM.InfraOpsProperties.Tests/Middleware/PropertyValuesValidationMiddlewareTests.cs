@@ -10,24 +10,26 @@
 
 	using SDM.InfraOpsProperties.Tests.Setup;
 
-	using Skyline.DataMiner.SDM.InfraOpsProperties.Middleware;
 	using Skyline.DataMiner.SDM.InfraOpsProperties.Models;
 	using Skyline.DataMiner.SDM.InfraOpsProperties.Validation;
 	using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Exceptions;
+	using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Middleware;
 	using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
 	/// <summary>
-	/// Tests for <see cref="PropertyValuesValidationMiddleware"/>.
+	/// Tests for <see cref="ValidationMiddleware{T}"/> wired with <see cref="PropertyValuesValidator"/>.
 	/// </summary>
 	[TestClass]
 	public class PropertyValuesValidationMiddlewareTests : BaseRepositoryTest
 	{
-		private PropertyValuesValidationMiddleware _middleware = null!;
+		private ValidationMiddleware<PropertyValues> _middleware = null!;
 
 		[TestInitialize]
 		public void Setup()
 		{
-			_middleware = new PropertyValuesValidationMiddleware(new PropertyValuesValidator(Helper));
+			_middleware = new ValidationMiddleware<PropertyValues>(
+				new PropertyValuesValidator(Helper),
+				pv => $"PropertyValues '{pv.Identifier}'");
 		}
 
 		private static PropertyValues ValidPropertyValues() => new PropertyValues

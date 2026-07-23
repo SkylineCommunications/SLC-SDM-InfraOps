@@ -28,8 +28,10 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Helpers
 				.WithMiddleware(new IdentifierMiddleware<Property>());
 
 			PropertyValues = new PropertyValuesDomRepository(connection)
-				.WithMiddleware(new PropertyValuesValidationMiddleware(propertyValuesValidator))
-				.WithMiddleware(new IdentifierMiddleware<PropertyValues>());
+					.WithMiddleware(new ValidationMiddleware<PropertyValues>(
+						propertyValuesValidator,
+						pv => $"PropertyValues '{pv.Identifier}'"))
+					.WithMiddleware(new IdentifierMiddleware<PropertyValues>());
 		}
 
 		public IConnection Connection { get; }

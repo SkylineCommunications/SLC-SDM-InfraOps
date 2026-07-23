@@ -13,7 +13,7 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Validation
     /// <summary>
     /// Public validator service for Property validation, including data access for (Scope, Name) uniqueness checks.
     /// </summary>
-    public class PropertyValidator
+    public class PropertyValidator : IValidator<Property>
     {
         private readonly IInfraOpsPropertiesApiHelper _helper;
         private readonly Validator<Property> _validationPipeline;

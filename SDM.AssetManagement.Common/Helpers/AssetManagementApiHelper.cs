@@ -2,7 +2,6 @@
 
 using Skyline.DataMiner.Net;
 using Skyline.DataMiner.SDM;
-using Skyline.DataMiner.SDM.AssetManagement.Common.Middleware;
 using Skyline.DataMiner.SDM.AssetManagement.Models;
 using Skyline.DataMiner.SDM.AssetManagement.Helpers;
 using Skyline.DataMiner.SDM.AssetManagement.Validation;
@@ -55,12 +54,17 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
         _assetClassValidator = new AssetClassValidator(entityLoader);
         // Wrap with middleware
         Assets = assetRepository
-            .WithMiddleware(new AssetValidationMiddleware(_assetValidator))
+            .WithMiddleware(new ValidationMiddleware<Asset>(
+                _assetValidator,
+                a => string.IsNullOrEmpty(a.Name) ? $"Asset with ID '{a.AssetID}'" : $"Asset '{a.Name}'"))
             .WithMiddleware(new IdentifierMiddleware<Asset>());
 
         AppSettings = appSettingsRepository;
 
-        AssetClasses = assetClassRepository.WithMiddleware(new AssetClassValidationMiddleware(_assetClassValidator))
+        AssetClasses = assetClassRepository
+            .WithMiddleware(new ValidationMiddleware<AssetClass>(
+                _assetClassValidator,
+                ac => string.IsNullOrEmpty(ac.Name) ? $"AssetClass '{ac.Identifier}'" : $"AssetClass '{ac.Name}'"))
             .WithMiddleware(new IdentifierMiddleware<AssetClass>());
 
         PowerPorts = powerPortRepository;
