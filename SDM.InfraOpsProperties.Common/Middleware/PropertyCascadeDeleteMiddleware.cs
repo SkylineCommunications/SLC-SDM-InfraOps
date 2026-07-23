@@ -8,9 +8,12 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Middleware
     using Skyline.DataMiner.SDM.InfraOpsProperties.Extensions;
     using Skyline.DataMiner.SDM.InfraOpsProperties.Helpers;
     using Skyline.DataMiner.SDM.InfraOpsProperties.Models;
+    using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Extensions;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Middleware;
 
     using SLDataGateway.API.Types.Querying;
+
+    using static SLDataGateway.API.Util.ReferenceManager;
 
     /// <summary>
     /// Middleware that cascade-deletes <see cref="PropertyValues"/> entries referencing a <see cref="Property"/>
@@ -93,10 +96,7 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Middleware
 
             if (_cascadeDeletes)
             {
-                foreach (var property in properties)
-                {
-                    CascadeDeleteReferencingValues(property);
-                }
+                CascadeDeleteReferencingValues(properties.ToArray());
             }
 
             next(properties);
@@ -164,21 +164,22 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Middleware
         /// Removes any PropertyValue entries referencing <paramref name="property"/> from all PropertyValues
         /// instances that carry them, before the Property itself is deleted - preventing orphaned references.
         /// </summary>
-        private void CascadeDeleteReferencingValues(Property property)
+        private void CascadeDeleteReferencingValues(params Property[] properties)
         {
-            if (property == null || property.IsNew)
+            if (properties == null)
             {
                 return;
             }
 
-            var affectedPropertyValues = _helper.PropertyValues.GetByPropertyID(Guid.Parse(property.Identifier)).ToList();
+            var propertyIdentifiers = properties.Select(p => p.Identifier).ToHashSet();
+            var affectedPropertyValues = _helper.PropertyValues.ReadByBigOrFilter(propertyIdentifiers, id => PropertyValuesExposers.Values.PropertyId.Equal(new SdmObjectReference<Property>(id)));
 
             var toUpdate = new List<PropertyValues>();
 
             foreach (var propertyValues in affectedPropertyValues)
             {
                 var remainingValues = propertyValues.Values
-                    .Where(v => v == null || v.PropertyId == null || v.PropertyId.Identifier != property.Identifier)
+                    .Where(v => v == null || v.PropertyId == null || !propertyIdentifiers.Contains(v.PropertyId.Identifier))
                     .ToList();
 
                 if (remainingValues.Count == propertyValues.Values.Count)
