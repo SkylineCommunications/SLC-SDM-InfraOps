@@ -1,4 +1,4 @@
-﻿namespace SDM.InfraOpsProperties.Tests.Properties
+namespace SDM.InfraOpsProperties.Tests.Properties
 {
 	using System;
 	using System.Collections.Generic;
@@ -14,6 +14,7 @@
 
 	using Skyline.DataMiner.SDM.InfraOpsProperties.Models;
 	using Skyline.DataMiner.SDM.InfraOpsProperties.Validation;
+using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
 	/// <summary>
 	/// Tests for PropertyValidator which validates Property business rules.
@@ -42,7 +43,7 @@
 				StringSizeLimit = 64,
 			};
 
-			var result = _validator.Validate(property);
+			var result = _validator.Validate(property, RepositoryAction.Create);
 
 			using (new AssertionScope())
 			{
@@ -54,7 +55,7 @@
 		[TestMethod]
 		public void Validate_WithNullProperty_ShouldThrowArgumentNullException()
 		{
-			_validator.Invoking(v => v.Validate(null!))
+			_validator.Invoking(v => v.Validate(null!, RepositoryAction.Create))
 				.Should().Throw<ArgumentNullException>();
 		}
 
@@ -74,7 +75,7 @@
 				Discreets = new List<PropertyOption>(),
 			};
 
-			var result = _validator.Validate(property);
+			var result = _validator.Validate(property, RepositoryAction.Create);
 
 			using (new AssertionScope())
 			{
@@ -94,7 +95,7 @@
 				StringSizeLimit = -5,
 			};
 
-			var result = _validator.Validate(property);
+			var result = _validator.Validate(property, RepositoryAction.Create);
 
 			using (new AssertionScope())
 			{
@@ -119,7 +120,7 @@
 				Discreets = new List<PropertyOption> { new PropertyOption { Option = "Low" }, new PropertyOption { Option = "High" } },
 			};
 
-			var result = _validator.Validate(property);
+			var result = _validator.Validate(property, RepositoryAction.Create);
 
 			result.IsValid.Should().BeTrue();
 		}
@@ -134,7 +135,7 @@
 				PropertyType = InfraopsProperties.Enums.PropertyTypeEnum.Discrete,
 			};
 
-			var result = _validator.Validate(property);
+			var result = _validator.Validate(property, RepositoryAction.Create);
 
 			using (new AssertionScope())
 			{
@@ -170,7 +171,7 @@
 			// Now only change StringSizeLimit to something valid.
 			property.StringSizeLimit = 20;
 
-			var result = _validator.Validate(property);
+			var result = _validator.Validate(property, RepositoryAction.Create);
 
 			result.IsValid.Should().BeTrue("Scope error should not be reported since it wasn't changed after the reset");
 		}
@@ -186,7 +187,7 @@
 
 			var newProperty = new Property { Name = "Serial Number", Scope = "Asset" };
 
-			var result = _validator.Validate(newProperty);
+			var result = _validator.Validate(newProperty, RepositoryAction.Create);
 
 			using (new AssertionScope())
 			{
@@ -204,7 +205,7 @@
 
 			var newProperty = new Property { Name = "Description", Scope = "Facility" };
 
-			var result = _validator.Validate(newProperty);
+			var result = _validator.Validate(newProperty, RepositoryAction.Create);
 
 			result.IsValid.Should().BeTrue();
 		}
@@ -214,7 +215,7 @@
 		{
 			var created = Helper.Properties.Create(new Property { Name = "Serial Number", Scope = "Asset" });
 
-			var result = _validator.Validate(created);
+			var result = _validator.Validate(created, RepositoryAction.Create);
 
 			result.IsValid.Should().BeTrue("the uniqueness check must exclude the Property's own identifier");
 		}
@@ -226,7 +227,7 @@
 		[TestMethod]
 		public void ValidateBulk_WithNullList_ShouldReturnEmptyResults()
 		{
-			var results = _validator.ValidateBulk(null!);
+			var results = _validator.ValidateBulk(null!, RepositoryAction.Create);
 
 			results.Should().BeEmpty();
 		}
@@ -234,7 +235,7 @@
 		[TestMethod]
 		public void ValidateBulk_WithEmptyList_ShouldReturnEmptyResults()
 		{
-			var results = _validator.ValidateBulk(new List<Property>());
+			var results = _validator.ValidateBulk(new List<Property>(), RepositoryAction.Create);
 
 			results.Should().BeEmpty();
 		}
@@ -248,7 +249,7 @@
 				new Property { Name = "Property Two", Scope = "Asset" },
 			};
 
-			var results = _validator.ValidateBulk(properties);
+			var results = _validator.ValidateBulk(properties, RepositoryAction.Create);
 
 			using (new AssertionScope())
 			{
@@ -268,7 +269,7 @@
 				new Property { Name = "Serial Number", Scope = "Asset" },
 			};
 
-			var results = _validator.ValidateBulk(properties);
+			var results = _validator.ValidateBulk(properties, RepositoryAction.Create);
 
 			using (new AssertionScope())
 			{
@@ -291,7 +292,7 @@
 				new Property { Name = "Description", Scope = "Facility" },
 			};
 
-			var results = _validator.ValidateBulk(properties);
+			var results = _validator.ValidateBulk(properties, RepositoryAction.Create);
 
 			results.Should().OnlyContain(r => r.IsValid);
 		}
@@ -305,7 +306,7 @@
 				new Property { Name = "SERIAL NUMBER", Scope = "ASSET" },
 			};
 
-			var results = _validator.ValidateBulk(properties);
+			var results = _validator.ValidateBulk(properties, RepositoryAction.Create);
 
 			results.Should().OnlyContain(r => !r.IsValid);
 		}
@@ -323,7 +324,7 @@
 				new Property { Name = "Brand New Property", Scope = "Asset" },
 			};
 
-			var results = _validator.ValidateBulk(properties);
+			var results = _validator.ValidateBulk(properties, RepositoryAction.Create);
 
 			using (new AssertionScope())
 			{

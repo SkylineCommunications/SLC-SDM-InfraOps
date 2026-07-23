@@ -1,4 +1,4 @@
-﻿namespace SDM.InfraOpsProperties.Tests.PropertyValuesTests
+namespace SDM.InfraOpsProperties.Tests.PropertyValuesTests
 {
 	using System;
 	using System.Collections.Generic;
@@ -12,6 +12,7 @@
 
 	using Skyline.DataMiner.SDM.InfraOpsProperties.Models;
 	using Skyline.DataMiner.SDM.InfraOpsProperties.Validation;
+using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
 	/// <summary>
 	/// Tests for PropertyValuesValidator which validates PropertyValues business rules.
@@ -42,7 +43,7 @@
 				},
 			};
 
-			var result = _validator.Validate(propertyValues);
+			var result = _validator.Validate(propertyValues, RepositoryAction.Create);
 
 			using (new AssertionScope())
 			{
@@ -54,7 +55,7 @@
 		[TestMethod]
 		public void Validate_WithNullPropertyValues_ShouldThrowArgumentNullException()
 		{
-			_validator.Invoking(v => v.Validate(null!))
+			_validator.Invoking(v => v.Validate(null!, RepositoryAction.Create))
 				.Should().Throw<ArgumentNullException>();
 		}
 
@@ -71,7 +72,7 @@
 				Scope = "Asset",
 			};
 
-			var result = _validator.Validate(propertyValues);
+			var result = _validator.Validate(propertyValues, RepositoryAction.Create);
 
 			using (new AssertionScope())
 			{
@@ -89,7 +90,7 @@
 				Scope = string.Empty,
 			};
 
-			var result = _validator.Validate(propertyValues);
+			var result = _validator.Validate(propertyValues, RepositoryAction.Create);
 
 			using (new AssertionScope())
 			{
@@ -116,7 +117,7 @@
 				},
 			};
 
-			var result = _validator.Validate(propertyValues);
+			var result = _validator.Validate(propertyValues, RepositoryAction.Create);
 
 			using (new AssertionScope())
 			{
@@ -148,7 +149,7 @@
 			// Only change LinkedObjectID now.
 			propertyValues.LinkedObjectID = Guid.NewGuid();
 
-			var result = _validator.Validate(propertyValues);
+			var result = _validator.Validate(propertyValues, RepositoryAction.Create);
 
 			result.IsValid.Should().BeTrue("Scope error should not be reported since it wasn't changed after the reset");
 		}
@@ -165,7 +166,7 @@
 
 			var newPropertyValues = new PropertyValues { LinkedObjectID = linkedObjectId, Scope = "Asset" };
 
-			var result = _validator.Validate(newPropertyValues);
+			var result = _validator.Validate(newPropertyValues, RepositoryAction.Create);
 
 			using (new AssertionScope())
 			{
@@ -183,7 +184,7 @@
 
 			var newPropertyValues = new PropertyValues { LinkedObjectID = linkedObjectId, Scope = "Asset", SubID = "Port1" };
 
-			var result = _validator.Validate(newPropertyValues);
+			var result = _validator.Validate(newPropertyValues, RepositoryAction.Create);
 
 			result.IsValid.Should().BeFalse("a PropertyValues row already exists for this (LinkedObjectID, Scope, SubID) combo");
 		}
@@ -199,7 +200,7 @@
 
 			var newPropertyValues = new PropertyValues { LinkedObjectID = linkedObjectId, Scope = "Asset" };
 
-			var result = _validator.Validate(newPropertyValues);
+			var result = _validator.Validate(newPropertyValues, RepositoryAction.Create);
 
 			result.IsValid.Should().BeTrue("a PropertyValues without a SubID does not conflict with one that has a specific SubID");
 		}
@@ -212,7 +213,7 @@
 
 			var newPropertyValues = new PropertyValues { LinkedObjectID = linkedObjectId, Scope = "Asset", SubID = "Port2" };
 
-			var result = _validator.Validate(newPropertyValues);
+			var result = _validator.Validate(newPropertyValues, RepositoryAction.Create);
 
 			result.IsValid.Should().BeTrue();
 		}
@@ -225,7 +226,7 @@
 
 			var newPropertyValues = new PropertyValues { LinkedObjectID = linkedObjectId, Scope = "Facility" };
 
-			var result = _validator.Validate(newPropertyValues);
+			var result = _validator.Validate(newPropertyValues, RepositoryAction.Create);
 
 			result.IsValid.Should().BeTrue("(LinkedObjectID, Scope, SubID) is the natural key - Scope differs so no conflict");
 		}
@@ -237,7 +238,7 @@
 
 			var newPropertyValues = new PropertyValues { LinkedObjectID = Guid.NewGuid(), Scope = "Asset" };
 
-			var result = _validator.Validate(newPropertyValues);
+			var result = _validator.Validate(newPropertyValues, RepositoryAction.Create);
 
 			result.IsValid.Should().BeTrue();
 		}
@@ -247,7 +248,7 @@
 		{
 			var created = Helper.PropertyValues.Create(new PropertyValues { LinkedObjectID = Guid.NewGuid(), Scope = "Asset", SubID = "Port1" });
 
-			var result = _validator.Validate(created);
+			var result = _validator.Validate(created, RepositoryAction.Create);
 
 			result.IsValid.Should().BeTrue("the uniqueness check must exclude the PropertyValues' own identifier");
 		}
@@ -259,7 +260,7 @@
 		[TestMethod]
 		public void ValidateBulk_WithNullList_ShouldReturnEmptyResults()
 		{
-			var results = _validator.ValidateBulk(null!);
+			var results = _validator.ValidateBulk(null!, RepositoryAction.Create);
 
 			results.Should().BeEmpty();
 		}
@@ -267,7 +268,7 @@
 		[TestMethod]
 		public void ValidateBulk_WithEmptyList_ShouldReturnEmptyResults()
 		{
-			var results = _validator.ValidateBulk(new List<PropertyValues>());
+			var results = _validator.ValidateBulk(new List<PropertyValues>(), RepositoryAction.Create);
 
 			results.Should().BeEmpty();
 		}
@@ -281,7 +282,7 @@
 				new PropertyValues { LinkedObjectID = Guid.NewGuid(), Scope = "Asset" },
 			};
 
-			var results = _validator.ValidateBulk(propertyValuesList);
+			var results = _validator.ValidateBulk(propertyValuesList, RepositoryAction.Create);
 
 			using (new AssertionScope())
 			{
@@ -302,7 +303,7 @@
 				new PropertyValues { LinkedObjectID = linkedObjectId, Scope = "Asset", SubID = "Port1" },
 			};
 
-			var results = _validator.ValidateBulk(propertyValuesList);
+			var results = _validator.ValidateBulk(propertyValuesList, RepositoryAction.Create);
 
 			using (new AssertionScope())
 			{
@@ -326,7 +327,7 @@
 				new PropertyValues { LinkedObjectID = linkedObjectId, Scope = "Asset", SubID = "Port2" },
 			};
 
-			var results = _validator.ValidateBulk(propertyValuesList);
+			var results = _validator.ValidateBulk(propertyValuesList, RepositoryAction.Create);
 
 			results.Should().OnlyContain(r => r.IsValid);
 		}
@@ -341,7 +342,7 @@
 				new PropertyValues { LinkedObjectID = linkedObjectId, Scope = "Asset", SubID = "Port1" },
 			};
 
-			var results = _validator.ValidateBulk(propertyValuesList);
+			var results = _validator.ValidateBulk(propertyValuesList, RepositoryAction.Create);
 
 			results.Should().OnlyContain(r => r.IsValid);
 		}
@@ -360,7 +361,7 @@
 				new PropertyValues { LinkedObjectID = Guid.NewGuid(), Scope = "Asset" },
 			};
 
-			var results = _validator.ValidateBulk(propertyValuesList);
+			var results = _validator.ValidateBulk(propertyValuesList, RepositoryAction.Create);
 
 			using (new AssertionScope())
 			{

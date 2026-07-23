@@ -39,14 +39,12 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Helpers
             jobRepository.Validator = jobValidator;
 
             Jobs = jobRepository
-                .WithMiddleware(new PlanAndBuildJobValidationMiddleware(jobValidator, this))
+                .WithMiddleware(new PlanAndBuildJobValidationMiddleware(jobValidator))
+                .WithMiddleware(new JobIdAllocationMiddleware(this))
                 .WithMiddleware(new IdentifierMiddleware<PlanAndBuildJob>());
 
             JobTypes = jobTypeRepository
-                .WithMiddleware(new ValidationMiddleware<JobType>(
-                    jobTypeValidator,
-                    jt => string.IsNullOrEmpty(jt.Name) ? $"Job Type '{jt.Identifier}'" : $"Job Type '{jt.Name}'",
-                    jt => jobTypeValidator.ValidateDeletion(jt)))
+                .WithMiddleware(new JobTypeValidationMiddleware(jobTypeValidator))
                 .WithMiddleware(new IdentifierMiddleware<JobType>());
 
             AppSettings = appSettingsRepository;

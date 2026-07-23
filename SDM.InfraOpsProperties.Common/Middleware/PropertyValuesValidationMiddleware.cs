@@ -8,17 +8,17 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Middleware
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Middleware;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
-    internal class PropertyValidationMiddleware : ValidationMiddleware<Property>
+    internal class PropertyValuesValidationMiddleware : ValidationMiddleware<PropertyValues>
     {
-        internal PropertyValidationMiddleware(PropertyValidator validator)
+        internal PropertyValuesValidationMiddleware(PropertyValuesValidator validator)
             : base(validator)
         {
         }
 
-        protected override Exception BuildBulkValidationException(List<Property> entities, List<ValidationResult> results)
-            => new BulkValidationException<Property>(
+        protected override Exception BuildBulkValidationException(List<PropertyValues> entities, List<ValidationResult> results)
+            => new BulkValidationException<PropertyValues>(
                 entities,
                 results,
-                p => string.IsNullOrEmpty(p.Name) ? $"Property '{p.Identifier}'" : $"Property '{p.Name}'");
+                pv => $"PropertyValues '{pv.Identifier}'");
     }
 }

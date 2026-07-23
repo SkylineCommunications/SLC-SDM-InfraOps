@@ -16,7 +16,7 @@
     /// <summary>
     /// Public validator service for Asset validation with comprehensive error handling.
     /// </summary>
-    public class AssetValidator : IValidator<Asset>
+    public class AssetValidator : ValidatorBase<Asset>
     {
         private readonly SdmEntityLoader _entityLoader;
         private readonly Validator<Asset> _validationPipeline;
@@ -39,13 +39,8 @@
         /// Validates an Asset and returns ValidationResult.
         /// Collects all errors without throwing exceptions.
         /// </summary>
-        public ValidationResult Validate(Asset asset)
+        protected override ValidationResult Validate(Asset asset)
         {
-            if (asset == null)
-            {
-                throw new ArgumentNullException(nameof(asset));
-            }
-
             return _validationPipeline.Validate(asset);
         }
 
@@ -112,7 +107,7 @@
         /// Returns validation results in the same order as the input assets.
         /// Result at index i corresponds to asset at index i.
         /// </summary>
-        public List<ValidationResult> ValidateBulk(List<Asset> assets)
+        protected override List<ValidationResult> ValidateBulk(List<Asset> assets)
         {
             if (assets == null || !assets.Any())
             {

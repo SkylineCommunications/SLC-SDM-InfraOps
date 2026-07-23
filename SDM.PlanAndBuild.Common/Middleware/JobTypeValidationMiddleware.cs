@@ -8,17 +8,17 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Middleware
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Middleware;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
-    internal class PlanAndBuildJobValidationMiddleware : ValidationMiddleware<PlanAndBuildJob>
+    internal class JobTypeValidationMiddleware : ValidationMiddleware<JobType>
     {
-        internal PlanAndBuildJobValidationMiddleware(PlanAndBuildJobValidator validator)
+        internal JobTypeValidationMiddleware(JobTypeValidator validator)
             : base(validator)
         {
         }
 
-        protected override Exception BuildBulkValidationException(List<PlanAndBuildJob> entities, List<ValidationResult> results)
-            => new BulkValidationException<PlanAndBuildJob>(
+        protected override Exception BuildBulkValidationException(List<JobType> entities, List<ValidationResult> results)
+            => new BulkValidationException<JobType>(
                 entities,
                 results,
-                job => string.IsNullOrEmpty(job.JobName) ? $"Job '{job.Identifier}'" : $"Job '{job.JobName}'");
+                jt => string.IsNullOrEmpty(jt.Name) ? $"Job Type '{jt.Identifier}'" : $"Job Type '{jt.Name}'");
     }
 }

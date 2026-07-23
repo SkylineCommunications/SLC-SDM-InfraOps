@@ -15,7 +15,7 @@
     /// <summary>
     /// Public validator service for AssetClass validation with comprehensive error handling.
     /// </summary>
-    public class AssetClassValidator : IValidator<AssetClass>
+    public class AssetClassValidator : ValidatorBase<AssetClass>
     {
         private readonly SdmEntityLoader _entityLoader;
         private readonly Validator<AssetClass> _validationPipeline;
@@ -36,13 +36,8 @@
         /// Collects all errors without throwing exceptions.
         /// <para><b>Not suitable for bulk scenarios</b>: issues one DB query per item. Use <see cref="ValidateBulk"/> instead.</para>
         /// </summary>
-        public ValidationResult Validate(AssetClass assetClass)
+        protected override ValidationResult Validate(AssetClass assetClass)
         {
-            if (assetClass == null)
-            {
-                throw new ArgumentNullException(nameof(assetClass));
-            }
-
             return _validationPipeline.Validate(assetClass);
         }
 
@@ -72,7 +67,7 @@
         /// 3. Database checks per item (name uniqueness vs DB, power supply against device type).
         /// Results are returned in the same order as the input list.
         /// </summary>
-        public List<ValidationResult> ValidateBulk(List<AssetClass> assetClasses)
+        protected override List<ValidationResult> ValidateBulk(List<AssetClass> assetClasses)
         {
             if (assetClasses == null || !assetClasses.Any())
             {

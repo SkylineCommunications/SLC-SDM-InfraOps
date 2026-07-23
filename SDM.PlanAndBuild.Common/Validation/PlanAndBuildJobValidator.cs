@@ -17,7 +17,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
     /// <summary>
     /// Public validator service for PlanAndBuildJob validation, including data access for JobName uniqueness checks.
     /// </summary>
-    public class PlanAndBuildJobValidator : IValidator<PlanAndBuildJob>
+    public class PlanAndBuildJobValidator : ValidatorBase<PlanAndBuildJob>
     {
         private readonly IPlanAndBuildApiHelper _helper;
         private readonly Validator<PlanAndBuildJob> _validationPipeline;
@@ -43,13 +43,8 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
         /// Validates a PlanAndBuildJob and returns a ValidationResult.
         /// Collects all errors without throwing exceptions.
         /// </summary>
-        public ValidationResult Validate(PlanAndBuildJob job)
+        protected override ValidationResult Validate(PlanAndBuildJob job)
         {
-            if (job == null)
-            {
-                throw new ArgumentNullException(nameof(job));
-            }
-
             return _validationPipeline.Validate(job);
         }
 
@@ -78,7 +73,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
         /// Mirrors InfraOpsShared.DOM_Classes.DOM.Applications.Plan_And_Build.Validation.JobValidationHandler's
         /// OtherChangedEntries check.
         /// </summary>
-        public List<ValidationResult> ValidateBulk(List<PlanAndBuildJob> jobs)
+        protected override List<ValidationResult> ValidateBulk(List<PlanAndBuildJob> jobs)
         {
             if (jobs == null || !jobs.Any())
             {

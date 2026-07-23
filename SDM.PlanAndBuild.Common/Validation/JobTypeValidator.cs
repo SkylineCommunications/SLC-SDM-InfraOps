@@ -16,7 +16,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
     /// Public validator service for JobType validation, including data access for Name uniqueness
     /// and "in use" checks.
     /// </summary>
-    public class JobTypeValidator : IValidator<JobType>
+    public class JobTypeValidator : ValidatorBase<JobType>
     {
         private readonly IPlanAndBuildApiHelper _helper;
         private readonly Validator<JobType> _validationPipeline;
@@ -40,15 +40,26 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
 
         /// <summary>
         /// Validates a JobType and returns a ValidationResult.
-        /// Collects all errors without throwing exceptions.
+        /// For <see cref="RepositoryAction.Delete"/>, checks whether the JobType is in use by existing Jobs.
+        /// For all other actions, runs standard field validation.
         /// </summary>
-        public ValidationResult Validate(JobType jobType)
+        public override ValidationResult Validate(JobType jobType, RepositoryAction action)
         {
             if (jobType == null)
             {
                 throw new ArgumentNullException(nameof(jobType));
             }
 
+            if (action == RepositoryAction.Delete)
+            {
+                return ValidateDeletion(jobType);
+            }
+
+            return base.Validate(jobType, action);
+        }
+
+        protected override ValidationResult Validate(JobType jobType)
+        {
             return _validationPipeline.Validate(jobType);
         }
 
@@ -98,7 +109,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
         /// Mirrors InfraOpsShared.DOM_Classes.DOM.Applications.Plan_And_Build.Validation.JobTypeValidationHandler's
         /// OtherChangedEntries check.
         /// </summary>
-        public List<ValidationResult> ValidateBulk(List<JobType> jobTypes)
+        protected override List<ValidationResult> ValidateBulk(List<JobType> jobTypes)
         {
             if (jobTypes == null || !jobTypes.Any())
             {
