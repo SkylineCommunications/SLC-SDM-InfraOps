@@ -157,17 +157,17 @@ using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 		#region Delete In-Use Blocking
 
 		[TestMethod]
-		public void ValidateDeletion_WhenNotInUse_ShouldReturnValid()
+		public void ValidateNotInUseWhenDeleted_WhenNotInUse_ShouldReturnValid()
 		{
 			var jobType = Helper.JobTypes.Create(new JobType { Name = "Installation" });
 
-			var result = _validator.ValidateDeletion(jobType);
+			var result = _validator.ValidateNotInUseWhenDeleted(jobType);
 
 			result.IsValid.Should().BeTrue();
 		}
 
 		[TestMethod]
-		public void ValidateDeletion_WhenInUseByExistingJobs_ShouldReturnInvalid()
+		public void ValidateNotInUseWhenDeleted_WhenInUseByExistingJobs_ShouldReturnInvalid()
 		{
 			var jobType = Helper.JobTypes.Create(new JobType { Name = "Installation" });
 			Helper.Jobs.Create(new PlanAndBuildJob
@@ -176,7 +176,7 @@ using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 				Type = new SdmObjectReference<JobType>(jobType.Identifier),
 			});
 
-			var result = _validator.ValidateDeletion(jobType);
+			var result = _validator.ValidateNotInUseWhenDeleted(jobType);
 
 			using (new AssertionScope())
 			{
@@ -187,9 +187,9 @@ using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 		}
 
 		[TestMethod]
-		public void ValidateDeletion_WithNullJobType_ShouldThrowArgumentNullException()
+		public void ValidateNotInUseWhenDeleted_WithNullJobType_ShouldThrowArgumentNullException()
 		{
-			_validator.Invoking(v => v.ValidateDeletion(null!))
+			_validator.Invoking(v => v.ValidateNotInUseWhenDeleted(null!))
 				.Should().Throw<ArgumentNullException>();
 		}
 

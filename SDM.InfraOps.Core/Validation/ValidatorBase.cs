@@ -43,6 +43,11 @@ namespace Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations
         /// Default: null-guard then delegates to <see cref="Validate(T)"/>.
         /// Override <b>only</b> when the validator has action-specific rules
         /// (e.g. routing <see cref="RepositoryAction.Delete"/> to a different check).
+        /// <para>
+        /// <b>Warning:</b> if you override this method for action-specific behavior (e.g. Delete routing),
+        /// you almost certainly also need to override <see cref="ValidateBulk(List{T}, RepositoryAction)"/>
+        /// for the same action. Failing to do so leaves a bug where bulk operations skip the action-specific rules.
+        /// </para>
         /// Call <c>base.Validate(entity, action)</c> for the standard path.
         /// </summary>
         public virtual ValidationResult Validate(T entity, RepositoryAction action)

@@ -52,10 +52,31 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
 
             if (action == RepositoryAction.Delete)
             {
-                return ValidateDeletion(jobType);
+                return ValidateNotInUseWhenDeleted(jobType);
             }
 
             return base.Validate(jobType, action);
+        }
+
+        /// <summary>
+        /// Validates multiple JobTypes in bulk for the given action.
+        /// For <see cref="RepositoryAction.Delete"/>, checks whether any of the JobTypes are in use
+        /// by existing Jobs (batch-fetched in a single query to avoid N+1).
+        /// For all other actions, delegates to the standard bulk field/uniqueness checks.
+        /// </summary>
+        public override List<ValidationResult> ValidateBulk(List<JobType> jobTypes, RepositoryAction action)
+        {
+            if (jobTypes == null || !jobTypes.Any())
+            {
+                return new List<ValidationResult>();
+            }
+
+            if (action == RepositoryAction.Delete)
+            {
+                return ValidateNotInUseWhenDeleted(jobTypes);
+            }
+
+            return base.ValidateBulk(jobTypes, action);
         }
 
         protected override ValidationResult Validate(JobType jobType)
@@ -81,10 +102,9 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
         }
 
         /// <summary>
-        /// Validates that a JobType can be deleted. Mirrors production behavior: deletion is blocked
-        /// while the JobType is referenced by existing Jobs.
+        /// Checks whether a JobType is in use by existing Jobs. Deletion is blocked while referenced.
         /// </summary>
-        public ValidationResult ValidateDeletion(JobType jobType)
+        public ValidationResult ValidateNotInUseWhenDeleted(JobType jobType)
         {
             if (jobType == null)
             {
@@ -99,6 +119,36 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Batch variant of <see cref="ValidateNotInUseWhenDeleted(JobType)"/>: checks which JobTypes in the batch
+        /// are in use by existing Jobs in a single query, then maps the results back to per-JobType <see cref="ValidationResult"/>s.
+        /// </summary>
+        private List<ValidationResult> ValidateNotInUseWhenDeleted(List<JobType> jobTypes)
+        {
+            var results = jobTypes.Select(j => new ValidationResult()).ToList();
+
+            var identifiers = jobTypes
+                .Select(j => j.Identifier)
+                .Where(id => id != null)
+                .Distinct()
+                .ToList();
+
+            var inUseIdentifiers = _helper.Jobs.GetByJobTypes(identifiers)
+                .Select(job => job.Type.Identifier)
+                .Where(id => id != null)
+                .ToHashSet();
+
+            for (int i = 0; i < jobTypes.Count; i++)
+            {
+                if (inUseIdentifiers.Contains(jobTypes[i].Identifier))
+                {
+                    results[i].AddFailReason(JobTypeValidationField.JobType, "Cannot delete a Job Type that is in use by existing Jobs.");
+                }
+            }
+
+            return results;
         }
 
         /// <summary>
