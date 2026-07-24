@@ -13,12 +13,5 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Helpers
         IJobTypeRepository JobTypes { get; }
 
         IBulkRepository<PlanAndBuildAppSettings> AppSettings { get; }
-
-        /// <summary>
-        /// Gets the People &amp; Organizations API, used to validate the existence of the Person/Team referenced
-        /// by <see cref="Models.JobOwnership.AssignedTo"/>, <see cref="Models.JobOwnership.AssignmentGroup"/> and
-        /// <see cref="Models.JobAttachment.AttachedBy"/>.
-        /// </summary>
-        IPeopleAndOrganizationsApi People { get; }
     }
 }

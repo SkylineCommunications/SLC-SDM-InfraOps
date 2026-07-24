@@ -22,5 +22,7 @@
         IBulkRepository<Zone> Zones { get; }
 
         IBulkRepository<Row> Rows { get; }
+
+        IBulkRepository<Site> Sites { get; }
     }
 }

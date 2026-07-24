@@ -28,7 +28,7 @@ using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 		public void Setup()
 		{
 			Helper.PopulateAppSettings();
-			_validator = new PlanAndBuildJobValidator(Helper);
+			_validator = new PlanAndBuildJobValidator(Helper, ConnectionHelper.CreateDefaultPeopleApiMock());
 			_jobType = Helper.JobTypes.Create(new JobType { Name = "Installation" });
 		}
 
@@ -413,7 +413,7 @@ using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 				.GetMockedHelperWithPeopleApi(exists: false)
 				.PopulateAppSettings();
 			var jobType = helper.JobTypes.Create(new JobType { Name = "Installation" });
-			var validator = new PlanAndBuildJobValidator(helper);
+			var validator = new PlanAndBuildJobValidator(helper, ConnectionHelper.CreatePeopleApiMock(exists: false));
 
 			var job = new PlanAndBuildJob
 			{
@@ -439,7 +439,7 @@ using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 				.GetMockedHelperWithPeopleApi(exists: false)
 				.PopulateAppSettings();
 			var jobType = helper.JobTypes.Create(new JobType { Name = "Installation" });
-			var validator = new PlanAndBuildJobValidator(helper);
+			var validator = new PlanAndBuildJobValidator(helper, ConnectionHelper.CreatePeopleApiMock(exists: false));
 
 			var job = new PlanAndBuildJob
 			{
@@ -465,7 +465,7 @@ using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 				.GetMockedHelperWithPeopleApi(exists: false)
 				.PopulateAppSettings();
 			var jobType = helper.JobTypes.Create(new JobType { Name = "Installation" });
-			var validator = new PlanAndBuildJobValidator(helper);
+			var validator = new PlanAndBuildJobValidator(helper, ConnectionHelper.CreatePeopleApiMock(exists: false));
 
 			var job = new PlanAndBuildJob
 			{
@@ -496,7 +496,7 @@ using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 				.GetMockedHelperWithPeopleApi(exists: false)
 				.PopulateAppSettings();
 			var jobType = helper.JobTypes.Create(new JobType { Name = "Installation" });
-			var validator = new PlanAndBuildJobValidator(helper);
+			var validator = new PlanAndBuildJobValidator(helper, ConnectionHelper.CreatePeopleApiMock(exists: false));
 
 			var job = new PlanAndBuildJob
 			{
