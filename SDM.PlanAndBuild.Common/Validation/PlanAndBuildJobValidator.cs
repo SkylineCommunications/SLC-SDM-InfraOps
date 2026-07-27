@@ -6,10 +6,10 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
 
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM.InfraOps.Common.Validation;
-    using Skyline.DataMiner.SDM.PlanAndBuild.Extensions;
     using Skyline.DataMiner.SDM.PlanAndBuild.Helpers;
     using Skyline.DataMiner.SDM.PlanAndBuild.Models;
     using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
+    using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Extensions;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
     using static Skyline.DataMiner.SDM.PlanAndBuild.Validation.PlanAndBuildJobValidationHandler;
@@ -17,9 +17,10 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
     /// <summary>
     /// Public validator service for PlanAndBuildJob validation, including data access for JobName uniqueness checks.
     /// </summary>
-    public class PlanAndBuildJobValidator
+    public class PlanAndBuildJobValidator : ValidatorBase<PlanAndBuildJob>
     {
         private readonly IPlanAndBuildApiHelper _helper;
+        private readonly IPeopleAndOrganizationsApi _peopleApi;
         private readonly Validator<PlanAndBuildJob> _validationPipeline;
 
         /// <summary>
@@ -31,9 +32,15 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
         /// its repositories are wired up. Only <see cref="Validate"/>/<see cref="ValidateAndThrow"/> (called
         /// after construction completes) access <paramref name="helper"/>'s repositories.
         /// </param>
-        public PlanAndBuildJobValidator(IPlanAndBuildApiHelper helper)
+        /// <param name="peopleApi">
+        /// The People &amp; Organizations API used to validate the existence of Person/Team references in Jobs.
+        /// Kept separate from the helper so validation does not require <see cref="IPeopleAndOrganizationsApi"/>
+        /// to be part of the public <see cref="IPlanAndBuildApiHelper"/> contract.
+        /// </param>
+        public PlanAndBuildJobValidator(IPlanAndBuildApiHelper helper, IPeopleAndOrganizationsApi peopleApi)
         {
             _helper = helper ?? throw new ArgumentNullException(nameof(helper));
+            _peopleApi = peopleApi ?? throw new ArgumentNullException(nameof(peopleApi));
             _validationPipeline = BuildValidationPipeline();
         }
 
@@ -43,13 +50,8 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
         /// Validates a PlanAndBuildJob and returns a ValidationResult.
         /// Collects all errors without throwing exceptions.
         /// </summary>
-        public ValidationResult Validate(PlanAndBuildJob job)
+        protected override ValidationResult Validate(PlanAndBuildJob job)
         {
-            if (job == null)
-            {
-                throw new ArgumentNullException(nameof(job));
-            }
-
             return _validationPipeline.Validate(job);
         }
 
@@ -78,7 +80,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
         /// Mirrors InfraOpsShared.DOM_Classes.DOM.Applications.Plan_And_Build.Validation.JobValidationHandler's
         /// OtherChangedEntries check.
         /// </summary>
-        public List<ValidationResult> ValidateBulk(List<PlanAndBuildJob> jobs)
+        protected override List<ValidationResult> ValidateBulk(List<PlanAndBuildJob> jobs)
         {
             if (jobs == null || !jobs.Any())
             {
@@ -149,8 +151,8 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
                 }
             }
 
-            var existingPersonIds = _helper.People.GetExistingPersonIds(personIds);
-            var existingTeamIds = _helper.People.GetExistingTeamIds(teamIds);
+            var existingPersonIds = GetExistingPersonIds(personIds);
+            var existingTeamIds = GetExistingTeamIds(teamIds);
 
             for (int i = 0; i < jobs.Count; i++)
             {
@@ -353,8 +355,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
         /// Batch variant of <see cref="ValidatePeopleAndOrganizations(PlanAndBuildJob)"/>, used by
         /// <see cref="ValidateBulk"/>. Checks the pre-fetched <paramref name="existingPersonIds"/>/
         /// <paramref name="existingTeamIds"/> sets (built once for the whole batch via
-        /// <see cref="PlanAndBuildPeopleExtensions.GetExistingPersonIds"/>/
-        /// <see cref="PlanAndBuildPeopleExtensions.GetExistingTeamIds"/>) instead of issuing a People
+        /// <see cref="GetExistingPersonIds"/>/<see cref="GetExistingTeamIds"/>) instead of issuing a People
         /// &amp; Organizations query per Person/Team reference.
         /// </summary>
         private ValidationResult ValidatePeopleAndOrganizations(PlanAndBuildJob job, HashSet<Guid> existingPersonIds, HashSet<Guid> existingTeamIds)
@@ -391,12 +392,40 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
 
         private bool IsPersonValid(Guid personId)
         {
-            return _helper.People.People.Count(PersonExposers.Id.Equal(personId)) > 0;
+            return _peopleApi.People.Count(PersonExposers.Id.Equal(personId)) > 0;
         }
 
         private bool IsTeamValid(Guid teamId)
         {
-            return _helper.People.Teams.Count(TeamExposers.Id.Equal(teamId)) > 0;
+            return _peopleApi.Teams.Count(TeamExposers.Id.Equal(teamId)) > 0;
+        }
+
+        /// <summary>
+        /// Batch-fetches the ids of all existing People matching any of <paramref name="personIds"/> in a single
+        /// big-OR query, instead of one <c>Count</c> call per candidate id.
+        /// </summary>
+        private HashSet<Guid> GetExistingPersonIds(IEnumerable<Guid> personIds)
+        {
+            var keys = personIds?.Distinct().ToList() ?? new List<Guid>();
+
+            return _peopleApi.People
+                .ReadByBigOrFilter(keys, id => PersonExposers.Id.Equal(id))
+                .Select(p => p.Id)
+                .ToHashSet();
+        }
+
+        /// <summary>
+        /// Batch-fetches the ids of all existing Teams matching any of <paramref name="teamIds"/> in a single
+        /// big-OR query, instead of one <c>Count</c> call per candidate id.
+        /// </summary>
+        private HashSet<Guid> GetExistingTeamIds(IEnumerable<Guid> teamIds)
+        {
+            var keys = teamIds?.Distinct().ToList() ?? new List<Guid>();
+
+            return _peopleApi.Teams
+                .ReadByBigOrFilter(keys, id => TeamExposers.Id.Equal(id))
+                .Select(t => t.Id)
+                .ToHashSet();
         }
 
         #endregion

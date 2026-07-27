@@ -31,7 +31,7 @@
 		public void Setup()
 		{
 			Helper.PopulateAppSettings();
-			_middleware = new PlanAndBuildJobValidationMiddleware(new PlanAndBuildJobValidator(Helper), Helper);
+			_middleware = new PlanAndBuildJobValidationMiddleware(new PlanAndBuildJobValidator(Helper, ConnectionHelper.CreateDefaultPeopleApiMock()));
 			_jobType = Helper.JobTypes.Create(new JobType { Name = "Installation" });
 		}
 

@@ -22,14 +22,14 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Helpers
         public PlanAndBuildApiHelper(IConnection connection, IPeopleAndOrganizationsApi peopleApi)
         {
             Connection = connection;
-            People = peopleApi;
+            PandOApiHelper = peopleApi;
 
             // Raw repositories - used internally by validators to query other entities (e.g. uniqueness/in-use checks).
             var jobRepository = new PlanAndBuildJobDomRepository(connection);
             var jobTypeRepository = new JobTypeDomRepository(connection);
             var appSettingsRepository = new PlanAndBuildAppSettingsDomRepository(connection);
 
-            var jobValidator = new PlanAndBuildJobValidator(this);
+            var jobValidator = new PlanAndBuildJobValidator(this, PandOApiHelper);
             var jobTypeValidator = new JobTypeValidator(this);
             var appSettingsValidator = new PlanAndBuildAppSettingsValidator();
 
@@ -39,7 +39,8 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Helpers
             jobRepository.Validator = jobValidator;
 
             Jobs = jobRepository
-                .WithMiddleware(new PlanAndBuildJobValidationMiddleware(jobValidator, this))
+                .WithMiddleware(new PlanAndBuildJobValidationMiddleware(jobValidator))
+                .WithMiddleware(new JobIdAllocationMiddleware(this))
                 .WithMiddleware(new IdentifierMiddleware<PlanAndBuildJob>());
 
             JobTypes = jobTypeRepository
@@ -55,7 +56,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Helpers
 
         public IConnection Connection { get; }
 
-        public IPeopleAndOrganizationsApi People { get; }
+        internal IPeopleAndOrganizationsApi PandOApiHelper { get; }
 
         public IPlanAndBuildJobRepository Jobs { get; }
 

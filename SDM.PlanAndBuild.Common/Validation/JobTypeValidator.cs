@@ -16,7 +16,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
     /// Public validator service for JobType validation, including data access for Name uniqueness
     /// and "in use" checks.
     /// </summary>
-    public class JobTypeValidator
+    public class JobTypeValidator : ValidatorBase<JobType>
     {
         private readonly IPlanAndBuildApiHelper _helper;
         private readonly Validator<JobType> _validationPipeline;
@@ -40,15 +40,47 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
 
         /// <summary>
         /// Validates a JobType and returns a ValidationResult.
-        /// Collects all errors without throwing exceptions.
+        /// For <see cref="RepositoryAction.Delete"/>, checks whether the JobType is in use by existing Jobs.
+        /// For all other actions, runs standard field validation.
         /// </summary>
-        public ValidationResult Validate(JobType jobType)
+        public override ValidationResult Validate(JobType jobType, RepositoryAction action)
         {
             if (jobType == null)
             {
                 throw new ArgumentNullException(nameof(jobType));
             }
 
+            if (action == RepositoryAction.Delete)
+            {
+                return ValidateNotInUseWhenDeleted(jobType);
+            }
+
+            return base.Validate(jobType, action);
+        }
+
+        /// <summary>
+        /// Validates multiple JobTypes in bulk for the given action.
+        /// For <see cref="RepositoryAction.Delete"/>, checks whether any of the JobTypes are in use
+        /// by existing Jobs (batch-fetched in a single query to avoid N+1).
+        /// For all other actions, delegates to the standard bulk field/uniqueness checks.
+        /// </summary>
+        public override List<ValidationResult> ValidateBulk(List<JobType> jobTypes, RepositoryAction action)
+        {
+            if (jobTypes == null || !jobTypes.Any())
+            {
+                return new List<ValidationResult>();
+            }
+
+            if (action == RepositoryAction.Delete)
+            {
+                return ValidateNotInUseWhenDeleted(jobTypes);
+            }
+
+            return base.ValidateBulk(jobTypes, action);
+        }
+
+        protected override ValidationResult Validate(JobType jobType)
+        {
             return _validationPipeline.Validate(jobType);
         }
 
@@ -70,10 +102,9 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
         }
 
         /// <summary>
-        /// Validates that a JobType can be deleted. Mirrors production behavior: deletion is blocked
-        /// while the JobType is referenced by existing Jobs.
+        /// Checks whether a JobType is in use by existing Jobs. Deletion is blocked while referenced.
         /// </summary>
-        public ValidationResult ValidateDeletion(JobType jobType)
+        public ValidationResult ValidateNotInUseWhenDeleted(JobType jobType)
         {
             if (jobType == null)
             {
@@ -91,6 +122,36 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
         }
 
         /// <summary>
+        /// Batch variant of <see cref="ValidateNotInUseWhenDeleted(JobType)"/>: checks which JobTypes in the batch
+        /// are in use by existing Jobs in a single query, then maps the results back to per-JobType <see cref="ValidationResult"/>s.
+        /// </summary>
+        private List<ValidationResult> ValidateNotInUseWhenDeleted(List<JobType> jobTypes)
+        {
+            var results = jobTypes.Select(j => new ValidationResult()).ToList();
+
+            var identifiers = jobTypes
+                .Select(j => j.Identifier)
+                .Where(id => id != null)
+                .Distinct()
+                .ToList();
+
+            var inUseIdentifiers = _helper.Jobs.GetByJobTypes(identifiers)
+                .Select(job => job.Type.Identifier)
+                .Where(id => id != null)
+                .ToHashSet();
+
+            for (int i = 0; i < jobTypes.Count; i++)
+            {
+                if (inUseIdentifiers.Contains(jobTypes[i].Identifier))
+                {
+                    results[i].AddFailReason(JobTypeValidationField.JobType, "Cannot delete a Job Type that is in use by existing Jobs.");
+                }
+            }
+
+            return results;
+        }
+
+        /// <summary>
         /// Validates multiple JobTypes in bulk. Results are returned in the same order as the input JobTypes.
         /// In addition to the per-JobType checks, this also detects Name conflicts <em>within the batch itself</em>
         /// (i.e. two JobTypes being saved together that share the same Name), which a single-JobType DB uniqueness
@@ -98,7 +159,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
         /// Mirrors InfraOpsShared.DOM_Classes.DOM.Applications.Plan_And_Build.Validation.JobTypeValidationHandler's
         /// OtherChangedEntries check.
         /// </summary>
-        public List<ValidationResult> ValidateBulk(List<JobType> jobTypes)
+        protected override List<ValidationResult> ValidateBulk(List<JobType> jobTypes)
         {
             if (jobTypes == null || !jobTypes.Any())
             {

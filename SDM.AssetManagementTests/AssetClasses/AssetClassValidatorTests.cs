@@ -1,4 +1,4 @@
-﻿namespace SDM.AssetManagement.Tests.AssetClasses
+namespace SDM.AssetManagement.Tests.AssetClasses
 {
     using System;
     using System.Collections.Generic;
@@ -18,6 +18,7 @@
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.AssetManagement.Validation;
+    using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
     /// <summary>
     /// Tests for AssetClassValidator which validates AssetClass business rules
@@ -62,7 +63,7 @@
             };
 
             // Act
-            var result = _validator.Validate(assetClass);
+            var result = _validator.Validate(assetClass, RepositoryAction.Create);
 
             // Assert
             using (new AssertionScope())
@@ -76,7 +77,7 @@
         public void Validate_WithNullAssetClass_ShouldThrowArgumentNullException()
         {
             // Act & Assert
-            _validator.Invoking(v => v.Validate(null))
+            _validator.Invoking(v => v.Validate(null, RepositoryAction.Create))
                 .Should().Throw<ArgumentNullException>();
         }
 
@@ -102,7 +103,7 @@
             };
 
             // Act
-            var result = _validator.Validate(assetClass);
+            var result = _validator.Validate(assetClass, RepositoryAction.Create);
 
             // Assert
             using (new AssertionScope())
@@ -132,7 +133,7 @@
             };
 
             // Act
-            var result = _validator.Validate(assetClass);
+            var result = _validator.Validate(assetClass, RepositoryAction.Create);
 
             // Assert
             using (new AssertionScope())
@@ -248,7 +249,7 @@
             };
 
             // Act
-            var result = _validator.Validate(assetClass);
+            var result = _validator.Validate(assetClass, RepositoryAction.Create);
 
             // Assert
             using (new AssertionScope())
@@ -284,7 +285,7 @@
             };
 
             // Act
-            var result = _validator.Validate(assetClass);
+            var result = _validator.Validate(assetClass, RepositoryAction.Create);
 
             // Assert
             result.IsValid.Should().BeTrue();
@@ -313,7 +314,7 @@
             };
 
             // Act
-            var result = _validator.Validate(assetClass);
+            var result = _validator.Validate(assetClass, RepositoryAction.Create);
 
             // Assert
             using (new AssertionScope())
@@ -344,7 +345,7 @@
             };
 
             // Act
-            var result = _validator.Validate(assetClass);
+            var result = _validator.Validate(assetClass, RepositoryAction.Create);
 
             // Assert
             using (new AssertionScope())
@@ -384,7 +385,7 @@
             };
 
             // Act
-            var result = _validator.Validate(assetClass);
+            var result = _validator.Validate(assetClass, RepositoryAction.Create);
 
             // Assert
             using (new AssertionScope())
@@ -433,7 +434,7 @@
             loaded.Width = 25;
 
             // Act
-            var result = _validator.Validate(loaded);
+            var result = _validator.Validate(loaded, RepositoryAction.Create);
 
             // Assert
             result.IsValid.Should().BeTrue("Depth error should not be reported since it wasn't changed after the reset");
@@ -460,7 +461,7 @@
             };
 
             // Act
-            var result = _validator.Validate(newAssetClass);
+            var result = _validator.Validate(newAssetClass, RepositoryAction.Create);
 
             // Assert
             result.IsValid.Should().BeTrue("new asset class should be valid with existing repository data");

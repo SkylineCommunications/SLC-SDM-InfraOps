@@ -1,4 +1,4 @@
-﻿namespace SDM.PlanAndBuild.Tests.JobTests
+namespace SDM.PlanAndBuild.Tests.JobTests
 {
 	using System;
 
@@ -12,6 +12,7 @@
 	using Skyline.DataMiner.SDM;
 	using Skyline.DataMiner.SDM.PlanAndBuild.Models;
 	using Skyline.DataMiner.SDM.PlanAndBuild.Validation;
+using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
 	/// <summary>
 	/// Tests for PlanAndBuildJobValidator, which validates PlanAndBuildJob business rules including
@@ -27,7 +28,7 @@
 		public void Setup()
 		{
 			Helper.PopulateAppSettings();
-			_validator = new PlanAndBuildJobValidator(Helper);
+			_validator = new PlanAndBuildJobValidator(Helper, ConnectionHelper.CreateDefaultPeopleApiMock());
 			_jobType = Helper.JobTypes.Create(new JobType { Name = "Installation" });
 		}
 
@@ -44,7 +45,7 @@
 				End = new DateTime(2026, 1, 15),
 			};
 
-			var result = _validator.Validate(job);
+			var result = _validator.Validate(job, RepositoryAction.Create);
 
 			using (new AssertionScope())
 			{
@@ -56,7 +57,7 @@
 		[TestMethod]
 		public void Validate_WithNullJob_ShouldThrowArgumentNullException()
 		{
-			_validator.Invoking(v => v.Validate(null!))
+			_validator.Invoking(v => v.Validate(null!, RepositoryAction.Create))
 				.Should().Throw<ArgumentNullException>();
 		}
 
@@ -73,7 +74,7 @@
 				Type = new SdmObjectReference<JobType>(_jobType.Identifier),
 			};
 
-			var result = _validator.Validate(job);
+			var result = _validator.Validate(job, RepositoryAction.Create);
 
 			using (new AssertionScope())
 			{
@@ -97,7 +98,7 @@
 				Type = new SdmObjectReference<JobType>(_jobType.Identifier),
 			};
 
-			var result = _validator.Validate(newJob);
+			var result = _validator.Validate(newJob, RepositoryAction.Create);
 
 			using (new AssertionScope())
 			{
@@ -116,7 +117,7 @@
 				Type = new SdmObjectReference<JobType>(_jobType.Identifier),
 			});
 
-			var result = _validator.Validate(created);
+			var result = _validator.Validate(created, RepositoryAction.Create);
 
 			result.IsValid.Should().BeTrue("the uniqueness check must exclude the Job's own identifier");
 		}
@@ -130,7 +131,7 @@
 		{
 			var job = new PlanAndBuildJob { JobName = "Some Job", Type = null };
 
-			var result = _validator.Validate(job);
+			var result = _validator.Validate(job, RepositoryAction.Create);
 
 			using (new AssertionScope())
 			{
@@ -155,7 +156,7 @@
 				End = start.AddDays(-1),
 			};
 
-			var result = _validator.Validate(job);
+			var result = _validator.Validate(job, RepositoryAction.Create);
 
 			using (new AssertionScope())
 			{
@@ -175,7 +176,7 @@
 				End = null,
 			};
 
-			var result = _validator.Validate(job);
+			var result = _validator.Validate(job, RepositoryAction.Create);
 
 			result.IsValid.Should().BeTrue();
 		}
@@ -197,7 +198,7 @@
 
 			created.Remarks = "Updated remarks only";
 
-			var result = _validator.Validate(created);
+			var result = _validator.Validate(created, RepositoryAction.Create);
 
 			result.IsValid.Should().BeTrue();
 		}
@@ -209,7 +210,7 @@
 		[TestMethod]
 		public void ValidateBulk_WithNullList_ShouldReturnEmptyResults()
 		{
-			var results = _validator.ValidateBulk(null!);
+			var results = _validator.ValidateBulk(null!, RepositoryAction.Create);
 
 			results.Should().BeEmpty();
 		}
@@ -217,7 +218,7 @@
 		[TestMethod]
 		public void ValidateBulk_WithEmptyList_ShouldReturnEmptyResults()
 		{
-			var results = _validator.ValidateBulk(new System.Collections.Generic.List<PlanAndBuildJob>());
+			var results = _validator.ValidateBulk(new System.Collections.Generic.List<PlanAndBuildJob>(), RepositoryAction.Create);
 
 			results.Should().BeEmpty();
 		}
@@ -231,7 +232,7 @@
 				new PlanAndBuildJob { JobName = "Job Two", Type = new SdmObjectReference<JobType>(_jobType.Identifier) },
 			};
 
-			var results = _validator.ValidateBulk(jobs);
+			var results = _validator.ValidateBulk(jobs, RepositoryAction.Create);
 
 			using (new AssertionScope())
 			{
@@ -251,7 +252,7 @@
 				new PlanAndBuildJob { JobName = "Install Rack 1 Equipment", Type = new SdmObjectReference<JobType>(_jobType.Identifier) },
 			};
 
-			var results = _validator.ValidateBulk(jobs);
+			var results = _validator.ValidateBulk(jobs, RepositoryAction.Create);
 
 			using (new AssertionScope())
 			{
@@ -274,7 +275,7 @@
 				new PlanAndBuildJob { JobName = "INSTALL RACK 1 EQUIPMENT", Type = new SdmObjectReference<JobType>(_jobType.Identifier) },
 			};
 
-			var results = _validator.ValidateBulk(jobs);
+			var results = _validator.ValidateBulk(jobs, RepositoryAction.Create);
 
 			results.Should().OnlyContain(r => !r.IsValid);
 		}
@@ -289,7 +290,7 @@
 				new PlanAndBuildJob { JobName = "Job Three", Type = new SdmObjectReference<JobType>(_jobType.Identifier) },
 			};
 
-			var results = _validator.ValidateBulk(jobs);
+			var results = _validator.ValidateBulk(jobs, RepositoryAction.Create);
 
 			results.Should().OnlyContain(r => r.IsValid);
 		}
@@ -311,7 +312,7 @@
 				new PlanAndBuildJob { JobName = "Brand New Job", Type = new SdmObjectReference<JobType>(_jobType.Identifier) },
 			};
 
-			var results = _validator.ValidateBulk(jobs);
+			var results = _validator.ValidateBulk(jobs, RepositoryAction.Create);
 
 			using (new AssertionScope())
 			{
@@ -334,7 +335,7 @@
 				new PlanAndBuildJob { JobName = "Valid Job", Type = new SdmObjectReference<JobType>(_jobType.Identifier) },
 			};
 
-			var results = _validator.ValidateBulk(jobs);
+			var results = _validator.ValidateBulk(jobs, RepositoryAction.Create);
 
 			using (new AssertionScope())
 			{
@@ -400,7 +401,7 @@
 			job.Ownership.AssignedTo = Guid.NewGuid();
 
 			// Base test Helper is wired with the default People API mock, where any Guid "exists".
-			var result = _validator.Validate(job);
+			var result = _validator.Validate(job, RepositoryAction.Create);
 
 			result.IsValid.Should().BeTrue();
 		}
@@ -412,7 +413,7 @@
 				.GetMockedHelperWithPeopleApi(exists: false)
 				.PopulateAppSettings();
 			var jobType = helper.JobTypes.Create(new JobType { Name = "Installation" });
-			var validator = new PlanAndBuildJobValidator(helper);
+			var validator = new PlanAndBuildJobValidator(helper, ConnectionHelper.CreatePeopleApiMock(exists: false));
 
 			var job = new PlanAndBuildJob
 			{
@@ -421,7 +422,7 @@
 			};
 			job.Ownership.AssignedTo = Guid.NewGuid();
 
-			var result = validator.Validate(job);
+			var result = validator.Validate(job, RepositoryAction.Create);
 
 			using (new AssertionScope())
 			{
@@ -438,7 +439,7 @@
 				.GetMockedHelperWithPeopleApi(exists: false)
 				.PopulateAppSettings();
 			var jobType = helper.JobTypes.Create(new JobType { Name = "Installation" });
-			var validator = new PlanAndBuildJobValidator(helper);
+			var validator = new PlanAndBuildJobValidator(helper, ConnectionHelper.CreatePeopleApiMock(exists: false));
 
 			var job = new PlanAndBuildJob
 			{
@@ -447,7 +448,7 @@
 			};
 			job.Ownership.AssignmentGroup = Guid.NewGuid();
 
-			var result = validator.Validate(job);
+			var result = validator.Validate(job, RepositoryAction.Create);
 
 			using (new AssertionScope())
 			{
@@ -464,7 +465,7 @@
 				.GetMockedHelperWithPeopleApi(exists: false)
 				.PopulateAppSettings();
 			var jobType = helper.JobTypes.Create(new JobType { Name = "Installation" });
-			var validator = new PlanAndBuildJobValidator(helper);
+			var validator = new PlanAndBuildJobValidator(helper, ConnectionHelper.CreatePeopleApiMock(exists: false));
 
 			var job = new PlanAndBuildJob
 			{
@@ -476,7 +477,7 @@
 				},
 			};
 
-			var result = validator.Validate(job);
+			var result = validator.Validate(job, RepositoryAction.Create);
 
 			using (new AssertionScope())
 			{
@@ -495,7 +496,7 @@
 				.GetMockedHelperWithPeopleApi(exists: false)
 				.PopulateAppSettings();
 			var jobType = helper.JobTypes.Create(new JobType { Name = "Installation" });
-			var validator = new PlanAndBuildJobValidator(helper);
+			var validator = new PlanAndBuildJobValidator(helper, ConnectionHelper.CreatePeopleApiMock(exists: false));
 
 			var job = new PlanAndBuildJob
 			{
@@ -503,7 +504,7 @@
 				Type = new SdmObjectReference<JobType>(jobType.Identifier),
 			};
 
-			var result = validator.Validate(job);
+			var result = validator.Validate(job, RepositoryAction.Create);
 
 			result.IsValid.Should().BeTrue();
 		}

@@ -16,6 +16,7 @@
             Floors = new FloorDomRepository(connection);
             Zones = new ZoneDomRepository(connection);
             Rows = new RowDomRepository(connection);
+            Sites = new SiteDomRepository(connection);
         }
 
 		public IConnection Connection { get; }
@@ -36,5 +37,6 @@
 
         public IBulkRepository<Row> Rows { get; }
 
+        public IBulkRepository<Site> Sites { get; }
     }
 }

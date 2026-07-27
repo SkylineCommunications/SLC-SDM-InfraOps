@@ -1,4 +1,4 @@
-﻿namespace SDM.PlanAndBuild.Tests.JobTypeTests
+namespace SDM.PlanAndBuild.Tests.JobTypeTests
 {
 	using System;
 
@@ -12,6 +12,7 @@
 	using Skyline.DataMiner.SDM;
 	using Skyline.DataMiner.SDM.PlanAndBuild.Models;
 	using Skyline.DataMiner.SDM.PlanAndBuild.Validation;
+using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
 	/// <summary>
 	/// Tests for JobTypeValidator, which validates JobType business rules including Name uniqueness,
@@ -36,7 +37,7 @@
 		{
 			var jobType = new JobType { Name = "Installation" };
 
-			var result = _validator.Validate(jobType);
+			var result = _validator.Validate(jobType, RepositoryAction.Create);
 
 			using (new AssertionScope())
 			{
@@ -48,7 +49,7 @@
 		[TestMethod]
 		public void Validate_WithNullJobType_ShouldThrowArgumentNullException()
 		{
-			_validator.Invoking(v => v.Validate(null!))
+			_validator.Invoking(v => v.Validate(null!, RepositoryAction.Create))
 				.Should().Throw<ArgumentNullException>();
 		}
 
@@ -63,7 +64,7 @@
 
 			var newJobType = new JobType { Name = "Installation" };
 
-			var result = _validator.Validate(newJobType);
+			var result = _validator.Validate(newJobType, RepositoryAction.Create);
 
 			using (new AssertionScope())
 			{
@@ -80,7 +81,7 @@
 
 			var newJobType = new JobType { Name = "Maintenance" };
 
-			var result = _validator.Validate(newJobType);
+			var result = _validator.Validate(newJobType, RepositoryAction.Create);
 
 			result.IsValid.Should().BeTrue();
 		}
@@ -90,7 +91,7 @@
 		{
 			var created = Helper.JobTypes.Create(new JobType { Name = "Installation" });
 
-			var result = _validator.Validate(created);
+			var result = _validator.Validate(created, RepositoryAction.Create);
 
 			result.IsValid.Should().BeTrue("the uniqueness check must exclude the JobType's own identifier");
 		}
@@ -106,7 +107,7 @@
 
 			jobType.Name = "Renamed Installation";
 
-			var result = _validator.Validate(jobType);
+			var result = _validator.Validate(jobType, RepositoryAction.Create);
 
 			result.IsValid.Should().BeTrue();
 		}
@@ -123,7 +124,7 @@
 
 			jobType.Name = "Renamed Installation";
 
-			var result = _validator.Validate(jobType);
+			var result = _validator.Validate(jobType, RepositoryAction.Create);
 
 			using (new AssertionScope())
 			{
@@ -146,7 +147,7 @@
 
 			jobType.Description = "Updated description only";
 
-			var result = _validator.Validate(jobType);
+			var result = _validator.Validate(jobType, RepositoryAction.Create);
 
 			result.IsValid.Should().BeTrue();
 		}
@@ -156,17 +157,17 @@
 		#region Delete In-Use Blocking
 
 		[TestMethod]
-		public void ValidateDeletion_WhenNotInUse_ShouldReturnValid()
+		public void ValidateNotInUseWhenDeleted_WhenNotInUse_ShouldReturnValid()
 		{
 			var jobType = Helper.JobTypes.Create(new JobType { Name = "Installation" });
 
-			var result = _validator.ValidateDeletion(jobType);
+			var result = _validator.ValidateNotInUseWhenDeleted(jobType);
 
 			result.IsValid.Should().BeTrue();
 		}
 
 		[TestMethod]
-		public void ValidateDeletion_WhenInUseByExistingJobs_ShouldReturnInvalid()
+		public void ValidateNotInUseWhenDeleted_WhenInUseByExistingJobs_ShouldReturnInvalid()
 		{
 			var jobType = Helper.JobTypes.Create(new JobType { Name = "Installation" });
 			Helper.Jobs.Create(new PlanAndBuildJob
@@ -175,7 +176,7 @@
 				Type = new SdmObjectReference<JobType>(jobType.Identifier),
 			});
 
-			var result = _validator.ValidateDeletion(jobType);
+			var result = _validator.ValidateNotInUseWhenDeleted(jobType);
 
 			using (new AssertionScope())
 			{
@@ -186,9 +187,9 @@
 		}
 
 		[TestMethod]
-		public void ValidateDeletion_WithNullJobType_ShouldThrowArgumentNullException()
+		public void ValidateNotInUseWhenDeleted_WithNullJobType_ShouldThrowArgumentNullException()
 		{
-			_validator.Invoking(v => v.ValidateDeletion(null!))
+			_validator.Invoking(v => v.ValidateNotInUseWhenDeleted(null!))
 				.Should().Throw<ArgumentNullException>();
 		}
 
@@ -199,7 +200,7 @@
 		[TestMethod]
 		public void ValidateBulk_WithNullList_ShouldReturnEmptyResults()
 		{
-			var results = _validator.ValidateBulk(null!);
+			var results = _validator.ValidateBulk(null!, RepositoryAction.Create);
 
 			results.Should().BeEmpty();
 		}
@@ -207,7 +208,7 @@
 		[TestMethod]
 		public void ValidateBulk_WithEmptyList_ShouldReturnEmptyResults()
 		{
-			var results = _validator.ValidateBulk(new System.Collections.Generic.List<JobType>());
+			var results = _validator.ValidateBulk(new System.Collections.Generic.List<JobType>(), RepositoryAction.Create);
 
 			results.Should().BeEmpty();
 		}
@@ -221,7 +222,7 @@
 				new JobType { Name = "Maintenance" },
 			};
 
-			var results = _validator.ValidateBulk(jobTypes);
+			var results = _validator.ValidateBulk(jobTypes, RepositoryAction.Create);
 
 			using (new AssertionScope())
 			{
@@ -241,7 +242,7 @@
 				new JobType { Name = "Installation" },
 			};
 
-			var results = _validator.ValidateBulk(jobTypes);
+			var results = _validator.ValidateBulk(jobTypes, RepositoryAction.Create);
 
 			using (new AssertionScope())
 			{
@@ -264,7 +265,7 @@
 				new JobType { Name = "INSTALLATION" },
 			};
 
-			var results = _validator.ValidateBulk(jobTypes);
+			var results = _validator.ValidateBulk(jobTypes, RepositoryAction.Create);
 
 			results.Should().OnlyContain(r => !r.IsValid);
 		}
@@ -279,7 +280,7 @@
 				new JobType { Name = "Decommission" },
 			};
 
-			var results = _validator.ValidateBulk(jobTypes);
+			var results = _validator.ValidateBulk(jobTypes, RepositoryAction.Create);
 
 			results.Should().OnlyContain(r => r.IsValid);
 		}
@@ -297,7 +298,7 @@
 				new JobType { Name = "Brand New Type" },
 			};
 
-			var results = _validator.ValidateBulk(jobTypes);
+			var results = _validator.ValidateBulk(jobTypes, RepositoryAction.Create);
 
 			using (new AssertionScope())
 			{
@@ -320,7 +321,7 @@
 				new JobType { Name = "Valid Type" },
 			};
 
-			var results = _validator.ValidateBulk(jobTypes);
+			var results = _validator.ValidateBulk(jobTypes, RepositoryAction.Create);
 
 			using (new AssertionScope())
 			{

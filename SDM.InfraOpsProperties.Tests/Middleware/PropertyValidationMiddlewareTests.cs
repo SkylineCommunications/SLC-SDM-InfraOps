@@ -30,7 +30,7 @@
 		[TestInitialize]
 		public void Setup()
 		{
-			_middleware = new PropertyValidationMiddleware(new PropertyValidator(Helper), Helper);
+			_middleware = new PropertyValidationMiddleware(new PropertyValidator(Helper));
 		}
 
 		private static Property ValidProperty(string name = "Valid Property") => new Property

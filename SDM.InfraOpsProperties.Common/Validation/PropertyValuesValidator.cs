@@ -14,7 +14,7 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Validation
     /// Public validator service for PropertyValues validation, including data access for
     /// (LinkedObjectID, Scope, SubID) uniqueness checks.
     /// </summary>
-    public class PropertyValuesValidator
+    public class PropertyValuesValidator : ValidatorBase<PropertyValues>
     {
         private readonly IInfraOpsPropertiesApiHelper _helper;
         private readonly Validator<PropertyValues> _validationPipeline;
@@ -41,13 +41,8 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Validation
         /// Validates a PropertyValues and returns ValidationResult.
         /// Collects all errors without throwing exceptions.
         /// </summary>
-        public ValidationResult Validate(PropertyValues propertyValues)
+        protected override ValidationResult Validate(PropertyValues propertyValues)
         {
-            if (propertyValues == null)
-            {
-                throw new ArgumentNullException(nameof(propertyValues));
-            }
-
             return _validationPipeline.Validate(propertyValues);
         }
 
@@ -220,7 +215,7 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Validation
         /// combo), which a single-entry DB uniqueness query cannot catch since none of the batch's entries are
         /// persisted yet. Mirrors the same batch-conflict detection used for PlanAndBuildJob/JobType/Property.
         /// </summary>
-        public List<ValidationResult> ValidateBulk(List<PropertyValues> propertyValuesList)
+        protected override List<ValidationResult> ValidateBulk(List<PropertyValues> propertyValuesList)
         {
             if (propertyValuesList == null || !propertyValuesList.Any())
             {

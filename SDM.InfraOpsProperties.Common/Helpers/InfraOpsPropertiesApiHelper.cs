@@ -24,12 +24,13 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Helpers
 			var propertyValuesValidator = new PropertyValuesValidator(this);
 
 			Properties = new PropertyDomRepository(connection)
-				.WithMiddleware(new PropertyValidationMiddleware(propertyValidator, this, cascadeDeleteOnProperty))
+				.WithMiddleware(new PropertyValidationMiddleware(propertyValidator))
+				.WithMiddleware(new PropertyCascadeDeleteMiddleware(this, cascadeDeleteOnProperty))
 				.WithMiddleware(new IdentifierMiddleware<Property>());
 
 			PropertyValues = new PropertyValuesDomRepository(connection)
-				.WithMiddleware(new PropertyValuesValidationMiddleware(propertyValuesValidator))
-				.WithMiddleware(new IdentifierMiddleware<PropertyValues>());
+					.WithMiddleware(new PropertyValuesValidationMiddleware(propertyValuesValidator))
+					.WithMiddleware(new IdentifierMiddleware<PropertyValues>());
 		}
 
 		public IConnection Connection { get; }

@@ -60,7 +60,8 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
 
         AppSettings = appSettingsRepository;
 
-        AssetClasses = assetClassRepository.WithMiddleware(new AssetClassValidationMiddleware(_assetClassValidator))
+        AssetClasses = assetClassRepository
+            .WithMiddleware(new AssetClassValidationMiddleware(_assetClassValidator))
             .WithMiddleware(new IdentifierMiddleware<AssetClass>());
 
         PowerPorts = powerPortRepository;
