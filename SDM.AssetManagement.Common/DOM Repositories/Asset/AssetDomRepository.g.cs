@@ -759,6 +759,25 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 {
                     obj.Ownership.Organization = _organization.Value;
                 }
+
+                var _ownershipcontactperson = _ownershipSection.GetValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Ownership.ContactPerson);
+                if (_ownershipcontactperson != null)
+                {
+                    obj.Ownership.ContactPerson = System.Guid.Parse(Convert.ToString(_ownershipcontactperson.Value));
+                }
+
+                var _ownershipcontactpersonrole = _ownershipSection.GetValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Ownership.ContactPersonRole);
+                if (_ownershipcontactpersonrole != null)
+                {
+                    obj.Ownership.ContactPersonRole = System.Guid.Parse(Convert.ToString(_ownershipcontactpersonrole.Value));
+                }
+
+                var _ownershipteam = _ownershipSection.GetValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Ownership.Team);
+                if (_ownershipteam != null)
+                {
+                    obj.Ownership.Team = System.Guid.Parse(Convert.ToString(_ownershipteam.Value));
+                }
+
             }
 
             var _custodySection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Custody.SectionDefinitionId));
@@ -1066,6 +1085,21 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 if (obj.Ownership.Organization != default)
                 {
                     _ownership.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Ownership.Organization, obj.Ownership.Organization);
+                }
+
+                if (obj.Ownership.ContactPerson != default)
+                {
+                    _ownership.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Ownership.ContactPerson, (System.Guid)obj.Ownership.ContactPerson);
+                }
+
+                if (obj.Ownership.ContactPersonRole != default)
+                {
+                    _ownership.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Ownership.ContactPersonRole, (System.Guid)obj.Ownership.ContactPersonRole);
+                }
+
+                if (obj.Ownership.Team != default)
+                {
+                    _ownership.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Ownership.Team, (System.Guid)obj.Ownership.Team);
                 }
 
                 instance.Sections.Add(_ownership);
