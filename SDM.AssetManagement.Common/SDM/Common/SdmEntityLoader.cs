@@ -452,6 +452,24 @@ namespace Skyline.DataMiner.SDM.Common.Services
         }
 
         /// <summary>
+        /// Retrieves all PortTypes whose identifier matches any of the provided identifiers.
+        /// Uses <see cref="Tools.RetrieveBigOrFilter"/> to safely handle large sets without
+        /// creating an oversized OR filter in a single call. Suitable for bulk scenarios.
+        /// </summary>
+        public List<PortType> GetPortTypesByDomIds(List<string> identifiers)
+        {
+            if (assetManagerApiHelper?.PortTypes == null || identifiers == null || !identifiers.Any())
+            {
+                return new List<PortType>();
+            }
+
+            return Tools.RetrieveBigOrFilter(
+                identifiers,
+                id => PortTypeExposers.Identifier.Equal(id),
+                filter => assetManagerApiHelper.PortTypes.Read(filter).ToList());
+        }
+
+        /// <summary>
         /// Retrieves all CableTypes whose Name matches any of the provided names.
         /// Uses <see cref="Tools.RetrieveBigOrFilter"/> to safely handle large sets without
         /// creating an oversized OR filter in a single call.

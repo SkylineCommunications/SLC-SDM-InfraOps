@@ -27,6 +27,22 @@
         [TestInitialize]
         public void TestInitialize()
         {
+            // Seed the asset dependency chain (below the ports layer, so no ports are created here).
+            Helper.PopulateWithDemoData(upTo: DemoDataLayer.Assets);
+            var asset = Helper.TestData.Assets.First();
+
+            // Seed a real power port type (has the Power category) for the wired validation middleware.
+            var powerPortType = new PortType
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                Name = "Test Power Port Type",
+                CategoryLinks = new CategoryRelation
+                {
+                    Categories = [SlcAsset_Management.Enums.CategoriesEnum.Power],
+                },
+            };
+            Helper.AssetManagement.PortTypes.Create(powerPortType);
+
             referencePowerPort = new PowerPort
             {
                 Identifier = Guid.NewGuid().ToString(),
@@ -36,9 +52,10 @@
                     PortNumber = 1,
                     OutputType = SlcAsset_Management.Enums.Outputtype.IO,
                     PortExposure = SlcAsset_Management.Enums.PortExposureEnum.Front,
+                    PortType = new SdmObjectReference<PortType>(powerPortType.Identifier),
                     Label = "Power Port 1",
                 },
-                Asset = new SdmObjectReference<Asset>(Guid.NewGuid().ToString()),
+                Asset = new SdmObjectReference<Asset>(asset.Identifier),
             };
         }
 
@@ -86,6 +103,7 @@
                     PortNumber = 2,
                     OutputType = SlcAsset_Management.Enums.Outputtype.Out,
                     PortExposure = SlcAsset_Management.Enums.PortExposureEnum.Back,
+                    PortType = referencePowerPort.PowerPortInfo.PortType,
                     Label = "Power Port 2",
                 },
                 Asset = referencePowerPort.Asset,

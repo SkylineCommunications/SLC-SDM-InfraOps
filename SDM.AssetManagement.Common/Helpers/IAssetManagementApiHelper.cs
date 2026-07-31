@@ -32,5 +32,9 @@
         AssetClassValidator AssetClassValidator { get; }
 
         AssetValidator AssetValidator { get; }
+
+        DataPortValidator DataPortValidator { get; }
+
+        PowerPortValidator PowerPortValidator { get; }
     }
 }

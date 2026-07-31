@@ -231,10 +231,23 @@
             Helper.PopulateWithDemoData(DemoDataLayer.Assets);
 
             var asset = Helper.TestData.Assets.First();
+
+            // Data ports require a valid data Port Type (validation is wired into the repository).
+            var dataPortType = new PortType
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                Name = "Custom Data Port Type",
+                CategoryLinks = new CategoryRelation
+                {
+                    Categories = [SlcAsset_Management.Enums.CategoriesEnum.Data],
+                },
+            };
+            Helper.AssetManagement.PortTypes.Create(dataPortType);
+
             var customDataPorts = new List<DataPort>
             {
-                CreateValidDataPort(asset.Identifier, 1),
-                CreateValidDataPort(asset.Identifier, 2)
+                CreateValidDataPort(asset.Identifier, dataPortType.Identifier, 1),
+                CreateValidDataPort(asset.Identifier, dataPortType.Identifier, 2)
             };
 
             // Act
@@ -406,14 +419,17 @@
             return deviceType;
         }
 
-        private static DataPort CreateValidDataPort(string assetId, long portNumber)
+        private static DataPort CreateValidDataPort(string assetId, string portTypeId, long portNumber)
         {
             var dataPort = new DataPort
             {
                 Asset = new SdmObjectReference<Asset>(assetId),
             };
 
+            dataPort.DataPortInfo.Name = $"Data Port {portNumber}";
             dataPort.DataPortInfo.PortNumber = portNumber;
+            dataPort.DataPortInfo.OutputType = SlcAsset_Management.Enums.Outputtype.IO;
+            dataPort.DataPortInfo.Type = new SdmObjectReference<PortType>(portTypeId);
             return dataPort;
         }
 

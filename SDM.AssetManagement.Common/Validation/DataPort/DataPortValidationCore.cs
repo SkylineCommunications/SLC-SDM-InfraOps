@@ -86,6 +86,32 @@
         /// </summary>
         private ValidationResult ValidatePortType(DataPort dataPort)
         {
+            if (dataPort.DataPortInfo.Type == null || !dataPort.DataPortInfo.Type.HasValue())
+            {
+                return ValidatePortTypeAgainst(dataPort, null);
+            }
+
+            try
+            {
+                var portType = _entityLoader.LoadPortType(dataPort.DataPortInfo.Type);
+                return ValidatePortTypeAgainst(dataPort, portType);
+            }
+            catch (Exception ex)
+            {
+                var result = new ValidationResult();
+                result.AddFailReason(DataPortValidationField.PortType,
+                    $"Error validating Port Type: {ex.Message}");
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Validates a DataPort's Port Type reference against an already-loaded PortType
+        /// (or null when the referenced type could not be found). Pure in-memory checks,
+        /// so it can be reused by the bulk path after a batched port-type load.
+        /// </summary>
+        public ValidationResult ValidatePortTypeAgainst(DataPort dataPort, PortType loadedPortType)
+        {
             var result = new ValidationResult();
 
             if (dataPort.DataPortInfo.Type == null || !dataPort.DataPortInfo.Type.HasValue())
@@ -95,27 +121,18 @@
                 return result;
             }
 
-            try
-            {
-                var portType = _entityLoader.LoadPortType(dataPort.DataPortInfo.Type);
-                if (portType == null)
-                {
-                    result.AddFailReason(DataPortValidationField.PortType,
-                        "Port Type not found.");
-                    return result;
-                }
-
-                if (!portType.IsDataPortType())
-                {
-                    result.AddFailReason(DataPortValidationField.PortType,
-                        "Port Type must be a Data Port Type.");
-                    return result;
-                }
-            }
-            catch (Exception ex)
+            if (loadedPortType == null)
             {
                 result.AddFailReason(DataPortValidationField.PortType,
-                    $"Error validating Port Type: {ex.Message}");
+                    "Port Type not found.");
+                return result;
+            }
+
+            if (!loadedPortType.IsDataPortType())
+            {
+                result.AddFailReason(DataPortValidationField.PortType,
+                    "Port Type must be a Data Port Type.");
+                return result;
             }
 
             return result;

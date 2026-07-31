@@ -8,7 +8,7 @@
     <RootNamespace>Skyline.DataMiner.SDM.FacilityManagement.Protocol</RootNamespace>
     <PackageVersion>1.0.1</PackageVersion>
     <Version>1.0.1</Version>
-    <AssemblyVersion>0.2.3.35</AssemblyVersion>
+    <AssemblyVersion>0.2.3.38</AssemblyVersion>
     <PackageTags>Skyline;DataMiner</PackageTags>
     <PackageProjectUrl>https://skyline.be</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>

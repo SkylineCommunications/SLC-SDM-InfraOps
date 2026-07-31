@@ -114,8 +114,6 @@ namespace Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Middleware
             next(items);
         }
 
-        // ── Pass-through operations (null-guarded) ──────────────────────────
-
         public IEnumerable<T> OnRead(FilterElement<T> filter, Func<FilterElement<T>, IEnumerable<T>> next)
         {
             if (filter == null)

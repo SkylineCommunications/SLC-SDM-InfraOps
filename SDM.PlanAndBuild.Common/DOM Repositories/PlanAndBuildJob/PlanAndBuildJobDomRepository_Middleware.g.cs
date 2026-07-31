@@ -195,7 +195,14 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
         }
         public System.Collections.Generic.IReadOnlyCollection<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob> CreateOrUpdate(System.Collections.Generic.IEnumerable<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob> oToCreateOrUpdate)
         {
-            return _inner.CreateOrUpdate(oToCreateOrUpdate);
+                if (_middleware is IBulkRepositoryMiddleware<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob> middleware)
+                {
+                    return middleware.OnCreateOrUpdate(oToCreateOrUpdate, _inner.CreateOrUpdate);
+                }
+                else
+                {
+                    return _inner.CreateOrUpdate(oToCreateOrUpdate);
+                }
         }
 
     }

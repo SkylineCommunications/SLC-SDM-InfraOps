@@ -10,6 +10,7 @@
 
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.AssetManagement.Extensions;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
 
@@ -336,6 +337,10 @@
                     "Cannot populate data ports: No Assets found. Call PopulateAssets() first.");
             }
 
+            // Ensure PortTypes exist and pick a data-compatible one (validation requires a valid Port Type).
+            helper.PopulatePortTypes();
+            var dataPortType = helper.TestData.PortTypes.First(pt => pt.IsDataPortType());
+
             var dataPorts = new List<DataPort>();
             for (int i = 0; i < DemoData.BaseDataPorts.Count; i++)
             {
@@ -344,6 +349,7 @@
 
                 var dataPort = CloneDataPort(basePort);
                 dataPort.Asset = new SdmObjectReference<Asset>(persistedAssets[assetIndex].Identifier);
+                dataPort.DataPortInfo.Type = new SdmObjectReference<PortType>(dataPortType.Identifier);
 
                 dataPorts.Add(dataPort);
             }
@@ -401,6 +407,10 @@
                     "Cannot populate power ports: No Assets found. Call PopulateAssets() first.");
             }
 
+            // Ensure PortTypes exist and pick a power-compatible one (validation requires a valid Port Type).
+            helper.PopulatePortTypes();
+            var powerPortType = helper.TestData.PortTypes.First(pt => pt.IsPowerPortType());
+
             var powerPorts = new List<PowerPort>();
             for (int i = 0; i < DemoData.BasePowerPorts.Count; i++)
             {
@@ -409,6 +419,7 @@
 
                 var powerPort = ClonePowerPort(basePort);
                 powerPort.Asset = new SdmObjectReference<Asset>(persistedAssets[assetIndex].Identifier);
+                powerPort.PowerPortInfo.PortType = new SdmObjectReference<PortType>(powerPortType.Identifier);
 
                 powerPorts.Add(powerPort);
             }

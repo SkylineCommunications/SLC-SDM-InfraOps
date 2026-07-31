@@ -23,10 +23,41 @@
     public class DataPortDomStorageProvider_CRUDTests : BaseRepositoryTest
     {
         private DataPort referenceDataPort = null!;
+        private SdmObjectReference<PortType> updateDataPortTypeRef = null!;
 
         [TestInitialize]
         public void TestInitialize()
         {
+            // Seed the asset dependency chain (DeviceTypes -> AssetClasses -> Assets).
+            // This stays below the DataPorts layer, so no data ports are created here.
+            Helper.PopulateWithDemoData(upTo: DemoDataLayer.Assets);
+            var asset = Helper.TestData.Assets.First();
+
+            // Seed a real data port type so the wired validation middleware can resolve it.
+            var dataPortType = new PortType
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                Name = "Test Data Port Type",
+                CategoryLinks = new CategoryRelation
+                {
+                    Categories = [SlcAsset_Management.Enums.CategoriesEnum.Data],
+                },
+            };
+            Helper.AssetManagement.PortTypes.Create(dataPortType);
+
+            // Seed a second data port type used by the update test to change the port's type.
+            var updateDataPortType = new PortType
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                Name = "Test Data Port Type (Update)",
+                CategoryLinks = new CategoryRelation
+                {
+                    Categories = [SlcAsset_Management.Enums.CategoriesEnum.Data],
+                },
+            };
+            Helper.AssetManagement.PortTypes.Create(updateDataPortType);
+            updateDataPortTypeRef = new SdmObjectReference<PortType>(updateDataPortType.Identifier);
+
             referenceDataPort = new DataPort
             {
                 Identifier = Guid.NewGuid().ToString(),
@@ -36,10 +67,10 @@
                     PortNumber = 1,
                     OutputType = SlcAsset_Management.Enums.Outputtype.IO,
                     PortExposure = SlcAsset_Management.Enums.PortExposureEnum.Front,
-                    Type = new SdmObjectReference<PortType>(Guid.NewGuid().ToString()),
+                    Type = new SdmObjectReference<PortType>(dataPortType.Identifier),
                     Label = "Ethernet Port 1",
                 },
-                Asset = new SdmObjectReference<Asset>(Guid.NewGuid().ToString()),
+                Asset = new SdmObjectReference<Asset>(asset.Identifier),
                 AddressInfo = new AddressInfo
                 {
                     Ipv4Address = "192.168.1.100",
@@ -69,6 +100,26 @@
         }
 
         [TestMethod]
+        public void Create_WithoutOutputType_ShouldThrowValidationException()
+        {
+            // Arrange - OutputType is a mandatory field, so creating a DataPort without it
+            // must fail validation before it is persisted.
+            referenceDataPort.DataPortInfo.OutputType = null;
+
+            // Act
+            var act = () => Helper.AssetManagement.DataPorts.Create(referenceDataPort);
+
+            // Assert
+            using (new AssertionScope())
+            {
+                act.Should().Throw<Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Exceptions.ValidationException>()
+                    .WithMessage("*Output Type*");
+
+                Helper.AssetManagement.DataPorts.Count(new TRUEFilterElement<DataPort>()).Should().Be(0);
+            }
+        }
+
+        [TestMethod]
         public void CreateOrUpdate_WithNewDataPort_ShouldCreate()
         {
             
@@ -78,6 +129,47 @@
             // Assert
             AssertCreated();
         }
+
+        [TestMethod]
+        public void CreateBulk_WithNonExistentPortType_ShouldThrowBulkValidationException()
+        {
+            // Arrange - the bulk path now validates Port Type (existence + category),
+            // so a batch referencing a non-existent Port Type must be rejected.
+            referenceDataPort.DataPortInfo.Type = new SdmObjectReference<PortType>(Guid.NewGuid().ToString());
+
+            // Act - bulk Create routes through the middleware's bulk validation.
+            var act = () => Helper.AssetManagement.DataPorts.Create(new[] { referenceDataPort });
+
+            // Assert
+            using (new AssertionScope())
+            {
+                act.Should().Throw<Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations.BulkValidationException<DataPort>>()
+                    .WithMessage("*Port Type*");
+
+                Helper.AssetManagement.DataPorts.Count(new TRUEFilterElement<DataPort>()).Should().Be(0);
+            }
+        }
+
+        [TestMethod]
+        public void CreateOrUpdate_WithNonExistentPortType_ShouldThrowBulkValidationException()
+        {
+            // Arrange - CreateOrUpdate now routes through the middleware's bulk validation
+            // (previously it bypassed validation entirely), so a non-existent Port Type must be rejected.
+            referenceDataPort.DataPortInfo.Type = new SdmObjectReference<PortType>(Guid.NewGuid().ToString());
+
+            // Act
+            var act = () => Helper.AssetManagement.DataPorts.CreateOrUpdate(new[] { referenceDataPort });
+
+            // Assert
+            using (new AssertionScope())
+            {
+                act.Should().Throw<Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations.BulkValidationException<DataPort>>()
+                    .WithMessage("*Port Type*");
+
+                Helper.AssetManagement.DataPorts.Count(new TRUEFilterElement<DataPort>()).Should().Be(0);
+            }
+        }
+
 
         [TestMethod]
         public void CreateOrUpdate_WithExistingDataPort_ShouldUpdate()
@@ -94,13 +186,14 @@
                     PortNumber = 2,
                     OutputType = SlcAsset_Management.Enums.Outputtype.Out,
                     PortExposure = SlcAsset_Management.Enums.PortExposureEnum.Back,
+                    Type = updateDataPortTypeRef,
                     Label = "Fiber Port 2",
                 },
                 Asset = created.Asset ,
                 AddressInfo = new AddressInfo
                 {
                     Ipv4Address = "10.0.0.50",
-                    Ipv6Address = "",
+                    Ipv6Address = "2001:0db8:85a3:0000:0000:8a2e:0370:1234",
                     Hostname = "updated-hostname",
                     DNS = false,
                 },
@@ -231,7 +324,7 @@
                 // AddressInfo changes
                 updated.AddressInfo.Should().NotBeNull();
                 updated.AddressInfo.Ipv4Address.Should().Be("10.0.0.50");
-                updated.AddressInfo.Ipv6Address.Should().BeNullOrEmpty();
+                updated.AddressInfo.Ipv6Address.Should().Be("2001:0db8:85a3:0000:0000:8a2e:0370:1234");
                 updated.AddressInfo.Hostname.Should().Be("updated-hostname");
                 updated.AddressInfo.DNS.Should().BeFalse();
 

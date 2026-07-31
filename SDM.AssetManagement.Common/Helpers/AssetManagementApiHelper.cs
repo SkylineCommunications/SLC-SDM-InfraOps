@@ -18,6 +18,8 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
 {
     private readonly AssetValidator _assetValidator;
     private readonly AssetClassValidator _assetClassValidator;
+    private readonly DataPortValidator _dataPortValidator;
+    private readonly PowerPortValidator _powerPortValidator;
     //private readonly DeviceTypeValidator _deviceTypeValidator;
 
     // Public constructor for production use - creates its own FacilityManagementHelper
@@ -53,6 +55,8 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
         _assetValidator = new AssetValidator(entityLoader);
 
         _assetClassValidator = new AssetClassValidator(entityLoader);
+        _dataPortValidator = new DataPortValidator(entityLoader);
+        _powerPortValidator = new PowerPortValidator(entityLoader);
         // Wrap with middleware
         Assets = assetRepository
             .WithMiddleware(new AssetValidationMiddleware(_assetValidator))
@@ -64,13 +68,17 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
             .WithMiddleware(new AssetClassValidationMiddleware(_assetClassValidator))
             .WithMiddleware(new IdentifierMiddleware<AssetClass>());
 
-        PowerPorts = powerPortRepository;
-        DataPorts = dataPortRepository;
-        DeviceTypes = deviceTypeRepository;
-        PortTypes = portTypeRepository;
-        Connections = connectionDomRepository;
-        CableTypes = cableTypeRepository;
-        Reservations = reservationRepository;
+        PowerPorts = powerPortRepository
+            .WithMiddleware(new PowerPortValidationMiddleware(_powerPortValidator))
+            .WithMiddleware(new IdentifierMiddleware<PowerPort>());
+        DataPorts = dataPortRepository
+            .WithMiddleware(new DataPortValidationMiddleware(_dataPortValidator))
+            .WithMiddleware(new IdentifierMiddleware<DataPort>());
+        DeviceTypes = deviceTypeRepository.WithMiddleware(new IdentifierMiddleware<DeviceType>());
+        PortTypes = portTypeRepository.WithMiddleware(new IdentifierMiddleware<PortType>());
+        Connections = connectionDomRepository.WithMiddleware(new IdentifierMiddleware<Connection>());
+        CableTypes = cableTypeRepository.WithMiddleware(new IdentifierMiddleware<CableType>());
+        Reservations = reservationRepository.WithMiddleware(new IdentifierMiddleware<InfraopsReservation>());
     }
 
     public IAssetRepository Assets { get; }
@@ -87,4 +95,8 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
     public AssetValidator AssetValidator => _assetValidator;
 
     public AssetClassValidator AssetClassValidator => _assetClassValidator;
+
+    public DataPortValidator DataPortValidator => _dataPortValidator;
+
+    public PowerPortValidator PowerPortValidator => _powerPortValidator;
 }
