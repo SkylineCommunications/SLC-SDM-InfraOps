@@ -128,6 +128,65 @@
             isValid.Should().BeFalse($"{property} cannot be negative");
         }
 
+        [TestMethod]
+        [DataRow(null, DisplayName = "Null HeightU")]
+        [DataRow(0.0, DisplayName = "Zero HeightU")]
+        [DataRow(-1.0, DisplayName = "Negative HeightU")]
+        public void HeightU_RackUnitConsumer_WithoutPositiveValue_ShouldBeInvalid(double? heightU)
+        {
+            // Arrange
+            var assetClass = new AssetClass { HeightU = heightU };
+
+            // Act
+            var isValid = AssetClassValidationHandler.IsHeightUnitValid(assetClass, isRackUnitConsumer: true, out var result);
+
+            // Assert
+            using (new AssertionScope())
+            {
+                isValid.Should().BeFalse();
+                result.TryGetFailReason(
+                    AssetClassValidationHandler.AssetClassValidationField.HeightU,
+                    out var reason).Should().BeTrue();
+                reason.Should().Contain("Rack Unit Consumer");
+            }
+        }
+
+        [TestMethod]
+        public void HeightU_RackUnitConsumer_WithPositiveValue_ShouldBeValid()
+        {
+            // Arrange
+            var assetClass = new AssetClass { HeightU = 2.0 };
+
+            // Act
+            var isValid = AssetClassValidationHandler.IsHeightUnitValid(assetClass, isRackUnitConsumer: true, out var result);
+
+            // Assert
+            using (new AssertionScope())
+            {
+                isValid.Should().BeTrue();
+                result.IsValid.Should().BeTrue();
+            }
+        }
+
+        [TestMethod]
+        [DataRow(null, DisplayName = "Null HeightU")]
+        [DataRow(0.0, DisplayName = "Zero HeightU")]
+        public void HeightU_NonRackUnitConsumer_WithoutPositiveValue_ShouldBeValid(double? heightU)
+        {
+            // Arrange
+            var assetClass = new AssetClass { HeightU = heightU };
+
+            // Act
+            var isValid = AssetClassValidationHandler.IsHeightUnitValid(assetClass, isRackUnitConsumer: false, out var result);
+
+            // Assert
+            using (new AssertionScope())
+            {
+                isValid.Should().BeTrue();
+                result.IsValid.Should().BeTrue();
+            }
+        }
+
         #endregion
 
         #region Power Consumption Validation

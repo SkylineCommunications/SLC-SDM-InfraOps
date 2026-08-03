@@ -402,6 +402,11 @@
                 assetClass.PowerSupply = SlcAsset_Management.Enums.PowerSupplyEnum.DC;
             }
 
+            if (deviceType.TagsInfo.Tags.Contains(SlcAsset_Management.Enums.TagOption.RackUnitConsumer))
+            {
+                assetClass.HeightU = 1;
+            }
+
             return assetClass;
         }
 

@@ -105,6 +105,24 @@
                 out result);
         }
 
+        /// <summary>
+        /// Validates HeightU in the context of the Device Type's Rack Unit Consumer tag.
+        /// A Rack Unit Consumer must have a Height Unit greater than 0.
+        /// </summary>
+        public static bool IsHeightUnitValid(AssetClass asset, bool isRackUnitConsumer, out ValidationResult result)
+        {
+            result = new ValidationResult();
+
+            if (isRackUnitConsumer && (!asset.HeightU.HasValue || asset.HeightU.Value <= 0))
+            {
+                result.AddFailReason(AssetClassValidationField.HeightU,
+                    "Asset Class with 'Rack Unit Consumer' Device Type must have a Height Unit greater than 0.");
+                return result.IsValid;
+            }
+
+            return IsHeightUnitValid(asset, out result);
+        }
+
         public static bool IsWeightValid(AssetClass asset, out ValidationResult result)
         {
             if(!asset.Weight.HasValue)

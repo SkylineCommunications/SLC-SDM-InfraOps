@@ -223,19 +223,19 @@
                 validations.Add(IsAssetClassNameValid(assetClass.Name, assetClass.Identifier));
             }
 
-            // Power Supply validation (requires loading device type from DB)
-            if ((assetClass.DeviceTypeIdField.Changed || assetClass.PowerSupplyField.Changed)
+            // Device-type-dependent validation (Power Supply, HeightU for Rack Unit Consumer)
+            if ((assetClass.DeviceTypeIdField.Changed || assetClass.PowerSupplyField.Changed || assetClass.HeightUField.Changed)
                 && assetClass.DeviceTypeId.HasValue())
             {
                 try
                 {
-                    validations.Add(ValidatePowerSupply(assetClass, deviceTypeCache));
+                    validations.Add(ValidateAgainstDeviceType(assetClass, deviceTypeCache));
                 }
                 catch (Exception ex)
                 {
                     var r = new ValidationResult();
-                    r.AddFailReason(AssetClassValidationHandler.AssetClassValidationField.PowerSupply,
-                        $"Error validating power supply: {ex.Message}");
+                    r.AddFailReason(AssetClassValidationHandler.AssetClassValidationField.DeviceTypeId,
+                        $"Error validating against device type: {ex.Message}");
                     validations.Add(r);
                 }
             }
@@ -243,7 +243,7 @@
             return validations.MergeAll();
         }
 
-        private ValidationResult ValidatePowerSupply(AssetClass assetClass, Dictionary<string, DeviceType> deviceTypeCache = null)
+        private ValidationResult ValidateAgainstDeviceType(AssetClass assetClass, Dictionary<string, DeviceType> deviceTypeCache = null)
         {
             var result = new ValidationResult();
 
@@ -277,6 +277,12 @@
             {
                 result.AddFailReason(AssetClassValidationHandler.AssetClassValidationField.PowerSupply,
                     "Asset Class with 'Power Provider' Device Type must have a Power Supply.");
+            }
+
+            bool isRackUnitConsumer = deviceType.TagsInfo.Tags.Contains(SlcAsset_Management.Enums.TagOption.RackUnitConsumer);
+            if (!AssetClassValidationHandler.IsHeightUnitValid(assetClass, isRackUnitConsumer, out var heightUResult))
+            {
+                result.AddFailuresFrom(heightUResult);
             }
 
             return result;
