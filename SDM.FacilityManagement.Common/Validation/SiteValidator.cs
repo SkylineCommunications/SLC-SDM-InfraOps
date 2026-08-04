@@ -11,97 +11,91 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
     /// <summary>
-    /// Public validator service for Rack validation.
-    /// Enforces Rack Id presence and uniqueness alongside the dimension and capacity business rules.
+    /// Public validator service for Site validation.
+    /// Enforces that the Site id is present and unique.
     /// </summary>
-    public class RackValidator : ValidatorBase<Rack>
+    public class SiteValidator : ValidatorBase<Site>
     {
         private readonly FacilityEntityLoader _entityLoader;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RackValidator"/> class.
+        /// Initializes a new instance of the <see cref="SiteValidator"/> class.
         /// </summary>
-        /// <param name="entityLoader">The entity loader for querying racks.</param>
-        public RackValidator(FacilityEntityLoader entityLoader)
+        /// <param name="entityLoader">The entity loader for querying sites.</param>
+        public SiteValidator(FacilityEntityLoader entityLoader)
         {
             _entityLoader = entityLoader ?? throw new ArgumentNullException(nameof(entityLoader));
         }
 
         /// <summary>
-        /// Validates a single Rack.
+        /// Validates a single Site.
         /// <para><b>Not suitable for bulk scenarios</b>: issues one DB query per item. Use <see cref="ValidateBulk"/> instead.</para>
         /// </summary>
-        protected override ValidationResult Validate(Rack rack)
+        protected override ValidationResult Validate(Site site)
         {
-            if (rack == null)
-            {
-                throw new ArgumentNullException(nameof(rack));
-            }
-
             var result = new ValidationResult();
 
-            // Id not empty is critical - stop if invalid.
-            if (!RackValidationHandler.IsRackIdValid(rack, out var idResult))
+            if (!SiteValidationHandler.IsSiteIdValid(site, out var idResult))
             {
                 result.AddFailuresFrom(idResult);
                 return result;
             }
 
-            if (rack.ShouldValidate(rack.RackIdField) && IsRackIdInUse(rack.RackId, rack.Identifier))
+            if (site.ShouldValidate(site.SiteIdField) && IsSiteIdInUse(site.SiteId, site.Identifier))
             {
-                result.AddFailReason(RackValidationHandler.RackValidationField.RackId,
-                    $"Rack Id '{rack.RackId}' is already in use.");
+                result.AddFailReason(SiteValidationHandler.SiteValidationField.SiteId,
+                    $"Site Id '{site.SiteId}' is already in use.");
             }
 
             return result;
         }
 
         /// <summary>
-        /// Validates Rack Id uniqueness for real-time UI validation.
+        /// Validates name uniqueness for real-time UI validation.
         /// <para><b>Not suitable for bulk scenarios</b>: issues one DB query per call. Use <see cref="ValidateBulk"/> instead.</para>
         /// </summary>
-        public ValidationResult IsRackIdValid(string rackId, string exceptIdentifier = null)
+        public ValidationResult IsSiteIdValid(string siteId, string exceptIdentifier = null)
         {
             var result = new ValidationResult();
 
-            if (string.IsNullOrWhiteSpace(rackId))
+            if (string.IsNullOrWhiteSpace(siteId))
             {
-                result.AddFailReason(RackValidationHandler.RackValidationField.RackId,
-                    "Rack Id cannot be empty or whitespace.");
+                result.AddFailReason(SiteValidationHandler.SiteValidationField.SiteId,
+                    "Site Id cannot be empty or whitespace.");
                 return result;
             }
 
-            if (IsRackIdInUse(rackId, exceptIdentifier))
+            if (IsSiteIdInUse(siteId, exceptIdentifier))
             {
-                result.AddFailReason(RackValidationHandler.RackValidationField.RackId,
-                    $"Rack Id '{rackId}' is already in use.");
+                result.AddFailReason(SiteValidationHandler.SiteValidationField.SiteId,
+                    $"Site Id '{siteId}' is already in use.");
             }
 
             return result;
         }
 
         /// <summary>
-        /// Validates a batch of Racks in three phases:
-        /// 1. Non-database checks per item (id not empty + dimension/capacity rules).
+        /// Validates a batch of Sites in three phases:
+        /// 1. Non-database checks per item (id not empty).
         /// 2. In-memory batch conflict detection (id uniqueness within batch).
         /// 3. Database uniqueness check (id uniqueness vs DB).
         /// Results are returned in the same order as the input list.
         /// </summary>
-        protected override List<ValidationResult> ValidateBulk(List<Rack> racks)
+        protected override List<ValidationResult> ValidateBulk(List<Site> sites)
         {
-            if (racks == null || !racks.Any())
+            if (sites == null || !sites.Any())
             {
                 return new List<ValidationResult>();
             }
 
-            var results = racks.Select(_ => new ValidationResult()).ToList();
+            var results = sites.Select(_ => new ValidationResult()).ToList();
 
             // ============================================================
             // PHASE 1: NO DATABASE ACCESS CHECKS (BUSINESS RULES)
             // ============================================================
-            for (int i = 0; i < racks.Count; i++)
+            for (int i = 0; i < sites.Count; i++)
             {
-                if (!RackValidationHandler.IsRackIdValid(racks[i], out var idResult))
+                if (!SiteValidationHandler.IsSiteIdValid(sites[i], out var idResult))
                 {
                     results[i].AddFailuresFrom(idResult);
                 }
@@ -115,7 +109,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
             // ============================================================
             // PHASE 2: IN-MEMORY BATCH CONFLICT DETECTION
             // ============================================================
-            var batchConflicts = ValidateRackIdDuplicatesInBatch(racks);
+            var batchConflicts = ValidateSiteIdDuplicatesInBatch(sites);
             results.MergeFrom(batchConflicts);
 
             if (results.AnyInvalid())
@@ -127,23 +121,23 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
             // PHASE 2.5: BULK ID UNIQUENESS CHECK AGAINST DATABASE
             // One OR-based query via Tools.RetrieveBigOrFilter — no large AND filter.
             // ============================================================
-            var dbConflicts = ValidateBulkRackIdsAgainstDatabase(racks);
+            var dbConflicts = ValidateBulkSiteIdsAgainstDatabase(sites);
             results.MergeFrom(dbConflicts);
 
             return results;
         }
 
-        private bool IsRackIdInUse(string rackId, string exceptIdentifier = null)
+        private bool IsSiteIdInUse(string siteId, string exceptIdentifier = null)
         {
-            return _entityLoader.CountRacksByRackId(rackId, exceptIdentifier) > 0;
+            return _entityLoader.CountSitesBySiteId(siteId, exceptIdentifier) > 0;
         }
 
-        private List<ValidationResult> ValidateBulkRackIdsAgainstDatabase(List<Rack> racks)
+        private List<ValidationResult> ValidateBulkSiteIdsAgainstDatabase(List<Site> sites)
         {
-            var results = racks.Select(_ => new ValidationResult()).ToList();
+            var results = sites.Select(_ => new ValidationResult()).ToList();
 
-            var uniqueIds = racks
-                .Select(r => r.RackId)
+            var uniqueIds = sites
+                .Select(s => s.SiteId)
                 .Where(id => !string.IsNullOrWhiteSpace(id))
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToList();
@@ -154,37 +148,37 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
             }
 
             var batchIdentifiers = new HashSet<string>(
-                racks.Select(r => r.Identifier).Where(id => !string.IsNullOrWhiteSpace(id)));
+                sites.Select(s => s.Identifier).Where(id => !string.IsNullOrWhiteSpace(id)));
 
-            var dbMatches = _entityLoader.GetRacksByRackIds(uniqueIds);
+            var dbMatches = _entityLoader.GetSitesBySiteIds(uniqueIds);
 
             var externalConflictIds = dbMatches
                 .Where(r => !batchIdentifiers.Contains(r.Identifier))
-                .Select(r => r.RackId)
+                .Select(r => r.SiteId)
                 .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-            for (int i = 0; i < racks.Count; i++)
+            for (int i = 0; i < sites.Count; i++)
             {
-                var rackId = racks[i].RackId;
-                if (!string.IsNullOrWhiteSpace(rackId) && externalConflictIds.Contains(rackId))
+                var siteId = sites[i].SiteId;
+                if (!string.IsNullOrWhiteSpace(siteId) && externalConflictIds.Contains(siteId))
                 {
                     results[i].AddFailReason(
-                        RackValidationHandler.RackValidationField.RackId,
-                        $"Rack Id '{rackId}' is already in use.");
+                        SiteValidationHandler.SiteValidationField.SiteId,
+                        $"Site Id '{siteId}' is already in use.");
                 }
             }
 
             return results;
         }
 
-        private static List<ValidationResult> ValidateRackIdDuplicatesInBatch(List<Rack> racks)
+        private static List<ValidationResult> ValidateSiteIdDuplicatesInBatch(List<Site> sites)
         {
-            var results = racks.Select(_ => new ValidationResult()).ToList();
+            var results = sites.Select(_ => new ValidationResult()).ToList();
 
-            var duplicateIds = racks
-                .Select((r, idx) => new { r.RackId, Index = idx })
-                .Where(x => !string.IsNullOrWhiteSpace(x.RackId))
-                .GroupBy(x => x.RackId, StringComparer.OrdinalIgnoreCase)
+            var duplicateIds = sites
+                .Select((s, idx) => new { s.SiteId, Index = idx })
+                .Where(x => !string.IsNullOrWhiteSpace(x.SiteId))
+                .GroupBy(x => x.SiteId, StringComparer.OrdinalIgnoreCase)
                 .Where(g => g.Count() > 1);
 
             foreach (var group in duplicateIds)
@@ -192,8 +186,8 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                 foreach (var item in group)
                 {
                     results[item.Index].AddFailReason(
-                        RackValidationHandler.RackValidationField.RackId,
-                        $"Rack Id '{item.RackId}' is duplicated within the batch.");
+                        SiteValidationHandler.SiteValidationField.SiteId,
+                        $"Site Id '{item.SiteId}' is duplicated within the batch.");
                 }
             }
 
