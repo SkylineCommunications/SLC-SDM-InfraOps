@@ -39,7 +39,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, double?> XPosition = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, double?>((obj) => obj.XPosition, "XPosition");
             public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, double?> YPosition = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, double?>((obj) => obj.YPosition, "YPosition");
             public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, double?> Width = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, double?>((obj) => obj.Width, "Width");
-            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, string> ZoneId = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, string>((obj) => obj.ZoneId, "ZoneId");
+            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, string> ZoneId = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, string>((obj) => obj.ZoneId, "ZoneProperties.ZoneId");
         }
 
         public static partial class ZoneCapacity

@@ -37,7 +37,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Site, string> Country = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Site, string>((obj) => obj.Country, "Country");
             public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Site, double?> Latitude = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Site, double?>((obj) => obj.Latitude, "Latitude");
             public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Site, double?> Longitude = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Site, double?>((obj) => obj.Longitude, "Longitude");
-            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Site, string> SiteId = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Site, string>((obj) => obj.SiteId, "SiteId");
+            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Site, string> SiteId = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Site, string>((obj) => obj.SiteId, "SiteProperties.SiteId");
         }
     }
 }

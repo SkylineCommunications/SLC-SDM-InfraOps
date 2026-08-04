@@ -33,7 +33,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Floor, string> Name = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Floor, string>((obj) => obj.Name, "Name");
             public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Floor, string> Plan = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Floor, string>((obj) => obj.Plan, "Plan");
             public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Floor, string> Description = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Floor, string>((obj) => obj.Description, "Description");
-            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Floor, string> FloorId = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Floor, string>((obj) => obj.FloorId, "FloorId");
+            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Floor, string> FloorId = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Floor, string>((obj) => obj.FloorId, "FloorProperties.FloorId");
         }
 
         public static partial class FacilityFk
