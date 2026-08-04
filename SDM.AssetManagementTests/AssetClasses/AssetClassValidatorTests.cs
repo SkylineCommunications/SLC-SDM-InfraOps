@@ -269,7 +269,8 @@ namespace SDM.AssetManagement.Tests.AssetClasses
             _helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
             
             var powerProviderDeviceType = _helper.TestData.DeviceTypes
-                .FirstOrDefault(dt => dt.TagsInfo.Tags.Contains(SlcAsset_Management.Enums.TagOption.PowerProvider));
+                .FirstOrDefault(dt => dt.TagsInfo.Tags.Contains(SlcAsset_Management.Enums.TagOption.PowerProvider)
+                    && !dt.TagsInfo.Tags.Contains(SlcAsset_Management.Enums.TagOption.RackUnitConsumer));
 
             if (powerProviderDeviceType == null)
             {
