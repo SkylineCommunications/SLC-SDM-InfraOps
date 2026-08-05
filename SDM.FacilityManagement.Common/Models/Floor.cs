@@ -2,6 +2,8 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 {
     using Newtonsoft.Json;
 
+    using SharedMappers.DomIds;
+
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     //[GenerateExposers]
@@ -73,6 +75,9 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
         }
 
         public FacilityRelation FacilityFk { get; set; }
+
+        [SdmIgnore]
+        public SlcFacility_Management.Behaviors.Floor_Behaviour.StatusesEnum State { get; internal set; }
 
         [JsonIgnore]
         [SdmIgnore]

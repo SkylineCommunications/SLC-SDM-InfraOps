@@ -13,8 +13,10 @@
     using SharedMappers.DomIds;
 
     using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.AssetManagement.Common.Validation;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
+    using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
     /// <summary>
     /// Tests that validate all Asset validation rules by intentionally violating them.
@@ -81,6 +83,55 @@
             // Assert
             act.Should().Throw<Exception>()
                 .WithMessage("*Asset Class cannot be empty*");
+        }
+
+        [TestMethod]
+        public void Create_WithDraftAssetClass_ShouldFail()
+        {
+            // Arrange
+            var deviceType = Helper.TestData.NonPowerProviderDeviceType();
+            var draftAssetClass = Helper.AssetManagement.AssetClasses.Create(new AssetClass
+            {
+                Name = "Draft Asset Class",
+                DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier),
+                Depth = 10,
+                Width = 20,
+                Height = 30,
+                HeightU = 1,
+                Weight = 5,
+            });
+
+            var asset = new Asset
+            {
+                AssetID = "TEST-DRAFT-CLASS-001",
+                Name = "Asset With Draft Class",
+                AssetClassId = new SdmObjectReference<AssetClass>(draftAssetClass.Identifier),
+            };
+
+            // Act
+            Action act = () => Helper.AssetManagement.Assets.Create(asset);
+
+            // Assert
+            act.Should().Throw<Exception>()
+                .WithMessage("*Asset Class must be Active*");
+        }
+
+        [TestMethod]
+        public void Create_WithActiveAssetClass_ShouldPassAssetClassStateValidation()
+        {
+            // Arrange
+            var asset = new Asset
+            {
+                AssetID = "TEST-ACTIVE-CLASS-001",
+                Name = "Asset With Active Class",
+                AssetClassId = new SdmObjectReference<AssetClass>(testAssetClass.Identifier),
+            };
+
+            // Act
+            Action act = () => Helper.AssetManagement.Assets.Create(asset);
+
+            // Assert
+            act.Should().NotThrow();
         }
 
         #endregion
@@ -801,6 +852,95 @@
             // Assert
             act.Should().Throw<Exception>()
                 .WithMessage("*Modification User must be set when Modification Date is provided*");
+        }
+
+        [TestMethod]
+        public void Validate_WithInstallationChangeInInstalledState_ShouldFail()
+        {
+            // Arrange
+            var asset = new Asset
+            {
+                AssetID = "TEST-LIFECYCLE-005",
+                Name = "Installed Asset",
+                AssetClassId = new SdmObjectReference<AssetClass>(testAssetClass.Identifier),
+                State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Installed,
+                InstallationUserId = Guid.NewGuid(),
+                InstallationDate = DateTime.UtcNow.AddDays(-1),
+            };
+            asset.IsNewInternal = false;
+            asset.ResetChangeTracking();
+            asset.InstallationDate = DateTime.UtcNow;
+
+            // Act
+            var result = Helper.AssetManagement.AssetValidator.Validate(asset, RepositoryAction.Update);
+
+            // Assert
+            result.IsValid.Should().BeFalse();
+            result.FailureReasons.Should().Contain(reason => reason.ToString().Contains("Cannot change Installation information in current State 'Installed'."));
+        }
+
+        [TestMethod]
+        public void Validate_WithInstallationChangeInAvailableState_ShouldPassStateLockValidation()
+        {
+            // Arrange
+            var asset = new Asset
+            {
+                AssetID = "TEST-LIFECYCLE-006",
+                Name = "Available Asset",
+                AssetClassId = new SdmObjectReference<AssetClass>(testAssetClass.Identifier),
+                State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available,
+                InstallationUserId = Guid.NewGuid(),
+                InstallationDate = DateTime.UtcNow.AddDays(-1),
+            };
+            asset.IsNewInternal = false;
+            asset.ResetChangeTracking();
+            asset.InstallationDate = DateTime.UtcNow;
+
+            // Act
+            var result = Helper.AssetManagement.AssetValidator.Validate(asset, RepositoryAction.Update);
+
+            // Assert
+            result.IsValid.Should().BeTrue();
+        }
+
+        [TestMethod]
+        public void IsReadyForInstall_WithMissingInstallationInfo_ShouldFail()
+        {
+            // Arrange
+            var asset = new Asset
+            {
+                State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.BuildPlanReady,
+            };
+
+            // Act
+            var isValid = AssetValidationHandler.IsReadyForInstall(asset, out var result);
+            Action transition = () => Helper.AssetManagement.Assets.TransitionTo(
+                asset,
+                SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Installed);
+
+            // Assert
+            isValid.Should().BeFalse();
+            result.IsValid.Should().BeFalse();
+            transition.Should().Throw<InvalidOperationException>()
+                .WithMessage("Please assign an installation user and date to the asset before installing.");
+        }
+
+        [TestMethod]
+        public void IsReadyForInstall_WithInstallationInfo_ShouldPass()
+        {
+            // Arrange
+            var asset = new Asset
+            {
+                InstallationUserId = Guid.NewGuid(),
+                InstallationDate = DateTime.UtcNow,
+            };
+
+            // Act
+            var isValid = AssetValidationHandler.IsReadyForInstall(asset, out var result);
+
+            // Assert
+            isValid.Should().BeTrue();
+            result.IsValid.Should().BeTrue();
         }
 
         #endregion

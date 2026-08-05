@@ -1,6 +1,7 @@
 namespace SDM.PlanAndBuild.Tests.JobTests
 {
 	using System;
+	using System.Collections.Generic;
 
 	using FluentAssertions;
 	using FluentAssertions.Execution;
@@ -10,9 +11,12 @@ namespace SDM.PlanAndBuild.Tests.JobTests
 	using SDM.PlanAndBuild.Tests.Setup;
 
 	using Skyline.DataMiner.SDM;
+	using Skyline.DataMiner.SDM.AssetManagement.Models;
 	using Skyline.DataMiner.SDM.PlanAndBuild.Models;
 	using Skyline.DataMiner.SDM.PlanAndBuild.Validation;
-using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
+	using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
+
+	using Statuses = SharedMappers.DomIds.SlcPlan_And_Build.Behaviors.Job_Behavior.StatusesEnum;
 
 	/// <summary>
 	/// Tests for PlanAndBuildJobValidator, which validates PlanAndBuildJob business rules including
@@ -507,6 +511,217 @@ using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 			var result = validator.Validate(job, RepositoryAction.Create);
 
 			result.IsValid.Should().BeTrue();
+		}
+
+		#endregion
+
+		#region State-Gated Edits
+
+		[TestMethod]
+		public void Validate_UpdateWithLocationsChangedOutsideNewOrAssigned_ShouldReturnInvalid()
+		{
+			var job = CreateJobAt(Statuses.Active);
+			job.Locations = new List<Guid> { Guid.NewGuid() };
+
+			var result = _validator.Validate(job, RepositoryAction.Update);
+
+			using (new AssertionScope())
+			{
+				result.IsValid.Should().BeFalse();
+				result.TryGetFailReason(PlanAndBuildJobValidationHandler.PlanAndBuildJobValidationField.Locations, out var reason).Should().BeTrue();
+				reason.Should().Be("Cannot edit job locations. This action is only available for jobs in 'New' or 'Assigned' state.");
+			}
+		}
+
+		[TestMethod]
+		public void Validate_UpdateWithLocationsChangedInAssigned_ShouldReturnValid()
+		{
+			var job = CreateJobAt(Statuses.Assigned);
+			job.Locations = new List<Guid> { Guid.NewGuid() };
+
+			var result = _validator.Validate(job, RepositoryAction.Update);
+
+			result.IsValid.Should().BeTrue();
+		}
+
+		[TestMethod]
+		public void Validate_UpdateWithAssetsUsedChangedInResolvedOrCanceled_ShouldReturnInvalid()
+		{
+			var job = CreateJobAt(Statuses.Resolved);
+			job.AssetsUsed = new List<JobAsset> { new JobAsset { AssetId = new SdmObjectReference<Asset>(Guid.NewGuid().ToString()) } };
+
+			var result = _validator.Validate(job, RepositoryAction.Update);
+
+			using (new AssertionScope())
+			{
+				result.IsValid.Should().BeFalse();
+				result.TryGetFailReason(PlanAndBuildJobValidationHandler.PlanAndBuildJobValidationField.AssetsUsed, out var reason).Should().BeTrue();
+				reason.Should().Be("Cannot edit job assets used. This action is not available for 'Resolved' or 'Cancelled' jobs.");
+			}
+		}
+
+		[TestMethod]
+		public void Validate_UpdateWithAssetsUsedChangedOutsideResolvedOrCanceled_ShouldReturnValid()
+		{
+			var job = CreateJobAt(Statuses.Review);
+			job.AssetsUsed = new List<JobAsset> { new JobAsset { AssetId = new SdmObjectReference<Asset>(Guid.NewGuid().ToString()) } };
+
+			var result = _validator.Validate(job, RepositoryAction.Update);
+
+			result.IsValid.Should().BeTrue();
+		}
+
+		[TestMethod]
+		public void Validate_UpdateWithConnectionsChangedInResolvedOrCanceled_ShouldReturnInvalid()
+		{
+			var job = CreateJobAt(Statuses.Canceled);
+			job.ConnectionsOnJob = new List<JobConnection> { new JobConnection { ConnectionId = new SdmObjectReference<Connection>(Guid.NewGuid().ToString()) } };
+
+			var result = _validator.Validate(job, RepositoryAction.Update);
+
+			using (new AssertionScope())
+			{
+				result.IsValid.Should().BeFalse();
+				result.TryGetFailReason(PlanAndBuildJobValidationHandler.PlanAndBuildJobValidationField.Connections, out var reason).Should().BeTrue();
+				reason.Should().Be("Cannot edit job connections. This action is not available for 'Resolved' or 'Cancelled' jobs.");
+			}
+		}
+
+		[TestMethod]
+		public void Validate_UpdateWithConnectionsChangedOutsideResolvedOrCanceled_ShouldReturnValid()
+		{
+			var job = CreateJobAt(Statuses.Active);
+			job.ConnectionsOnJob = new List<JobConnection> { new JobConnection { ConnectionId = new SdmObjectReference<Connection>(Guid.NewGuid().ToString()) } };
+
+			var result = _validator.Validate(job, RepositoryAction.Update);
+
+			result.IsValid.Should().BeTrue();
+		}
+
+		[DataTestMethod]
+		[DataRow("JobName", "Cannot edit the Job Name unless the Job is in 'New' state.")]
+		[DataRow("Start", "Cannot edit the Start time unless the Job is in 'New' state.")]
+		[DataRow("Type", "Cannot edit the Job Type unless the Job is in 'New' state.")]
+		public void Validate_UpdateWithCoreFieldChangedOutsideNew_ShouldReturnInvalid(string fieldName, string expectedMessage)
+		{
+			var job = CreateJobAt(Statuses.Assigned);
+			ChangeCoreField(job, fieldName);
+
+			var result = _validator.Validate(job, RepositoryAction.Update);
+
+			using (new AssertionScope())
+			{
+				result.IsValid.Should().BeFalse();
+				result.TryGetFailReason(GetCoreField(fieldName), out var reason).Should().BeTrue();
+				reason.Should().Be(expectedMessage);
+			}
+		}
+
+		[DataTestMethod]
+		[DataRow("JobName")]
+		[DataRow("Start")]
+		[DataRow("Type")]
+		public void Validate_UpdateWithCoreFieldChangedInNew_ShouldReturnValid(string fieldName)
+		{
+			var job = CreateJobAt(Statuses.New);
+			ChangeCoreField(job, fieldName);
+
+			var result = _validator.Validate(job, RepositoryAction.Update);
+
+			result.IsValid.Should().BeTrue();
+		}
+
+		[DataTestMethod]
+		[DataRow("Locations")]
+		[DataRow("AssetsUsed")]
+		[DataRow("Connections")]
+		[DataRow("JobName")]
+		[DataRow("Start")]
+		[DataRow("Type")]
+		public void Validate_CreateWithStateGatedFieldChanged_ShouldReturnValid(string fieldName)
+		{
+			var job = CreateValidJob();
+			ChangeStateGatedField(job, fieldName);
+
+			var result = _validator.Validate(job, RepositoryAction.Create);
+
+			result.IsValid.Should().BeTrue();
+		}
+
+		private PlanAndBuildJob CreateJobAt(Statuses status)
+		{
+			return Helper.Jobs.Create(CreateValidJob(status));
+		}
+
+		private PlanAndBuildJob CreateValidJob(Statuses status = Statuses.New)
+		{
+			return new PlanAndBuildJob
+			{
+				JobName = $"Job {Guid.NewGuid()}",
+				Type = new SdmObjectReference<JobType>(_jobType.Identifier),
+				Start = new DateTime(2026, 1, 10),
+				End = new DateTime(2026, 1, 15),
+				State = status,
+			};
+		}
+
+		private void ChangeStateGatedField(PlanAndBuildJob job, string fieldName)
+		{
+			if (fieldName == "Locations")
+			{
+				job.Locations = new List<Guid> { Guid.NewGuid() };
+				return;
+			}
+
+			if (fieldName == "AssetsUsed")
+			{
+				job.AssetsUsed = new List<JobAsset> { new JobAsset { AssetId = new SdmObjectReference<Asset>(Guid.NewGuid().ToString()) } };
+				return;
+			}
+
+			if (fieldName == "Connections")
+			{
+				job.ConnectionsOnJob = new List<JobConnection> { new JobConnection { ConnectionId = new SdmObjectReference<Connection>(Guid.NewGuid().ToString()) } };
+				return;
+			}
+
+			ChangeCoreField(job, fieldName);
+		}
+
+		private void ChangeCoreField(PlanAndBuildJob job, string fieldName)
+		{
+			if (fieldName == "JobName")
+			{
+				job.JobName = $"Updated {Guid.NewGuid()}";
+				return;
+			}
+
+			if (fieldName == "Start")
+			{
+				job.Start = job.Start.Value.AddHours(1);
+				return;
+			}
+
+			if (fieldName == "Type")
+			{
+				var otherJobType = Helper.JobTypes.Create(new JobType { Name = $"JobType {Guid.NewGuid()}" });
+				job.Type = new SdmObjectReference<JobType>(otherJobType.Identifier);
+			}
+		}
+
+		private static PlanAndBuildJobValidationHandler.PlanAndBuildJobValidationField GetCoreField(string fieldName)
+		{
+			if (fieldName == "JobName")
+			{
+				return PlanAndBuildJobValidationHandler.PlanAndBuildJobValidationField.JobName;
+			}
+
+			if (fieldName == "Start")
+			{
+				return PlanAndBuildJobValidationHandler.PlanAndBuildJobValidationField.Start;
+			}
+
+			return PlanAndBuildJobValidationHandler.PlanAndBuildJobValidationField.JobType;
 		}
 
 		#endregion

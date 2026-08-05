@@ -112,6 +112,9 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
         public SiteRelation SiteFk { get; set; }
 
+        [SdmIgnore]
+        public SlcFacility_Management.Behaviors.Facility_Behaviour.StatusesEnum State { get; internal set; }
+
         [JsonIgnore]
         [SdmIgnore]
         internal IChangeTrackingField<string> FacilityIdField => FieldHandler.GetOrCreateField(

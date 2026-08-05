@@ -404,6 +404,7 @@
             {
                 DeviceTypeId = new SdmObjectReference<DeviceType>(deviceTypeName),
                 Name = deviceName,
+                State = SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Active,
                 // DeviceTypeId will be set at runtime
                 Description = deviceDescription,
                 Manufacturer = Guid.NewGuid(),

@@ -2,6 +2,8 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 {
     using Newtonsoft.Json;
 
+    using SharedMappers.DomIds;
+
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
@@ -104,6 +106,9 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             get => SiteIdField.Value;
             set => SiteIdField.Value = value;
         }
+
+        [SdmIgnore]
+        public SlcFacility_Management.Behaviors.Site_Behaviour.StatusesEnum State { get; internal set; }
 
         // INTERNAL: Change tracking fields (validation handler uses these)
         [JsonIgnore]

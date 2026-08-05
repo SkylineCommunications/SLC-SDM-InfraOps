@@ -233,6 +233,10 @@
             var validations = new List<ValidationResult>();
 
             if (asset.ShouldValidateAny(asset.InstallationUserIdField, asset.InstallationDateField)
+                && !AssetValidationHandler.IsInstallationInformationChangeAllowed(asset, out var installationChangeResult))
+                validations.Add(installationChangeResult);
+
+            if (asset.ShouldValidateAny(asset.InstallationUserIdField, asset.InstallationDateField)
                 && !AssetValidationHandler.IsInstallationInfoValid(asset, out var installationResult))
                 validations.Add(installationResult);
 
@@ -288,11 +292,30 @@
         {
             var validations = new List<ValidationResult>
             {
+                ValidateAssetClassState(asset),
                 ValidateUniquenessChecks(asset),
                 ValidateLocationPlacement(asset),
             };
 
             return validations.MergeAll();
+        }
+
+        private ValidationResult ValidateAssetClassState(Asset asset)
+        {
+            var result = new ValidationResult();
+
+            if (!asset.ShouldValidate(asset.AssetClassIdField) || !asset.AssetClassId.HasValue())
+            {
+                return result;
+            }
+
+            var assetClass = _entityLoader.LoadAssetClass(asset.AssetClassId);
+            if (assetClass != null && assetClass.State != SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Active)
+            {
+                result.AddFailReason(AssetValidationField.AssetClass, "Asset Class must be Active.");
+            }
+
+            return result;
         }
 
         /// <summary>

@@ -589,6 +589,7 @@
             return new AssetClass
             {
                 Name = source.Name,
+                State = source.State,
                 Description = source.Description,
                 Manufacturer = source.Manufacturer,
                 Depth = source.Depth,

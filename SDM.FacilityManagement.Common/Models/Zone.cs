@@ -110,6 +110,9 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
         public ResourceLink Resource { get; set; }
 
+        [SdmIgnore]
+        public SlcFacility_Management.Behaviors.Zone_Behaviour.StatusesEnum State { get; internal set; }
+
         [JsonIgnore]
         [SdmIgnore]
         internal IChangeTrackingField<string> NameField => FieldHandler.GetOrCreateField(
