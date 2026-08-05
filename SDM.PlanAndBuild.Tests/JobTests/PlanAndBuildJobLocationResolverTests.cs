@@ -45,7 +45,7 @@ namespace SDM.PlanAndBuild.Tests.JobTests
 			zone = facilityHelper.Zones.Create(new Zone { Identifier = Guid.NewGuid().ToString(), Name = "Zone 1", ZoneId = "ZON-1" });
 			row = facilityHelper.Rows.Create(new Row { Identifier = Guid.NewGuid().ToString(), Name = "Row 1", RowId = "ROW-1" });
 			desk = facilityHelper.Desks.Create(new Desk { Identifier = Guid.NewGuid().ToString(), Name = "Desk 1", DeskID = "DSK-1" });
-			rack = facilityHelper.Racks.Create(new Rack { Identifier = Guid.NewGuid().ToString(), Name = "Rack 1", RackId = "RCK-1" });
+			rack = facilityHelper.Racks.Create(new Rack { Identifier = Guid.NewGuid().ToString(), Name = "Rack 1", RackId = "RCK-1", Capacity = new RackCapacity { MaximumRackCapacity = 42 } });
 		}
 
 		[TestMethod]

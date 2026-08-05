@@ -29,7 +29,7 @@
 			{
 				isValid.Should().BeFalse();
 				result.TryGetFailReason(PropertyValuesValidationHandler.PropertyValuesValidationField.PropertyValues, out var reason).Should().BeTrue();
-				reason.Should().Contain("cannot be null");
+				reason.Should().Be("PropertyValues cannot be null.");
 			}
 		}
 
@@ -44,7 +44,7 @@
 			{
 				isValid.Should().BeFalse();
 				result.TryGetFailReason(PropertyValuesValidationHandler.PropertyValuesValidationField.LinkedObjectID, out var reason).Should().BeTrue();
-				reason.Should().Contain("cannot be empty");
+				reason.Should().Be("PropertyValues Linked Object ID cannot be empty.");
 			}
 		}
 
@@ -76,7 +76,7 @@
 			{
 				isValid.Should().BeFalse();
 				result.TryGetFailReason(PropertyValuesValidationHandler.PropertyValuesValidationField.Scope, out var reason).Should().BeTrue();
-				reason.Should().Contain("cannot be empty or whitespace");
+				reason.Should().Be("PropertyValues Scope cannot be empty or whitespace.");
 			}
 		}
 
@@ -167,7 +167,7 @@
 			{
 				isValid.Should().BeFalse();
 				result.TryGetFailReason(PropertyValuesValidationHandler.PropertyValuesValidationField.Values, out var reason).Should().BeTrue();
-				reason.Should().Contain("non-empty Property Name");
+				reason.Should().Be("Every entry in Values must have a non-empty Property Name.");
 			}
 		}
 
@@ -189,7 +189,7 @@
 			{
 				isValid.Should().BeFalse();
 				result.TryGetFailReason(PropertyValuesValidationHandler.PropertyValuesValidationField.Values, out var reason).Should().BeTrue();
-				reason.Should().Contain("Duplicate Property Name");
+				reason.Should().Be("Duplicate Property Name(s) found in Values: Owner.");
 			}
 		}
 
@@ -213,7 +213,7 @@
 			{
 				isValid.Should().BeFalse();
 				result.TryGetFailReason(PropertyValuesValidationHandler.PropertyValuesValidationField.Values, out var reason).Should().BeTrue();
-				reason.Should().Contain("non-empty Property Name");
+				reason.Should().Be("Every entry in Values must have a non-empty Property Name.");
 			}
 		}
 

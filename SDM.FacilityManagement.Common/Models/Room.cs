@@ -1,4 +1,4 @@
-namespace Skyline.DataMiner.SDM.FacilityManagement.Models
+﻿namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 {
     using Newtonsoft.Json;
 
@@ -87,7 +87,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             set => RoomIdField.Value = value;
         }
 
-        public RoomOwnership Onwership { get; set; }
+        public RoomOwnership Ownership { get; set; }
 
         public ResourceLink ResourceLink { get; set; }
 

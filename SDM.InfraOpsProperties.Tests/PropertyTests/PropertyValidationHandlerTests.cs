@@ -31,7 +31,7 @@
 				isValid.Should().BeFalse();
 				result.IsValid.Should().BeFalse();
 				result.TryGetFailReason(PropertyValidationHandler.PropertyValidationField.Property, out var reason).Should().BeTrue();
-				reason.Should().Contain("cannot be null");
+				reason.Should().Be("Property cannot be null.");
 			}
 		}
 
@@ -49,7 +49,7 @@
 			{
 				isValid.Should().BeFalse();
 				result.TryGetFailReason(PropertyValidationHandler.PropertyValidationField.Name, out var reason).Should().BeTrue();
-				reason.Should().Contain("cannot be empty or whitespace");
+				reason.Should().Be("Property Name cannot be empty or whitespace.");
 			}
 		}
 
@@ -85,7 +85,7 @@
 			{
 				isValid.Should().BeFalse();
 				result.TryGetFailReason(PropertyValidationHandler.PropertyValidationField.Scope, out var reason).Should().BeTrue();
-				reason.Should().Contain("cannot be empty or whitespace");
+				reason.Should().Be("Property Scope cannot be empty or whitespace.");
 			}
 		}
 
@@ -146,7 +146,7 @@
 			{
 				isValid.Should().BeFalse();
 				result.TryGetFailReason(PropertyValidationHandler.PropertyValidationField.StringSizeLimit, out var reason).Should().BeTrue();
-				reason.Should().Contain("greater than 0");
+				reason.Should().Be("Property String Size Limit must be greater than 0 when defined.");
 			}
 		}
 
@@ -191,7 +191,7 @@
 			{
 				isValid.Should().BeFalse();
 				result.TryGetFailReason(PropertyValidationHandler.PropertyValidationField.Discreets, out var reason).Should().BeTrue();
-				reason.Should().Contain("cannot be empty");
+				reason.Should().Be("Property Discreets cannot be empty when Property Type is 'Discrete'.");
 			}
 		}
 
@@ -210,7 +210,7 @@
 			{
 				isValid.Should().BeFalse();
 				result.TryGetFailReason(PropertyValidationHandler.PropertyValidationField.Discreets, out var reason).Should().BeTrue();
-				reason.Should().Contain("must be empty");
+				reason.Should().Be("Property Discreets must be empty when Property Type is not 'Discrete'.");
 			}
 		}
 
@@ -253,8 +253,7 @@
 			{
 				isValid.Should().BeFalse();
 				result.TryGetFailReason(PropertyValidationHandler.PropertyValidationField.Discreets, out var reason).Should().BeTrue();
-				reason.Should().Contain("Duplicate Property Discreet");
-				reason.Should().Contain("Low");
+				reason.Should().Be("Duplicate Property Discreet(s) found: Low.");
 			}
 		}
 

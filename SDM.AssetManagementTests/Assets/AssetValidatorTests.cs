@@ -943,6 +943,22 @@
             result.IsValid.Should().BeTrue();
         }
 
+        [TestMethod]
+        public void TransitionTo_WithInvalidStateTransition_ShouldFail()
+        {
+            var asset = new Asset
+            {
+                State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available,
+            };
+
+            Action act = () => Helper.AssetManagement.Assets.TransitionTo(
+                asset,
+                SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available);
+
+            act.Should().Throw<InvalidOperationException>()
+                .WithMessage("*State transition from Available to Available is not allowed*");
+        }
+
         #endregion
 
         #region Ownership Validation Tests

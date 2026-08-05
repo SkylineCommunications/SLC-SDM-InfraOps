@@ -241,4 +241,37 @@ namespace SDM.FacilityManagement.Tests.State_Management
         }
     }
 
+    [TestClass]
+    public class DeskStateMachineTests
+    {
+        [TestMethod]
+        public void DeskStateMachine_DraftToActive_IsAllowed()
+        {
+            DeskStateMachine.IsTransitionAllowed(SlcFacility_Management.Behaviors.Desk_Behaviour.StatusesEnum.Draft, SlcFacility_Management.Behaviors.Desk_Behaviour.StatusesEnum.Active).Should().BeTrue();
+            DeskStateMachine.GetTransitionPath(SlcFacility_Management.Behaviors.Desk_Behaviour.StatusesEnum.Draft, SlcFacility_Management.Behaviors.Desk_Behaviour.StatusesEnum.Active).Should().ContainSingle().Which.Should().Be(SlcFacility_Management.Behaviors.Desk_Behaviour.TransitionsEnum.Draft_Active);
+        }
+
+        [TestMethod]
+        public void DeskStateMachine_ActiveToDeprecated_IsAllowed()
+        {
+            DeskStateMachine.IsTransitionAllowed(SlcFacility_Management.Behaviors.Desk_Behaviour.StatusesEnum.Active, SlcFacility_Management.Behaviors.Desk_Behaviour.StatusesEnum.Deprecated).Should().BeTrue();
+            DeskStateMachine.GetTransitionPath(SlcFacility_Management.Behaviors.Desk_Behaviour.StatusesEnum.Active, SlcFacility_Management.Behaviors.Desk_Behaviour.StatusesEnum.Deprecated).Should().ContainSingle().Which.Should().Be(SlcFacility_Management.Behaviors.Desk_Behaviour.TransitionsEnum.Active_Deprecated);
+        }
+
+        [TestMethod]
+        public void DeskDomRepository_DeprecatedToActive_ThrowsNotAllowedException()
+        {
+            var repository = (DeskDomRepository)FormatterServices.GetUninitializedObject(typeof(DeskDomRepository));
+            var item = new Desk
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                State = SlcFacility_Management.Behaviors.Desk_Behaviour.StatusesEnum.Deprecated,
+            };
+
+            Action transition = () => repository.TransitionTo(item, SlcFacility_Management.Behaviors.Desk_Behaviour.StatusesEnum.Active);
+
+            transition.Should().Throw<InvalidOperationException>().WithMessage("State transition from Deprecated to Active is not allowed.");
+        }
+    }
+
 }

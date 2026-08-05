@@ -141,7 +141,49 @@ using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 			{
 				result.IsValid.Should().BeFalse();
 				result.TryGetFailReason(PropertyValidationHandler.PropertyValidationField.Discreets, out var reason).Should().BeTrue();
-				reason.Should().Contain("cannot be empty");
+				reason.Should().Be("Property Discreets cannot be empty when Property Type is 'Discrete'.");
+			}
+		}
+
+		[TestMethod]
+		public void Validate_WithNonDiscreteTypeAndOptions_ShouldReturnExactFailureMessage()
+		{
+			var property = new Property
+			{
+				Name = "Is Managed",
+				Scope = "Asset",
+				PropertyType = InfraopsProperties.Enums.PropertyTypeEnum.Boolean,
+				Discreets = new List<PropertyOption> { new PropertyOption { Option = "Yes" } },
+			};
+
+			var result = _validator.Validate(property, RepositoryAction.Create);
+
+			using (new AssertionScope())
+			{
+				result.IsValid.Should().BeFalse();
+				result.TryGetFailReason(PropertyValidationHandler.PropertyValidationField.Discreets, out var reason).Should().BeTrue();
+				reason.Should().Be("Property Discreets must be empty when Property Type is not 'Discrete'.");
+			}
+		}
+
+		[TestMethod]
+		public void Validate_WithDuplicateDiscreteOptions_ShouldReturnExactFailureMessage()
+		{
+			var property = new Property
+			{
+				Name = "Criticality",
+				Scope = "Asset",
+				PropertyType = InfraopsProperties.Enums.PropertyTypeEnum.Discrete,
+				Discreets = new List<PropertyOption> { new PropertyOption { Option = "Low" }, new PropertyOption { Option = "Low" } },
+			};
+
+			var result = _validator.Validate(property, RepositoryAction.Create);
+
+			using (new AssertionScope())
+			{
+				result.IsValid.Should().BeFalse();
+				result.TryGetFailReason(PropertyValidationHandler.PropertyValidationField.Discreets, out var reason).Should().BeTrue();
+				reason.Should().Be("Duplicate Property Discreet(s) found: Low.");
 			}
 		}
 
@@ -193,7 +235,7 @@ using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 			{
 				result.IsValid.Should().BeFalse();
 				result.TryGetFailReason(PropertyValidationHandler.PropertyValidationField.Name, out var reason).Should().BeTrue();
-				reason.Should().Contain("already in use");
+				reason.Should().Be("Property Name 'Serial Number' is already in use within Scope 'Asset'.");
 			}
 		}
 
@@ -277,9 +319,9 @@ using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 				results[0].IsValid.Should().BeFalse();
 				results[1].IsValid.Should().BeFalse();
 				results[0].TryGetFailReason(PropertyValidationHandler.PropertyValidationField.Name, out var reason0).Should().BeTrue();
-				reason0.Should().Contain("duplicated within the validation batch");
+				reason0.Should().Be("Property Name 'Serial Number' is duplicated within the validation batch for Scope 'Asset'.");
 				results[1].TryGetFailReason(PropertyValidationHandler.PropertyValidationField.Name, out var reason1).Should().BeTrue();
-				reason1.Should().Contain("duplicated within the validation batch");
+				reason1.Should().Be("Property Name 'Serial Number' is duplicated within the validation batch for Scope 'Asset'.");
 			}
 		}
 
@@ -331,7 +373,7 @@ using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 				results.Should().HaveCount(2);
 				results[0].IsValid.Should().BeFalse();
 				results[0].TryGetFailReason(PropertyValidationHandler.PropertyValidationField.Name, out var reason).Should().BeTrue();
-				reason.Should().Contain("already in use");
+				reason.Should().Be("Property Name 'Serial Number' is already in use within Scope 'Asset'.");
 				results[1].IsValid.Should().BeTrue();
 			}
 		}

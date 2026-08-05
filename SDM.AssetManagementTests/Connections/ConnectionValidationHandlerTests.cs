@@ -13,6 +13,15 @@ namespace SDM.AssetManagement.Tests.Connections
     public class ConnectionValidationHandlerTests
     {
         [TestMethod]
+        public void IsEndpointAssetStateValid_WithNullAsset_ShouldFail()
+        {
+            var isValid = ConnectionValidationHandler.IsSourceAssetStateValid(null, out var result);
+
+            isValid.Should().BeFalse();
+            result.FailureReasons.Should().Contain(reason => reason.ToString().Contains("The asset must be provided."));
+        }
+
+        [TestMethod]
         public void IsSourceAssetStateValid_WithNotAvailableAsset_ShouldFail()
         {
             // Arrange

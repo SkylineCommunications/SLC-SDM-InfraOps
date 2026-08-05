@@ -47,6 +47,8 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                 return result;
             }
 
+            AddBusinessRuleFailures(rack, result);
+
             if (rack.ShouldValidate(rack.RackIdField) && IsRackIdInUse(rack.RackId, rack.Identifier))
             {
                 result.AddFailReason(RackValidationHandler.RackValidationField.RackId,
@@ -105,6 +107,8 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                 {
                     results[i].AddFailuresFrom(idResult);
                 }
+
+                AddBusinessRuleFailures(racks[i], results[i]);
             }
 
             if (results.AnyInvalid())
@@ -131,6 +135,34 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
             results.MergeFrom(dbConflicts);
 
             return results;
+        }
+
+        private static void AddBusinessRuleFailures(Rack rack, ValidationResult result)
+        {
+            if (!RackValidationHandler.IsRackHeightValid(rack, out var heightResult))
+            {
+                result.AddFailuresFrom(heightResult);
+            }
+
+            if (!RackValidationHandler.IsRackDepthValid(rack, out var depthResult))
+            {
+                result.AddFailuresFrom(depthResult);
+            }
+
+            if (!RackValidationHandler.IsRackWidthValid(rack, out var widthResult))
+            {
+                result.AddFailuresFrom(widthResult);
+            }
+
+            if (!RackValidationHandler.IsRackUnitCapacityValid(rack, out var unitResult))
+            {
+                result.AddFailuresFrom(unitResult);
+            }
+
+            if (!RackValidationHandler.IsRackPowerCapacityValid(rack, out var powerResult))
+            {
+                result.AddFailuresFrom(powerResult);
+            }
         }
 
         private bool IsRackIdInUse(string rackId, string exceptIdentifier = null)
