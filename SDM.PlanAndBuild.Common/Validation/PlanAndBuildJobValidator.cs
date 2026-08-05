@@ -155,9 +155,19 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
             // ============================================================
             // PHASE 3: DATABASE ACCESS CHECKS (UNIQUENESS) + REMAINING RULES
             // ============================================================
-            // Batch-fetch every JobName that needs a uniqueness check, and every Person/Team id referenced by
-            // AssignedTo/AssignmentGroup/Attachments, in a handful of big-OR queries instead of issuing one
-            // query per Job (and, for People/Teams, one remote People &amp; Organizations call per reference).
+            ValidateAgainstDatabase(jobs, results, includeStateGatedChanges);
+
+            return results;
+        }
+
+        /// <summary>
+        /// Runs the database-backed validation phase. Batch-fetches every JobName that needs a uniqueness
+        /// check, and every Person/Team id referenced by AssignedTo/AssignmentGroup/Attachments, in a handful
+        /// of big-OR queries instead of issuing one query per Job (and, for People/Teams, one remote
+        /// People &amp; Organizations call per reference).
+        /// </summary>
+        private void ValidateAgainstDatabase(List<PlanAndBuildJob> jobs, List<ValidationResult> results, bool includeStateGatedChanges)
+        {
             var jobNames = jobs
                 .Where(j => j.ShouldValidate(j.JobNameField) && !string.IsNullOrWhiteSpace(j.JobName))
                 .Select(j => j.JobName)
@@ -166,26 +176,8 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
 
             var existingByJobName = _helper.Jobs.GetByJobNames(jobNames).ToLookup(j => j.JobName);
 
-            var personIds = new List<Guid>();
-            var teamIds = new List<Guid>();
-
-            foreach (var job in jobs)
-            {
-                if (job.ShouldValidate(job.Ownership.AssignedToField) && job.Ownership.AssignedTo.HasValue)
-                {
-                    personIds.Add(job.Ownership.AssignedTo.Value);
-                }
-
-                if (job.ShouldValidate(job.Ownership.AssignmentGroupField) && job.Ownership.AssignmentGroup.HasValue)
-                {
-                    teamIds.Add(job.Ownership.AssignmentGroup.Value);
-                }
-
-                if (job.ShouldValidateAny(job.AttachmentsField) && job.Attachments != null)
-                {
-                    personIds.AddRange(job.Attachments.Where(a => a?.AttachedBy.HasValue == true).Select(a => a.AttachedBy.Value));
-                }
-            }
+            var personIds = CollectReferencedPersonIds(jobs);
+            var teamIds = CollectReferencedTeamIds(jobs);
 
             var existingPersonIds = GetExistingPersonIds(personIds);
             var existingTeamIds = GetExistingTeamIds(teamIds);
@@ -201,8 +193,35 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
                 results[i].AddFailuresFrom(ValidateJobNameUniqueness(jobs[i], existingByJobName));
                 results[i].AddFailuresFrom(ValidatePeopleAndOrganizations(jobs[i], existingPersonIds, existingTeamIds));
             }
+        }
 
-            return results;
+        /// <summary>
+        /// Collects every Person id referenced by AssignedTo or attachment AttachedBy fields that require validation.
+        /// </summary>
+        private static List<Guid> CollectReferencedPersonIds(List<PlanAndBuildJob> jobs)
+        {
+            var assignedTo = jobs
+                .Where(j => j.ShouldValidate(j.Ownership.AssignedToField) && j.Ownership.AssignedTo.HasValue)
+                .Select(j => j.Ownership.AssignedTo.Value);
+
+            var attachedBy = jobs
+                .Where(j => j.ShouldValidateAny(j.AttachmentsField) && j.Attachments != null)
+                .SelectMany(j => j.Attachments)
+                .Where(a => a?.AttachedBy.HasValue == true)
+                .Select(a => a.AttachedBy.Value);
+
+            return assignedTo.Concat(attachedBy).ToList();
+        }
+
+        /// <summary>
+        /// Collects every Team id referenced by AssignmentGroup fields that require validation.
+        /// </summary>
+        private static List<Guid> CollectReferencedTeamIds(List<PlanAndBuildJob> jobs)
+        {
+            return jobs
+                .Where(j => j.ShouldValidate(j.Ownership.AssignmentGroupField) && j.Ownership.AssignmentGroup.HasValue)
+                .Select(j => j.Ownership.AssignmentGroup.Value)
+                .ToList();
         }
 
         /// <summary>
