@@ -95,10 +95,10 @@ namespace SDM.AssetManagement.Tests.Setup
         {
             SafeDelete(() =>
             {
-                var portTypes = helper.AssetManagement.PortTypes.Read(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.PortType>());
-                if (portTypes.Any())
+                var connections = helper.AssetManagement.Connections.Read(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.Connection>());
+                if (connections.Any())
                 {
-                    helper.AssetManagement.PortTypes.Delete(portTypes);
+                    helper.AssetManagement.Connections.Delete(connections);
                 }
             });
 
@@ -135,6 +135,24 @@ namespace SDM.AssetManagement.Tests.Setup
                 if (assetClasses.Any())
                 {
                     helper.AssetManagement.AssetClasses.Delete(assetClasses);
+                }
+            });
+
+            SafeDelete(() =>
+            {
+                var portTypes = helper.AssetManagement.PortTypes.Read(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.PortType>());
+                if (portTypes.Any())
+                {
+                    helper.AssetManagement.PortTypes.Delete(portTypes);
+                }
+            });
+
+            SafeDelete(() =>
+            {
+                var cableTypes = helper.AssetManagement.CableTypes.Read(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.CableType>());
+                if (cableTypes.Any())
+                {
+                    helper.AssetManagement.CableTypes.Delete(cableTypes);
                 }
             });
 
@@ -201,6 +219,9 @@ namespace SDM.AssetManagement.Tests.Setup
                 && helper.AssetManagement.DeviceTypes.Count(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType>()) == 0
                 && helper.AssetManagement.DataPorts.Count(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort>()) == 0
                 && helper.AssetManagement.PowerPorts.Count(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort>()) == 0
+                && helper.AssetManagement.PortTypes.Count(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.PortType>()) == 0
+                && helper.AssetManagement.CableTypes.Count(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.CableType>()) == 0
+                && helper.AssetManagement.Connections.Count(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.Connection>()) == 0
                 && helper.FacilityManagement.Racks.Count(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<Skyline.DataMiner.SDM.FacilityManagement.Models.Rack>()) == 0;
         }
 

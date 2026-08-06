@@ -55,7 +55,29 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                     $"Rack Id '{rack.RackId}' is already in use.");
             }
 
+            result.AddFailuresFrom(ValidateReferencesAgainstDatabase(new List<Rack> { rack })[0]);
+
             return result;
+        }
+
+        protected override ValidationResult ValidateForDelete(Rack rack)
+        {
+            if (rack == null)
+            {
+                throw new ArgumentNullException(nameof(rack));
+            }
+
+            return ValidateNoAssetsAssigned(new List<Rack> { rack })[0];
+        }
+
+        protected override List<ValidationResult> ValidateBulkForDelete(List<Rack> racks)
+        {
+            if (racks == null || !racks.Any())
+            {
+                return new List<ValidationResult>();
+            }
+
+            return ValidateNoAssetsAssigned(racks);
         }
 
         /// <summary>
@@ -134,6 +156,9 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
             var dbConflicts = ValidateBulkRackIdsAgainstDatabase(racks);
             results.MergeFrom(dbConflicts);
 
+            var referenceConflicts = ValidateReferencesAgainstDatabase(racks);
+            results.MergeFrom(referenceConflicts);
+
             return results;
         }
 
@@ -168,6 +193,43 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
         private bool IsRackIdInUse(string rackId, string exceptIdentifier = null)
         {
             return _entityLoader.CountRacksByRackId(rackId, exceptIdentifier) > 0;
+        }
+
+        private List<ValidationResult> ValidateNoAssetsAssigned(List<Rack> racks)
+        {
+            var results = racks.Select(_ => new ValidationResult()).ToList();
+            var identifiers = racks.Select(r => r.Identifier).Where(id => !string.IsNullOrWhiteSpace(id)).Distinct().ToList();
+            if (!identifiers.Any())
+            {
+                return results;
+            }
+
+            var racksWithAssets = GetIdentifiersWithAssets(FacilityManagementEntityType.Rack, identifiers);
+
+            for (int i = 0; i < racks.Count; i++)
+            {
+                if (racksWithAssets.Contains(racks[i].Identifier))
+                {
+                    results[i].AddFailReason(
+                        RackValidationHandler.RackValidationField.RackId,
+                        "Can't remove rack, since it still has assets assigned to it. Please remove all the assets assigned to this rack before removing it.");
+                }
+            }
+
+            return results;
+        }
+
+        private HashSet<string> GetIdentifiersWithAssets(FacilityManagementEntityType entityType, List<string> identifiers)
+        {
+            var checker = _entityLoader.ExternalReferenceChecker;
+            if (checker == null)
+            {
+                return new HashSet<string>();
+            }
+
+            return (checker.GetIdentifiersWithAssets(entityType, identifiers) ?? new List<string>())
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .ToHashSet();
         }
 
         private List<ValidationResult> ValidateBulkRackIdsAgainstDatabase(List<Rack> racks)
@@ -207,6 +269,104 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
             }
 
             return results;
+        }
+
+        private List<ValidationResult> ValidateReferencesAgainstDatabase(List<Rack> racks)
+        {
+            var results = racks.Select(_ => new ValidationResult()).ToList();
+            var rowCandidates = racks
+                .Select((rack, index) => new
+                {
+                    Rack = rack,
+                    Index = index,
+                    RowIdentifier = rack.RowFk == null ? null : FacilityReferenceValidationHelper.GetId(rack.RowFk.Row),
+                })
+                .Where(x => FacilityReferenceValidationHelper.ShouldValidateReferences(x.Rack) &&
+                    FacilityReferenceValidationHelper.HasId(x.RowIdentifier))
+                .ToList();
+            var zoneCandidates = racks
+                .Select((rack, index) => new
+                {
+                    Rack = rack,
+                    Index = index,
+                    ZoneIdentifier = rack.ZoneFk == null ? null : FacilityReferenceValidationHelper.GetId(rack.ZoneFk.Zone),
+                })
+                .Where(x => FacilityReferenceValidationHelper.ShouldValidateReferences(x.Rack) &&
+                    FacilityReferenceValidationHelper.HasId(x.ZoneIdentifier))
+                .ToList();
+            var resourceCandidates = racks
+                .Select((rack, index) => new
+                {
+                    Rack = rack,
+                    Index = index,
+                    ResourceId = rack.Resource?.ResourceId ?? Guid.Empty,
+                })
+                .Where(x => FacilityReferenceValidationHelper.ShouldValidateReferences(x.Rack) &&
+                    FacilityReferenceValidationHelper.HasId(x.ResourceId))
+                .ToList();
+
+            var existingRowIds = rowCandidates.Any()
+                ? FacilityReferenceValidationHelper.ToIdentifierSet(_entityLoader.GetRowsByIdentifiers(rowCandidates.Select(x => x.RowIdentifier).Distinct().ToList()))
+                : new HashSet<string>();
+            var existingZoneIds = zoneCandidates.Any()
+                ? FacilityReferenceValidationHelper.ToIdentifierSet(_entityLoader.GetZonesByIdentifiers(zoneCandidates.Select(x => x.ZoneIdentifier).Distinct().ToList()))
+                : new HashSet<string>();
+            var existingResourceIds = GetExistingResourceIds(resourceCandidates.Select(x => x.ResourceId));
+
+            foreach (var candidate in rowCandidates)
+            {
+                if (!existingRowIds.Contains(candidate.RowIdentifier))
+                {
+                    FacilityReferenceValidationHelper.AddMissingReference(
+                        results[candidate.Index],
+                        RackValidationHandler.RackValidationField.RackId,
+                        "Row",
+                        candidate.RowIdentifier);
+                }
+            }
+
+            foreach (var candidate in zoneCandidates)
+            {
+                if (!existingZoneIds.Contains(candidate.ZoneIdentifier))
+                {
+                    FacilityReferenceValidationHelper.AddMissingReference(
+                        results[candidate.Index],
+                        RackValidationHandler.RackValidationField.RackId,
+                        "Zone",
+                        candidate.ZoneIdentifier);
+                }
+            }
+
+            foreach (var candidate in resourceCandidates)
+            {
+                if (existingResourceIds != null && !existingResourceIds.Contains(candidate.ResourceId))
+                {
+                    FacilityReferenceValidationHelper.AddMissingReference(
+                        results[candidate.Index],
+                        RackValidationHandler.RackValidationField.RackId,
+                        "Resource",
+                        candidate.ResourceId);
+                }
+            }
+
+            return results;
+        }
+
+        private HashSet<Guid> GetExistingResourceIds(IEnumerable<Guid> resourceIds)
+        {
+            var checker = _entityLoader.ExternalReferenceChecker;
+            if (checker == null)
+            {
+                return null;
+            }
+
+            var keys = resourceIds?.Where(FacilityReferenceValidationHelper.HasId).Distinct().ToList() ?? new List<Guid>();
+            if (!keys.Any())
+            {
+                return new HashSet<Guid>();
+            }
+
+            return FacilityReferenceValidationHelper.ToGuidSet(checker.GetExistingResourceIds(keys));
         }
 
         private static List<ValidationResult> ValidateRackIdDuplicatesInBatch(List<Rack> racks)

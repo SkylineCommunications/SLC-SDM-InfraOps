@@ -4,8 +4,10 @@
     using System.Collections.Generic;
     using System.Linq;
 
+    using SharedMappers.DomIds;
     using SharedCommonLibrary.AssetManagement.Models;
 
+    using Skyline.DataMiner.SDM.AssetManagement.Common.Validation;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.Common.Services;
     using Skyline.DataMiner.SDM.Extensions;
@@ -152,6 +154,7 @@
             results.MergeFrom(_validationCore.ValidateBulkNameUniquenessAgainstDatabase(assets));
             results.MergeFrom(_validationCore.ValidateBulkAssetIdUniquenessAgainstDatabase(assets));
             results.MergeFrom(_validationCore.ValidateBulkSerialNumberUniquenessAgainstDatabase(assets));
+            results.MergeFrom(_validationCore.ValidateBulkReferencesAgainstDatabase(assets));
 
             if (results.AnyInvalid())
             {
@@ -166,6 +169,95 @@
             results.MergeFrom(placementResults);
 
             return results;
+        }
+
+        protected override ValidationResult ValidateForDelete(Asset asset)
+        {
+            if (asset == null)
+            {
+                throw new ArgumentNullException(nameof(asset));
+            }
+
+            return ValidateCanDelete(new List<Asset> { asset })[0];
+        }
+
+        protected override List<ValidationResult> ValidateBulkForDelete(List<Asset> assets)
+        {
+            if (assets == null || !assets.Any())
+            {
+                return new List<ValidationResult>();
+            }
+
+            return ValidateCanDelete(assets);
+        }
+
+        private List<ValidationResult> ValidateCanDelete(List<Asset> assets)
+        {
+            var results = assets.Select(_ => new ValidationResult()).ToList();
+
+            var assetIds = assets
+                .Select(a => a.Identifier)
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .Distinct()
+                .ToList();
+
+            var portToAssetId = new Dictionary<string, string>();
+
+            foreach (var dataPort in _entityLoader.GetDataPortsByAssetIds(assetIds))
+            {
+                if (!string.IsNullOrWhiteSpace(dataPort.Identifier) && dataPort.Asset != null && dataPort.Asset.HasValue())
+                {
+                    portToAssetId[dataPort.Identifier] = dataPort.Asset.Identifier;
+                }
+            }
+
+            foreach (var powerPort in _entityLoader.GetPowerPortsByAssetIds(assetIds))
+            {
+                if (!string.IsNullOrWhiteSpace(powerPort.Identifier) && powerPort.Asset != null && powerPort.Asset.HasValue())
+                {
+                    portToAssetId[powerPort.Identifier] = powerPort.Asset.Identifier;
+                }
+            }
+
+            var assetIdsWithConnections = _entityLoader.GetConnectionsByPortIds(portToAssetId.Keys.ToList())
+                .SelectMany(GetConnectionPortIds)
+                .Where(portToAssetId.ContainsKey)
+                .Select(portId => portToAssetId[portId])
+                .ToHashSet();
+
+            for (int i = 0; i < assets.Count; i++)
+            {
+                var state = assets[i].State;
+                if (state != SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable
+                    && state != SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Disposed)
+                {
+                    results[i].AddFailReason(
+                        AssetValidationHandler.AssetValidationField.Asset,
+                        "Asset must be in 'Not Available' or 'Disposed' State to Delete");
+                }
+
+                if (assetIdsWithConnections.Contains(assets[i].Identifier))
+                {
+                    results[i].AddFailReason(
+                        AssetValidationHandler.AssetValidationField.DataPort,
+                        "This asset has connections assigned. Please delete all of the connections first.");
+                }
+            }
+
+            return results;
+        }
+
+        private static IEnumerable<string> GetConnectionPortIds(Connection connection)
+        {
+            if (connection?.Source != null && connection.Source.Port != Guid.Empty)
+            {
+                yield return connection.Source.Port.ToString();
+            }
+
+            if (connection?.Destination != null && connection.Destination.Port != Guid.Empty)
+            {
+                yield return connection.Destination.Port.ToString();
+            }
         }
 
         #endregion

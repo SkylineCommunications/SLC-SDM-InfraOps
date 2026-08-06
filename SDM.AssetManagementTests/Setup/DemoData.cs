@@ -305,15 +305,7 @@
                 AllCategories[(i + 3) % AllCategories.Length],
             };
 
-            var cableTypeFks = new List<SdmObjectReference<CableType>>
-            {
-                new SdmObjectReference<CableType>(Guid.NewGuid().ToString()),
-            };
-
-            if (i % 3 == 0)
-            {
-                cableTypeFks.Add(new SdmObjectReference<CableType>(Guid.NewGuid().ToString()));
-            }
+            var cableTypeFks = new List<SdmObjectReference<CableType>>();
 
             return new PortType
             {

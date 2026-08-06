@@ -10,9 +10,10 @@ namespace SDM.InfraOpsProperties.Tests.PropertyValuesTests
 
 	using SDM.InfraOpsProperties.Tests.Setup;
 
+	using Skyline.DataMiner.SDM;
 	using Skyline.DataMiner.SDM.InfraOpsProperties.Models;
 	using Skyline.DataMiner.SDM.InfraOpsProperties.Validation;
-using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
+	using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
 	/// <summary>
 	/// Tests for PropertyValuesValidator which validates PropertyValues business rules.
@@ -150,6 +151,141 @@ using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 				result.TryGetFailReason(PropertyValuesValidationHandler.PropertyValuesValidationField.Values, out var reason).Should().BeTrue();
 				reason.Should().Be("Every entry in Values must have a non-empty Property Name.");
 			}
+		}
+
+		#endregion
+
+		#region Property References
+
+		[TestMethod]
+		public void Validate_WithExistingPropertyReference_ShouldReturnValid()
+		{
+			var property = Helper.Properties.Create(new Property { Name = "Owner", Scope = "Asset" });
+			var propertyValues = new PropertyValues
+			{
+				LinkedObjectID = Guid.NewGuid(),
+				Scope = "Asset",
+				Values = new List<PropertyValue>
+				{
+					new PropertyValue { PropertyName = "Owner", Value = "Alice", PropertyId = new SdmObjectReference<Property>(property.Identifier) },
+				},
+			};
+
+			var result = _validator.Validate(propertyValues, RepositoryAction.Create);
+
+			result.IsValid.Should().BeTrue();
+		}
+
+		[TestMethod]
+		public void Validate_WithUnknownPropertyReference_ShouldReturnInvalid()
+		{
+			var propertyId = Guid.NewGuid().ToString();
+			var propertyValues = new PropertyValues
+			{
+				LinkedObjectID = Guid.NewGuid(),
+				Scope = "Asset",
+				Values = new List<PropertyValue>
+				{
+					new PropertyValue { PropertyName = "Owner", Value = "Alice", PropertyId = new SdmObjectReference<Property>(propertyId) },
+				},
+			};
+
+			var result = _validator.Validate(propertyValues, RepositoryAction.Create);
+
+			using (new AssertionScope())
+			{
+				result.IsValid.Should().BeFalse();
+				result.TryGetFailReason(PropertyValuesValidationHandler.PropertyValuesValidationField.Values, out var reason).Should().BeTrue();
+				reason.Should().Be($"Referenced Property '{propertyId}' does not exist.");
+			}
+		}
+
+		[TestMethod]
+		public void Validate_WithNullPropertyReference_ShouldReturnValid()
+		{
+			var propertyValues = new PropertyValues
+			{
+				LinkedObjectID = Guid.NewGuid(),
+				Scope = "Asset",
+				Values = new List<PropertyValue>
+				{
+					new PropertyValue { PropertyName = "Owner", Value = "Alice", PropertyId = null },
+				},
+			};
+
+			var result = _validator.Validate(propertyValues, RepositoryAction.Create);
+
+			result.IsValid.Should().BeTrue();
+		}
+
+		[TestMethod]
+		public void ValidateBulk_WithUnknownPropertyReference_ShouldFlagOnlyThatEntry()
+		{
+			var property = Helper.Properties.Create(new Property { Name = "Owner", Scope = "Asset" });
+			var unknownPropertyId = Guid.NewGuid().ToString();
+			var propertyValuesList = new List<PropertyValues>
+			{
+				new PropertyValues
+				{
+					LinkedObjectID = Guid.NewGuid(),
+					Scope = "Asset",
+					Values = new List<PropertyValue> { new PropertyValue { PropertyName = "Owner", PropertyId = new SdmObjectReference<Property>(unknownPropertyId) } },
+				},
+				new PropertyValues
+				{
+					LinkedObjectID = Guid.NewGuid(),
+					Scope = "Asset",
+					Values = new List<PropertyValue> { new PropertyValue { PropertyName = "Owner", PropertyId = new SdmObjectReference<Property>(property.Identifier) } },
+				},
+			};
+
+			var results = _validator.ValidateBulk(propertyValuesList, RepositoryAction.Create);
+
+			using (new AssertionScope())
+			{
+				results.Should().HaveCount(2);
+				results[0].IsValid.Should().BeFalse();
+				results[0].TryGetFailReason(PropertyValuesValidationHandler.PropertyValuesValidationField.Values, out var reason).Should().BeTrue();
+				reason.Should().Be($"Referenced Property '{unknownPropertyId}' does not exist.");
+				results[1].IsValid.Should().BeTrue();
+			}
+		}
+
+		[TestMethod]
+		public void Validate_WithUnknownLinkedObjectAndExternalChecker_ShouldReturnInvalid()
+		{
+			var linkedObjectId = Guid.NewGuid();
+			var validator = new PropertyValuesValidator(Helper, new ExternalReferenceCheckerStub());
+			var propertyValues = new PropertyValues
+			{
+				LinkedObjectID = linkedObjectId,
+				Scope = "Asset",
+			};
+
+			var result = validator.Validate(propertyValues, RepositoryAction.Create);
+
+			using (new AssertionScope())
+			{
+				result.IsValid.Should().BeFalse();
+				result.TryGetFailReason(PropertyValuesValidationHandler.PropertyValuesValidationField.LinkedObjectID, out var reason).Should().BeTrue();
+				reason.Should().Be($"Referenced Linked Object '{linkedObjectId}' does not exist.");
+			}
+		}
+
+		[TestMethod]
+		public void Validate_WithExistingLinkedObjectAndExternalChecker_ShouldReturnValid()
+		{
+			var linkedObjectId = Guid.NewGuid();
+			var validator = new PropertyValuesValidator(Helper, new ExternalReferenceCheckerStub(new[] { (linkedObjectId, "Asset") }));
+			var propertyValues = new PropertyValues
+			{
+				LinkedObjectID = linkedObjectId,
+				Scope = "Asset",
+			};
+
+			var result = validator.Validate(propertyValues, RepositoryAction.Create);
+
+			result.IsValid.Should().BeTrue();
 		}
 
 		#endregion
@@ -445,5 +581,20 @@ using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 		}
 
 		#endregion
+
+		private sealed class ExternalReferenceCheckerStub : IInfraOpsPropertiesExternalReferenceChecker
+		{
+			private readonly IReadOnlyCollection<(Guid LinkedObjectID, string Scope)> existingLinkedObjects;
+
+			public ExternalReferenceCheckerStub(IReadOnlyCollection<(Guid LinkedObjectID, string Scope)> existingLinkedObjects = null)
+			{
+				this.existingLinkedObjects = existingLinkedObjects ?? new List<(Guid LinkedObjectID, string Scope)>();
+			}
+
+			public IReadOnlyCollection<(Guid LinkedObjectID, string Scope)> GetExistingLinkedObjects(IReadOnlyCollection<(Guid LinkedObjectID, string Scope)> linkedObjects)
+			{
+				return existingLinkedObjects;
+			}
+		}
 	}
 }

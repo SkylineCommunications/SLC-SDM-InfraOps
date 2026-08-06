@@ -117,7 +117,7 @@
             if (loadedPortType == null)
             {
                 result.AddFailReason(PowerPortValidationField.PortType,
-                    "Port Type not found.");
+                    $"Port Type not found. Referenced Port Type '{powerPort.PowerPortInfo.PortType.Identifier}' does not exist.");
                 return result;
             }
 
@@ -144,7 +144,7 @@
                 if (asset == null)
                 {
                     result.AddFailReason(PowerPortValidationField.Asset,
-                        $"Parent Asset '{powerPort.Asset.Identifier}' not found.");
+                        $"Referenced Asset '{powerPort.Asset.Identifier}' does not exist.");
                     return result;
                 }
 

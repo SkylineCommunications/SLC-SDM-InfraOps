@@ -2,10 +2,13 @@
 {
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.SDM.FacilityManagement.Models;
+	using Skyline.DataMiner.SDM.FacilityManagement.Validation;
 
 	public interface IFacilityManagementApiHelper
 	{
 		IConnection Connection { get; }
+
+        IFacilityManagementExternalReferenceChecker ExternalReferenceChecker { get; }
 
         IBulkRepository<FacilityManagerAppSettings> AppSettings { get; }
 

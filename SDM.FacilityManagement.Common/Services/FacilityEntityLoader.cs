@@ -5,8 +5,10 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Services
     using System.Linq;
 
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
+    using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.FacilityManagement.Helpers;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
+    using Skyline.DataMiner.SDM.FacilityManagement.Validation;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Extensions;
 
     /// <summary>
@@ -26,6 +28,8 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Services
         {
             _helper = helper ?? throw new ArgumentNullException(nameof(helper));
         }
+
+        public IFacilityManagementExternalReferenceChecker ExternalReferenceChecker => _helper.ExternalReferenceChecker;
 
         #region Site
 
@@ -66,6 +70,18 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Services
                 id => SiteExposers.SiteProperties.SiteId.Equal(id));
         }
 
+        public List<Site> GetSitesByIdentifiers(List<string> identifiers)
+        {
+            if (_helper?.Sites == null || identifiers == null || !identifiers.Any())
+            {
+                return new List<Site>();
+            }
+
+            return _helper.Sites.ReadByBigOrFilter(
+                identifiers,
+                id => SiteExposers.Identifier.Equal(id));
+        }
+
         #endregion
 
         #region Facility
@@ -97,6 +113,30 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Services
             return _helper.Facilities.ReadByBigOrFilter(
                 facilityIds,
                 id => FacilityExposers.FacilityId.Equal(id));
+        }
+
+        public List<Facility> GetFacilitiesByIdentifiers(List<string> identifiers)
+        {
+            if (_helper?.Facilities == null || identifiers == null || !identifiers.Any())
+            {
+                return new List<Facility>();
+            }
+
+            return _helper.Facilities.ReadByBigOrFilter(
+                identifiers,
+                id => FacilityExposers.Identifier.Equal(id));
+        }
+
+        public List<Facility> GetFacilitiesBySiteIdentifiers(List<string> siteIdentifiers)
+        {
+            if (_helper?.Facilities == null || siteIdentifiers == null || !siteIdentifiers.Any())
+            {
+                return new List<Facility>();
+            }
+
+            return _helper.Facilities.ReadByBigOrFilter(
+                siteIdentifiers,
+                id => FacilityExposers.SiteFk.Site.Equal(new SdmObjectReference<Site>(id)));
         }
 
         #endregion
@@ -132,6 +172,30 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Services
                 id => FloorExposers.FloorProperties.FloorId.Equal(id));
         }
 
+        public List<Floor> GetFloorsByIdentifiers(List<string> identifiers)
+        {
+            if (_helper?.Floors == null || identifiers == null || !identifiers.Any())
+            {
+                return new List<Floor>();
+            }
+
+            return _helper.Floors.ReadByBigOrFilter(
+                identifiers,
+                id => FloorExposers.Identifier.Equal(id));
+        }
+
+        public List<Floor> GetFloorsByFacilityIdentifiers(List<string> facilityIdentifiers)
+        {
+            if (_helper?.Floors == null || facilityIdentifiers == null || !facilityIdentifiers.Any())
+            {
+                return new List<Floor>();
+            }
+
+            return _helper.Floors.ReadByBigOrFilter(
+                facilityIdentifiers,
+                id => FloorExposers.FacilityFk.Facility.Equal(new SdmObjectReference<Facility>(id)));
+        }
+
         #endregion
 
         #region Room
@@ -163,6 +227,30 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Services
             return _helper.Rooms.ReadByBigOrFilter(
                 roomIds,
                 id => RoomExposers.RoomProperties.RoomId.Equal(id));
+        }
+
+        public List<Room> GetRoomsByIdentifiers(List<string> identifiers)
+        {
+            if (_helper?.Rooms == null || identifiers == null || !identifiers.Any())
+            {
+                return new List<Room>();
+            }
+
+            return _helper.Rooms.ReadByBigOrFilter(
+                identifiers,
+                id => RoomExposers.Identifier.Equal(id));
+        }
+
+        public List<Room> GetRoomsByFloorIdentifiers(List<string> floorIdentifiers)
+        {
+            if (_helper?.Rooms == null || floorIdentifiers == null || !floorIdentifiers.Any())
+            {
+                return new List<Room>();
+            }
+
+            return _helper.Rooms.ReadByBigOrFilter(
+                floorIdentifiers,
+                id => RoomExposers.FloorFk.Floor.Equal(new SdmObjectReference<Floor>(id)));
         }
 
         #endregion
@@ -198,6 +286,30 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Services
                 id => RowExposers.RowProperties.RowId.Equal(id));
         }
 
+        public List<Row> GetRowsByIdentifiers(List<string> identifiers)
+        {
+            if (_helper?.Rows == null || identifiers == null || !identifiers.Any())
+            {
+                return new List<Row>();
+            }
+
+            return _helper.Rows.ReadByBigOrFilter(
+                identifiers,
+                id => RowExposers.Identifier.Equal(id));
+        }
+
+        public List<Row> GetRowsByRoomIdentifiers(List<string> roomIdentifiers)
+        {
+            if (_helper?.Rows == null || roomIdentifiers == null || !roomIdentifiers.Any())
+            {
+                return new List<Row>();
+            }
+
+            return _helper.Rows.ReadByBigOrFilter(
+                roomIdentifiers,
+                id => RowExposers.RoomFk.Room.Equal(new SdmObjectReference<Room>(id)));
+        }
+
         #endregion
 
         #region Zone
@@ -229,6 +341,30 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Services
             return _helper.Zones.ReadByBigOrFilter(
                 zoneIds,
                 id => ZoneExposers.ZoneProperties.ZoneId.Equal(id));
+        }
+
+        public List<Zone> GetZonesByIdentifiers(List<string> identifiers)
+        {
+            if (_helper?.Zones == null || identifiers == null || !identifiers.Any())
+            {
+                return new List<Zone>();
+            }
+
+            return _helper.Zones.ReadByBigOrFilter(
+                identifiers,
+                id => ZoneExposers.Identifier.Equal(id));
+        }
+
+        public List<Zone> GetZonesByRoomIdentifiers(List<string> roomIdentifiers)
+        {
+            if (_helper?.Zones == null || roomIdentifiers == null || !roomIdentifiers.Any())
+            {
+                return new List<Zone>();
+            }
+
+            return _helper.Zones.ReadByBigOrFilter(
+                roomIdentifiers,
+                id => ZoneExposers.RoomFk.Room.Equal(new SdmObjectReference<Room>(id)));
         }
 
         #endregion
@@ -264,6 +400,18 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Services
                 id => DeskExposers.DeskInformation.DeskID.Equal(id));
         }
 
+        public List<Desk> GetDesksByRoomIdentifiers(List<string> roomIdentifiers)
+        {
+            if (_helper?.Desks == null || roomIdentifiers == null || !roomIdentifiers.Any())
+            {
+                return new List<Desk>();
+            }
+
+            return _helper.Desks.ReadByBigOrFilter(
+                roomIdentifiers,
+                id => DeskExposers.RoomFk.Room.Equal(new SdmObjectReference<Room>(id)));
+        }
+
         #endregion
 
         #region Rack
@@ -295,6 +443,30 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Services
             return _helper.Racks.ReadByBigOrFilter(
                 rackIds,
                 id => RackExposers.RackProperties.RackId.Equal(id));
+        }
+
+        public List<Rack> GetRacksByRowIdentifiers(List<string> rowIdentifiers)
+        {
+            if (_helper?.Racks == null || rowIdentifiers == null || !rowIdentifiers.Any())
+            {
+                return new List<Rack>();
+            }
+
+            return _helper.Racks.ReadByBigOrFilter(
+                rowIdentifiers,
+                id => RackExposers.RowFk.Row.Equal(new SdmObjectReference<Row>(id)));
+        }
+
+        public List<Rack> GetRacksByZoneIdentifiers(List<string> zoneIdentifiers)
+        {
+            if (_helper?.Racks == null || zoneIdentifiers == null || !zoneIdentifiers.Any())
+            {
+                return new List<Rack>();
+            }
+
+            return _helper.Racks.ReadByBigOrFilter(
+                zoneIdentifiers,
+                id => RackExposers.ZoneFk.Zone.Equal(new SdmObjectReference<Zone>(id)));
         }
 
         #endregion

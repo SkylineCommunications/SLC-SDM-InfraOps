@@ -74,8 +74,6 @@
                 return new List<ValidationResult>();
             }
 
-            var deviceTypeCache = new Dictionary<string, DeviceType>();
-
             var results = assetClasses.Select(_ => new ValidationResult()).ToList();
 
             // ============================================================
@@ -116,11 +114,86 @@
             }
 
             // ============================================================
-            // PHASE 3: DATABASE ACCESS CHECKS (POWER SUPPLY ONLY IN BULK)
+            // PHASE 3: DATABASE ACCESS CHECKS
             // ============================================================
+            results.MergeFrom(ValidateBulkReferencesAgainstDatabase(assetClasses));
+
+            if (results.AnyInvalid())
+            {
+                return results;
+            }
+
+            var deviceTypeMap = _entityLoader.GetDeviceTypesByDomIds(
+                    assetClasses
+                        .Where(ac => ac.DeviceTypeId != null && ac.DeviceTypeId.HasValue())
+                        .Select(ac => ac.DeviceTypeId.Identifier)
+                        .Distinct()
+                        .ToList())
+                .ToDictionary(dt => dt.Identifier);
+
             for (int i = 0; i < assetClasses.Count; i++)
             {
-                results[i].AddFailuresFrom(ValidateWithDatabaseAccess(assetClasses[i], deviceTypeCache));
+                results[i].AddFailuresFrom(ValidateWithDatabaseAccess(assetClasses[i], deviceTypeMap));
+            }
+
+            return results;
+        }
+
+        protected override ValidationResult ValidateForDelete(AssetClass assetClass)
+        {
+            if (assetClass == null)
+            {
+                throw new ArgumentNullException(nameof(assetClass));
+            }
+
+            return ValidateNotInUseWhenDeleted(assetClass);
+        }
+
+        protected override List<ValidationResult> ValidateBulkForDelete(List<AssetClass> assetClasses)
+        {
+            if (assetClasses == null || !assetClasses.Any())
+            {
+                return new List<ValidationResult>();
+            }
+
+            return ValidateNotInUseWhenDeleted(assetClasses);
+        }
+
+        private ValidationResult ValidateNotInUseWhenDeleted(AssetClass assetClass)
+        {
+            return ValidateNotInUseWhenDeleted(new List<AssetClass> { assetClass })[0];
+        }
+
+        private List<ValidationResult> ValidateNotInUseWhenDeleted(List<AssetClass> assetClasses)
+        {
+            var results = assetClasses.Select(_ => new ValidationResult()).ToList();
+
+            var identifiers = assetClasses
+                .Select(ac => ac.Identifier)
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .Distinct()
+                .ToList();
+
+            var assetClassIdsInUse = _entityLoader.GetAssetsByAssetClassIds(identifiers)
+                .Where(asset => asset.AssetClassId != null && asset.AssetClassId.HasValue())
+                .Select(asset => asset.AssetClassId.Identifier)
+                .ToHashSet();
+
+            for (int i = 0; i < assetClasses.Count; i++)
+            {
+                if (assetClasses[i].State == SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Active)
+                {
+                    results[i].AddFailReason(
+                        AssetClassValidationHandler.AssetClassValidationField.State,
+                        "Asset Class must not be in 'Active' State to Delete");
+                }
+
+                if (assetClassIdsInUse.Contains(assetClasses[i].Identifier))
+                {
+                    results[i].AddFailReason(
+                        AssetClassValidationHandler.AssetClassValidationField.AssetClass,
+                        "There are still Assets in this Asset Class. Please remove them first");
+                }
             }
 
             return results;
@@ -240,6 +313,8 @@
                 }
             }
 
+            validations.Add(ValidateReferencesAgainstDatabase(assetClass));
+
             return validations.MergeAll();
         }
 
@@ -252,7 +327,7 @@
                 return result;
             }
 
-            DeviceType deviceType;
+                DeviceType deviceType;
             if (deviceTypeCache != null && deviceTypeCache.TryGetValue(assetClass.DeviceTypeId, out var cached))
             {
                 deviceType = cached;
@@ -269,7 +344,7 @@
             if (deviceType == null)
             {
                 result.AddFailReason(AssetClassValidationHandler.AssetClassValidationField.DeviceTypeId,
-                    "Device Type not found.");
+                    $"Device Type not found. Referenced Device Type '{assetClass.DeviceTypeId.Identifier}' does not exist.");
                 return result;
             }
 
@@ -285,8 +360,158 @@
                 result.AddFailuresFrom(heightUResult);
             }
 
-            return result;
-        }
+            return result;
+        }
+
+        private ValidationResult ValidateReferencesAgainstDatabase(AssetClass assetClass)
+            {
+                var result = new ValidationResult();
+
+                if (assetClass.ShouldValidate(assetClass.DeviceTypeIdField) && assetClass.DeviceTypeId.HasValue())
+                {
+                    var deviceType = _entityLoader.LoadDeviceType(assetClass.DeviceTypeId);
+                    if (deviceType == null)
+                    {
+                        result.AddFailReason(AssetClassValidationHandler.AssetClassValidationField.DeviceTypeId,
+                            $"Referenced Device Type '{assetClass.DeviceTypeId.Identifier}' does not exist.");
+                    }
+                }
+
+                ValidateDataPortTypeReferences(assetClass.DataPorts, "AssetClass.DataPorts.Type", "DataPorts", result);
+                ValidatePowerPortTypeReferences(assetClass.PowerPorts, "AssetClass.PowerPorts.PortType", "PowerPorts", result);
+                ValidateExternalGuid(assetClass.Manufacturer, AssetManagementExternalReferenceType.Organization, "AssetClass.Manufacturer", "Manufacturer", result);
+
+                return result;
+            }
+
+            private List<ValidationResult> ValidateBulkReferencesAgainstDatabase(List<AssetClass> assetClasses)
+            {
+                var results = assetClasses.Select(_ => new ValidationResult()).ToList();
+
+                var deviceTypeIds = assetClasses
+                    .Where(ac => ac.ShouldValidate(ac.DeviceTypeIdField) && ac.DeviceTypeId != null && ac.DeviceTypeId.HasValue())
+                    .Select(ac => ac.DeviceTypeId.Identifier)
+                    .Distinct()
+                    .ToList();
+                var existingDeviceTypeIds = _entityLoader.GetDeviceTypesByDomIds(deviceTypeIds).Select(dt => dt.Identifier).ToHashSet();
+
+                var portTypeIds = assetClasses
+                    .SelectMany(ac => (ac.DataPorts ?? new List<DataPortInfo>())
+                        .Where(p => p?.Type != null && p.Type.HasValue())
+                        .Select(p => p.Type.Identifier)
+                        .Concat((ac.PowerPorts ?? new List<PowerPortInfo>())
+                            .Where(p => p?.PortType != null && p.PortType.HasValue())
+                            .Select(p => p.PortType.Identifier)))
+                    .Distinct()
+                    .ToList();
+                var existingPortTypeIds = _entityLoader.GetPortTypesByDomIds(portTypeIds).Select(pt => pt.Identifier).ToHashSet();
+
+                var existingManufacturers = GetExistingExternalIds(
+                    AssetManagementExternalReferenceType.Organization,
+                    assetClasses.Where(ac => ac.ShouldValidate(ac.ManufacturerField)).Select(ac => ac.Manufacturer));
+
+                for (int i = 0; i < assetClasses.Count; i++)
+                {
+                    var assetClass = assetClasses[i];
+                    if (assetClass.ShouldValidate(assetClass.DeviceTypeIdField)
+                        && assetClass.DeviceTypeId != null
+                        && assetClass.DeviceTypeId.HasValue()
+                        && !existingDeviceTypeIds.Contains(assetClass.DeviceTypeId.Identifier))
+                    {
+                        results[i].AddFailReason(AssetClassValidationHandler.AssetClassValidationField.DeviceTypeId,
+                            $"Referenced Device Type '{assetClass.DeviceTypeId.Identifier}' does not exist.");
+                    }
+
+                    foreach (var port in assetClass.DataPorts ?? new List<DataPortInfo>())
+                    {
+                        if (port?.Type != null && port.Type.HasValue() && !existingPortTypeIds.Contains(port.Type.Identifier))
+                        {
+                            results[i].AddFailReason("AssetClass.DataPorts.Type", "DataPorts", $"Referenced Port Type '{port.Type.Identifier}' does not exist.");
+                        }
+                    }
+
+                    foreach (var port in assetClass.PowerPorts ?? new List<PowerPortInfo>())
+                    {
+                        if (port?.PortType != null && port.PortType.HasValue() && !existingPortTypeIds.Contains(port.PortType.Identifier))
+                        {
+                            results[i].AddFailReason("AssetClass.PowerPorts.PortType", "PowerPorts", $"Referenced Port Type '{port.PortType.Identifier}' does not exist.");
+                        }
+                    }
+
+                    if (assetClass.ShouldValidate(assetClass.ManufacturerField)
+                        && assetClass.Manufacturer != Guid.Empty
+                        && _entityLoader.ExternalReferenceChecker != null
+                        && !existingManufacturers.Contains(assetClass.Manufacturer))
+                    {
+                        results[i].AddFailReason("AssetClass.Manufacturer", "Manufacturer", $"Referenced Organization '{assetClass.Manufacturer}' does not exist.");
+                    }
+                }
+
+                return results;
+            }
+
+            private void ValidateDataPortTypeReferences(IEnumerable<DataPortInfo> ports, string fieldId, string fieldName, ValidationResult result)
+            {
+                foreach (var port in ports ?? Enumerable.Empty<DataPortInfo>())
+                {
+                    if (port?.Type == null || !port.Type.HasValue())
+                    {
+                        continue;
+                    }
+
+                    var reference = port.Type;
+                    if (!_entityLoader.GetPortTypesByDomIds(new List<string> { reference.Identifier }).Any())
+                    {
+                        result.AddFailReason(fieldId, fieldName, $"Referenced Port Type '{reference.Identifier}' does not exist.");
+                    }
+                }
+            }
+
+            private void ValidatePowerPortTypeReferences(IEnumerable<PowerPortInfo> ports, string fieldId, string fieldName, ValidationResult result)
+            {
+                foreach (var port in ports ?? Enumerable.Empty<PowerPortInfo>())
+                {
+                    if (port?.PortType == null || !port.PortType.HasValue())
+                    {
+                        continue;
+                    }
+
+                    var reference = port.PortType;
+                    if (!_entityLoader.GetPortTypesByDomIds(new List<string> { reference.Identifier }).Any())
+                    {
+                        result.AddFailReason(fieldId, fieldName, $"Referenced Port Type '{reference.Identifier}' does not exist.");
+                    }
+                }
+            }
+
+            private void ValidateExternalGuid(Guid identifier, AssetManagementExternalReferenceType type, string fieldId, string fieldName, ValidationResult result)
+            {
+                if (identifier == Guid.Empty || _entityLoader.ExternalReferenceChecker == null)
+                {
+                    return;
+                }
+
+                if (!GetExistingExternalIds(type, new[] { identifier }).Contains(identifier))
+                {
+                    result.AddFailReason(fieldId, fieldName, $"Referenced {FormatExternalType(type)} '{identifier}' does not exist.");
+                }
+            }
+
+            private HashSet<Guid> GetExistingExternalIds(AssetManagementExternalReferenceType type, IEnumerable<Guid> identifiers)
+            {
+                var ids = identifiers.Where(id => id != Guid.Empty).Distinct().ToList();
+                if (!ids.Any() || _entityLoader.ExternalReferenceChecker == null)
+                {
+                    return new HashSet<Guid>();
+                }
+
+                return (_entityLoader.ExternalReferenceChecker.GetExistingIdentifiers(type, ids) ?? new List<Guid>()).ToHashSet();
+            }
+
+            private static string FormatExternalType(AssetManagementExternalReferenceType type)
+            {
+                return type == AssetManagementExternalReferenceType.ContactPersonRole ? "Contact Person Role" : type.ToString();
+            }
 
         private ValidationResult ValidateDimensions(AssetClass assetClass)
         {

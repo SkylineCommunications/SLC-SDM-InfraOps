@@ -1,4 +1,4 @@
-﻿namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
+namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
 {
     using System;
     using System.Collections.Generic;
@@ -43,7 +43,29 @@
                     $"Row Id '{entity.RowId}' is already in use.");
             }
 
+            result.AddFailuresFrom(ValidateReferencesAgainstDatabase(new List<Row> { entity })[0]);
+
             return result;
+        }
+
+        protected override ValidationResult ValidateForDelete(Row row)
+        {
+            if (row == null)
+            {
+                throw new ArgumentNullException(nameof(row));
+            }
+
+            return ValidateNoRacksAssigned(new List<Row> { row })[0];
+        }
+
+        protected override List<ValidationResult> ValidateBulkForDelete(List<Row> rows)
+        {
+            if (rows == null || !rows.Any())
+            {
+                return new List<ValidationResult>();
+            }
+
+            return ValidateNoRacksAssigned(rows);
         }
 
         /// <summary>
@@ -110,12 +132,42 @@
             var dbConflicts = ValidateBulkIdsAgainstDatabase(entities);
             results.MergeFrom(dbConflicts);
 
+            var referenceConflicts = ValidateReferencesAgainstDatabase(entities);
+            results.MergeFrom(referenceConflicts);
+
             return results;
         }
 
         private bool IsIdInUse(string id, string exceptIdentifier = null)
         {
             return _entityLoader.CountRowsByRowId(id, exceptIdentifier) > 0;
+        }
+
+        private List<ValidationResult> ValidateNoRacksAssigned(List<Row> rows)
+        {
+            var results = rows.Select(_ => new ValidationResult()).ToList();
+            var identifiers = rows.Select(r => r.Identifier).Where(id => !string.IsNullOrWhiteSpace(id)).Distinct().ToList();
+            if (!identifiers.Any())
+            {
+                return results;
+            }
+
+            var referencedIdentifiers = _entityLoader.GetRacksByRowIdentifiers(identifiers)
+                .Select(r => r.RowFk == null ? null : r.RowFk.Row.Identifier)
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .ToHashSet();
+
+            for (int i = 0; i < rows.Count; i++)
+            {
+                if (referencedIdentifiers.Contains(rows[i].Identifier))
+                {
+                    results[i].AddFailReason(
+                        RowValidationHandler.RowValidationField.RowId,
+                        "Can't remove row, since it still has racks assigned to it. Please remove all the racks assigned to this row before removing it.");
+                }
+            }
+
+            return results;
         }
 
         private List<ValidationResult> ValidateBulkIdsAgainstDatabase(List<Row> entities)
@@ -155,6 +207,80 @@
             }
 
             return results;
+        }
+
+        private List<ValidationResult> ValidateReferencesAgainstDatabase(List<Row> entities)
+        {
+            var results = entities.Select(_ => new ValidationResult()).ToList();
+            var roomCandidates = entities
+                .Select((entity, index) => new
+                {
+                    Entity = entity,
+                    Index = index,
+                    RoomIdentifier = entity.RoomFk == null ? null : FacilityReferenceValidationHelper.GetId(entity.RoomFk.Room),
+                })
+                .Where(x => FacilityReferenceValidationHelper.ShouldValidateReferences(x.Entity) &&
+                    FacilityReferenceValidationHelper.HasId(x.RoomIdentifier))
+                .ToList();
+
+            var resourceCandidates = entities
+                .Select((entity, index) => new
+                {
+                    Entity = entity,
+                    Index = index,
+                    ResourceId = entity.Resource?.ResourceId ?? Guid.Empty,
+                })
+                .Where(x => FacilityReferenceValidationHelper.ShouldValidateReferences(x.Entity) &&
+                    FacilityReferenceValidationHelper.HasId(x.ResourceId))
+                .ToList();
+
+            var existingRoomIds = roomCandidates.Any()
+                ? FacilityReferenceValidationHelper.ToIdentifierSet(_entityLoader.GetRoomsByIdentifiers(roomCandidates.Select(x => x.RoomIdentifier).Distinct().ToList()))
+                : new HashSet<string>();
+            var existingResourceIds = GetExistingResourceIds(resourceCandidates.Select(x => x.ResourceId));
+
+            foreach (var candidate in roomCandidates)
+            {
+                if (!existingRoomIds.Contains(candidate.RoomIdentifier))
+                {
+                    FacilityReferenceValidationHelper.AddMissingReference(
+                        results[candidate.Index],
+                        RowValidationHandler.RowValidationField.RowId,
+                        "Room",
+                        candidate.RoomIdentifier);
+                }
+            }
+
+            foreach (var candidate in resourceCandidates)
+            {
+                if (existingResourceIds != null && !existingResourceIds.Contains(candidate.ResourceId))
+                {
+                    FacilityReferenceValidationHelper.AddMissingReference(
+                        results[candidate.Index],
+                        RowValidationHandler.RowValidationField.RowId,
+                        "Resource",
+                        candidate.ResourceId);
+                }
+            }
+
+            return results;
+        }
+
+        private HashSet<Guid> GetExistingResourceIds(IEnumerable<Guid> resourceIds)
+        {
+            var checker = _entityLoader.ExternalReferenceChecker;
+            if (checker == null)
+            {
+                return null;
+            }
+
+            var keys = resourceIds?.Where(FacilityReferenceValidationHelper.HasId).Distinct().ToList() ?? new List<Guid>();
+            if (!keys.Any())
+            {
+                return new HashSet<Guid>();
+            }
+
+            return FacilityReferenceValidationHelper.ToGuidSet(checker.GetExistingResourceIds(keys));
         }
 
         private static List<ValidationResult> ValidateIdDuplicatesInBatch(List<Row> entities)

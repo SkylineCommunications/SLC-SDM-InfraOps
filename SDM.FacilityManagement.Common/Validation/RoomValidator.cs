@@ -1,4 +1,4 @@
-﻿namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
+namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
 {
     using System;
     using System.Collections.Generic;
@@ -43,7 +43,29 @@
                     $"Room Id '{entity.RoomId}' is already in use.");
             }
 
+            result.AddFailuresFrom(ValidateReferencesAgainstDatabase(new List<Room> { entity })[0]);
+
             return result;
+        }
+
+        protected override ValidationResult ValidateForDelete(Room room)
+        {
+            if (room == null)
+            {
+                throw new ArgumentNullException(nameof(room));
+            }
+
+            return ValidateNotInUseWhenDeleted(new List<Room> { room })[0];
+        }
+
+        protected override List<ValidationResult> ValidateBulkForDelete(List<Room> rooms)
+        {
+            if (rooms == null || !rooms.Any())
+            {
+                return new List<ValidationResult>();
+            }
+
+            return ValidateNotInUseWhenDeleted(rooms);
         }
 
         /// <summary>
@@ -110,12 +132,85 @@
             var dbConflicts = ValidateBulkIdsAgainstDatabase(entities);
             results.MergeFrom(dbConflicts);
 
+            var referenceConflicts = ValidateReferencesAgainstDatabase(entities);
+            results.MergeFrom(referenceConflicts);
+
             return results;
         }
 
         private bool IsIdInUse(string id, string exceptIdentifier = null)
         {
             return _entityLoader.CountRoomsByRoomId(id, exceptIdentifier) > 0;
+        }
+
+        private List<ValidationResult> ValidateNotInUseWhenDeleted(List<Room> rooms)
+        {
+            var results = rooms.Select(_ => new ValidationResult()).ToList();
+            var identifiers = rooms.Select(r => r.Identifier).Where(id => !string.IsNullOrWhiteSpace(id)).Distinct().ToList();
+            if (!identifiers.Any())
+            {
+                return results;
+            }
+
+            var roomsWithRows = _entityLoader.GetRowsByRoomIdentifiers(identifiers)
+                .Select(r => r.RoomFk == null ? null : r.RoomFk.Room.Identifier)
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .ToHashSet();
+            var roomsWithZones = _entityLoader.GetZonesByRoomIdentifiers(identifiers)
+                .Select(z => z.RoomFk == null ? null : z.RoomFk.Room.Identifier)
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .ToHashSet();
+            var roomsWithDesks = _entityLoader.GetDesksByRoomIdentifiers(identifiers)
+                .Select(d => d.RoomFk == null ? null : d.RoomFk.Room.Identifier)
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .ToHashSet();
+            var roomsWithAssets = GetIdentifiersWithAssets(FacilityManagementEntityType.Room, identifiers);
+
+            for (int i = 0; i < rooms.Count; i++)
+            {
+                if (roomsWithRows.Contains(rooms[i].Identifier))
+                {
+                    results[i].AddFailReason(
+                        RoomValidationHandler.RoomValidationField.RoomId,
+                        "Can't remove room, since it still has rows assigned to it. Please remove all the rows assigned to this room before removing it.");
+                }
+
+                if (roomsWithZones.Contains(rooms[i].Identifier))
+                {
+                    results[i].AddFailReason(
+                        RoomValidationHandler.RoomValidationField.RoomId,
+                        "Can't remove room, since it still has zones assigned to it. Please remove all the zones assigned to this room before removing it.");
+                }
+
+                if (roomsWithDesks.Contains(rooms[i].Identifier))
+                {
+                    results[i].AddFailReason(
+                        RoomValidationHandler.RoomValidationField.RoomId,
+                        "Can't remove room, since it still has desks assigned to it. Please remove all the desks assigned to this room before removing it.");
+                }
+
+                if (roomsWithAssets.Contains(rooms[i].Identifier))
+                {
+                    results[i].AddFailReason(
+                        RoomValidationHandler.RoomValidationField.RoomId,
+                        "Can't remove room, since it still has assets assigned to it. Please remove all the assets assigned to this room before removing it.");
+                }
+            }
+
+            return results;
+        }
+
+        private HashSet<string> GetIdentifiersWithAssets(FacilityManagementEntityType entityType, List<string> identifiers)
+        {
+            var checker = _entityLoader.ExternalReferenceChecker;
+            if (checker == null)
+            {
+                return new HashSet<string>();
+            }
+
+            return (checker.GetIdentifiersWithAssets(entityType, identifiers) ?? new List<string>())
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .ToHashSet();
         }
 
         private List<ValidationResult> ValidateBulkIdsAgainstDatabase(List<Room> entities)
@@ -155,6 +250,144 @@
             }
 
             return results;
+        }
+
+        private List<ValidationResult> ValidateReferencesAgainstDatabase(List<Room> entities)
+        {
+            var results = entities.Select(_ => new ValidationResult()).ToList();
+            var floorCandidates = entities
+                .Select((entity, index) => new
+                {
+                    Entity = entity,
+                    Index = index,
+                    FloorIdentifier = entity.FloorFk == null ? null : FacilityReferenceValidationHelper.GetId(entity.FloorFk.Floor),
+                })
+                .Where(x => FacilityReferenceValidationHelper.ShouldValidateReferences(x.Entity) &&
+                    FacilityReferenceValidationHelper.HasId(x.FloorIdentifier))
+                .ToList();
+            var ownerCandidates = entities
+                .Select((entity, index) => new { Entity = entity, Index = index, OwnerId = entity.Ownership?.Owner ?? Guid.Empty })
+                .Where(x => FacilityReferenceValidationHelper.ShouldValidateReferences(x.Entity) &&
+                    FacilityReferenceValidationHelper.HasId(x.OwnerId))
+                .ToList();
+            var teamCandidates = entities
+                .Select((entity, index) => new { Entity = entity, Index = index, TeamId = entity.Ownership?.Team ?? Guid.Empty })
+                .Where(x => FacilityReferenceValidationHelper.ShouldValidateReferences(x.Entity) &&
+                    FacilityReferenceValidationHelper.HasId(x.TeamId))
+                .ToList();
+            var resourceCandidates = entities
+                .Select((entity, index) => new { Entity = entity, Index = index, ResourceId = entity.ResourceLink?.ResourceId ?? Guid.Empty })
+                .Where(x => FacilityReferenceValidationHelper.ShouldValidateReferences(x.Entity) &&
+                    FacilityReferenceValidationHelper.HasId(x.ResourceId))
+                .ToList();
+
+            var existingFloorIds = floorCandidates.Any()
+                ? FacilityReferenceValidationHelper.ToIdentifierSet(_entityLoader.GetFloorsByIdentifiers(floorCandidates.Select(x => x.FloorIdentifier).Distinct().ToList()))
+                : new HashSet<string>();
+            var existingPersonIds = GetExistingPersonIds(ownerCandidates.Select(x => x.OwnerId));
+            var existingTeamIds = GetExistingTeamIds(teamCandidates.Select(x => x.TeamId));
+            var existingResourceIds = GetExistingResourceIds(resourceCandidates.Select(x => x.ResourceId));
+
+            foreach (var candidate in floorCandidates)
+            {
+                if (!existingFloorIds.Contains(candidate.FloorIdentifier))
+                {
+                    FacilityReferenceValidationHelper.AddMissingReference(
+                        results[candidate.Index],
+                        RoomValidationHandler.RoomValidationField.RoomId,
+                        "Floor",
+                        candidate.FloorIdentifier);
+                }
+            }
+
+            foreach (var candidate in ownerCandidates)
+            {
+                if (existingPersonIds != null && !existingPersonIds.Contains(candidate.OwnerId))
+                {
+                    FacilityReferenceValidationHelper.AddMissingReference(
+                        results[candidate.Index],
+                        RoomValidationHandler.RoomValidationField.RoomId,
+                        "Person",
+                        candidate.OwnerId);
+                }
+            }
+
+            foreach (var candidate in teamCandidates)
+            {
+                if (existingTeamIds != null && !existingTeamIds.Contains(candidate.TeamId))
+                {
+                    FacilityReferenceValidationHelper.AddMissingReference(
+                        results[candidate.Index],
+                        RoomValidationHandler.RoomValidationField.RoomId,
+                        "Team",
+                        candidate.TeamId);
+                }
+            }
+
+            foreach (var candidate in resourceCandidates)
+            {
+                if (existingResourceIds != null && !existingResourceIds.Contains(candidate.ResourceId))
+                {
+                    FacilityReferenceValidationHelper.AddMissingReference(
+                        results[candidate.Index],
+                        RoomValidationHandler.RoomValidationField.RoomId,
+                        "Resource",
+                        candidate.ResourceId);
+                }
+            }
+
+            return results;
+        }
+
+        private HashSet<Guid> GetExistingPersonIds(IEnumerable<Guid> personIds)
+        {
+            var checker = _entityLoader.ExternalReferenceChecker;
+            if (checker == null)
+            {
+                return null;
+            }
+
+            var keys = personIds?.Where(FacilityReferenceValidationHelper.HasId).Distinct().ToList() ?? new List<Guid>();
+            if (!keys.Any())
+            {
+                return new HashSet<Guid>();
+            }
+
+            return FacilityReferenceValidationHelper.ToGuidSet(checker.GetExistingPersonIds(keys));
+        }
+
+        private HashSet<Guid> GetExistingTeamIds(IEnumerable<Guid> teamIds)
+        {
+            var checker = _entityLoader.ExternalReferenceChecker;
+            if (checker == null)
+            {
+                return null;
+            }
+
+            var keys = teamIds?.Where(FacilityReferenceValidationHelper.HasId).Distinct().ToList() ?? new List<Guid>();
+            if (!keys.Any())
+            {
+                return new HashSet<Guid>();
+            }
+
+            return FacilityReferenceValidationHelper.ToGuidSet(checker.GetExistingTeamIds(keys));
+        }
+
+        private HashSet<Guid> GetExistingResourceIds(IEnumerable<Guid> resourceIds)
+        {
+            var checker = _entityLoader.ExternalReferenceChecker;
+            if (checker == null)
+            {
+                return null;
+            }
+
+            var keys = resourceIds?.Where(FacilityReferenceValidationHelper.HasId).Distinct().ToList() ?? new List<Guid>();
+            if (!keys.Any())
+            {
+                return new HashSet<Guid>();
+            }
+
+            return FacilityReferenceValidationHelper.ToGuidSet(checker.GetExistingResourceIds(keys));
         }
 
         private static List<ValidationResult> ValidateIdDuplicatesInBatch(List<Room> entities)

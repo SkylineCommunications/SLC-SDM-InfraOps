@@ -263,6 +263,22 @@ namespace SDM.AssetManagement.Tests.AssetClasses
         }
 
         [TestMethod]
+        public void Validate_WithNonExistingDeviceTypeGuid_ShouldReturnInvalid()
+        {
+            var missingId = Guid.NewGuid().ToString();
+            var assetClass = new AssetClass
+            {
+                Name = "Missing Device Type",
+                DeviceTypeId = new SdmObjectReference<DeviceType>(missingId),
+            };
+
+            var result = _validator.Validate(assetClass, RepositoryAction.Create);
+
+            result.IsValid.Should().BeFalse();
+            result.FailureReasons.Should().Contain(reason => reason.ToString().Contains($"Referenced Device Type '{missingId}' does not exist."));
+        }
+
+        [TestMethod]
         public void Validate_WithPowerProviderDeviceType_AndPowerSupply_ShouldReturnValid()
         {
             // Arrange

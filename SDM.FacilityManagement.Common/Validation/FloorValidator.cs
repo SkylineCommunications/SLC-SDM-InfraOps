@@ -1,4 +1,4 @@
-﻿namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
+namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
 {
     using System;
     using System.Collections.Generic;
@@ -43,7 +43,29 @@
                     $"Floor Id '{entity.FloorId}' is already in use.");
             }
 
+            result.AddFailuresFrom(ValidateReferencesAgainstDatabase(new List<Floor> { entity })[0]);
+
             return result;
+        }
+
+        protected override ValidationResult ValidateForDelete(Floor floor)
+        {
+            if (floor == null)
+            {
+                throw new ArgumentNullException(nameof(floor));
+            }
+
+            return ValidateNoRoomsAssigned(new List<Floor> { floor })[0];
+        }
+
+        protected override List<ValidationResult> ValidateBulkForDelete(List<Floor> floors)
+        {
+            if (floors == null || !floors.Any())
+            {
+                return new List<ValidationResult>();
+            }
+
+            return ValidateNoRoomsAssigned(floors);
         }
 
         /// <summary>
@@ -110,12 +132,42 @@
             var dbConflicts = ValidateBulkIdsAgainstDatabase(entities);
             results.MergeFrom(dbConflicts);
 
+            var referenceConflicts = ValidateReferencesAgainstDatabase(entities);
+            results.MergeFrom(referenceConflicts);
+
             return results;
         }
 
         private bool IsIdInUse(string id, string exceptIdentifier = null)
         {
             return _entityLoader.CountFloorsByFloorId(id, exceptIdentifier) > 0;
+        }
+
+        private List<ValidationResult> ValidateNoRoomsAssigned(List<Floor> floors)
+        {
+            var results = floors.Select(_ => new ValidationResult()).ToList();
+            var identifiers = floors.Select(f => f.Identifier).Where(id => !string.IsNullOrWhiteSpace(id)).Distinct().ToList();
+            if (!identifiers.Any())
+            {
+                return results;
+            }
+
+            var referencedIdentifiers = _entityLoader.GetRoomsByFloorIdentifiers(identifiers)
+                .Select(r => r.FloorFk == null ? null : r.FloorFk.Floor.Identifier)
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .ToHashSet();
+
+            for (int i = 0; i < floors.Count; i++)
+            {
+                if (referencedIdentifiers.Contains(floors[i].Identifier))
+                {
+                    results[i].AddFailReason(
+                        FloorValidationHandler.FloorValidationField.FloorId,
+                        "Can't remove floor, since it still has rooms assigned to it. Please remove all the rooms assigned to this floor before removing it.");
+                }
+            }
+
+            return results;
         }
 
         private List<ValidationResult> ValidateBulkIdsAgainstDatabase(List<Floor> entities)
@@ -151,6 +203,43 @@
                     results[i].AddFailReason(
                         FloorValidationHandler.FloorValidationField.FloorId,
                         $"Floor Id '{id}' is already in use.");
+                }
+            }
+
+            return results;
+        }
+
+        private List<ValidationResult> ValidateReferencesAgainstDatabase(List<Floor> entities)
+        {
+            var results = entities.Select(_ => new ValidationResult()).ToList();
+            var candidates = entities
+                .Select((entity, index) => new
+                {
+                    Entity = entity,
+                    Index = index,
+                    FacilityIdentifier = entity.FacilityFk == null ? null : FacilityReferenceValidationHelper.GetId(entity.FacilityFk.Facility),
+                })
+                .Where(x => FacilityReferenceValidationHelper.ShouldValidateReferences(x.Entity) &&
+                    FacilityReferenceValidationHelper.HasId(x.FacilityIdentifier))
+                .ToList();
+
+            if (!candidates.Any())
+            {
+                return results;
+            }
+
+            var existingFacilityIds = FacilityReferenceValidationHelper.ToIdentifierSet(
+                _entityLoader.GetFacilitiesByIdentifiers(candidates.Select(x => x.FacilityIdentifier).Distinct().ToList()));
+
+            foreach (var candidate in candidates)
+            {
+                if (!existingFacilityIds.Contains(candidate.FacilityIdentifier))
+                {
+                    FacilityReferenceValidationHelper.AddMissingReference(
+                        results[candidate.Index],
+                        FloorValidationHandler.FloorValidationField.FloorId,
+                        "Facility",
+                        candidate.FacilityIdentifier);
                 }
             }
 

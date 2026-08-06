@@ -124,7 +124,7 @@
             if (loadedPortType == null)
             {
                 result.AddFailReason(DataPortValidationField.PortType,
-                    "Port Type not found.");
+                    $"Port Type not found. Referenced Port Type '{dataPort.DataPortInfo.Type.Identifier}' does not exist.");
                 return result;
             }
 
@@ -151,7 +151,7 @@
                 if (asset == null)
                 {
                     result.AddFailReason(DataPortValidationField.Asset,
-                        $"Parent Asset '{dataPort.Asset.Identifier}' not found.");
+                        $"Referenced Asset '{dataPort.Asset.Identifier}' does not exist.");
                     return result;
                 }
 

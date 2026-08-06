@@ -15,6 +15,8 @@
         {
             Name,
             Category,
+            Connection,
+            PortType,
         }
 
         #region Name Validation

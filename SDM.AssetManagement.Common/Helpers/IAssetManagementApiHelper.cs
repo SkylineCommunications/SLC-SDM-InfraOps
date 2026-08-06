@@ -9,7 +9,9 @@
 
     public interface IAssetManagementApiHelper
 	{
-		IAssetRepository Assets { get; }
+        IAssetManagementExternalReferenceChecker ExternalReferenceChecker { get; }
+
+    	IAssetRepository Assets { get; }
 
         IBulkRepository<AssetManagerAppSettings> AppSettings { get; }
 
@@ -36,5 +38,11 @@
         DataPortValidator DataPortValidator { get; }
 
         PowerPortValidator PowerPortValidator { get; }
+
+        DeviceTypeValidator DeviceTypeValidator { get; }
+
+        PortTypeValidator PortTypeValidator { get; }
+
+        CableTypeValidator CableTypeValidator { get; }
     }
 }

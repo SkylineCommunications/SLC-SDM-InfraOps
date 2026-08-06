@@ -5,6 +5,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
     using System.Linq;
 
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
+    using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.InfraOps.Common.Validation;
     using Skyline.DataMiner.SDM.PlanAndBuild.Helpers;
     using Skyline.DataMiner.SDM.PlanAndBuild.Models;
@@ -21,6 +22,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
     {
         private readonly IPlanAndBuildApiHelper _helper;
         private readonly IPeopleAndOrganizationsApi _peopleApi;
+        private readonly IPlanAndBuildExternalReferenceChecker _externalReferenceChecker;
         private readonly Validator<PlanAndBuildJob> _validationPipeline;
         private readonly Validator<PlanAndBuildJob> _creationValidationPipeline;
 
@@ -38,10 +40,14 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
         /// Kept separate from the helper so validation does not require <see cref="IPeopleAndOrganizationsApi"/>
         /// to be part of the public <see cref="IPlanAndBuildApiHelper"/> contract.
         /// </param>
-        public PlanAndBuildJobValidator(IPlanAndBuildApiHelper helper, IPeopleAndOrganizationsApi peopleApi)
+        public PlanAndBuildJobValidator(
+            IPlanAndBuildApiHelper helper,
+            IPeopleAndOrganizationsApi peopleApi,
+            IPlanAndBuildExternalReferenceChecker externalReferenceChecker = null)
         {
             _helper = helper ?? throw new ArgumentNullException(nameof(helper));
             _peopleApi = peopleApi ?? throw new ArgumentNullException(nameof(peopleApi));
+            _externalReferenceChecker = externalReferenceChecker;
             _validationPipeline = BuildValidationPipeline(includeStateGatedChanges: true);
             _creationValidationPipeline = BuildValidationPipeline(includeStateGatedChanges: false);
         }
@@ -178,9 +184,19 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
 
             var personIds = CollectReferencedPersonIds(jobs);
             var teamIds = CollectReferencedTeamIds(jobs);
+            var jobTypeIds = CollectReferencedJobTypeIds(jobs);
+            var locationIds = CollectReferencedLocationIds(jobs);
+            var assetIds = CollectReferencedAssetIds(jobs);
+            var connectionIds = CollectReferencedConnectionIds(jobs);
+            var cableTypeIds = CollectReferencedCableTypeIds(jobs);
 
             var existingPersonIds = GetExistingPersonIds(personIds);
             var existingTeamIds = GetExistingTeamIds(teamIds);
+            var existingJobTypeIds = GetExistingJobTypeIds(jobTypeIds);
+            var existingLocationIds = _externalReferenceChecker?.GetExistingLocationIds(locationIds);
+            var existingAssetIds = _externalReferenceChecker?.GetExistingAssetIds(assetIds);
+            var existingConnectionIds = _externalReferenceChecker?.GetExistingConnectionIds(connectionIds);
+            var existingCableTypeIds = _externalReferenceChecker?.GetExistingCableTypeIds(cableTypeIds);
 
             for (int i = 0; i < jobs.Count; i++)
             {
@@ -192,7 +208,56 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
 
                 results[i].AddFailuresFrom(ValidateJobNameUniqueness(jobs[i], existingByJobName));
                 results[i].AddFailuresFrom(ValidatePeopleAndOrganizations(jobs[i], existingPersonIds, existingTeamIds));
+                results[i].AddFailuresFrom(ValidateJobTypeReference(jobs[i], existingJobTypeIds));
+                results[i].AddFailuresFrom(ValidateExternalReferences(jobs[i], existingLocationIds, existingAssetIds, existingConnectionIds, existingCableTypeIds));
             }
+        }
+
+        private static List<string> CollectReferencedJobTypeIds(List<PlanAndBuildJob> jobs)
+        {
+            return jobs
+                .Where(j => j.ShouldValidate(j.TypeField) && IsReferenceSet(j.Type))
+                .Select(j => j.Type.Identifier)
+                .ToList();
+        }
+
+        private static List<Guid> CollectReferencedLocationIds(List<PlanAndBuildJob> jobs)
+        {
+            return jobs
+                .Where(j => j.ShouldValidateAny(j.LocationsField) && j.Locations != null)
+                .SelectMany(j => j.Locations)
+                .Where(id => id != Guid.Empty)
+                .ToList();
+        }
+
+        private static List<string> CollectReferencedAssetIds(List<PlanAndBuildJob> jobs)
+        {
+            return jobs
+                .Where(j => j.ShouldValidateAny(j.AssetsUsedField) && j.AssetsUsed != null)
+                .SelectMany(j => j.AssetsUsed)
+                .Where(asset => asset != null && IsReferenceSet(asset.AssetId))
+                .Select(asset => asset.AssetId.Identifier)
+                .ToList();
+        }
+
+        private static List<string> CollectReferencedConnectionIds(List<PlanAndBuildJob> jobs)
+        {
+            return jobs
+                .Where(j => j.ShouldValidateAny(j.ConnectionsOnJobField) && j.ConnectionsOnJob != null)
+                .SelectMany(j => j.ConnectionsOnJob)
+                .Where(connection => connection != null && IsReferenceSet(connection.ConnectionId))
+                .Select(connection => connection.ConnectionId.Identifier)
+                .ToList();
+        }
+
+        private static List<string> CollectReferencedCableTypeIds(List<PlanAndBuildJob> jobs)
+        {
+            return jobs
+                .Where(j => j.ShouldValidateAny(j.ConnectionsOnJobField) && j.ConnectionsOnJob != null)
+                .SelectMany(j => j.ConnectionsOnJob)
+                .Where(connection => connection != null && IsReferenceSet(connection.CableType))
+                .Select(connection => connection.CableType.Identifier)
+                .ToList();
         }
 
         /// <summary>
@@ -275,7 +340,9 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
             // Database access checks (uniqueness, People/Team existence)
             var databaseChecks = Validator<PlanAndBuildJob>
                 .Create(ValidateJobNameUniqueness)
-                .AndThen(ValidatePeopleAndOrganizations);
+                .AndThen(ValidatePeopleAndOrganizations)
+                .AndThen(ValidateJobTypeReference)
+                .AndThen(ValidateExternalReferences);
 
             // Combine: critical first, then no-database checks, then database checks
             return criticalValidations.AndThen(noDatabaseChecks.AndThen(databaseChecks));
@@ -384,6 +451,34 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
                 .Any(j => string.IsNullOrEmpty(exceptIdentifier) || !string.Equals(j.Identifier, exceptIdentifier, StringComparison.Ordinal));
         }
 
+        private ValidationResult ValidateJobTypeReference(PlanAndBuildJob job)
+        {
+            return ValidateJobTypeReference(job, GetExistingJobTypeIds(new[] { job.Type == null ? null : job.Type.Identifier }));
+        }
+
+        private ValidationResult ValidateJobTypeReference(PlanAndBuildJob job, HashSet<string> existingJobTypeIds)
+        {
+            var result = new ValidationResult();
+
+            if (job.ShouldValidate(job.TypeField) &&
+                IsReferenceSet(job.Type) &&
+                existingJobTypeIds?.Contains(job.Type.Identifier) != true)
+            {
+                result.AddFailReason(PlanAndBuildJobValidationField.JobType, $"Referenced JobType '{job.Type.Identifier}' does not exist.");
+            }
+
+            return result;
+        }
+
+        private HashSet<string> GetExistingJobTypeIds(IEnumerable<string> jobTypeIds)
+        {
+            var keys = jobTypeIds?.Where(id => !string.IsNullOrWhiteSpace(id)).Distinct().ToList() ?? new List<string>();
+
+            return _helper.JobTypes.GetByIdentifiers(keys)
+                .Select(jobType => jobType.Identifier)
+                .ToHashSet();
+        }
+
         /// <summary>
         /// Validates that <see cref="JobOwnership.AssignedTo"/> and <see cref="JobOwnership.AssignmentGroup"/>
         /// (when set) reference an existing Person/Team in the People &amp; Organizations solution, and that each
@@ -463,6 +558,81 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
             return result;
         }
 
+        private ValidationResult ValidateExternalReferences(PlanAndBuildJob job)
+        {
+            if (_externalReferenceChecker == null)
+            {
+                return new ValidationResult();
+            }
+
+            return ValidateExternalReferences(
+                job,
+                _externalReferenceChecker.GetExistingLocationIds(CollectReferencedLocationIds(new List<PlanAndBuildJob> { job })),
+                _externalReferenceChecker.GetExistingAssetIds(CollectReferencedAssetIds(new List<PlanAndBuildJob> { job })),
+                _externalReferenceChecker.GetExistingConnectionIds(CollectReferencedConnectionIds(new List<PlanAndBuildJob> { job })),
+                _externalReferenceChecker.GetExistingCableTypeIds(CollectReferencedCableTypeIds(new List<PlanAndBuildJob> { job })));
+        }
+
+        private ValidationResult ValidateExternalReferences(
+            PlanAndBuildJob job,
+            IReadOnlyCollection<Guid> existingLocationIds,
+            IReadOnlyCollection<string> existingAssetIds,
+            IReadOnlyCollection<string> existingConnectionIds,
+            IReadOnlyCollection<string> existingCableTypeIds)
+        {
+            var result = new ValidationResult();
+
+            if (existingLocationIds != null && job.ShouldValidateAny(job.LocationsField) && job.Locations != null)
+            {
+                var existing = existingLocationIds.ToHashSet();
+                foreach (var locationId in job.Locations.Where(id => id != Guid.Empty))
+                {
+                    if (!existing.Contains(locationId))
+                    {
+                        result.AddFailReason(PlanAndBuildJobValidationField.Locations, $"Referenced Location '{locationId}' does not exist.");
+                    }
+                }
+            }
+
+            if (existingAssetIds != null && job.ShouldValidateAny(job.AssetsUsedField) && job.AssetsUsed != null)
+            {
+                var existing = existingAssetIds.ToHashSet();
+                foreach (var assetId in job.AssetsUsed.Where(asset => asset != null && IsReferenceSet(asset.AssetId)).Select(asset => asset.AssetId.Identifier))
+                {
+                    if (!existing.Contains(assetId))
+                    {
+                        result.AddFailReason(PlanAndBuildJobValidationField.AssetsUsed, $"Referenced Asset '{assetId}' does not exist.");
+                    }
+                }
+            }
+
+            if (existingConnectionIds != null && job.ShouldValidateAny(job.ConnectionsOnJobField) && job.ConnectionsOnJob != null)
+            {
+                var existing = existingConnectionIds.ToHashSet();
+                foreach (var connectionId in job.ConnectionsOnJob.Where(connection => connection != null && IsReferenceSet(connection.ConnectionId)).Select(connection => connection.ConnectionId.Identifier))
+                {
+                    if (!existing.Contains(connectionId))
+                    {
+                        result.AddFailReason(PlanAndBuildJobValidationField.Connections, $"Referenced Connection '{connectionId}' does not exist.");
+                    }
+                }
+            }
+
+            if (existingCableTypeIds != null && job.ShouldValidateAny(job.ConnectionsOnJobField) && job.ConnectionsOnJob != null)
+            {
+                var existing = existingCableTypeIds.ToHashSet();
+                foreach (var cableTypeId in job.ConnectionsOnJob.Where(connection => connection != null && IsReferenceSet(connection.CableType)).Select(connection => connection.CableType.Identifier))
+                {
+                    if (!existing.Contains(cableTypeId))
+                    {
+                        result.AddFailReason(PlanAndBuildJobValidationField.Connections, $"Referenced CableType '{cableTypeId}' does not exist.");
+                    }
+                }
+            }
+
+            return result;
+        }
+
         private bool IsPersonValid(Guid personId)
         {
             return _peopleApi.People.Count(PersonExposers.Id.Equal(personId)) > 0;
@@ -499,6 +669,12 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
                 .ReadByBigOrFilter(keys, id => TeamExposers.Id.Equal(id))
                 .Select(t => t.Id)
                 .ToHashSet();
+        }
+
+        private static bool IsReferenceSet<T>(SdmObjectReference<T> reference)
+            where T : SdmObject<T>
+        {
+            return reference != null && !string.IsNullOrWhiteSpace(reference.Identifier);
         }
 
         #endregion

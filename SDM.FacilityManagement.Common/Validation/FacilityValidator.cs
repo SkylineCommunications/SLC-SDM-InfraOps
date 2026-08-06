@@ -1,4 +1,4 @@
-﻿namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
+namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
 {
     using System;
     using System.Collections.Generic;
@@ -43,7 +43,29 @@
                     $"Facility Id '{entity.FacilityId}' is already in use.");
             }
 
+            result.AddFailuresFrom(ValidateReferencesAgainstDatabase(new List<Facility> { entity })[0]);
+
             return result;
+        }
+
+        protected override ValidationResult ValidateForDelete(Facility facility)
+        {
+            if (facility == null)
+            {
+                throw new ArgumentNullException(nameof(facility));
+            }
+
+            return ValidateNotInUseWhenDeleted(new List<Facility> { facility })[0];
+        }
+
+        protected override List<ValidationResult> ValidateBulkForDelete(List<Facility> facilities)
+        {
+            if (facilities == null || !facilities.Any())
+            {
+                return new List<ValidationResult>();
+            }
+
+            return ValidateNotInUseWhenDeleted(facilities);
         }
 
         /// <summary>
@@ -110,12 +132,64 @@
             var dbConflicts = ValidateBulkIdsAgainstDatabase(entities);
             results.MergeFrom(dbConflicts);
 
+            var referenceConflicts = ValidateReferencesAgainstDatabase(entities);
+            results.MergeFrom(referenceConflicts);
+
             return results;
         }
 
         private bool IsIdInUse(string id, string exceptIdentifier = null)
         {
             return _entityLoader.CountFacilitiesByFacilityId(id, exceptIdentifier) > 0;
+        }
+
+        private List<ValidationResult> ValidateNotInUseWhenDeleted(List<Facility> facilities)
+        {
+            var results = facilities.Select(_ => new ValidationResult()).ToList();
+            var identifiers = facilities.Select(f => f.Identifier).Where(id => !string.IsNullOrWhiteSpace(id)).Distinct().ToList();
+            if (!identifiers.Any())
+            {
+                return results;
+            }
+
+            var facilitiesWithFloors = _entityLoader.GetFloorsByFacilityIdentifiers(identifiers)
+                .Select(f => f.FacilityFk == null ? null : f.FacilityFk.Facility.Identifier)
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .ToHashSet();
+
+            var facilitiesWithAssets = GetIdentifiersWithAssets(FacilityManagementEntityType.Facility, identifiers);
+
+            for (int i = 0; i < facilities.Count; i++)
+            {
+                if (facilitiesWithFloors.Contains(facilities[i].Identifier))
+                {
+                    results[i].AddFailReason(
+                        FacilityValidationHandler.FacilityValidationField.FacilityId,
+                        "Can't remove facility, since it still has floors assigned to it. Please remove all the floors assigned to this facility before removing it.");
+                }
+
+                if (facilitiesWithAssets.Contains(facilities[i].Identifier))
+                {
+                    results[i].AddFailReason(
+                        FacilityValidationHandler.FacilityValidationField.FacilityId,
+                        "Can't remove facility, since it still has assets assigned to it. Please remove all the assets assigned to this facility before removing it.");
+                }
+            }
+
+            return results;
+        }
+
+        private HashSet<string> GetIdentifiersWithAssets(FacilityManagementEntityType entityType, List<string> identifiers)
+        {
+            var checker = _entityLoader.ExternalReferenceChecker;
+            if (checker == null)
+            {
+                return new HashSet<string>();
+            }
+
+            return (checker.GetIdentifiersWithAssets(entityType, identifiers) ?? new List<string>())
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .ToHashSet();
         }
 
         private List<ValidationResult> ValidateBulkIdsAgainstDatabase(List<Facility> entities)
@@ -151,6 +225,43 @@
                     results[i].AddFailReason(
                         FacilityValidationHandler.FacilityValidationField.FacilityId,
                         $"Facility Id '{id}' is already in use.");
+                }
+            }
+
+            return results;
+        }
+
+        private List<ValidationResult> ValidateReferencesAgainstDatabase(List<Facility> entities)
+        {
+            var results = entities.Select(_ => new ValidationResult()).ToList();
+            var candidates = entities
+                .Select((entity, index) => new
+                {
+                    Entity = entity,
+                    Index = index,
+                    SiteIdentifier = entity.SiteFk == null ? null : FacilityReferenceValidationHelper.GetId(entity.SiteFk.Site),
+                })
+                .Where(x => FacilityReferenceValidationHelper.ShouldValidateReferences(x.Entity) &&
+                    FacilityReferenceValidationHelper.HasId(x.SiteIdentifier))
+                .ToList();
+
+            if (!candidates.Any())
+            {
+                return results;
+            }
+
+            var existingSiteIds = FacilityReferenceValidationHelper.ToIdentifierSet(
+                _entityLoader.GetSitesByIdentifiers(candidates.Select(x => x.SiteIdentifier).Distinct().ToList()));
+
+            foreach (var candidate in candidates)
+            {
+                if (!existingSiteIds.Contains(candidate.SiteIdentifier))
+                {
+                    FacilityReferenceValidationHelper.AddMissingReference(
+                        results[candidate.Index],
+                        FacilityValidationHandler.FacilityValidationField.FacilityId,
+                        "Site",
+                        candidate.SiteIdentifier);
                 }
             }
 

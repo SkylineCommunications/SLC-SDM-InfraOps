@@ -12,6 +12,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Helpers;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
+    using Skyline.DataMiner.SDM.AssetManagement.Validation;
     using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.SDM.FacilityManagement.Helpers;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
@@ -37,6 +38,8 @@ namespace Skyline.DataMiner.SDM.Common.Services
             this.assetManagerApiHelper = assetManagerApiHelper;
             this.facilityManagerApiHelper = facilityManagerApiHelper;
         }
+
+        public IAssetManagementExternalReferenceChecker ExternalReferenceChecker => assetManagerApiHelper?.ExternalReferenceChecker;
 
         #region Single Entity Loaders
 
@@ -451,6 +454,84 @@ namespace Skyline.DataMiner.SDM.Common.Services
                 filter => assetManagerApiHelper.Assets.Read(filter).ToList());
         }
 
+        public List<DeviceType> GetDeviceTypesByDomIds(List<string> identifiers)
+        {
+            if (assetManagerApiHelper?.DeviceTypes == null || identifiers == null || !identifiers.Any())
+            {
+                return new List<DeviceType>();
+            }
+
+            return Tools.RetrieveBigOrFilter(
+                identifiers,
+                id => DeviceTypeExposers.Identifier.Equal(id),
+                filter => assetManagerApiHelper.DeviceTypes.Read(filter).ToList());
+        }
+
+        public List<AssetClass> GetAssetClassesByDomIds(List<string> identifiers)
+        {
+            if (assetManagerApiHelper?.AssetClasses == null || identifiers == null || !identifiers.Any())
+            {
+                return new List<AssetClass>();
+            }
+
+            return Tools.RetrieveBigOrFilter(
+                identifiers,
+                id => AssetClassExposers.Identifier.Equal(id),
+                filter => assetManagerApiHelper.AssetClasses.Read(filter).ToList());
+        }
+
+        public List<Asset> GetAssetsByAssetClassIds(List<string> assetClassIds)
+        {
+            if (assetManagerApiHelper?.Assets == null || assetClassIds == null || !assetClassIds.Any())
+            {
+                return new List<Asset>();
+            }
+
+            return Tools.RetrieveBigOrFilter(
+                assetClassIds,
+                id => AssetExposers.AssetClass.Equal(new SdmObjectReference<AssetClass>(id)),
+                filter => assetManagerApiHelper.Assets.Read(filter).ToList());
+        }
+
+        public List<AssetClass> GetAssetClassesByDeviceTypeIds(List<string> deviceTypeIds)
+        {
+            if (assetManagerApiHelper?.AssetClasses == null || deviceTypeIds == null || !deviceTypeIds.Any())
+            {
+                return new List<AssetClass>();
+            }
+
+            return Tools.RetrieveBigOrFilter(
+                deviceTypeIds,
+                id => AssetClassExposers.DeviceTypeId.Equal(new SdmObjectReference<DeviceType>(id)),
+                filter => assetManagerApiHelper.AssetClasses.Read(filter).ToList());
+        }
+
+        public List<DataPort> GetDataPortsByAssetIds(List<string> assetIds)
+        {
+            if (assetManagerApiHelper?.DataPorts == null || assetIds == null || !assetIds.Any())
+            {
+                return new List<DataPort>();
+            }
+
+            return Tools.RetrieveBigOrFilter(
+                assetIds,
+                id => DataPortExposers.Asset.Equal(new SdmObjectReference<Asset>(id)),
+                filter => assetManagerApiHelper.DataPorts.Read(filter).ToList());
+        }
+
+        public List<PowerPort> GetPowerPortsByAssetIds(List<string> assetIds)
+        {
+            if (assetManagerApiHelper?.PowerPorts == null || assetIds == null || !assetIds.Any())
+            {
+                return new List<PowerPort>();
+            }
+
+            return Tools.RetrieveBigOrFilter(
+                assetIds,
+                id => PowerPortExposers.Asset.Equal(new SdmObjectReference<Asset>(id)),
+                filter => assetManagerApiHelper.PowerPorts.Read(filter).ToList());
+        }
+
         /// <summary>
         /// Retrieves all PortTypes whose identifier matches any of the provided identifiers.
         /// Uses <see cref="Tools.RetrieveBigOrFilter"/> to safely handle large sets without
@@ -467,6 +548,170 @@ namespace Skyline.DataMiner.SDM.Common.Services
                 identifiers,
                 id => PortTypeExposers.Identifier.Equal(id),
                 filter => assetManagerApiHelper.PortTypes.Read(filter).ToList());
+        }
+
+        public List<CableType> GetCableTypesByDomIds(List<string> identifiers)
+        {
+            if (assetManagerApiHelper?.CableTypes == null || identifiers == null || !identifiers.Any())
+            {
+                return new List<CableType>();
+            }
+
+            return Tools.RetrieveBigOrFilter(
+                identifiers,
+                id => CableTypeExposers.Identifier.Equal(id),
+                filter => assetManagerApiHelper.CableTypes.Read(filter).ToList());
+        }
+
+        public List<DataPort> GetDataPortsByDomIds(List<string> identifiers)
+        {
+            if (assetManagerApiHelper?.DataPorts == null || identifiers == null || !identifiers.Any())
+            {
+                return new List<DataPort>();
+            }
+
+            return Tools.RetrieveBigOrFilter(
+                identifiers,
+                id => DataPortExposers.Identifier.Equal(id),
+                filter => assetManagerApiHelper.DataPorts.Read(filter).ToList());
+        }
+
+        public List<PowerPort> GetPowerPortsByDomIds(List<string> identifiers)
+        {
+            if (assetManagerApiHelper?.PowerPorts == null || identifiers == null || !identifiers.Any())
+            {
+                return new List<PowerPort>();
+            }
+
+            return Tools.RetrieveBigOrFilter(
+                identifiers,
+                id => PowerPortExposers.Identifier.Equal(id),
+                filter => assetManagerApiHelper.PowerPorts.Read(filter).ToList());
+        }
+
+        public List<DataPort> GetDataPortsByPortTypeIds(List<string> portTypeIds)
+        {
+            if (assetManagerApiHelper?.DataPorts == null || portTypeIds == null || !portTypeIds.Any())
+            {
+                return new List<DataPort>();
+            }
+
+            return Tools.RetrieveBigOrFilter(
+                portTypeIds,
+                id => DataPortExposers.DataPortInfo.Type.Equal(new SdmObjectReference<PortType>(id)),
+                filter => assetManagerApiHelper.DataPorts.Read(filter).ToList());
+        }
+
+        public List<PowerPort> GetPowerPortsByPortTypeIds(List<string> portTypeIds)
+        {
+            if (assetManagerApiHelper?.PowerPorts == null || portTypeIds == null || !portTypeIds.Any())
+            {
+                return new List<PowerPort>();
+            }
+
+            var portTypeGuids = portTypeIds
+                .Where(id => Guid.TryParse(id, out _))
+                .Select(Guid.Parse)
+                .Distinct()
+                .ToList();
+
+            if (!portTypeGuids.Any())
+            {
+                return new List<PowerPort>();
+            }
+
+            var powerPortTypeExposer = new Exposer<PowerPort, Guid>(
+                obj => Guid.Parse(obj.PowerPortInfo.PortType.Identifier),
+                "PowerPortInfo.PortType");
+
+            return Tools.RetrieveBigOrFilter(
+                portTypeGuids,
+                id => powerPortTypeExposer.Equal(id),
+                filter => assetManagerApiHelper.PowerPorts.Read(filter).ToList());
+        }
+
+        public List<AssetClass> GetAssetClassesByDataPortTypeIds(List<string> portTypeIds)
+        {
+            if (assetManagerApiHelper?.AssetClasses == null || portTypeIds == null || !portTypeIds.Any())
+            {
+                return new List<AssetClass>();
+            }
+
+            var portTypeGuids = portTypeIds
+                .Where(id => Guid.TryParse(id, out _))
+                .Select(Guid.Parse)
+                .Distinct()
+                .ToList();
+
+            if (!portTypeGuids.Any())
+            {
+                return new List<AssetClass>();
+            }
+
+            var dataPortTypeExposer = new Skyline.DataMiner.SDM.Exposers.CollectionExposer<AssetClass, Guid>(
+                obj => obj.DataPorts
+                    .Where(port => port?.Type != null && port.Type.HasValue())
+                    .Select(port => Guid.Parse(port.Type.Identifier)),
+                "DataPorts.Type");
+
+            var matches = Tools.RetrieveBigOrFilter(
+                portTypeGuids,
+                id => dataPortTypeExposer.Contains(id),
+                filter => assetManagerApiHelper.AssetClasses.Read(filter).ToList());
+
+            if (matches.Any())
+            {
+                return matches;
+            }
+
+            var lookup = new HashSet<string>(portTypeIds);
+            return assetManagerApiHelper.AssetClasses.Read(new TRUEFilterElement<AssetClass>())
+                .Where(assetClass => assetClass.DataPorts.Any(port => port?.Type != null
+                    && port.Type.HasValue()
+                    && lookup.Contains(port.Type.Identifier)))
+                .ToList();
+        }
+
+        public List<AssetClass> GetAssetClassesByPowerPortTypeIds(List<string> portTypeIds)
+        {
+            if (assetManagerApiHelper?.AssetClasses == null || portTypeIds == null || !portTypeIds.Any())
+            {
+                return new List<AssetClass>();
+            }
+
+            var portTypeGuids = portTypeIds
+                .Where(id => Guid.TryParse(id, out _))
+                .Select(Guid.Parse)
+                .Distinct()
+                .ToList();
+
+            if (!portTypeGuids.Any())
+            {
+                return new List<AssetClass>();
+            }
+
+            var powerPortTypeExposer = new Skyline.DataMiner.SDM.Exposers.CollectionExposer<AssetClass, Guid>(
+                obj => obj.PowerPorts
+                    .Where(port => port?.PortType != null && port.PortType.HasValue())
+                    .Select(port => Guid.Parse(port.PortType.Identifier)),
+                "PowerPorts.PortType");
+
+            var matches = Tools.RetrieveBigOrFilter(
+                portTypeGuids,
+                id => powerPortTypeExposer.Contains(id),
+                filter => assetManagerApiHelper.AssetClasses.Read(filter).ToList());
+
+            if (matches.Any())
+            {
+                return matches;
+            }
+
+            var lookup = new HashSet<string>(portTypeIds);
+            return assetManagerApiHelper.AssetClasses.Read(new TRUEFilterElement<AssetClass>())
+                .Where(assetClass => assetClass.PowerPorts.Any(port => port?.PortType != null
+                    && port.PortType.HasValue()
+                    && lookup.Contains(port.PortType.Identifier)))
+                .ToList();
         }
 
         /// <summary>
@@ -487,8 +732,113 @@ namespace Skyline.DataMiner.SDM.Common.Services
                 filter => assetManagerApiHelper.CableTypes.Read(filter).ToList());
         }
 
+        public List<Skyline.DataMiner.SDM.AssetManagement.Models.Connection> GetConnectionsByCableTypeIds(List<string> cableTypeIds)
+        {
+            if (assetManagerApiHelper?.Connections == null || cableTypeIds == null || !cableTypeIds.Any())
+            {
+                return new List<Skyline.DataMiner.SDM.AssetManagement.Models.Connection>();
+            }
+
+            return Tools.RetrieveBigOrFilter(
+                cableTypeIds,
+                id => ConnectionExposers.CableType.Equal(new SdmObjectReference<CableType>(id)),
+                filter => assetManagerApiHelper.Connections.Read(filter).ToList());
+        }
+
+        public List<PortType> GetPortTypesByCableTypeIds(List<string> cableTypeIds)
+        {
+            if (assetManagerApiHelper?.PortTypes == null || cableTypeIds == null || !cableTypeIds.Any())
+            {
+                return new List<PortType>();
+            }
+
+            return Tools.RetrieveBigOrFilter(
+                cableTypeIds,
+                id => PortTypeExposers.CableFKs.CableTypeFks.Contains(new SdmObjectReference<CableType>(id)),
+                filter => assetManagerApiHelper.PortTypes.Read(filter).ToList());
+        }
+
+        public List<Skyline.DataMiner.SDM.AssetManagement.Models.Connection> GetConnectionsByPortIds(List<string> portIds)
+        {
+            if (assetManagerApiHelper?.Connections == null || portIds == null || !portIds.Any())
+            {
+                return new List<Skyline.DataMiner.SDM.AssetManagement.Models.Connection>();
+            }
+
+            var portGuids = portIds
+                .Where(id => Guid.TryParse(id, out _))
+                .Select(Guid.Parse)
+                .Distinct()
+                .ToList();
+
+            if (!portGuids.Any())
+            {
+                return new List<Skyline.DataMiner.SDM.AssetManagement.Models.Connection>();
+            }
+
+            return Tools.RetrieveBigOrFilter(
+                portGuids,
+                portId => ConnectionExposers.Source.Port.Equal(portId)
+                    .OR(ConnectionExposers.Destination.Port.Equal(portId)),
+                filter => assetManagerApiHelper.Connections.Read(filter).ToList());
+        }
+
+        public List<Rack> GetRacksByDomIds(List<string> identifiers)
+        {
+            if (facilityManagerApiHelper?.Racks == null || identifiers == null || !identifiers.Any())
+            {
+                return new List<Rack>();
+            }
+
+            return Tools.RetrieveBigOrFilter(
+                identifiers,
+                id => RackExposers.Identifier.Equal(id),
+                filter => facilityManagerApiHelper.Racks.Read(filter).ToList());
+        }
+
+        public List<Facility> GetFacilitiesByDomIds(List<string> identifiers)
+        {
+            if (facilityManagerApiHelper?.Facilities == null || identifiers == null || !identifiers.Any())
+            {
+                return new List<Facility>();
+            }
+
+            return Tools.RetrieveBigOrFilter(
+                identifiers,
+                id => FacilityExposers.Identifier.Equal(id),
+                filter => facilityManagerApiHelper.Facilities.Read(filter).ToList());
+        }
+
+        public List<Room> GetRoomsByDomIds(List<string> identifiers)
+        {
+            if (facilityManagerApiHelper?.Rooms == null || identifiers == null || !identifiers.Any())
+            {
+                return new List<Room>();
+            }
+
+            return Tools.RetrieveBigOrFilter(
+                identifiers,
+                id => RoomExposers.Identifier.Equal(id),
+                filter => facilityManagerApiHelper.Rooms.Read(filter).ToList());
+        }
+
+        public List<Desk> GetDesksByDomIds(List<string> identifiers)
+        {
+            if (facilityManagerApiHelper?.Desks == null || identifiers == null || !identifiers.Any())
+            {
+                return new List<Desk>();
+            }
+
+            return Tools.RetrieveBigOrFilter(
+                identifiers,
+                id => DeskExposers.Identifier.Equal(id),
+                filter => facilityManagerApiHelper.Desks.Read(filter).ToList());
+        }
 
 
+
+        /// <summary>
+        /// Finds assets in a rack, excluding optional asset identifiers.
         /// <para><b>Not suitable for bulk scenarios</b>: builds an AND clause per excluded identifier.</para>
         /// </summary>
         public List<Asset> FindAssetsInRack(string rackIdentifier, List<string> excludeAssetIds = null)

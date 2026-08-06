@@ -231,6 +231,7 @@
             var assetToDelete = Helper.AssetManagement.Assets
                 .Read(AssetExposers.AssetName.Equal("Test Asset 3"))
                 .First();
+            assetToDelete.State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable;
 
             // Act
             Helper.AssetManagement.Assets.Delete(assetToDelete);
@@ -259,6 +260,7 @@
                 AssetExposers.AssetDescription.Equal("Sample asset 7"));
 
             var assetsToDelete = Helper.AssetManagement.Assets.Read(filter).ToList();
+            assetsToDelete.ForEach(asset => asset.State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable);
             var deleteCount = assetsToDelete.Count;
 
             // Act
@@ -290,9 +292,15 @@
             // instead of _locationroom.Value, causing NullReferenceException when ContainerId was absent.
             PrepareReferenceAssetWithAssetClass();
             var roomId = Guid.NewGuid();
+            var room = Helper.FacilityManagement.Rooms.Create(new Room
+            {
+                Identifier = roomId.ToString(),
+                RoomId = $"ROOM-{roomId}",
+                Name = "Asset Location Room",
+            });
             referenceAsset.Location = new AssetLocation
             {
-                RoomId = new SdmObjectReference<Room>(roomId.ToString()),
+                RoomId = new SdmObjectReference<Room>(room.Identifier),
             };
 
             // Act
@@ -307,7 +315,7 @@
                 readBack.Should().NotBeNull();
                 readBack.Location.Should().NotBeNull();
                 readBack.Location.RoomId.Should().NotBeNull();
-                readBack.Location.RoomId.Identifier.Should().Be(roomId.ToString());
+                readBack.Location.RoomId.Identifier.Should().Be(room.Identifier);
                 readBack.Location.RackId.HasValue().Should().BeFalse();
                 readBack.Location.ContainerId.HasValue().Should().BeFalse();
             }

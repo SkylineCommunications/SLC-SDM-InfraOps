@@ -28,6 +28,7 @@
 		{
 			var propertyId = Guid.NewGuid().ToString();
 			var linkedObjectId = Guid.NewGuid();
+			Helper.Properties.Create(new Property { Identifier = propertyId, Name = "Owner", Scope = "Asset" });
 			var original = new PropertyValues
 			{
 				Identifier = Guid.NewGuid().ToString(),

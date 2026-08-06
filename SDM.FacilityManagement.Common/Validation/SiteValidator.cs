@@ -50,6 +50,26 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
             return result;
         }
 
+        protected override ValidationResult ValidateForDelete(Site site)
+        {
+            if (site == null)
+            {
+                throw new ArgumentNullException(nameof(site));
+            }
+
+            return ValidateNoFacilitiesAssigned(new List<Site> { site })[0];
+        }
+
+        protected override List<ValidationResult> ValidateBulkForDelete(List<Site> sites)
+        {
+            if (sites == null || !sites.Any())
+            {
+                return new List<ValidationResult>();
+            }
+
+            return ValidateNoFacilitiesAssigned(sites);
+        }
+
         /// <summary>
         /// Validates name uniqueness for real-time UI validation.
         /// <para><b>Not suitable for bulk scenarios</b>: issues one DB query per call. Use <see cref="ValidateBulk"/> instead.</para>
@@ -132,6 +152,33 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
             return _entityLoader.CountSitesBySiteId(siteId, exceptIdentifier) > 0;
         }
 
+        private List<ValidationResult> ValidateNoFacilitiesAssigned(List<Site> sites)
+        {
+            var results = sites.Select(_ => new ValidationResult()).ToList();
+            var identifiers = sites.Select(s => s.Identifier).Where(id => !string.IsNullOrWhiteSpace(id)).Distinct().ToList();
+            if (!identifiers.Any())
+            {
+                return results;
+            }
+
+            var referencedIdentifiers = _entityLoader.GetFacilitiesBySiteIdentifiers(identifiers)
+                .Select(f => f.SiteFk == null ? null : f.SiteFk.Site.Identifier)
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .ToHashSet();
+
+            for (int i = 0; i < sites.Count; i++)
+            {
+                if (referencedIdentifiers.Contains(sites[i].Identifier))
+                {
+                    results[i].AddFailReason(
+                        SiteValidationHandler.SiteValidationField.SiteId,
+                        "Can't remove site, since it still has facilities assigned to it. Please remove all the facilities assigned to this site before removing it.");
+                }
+            }
+
+            return results;
+        }
+
         private List<ValidationResult> ValidateBulkSiteIdsAgainstDatabase(List<Site> sites)
         {
             var results = sites.Select(_ => new ValidationResult()).ToList();
@@ -195,3 +242,4 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
         }
     }
 }
+

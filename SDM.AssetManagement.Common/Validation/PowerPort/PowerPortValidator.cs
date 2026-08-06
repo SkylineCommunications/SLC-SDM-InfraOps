@@ -160,7 +160,7 @@
                     {
                         results[indexByIdentifier[port.Identifier]].AddFailReason(
                             PowerPortValidationField.Asset,
-                            $"Parent Asset '{group.Key}' not found.");
+                            $"Referenced Asset '{group.Key}' does not exist.");
                     }
 
                     continue;
@@ -174,6 +174,66 @@
             }
 
             return results;
+        }
+
+        protected override ValidationResult ValidateForDelete(PowerPort powerPort)
+        {
+            if (powerPort == null)
+            {
+                throw new ArgumentNullException(nameof(powerPort));
+            }
+
+            return ValidateNotAssignedToConnections(new List<PowerPort> { powerPort })[0];
+        }
+
+        protected override List<ValidationResult> ValidateBulkForDelete(List<PowerPort> powerPorts)
+        {
+            if (powerPorts == null || !powerPorts.Any())
+            {
+                return new List<ValidationResult>();
+            }
+
+            return ValidateNotAssignedToConnections(powerPorts);
+        }
+
+        private List<ValidationResult> ValidateNotAssignedToConnections(List<PowerPort> powerPorts)
+        {
+            var results = powerPorts.Select(_ => new ValidationResult()).ToList();
+
+            var portIds = powerPorts
+                .Select(p => p.Identifier)
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .Distinct()
+                .ToList();
+
+            var connectedPortIds = _entityLoader.GetConnectionsByPortIds(portIds)
+                .SelectMany(GetConnectionPortIds)
+                .ToHashSet();
+
+            for (int i = 0; i < powerPorts.Count; i++)
+            {
+                if (connectedPortIds.Contains(powerPorts[i].Identifier))
+                {
+                    results[i].AddFailReason(
+                        PowerPortValidationField.PowerPort,
+                        "This port has connections assigned. Please delete all of the connections first.");
+                }
+            }
+
+            return results;
+        }
+
+        private static IEnumerable<string> GetConnectionPortIds(Connection connection)
+        {
+            if (connection?.Source != null && connection.Source.Port != Guid.Empty)
+            {
+                yield return connection.Source.Port.ToString();
+            }
+
+            if (connection?.Destination != null && connection.Destination.Port != Guid.Empty)
+            {
+                yield return connection.Destination.Port.ToString();
+            }
         }
 
         #endregion

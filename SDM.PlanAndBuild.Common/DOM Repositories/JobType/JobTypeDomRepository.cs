@@ -22,6 +22,12 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
         /// </summary>
         /// <param name="names">The Names to look up. Duplicates are handled gracefully.</param>
         List<JobType> GetByNames(IEnumerable<string> names);
+
+        /// <summary>
+        /// Reads all JobTypes matching any of the given identifiers, using a single batched big-OR query.
+        /// </summary>
+        /// <param name="identifiers">The identifiers to look up. Duplicates are handled gracefully.</param>
+        List<JobType> GetByIdentifiers(IEnumerable<string> identifiers);
     }
 
     internal partial class JobTypeDomRepository : IJobTypeRepository
@@ -31,6 +37,17 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             var keys = names?.Distinct().ToList() ?? new List<string>();
 
             return this.ReadByBigOrFilter(keys, name => JobTypeExposers.Name.Equal(name));
+        }
+
+        public List<JobType> GetByIdentifiers(IEnumerable<string> identifiers)
+        {
+            var keys = identifiers?.Where(id => !string.IsNullOrWhiteSpace(id)).Distinct().ToList() ?? new List<string>();
+            if (keys.Count == 0)
+            {
+                return new List<JobType>();
+            }
+
+            return this.ReadByBigOrFilter(keys, identifier => JobTypeExposers.Identifier.Equal(identifier));
         }
     }
 }

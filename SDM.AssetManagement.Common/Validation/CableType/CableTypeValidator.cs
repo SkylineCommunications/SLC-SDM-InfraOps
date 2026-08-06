@@ -4,14 +4,16 @@
     using System.Collections.Generic;
     using System.Linq;
 
+    using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.Common.Services;
+    using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
     /// <summary>
     /// Public validator service for CableType validation with comprehensive error handling.
     /// </summary>
-    public class CableTypeValidator
+    public class CableTypeValidator : ValidatorBase<CableType>
     {
         private readonly SdmEntityLoader _entityLoader;
         private readonly Validator<CableType> _validationPipeline;
@@ -31,7 +33,7 @@
         /// Collects all errors without throwing exceptions.
         /// <para><b>Not suitable for bulk scenarios</b>: issues one DB query per item. Use <see cref="ValidateBulk"/> instead.</para>
         /// </summary>
-        public ValidationResult Validate(CableType cableType)
+        protected override ValidationResult Validate(CableType cableType)
         {
             if (cableType == null)
             {
@@ -149,7 +151,7 @@
         /// Returns validation results in the same order as the input cable types.
         /// Result at index i corresponds to cable type at index i.
         /// </summary>
-        public List<ValidationResult> ValidateBulk(List<CableType> cableTypes)
+        protected override List<ValidationResult> ValidateBulk(List<CableType> cableTypes)
         {
             if (cableTypes == null || !cableTypes.Any())
             {
@@ -196,6 +198,67 @@
             // ============================================================
             var nameDbConflicts = ValidateBulkNamesAgainstDatabase(cableTypes);
             results.MergeFrom(nameDbConflicts);
+
+            return results;
+        }
+
+        protected override ValidationResult ValidateForDelete(CableType cableType)
+        {
+            if (cableType == null)
+            {
+                throw new ArgumentNullException(nameof(cableType));
+            }
+
+            return ValidateNotInUseWhenDeleted(new List<CableType> { cableType })[0];
+        }
+
+        protected override List<ValidationResult> ValidateBulkForDelete(List<CableType> cableTypes)
+        {
+            if (cableTypes == null || !cableTypes.Any())
+            {
+                return new List<ValidationResult>();
+            }
+
+            return ValidateNotInUseWhenDeleted(cableTypes);
+        }
+
+        private List<ValidationResult> ValidateNotInUseWhenDeleted(List<CableType> cableTypes)
+        {
+            var results = cableTypes.Select(_ => new ValidationResult()).ToList();
+
+            var identifiers = cableTypes
+                .Select(c => c.Identifier)
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .Distinct()
+                .ToList();
+
+            var cableTypeIdsUsedByConnections = _entityLoader.GetConnectionsByCableTypeIds(identifiers)
+                .Where(connection => connection.CableType != null && connection.CableType.HasValue())
+                .Select(connection => connection.CableType.Identifier)
+                .ToHashSet();
+
+            var cableTypeIdsUsedByPortTypes = _entityLoader.GetPortTypesByCableTypeIds(identifiers)
+                .SelectMany(portType => portType.CableFKs?.CableTypeFks ?? new List<SdmObjectReference<CableType>>())
+                .Where(reference => reference != null && reference.HasValue())
+                .Select(reference => reference.Identifier)
+                .ToHashSet();
+
+            for (int i = 0; i < cableTypes.Count; i++)
+            {
+                if (cableTypeIdsUsedByConnections.Contains(cableTypes[i].Identifier))
+                {
+                    results[i].AddFailReason(
+                        CableTypeValidationHandler.CableTypeValidationField.Connection,
+                        "There are still connections using this cable type. Please remove them first.");
+                }
+
+                if (cableTypeIdsUsedByPortTypes.Contains(cableTypes[i].Identifier))
+                {
+                    results[i].AddFailReason(
+                        CableTypeValidationHandler.CableTypeValidationField.PortType,
+                        "There are still port types using this cable type as compatibility. Please remove them first.");
+                }
+            }
 
             return results;
         }

@@ -109,7 +109,7 @@
             // (via BigOrFilter), then validate each port's type in memory.
             // ============================================================
             var distinctPortTypeIds = dataPorts
-                .Where(p => p.DataPortInfo?.Type != null && p.DataPortInfo.Type.HasValue())
+                .Where(p => p.DataPortInfo?.TypeField.Changed == true && p.DataPortInfo?.Type != null && p.DataPortInfo.Type.HasValue())
                 .Select(p => p.DataPortInfo.Type.Identifier)
                 .Distinct()
                 .ToList();
@@ -140,6 +140,7 @@
             // PHASE 2: ASSET-CONTEXT VALIDATION (grouped by parent Asset)
             // ============================================================
             var distinctAssetIds = dataPorts
+                .Where(p => p.AssetField.Changed)
                 .Select(p => p.Asset.Identifier)
                 .Where(id => !string.IsNullOrWhiteSpace(id))
                 .Distinct()
@@ -149,7 +150,7 @@
                 .ToDictionary(a => a.Identifier);
 
             var portsByAsset = dataPorts
-                .Where(p => !string.IsNullOrWhiteSpace(p.Asset.Identifier))
+                .Where(p => p.AssetField.Changed && !string.IsNullOrWhiteSpace(p.Asset.Identifier))
                 .GroupBy(p => p.Asset.Identifier);
 
             foreach (var group in portsByAsset)
@@ -160,7 +161,7 @@
                     {
                         results[indexByIdentifier[port.Identifier]].AddFailReason(
                             DataPortValidationField.Asset,
-                            $"Parent Asset '{group.Key}' not found.");
+                            $"Referenced Asset '{group.Key}' does not exist.");
                     }
 
                     continue;
@@ -174,6 +175,66 @@
             }
 
             return results;
+        }
+
+        protected override ValidationResult ValidateForDelete(DataPort dataPort)
+        {
+            if (dataPort == null)
+            {
+                throw new ArgumentNullException(nameof(dataPort));
+            }
+
+            return ValidateNotAssignedToConnections(new List<DataPort> { dataPort })[0];
+        }
+
+        protected override List<ValidationResult> ValidateBulkForDelete(List<DataPort> dataPorts)
+        {
+            if (dataPorts == null || !dataPorts.Any())
+            {
+                return new List<ValidationResult>();
+            }
+
+            return ValidateNotAssignedToConnections(dataPorts);
+        }
+
+        private List<ValidationResult> ValidateNotAssignedToConnections(List<DataPort> dataPorts)
+        {
+            var results = dataPorts.Select(_ => new ValidationResult()).ToList();
+
+            var portIds = dataPorts
+                .Select(p => p.Identifier)
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .Distinct()
+                .ToList();
+
+            var connectedPortIds = _entityLoader.GetConnectionsByPortIds(portIds)
+                .SelectMany(GetConnectionPortIds)
+                .ToHashSet();
+
+            for (int i = 0; i < dataPorts.Count; i++)
+            {
+                if (connectedPortIds.Contains(dataPorts[i].Identifier))
+                {
+                    results[i].AddFailReason(
+                        DataPortValidationField.DataPort,
+                        "This port has connections assigned. Please delete all of the connections first.");
+                }
+            }
+
+            return results;
+        }
+
+        private static IEnumerable<string> GetConnectionPortIds(Connection connection)
+        {
+            if (connection?.Source != null && connection.Source.Port != Guid.Empty)
+            {
+                yield return connection.Source.Port.ToString();
+            }
+
+            if (connection?.Destination != null && connection.Destination.Port != Guid.Empty)
+            {
+                yield return connection.Destination.Port.ToString();
+            }
         }
 
         #endregion

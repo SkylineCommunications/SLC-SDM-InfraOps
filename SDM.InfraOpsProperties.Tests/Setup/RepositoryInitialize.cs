@@ -1,6 +1,7 @@
 ﻿namespace SDM.InfraOpsProperties.Tests
 {
 	using SDM.InfraOpsProperties.Tests.Setup;
+	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.SDM.InfraOpsProperties.Helpers;
 	using Skyline.DataMiner.SDM.InfraOpsProperties.Models;
 
@@ -77,6 +78,11 @@
 		/// <returns><see cref="IInfraOpsPropertiesApiHelper"/> API helper interface with populated data.</returns>
 		public static IInfraOpsPropertiesApiHelper PopulatePropertyValues(this IInfraOpsPropertiesApiHelper helper)
 		{
+			if (!helper.Properties.Read(new TRUEFilterElement<Property>()).Any())
+			{
+				helper.Properties.Create(DemoData.Properties);
+			}
+
 			helper.PropertyValues.Create(DemoData.PropertyValuesList);
 
 			return helper;

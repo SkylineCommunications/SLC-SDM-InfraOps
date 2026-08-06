@@ -14,9 +14,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Common.Validation
         public enum ConnectionValidationField
         {
             CableLength,
+            CableType,
             SourcePort,
+            SourcePortType,
             SourceAsset,
             DestinationPort,
+            DestinationPortType,
             DestinationAsset,
         }
 

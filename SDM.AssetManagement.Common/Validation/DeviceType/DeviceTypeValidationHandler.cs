@@ -18,6 +18,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
         {
             Name,
             DeviceType,
+            AssetClass,
+            Asset,
         }
 
         /// <summary>
@@ -30,7 +32,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             if (referencingAssets != null
                 && referencingAssets.Any(asset => asset.State != SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Disposed))
             {
-                result.AddFailReason(DeviceTypeValidationField.DeviceType, "There are already assets assigned to this device type not in the 'Disposed' State");
+                result.AddFailReason(DeviceTypeValidationField.Asset, "There are already assets assigned to this device type not in the 'Disposed' State");
             }
 
             return result.IsValid;

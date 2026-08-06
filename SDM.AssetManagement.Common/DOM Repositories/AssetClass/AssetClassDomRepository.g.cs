@@ -936,7 +936,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				_dataportsSection.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.DataPorts.PortExposure, SharedMappers.DomIds.SlcAsset_Management.Enums.Portexposure.ToValue(dataports.PortExposure));
 				if (dataports.Type != default)
 				{
-					_dataportsSection.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.DataPorts.Type, Convert.ToString(dataports.Type));
+					_dataportsSection.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.DataPorts.Type, System.Guid.Parse(dataports.Type.Identifier));
 				}
 
 				if (dataports.Label != default)
@@ -965,7 +965,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				_powerportsSection.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.PowerPorts.PortExposure, SharedMappers.DomIds.SlcAsset_Management.Enums.Portexposure.ToValue(powerports.PortExposure));
 				if (powerports.PortType != default)
 				{
-					_powerportsSection.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.PowerPorts.PortType, Convert.ToString(powerports.PortType));
+					_powerportsSection.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.PowerPorts.PortType, System.Guid.Parse(powerports.PortType.Identifier));
 				}
 
 				if (powerports.Label != default)

@@ -144,6 +144,26 @@ namespace SDM.PlanAndBuild.Tests.JobTests
 			}
 		}
 
+		[TestMethod]
+		public void Validate_WithUnknownJobTypeReference_ShouldReturnInvalid()
+		{
+			var jobTypeId = Guid.NewGuid().ToString();
+			var job = new PlanAndBuildJob
+			{
+				JobName = "Some Job",
+				Type = new SdmObjectReference<JobType>(jobTypeId),
+			};
+
+			var result = _validator.Validate(job, RepositoryAction.Create);
+
+			using (new AssertionScope())
+			{
+				result.IsValid.Should().BeFalse();
+				result.TryGetFailReason(PlanAndBuildJobValidationHandler.PlanAndBuildJobValidationField.JobType, out var reason).Should().BeTrue();
+				reason.Should().Be($"Referenced JobType '{jobTypeId}' does not exist.");
+			}
+		}
+
 		#endregion
 
 		#region Start/End Dates
@@ -515,6 +535,109 @@ namespace SDM.PlanAndBuild.Tests.JobTests
 
 		#endregion
 
+		#region External References
+
+		[TestMethod]
+		public void Validate_WithUnknownLocationAndExternalChecker_ShouldReturnInvalid()
+		{
+			var locationId = Guid.NewGuid();
+			var validator = new PlanAndBuildJobValidator(Helper, ConnectionHelper.CreateDefaultPeopleApiMock(), new ExternalReferenceCheckerStub());
+			var job = CreateValidJob();
+			job.Locations = new List<Guid> { locationId };
+
+			var result = validator.Validate(job, RepositoryAction.Create);
+
+			using (new AssertionScope())
+			{
+				result.IsValid.Should().BeFalse();
+				result.TryGetFailReason(PlanAndBuildJobValidationHandler.PlanAndBuildJobValidationField.Locations, out var reason).Should().BeTrue();
+				reason.Should().Be($"Referenced Location '{locationId}' does not exist.");
+			}
+		}
+
+		[TestMethod]
+		public void Validate_WithUnknownAssetAndExternalChecker_ShouldReturnInvalid()
+		{
+			var assetId = Guid.NewGuid().ToString();
+			var validator = new PlanAndBuildJobValidator(Helper, ConnectionHelper.CreateDefaultPeopleApiMock(), new ExternalReferenceCheckerStub());
+			var job = CreateValidJob();
+			job.AssetsUsed = new List<JobAsset> { new JobAsset { AssetId = new SdmObjectReference<Asset>(assetId) } };
+
+			var result = validator.Validate(job, RepositoryAction.Create);
+
+			using (new AssertionScope())
+			{
+				result.IsValid.Should().BeFalse();
+				result.TryGetFailReason(PlanAndBuildJobValidationHandler.PlanAndBuildJobValidationField.AssetsUsed, out var reason).Should().BeTrue();
+				reason.Should().Be($"Referenced Asset '{assetId}' does not exist.");
+			}
+		}
+
+		[TestMethod]
+		public void Validate_WithUnknownConnectionAndExternalChecker_ShouldReturnInvalid()
+		{
+			var connectionId = Guid.NewGuid().ToString();
+			var validator = new PlanAndBuildJobValidator(Helper, ConnectionHelper.CreateDefaultPeopleApiMock(), new ExternalReferenceCheckerStub());
+			var job = CreateValidJob();
+			job.ConnectionsOnJob = new List<JobConnection> { new JobConnection { ConnectionId = new SdmObjectReference<Connection>(connectionId) } };
+
+			var result = validator.Validate(job, RepositoryAction.Create);
+
+			using (new AssertionScope())
+			{
+				result.IsValid.Should().BeFalse();
+				result.TryGetFailReason(PlanAndBuildJobValidationHandler.PlanAndBuildJobValidationField.Connections, out var reason).Should().BeTrue();
+				reason.Should().Be($"Referenced Connection '{connectionId}' does not exist.");
+			}
+		}
+
+		[TestMethod]
+		public void Validate_WithValidExternalReferencesAndExternalChecker_ShouldReturnValid()
+		{
+			var locationId = Guid.NewGuid();
+			var assetId = Guid.NewGuid().ToString();
+			var connectionId = Guid.NewGuid().ToString();
+			var cableTypeId = Guid.NewGuid().ToString();
+			var validator = new PlanAndBuildJobValidator(
+				Helper,
+				ConnectionHelper.CreateDefaultPeopleApiMock(),
+				new ExternalReferenceCheckerStub(
+					locationIds: new[] { locationId },
+					assetIds: new[] { assetId },
+					connectionIds: new[] { connectionId },
+					cableTypeIds: new[] { cableTypeId }));
+			var job = CreateValidJob();
+			job.Locations = new List<Guid> { locationId };
+			job.AssetsUsed = new List<JobAsset> { new JobAsset { AssetId = new SdmObjectReference<Asset>(assetId) } };
+			job.ConnectionsOnJob = new List<JobConnection>
+			{
+				new JobConnection
+				{
+					ConnectionId = new SdmObjectReference<Connection>(connectionId),
+					CableType = new SdmObjectReference<CableType>(cableTypeId),
+				},
+			};
+
+			var result = validator.Validate(job, RepositoryAction.Create);
+
+			result.IsValid.Should().BeTrue();
+		}
+
+		[TestMethod]
+		public void Validate_WithUnknownExternalReferencesAndNoExternalChecker_ShouldReturnValid()
+		{
+			var job = CreateValidJob();
+			job.Locations = new List<Guid> { Guid.NewGuid() };
+			job.AssetsUsed = new List<JobAsset> { new JobAsset { AssetId = new SdmObjectReference<Asset>(Guid.NewGuid().ToString()) } };
+			job.ConnectionsOnJob = new List<JobConnection> { new JobConnection { ConnectionId = new SdmObjectReference<Connection>(Guid.NewGuid().ToString()) } };
+
+			var result = _validator.Validate(job, RepositoryAction.Create);
+
+			result.IsValid.Should().BeTrue();
+		}
+
+		#endregion
+
 		#region State-Gated Edits
 
 		[TestMethod]
@@ -722,6 +845,46 @@ namespace SDM.PlanAndBuild.Tests.JobTests
 			}
 
 			return PlanAndBuildJobValidationHandler.PlanAndBuildJobValidationField.JobType;
+		}
+
+		private sealed class ExternalReferenceCheckerStub : IPlanAndBuildExternalReferenceChecker
+		{
+			private readonly IReadOnlyCollection<Guid> locationIds;
+			private readonly IReadOnlyCollection<string> assetIds;
+			private readonly IReadOnlyCollection<string> connectionIds;
+			private readonly IReadOnlyCollection<string> cableTypeIds;
+
+			public ExternalReferenceCheckerStub(
+				IReadOnlyCollection<Guid> locationIds = null,
+				IReadOnlyCollection<string> assetIds = null,
+				IReadOnlyCollection<string> connectionIds = null,
+				IReadOnlyCollection<string> cableTypeIds = null)
+			{
+				this.locationIds = locationIds ?? new List<Guid>();
+				this.assetIds = assetIds ?? new List<string>();
+				this.connectionIds = connectionIds ?? new List<string>();
+				this.cableTypeIds = cableTypeIds ?? new List<string>();
+			}
+
+			public IReadOnlyCollection<Guid> GetExistingLocationIds(IReadOnlyCollection<Guid> locationIds)
+			{
+				return this.locationIds;
+			}
+
+			public IReadOnlyCollection<string> GetExistingAssetIds(IReadOnlyCollection<string> assetIds)
+			{
+				return this.assetIds;
+			}
+
+			public IReadOnlyCollection<string> GetExistingConnectionIds(IReadOnlyCollection<string> connectionIds)
+			{
+				return this.connectionIds;
+			}
+
+			public IReadOnlyCollection<string> GetExistingCableTypeIds(IReadOnlyCollection<string> cableTypeIds)
+			{
+				return this.cableTypeIds;
+			}
 		}
 
 		#endregion

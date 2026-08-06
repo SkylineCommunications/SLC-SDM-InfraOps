@@ -86,6 +86,23 @@
         }
 
         [TestMethod]
+        public void Create_WithNonExistingAssetClassReference_ShouldFail()
+        {
+            var missingId = Guid.NewGuid().ToString();
+            var asset = new Asset
+            {
+                AssetID = "TEST-MISSING-CLASS-001",
+                Name = "Asset With Missing Class",
+                AssetClassId = new SdmObjectReference<AssetClass>(missingId),
+            };
+
+            Action act = () => Helper.AssetManagement.Assets.Create(asset);
+
+            act.Should().Throw<Exception>()
+                .WithMessage($"*Referenced Asset Class '{missingId}' does not exist*");
+        }
+
+        [TestMethod]
         public void Create_WithDraftAssetClass_ShouldFail()
         {
             // Arrange
