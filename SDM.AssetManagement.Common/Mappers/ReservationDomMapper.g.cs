@@ -4,7 +4,7 @@
 //     Changes to this file will be lost if the code is regenerated.
 // </auto-generated>
 //------------------------------------------------------------------------------
-namespace SharedCommonLibrary.AssetManagement.Models
+namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
     using System;
     using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;

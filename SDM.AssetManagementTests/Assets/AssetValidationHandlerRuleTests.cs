@@ -7,12 +7,11 @@ namespace SDM.AssetManagement.Tests.Assets
 
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-    using SharedCommonLibrary.AssetManagement.Models;
+    using Skyline.DataMiner.SDM.AssetManagement.Models;
     using SharedMappers.DomIds;
 
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Common.Validation;
-    using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.AssetManagement.Validation;
     using Skyline.DataMiner.SDM.Common.Services;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;

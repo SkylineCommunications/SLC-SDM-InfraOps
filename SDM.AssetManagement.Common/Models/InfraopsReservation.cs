@@ -1,9 +1,8 @@
-﻿namespace SharedCommonLibrary.AssetManagement.Models
+namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
     using System.Collections.Generic;
 
     using Skyline.DataMiner.SDM;
-    using Skyline.DataMiner.SDM.AssetManagement.Models;
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)asset_management")]

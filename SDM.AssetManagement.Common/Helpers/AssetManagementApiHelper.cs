@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 using Skyline.DataMiner.Net;
 using Skyline.DataMiner.SDM;
@@ -11,8 +11,6 @@ using Skyline.DataMiner.SDM.FacilityManagement.Helpers;
 using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Middleware;
 
 using Connection = Skyline.DataMiner.SDM.AssetManagement.Models.Connection;
-
-using SharedCommonLibrary.AssetManagement.Models;
 
 public class AssetManagementApiHelper : IAssetManagementApiHelper
 {

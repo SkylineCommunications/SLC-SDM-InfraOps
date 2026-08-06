@@ -4,14 +4,13 @@ namespace Skyline.DataMiner.SDM.Common.Services
     using System.Collections.Generic;
     using System.Linq;
 
-    using SharedCommonLibrary.AssetManagement.Models;
+    using Skyline.DataMiner.SDM.AssetManagement.Models;
 
     using Skyline.DataMiner.Net;
     using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Helpers;
-    using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.AssetManagement.Validation;
     using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.SDM.FacilityManagement.Helpers;

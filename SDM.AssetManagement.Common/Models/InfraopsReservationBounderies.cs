@@ -1,4 +1,4 @@
-﻿namespace SharedCommonLibrary.AssetManagement.Models
+namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
     public class InfraopsReservationBounderies
     {

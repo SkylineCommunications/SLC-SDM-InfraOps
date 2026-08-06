@@ -1,8 +1,7 @@
-﻿namespace Skyline.DataMiner.SDM.AssetManagement.Helpers
+namespace Skyline.DataMiner.SDM.AssetManagement.Helpers
 {
-    using SharedCommonLibrary.AssetManagement.Models;
-
     using Skyline.DataMiner.SDM.AssetManagement.Models;
+
     using Skyline.DataMiner.SDM.AssetManagement.Validation;
 
     using Connection = Skyline.DataMiner.SDM.AssetManagement.Models.Connection;
