@@ -821,7 +821,7 @@ namespace SDM.PlanAndBuild.Tests.JobTests
 
 			if (fieldName == "Start")
 			{
-				job.Start = job.Start.Value.AddHours(1);
+				job.Start = job.Start.GetValueOrDefault().AddHours(1);
 				return;
 			}
 
@@ -855,10 +855,10 @@ namespace SDM.PlanAndBuild.Tests.JobTests
 			private readonly IReadOnlyCollection<string> cableTypeIds;
 
 			public ExternalReferenceCheckerStub(
-				IReadOnlyCollection<Guid> locationIds = null,
-				IReadOnlyCollection<string> assetIds = null,
-				IReadOnlyCollection<string> connectionIds = null,
-				IReadOnlyCollection<string> cableTypeIds = null)
+				IReadOnlyCollection<Guid>? locationIds = null,
+				IReadOnlyCollection<string>? assetIds = null,
+				IReadOnlyCollection<string>? connectionIds = null,
+				IReadOnlyCollection<string>? cableTypeIds = null)
 			{
 				this.locationIds = locationIds ?? new List<Guid>();
 				this.assetIds = assetIds ?? new List<string>();

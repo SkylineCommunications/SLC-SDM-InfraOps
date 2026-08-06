@@ -283,6 +283,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                 })
                 .Where(x => FacilityReferenceValidationHelper.ShouldValidateReferences(x.Rack) &&
                     FacilityReferenceValidationHelper.HasId(x.RowIdentifier))
+                .Select(x => (x.Index, x.RowIdentifier))
                 .ToList();
             var zoneCandidates = racks
                 .Select((rack, index) => new
@@ -293,6 +294,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                 })
                 .Where(x => FacilityReferenceValidationHelper.ShouldValidateReferences(x.Rack) &&
                     FacilityReferenceValidationHelper.HasId(x.ZoneIdentifier))
+                .Select(x => (x.Index, x.ZoneIdentifier))
                 .ToList();
             var resourceCandidates = racks
                 .Select((rack, index) => new
@@ -303,6 +305,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                 })
                 .Where(x => FacilityReferenceValidationHelper.ShouldValidateReferences(x.Rack) &&
                     FacilityReferenceValidationHelper.HasId(x.ResourceId))
+                .Select(x => (x.Index, x.ResourceId))
                 .ToList();
 
             var existingRowIds = rowCandidates.Any()
@@ -313,57 +316,59 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                 : new HashSet<string>();
             var existingResourceIds = GetExistingResourceIds(resourceCandidates.Select(x => x.ResourceId));
 
-            foreach (var candidate in rowCandidates)
-            {
-                if (!existingRowIds.Contains(candidate.RowIdentifier))
-                {
-                    FacilityReferenceValidationHelper.AddMissingReference(
-                        results[candidate.Index],
-                        RackValidationHandler.RackValidationField.RackId,
-                        "Row",
-                        candidate.RowIdentifier);
-                }
-            }
-
-            foreach (var candidate in zoneCandidates)
-            {
-                if (!existingZoneIds.Contains(candidate.ZoneIdentifier))
-                {
-                    FacilityReferenceValidationHelper.AddMissingReference(
-                        results[candidate.Index],
-                        RackValidationHandler.RackValidationField.RackId,
-                        "Zone",
-                        candidate.ZoneIdentifier);
-                }
-            }
-
-            foreach (var candidate in resourceCandidates)
-            {
-                if (existingResourceIds != null && !existingResourceIds.Contains(candidate.ResourceId))
-                {
-                    FacilityReferenceValidationHelper.AddMissingReference(
-                        results[candidate.Index],
-                        RackValidationHandler.RackValidationField.RackId,
-                        "Resource",
-                        candidate.ResourceId);
-                }
-            }
+            ValidateStringReferences(rowCandidates, existingRowIds, "Row", results);
+            ValidateStringReferences(zoneCandidates, existingZoneIds, "Zone", results);
+            ValidateResourceReferences(resourceCandidates, existingResourceIds, results);
 
             return results;
+        }
+
+        private static void ValidateStringReferences(
+            List<(int Index, string Identifier)> candidates,
+            HashSet<string> existingIds,
+            string referenceType,
+            List<ValidationResult> results)
+        {
+            foreach (var (index, identifier) in candidates)
+            {
+                if (!existingIds.Contains(identifier))
+                {
+                    FacilityReferenceValidationHelper.AddMissingReference(
+                        results[index],
+                        RackValidationHandler.RackValidationField.RackId,
+                        referenceType,
+                        identifier);
+                }
+            }
+        }
+
+        private static void ValidateResourceReferences(
+            List<(int Index, Guid ResourceId)> candidates,
+            HashSet<Guid> existingIds,
+            List<ValidationResult> results)
+        {
+            foreach (var (index, resourceId) in candidates)
+            {
+                if (!existingIds.Contains(resourceId))
+                {
+                    FacilityReferenceValidationHelper.AddMissingReference(
+                        results[index],
+                        RackValidationHandler.RackValidationField.RackId,
+                        "Resource",
+                        resourceId);
+                }
+            }
         }
 
         private HashSet<Guid> GetExistingResourceIds(IEnumerable<Guid> resourceIds)
         {
             var checker = _entityLoader.ExternalReferenceChecker;
-            if (checker == null)
-            {
-                return null;
-            }
-
             var keys = resourceIds?.Where(FacilityReferenceValidationHelper.HasId).Distinct().ToList() ?? new List<Guid>();
-            if (!keys.Any())
+            if (checker == null || !keys.Any())
             {
-                return new HashSet<Guid>();
+                // No reference checker available: treat all referenced ids as existing so the
+                // reference check is effectively skipped instead of reporting false errors.
+                return new HashSet<Guid>(keys);
             }
 
             return FacilityReferenceValidationHelper.ToGuidSet(checker.GetExistingResourceIds(keys));

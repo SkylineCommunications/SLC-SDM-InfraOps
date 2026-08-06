@@ -80,32 +80,51 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
 
             for (int i = 0; i < deviceTypes.Count; i++)
             {
-                if (deviceTypeIdsUsedByAssetClasses.Contains(deviceTypes[i].Identifier))
-                {
-                    results[i].AddFailReason(
-                        DeviceTypeValidationHandler.DeviceTypeValidationField.AssetClass,
-                        "There are still asset classes associated with this device type. Please remove them first.");
-                }
-
-                var referencingAssets = new List<Asset>();
-                if (assetClassesByDeviceType.TryGetValue(deviceTypes[i].Identifier, out var referencingAssetClasses))
-                {
-                    foreach (var assetClass in referencingAssetClasses)
-                    {
-                        if (assetsByAssetClassId.TryGetValue(assetClass.Identifier, out var assets))
-                        {
-                            referencingAssets.AddRange(assets);
-                        }
-                    }
-                }
-
-                if (!DeviceTypeValidationHandler.CanDelete(referencingAssets, out var deviceTypeResult))
-                {
-                    results[i].AddFailuresFrom(deviceTypeResult);
-                }
+                ValidateDeviceTypeNotInUse(deviceTypes[i], results[i], deviceTypeIdsUsedByAssetClasses, assetClassesByDeviceType, assetsByAssetClassId);
             }
 
             return results;
+        }
+
+        private static void ValidateDeviceTypeNotInUse(
+            DeviceType deviceType,
+            ValidationResult result,
+            HashSet<string> deviceTypeIdsUsedByAssetClasses,
+            Dictionary<string, List<AssetClass>> assetClassesByDeviceType,
+            Dictionary<string, List<Asset>> assetsByAssetClassId)
+        {
+            if (deviceTypeIdsUsedByAssetClasses.Contains(deviceType.Identifier))
+            {
+                result.AddFailReason(
+                    DeviceTypeValidationHandler.DeviceTypeValidationField.AssetClass,
+                    "There are still asset classes associated with this device type. Please remove them first.");
+            }
+
+            var referencingAssets = CollectReferencingAssets(deviceType.Identifier, assetClassesByDeviceType, assetsByAssetClassId);
+            if (!DeviceTypeValidationHandler.CanDelete(referencingAssets, out var deviceTypeResult))
+            {
+                result.AddFailuresFrom(deviceTypeResult);
+            }
+        }
+
+        private static List<Asset> CollectReferencingAssets(
+            string deviceTypeId,
+            Dictionary<string, List<AssetClass>> assetClassesByDeviceType,
+            Dictionary<string, List<Asset>> assetsByAssetClassId)
+        {
+            var referencingAssets = new List<Asset>();
+            if (assetClassesByDeviceType.TryGetValue(deviceTypeId, out var referencingAssetClasses))
+            {
+                foreach (var assetClass in referencingAssetClasses)
+                {
+                    if (assetsByAssetClassId.TryGetValue(assetClass.Identifier, out var assets))
+                    {
+                        referencingAssets.AddRange(assets);
+                    }
+                }
+            }
+
+            return referencingAssets;
         }
     }
 }

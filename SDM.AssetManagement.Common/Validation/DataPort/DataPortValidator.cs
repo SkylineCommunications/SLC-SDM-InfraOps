@@ -88,26 +88,33 @@
                 indexByIdentifier[dataPorts[i].Identifier] = i;
             }
 
-            // ============================================================
-            // PHASE 1: NO DATABASE ACCESS CHECKS (BUSINESS RULES)
-            // ============================================================
-            for (int i = 0; i < dataPorts.Count; i++)
-            {
-                var nonDbResult = _validationCore.ValidateWithoutDatabaseAccess(dataPorts[i]);
-                results[i].AddFailuresFrom(nonDbResult);
-            }
-
-            // Fast-fail if business rules fail
+            ValidateBusinessRules(dataPorts, results);
             if (results.AnyInvalid())
             {
                 return results;
             }
 
-            // ============================================================
-            // PHASE 1.5: PORT TYPE VALIDATION (batch-loaded)
-            // Bulk-load all distinct referenced PortTypes in one query
-            // (via BigOrFilter), then validate each port's type in memory.
-            // ============================================================
+            ValidatePortTypesInBulk(dataPorts, results);
+            if (results.AnyInvalid())
+            {
+                return results;
+            }
+
+            ValidateAssetContext(dataPorts, results, indexByIdentifier);
+
+            return results;
+        }
+
+        private void ValidateBusinessRules(List<DataPort> dataPorts, List<ValidationResult> results)
+        {
+            for (int i = 0; i < dataPorts.Count; i++)
+            {
+                results[i].AddFailuresFrom(_validationCore.ValidateWithoutDatabaseAccess(dataPorts[i]));
+            }
+        }
+
+        private void ValidatePortTypesInBulk(List<DataPort> dataPorts, List<ValidationResult> results)
+        {
             var distinctPortTypeIds = dataPorts
                 .Where(p => p.DataPortInfo?.TypeField.Changed == true && p.DataPortInfo?.Type != null && p.DataPortInfo.Type.HasValue())
                 .Select(p => p.DataPortInfo.Type.Identifier)
@@ -129,16 +136,10 @@
 
                 results[i].AddFailuresFrom(_validationCore.ValidatePortTypeAgainst(port, loadedPortType));
             }
+        }
 
-            // Fast-fail if port type validation fails
-            if (results.AnyInvalid())
-            {
-                return results;
-            }
-
-            // ============================================================
-            // PHASE 2: ASSET-CONTEXT VALIDATION (grouped by parent Asset)
-            // ============================================================
+        private void ValidateAssetContext(List<DataPort> dataPorts, List<ValidationResult> results, Dictionary<string, int> indexByIdentifier)
+        {
             var distinctAssetIds = dataPorts
                 .Where(p => p.AssetField.Changed)
                 .Select(p => p.Asset.Identifier)
@@ -155,26 +156,29 @@
 
             foreach (var group in portsByAsset)
             {
-                if (!assetMap.TryGetValue(group.Key, out var asset))
-                {
-                    foreach (var port in group)
-                    {
-                        results[indexByIdentifier[port.Identifier]].AddFailReason(
-                            DataPortValidationField.Asset,
-                            $"Referenced Asset '{group.Key}' does not exist.");
-                    }
+                ValidateAssetGroup(group, assetMap, results, indexByIdentifier);
+            }
+        }
 
-                    continue;
+        private void ValidateAssetGroup(IGrouping<string, DataPort> group, Dictionary<string, Asset> assetMap, List<ValidationResult> results, Dictionary<string, int> indexByIdentifier)
+        {
+            if (!assetMap.TryGetValue(group.Key, out var asset))
+            {
+                foreach (var port in group)
+                {
+                    results[indexByIdentifier[port.Identifier]].AddFailReason(
+                        DataPortValidationField.Asset,
+                        $"Referenced Asset '{group.Key}' does not exist.");
                 }
 
-                var groupResults = _validationCore.ValidateDataPortsForAsset(group.ToList(), asset);
-                foreach (var kvp in groupResults)
-                {
-                    results[indexByIdentifier[kvp.Key]].AddFailuresFrom(kvp.Value);
-                }
+                return;
             }
 
-            return results;
+            var groupResults = _validationCore.ValidateDataPortsForAsset(group.ToList(), asset);
+            foreach (var kvp in groupResults)
+            {
+                results[indexByIdentifier[kvp.Key]].AddFailuresFrom(kvp.Value);
+            }
         }
 
         protected override ValidationResult ValidateForDelete(DataPort dataPort)

@@ -265,9 +265,9 @@ namespace SDM.AssetManagement.Tests
         private AssetClass CreateAssetClass(
             string name,
             SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum state,
-            DeviceType deviceType = null,
-            List<DataPortInfo> dataPorts = null,
-            List<SlcAsset_Management.Enums.TagOption> deviceTags = null,
+            DeviceType? deviceType = null,
+            List<DataPortInfo>? dataPorts = null,
+            List<SlcAsset_Management.Enums.TagOption>? deviceTags = null,
             SlcAsset_Management.Enums.PowerSupplyEnum? powerSupply = null)
         {
             deviceType = deviceType ?? CreateDeviceType($"{name} Device Type", deviceTags);
@@ -305,7 +305,7 @@ namespace SDM.AssetManagement.Tests
             return Helper.AssetManagement.Assets.Create(asset);
         }
 
-        private DeviceType CreateDeviceType(string name, List<SlcAsset_Management.Enums.TagOption> tags = null)
+        private DeviceType CreateDeviceType(string name, List<SlcAsset_Management.Enums.TagOption>? tags = null)
         {
             var deviceType = new DeviceType
             {
@@ -325,7 +325,7 @@ namespace SDM.AssetManagement.Tests
             return Helper.AssetManagement.DeviceTypes.Create(deviceType);
         }
 
-        private PortType CreateDataPortType(string name, CableType compatibleCableType = null)
+        private PortType CreateDataPortType(string name, CableType? compatibleCableType = null)
         {
             return CreatePortType(name, SlcAsset_Management.Enums.CategoriesEnum.Data, compatibleCableType);
         }
@@ -335,7 +335,7 @@ namespace SDM.AssetManagement.Tests
             return CreatePortType(name, SlcAsset_Management.Enums.CategoriesEnum.Power);
         }
 
-        private PortType CreatePortType(string name, SlcAsset_Management.Enums.CategoriesEnum category, CableType compatibleCableType = null)
+        private PortType CreatePortType(string name, SlcAsset_Management.Enums.CategoriesEnum category, CableType? compatibleCableType = null)
         {
             var cableRefs = compatibleCableType == null
                 ? new List<SdmObjectReference<CableType>>()
@@ -411,7 +411,7 @@ namespace SDM.AssetManagement.Tests
             return Helper.AssetManagement.PowerPorts.Create(powerPort);
         }
 
-        private void CreateConnection(string sourcePortId, SdmObjectReference<PortType> sourcePortType, CableType cableType = null)
+        private void CreateConnection(string sourcePortId, SdmObjectReference<PortType> sourcePortType, CableType? cableType = null)
         {
             var connection = new Connection
             {

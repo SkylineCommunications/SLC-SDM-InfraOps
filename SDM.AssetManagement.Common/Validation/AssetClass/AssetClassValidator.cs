@@ -413,41 +413,54 @@
                 for (int i = 0; i < assetClasses.Count; i++)
                 {
                     var assetClass = assetClasses[i];
-                    if (assetClass.ShouldValidate(assetClass.DeviceTypeIdField)
-                        && assetClass.DeviceTypeId != null
-                        && assetClass.DeviceTypeId.HasValue()
-                        && !existingDeviceTypeIds.Contains(assetClass.DeviceTypeId.Identifier))
-                    {
-                        results[i].AddFailReason(AssetClassValidationHandler.AssetClassValidationField.DeviceTypeId,
-                            $"Referenced Device Type '{assetClass.DeviceTypeId.Identifier}' does not exist.");
-                    }
-
-                    foreach (var port in assetClass.DataPorts ?? new List<DataPortInfo>())
-                    {
-                        if (port?.Type != null && port.Type.HasValue() && !existingPortTypeIds.Contains(port.Type.Identifier))
-                        {
-                            results[i].AddFailReason("AssetClass.DataPorts.Type", "DataPorts", $"Referenced Port Type '{port.Type.Identifier}' does not exist.");
-                        }
-                    }
-
-                    foreach (var port in assetClass.PowerPorts ?? new List<PowerPortInfo>())
-                    {
-                        if (port?.PortType != null && port.PortType.HasValue() && !existingPortTypeIds.Contains(port.PortType.Identifier))
-                        {
-                            results[i].AddFailReason("AssetClass.PowerPorts.PortType", "PowerPorts", $"Referenced Port Type '{port.PortType.Identifier}' does not exist.");
-                        }
-                    }
-
-                    if (assetClass.ShouldValidate(assetClass.ManufacturerField)
-                        && assetClass.Manufacturer != Guid.Empty
-                        && _entityLoader.ExternalReferenceChecker != null
-                        && !existingManufacturers.Contains(assetClass.Manufacturer))
-                    {
-                        results[i].AddFailReason("AssetClass.Manufacturer", "Manufacturer", $"Referenced Organization '{assetClass.Manufacturer}' does not exist.");
-                    }
+                    ValidateDeviceTypeReference(assetClass, results[i], existingDeviceTypeIds);
+                    ValidatePortTypeReferences(assetClass, results[i], existingPortTypeIds);
+                    ValidateManufacturerReference(assetClass, results[i], existingManufacturers);
                 }
 
                 return results;
+            }
+
+            private static void ValidateDeviceTypeReference(AssetClass assetClass, ValidationResult result, HashSet<string> existingDeviceTypeIds)
+            {
+                if (assetClass.ShouldValidate(assetClass.DeviceTypeIdField)
+                    && assetClass.DeviceTypeId != null
+                    && assetClass.DeviceTypeId.HasValue()
+                    && !existingDeviceTypeIds.Contains(assetClass.DeviceTypeId.Identifier))
+                {
+                    result.AddFailReason(AssetClassValidationHandler.AssetClassValidationField.DeviceTypeId,
+                        $"Referenced Device Type '{assetClass.DeviceTypeId.Identifier}' does not exist.");
+                }
+            }
+
+            private static void ValidatePortTypeReferences(AssetClass assetClass, ValidationResult result, HashSet<string> existingPortTypeIds)
+            {
+                foreach (var port in assetClass.DataPorts ?? new List<DataPortInfo>())
+                {
+                    if (port?.Type != null && port.Type.HasValue() && !existingPortTypeIds.Contains(port.Type.Identifier))
+                    {
+                        result.AddFailReason("AssetClass.DataPorts.Type", "DataPorts", $"Referenced Port Type '{port.Type.Identifier}' does not exist.");
+                    }
+                }
+
+                foreach (var port in assetClass.PowerPorts ?? new List<PowerPortInfo>())
+                {
+                    if (port?.PortType != null && port.PortType.HasValue() && !existingPortTypeIds.Contains(port.PortType.Identifier))
+                    {
+                        result.AddFailReason("AssetClass.PowerPorts.PortType", "PowerPorts", $"Referenced Port Type '{port.PortType.Identifier}' does not exist.");
+                    }
+                }
+            }
+
+            private void ValidateManufacturerReference(AssetClass assetClass, ValidationResult result, HashSet<Guid> existingManufacturers)
+            {
+                if (assetClass.ShouldValidate(assetClass.ManufacturerField)
+                    && assetClass.Manufacturer != Guid.Empty
+                    && _entityLoader.ExternalReferenceChecker != null
+                    && !existingManufacturers.Contains(assetClass.Manufacturer))
+                {
+                    result.AddFailReason("AssetClass.Manufacturer", "Manufacturer", $"Referenced Organization '{assetClass.Manufacturer}' does not exist.");
+                }
             }
 
             private void ValidateDataPortTypeReferences(IEnumerable<DataPortInfo> ports, string fieldId, string fieldName, ValidationResult result)

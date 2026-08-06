@@ -32,13 +32,17 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
         /// <param name="helper">
         /// The Plan &amp; Build API helper used to query existing Jobs for uniqueness checks.
         /// Note: this is captured by reference during <see cref="PlanAndBuildApiHelper"/> construction, before
-        /// its repositories are wired up. Only <see cref="Validate"/>/<see cref="ValidateAndThrow"/> (called
+        /// its repositories are wired up. Only <see cref="Validate(PlanAndBuildJob)"/>/<see cref="ValidateAndThrow"/> (called
         /// after construction completes) access <paramref name="helper"/>'s repositories.
         /// </param>
         /// <param name="peopleApi">
         /// The People &amp; Organizations API used to validate the existence of Person/Team references in Jobs.
         /// Kept separate from the helper so validation does not require <see cref="IPeopleAndOrganizationsApi"/>
         /// to be part of the public <see cref="IPlanAndBuildApiHelper"/> contract.
+        /// </param>
+        /// <param name="externalReferenceChecker">
+        /// Optional cross-module checker used to verify that referenced Location/Asset/Connection/CableType ids
+        /// exist. When <c>null</c>, those reference checks are skipped.
         /// </param>
         public PlanAndBuildJobValidator(
             IPlanAndBuildApiHelper helper,
@@ -419,7 +423,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
 
         /// <summary>
         /// Batch variant of <see cref="ValidateJobNameUniqueness(PlanAndBuildJob)"/>, used by
-        /// <see cref="ValidateBulk"/>. Checks the pre-fetched <paramref name="existingByJobName"/> lookup (built
+        /// <see cref="ValidateBulk(System.Collections.Generic.List{PlanAndBuildJob})"/>. Checks the pre-fetched <paramref name="existingByJobName"/> lookup (built
         /// once for the whole batch via <see cref="IPlanAndBuildJobRepository.GetByJobNames"/>) instead of
         /// issuing its own DB query.
         /// </summary>
@@ -521,7 +525,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
 
         /// <summary>
         /// Batch variant of <see cref="ValidatePeopleAndOrganizations(PlanAndBuildJob)"/>, used by
-        /// <see cref="ValidateBulk"/>. Checks the pre-fetched <paramref name="existingPersonIds"/>/
+        /// <see cref="ValidateBulk(System.Collections.Generic.List{PlanAndBuildJob})"/>. Checks the pre-fetched <paramref name="existingPersonIds"/>/
         /// <paramref name="existingTeamIds"/> sets (built once for the whole batch via
         /// <see cref="GetExistingPersonIds"/>/<see cref="GetExistingTeamIds"/>) instead of issuing a People
         /// &amp; Organizations query per Person/Team reference.
@@ -581,56 +585,79 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
             IReadOnlyCollection<string> existingCableTypeIds)
         {
             var result = new ValidationResult();
-
-            if (existingLocationIds != null && job.ShouldValidateAny(job.LocationsField) && job.Locations != null)
-            {
-                var existing = existingLocationIds.ToHashSet();
-                foreach (var locationId in job.Locations.Where(id => id != Guid.Empty))
-                {
-                    if (!existing.Contains(locationId))
-                    {
-                        result.AddFailReason(PlanAndBuildJobValidationField.Locations, $"Referenced Location '{locationId}' does not exist.");
-                    }
-                }
-            }
-
-            if (existingAssetIds != null && job.ShouldValidateAny(job.AssetsUsedField) && job.AssetsUsed != null)
-            {
-                var existing = existingAssetIds.ToHashSet();
-                foreach (var assetId in job.AssetsUsed.Where(asset => asset != null && IsReferenceSet(asset.AssetId)).Select(asset => asset.AssetId.Identifier))
-                {
-                    if (!existing.Contains(assetId))
-                    {
-                        result.AddFailReason(PlanAndBuildJobValidationField.AssetsUsed, $"Referenced Asset '{assetId}' does not exist.");
-                    }
-                }
-            }
-
-            if (existingConnectionIds != null && job.ShouldValidateAny(job.ConnectionsOnJobField) && job.ConnectionsOnJob != null)
-            {
-                var existing = existingConnectionIds.ToHashSet();
-                foreach (var connectionId in job.ConnectionsOnJob.Where(connection => connection != null && IsReferenceSet(connection.ConnectionId)).Select(connection => connection.ConnectionId.Identifier))
-                {
-                    if (!existing.Contains(connectionId))
-                    {
-                        result.AddFailReason(PlanAndBuildJobValidationField.Connections, $"Referenced Connection '{connectionId}' does not exist.");
-                    }
-                }
-            }
-
-            if (existingCableTypeIds != null && job.ShouldValidateAny(job.ConnectionsOnJobField) && job.ConnectionsOnJob != null)
-            {
-                var existing = existingCableTypeIds.ToHashSet();
-                foreach (var cableTypeId in job.ConnectionsOnJob.Where(connection => connection != null && IsReferenceSet(connection.CableType)).Select(connection => connection.CableType.Identifier))
-                {
-                    if (!existing.Contains(cableTypeId))
-                    {
-                        result.AddFailReason(PlanAndBuildJobValidationField.Connections, $"Referenced CableType '{cableTypeId}' does not exist.");
-                    }
-                }
-            }
-
+            ValidateLocationReferences(job, existingLocationIds, result);
+            ValidateAssetReferences(job, existingAssetIds, result);
+            ValidateConnectionReferences(job, existingConnectionIds, result);
+            ValidateCableTypeReferences(job, existingCableTypeIds, result);
             return result;
+        }
+
+        private static void ValidateLocationReferences(PlanAndBuildJob job, IReadOnlyCollection<Guid> existingLocationIds, ValidationResult result)
+        {
+            if (existingLocationIds == null || !job.ShouldValidateAny(job.LocationsField) || job.Locations == null)
+            {
+                return;
+            }
+
+            var existing = existingLocationIds.ToHashSet();
+            foreach (var locationId in job.Locations.Where(id => id != Guid.Empty))
+            {
+                if (!existing.Contains(locationId))
+                {
+                    result.AddFailReason(PlanAndBuildJobValidationField.Locations, $"Referenced Location '{locationId}' does not exist.");
+                }
+            }
+        }
+
+        private static void ValidateAssetReferences(PlanAndBuildJob job, IReadOnlyCollection<string> existingAssetIds, ValidationResult result)
+        {
+            if (existingAssetIds == null || !job.ShouldValidateAny(job.AssetsUsedField) || job.AssetsUsed == null)
+            {
+                return;
+            }
+
+            var existing = existingAssetIds.ToHashSet();
+            foreach (var assetId in job.AssetsUsed.Where(asset => asset != null && IsReferenceSet(asset.AssetId)).Select(asset => asset.AssetId.Identifier))
+            {
+                if (!existing.Contains(assetId))
+                {
+                    result.AddFailReason(PlanAndBuildJobValidationField.AssetsUsed, $"Referenced Asset '{assetId}' does not exist.");
+                }
+            }
+        }
+
+        private static void ValidateConnectionReferences(PlanAndBuildJob job, IReadOnlyCollection<string> existingConnectionIds, ValidationResult result)
+        {
+            if (existingConnectionIds == null || !job.ShouldValidateAny(job.ConnectionsOnJobField) || job.ConnectionsOnJob == null)
+            {
+                return;
+            }
+
+            var existing = existingConnectionIds.ToHashSet();
+            foreach (var connectionId in job.ConnectionsOnJob.Where(connection => connection != null && IsReferenceSet(connection.ConnectionId)).Select(connection => connection.ConnectionId.Identifier))
+            {
+                if (!existing.Contains(connectionId))
+                {
+                    result.AddFailReason(PlanAndBuildJobValidationField.Connections, $"Referenced Connection '{connectionId}' does not exist.");
+                }
+            }
+        }
+
+        private static void ValidateCableTypeReferences(PlanAndBuildJob job, IReadOnlyCollection<string> existingCableTypeIds, ValidationResult result)
+        {
+            if (existingCableTypeIds == null || !job.ShouldValidateAny(job.ConnectionsOnJobField) || job.ConnectionsOnJob == null)
+            {
+                return;
+            }
+
+            var existing = existingCableTypeIds.ToHashSet();
+            foreach (var cableTypeId in job.ConnectionsOnJob.Where(connection => connection != null && IsReferenceSet(connection.CableType)).Select(connection => connection.CableType.Identifier))
+            {
+                if (!existing.Contains(cableTypeId))
+                {
+                    result.AddFailReason(PlanAndBuildJobValidationField.Connections, $"Referenced CableType '{cableTypeId}' does not exist.");
+                }
+            }
         }
 
         private bool IsPersonValid(Guid personId)

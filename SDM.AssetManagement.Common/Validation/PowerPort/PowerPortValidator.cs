@@ -88,26 +88,33 @@
                 indexByIdentifier[powerPorts[i].Identifier] = i;
             }
 
-            // ============================================================
-            // PHASE 1: NO DATABASE ACCESS CHECKS (BUSINESS RULES)
-            // ============================================================
-            for (int i = 0; i < powerPorts.Count; i++)
-            {
-                var nonDbResult = _validationCore.ValidateWithoutDatabaseAccess(powerPorts[i]);
-                results[i].AddFailuresFrom(nonDbResult);
-            }
-
-            // Fast-fail if business rules fail
+            ValidateBusinessRules(powerPorts, results);
             if (results.AnyInvalid())
             {
                 return results;
             }
 
-            // ============================================================
-            // PHASE 1.5: PORT TYPE VALIDATION (batch-loaded)
-            // Bulk-load all distinct referenced PortTypes in one query
-            // (via BigOrFilter), then validate each port's type in memory.
-            // ============================================================
+            ValidatePortTypesInBulk(powerPorts, results);
+            if (results.AnyInvalid())
+            {
+                return results;
+            }
+
+            ValidateAssetContext(powerPorts, results, indexByIdentifier);
+
+            return results;
+        }
+
+        private void ValidateBusinessRules(List<PowerPort> powerPorts, List<ValidationResult> results)
+        {
+            for (int i = 0; i < powerPorts.Count; i++)
+            {
+                results[i].AddFailuresFrom(_validationCore.ValidateWithoutDatabaseAccess(powerPorts[i]));
+            }
+        }
+
+        private void ValidatePortTypesInBulk(List<PowerPort> powerPorts, List<ValidationResult> results)
+        {
             var distinctPortTypeIds = powerPorts
                 .Where(p => p.PowerPortInfo?.PortType != null && p.PowerPortInfo.PortType.HasValue())
                 .Select(p => p.PowerPortInfo.PortType.Identifier)
@@ -129,16 +136,10 @@
 
                 results[i].AddFailuresFrom(_validationCore.ValidatePortTypeAgainst(port, loadedPortType));
             }
+        }
 
-            // Fast-fail if port type validation fails
-            if (results.AnyInvalid())
-            {
-                return results;
-            }
-
-            // ============================================================
-            // PHASE 2: ASSET-CONTEXT VALIDATION (grouped by parent Asset)
-            // ============================================================
+        private void ValidateAssetContext(List<PowerPort> powerPorts, List<ValidationResult> results, Dictionary<string, int> indexByIdentifier)
+        {
             var distinctAssetIds = powerPorts
                 .Select(p => p.Asset.Identifier)
                 .Where(id => !string.IsNullOrWhiteSpace(id))
@@ -154,26 +155,29 @@
 
             foreach (var group in portsByAsset)
             {
-                if (!assetMap.TryGetValue(group.Key, out var asset))
-                {
-                    foreach (var port in group)
-                    {
-                        results[indexByIdentifier[port.Identifier]].AddFailReason(
-                            PowerPortValidationField.Asset,
-                            $"Referenced Asset '{group.Key}' does not exist.");
-                    }
+                ValidateAssetGroup(group, assetMap, results, indexByIdentifier);
+            }
+        }
 
-                    continue;
+        private void ValidateAssetGroup(IGrouping<string, PowerPort> group, Dictionary<string, Asset> assetMap, List<ValidationResult> results, Dictionary<string, int> indexByIdentifier)
+        {
+            if (!assetMap.TryGetValue(group.Key, out var asset))
+            {
+                foreach (var port in group)
+                {
+                    results[indexByIdentifier[port.Identifier]].AddFailReason(
+                        PowerPortValidationField.Asset,
+                        $"Referenced Asset '{group.Key}' does not exist.");
                 }
 
-                var groupResults = _validationCore.ValidatePowerPortsForAsset(group.ToList(), asset);
-                foreach (var kvp in groupResults)
-                {
-                    results[indexByIdentifier[kvp.Key]].AddFailuresFrom(kvp.Value);
-                }
+                return;
             }
 
-            return results;
+            var groupResults = _validationCore.ValidatePowerPortsForAsset(group.ToList(), asset);
+            foreach (var kvp in groupResults)
+            {
+                results[indexByIdentifier[kvp.Key]].AddFailuresFrom(kvp.Value);
+            }
         }
 
         protected override ValidationResult ValidateForDelete(PowerPort powerPort)

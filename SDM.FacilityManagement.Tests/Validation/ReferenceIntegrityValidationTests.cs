@@ -465,9 +465,9 @@ namespace SDM.FacilityManagement.Tests.Validation
 			private readonly HashSet<Guid> _existingResourceIds;
 
 			public ExternalReferenceCheckerStub(
-				IEnumerable<Guid> existingPersonIds = null,
-				IEnumerable<Guid> existingTeamIds = null,
-				IEnumerable<Guid> existingResourceIds = null)
+				IEnumerable<Guid>? existingPersonIds = null,
+				IEnumerable<Guid>? existingTeamIds = null,
+				IEnumerable<Guid>? existingResourceIds = null)
 			{
 				_existingPersonIds = new HashSet<Guid>(existingPersonIds ?? Enumerable.Empty<Guid>());
 				_existingTeamIds = new HashSet<Guid>(existingTeamIds ?? Enumerable.Empty<Guid>());

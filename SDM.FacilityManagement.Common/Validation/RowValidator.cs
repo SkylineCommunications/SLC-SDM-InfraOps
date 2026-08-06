@@ -269,15 +269,12 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
         private HashSet<Guid> GetExistingResourceIds(IEnumerable<Guid> resourceIds)
         {
             var checker = _entityLoader.ExternalReferenceChecker;
-            if (checker == null)
-            {
-                return null;
-            }
-
             var keys = resourceIds?.Where(FacilityReferenceValidationHelper.HasId).Distinct().ToList() ?? new List<Guid>();
-            if (!keys.Any())
+            if (checker == null || !keys.Any())
             {
-                return new HashSet<Guid>();
+                // No reference checker available: treat all referenced ids as existing so the
+                // reference check is effectively skipped instead of reporting false errors.
+                return new HashSet<Guid>(keys);
             }
 
             return FacilityReferenceValidationHelper.ToGuidSet(checker.GetExistingResourceIds(keys));

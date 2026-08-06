@@ -30,15 +30,12 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
 
         public IReadOnlyCollection<Guid> GetExistingLocationIds(IReadOnlyCollection<Guid> locationIds)
         {
-            if (_facilityManagementHelper == null)
-            {
-                return null;
-            }
-
             var ids = locationIds?.Distinct().ToList() ?? new List<Guid>();
-            if (ids.Count == 0)
+            if (_facilityManagementHelper == null || ids.Count == 0)
             {
-                return new List<Guid>();
+                // No facility helper available: treat every referenced id as existing so
+                // reference validation is effectively skipped rather than reporting false errors.
+                return ids;
             }
 
             return new PlanAndBuildJob { Locations = ids }
@@ -50,15 +47,10 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
 
         public IReadOnlyCollection<string> GetExistingAssetIds(IReadOnlyCollection<string> assetIds)
         {
-            if (_assetManagementHelper == null)
-            {
-                return null;
-            }
-
             var keys = Normalize(assetIds);
-            if (keys.Count == 0)
+            if (_assetManagementHelper == null || keys.Count == 0)
             {
-                return new List<string>();
+                return keys;
             }
 
             return _assetManagementHelper.Assets
@@ -69,15 +61,10 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
 
         public IReadOnlyCollection<string> GetExistingConnectionIds(IReadOnlyCollection<string> connectionIds)
         {
-            if (_assetManagementHelper == null)
-            {
-                return null;
-            }
-
             var keys = Normalize(connectionIds);
-            if (keys.Count == 0)
+            if (_assetManagementHelper == null || keys.Count == 0)
             {
-                return new List<string>();
+                return keys;
             }
 
             return _assetManagementHelper.Connections
@@ -88,15 +75,10 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
 
         public IReadOnlyCollection<string> GetExistingCableTypeIds(IReadOnlyCollection<string> cableTypeIds)
         {
-            if (_assetManagementHelper == null)
-            {
-                return null;
-            }
-
             var keys = Normalize(cableTypeIds);
-            if (keys.Count == 0)
+            if (_assetManagementHelper == null || keys.Count == 0)
             {
-                return new List<string>();
+                return keys;
             }
 
             return _assetManagementHelper.CableTypes

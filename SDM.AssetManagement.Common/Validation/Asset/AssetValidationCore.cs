@@ -318,7 +318,7 @@
                 return result;
             }
 
-            if (assetClass != null && assetClass.State != SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Active)
+            if (assetClass.State != SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Active)
             {
                 result.AddFailReason(AssetValidationField.AssetClass, "Asset Class must be Active.");
             }
@@ -398,6 +398,9 @@
                 .ToList();
             var existingDeskIds = _entityLoader.GetDesksByDomIds(deskIds).Select(d => d.Identifier).ToHashSet();
 
+            var locationLookups = new LocationReferenceLookups(
+                existingAssetIds, existingRackIds, existingFacilityIds, existingRoomIds, existingDeskIds);
+
             var existingPeople = GetExistingExternalIds(AssetManagementExternalReferenceType.Person, CollectPersonIds(assets));
             var existingTeams = GetExistingExternalIds(AssetManagementExternalReferenceType.Team, CollectTeamIds(assets));
             var existingOrganizations = GetExistingExternalIds(AssetManagementExternalReferenceType.Organization, CollectOrganizationIds(assets));
@@ -407,10 +410,10 @@
             {
                 var asset = assets[i];
                 AddReferenceFailure(asset.ShouldValidate(asset.AssetClassIdField), asset.AssetClassId, existingAssetClassIds, AssetValidationField.AssetClass, "Asset Class", results[i]);
-                ValidateLocationReferences(asset.Location, false, existingAssetIds, existingRackIds, existingFacilityIds, existingRoomIds, existingDeskIds, results[i]);
+                ValidateLocationReferences(asset.Location, false, locationLookups, results[i]);
                 if (asset.State == SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit)
                 {
-                    ValidateLocationReferences(asset.DestinationLocation, true, existingAssetIds, existingRackIds, existingFacilityIds, existingRoomIds, existingDeskIds, results[i]);
+                    ValidateLocationReferences(asset.DestinationLocation, true, locationLookups, results[i]);
                 }
                 ValidateExternalReferences(asset, existingPeople, existingTeams, existingOrganizations, existingRoles, results[i]);
             }
@@ -719,11 +722,7 @@
         private static void ValidateLocationReferences(
             AssetLocation location,
             bool isDestination,
-            HashSet<string> existingAssetIds,
-            HashSet<string> existingRackIds,
-            HashSet<string> existingFacilityIds,
-            HashSet<string> existingRoomIds,
-            HashSet<string> existingDeskIds,
+            LocationReferenceLookups lookups,
             ValidationResult result)
         {
             if (location == null)
@@ -731,16 +730,43 @@
                 return;
             }
 
-            AddLocationReferenceFailure(location.ParentAsset, existingAssetIds, isDestination ? AssetValidationField.DestinationParentAsset : AssetValidationField.ParentAsset, "Asset", result);
-            AddLocationReferenceFailure(location.RackId, existingRackIds, isDestination ? AssetValidationField.DestinationRackId : AssetValidationField.RackId, "Rack", result);
-            AddLocationReferenceFailure(location.ContainerId, existingFacilityIds, isDestination ? AssetValidationField.DestinationContainerId : AssetValidationField.ContainerId, "Facility", result);
-            AddLocationReferenceFailure(location.RoomId, existingRoomIds, isDestination ? AssetValidationField.DestinationRoomId : AssetValidationField.RoomId, "Room", result);
+            AddLocationReferenceFailure(location.ParentAsset, lookups.AssetIds, isDestination ? AssetValidationField.DestinationParentAsset : AssetValidationField.ParentAsset, "Asset", result);
+            AddLocationReferenceFailure(location.RackId, lookups.RackIds, isDestination ? AssetValidationField.DestinationRackId : AssetValidationField.RackId, "Rack", result);
+            AddLocationReferenceFailure(location.ContainerId, lookups.FacilityIds, isDestination ? AssetValidationField.DestinationContainerId : AssetValidationField.ContainerId, "Facility", result);
+            AddLocationReferenceFailure(location.RoomId, lookups.RoomIds, isDestination ? AssetValidationField.DestinationRoomId : AssetValidationField.RoomId, "Room", result);
 
-            if (location.DeskId != Guid.Empty && !existingDeskIds.Contains(location.DeskId.ToString()))
+            if (location.DeskId != Guid.Empty && !lookups.DeskIds.Contains(location.DeskId.ToString()))
             {
                 result.AddFailReason(isDestination ? AssetValidationField.DestinationDeskId : AssetValidationField.DeskId,
                     $"Referenced Desk '{location.DeskId}' does not exist.");
             }
+        }
+
+        private sealed class LocationReferenceLookups
+        {
+            public LocationReferenceLookups(
+                HashSet<string> assetIds,
+                HashSet<string> rackIds,
+                HashSet<string> facilityIds,
+                HashSet<string> roomIds,
+                HashSet<string> deskIds)
+            {
+                AssetIds = assetIds;
+                RackIds = rackIds;
+                FacilityIds = facilityIds;
+                RoomIds = roomIds;
+                DeskIds = deskIds;
+            }
+
+            public HashSet<string> AssetIds { get; }
+
+            public HashSet<string> RackIds { get; }
+
+            public HashSet<string> FacilityIds { get; }
+
+            public HashSet<string> RoomIds { get; }
+
+            public HashSet<string> DeskIds { get; }
         }
 
         private static void AddLocationReferenceFailure<T>(

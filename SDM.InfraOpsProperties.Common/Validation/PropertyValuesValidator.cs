@@ -30,6 +30,9 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Validation
         /// its repositories are wired up. Only <see cref="Validate"/>/<see cref="ValidateAndThrow"/> (called
         /// after construction completes) access <paramref name="helper"/>'s repositories.
         /// </param>
+        /// <param name="externalReferenceChecker">
+        /// Optional cross-module checker used to verify referenced ids exist. When <c>null</c>, those checks are skipped.
+        /// </param>
         public PropertyValuesValidator(
             IInfraOpsPropertiesApiHelper helper,
             IInfraOpsPropertiesExternalReferenceChecker externalReferenceChecker = null)

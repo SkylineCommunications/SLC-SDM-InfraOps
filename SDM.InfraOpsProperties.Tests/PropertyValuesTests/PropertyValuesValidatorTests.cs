@@ -586,7 +586,7 @@ namespace SDM.InfraOpsProperties.Tests.PropertyValuesTests
 		{
 			private readonly IReadOnlyCollection<(Guid LinkedObjectID, string Scope)> existingLinkedObjects;
 
-			public ExternalReferenceCheckerStub(IReadOnlyCollection<(Guid LinkedObjectID, string Scope)> existingLinkedObjects = null)
+			public ExternalReferenceCheckerStub(IReadOnlyCollection<(Guid LinkedObjectID, string Scope)>? existingLinkedObjects = null)
 			{
 				this.existingLinkedObjects = existingLinkedObjects ?? new List<(Guid LinkedObjectID, string Scope)>();
 			}
