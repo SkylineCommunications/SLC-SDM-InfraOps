@@ -68,7 +68,7 @@ namespace SDM.AssetManagement.Tests
         [TestMethod]
         public void Asset_Delete_WhenAnyPortHasConnection_ShouldBeBlocked()
         {
-            var assetClass = CreateAssetClass("Asset Connection Class", SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Active);
+            var assetClass = CreateAssetClass("Asset Connection Class", SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Active, deviceTags: new List<SlcAsset_Management.Enums.TagOption> { SlcAsset_Management.Enums.TagOption.AcceptsDataConnection });
             var asset = CreateAsset(assetClass, "ASSET-CONNECTION-BLOCK");
             asset.State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable;
             var dataPort = CreateDataPort(asset, CreateDataPortType("Asset Connection Port Type"));
@@ -95,7 +95,7 @@ namespace SDM.AssetManagement.Tests
         [TestMethod]
         public void DataPort_Delete_WhenAssignedToConnection_ShouldBeBlocked()
         {
-            var asset = CreateAsset(CreateAssetClass("Data Port Class", SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Active), "DATA-PORT-ASSET");
+            var asset = CreateAsset(CreateAssetClass("Data Port Class", SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Active, deviceTags: new List<SlcAsset_Management.Enums.TagOption> { SlcAsset_Management.Enums.TagOption.AcceptsDataConnection }), "DATA-PORT-ASSET");
             var dataPort = CreateDataPort(asset, CreateDataPortType("Data Port Connected Type"));
             CreateConnection(dataPort.Identifier, dataPort.DataPortInfo.Type);
 
@@ -119,7 +119,7 @@ namespace SDM.AssetManagement.Tests
         [TestMethod]
         public void PowerPort_Delete_WhenAssignedToConnection_ShouldBeBlocked()
         {
-            var asset = CreateAsset(CreateAssetClass("Power Port Class", SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Active), "POWER-PORT-ASSET");
+            var asset = CreateAsset(CreateAssetClass("Power Port Class", SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Active, deviceTags: new List<SlcAsset_Management.Enums.TagOption> { SlcAsset_Management.Enums.TagOption.PowerProvider }, powerSupply: SlcAsset_Management.Enums.PowerSupplyEnum.AC), "POWER-PORT-ASSET");
             var powerPort = CreatePowerPort(asset, CreatePowerPortType("Power Port Connected Type"));
             CreateConnection(powerPort.Identifier, powerPort.PowerPortInfo.PortType);
 
@@ -228,8 +228,9 @@ namespace SDM.AssetManagement.Tests
         {
             var cableType = CreateCableType("Connection Cable Type");
             var portType = CreateDataPortType("Cable Connection Port Type");
+            var dataAcceptingDeviceType = CreateDeviceType("Cable Connection Device Type", new List<SlcAsset_Management.Enums.TagOption> { SlcAsset_Management.Enums.TagOption.AcceptsDataConnection });
             var dataPort = CreateDataPort(
-                CreateAsset(CreateAssetClass("Cable Connection Class", SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Active), "CABLE-CONNECTION-ASSET"),
+                CreateAsset(CreateAssetClass("Cable Connection Class", SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Active, dataAcceptingDeviceType), "CABLE-CONNECTION-ASSET"),
                 portType);
             CreateConnection(dataPort.Identifier, new SdmObjectReference<PortType>(portType.Identifier), cableType);
 
@@ -265,15 +266,18 @@ namespace SDM.AssetManagement.Tests
             string name,
             SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum state,
             DeviceType deviceType = null,
-            List<DataPortInfo> dataPorts = null)
+            List<DataPortInfo> dataPorts = null,
+            List<SlcAsset_Management.Enums.TagOption> deviceTags = null,
+            SlcAsset_Management.Enums.PowerSupplyEnum? powerSupply = null)
         {
-            deviceType = deviceType ?? CreateDeviceType($"{name} Device Type");
+            deviceType = deviceType ?? CreateDeviceType($"{name} Device Type", deviceTags);
             var assetClass = new AssetClass
             {
                 Identifier = Guid.NewGuid().ToString(),
                 Name = name,
                 State = state,
                 DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier),
+                PowerSupply = powerSupply,
                 Depth = 10,
                 Width = 20,
                 Height = 30,
@@ -301,7 +305,7 @@ namespace SDM.AssetManagement.Tests
             return Helper.AssetManagement.Assets.Create(asset);
         }
 
-        private DeviceType CreateDeviceType(string name)
+        private DeviceType CreateDeviceType(string name, List<SlcAsset_Management.Enums.TagOption> tags = null)
         {
             var deviceType = new DeviceType
             {
@@ -314,7 +318,7 @@ namespace SDM.AssetManagement.Tests
                 },
                 TagsInfo = new TagsInfo
                 {
-                    Tags = new List<SlcAsset_Management.Enums.TagOption>(),
+                    Tags = tags ?? new List<SlcAsset_Management.Enums.TagOption>(),
                 },
             };
 
