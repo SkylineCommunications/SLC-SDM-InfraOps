@@ -518,6 +518,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             var _sitepropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.FacilityManagement.Models.SiteDomMapper.SiteProperties.SectionDefinitionId));
             if (_sitepropertiesSection != default)
             {
+                obj.SitePropertiesSectionId = _sitepropertiesSection.ID.Id;
                 var _sitepropertiesname = _sitepropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.SiteDomMapper.SiteProperties.Name);
                 if (_sitepropertiesname != null)
                 {
@@ -597,6 +598,11 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 }
             };
             var _siteproperties = new Section(Skyline.DataMiner.SDM.FacilityManagement.Models.SiteDomMapper.SiteProperties.SectionDefinitionId);
+            if (obj.SitePropertiesSectionId.HasValue)
+            {
+                _siteproperties.ID = new SectionID(obj.SitePropertiesSectionId.Value);
+            }
+
             if (obj.Name != default)
             {
                 _siteproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.SiteDomMapper.SiteProperties.Name, Convert.ToString(obj.Name));

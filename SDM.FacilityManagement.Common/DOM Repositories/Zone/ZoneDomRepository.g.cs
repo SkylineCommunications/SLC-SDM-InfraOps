@@ -518,6 +518,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             var _zonepropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.SectionDefinitionId));
             if (_zonepropertiesSection != default)
             {
+                obj.ZonePropertiesSectionId = _zonepropertiesSection.ID.Id;
                 var _zonepropertiesname = _zonepropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Name);
                 if (_zonepropertiesname != null)
                 {
@@ -571,6 +572,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             if (_zonecapacitySection != default)
             {
                 obj.ZoneCapacity = new Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneCapacity();
+                ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.ZoneCapacity).SectionId = _zonecapacitySection.ID.Id;
                 var _zonecapacitycoolingcapacity = _zonecapacitySection.GetValue<double>(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneCapacity.CoolingCapacity);
                 if (_zonecapacitycoolingcapacity != null)
                 {
@@ -582,6 +584,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             if (_roomfkSection != default)
             {
                 obj.RoomFk = new Skyline.DataMiner.SDM.FacilityManagement.Models.RoomRelation();
+                ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.RoomFk).SectionId = _roomfkSection.ID.Id;
                 var _roomfkroom = _roomfkSection.GetValue<System.Guid>(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.RoomFk.Room);
                 if (_roomfkroom != null)
                 {
@@ -593,6 +596,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             if (_resourceSection != default)
             {
                 obj.Resource = new Skyline.DataMiner.SDM.FacilityManagement.Models.ResourceLink();
+                ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Resource).SectionId = _resourceSection.ID.Id;
                 var _resourceresourceid = _resourceSection.GetValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.Resource.ResourceId);
                 if (_resourceresourceid != null)
                 {
@@ -624,6 +628,11 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 }
             };
             var _zoneproperties = new Section(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.SectionDefinitionId);
+            if (obj.ZonePropertiesSectionId.HasValue)
+            {
+                _zoneproperties.ID = new SectionID(obj.ZonePropertiesSectionId.Value);
+            }
+
             if (obj.Name != default)
             {
                 _zoneproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Name, Convert.ToString(obj.Name));
@@ -667,6 +676,12 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             if (obj.ZoneCapacity != null)
             {
                 var _zonecapacity = new Section(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneCapacity.SectionDefinitionId);
+                var _zonecapacitySectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.ZoneCapacity).SectionId;
+                if (_zonecapacitySectionId.HasValue)
+                {
+                    _zonecapacity.ID = new SectionID(_zonecapacitySectionId.Value);
+                }
+
                 if (obj.ZoneCapacity.CoolingCapacity != default)
                 {
                     _zonecapacity.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneCapacity.CoolingCapacity, (double)(obj.ZoneCapacity.CoolingCapacity).Value);
@@ -678,6 +693,12 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             if (obj.RoomFk != null)
             {
                 var _roomfk = new Section(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.RoomFk.SectionDefinitionId);
+                var _roomfkSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.RoomFk).SectionId;
+                if (_roomfkSectionId.HasValue)
+                {
+                    _roomfk.ID = new SectionID(_roomfkSectionId.Value);
+                }
+
                 if (obj.RoomFk.Room != default)
                 {
                     _roomfk.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.RoomFk.Room, System.Guid.Parse(obj.RoomFk.Room.Identifier));
@@ -689,6 +710,12 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             if (obj.Resource != null)
             {
                 var _resource = new Section(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.Resource.SectionDefinitionId);
+                var _resourceSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Resource).SectionId;
+                if (_resourceSectionId.HasValue)
+                {
+                    _resource.ID = new SectionID(_resourceSectionId.Value);
+                }
+
                 if (obj.Resource.ResourceId != default)
                 {
                     _resource.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.Resource.ResourceId, Convert.ToString(obj.Resource.ResourceId));

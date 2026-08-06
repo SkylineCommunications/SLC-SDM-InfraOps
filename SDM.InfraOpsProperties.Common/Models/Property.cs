@@ -109,6 +109,17 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
 
         #endregion
 
+        #region Section Tracking
+
+        /// <summary>
+        /// Gets or sets the DOM Section ID of the PropertyProperties section, captured on read so it can be reused on update.
+        /// </summary>
+        [JsonIgnore]
+        [SdmIgnore]
+        internal System.Guid? PropertyPropertiesSectionId { get; set; }
+
+        #endregion
+
         #region Discrete
 
         public List<PropertyOption> Discreets

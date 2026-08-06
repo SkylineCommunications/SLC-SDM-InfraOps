@@ -1,4 +1,4 @@
-namespace Skyline.DataMiner.SDM.AssetManagement.Models
+﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
     using System;
     using System.Collections.Generic;
@@ -320,5 +320,14 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 }
             }
         }
+
+        #region Section Tracking
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal Guid? AssetClassPropertiesSectionId { get; set; }
+
+        #endregion
+
     }
 }

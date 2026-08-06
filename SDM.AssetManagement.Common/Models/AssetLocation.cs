@@ -7,8 +7,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
-    public class AssetLocation : ChangeTrackingBase
+    public class AssetLocation : ChangeTrackingBase, ISectionTrackable
     {
+        [JsonIgnore]
+        [SdmIgnore]
+        Guid? ISectionTrackable.SectionId { get; set; }
+
         public SdmObjectReference<Asset> ParentAsset
         {
             get => ParentAssetField.Value;

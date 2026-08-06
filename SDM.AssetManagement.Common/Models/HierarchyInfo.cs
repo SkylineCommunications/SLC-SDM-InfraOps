@@ -1,13 +1,18 @@
-namespace Skyline.DataMiner.SDM.AssetManagement.Models
+﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
     using Newtonsoft.Json;
 
     using SharedMappers.DomIds;
 
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
+    using System;
 
-    public class HierarchyInfo : ChangeTrackingBase
+    public class HierarchyInfo : ChangeTrackingBase, ISectionTrackable
     {
+        [JsonIgnore]
+        [SdmIgnore]
+        Guid? ISectionTrackable.SectionId { get; set; }
+
         public SlcAsset_Management.Enums.HierarchyRoleEnum? HierarchyRole
         {
             get => HierarchyRoleField.Value;

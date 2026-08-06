@@ -517,6 +517,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             var _porttypepropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.PortTypeProperties.SectionDefinitionId));
             if (_porttypepropertiesSection != default)
             {
+                obj.PortTypePropertiesSectionId = _porttypepropertiesSection.ID.Id;
                 var _name = _porttypepropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.PortTypeProperties.Name);
                 if (_name != null)
                 {
@@ -534,6 +535,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             if (_categorylinksSection != default)
             {
                 obj.CategoryLinks = new Skyline.DataMiner.SDM.AssetManagement.Models.CategoryRelation();
+                ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.CategoryLinks).SectionId = _categorylinksSection.ID.Id;
                 var _categorylinkscategories = _categorylinksSection.GetListValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.CategoryRelation.CategoryLinks);
                 if (_categorylinkscategories != null)
                 {
@@ -545,6 +547,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             if (_cablefksSection != default)
             {
                 obj.CableFKs = new Skyline.DataMiner.SDM.AssetManagement.Models.CableRelation();
+                ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.CableFKs).SectionId = _cablefksSection.ID.Id;
                 var _cablefkscabletypefks = _cablefksSection.GetListValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.CableFKs.CableTypeFks);
                 if (_cablefkscabletypefks != null)
                 {
@@ -576,6 +579,10 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 }
             };
             var _porttypeproperties = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.PortTypeProperties.SectionDefinitionId);
+            if (obj.PortTypePropertiesSectionId.HasValue)
+            {
+                _porttypeproperties.ID = new SectionID(obj.PortTypePropertiesSectionId.Value);
+            }
             if (obj.Name != default)
             {
                 _porttypeproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.PortTypeProperties.Name, Convert.ToString(obj.Name));
@@ -590,6 +597,11 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             if (obj.CategoryLinks != null)
             {
                 var _categorylinks = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.CategoryRelation.SectionDefinitionId);
+                var _categorylinksSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.CategoryLinks).SectionId;
+                if (_categorylinksSectionId.HasValue)
+                {
+                    _categorylinks.ID = new SectionID(_categorylinksSectionId.Value);
+                }
                 if (obj.CategoryLinks.Categories != default)
                 {
                     _categorylinks.AddOrUpdateListValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.CategoryRelation.CategoryLinks, obj.CategoryLinks.Categories.Select(x => SlcAsset_Management.Enums.Categories.ToValue(x)).ToList());
@@ -601,6 +613,11 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             if (obj.CableFKs != null)
             {
                 var _cablefks = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.CableFKs.SectionDefinitionId);
+                var _cablefksSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.CableFKs).SectionId;
+                if (_cablefksSectionId.HasValue)
+                {
+                    _cablefks.ID = new SectionID(_cablefksSectionId.Value);
+                }
                 if (obj.CableFKs.CableTypeFks != default)
                 {
                     _cablefks.AddOrUpdateListValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.CableFKs.CableTypeFks, obj.CableFKs.CableTypeFks.Select(x => System.Guid.Parse(x.Identifier)).ToList());

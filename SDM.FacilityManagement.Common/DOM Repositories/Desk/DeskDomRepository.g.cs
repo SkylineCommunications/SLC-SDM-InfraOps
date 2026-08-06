@@ -511,6 +511,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             var _deskinformationSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.FacilityManagement.Models.DeskDomMapper.DeskInformation.SectionDefinitionId));
             if (_deskinformationSection != default)
             {
+                obj.DeskInformationSectionId = _deskinformationSection.ID.Id;
                 var _deskinformationname = _deskinformationSection.GetValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.DeskDomMapper.DeskInformation.Name);
                 if (_deskinformationname != null)
                 {
@@ -540,6 +541,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             if (_roomfkSection != default)
             {
                 obj.RoomFk = new Skyline.DataMiner.SDM.FacilityManagement.Models.RoomRelation();
+                ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.RoomFk).SectionId = _roomfkSection.ID.Id;
                 var _roomfkroom = _roomfkSection.GetValue<System.Guid>(Skyline.DataMiner.SDM.FacilityManagement.Models.DeskDomMapper.RoomFk.Room);
                 if (_roomfkroom != null)
                 {
@@ -551,6 +553,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             if (_resourceSection != default)
             {
                 obj.Resource = new Skyline.DataMiner.SDM.FacilityManagement.Models.ResourceLink();
+                ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Resource).SectionId = _resourceSection.ID.Id;
                 var _resourceresourceid = _resourceSection.GetValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.DeskDomMapper.Resource.ResourceId);
                 if (_resourceresourceid != null)
                 {
@@ -582,6 +585,11 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 }
             };
             var _deskinformation = new Section(Skyline.DataMiner.SDM.FacilityManagement.Models.DeskDomMapper.DeskInformation.SectionDefinitionId);
+            if (obj.DeskInformationSectionId.HasValue)
+            {
+                _deskinformation.ID = new SectionID(obj.DeskInformationSectionId.Value);
+            }
+
             if (obj.Name != default)
             {
                 _deskinformation.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.DeskDomMapper.DeskInformation.Name, Convert.ToString(obj.Name));
@@ -606,6 +614,12 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             if (obj.RoomFk != null)
             {
                 var _roomfk = new Section(Skyline.DataMiner.SDM.FacilityManagement.Models.DeskDomMapper.RoomFk.SectionDefinitionId);
+                var _roomfkSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.RoomFk).SectionId;
+                if (_roomfkSectionId.HasValue)
+                {
+                    _roomfk.ID = new SectionID(_roomfkSectionId.Value);
+                }
+
                 if (obj.RoomFk.Room != default)
                 {
                     _roomfk.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.FacilityManagement.Models.DeskDomMapper.RoomFk.Room, System.Guid.Parse(obj.RoomFk.Room.Identifier));
@@ -617,6 +631,12 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             if (obj.Resource != null)
             {
                 var _resource = new Section(Skyline.DataMiner.SDM.FacilityManagement.Models.DeskDomMapper.Resource.SectionDefinitionId);
+                var _resourceSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Resource).SectionId;
+                if (_resourceSectionId.HasValue)
+                {
+                    _resource.ID = new SectionID(_resourceSectionId.Value);
+                }
+
                 if (obj.Resource.ResourceId != default)
                 {
                     _resource.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.DeskDomMapper.Resource.ResourceId, Convert.ToString(obj.Resource.ResourceId));

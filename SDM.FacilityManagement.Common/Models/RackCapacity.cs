@@ -1,10 +1,17 @@
 namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 {
+    using System;
+
     using Newtonsoft.Json;
+
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
-    public class RackCapacity : ChangeTrackingBase
+    public class RackCapacity : ChangeTrackingBase, ISectionTrackable
     {
+        [JsonIgnore]
+        [SdmIgnore]
+        Guid? ISectionTrackable.SectionId { get; set; }
+
         public double MaximumRackCapacity
         {
             get => RackUnitsField.Value;

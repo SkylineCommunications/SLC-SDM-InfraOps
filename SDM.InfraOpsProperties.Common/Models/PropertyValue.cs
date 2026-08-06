@@ -2,15 +2,25 @@
 {
     using System;
 
-    using Skyline.DataMiner.SDM;
+    using Newtonsoft.Json;
 
-    public sealed class PropertyValue : IEquatable<PropertyValue>
+    using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
+
+    public sealed class PropertyValue : IEquatable<PropertyValue>, ISectionTrackable
     {
         public string PropertyName { get; set; }
 
         public string Value { get; set; }
 
         public SdmObjectReference<Property> PropertyId { get; set; }
+
+        /// <summary>
+        /// Gets or sets the DOM Section ID this element was read from, so it can be reused on update.
+        /// </summary>
+        [JsonIgnore]
+        [SdmIgnore]
+        Guid? ISectionTrackable.SectionId { get; set; }
 
         public static bool operator ==(PropertyValue left, PropertyValue right)
         {

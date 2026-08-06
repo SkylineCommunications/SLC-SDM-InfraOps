@@ -575,6 +575,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			var _assetclasspropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.SectionDefinitionId));
 			if (_assetclasspropertiesSection != default)
 			{
+				obj.AssetClassPropertiesSectionId = _assetclasspropertiesSection.ID.Id;
 				var _devicename = _assetclasspropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.DeviceName);
 				if (_devicename != null)
 				{
@@ -664,6 +665,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			if (_lifecycleSection != default)
 			{
 				obj.Lifecycle = new Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassLifecycle();
+				((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Lifecycle).SectionId = _lifecycleSection.ID.Id;
 				var _lifecycleendoflife = _lifecycleSection.GetValue<DateTime>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.Lifecycle.EndOfLife);
 				if (_lifecycleendoflife != null)
 				{
@@ -687,6 +689,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			foreach (var _dataportsSection in instance.Sections.Where(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.DataPorts.SectionDefinitionId)))
 			{
                 var dataports = new Skyline.DataMiner.SDM.AssetManagement.Models.DataPortInfo();
+				((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)dataports).SectionId = _dataportsSection.ID.Id;
 
 				var _dataportsname = _dataportsSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.DataPorts.Name);
 				if (_dataportsname != null)
@@ -732,6 +735,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			foreach (var _powerportsSection in instance.Sections.Where(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.PowerPorts.SectionDefinitionId)))
 			{
                 var powerports = new Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortInfo();
+				((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)powerports).SectionId = _powerportsSection.ID.Id;
 
 				var _powerportsname = _powerportsSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.PowerPorts.Name);
 				if (_powerportsname != null)
@@ -777,6 +781,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			foreach (var _holdersSection in instance.Sections.Where(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.Holders.SectionDefinitionId)))
 			{
                 var holders = new Skyline.DataMiner.SDM.AssetManagement.Models.AssetHolder();
+				((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)holders).SectionId = _holdersSection.ID.Id;
 				var _holdersslotnumber = _holdersSection.GetValue<long>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.Holders.SlotNumber);
 				if (_holdersslotnumber != null)
 				{
@@ -826,6 +831,10 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				instance.StatusId = SlcAsset_Management.Behaviors.Asset_Class_Behavior.Statuses.ToValue(obj.State);
 			}
 			var _assetclassproperties = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.SectionDefinitionId);
+			if (obj.AssetClassPropertiesSectionId.HasValue)
+			{
+				_assetclassproperties.ID = new SectionID(obj.AssetClassPropertiesSectionId.Value);
+			}
 			if (obj.Name != default)
 			{
 				_assetclassproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.DeviceName, Convert.ToString(obj.Name));
@@ -900,6 +909,11 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			if (obj.Lifecycle != null)
 			{
 				var _lifecycle = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.Lifecycle.SectionDefinitionId);
+				var _lifecycleSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Lifecycle).SectionId;
+				if (_lifecycleSectionId.HasValue)
+				{
+					_lifecycle.ID = new SectionID(_lifecycleSectionId.Value);
+				}
 				if (obj.Lifecycle.EndOfLife != default)
 				{
 					_lifecycle.AddOrUpdateValue<DateTime>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.Lifecycle.EndOfLife, (DateTime)obj.Lifecycle.EndOfLife);
@@ -921,6 +935,11 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			foreach (var dataports in obj.DataPorts)
 			{
                 var _dataportsSection = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.DataPorts.SectionDefinitionId);
+				var _dataportsSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)dataports).SectionId;
+				if (_dataportsSectionId.HasValue)
+				{
+					_dataportsSection.ID = new SectionID(_dataportsSectionId.Value);
+				}
 
 				if (dataports.Name != default)
 				{
@@ -950,6 +969,11 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			foreach (var powerports in obj.PowerPorts)
 			{
 				var _powerportsSection = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.PowerPorts.SectionDefinitionId);
+				var _powerportsSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)powerports).SectionId;
+				if (_powerportsSectionId.HasValue)
+				{
+					_powerportsSection.ID = new SectionID(_powerportsSectionId.Value);
+				}
 
 				if (powerports.Name != default)
 				{
@@ -979,6 +1003,11 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			foreach (var holders in obj.Holders)
 			{
                 var _holdersSection = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.Holders.SectionDefinitionId);
+				var _holdersSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)holders).SectionId;
+				if (_holdersSectionId.HasValue)
+				{
+					_holdersSection.ID = new SectionID(_holdersSectionId.Value);
+				}
 
 				if (holders.SlotNumber != default)
 				{

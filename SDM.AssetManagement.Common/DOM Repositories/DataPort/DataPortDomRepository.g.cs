@@ -519,6 +519,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             if (_dataportinfoSection != default)
             {
                 obj.DataPortInfo = new Skyline.DataMiner.SDM.AssetManagement.Models.DataPortInfo();
+                ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.DataPortInfo).SectionId = _dataportinfoSection.ID.Id;
                 var _dataportinfoname = _dataportinfoSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.Name);
                 if (_dataportinfoname != null)
                 {
@@ -559,6 +560,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             var _assetfkSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.AssetFk.SectionDefinitionId));
             if (_assetfkSection != default)
             {
+                obj.AssetFkSectionId = _assetfkSection.ID.Id;
                 obj.Asset = new Skyline.DataMiner.SDM.AssetManagement.Models.Asset();
                 var _assetfkasset = _assetfkSection.GetValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.AssetFk.Asset);
                 if (_assetfkasset != null)
@@ -571,6 +573,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             if (_addressinfoSection != default)
             {
                 obj.AddressInfo = new Skyline.DataMiner.SDM.AssetManagement.Models.AddressInfo();
+                ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.AddressInfo).SectionId = _addressinfoSection.ID.Id;
                 var _addressinfoipv4address = _addressinfoSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.AddressInfo.Ipv4Address);
                 if (_addressinfoipv4address != null)
                 {
@@ -600,6 +603,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             if (_primaryportrelationSection != default)
             {
                 obj.PrimaryPortRelation = new Skyline.DataMiner.SDM.AssetManagement.Models.PrimaryPortRelation();
+                ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.PrimaryPortRelation).SectionId = _primaryportrelationSection.ID.Id;
                 var _primaryportrelationisprimaryipv6 = _primaryportrelationSection.GetValue<bool>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.PrimaryPortRelation.IsPrimaryIpv6);
                 if (_primaryportrelationisprimaryipv6 != null)
                 {
@@ -639,6 +643,11 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             if (obj.DataPortInfo != null)
             {
                 var _dataportinfo = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.SectionDefinitionId);
+                var _dataportinfoSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.DataPortInfo).SectionId;
+                if (_dataportinfoSectionId.HasValue)
+                {
+                    _dataportinfo.ID = new SectionID(_dataportinfoSectionId.Value);
+                }
                 if (obj.DataPortInfo.Name != default)
                 {
                     _dataportinfo.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.Name, Convert.ToString(obj.DataPortInfo.Name));
@@ -672,6 +681,10 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             if (obj.Asset != null)
             {
                 var _assetrelation = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.AssetFk.SectionDefinitionId);
+                if (obj.AssetFkSectionId.HasValue)
+                {
+                    _assetrelation.ID = new SectionID(obj.AssetFkSectionId.Value);
+                }
                 if (obj.Asset != default)
                 {
                     _assetrelation.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.AssetFk.Asset, System.Guid.Parse(obj.Asset.Identifier));
@@ -683,6 +696,11 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             if (obj.AddressInfo != null)
             {
                 var _addressinfo = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.AddressInfo.SectionDefinitionId);
+                var _addressinfoSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.AddressInfo).SectionId;
+                if (_addressinfoSectionId.HasValue)
+                {
+                    _addressinfo.ID = new SectionID(_addressinfoSectionId.Value);
+                }
                 if (obj.AddressInfo.Ipv4Address != default)
                 {
                     _addressinfo.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.AddressInfo.Ipv4Address, Convert.ToString(obj.AddressInfo.Ipv4Address));
@@ -709,6 +727,11 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             if (obj.PrimaryPortRelation != null)
             {
                 var _primaryportrelation = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.PrimaryPortRelation.SectionDefinitionId);
+                var _primaryportrelationSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.PrimaryPortRelation).SectionId;
+                if (_primaryportrelationSectionId.HasValue)
+                {
+                    _primaryportrelation.ID = new SectionID(_primaryportrelationSectionId.Value);
+                }
                 if (obj.PrimaryPortRelation.IsPrimaryIpv6 != default)
                 {
                     _primaryportrelation.AddOrUpdateValue<bool>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.PrimaryPortRelation.IsPrimaryIpv6, (bool)obj.PrimaryPortRelation.IsPrimaryIpv6);

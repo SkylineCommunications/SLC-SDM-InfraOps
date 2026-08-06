@@ -520,6 +520,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			if (_powerportinfoSection != default)
 			{
 				obj.PowerPortInfo = new Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortInfo();
+				((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.PowerPortInfo).SectionId = _powerportinfoSection.ID.Id;
 
 				var _powerportinfoname = _powerportinfoSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.Name);
 				if (_powerportinfoname != null)
@@ -561,6 +562,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			var _assetrelationSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortDomMapper.AssetRelationProperties.SectionDefinitionId));
 			if (_assetrelationSection != default)
 			{
+				obj.AssetRelationPropertiesSectionId = _assetrelationSection.ID.Id;
 				obj.Asset = new Skyline.DataMiner.SDM.AssetManagement.Models.Asset();
 				var _asset = _assetrelationSection.GetValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortDomMapper.AssetRelationProperties.Asset);
 				if (_asset != null)
@@ -595,6 +597,11 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			if (obj.PowerPortInfo != null)
 			{
 				var _powerportinfo = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.SectionDefinitionId);
+				var _powerportinfoSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.PowerPortInfo).SectionId;
+				if (_powerportinfoSectionId.HasValue)
+				{
+					_powerportinfo.ID = new SectionID(_powerportinfoSectionId.Value);
+				}
 
 				if (obj.PowerPortInfo.Name != default)
 				{
@@ -623,6 +630,10 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			if (obj.Asset != null)
 			{
 				var _assetrelation = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortDomMapper.AssetRelationProperties.SectionDefinitionId);
+				if (obj.AssetRelationPropertiesSectionId.HasValue)
+				{
+					_assetrelation.ID = new SectionID(obj.AssetRelationPropertiesSectionId.Value);
+				}
 				if (obj.Asset != default)
 				{
 					_assetrelation.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortDomMapper.AssetRelationProperties.Asset, System.Guid.Parse(obj.Asset.Identifier));

@@ -2,16 +2,23 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 {
     using System;
 
+    using Newtonsoft.Json;
+
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
+    using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     /// <summary>
     /// Records a Connection (Asset Manager entity) affected by a Plan &amp; Build Job, along with a snapshot of
     /// its cabling details at the time of the Job. Ported from InfraOpsShared's
     /// DOM_Classes.DOM.Applications.Plan_And_Build.Sections.ConnectionsOnJob.
     /// </summary>
-    public sealed class JobConnection : IEquatable<JobConnection>
+    public sealed class JobConnection : IEquatable<JobConnection>, ISectionTrackable
     {
+        [JsonIgnore]
+        [SdmIgnore]
+        Guid? ISectionTrackable.SectionId { get; set; }
+
         public SdmObjectReference<Connection> ConnectionId { get; set; }
 
         public string Source { get; set; }

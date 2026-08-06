@@ -1,9 +1,10 @@
-namespace Skyline.DataMiner.SDM.AssetManagement.Models
+﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
     using Newtonsoft.Json;
 
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
+    using System;
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)asset_management")]
@@ -104,5 +105,14 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             _tagsInfo?.ResetChangeTracking();
             _hierarchyInfo?.ResetChangeTracking();
         }
+
+        #region Section Tracking
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal Guid? DeviceTypePropertiesSectionId { get; set; }
+
+        #endregion
+
     }
 }

@@ -508,6 +508,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             var _appsettingsSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettingsDomMapper.AppSettings.SectionDefinitionId));
             if (_appsettingsSection != default)
             {
+                obj.AppSettingsSectionId = _appsettingsSection.ID.Id;
                 var _appsettingsgooglemapsapikey = _appsettingsSection.GetValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettingsDomMapper.AppSettings.GoogleMapsAPIKey);
                 if (_appsettingsgooglemapsapikey != null)
                 {
@@ -539,6 +540,11 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 }
             };
             var _appsettings = new Section(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettingsDomMapper.AppSettings.SectionDefinitionId);
+            if (obj.AppSettingsSectionId.HasValue)
+            {
+                _appsettings.ID = new SectionID(obj.AppSettingsSectionId.Value);
+            }
+
             if (obj.GoogleMapsAPIKey != default)
             {
                 _appsettings.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettingsDomMapper.AppSettings.GoogleMapsAPIKey, Convert.ToString(obj.GoogleMapsAPIKey));

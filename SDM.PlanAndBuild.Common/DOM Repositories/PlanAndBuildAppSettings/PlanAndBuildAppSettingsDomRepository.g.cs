@@ -516,6 +516,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             var _planandbuildappsettingspropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.SectionDefinitionId));
             if (_planandbuildappsettingspropertiesSection != default)
             {
+                obj.PlanAndBuildAppSettingsPropertiesSectionId = _planandbuildappsettingspropertiesSection.ID.Id;
                 var _jobidprefix = _planandbuildappsettingspropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDPrefix);
                 if (_jobidprefix != null)
                 {
@@ -572,6 +573,11 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
                 }
             };
             var _planandbuildappsettingsproperties = new Section(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.SectionDefinitionId);
+            if (obj.PlanAndBuildAppSettingsPropertiesSectionId.HasValue)
+            {
+                _planandbuildappsettingsproperties.ID = new SectionID(obj.PlanAndBuildAppSettingsPropertiesSectionId.Value);
+            }
+
             if (obj.JobIDPrefix != default)
             {
                 _planandbuildappsettingsproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDPrefix, Convert.ToString(obj.JobIDPrefix));

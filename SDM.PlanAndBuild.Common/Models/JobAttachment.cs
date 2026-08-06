@@ -2,8 +2,17 @@
 {
     using System;
 
-    public sealed class JobAttachment : IEquatable<JobAttachment>
+    using Newtonsoft.Json;
+
+    using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
+
+    public sealed class JobAttachment : IEquatable<JobAttachment>, ISectionTrackable
     {
+        [JsonIgnore]
+        [SdmIgnore]
+        Guid? ISectionTrackable.SectionId { get; set; }
+
         public string FilePath { get; set; }
 
         public DateTime? AttachedAt { get; set; }

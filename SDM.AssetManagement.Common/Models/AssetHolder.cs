@@ -2,10 +2,18 @@
 {
     using System;
 
+    using Newtonsoft.Json;
+
     using SharedMappers.DomIds;
 
-    public sealed class AssetHolder : IEquatable<AssetHolder>
+    using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
+
+    public sealed class AssetHolder : IEquatable<AssetHolder>, ISectionTrackable
 	{
+		[JsonIgnore]
+		[SdmIgnore]
+		Guid? ISectionTrackable.SectionId { get; set; }
+
 		public long SlotNumber { get; set; }
 
         public string Label { get; set; }

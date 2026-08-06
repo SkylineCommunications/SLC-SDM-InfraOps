@@ -518,6 +518,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             var _floorpropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.FacilityManagement.Models.FloorDomMapper.FloorProperties.SectionDefinitionId));
             if (_floorpropertiesSection != default)
             {
+                obj.FloorPropertiesSectionId = _floorpropertiesSection.ID.Id;
                 var _floorpropertiesname = _floorpropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.FloorDomMapper.FloorProperties.Name);
                 if (_floorpropertiesname != null)
                 {
@@ -547,6 +548,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             if (_facilityfkSection != default)
             {
                 obj.FacilityFk = new Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityRelation();
+                ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.FacilityFk).SectionId = _facilityfkSection.ID.Id;
                 var _facilityfkfacility = _facilityfkSection.GetValue<System.Guid>(Skyline.DataMiner.SDM.FacilityManagement.Models.FloorDomMapper.FacilityFk.Facility);
                 if (_facilityfkfacility != null)
                 {
@@ -578,6 +580,11 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 }
             };
             var _floorproperties = new Section(Skyline.DataMiner.SDM.FacilityManagement.Models.FloorDomMapper.FloorProperties.SectionDefinitionId);
+            if (obj.FloorPropertiesSectionId.HasValue)
+            {
+                _floorproperties.ID = new SectionID(obj.FloorPropertiesSectionId.Value);
+            }
+
             if (obj.Name != default)
             {
                 _floorproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.FloorDomMapper.FloorProperties.Name, Convert.ToString(obj.Name));
@@ -602,6 +609,12 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             if (obj.FacilityFk != null)
             {
                 var _facilityfk = new Section(Skyline.DataMiner.SDM.FacilityManagement.Models.FloorDomMapper.FacilityFk.SectionDefinitionId);
+                var _facilityfkSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.FacilityFk).SectionId;
+                if (_facilityfkSectionId.HasValue)
+                {
+                    _facilityfk.ID = new SectionID(_facilityfkSectionId.Value);
+                }
+
                 if (obj.FacilityFk.Facility != default)
                 {
                     _facilityfk.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.FacilityManagement.Models.FloorDomMapper.FacilityFk.Facility, System.Guid.Parse(obj.FacilityFk.Facility.Identifier));

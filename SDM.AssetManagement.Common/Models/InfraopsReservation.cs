@@ -1,8 +1,10 @@
-namespace Skyline.DataMiner.SDM.AssetManagement.Models
+﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
     using System.Collections.Generic;
 
     using Skyline.DataMiner.SDM;
+    using System;
+    using Newtonsoft.Json;
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)asset_management")]
@@ -15,5 +17,14 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         public RackRelation RackFk { get; set; }
 
         public List<InfraopsReservationBounderies> ReservedPositions { get; set; }
+
+        #region Section Tracking
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal Guid? ReservationPropertiesSectionId { get; set; }
+
+        #endregion
+
     }
 }

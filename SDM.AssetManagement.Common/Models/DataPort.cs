@@ -1,4 +1,4 @@
-namespace Skyline.DataMiner.SDM.AssetManagement.Models
+﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
     using System;
 
@@ -133,5 +133,14 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             _addressInfo?.ResetChangeTracking();
             _primaryPortRelation?.ResetChangeTracking();
         }
+
+        #region Section Tracking
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal Guid? AssetFkSectionId { get; set; }
+
+        #endregion
+
     }
 }

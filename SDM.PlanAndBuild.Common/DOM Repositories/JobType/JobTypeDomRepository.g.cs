@@ -516,6 +516,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             var _jobtypepropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.PlanAndBuild.Models.JobTypeDomMapper.JobTypeProperties.SectionDefinitionId));
             if (_jobtypepropertiesSection != default)
             {
+                obj.JobTypePropertiesSectionId = _jobtypepropertiesSection.ID.Id;
                 var _name = _jobtypepropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.JobTypeDomMapper.JobTypeProperties.Name);
                 if (_name != null)
                 {
@@ -560,6 +561,11 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
                 }
             };
             var _jobtypeproperties = new Section(Skyline.DataMiner.SDM.PlanAndBuild.Models.JobTypeDomMapper.JobTypeProperties.SectionDefinitionId);
+            if (obj.JobTypePropertiesSectionId.HasValue)
+            {
+                _jobtypeproperties.ID = new SectionID(obj.JobTypePropertiesSectionId.Value);
+            }
+
             if (obj.Name != default)
             {
                 _jobtypeproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.JobTypeDomMapper.JobTypeProperties.Name, Convert.ToString(obj.Name));

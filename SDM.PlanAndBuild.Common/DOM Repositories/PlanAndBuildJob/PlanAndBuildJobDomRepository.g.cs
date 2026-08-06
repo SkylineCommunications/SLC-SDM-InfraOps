@@ -517,6 +517,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             var _planandbuildjobpropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.SectionDefinitionId));
             if (_planandbuildjobpropertiesSection != default)
             {
+                obj.PlanAndBuildJobPropertiesSectionId = _planandbuildjobpropertiesSection.ID.Id;
                 var _jobid = _planandbuildjobpropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.JobID);
                 if (_jobid != null)
                 {
@@ -588,6 +589,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             if (_ownershipSection != default)
             {
                 obj.Ownership = new Skyline.DataMiner.SDM.PlanAndBuild.Models.JobOwnership();
+                ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Ownership).SectionId = _ownershipSection.ID.Id;
                 var _ownershipassignedto = _ownershipSection.GetValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.Ownership.AssignedTo);
                 if (_ownershipassignedto != null)
                 {
@@ -605,6 +607,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             foreach (var _assetsusedSection in instance.Sections.Where(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.AssetsUsed.SectionDefinitionId)))
             {
                 var assetsused = new Skyline.DataMiner.SDM.PlanAndBuild.Models.JobAsset();
+                ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)assetsused).SectionId = _assetsusedSection.ID.Id;
                 var _assetsusedassetid = _assetsusedSection.GetValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.AssetsUsed.AssetId);
                 if (_assetsusedassetid != null)
                 {
@@ -625,6 +628,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             foreach (var _attachmentsSection in instance.Sections.Where(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.Attachments.SectionDefinitionId)))
             {
                 var attachments = new Skyline.DataMiner.SDM.PlanAndBuild.Models.JobAttachment();
+                ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)attachments).SectionId = _attachmentsSection.ID.Id;
                 var _attachmentsfilepath = _attachmentsSection.GetValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.Attachments.FilePath);
                 if (_attachmentsfilepath != null)
                 {
@@ -651,6 +655,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             foreach (var _connectionsonjobSection in instance.Sections.Where(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.SectionDefinitionId)))
             {
                 var connectionsonjob = new Skyline.DataMiner.SDM.PlanAndBuild.Models.JobConnection();
+                ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)connectionsonjob).SectionId = _connectionsonjobSection.ID.Id;
                 var _connectionsonjobconnectionid = _connectionsonjobSection.GetValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.ConnectionId);
                 if (_connectionsonjobconnectionid != null)
                 {
@@ -726,6 +731,11 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             };
 
             var _planandbuildjobproperties = new Section(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.SectionDefinitionId);
+            if (obj.PlanAndBuildJobPropertiesSectionId.HasValue)
+            {
+                _planandbuildjobproperties.ID = new SectionID(obj.PlanAndBuildJobPropertiesSectionId.Value);
+            }
+
             if (obj.JobID != default)
             {
                 _planandbuildjobproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.JobID, Convert.ToString(obj.JobID));
@@ -777,6 +787,12 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             if (obj.Ownership != null)
             {
                 var _ownership = new Section(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.Ownership.SectionDefinitionId);
+                var _ownershipSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Ownership).SectionId;
+                if (_ownershipSectionId.HasValue)
+                {
+                    _ownership.ID = new SectionID(_ownershipSectionId.Value);
+                }
+
                 if (obj.Ownership.AssignedTo != default)
                 {
                     _ownership.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.Ownership.AssignedTo, Convert.ToString((obj.Ownership.AssignedTo).Value));
@@ -793,6 +809,12 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             foreach (var assetsused in obj.AssetsUsed)
             {
                 var _assetsusedSection = new Section(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.AssetsUsed.SectionDefinitionId);
+                var _assetsusedSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)assetsused).SectionId;
+                if (_assetsusedSectionId.HasValue)
+                {
+                    _assetsusedSection.ID = new SectionID(_assetsusedSectionId.Value);
+                }
+
                 if (assetsused.AssetId != default)
                 {
                     _assetsusedSection.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.AssetsUsed.AssetId, assetsused.AssetId.Identifier);
@@ -805,6 +827,12 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             foreach (var attachments in obj.Attachments)
             {
                 var _attachmentsSection = new Section(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.Attachments.SectionDefinitionId);
+                var _attachmentsSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)attachments).SectionId;
+                if (_attachmentsSectionId.HasValue)
+                {
+                    _attachmentsSection.ID = new SectionID(_attachmentsSectionId.Value);
+                }
+
                 if (attachments.FilePath != default)
                 {
                     _attachmentsSection.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.Attachments.FilePath, Convert.ToString(attachments.FilePath));
@@ -826,6 +854,12 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             foreach (var connectionsonjob in obj.ConnectionsOnJob)
             {
                 var _connectionsonjobSection = new Section(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.SectionDefinitionId);
+                var _connectionsonjobSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)connectionsonjob).SectionId;
+                if (_connectionsonjobSectionId.HasValue)
+                {
+                    _connectionsonjobSection.ID = new SectionID(_connectionsonjobSectionId.Value);
+                }
+
                 if (connectionsonjob.ConnectionId != default)
                 {
                     _connectionsonjobSection.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.ConnectionId, connectionsonjob.ConnectionId.Identifier);

@@ -6,8 +6,12 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
-    public class JobOwnership : ChangeTrackingBase
+    public class JobOwnership : ChangeTrackingBase, ISectionTrackable
     {
+        [JsonIgnore]
+        [SdmIgnore]
+        Guid? ISectionTrackable.SectionId { get; set; }
+
         public Guid? AssignedTo
         {
             get => AssignedToField.Value;

@@ -3,9 +3,15 @@
 	using System;
 
     using SharedMappers.DomIds;
+    using Newtonsoft.Json;
+    using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
-    public sealed class PowerPortInfo : IEquatable<PowerPortInfo>
+    public sealed class PowerPortInfo : IEquatable<PowerPortInfo>, ISectionTrackable
 	{
+        [JsonIgnore]
+        [SdmIgnore]
+        Guid? ISectionTrackable.SectionId { get; set; }
+
 		public string Name { get; set; }
 
 		public long? PortNumber { get; set; }

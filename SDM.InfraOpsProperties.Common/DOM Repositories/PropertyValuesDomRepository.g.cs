@@ -516,6 +516,7 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
             var _propertyvaluespropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValuesDomMapper.PropertyValuesProperties.SectionDefinitionId));
             if (_propertyvaluespropertiesSection != default)
             {
+                obj.PropertyValuesPropertiesSectionId = _propertyvaluespropertiesSection.ID.Id;
                 var _linkedobjectid = _propertyvaluespropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValuesDomMapper.PropertyValuesProperties.LinkedObjectID);
                 if (_linkedobjectid != null)
                 {
@@ -539,6 +540,7 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
             foreach (var _valuesSection in instance.Sections.Where(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValuesDomMapper.Values.SectionDefinitionId)))
             {
                 var values = new Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValue();
+                ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)values).SectionId = _valuesSection.ID.Id;
                 var _valuespropertyname = _valuesSection.GetValue<string>(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValuesDomMapper.Values.PropertyName);
                 if (_valuespropertyname != null)
                 {
@@ -586,6 +588,11 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
                 }
             };
             var _propertyvaluesproperties = new Section(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValuesDomMapper.PropertyValuesProperties.SectionDefinitionId);
+            if (obj.PropertyValuesPropertiesSectionId.HasValue)
+            {
+                _propertyvaluesproperties.ID = new SectionID(obj.PropertyValuesPropertiesSectionId.Value);
+            }
+
             if (obj.LinkedObjectID != default)
             {
                 _propertyvaluesproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValuesDomMapper.PropertyValuesProperties.LinkedObjectID, Convert.ToString(obj.LinkedObjectID));
@@ -605,6 +612,12 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
             foreach (var values in obj.Values)
             {
                 var _valuesSection = new Section(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValuesDomMapper.Values.SectionDefinitionId);
+                var _valuesSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)values).SectionId;
+                if (_valuesSectionId.HasValue)
+                {
+                    _valuesSection.ID = new SectionID(_valuesSectionId.Value);
+                }
+
                 if (values.PropertyName != default)
                 {
                     _valuesSection.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValuesDomMapper.Values.PropertyName, Convert.ToString(values.PropertyName));

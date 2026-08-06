@@ -1,5 +1,7 @@
 ﻿namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 {
+    using System;
+
     using Newtonsoft.Json;
 
     using SharedMappers.DomIds;
@@ -50,6 +52,14 @@
         [JsonIgnore]
         [SdmIgnore]
         public bool IsNew => _isNew;
+
+        #region Section Tracking
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal Guid? RoomPropertiesSectionId { get; set; }
+
+        #endregion
 
         public string Name
         {

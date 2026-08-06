@@ -1,6 +1,8 @@
 ﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
     using SharedMappers.DomIds;
+    using System;
+    using Newtonsoft.Json;
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)asset_management")]
@@ -22,5 +24,18 @@
         public SourceInfo Source { get; set; }
 
         public DestinationInfo Destination { get; set; }
+
+        #region Section Tracking
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal Guid? ConnectionPropertiesSectionId { get; set; }
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal Guid? CableInformationSectionId { get; set; }
+
+        #endregion
+
     }
 }

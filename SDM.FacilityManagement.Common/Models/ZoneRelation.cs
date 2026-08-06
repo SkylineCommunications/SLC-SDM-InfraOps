@@ -1,9 +1,18 @@
 ﻿namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 {
-    using Skyline.DataMiner.SDM;
+    using System;
 
-    public class ZoneRelation
+    using Newtonsoft.Json;
+
+    using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
+
+    public class ZoneRelation : ISectionTrackable
     {
+        [JsonIgnore]
+        [SdmIgnore]
+        Guid? ISectionTrackable.SectionId { get; set; }
+
         public SdmObjectReference<Zone> Zone { get; set; }
     }
 }

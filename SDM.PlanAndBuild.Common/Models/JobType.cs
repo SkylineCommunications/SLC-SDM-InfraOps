@@ -1,5 +1,7 @@
 namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 {
+    using System;
+
     using Newtonsoft.Json;
 
     using Skyline.DataMiner.SDM;
@@ -90,6 +92,14 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
         internal IChangeTrackingField<string> IconField => FieldHandler.GetOrCreateField(
             nameof(Icon),
             () => new ChangeTrackingStringField(null));
+
+        #region Section Tracking
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal Guid? JobTypePropertiesSectionId { get; set; }
+
+        #endregion
 
         public void ResetChangeTracking()
         {

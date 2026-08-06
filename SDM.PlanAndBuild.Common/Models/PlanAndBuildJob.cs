@@ -280,6 +280,14 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 
         #endregion
 
+        #region Section Tracking
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal Guid? PlanAndBuildJobPropertiesSectionId { get; set; }
+
+        #endregion
+
         #region Collection Tracking Fields
 
         [JsonIgnore]

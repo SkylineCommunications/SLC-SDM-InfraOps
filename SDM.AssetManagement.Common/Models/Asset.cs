@@ -365,6 +365,28 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
         #endregion
 
+        #region Section Tracking
+
+        /// <summary>
+        /// Original DOM SectionIDs of the inline sections (built from the entity's own fields),
+        /// captured on read and reused on write so each section keeps a stable identity across
+        /// updates instead of getting a fresh random SectionID every save.
+        /// See <see cref="Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable"/>.
+        /// </summary>
+        [JsonIgnore]
+        [SdmIgnore]
+        internal Guid? AssetPropertiesSectionId { get; set; }
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal Guid? NetworkDetailsSectionId { get; set; }
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal Guid? LifecycleSectionId { get; set; }
+
+        #endregion
+
         public void ResetChangeTracking()
         {
             FieldHandler?.ApplyChanges();
