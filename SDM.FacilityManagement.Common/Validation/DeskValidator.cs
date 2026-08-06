@@ -101,41 +101,12 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
         /// </summary>
         protected override List<ValidationResult> ValidateBulk(List<Desk> entities)
         {
-            if (entities == null || !entities.Any())
-            {
-                return new List<ValidationResult>();
-            }
-
-            var results = entities.Select(_ => new ValidationResult()).ToList();
-
-            for (int i = 0; i < entities.Count; i++)
-            {
-                if (!DeskValidationHandler.IsDeskIdValid(entities[i], out var idResult))
-                {
-                    results[i].AddFailuresFrom(idResult);
-                }
-            }
-
-            if (results.AnyInvalid())
-            {
-                return results;
-            }
-
-            var batchConflicts = ValidateIdDuplicatesInBatch(entities);
-            results.MergeFrom(batchConflicts);
-
-            if (results.AnyInvalid())
-            {
-                return results;
-            }
-
-            var dbConflicts = ValidateBulkIdsAgainstDatabase(entities);
-            results.MergeFrom(dbConflicts);
-
-            var referenceConflicts = ValidateReferencesAgainstDatabase(entities);
-            results.MergeFrom(referenceConflicts);
-
-            return results;
+            return FacilityBulkValidationHelper.RunBulkValidation(
+                entities,
+                DeskValidationHandler.IsDeskIdValid,
+                ValidateIdDuplicatesInBatch,
+                ValidateBulkIdsAgainstDatabase,
+                ValidateReferencesAgainstDatabase);
         }
 
         private bool IsIdInUse(string id, string exceptIdentifier = null)
@@ -221,73 +192,14 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
 
         private List<ValidationResult> ValidateReferencesAgainstDatabase(List<Desk> entities)
         {
-            var results = entities.Select(_ => new ValidationResult()).ToList();
-            var roomCandidates = entities
-                .Select((entity, index) => new
-                {
-                    Entity = entity,
-                    Index = index,
-                    RoomIdentifier = entity.RoomFk == null ? null : FacilityReferenceValidationHelper.GetId(entity.RoomFk.Room),
-                })
-                .Where(x => FacilityReferenceValidationHelper.ShouldValidateReferences(x.Entity) &&
-                    FacilityReferenceValidationHelper.HasId(x.RoomIdentifier))
-                .ToList();
-
-            var resourceCandidates = entities
-                .Select((entity, index) => new
-                {
-                    Entity = entity,
-                    Index = index,
-                    ResourceId = entity.Resource?.ResourceId ?? Guid.Empty,
-                })
-                .Where(x => FacilityReferenceValidationHelper.ShouldValidateReferences(x.Entity) &&
-                    FacilityReferenceValidationHelper.HasId(x.ResourceId))
-                .ToList();
-
-            var existingRoomIds = roomCandidates.Any()
-                ? FacilityReferenceValidationHelper.ToIdentifierSet(_entityLoader.GetRoomsByIdentifiers(roomCandidates.Select(x => x.RoomIdentifier).Distinct().ToList()))
-                : new HashSet<string>();
-            var existingResourceIds = GetExistingResourceIds(resourceCandidates.Select(x => x.ResourceId));
-
-            foreach (var candidate in roomCandidates)
-            {
-                if (!existingRoomIds.Contains(candidate.RoomIdentifier))
-                {
-                    FacilityReferenceValidationHelper.AddMissingReference(
-                        results[candidate.Index],
-                        DeskValidationHandler.DeskValidationField.DeskId,
-                        "Room",
-                        candidate.RoomIdentifier);
-                }
-            }
-
-            foreach (var candidate in resourceCandidates)
-            {
-                if (existingResourceIds != null && !existingResourceIds.Contains(candidate.ResourceId))
-                {
-                    FacilityReferenceValidationHelper.AddMissingReference(
-                        results[candidate.Index],
-                        DeskValidationHandler.DeskValidationField.DeskId,
-                        "Resource",
-                        candidate.ResourceId);
-                }
-            }
-
-            return results;
-        }
-
-        private HashSet<Guid> GetExistingResourceIds(IEnumerable<Guid> resourceIds)
-        {
             var checker = _entityLoader.ExternalReferenceChecker;
-            var keys = resourceIds?.Where(FacilityReferenceValidationHelper.HasId).Distinct().ToList() ?? new List<Guid>();
-            if (checker == null || !keys.Any())
-            {
-                // No reference checker available: treat all referenced ids as existing so the
-                // reference check is effectively skipped instead of reporting false errors.
-                return new HashSet<Guid>(keys);
-            }
-
-            return FacilityReferenceValidationHelper.ToGuidSet(checker.GetExistingResourceIds(keys));
+            return FacilityReferenceValidationHelper.ValidateRoomAndResourceReferences(
+                entities,
+                DeskValidationHandler.DeskValidationField.DeskId,
+                entity => entity.RoomFk == null ? null : FacilityReferenceValidationHelper.GetId(entity.RoomFk.Room),
+                entity => entity.Resource?.ResourceId ?? Guid.Empty,
+                ids => FacilityReferenceValidationHelper.ToIdentifierSet(_entityLoader.GetRoomsByIdentifiers(ids)),
+                checker == null ? (Func<IReadOnlyCollection<Guid>, IReadOnlyCollection<Guid>>)null : checker.GetExistingResourceIds);
         }
 
         private static List<ValidationResult> ValidateIdDuplicatesInBatch(List<Desk> entities)

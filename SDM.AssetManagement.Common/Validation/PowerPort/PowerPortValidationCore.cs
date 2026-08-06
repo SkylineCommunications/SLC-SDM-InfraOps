@@ -215,48 +215,14 @@
         public Dictionary<string, ValidationResult> ValidatePowerPortsForAsset(
             List<PowerPort> portsToValidate, Asset asset)
         {
-            if (asset == null)
-            {
-                throw new ArgumentNullException(nameof(asset));
-            }
-
-            if (portsToValidate == null || !portsToValidate.Any())
-            {
-                return new Dictionary<string, ValidationResult>();
-            }
-
-            // Defensive check: ensure all ports belong to this asset
-            var mismatchedPorts = portsToValidate
-                .Where(p => p.Asset.Identifier != asset.Identifier)
-                .ToList();
-
-            if (mismatchedPorts.Any())
-            {
-                throw new ArgumentException(
-                    $"All PowerPorts must belong to Asset '{asset.Identifier}'. Found {mismatchedPorts.Count} port(s) belonging to different assets. ",
-                    nameof(portsToValidate));
-            }
-
-            var results = portsToValidate.ToDictionary(p => p.Identifier, p => new ValidationResult());
-
-            var validatedIds = portsToValidate.Select(p => p.Identifier).ToList();
-            var existingPorts = _entityLoader.LoadPowerPorts(asset)
-                .Where(p => !validatedIds.Contains(p.Identifier))
-                .ToList();
-
-            var allPorts = existingPorts.Concat(portsToValidate).ToList();
-
-            var collectionResult = ValidatePowerPortCollection(allPorts);
-
-            if (!collectionResult.IsValid)
-            {
-                foreach (var port in portsToValidate)
-                {
-                    results[port.Identifier].AddFailuresFrom(collectionResult);
-                }
-            }
-
-            return results;
+            return PortBulkValidationHelper.ValidatePortsForAsset(
+                portsToValidate,
+                asset,
+                "PowerPorts",
+                p => p.Identifier,
+                p => p.Asset.Identifier,
+                a => _entityLoader.LoadPowerPorts(a),
+                ValidatePowerPortCollection);
         }
 
         #endregion

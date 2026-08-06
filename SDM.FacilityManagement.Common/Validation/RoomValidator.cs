@@ -101,41 +101,12 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
         /// </summary>
         protected override List<ValidationResult> ValidateBulk(List<Room> entities)
         {
-            if (entities == null || !entities.Any())
-            {
-                return new List<ValidationResult>();
-            }
-
-            var results = entities.Select(_ => new ValidationResult()).ToList();
-
-            for (int i = 0; i < entities.Count; i++)
-            {
-                if (!RoomValidationHandler.IsRoomIdValid(entities[i], out var idResult))
-                {
-                    results[i].AddFailuresFrom(idResult);
-                }
-            }
-
-            if (results.AnyInvalid())
-            {
-                return results;
-            }
-
-            var batchConflicts = ValidateIdDuplicatesInBatch(entities);
-            results.MergeFrom(batchConflicts);
-
-            if (results.AnyInvalid())
-            {
-                return results;
-            }
-
-            var dbConflicts = ValidateBulkIdsAgainstDatabase(entities);
-            results.MergeFrom(dbConflicts);
-
-            var referenceConflicts = ValidateReferencesAgainstDatabase(entities);
-            results.MergeFrom(referenceConflicts);
-
-            return results;
+            return FacilityBulkValidationHelper.RunBulkValidation(
+                entities,
+                RoomValidationHandler.IsRoomIdValid,
+                ValidateIdDuplicatesInBatch,
+                ValidateBulkIdsAgainstDatabase,
+                ValidateReferencesAgainstDatabase);
         }
 
         private bool IsIdInUse(string id, string exceptIdentifier = null)

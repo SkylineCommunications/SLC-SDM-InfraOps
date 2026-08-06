@@ -837,6 +837,33 @@ namespace Skyline.DataMiner.SDM.Common.Services
 
 
         /// <summary>
+        /// Builds a filter that excludes the supplied asset identifiers. Returns a match-all filter
+        /// when no valid identifiers are supplied.
+        /// </summary>
+        private static FilterElement<Asset> BuildExcludeAssetIdsFilter(List<string> excludeAssetIds)
+        {
+            FilterElement<Asset> filter = new TRUEFilterElement<Asset>();
+
+            if (excludeAssetIds == null || !excludeAssetIds.Any())
+            {
+                return filter;
+            }
+
+            var validIdentifiers = excludeAssetIds.Where(id => !string.IsNullOrWhiteSpace(id)).ToList();
+
+            if (validIdentifiers.Any())
+            {
+                var clauses = validIdentifiers
+                    .Select(id => AssetExposers.Identifier.NotEqual(id))
+                    .Cast<FilterElement<Asset>>()
+                    .ToArray();
+                filter = filter.AND(new ANDFilterElement<Asset>(clauses));
+            }
+
+            return filter;
+        }
+
+        /// <summary>
         /// Finds assets in a rack, excluding optional asset identifiers.
         /// <para><b>Not suitable for bulk scenarios</b>: builds an AND clause per excluded identifier.</para>
         /// </summary>
@@ -849,21 +876,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
 
             try
             {
-                FilterElement<Asset> filter = new TRUEFilterElement<Asset>();
-
-                if (excludeAssetIds != null && excludeAssetIds.Any())
-                {
-                    var validIdentifiers = excludeAssetIds.Where(id => !string.IsNullOrWhiteSpace(id)).ToList();
-
-                    if (validIdentifiers.Any())
-                    {
-                        var clauses = validIdentifiers
-                            .Select(id => AssetExposers.Identifier.NotEqual(id))
-                            .Cast<FilterElement<Asset>>()
-                            .ToArray();
-                        filter = filter.AND(new ANDFilterElement<Asset>(clauses));
-                    }
-                }
+                var filter = BuildExcludeAssetIdsFilter(excludeAssetIds);
 
                 var allAssets = assetManagerApiHelper.Assets.Read(filter);
 
@@ -890,21 +903,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
 
             try
             {
-                FilterElement<Asset> filter = new TRUEFilterElement<Asset>();
-
-                if (excludeAssetIds != null && excludeAssetIds.Any())
-                {
-                    var validIdentifiers = excludeAssetIds.Where(id => !string.IsNullOrWhiteSpace(id)).ToList();
-
-                    if (validIdentifiers.Any())
-                    {
-                        var clauses = validIdentifiers
-                            .Select(id => AssetExposers.Identifier.NotEqual(id))
-                            .Cast<FilterElement<Asset>>()
-                            .ToArray();
-                        filter = filter.AND(new ANDFilterElement<Asset>(clauses));
-                    }
-                }
+                var filter = BuildExcludeAssetIdsFilter(excludeAssetIds);
 
                 var allAssets = assetManagerApiHelper.Assets.Read(filter.AND(AssetExposers.Location.ParentAsset.Equal(new SdmObjectReference<Asset>(parentAssetIdentifier))));
 
