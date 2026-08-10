@@ -31,7 +31,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
         public SiteDomRepository(IConnection connection)
         {
             this.connection = connection;
-            this.helper = new DomHelper(connection.HandleMessages, Skyline.DataMiner.SDM.FacilityManagement.Models.SiteDomMapper.ModuleId);
+            this.helper = new DomHelper(connection.HandleMessages, FacilityManagement.Models.SiteDomMapper.ModuleId);
         }
 
         public Site Create(Site createObject)
@@ -148,7 +148,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             }
 
             var domFilter = TranslateFullFilter(filter);
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.FacilityManagement.Models.SiteDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(FacilityManagement.Models.SiteDomMapper.DomDefinitionId.Id));
             return helper.DomInstances.Count(domFilter);
         }
 
@@ -160,7 +160,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             }
 
             var domFilter = TranslateFullFilter(query.Filter);
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.FacilityManagement.Models.SiteDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(FacilityManagement.Models.SiteDomMapper.DomDefinitionId.Id));
             var domOrder = TranslateFullOrderBy(query.Order);
             var domQuery = query.WithFilter(domFilter).WithOrder(domOrder);
             return helper.DomInstances.Count(domQuery);
@@ -372,7 +372,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 throw new ArgumentNullException(nameof(domFilter));
             }
 
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.FacilityManagement.Models.SiteDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(FacilityManagement.Models.SiteDomMapper.DomDefinitionId.Id));
             var domInstances = helper.DomInstances.Read(domFilter);
             return domInstances.Select(FromInstance);
         }
@@ -384,7 +384,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 throw new ArgumentNullException(nameof(domQuery));
             }
 
-            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.FacilityManagement.Models.SiteDomMapper.DomDefinitionId.Id));
+            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(FacilityManagement.Models.SiteDomMapper.DomDefinitionId.Id));
             domQuery = domQuery.WithFilter(domFilter);
             var domInstances = helper.DomInstances.Read(domQuery);
             return domInstances.Select(FromInstance);
@@ -397,7 +397,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 throw new ArgumentNullException(nameof(domFilter));
             }
 
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.FacilityManagement.Models.SiteDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(FacilityManagement.Models.SiteDomMapper.DomDefinitionId.Id));
             var pagingHelper = helper.DomInstances.PreparePaging(domFilter, pageSize);
             while (pagingHelper.MoveToNextPage())
             {
@@ -412,7 +412,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 throw new ArgumentNullException(nameof(domQuery));
             }
 
-            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.FacilityManagement.Models.SiteDomMapper.DomDefinitionId.Id));
+            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(FacilityManagement.Models.SiteDomMapper.DomDefinitionId.Id));
             domQuery = domQuery.WithFilter(domFilter);
             var pagingHelper = helper.DomInstances.PreparePaging(domQuery, pageSize);
             while (pagingHelper.MoveToNextPage())
@@ -515,58 +515,58 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             obj.State = String.IsNullOrWhiteSpace(instance.StatusId)
                 ? SharedMappers.DomIds.SlcFacility_Management.Behaviors.Site_Behaviour.StatusesEnum.Draft
                 : SharedMappers.DomIds.SlcFacility_Management.Behaviors.Site_Behaviour.Statuses.ToEnum(instance.StatusId);
-            var _sitepropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.FacilityManagement.Models.SiteDomMapper.SiteProperties.SectionDefinitionId));
+            var _sitepropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(FacilityManagement.Models.SiteDomMapper.SiteProperties.SectionDefinitionId));
             if (_sitepropertiesSection != default)
             {
-                var _sitepropertiesname = _sitepropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.SiteDomMapper.SiteProperties.Name);
+                var _sitepropertiesname = _sitepropertiesSection.GetValue<string>(FacilityManagement.Models.SiteDomMapper.SiteProperties.Name);
                 if (_sitepropertiesname != null)
                 {
                     obj.Name = _sitepropertiesname.Value;
                 }
 
-                var _sitepropertiesdescription = _sitepropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.SiteDomMapper.SiteProperties.Description);
+                var _sitepropertiesdescription = _sitepropertiesSection.GetValue<string>(FacilityManagement.Models.SiteDomMapper.SiteProperties.Description);
                 if (_sitepropertiesdescription != null)
                 {
                     obj.Description = _sitepropertiesdescription.Value;
                 }
 
-                var _sitepropertiesaddress = _sitepropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.SiteDomMapper.SiteProperties.Address);
+                var _sitepropertiesaddress = _sitepropertiesSection.GetValue<string>(FacilityManagement.Models.SiteDomMapper.SiteProperties.Address);
                 if (_sitepropertiesaddress != null)
                 {
                     obj.Address = _sitepropertiesaddress.Value;
                 }
 
-                var _sitepropertiescity = _sitepropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.SiteDomMapper.SiteProperties.City);
+                var _sitepropertiescity = _sitepropertiesSection.GetValue<string>(FacilityManagement.Models.SiteDomMapper.SiteProperties.City);
                 if (_sitepropertiescity != null)
                 {
                     obj.City = _sitepropertiescity.Value;
                 }
 
-                var _sitepropertieszipcode = _sitepropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.SiteDomMapper.SiteProperties.ZipCode);
+                var _sitepropertieszipcode = _sitepropertiesSection.GetValue<string>(FacilityManagement.Models.SiteDomMapper.SiteProperties.ZipCode);
                 if (_sitepropertieszipcode != null)
                 {
                     obj.ZipCode = _sitepropertieszipcode.Value;
                 }
 
-                var _sitepropertiescountry = _sitepropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.SiteDomMapper.SiteProperties.Country);
+                var _sitepropertiescountry = _sitepropertiesSection.GetValue<string>(FacilityManagement.Models.SiteDomMapper.SiteProperties.Country);
                 if (_sitepropertiescountry != null)
                 {
                     obj.Country = _sitepropertiescountry.Value;
                 }
 
-                var _sitepropertieslatitude = _sitepropertiesSection.GetValue<double>(Skyline.DataMiner.SDM.FacilityManagement.Models.SiteDomMapper.SiteProperties.Latitude);
+                var _sitepropertieslatitude = _sitepropertiesSection.GetValue<double>(FacilityManagement.Models.SiteDomMapper.SiteProperties.Latitude);
                 if (_sitepropertieslatitude != null)
                 {
                     obj.Latitude = _sitepropertieslatitude.Value;
                 }
 
-                var _sitepropertieslongitude = _sitepropertiesSection.GetValue<double>(Skyline.DataMiner.SDM.FacilityManagement.Models.SiteDomMapper.SiteProperties.Longitude);
+                var _sitepropertieslongitude = _sitepropertiesSection.GetValue<double>(FacilityManagement.Models.SiteDomMapper.SiteProperties.Longitude);
                 if (_sitepropertieslongitude != null)
                 {
                     obj.Longitude = _sitepropertieslongitude.Value;
                 }
 
-                var _sitepropertiessiteid = _sitepropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.SiteDomMapper.SiteProperties.SiteId);
+                var _sitepropertiessiteid = _sitepropertiesSection.GetValue<string>(FacilityManagement.Models.SiteDomMapper.SiteProperties.SiteId);
                 if (_sitepropertiessiteid != null)
                 {
                     obj.SiteId = _sitepropertiessiteid.Value;
@@ -590,56 +590,56 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
             var instance = new DomInstance
             {
-                DomDefinitionId = Skyline.DataMiner.SDM.FacilityManagement.Models.SiteDomMapper.DomDefinitionId,
+                DomDefinitionId = FacilityManagement.Models.SiteDomMapper.DomDefinitionId,
                 ID = new DomInstanceId(id)
                 {
-                    ModuleId = Skyline.DataMiner.SDM.FacilityManagement.Models.SiteDomMapper.ModuleId
+                    ModuleId = FacilityManagement.Models.SiteDomMapper.ModuleId
                 }
             };
-            var _siteproperties = new Section(Skyline.DataMiner.SDM.FacilityManagement.Models.SiteDomMapper.SiteProperties.SectionDefinitionId);
+            var _siteproperties = new Section(FacilityManagement.Models.SiteDomMapper.SiteProperties.SectionDefinitionId);
             if (obj.Name != default)
             {
-                _siteproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.SiteDomMapper.SiteProperties.Name, Convert.ToString(obj.Name));
+                _siteproperties.AddOrUpdateValue<string>(FacilityManagement.Models.SiteDomMapper.SiteProperties.Name, Convert.ToString(obj.Name));
             }
 
             if (obj.Description != default)
             {
-                _siteproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.SiteDomMapper.SiteProperties.Description, Convert.ToString(obj.Description));
+                _siteproperties.AddOrUpdateValue<string>(FacilityManagement.Models.SiteDomMapper.SiteProperties.Description, Convert.ToString(obj.Description));
             }
 
             if (obj.Address != default)
             {
-                _siteproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.SiteDomMapper.SiteProperties.Address, Convert.ToString(obj.Address));
+                _siteproperties.AddOrUpdateValue<string>(FacilityManagement.Models.SiteDomMapper.SiteProperties.Address, Convert.ToString(obj.Address));
             }
 
             if (obj.City != default)
             {
-                _siteproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.SiteDomMapper.SiteProperties.City, Convert.ToString(obj.City));
+                _siteproperties.AddOrUpdateValue<string>(FacilityManagement.Models.SiteDomMapper.SiteProperties.City, Convert.ToString(obj.City));
             }
 
             if (obj.ZipCode != default)
             {
-                _siteproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.SiteDomMapper.SiteProperties.ZipCode, Convert.ToString(obj.ZipCode));
+                _siteproperties.AddOrUpdateValue<string>(FacilityManagement.Models.SiteDomMapper.SiteProperties.ZipCode, Convert.ToString(obj.ZipCode));
             }
 
             if (obj.Country != default)
             {
-                _siteproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.SiteDomMapper.SiteProperties.Country, Convert.ToString(obj.Country));
+                _siteproperties.AddOrUpdateValue<string>(FacilityManagement.Models.SiteDomMapper.SiteProperties.Country, Convert.ToString(obj.Country));
             }
 
             if (obj.Latitude != default)
             {
-                _siteproperties.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.FacilityManagement.Models.SiteDomMapper.SiteProperties.Latitude, (double)(obj.Latitude).Value);
+                _siteproperties.AddOrUpdateValue<double>(FacilityManagement.Models.SiteDomMapper.SiteProperties.Latitude, (double)(obj.Latitude).Value);
             }
 
             if (obj.Longitude != default)
             {
-                _siteproperties.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.FacilityManagement.Models.SiteDomMapper.SiteProperties.Longitude, (double)(obj.Longitude).Value);
+                _siteproperties.AddOrUpdateValue<double>(FacilityManagement.Models.SiteDomMapper.SiteProperties.Longitude, (double)(obj.Longitude).Value);
             }
 
             if (obj.SiteId != default)
             {
-                _siteproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.SiteDomMapper.SiteProperties.SiteId, Convert.ToString(obj.SiteId));
+                _siteproperties.AddOrUpdateValue<string>(FacilityManagement.Models.SiteDomMapper.SiteProperties.SiteId, Convert.ToString(obj.SiteId));
             }
 
             instance.Sections.Add(_siteproperties);
@@ -653,27 +653,27 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 case "Identifier":
                     return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.Id, comparer, Guid.Parse((string)value));
                 case "SiteProperties.Name":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.SiteDomMapper.SiteProperties.Name), comparer, (string)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.SiteDomMapper.SiteProperties.Name), comparer, (string)value);
                 case "SiteProperties.Description":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.SiteDomMapper.SiteProperties.Description), comparer, (string)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.SiteDomMapper.SiteProperties.Description), comparer, (string)value);
                 case "SiteProperties.Address":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.SiteDomMapper.SiteProperties.Address), comparer, (string)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.SiteDomMapper.SiteProperties.Address), comparer, (string)value);
                 case "SiteProperties.City":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.SiteDomMapper.SiteProperties.City), comparer, (string)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.SiteDomMapper.SiteProperties.City), comparer, (string)value);
                 case "SiteProperties.ZipCode":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.SiteDomMapper.SiteProperties.ZipCode), comparer, (string)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.SiteDomMapper.SiteProperties.ZipCode), comparer, (string)value);
                 case "SiteProperties.Country":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.SiteDomMapper.SiteProperties.Country), comparer, (string)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.SiteDomMapper.SiteProperties.Country), comparer, (string)value);
                 case "SiteProperties.Latitude" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
-                    return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.FacilityManagement.Models.SiteDomMapper.SiteProperties.Latitude.Id.ToString()).Equal(comparer == Comparer.NotEquals);
+                    return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.SiteDomMapper.SiteProperties.Latitude.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "SiteProperties.Latitude":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.SiteDomMapper.SiteProperties.Latitude), comparer, (double)((double?)value).Value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.SiteDomMapper.SiteProperties.Latitude), comparer, (double)((double?)value).Value);
                 case "SiteProperties.Longitude" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
-                    return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.FacilityManagement.Models.SiteDomMapper.SiteProperties.Longitude.Id.ToString()).Equal(comparer == Comparer.NotEquals);
+                    return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.SiteDomMapper.SiteProperties.Longitude.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "SiteProperties.Longitude":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.SiteDomMapper.SiteProperties.Longitude), comparer, (double)((double?)value).Value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.SiteDomMapper.SiteProperties.Longitude), comparer, (double)((double?)value).Value);
                 case "SiteProperties.SiteId":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.SiteDomMapper.SiteProperties.SiteId), comparer, (string)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.SiteDomMapper.SiteProperties.SiteId), comparer, (string)value);
                 default:
                     throw new NotImplementedException();
             }
@@ -686,23 +686,23 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 case "Identifier":
                     return OrderByElementFactory.Create(DomInstanceExposers.Id, sortOrder, naturalSort);
                 case "SiteProperties.Name":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.SiteDomMapper.SiteProperties.Name), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.SiteDomMapper.SiteProperties.Name), sortOrder, naturalSort);
                 case "SiteProperties.Description":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.SiteDomMapper.SiteProperties.Description), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.SiteDomMapper.SiteProperties.Description), sortOrder, naturalSort);
                 case "SiteProperties.Address":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.SiteDomMapper.SiteProperties.Address), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.SiteDomMapper.SiteProperties.Address), sortOrder, naturalSort);
                 case "SiteProperties.City":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.SiteDomMapper.SiteProperties.City), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.SiteDomMapper.SiteProperties.City), sortOrder, naturalSort);
                 case "SiteProperties.ZipCode":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.SiteDomMapper.SiteProperties.ZipCode), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.SiteDomMapper.SiteProperties.ZipCode), sortOrder, naturalSort);
                 case "SiteProperties.Country":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.SiteDomMapper.SiteProperties.Country), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.SiteDomMapper.SiteProperties.Country), sortOrder, naturalSort);
                 case "SiteProperties.Latitude":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.SiteDomMapper.SiteProperties.Latitude), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.SiteDomMapper.SiteProperties.Latitude), sortOrder, naturalSort);
                 case "SiteProperties.Longitude":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.SiteDomMapper.SiteProperties.Longitude), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.SiteDomMapper.SiteProperties.Longitude), sortOrder, naturalSort);
                 case "SiteProperties.SiteId":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.SiteDomMapper.SiteProperties.SiteId), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.SiteDomMapper.SiteProperties.SiteId), sortOrder, naturalSort);
                 default:
                     throw new NotImplementedException();
             }

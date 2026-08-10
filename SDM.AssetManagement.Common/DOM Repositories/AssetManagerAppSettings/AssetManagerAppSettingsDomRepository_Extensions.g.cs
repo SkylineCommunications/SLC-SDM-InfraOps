@@ -12,9 +12,9 @@ namespace Skyline.DataMiner.SDM
 
     public static class AssetManagerAppSettingsDomRepository_Extensions
     {
-        public static Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettings> WithMiddleware(
-            this Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettings> repository,
-            IMiddlewareMarker<Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettings> middleware)
+        public static IBulkRepository<AssetManagement.Models.AssetManagerAppSettings> WithMiddleware(
+            this IBulkRepository<AssetManagement.Models.AssetManagerAppSettings> repository,
+            IMiddlewareMarker<AssetManagement.Models.AssetManagerAppSettings> middleware)
         {
             return new AssetManagerAppSettingsDomRepository_Middleware(repository, middleware);
         }

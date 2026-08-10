@@ -31,7 +31,7 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
         public PropertyValuesDomRepository(IConnection connection)
         {
             this.connection = connection;
-            this.helper = new DomHelper(connection.HandleMessages, Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValuesDomMapper.ModuleId);
+            this.helper = new DomHelper(connection.HandleMessages, InfraOpsProperties.Models.PropertyValuesDomMapper.ModuleId);
         }
 
         public PropertyValues Create(PropertyValues createObject)
@@ -148,7 +148,7 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
             }
 
             var domFilter = TranslateFullFilter(filter);
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValuesDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(InfraOpsProperties.Models.PropertyValuesDomMapper.DomDefinitionId.Id));
             return helper.DomInstances.Count(domFilter);
         }
 
@@ -160,7 +160,7 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
             }
 
             var domFilter = TranslateFullFilter(query.Filter);
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValuesDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(InfraOpsProperties.Models.PropertyValuesDomMapper.DomDefinitionId.Id));
             var domOrder = TranslateFullOrderBy(query.Order);
             var domQuery = query.WithFilter(domFilter).WithOrder(domOrder);
             return helper.DomInstances.Count(domQuery);
@@ -372,7 +372,7 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
                 throw new ArgumentNullException(nameof(domFilter));
             }
 
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValuesDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(InfraOpsProperties.Models.PropertyValuesDomMapper.DomDefinitionId.Id));
             var domInstances = helper.DomInstances.Read(domFilter);
             return domInstances.Select(FromInstance);
         }
@@ -384,7 +384,7 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
                 throw new ArgumentNullException(nameof(domQuery));
             }
 
-            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValuesDomMapper.DomDefinitionId.Id));
+            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(InfraOpsProperties.Models.PropertyValuesDomMapper.DomDefinitionId.Id));
             domQuery = domQuery.WithFilter(domFilter);
             var domInstances = helper.DomInstances.Read(domQuery);
             return domInstances.Select(FromInstance);
@@ -397,7 +397,7 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
                 throw new ArgumentNullException(nameof(domFilter));
             }
 
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValuesDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(InfraOpsProperties.Models.PropertyValuesDomMapper.DomDefinitionId.Id));
             var pagingHelper = helper.DomInstances.PreparePaging(domFilter, pageSize);
             while (pagingHelper.MoveToNextPage())
             {
@@ -412,7 +412,7 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
                 throw new ArgumentNullException(nameof(domQuery));
             }
 
-            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValuesDomMapper.DomDefinitionId.Id));
+            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(InfraOpsProperties.Models.PropertyValuesDomMapper.DomDefinitionId.Id));
             domQuery = domQuery.WithFilter(domFilter);
             var pagingHelper = helper.DomInstances.PreparePaging(domQuery, pageSize);
             while (pagingHelper.MoveToNextPage())
@@ -513,48 +513,48 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
                 Identifier = instance.ID.Id.ToString(),
                 IsNewInternal = false,
             };
-            var _propertyvaluespropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValuesDomMapper.PropertyValuesProperties.SectionDefinitionId));
+            var _propertyvaluespropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(InfraOpsProperties.Models.PropertyValuesDomMapper.PropertyValuesProperties.SectionDefinitionId));
             if (_propertyvaluespropertiesSection != default)
             {
-                var _linkedobjectid = _propertyvaluespropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValuesDomMapper.PropertyValuesProperties.LinkedObjectID);
+                var _linkedobjectid = _propertyvaluespropertiesSection.GetValue<string>(InfraOpsProperties.Models.PropertyValuesDomMapper.PropertyValuesProperties.LinkedObjectID);
                 if (_linkedobjectid != null)
                 {
                     obj.LinkedObjectID = System.Guid.Parse(Convert.ToString(_linkedobjectid.Value));
                 }
 
-                var _scope = _propertyvaluespropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValuesDomMapper.PropertyValuesProperties.Scope);
+                var _scope = _propertyvaluespropertiesSection.GetValue<string>(InfraOpsProperties.Models.PropertyValuesDomMapper.PropertyValuesProperties.Scope);
                 if (_scope != null)
                 {
                     obj.Scope = _scope.Value;
                 }
 
-                var _subid = _propertyvaluespropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValuesDomMapper.PropertyValuesProperties.SubID);
+                var _subid = _propertyvaluespropertiesSection.GetValue<string>(InfraOpsProperties.Models.PropertyValuesDomMapper.PropertyValuesProperties.SubID);
                 if (_subid != null)
                 {
                     obj.SubID = _subid.Value;
                 }
             }
 
-            var _valuesList = new System.Collections.Generic.List<Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValue>();
-            foreach (var _valuesSection in instance.Sections.Where(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValuesDomMapper.Values.SectionDefinitionId)))
+            var _valuesList = new System.Collections.Generic.List<InfraOpsProperties.Models.PropertyValue>();
+            foreach (var _valuesSection in instance.Sections.Where(s => s.SectionDefinitionID.Equals(InfraOpsProperties.Models.PropertyValuesDomMapper.Values.SectionDefinitionId)))
             {
-                var values = new Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValue();
-                var _valuespropertyname = _valuesSection.GetValue<string>(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValuesDomMapper.Values.PropertyName);
+                var values = new InfraOpsProperties.Models.PropertyValue();
+                var _valuespropertyname = _valuesSection.GetValue<string>(InfraOpsProperties.Models.PropertyValuesDomMapper.Values.PropertyName);
                 if (_valuespropertyname != null)
                 {
                     values.PropertyName = _valuespropertyname.Value;
                 }
 
-                var _valuesvalue = _valuesSection.GetValue<string>(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValuesDomMapper.Values.Value);
+                var _valuesvalue = _valuesSection.GetValue<string>(InfraOpsProperties.Models.PropertyValuesDomMapper.Values.Value);
                 if (_valuesvalue != null)
                 {
                     values.Value = _valuesvalue.Value;
                 }
 
-                var _valuespropertyid = _valuesSection.GetValue<System.Guid>(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValuesDomMapper.Values.PropertyId);
+                var _valuespropertyid = _valuesSection.GetValue<System.Guid>(InfraOpsProperties.Models.PropertyValuesDomMapper.Values.PropertyId);
                 if (_valuespropertyid != null)
                 {
-                    values.PropertyId = new Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.InfraOpsProperties.Models.Property>(Convert.ToString(_valuespropertyid.Value));
+                    values.PropertyId = new SdmObjectReference<InfraOpsProperties.Models.Property>(Convert.ToString(_valuespropertyid.Value));
                 }
 
                 _valuesList.Add(values);
@@ -579,45 +579,45 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
 
             var instance = new DomInstance
             {
-                DomDefinitionId = Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValuesDomMapper.DomDefinitionId,
+                DomDefinitionId = InfraOpsProperties.Models.PropertyValuesDomMapper.DomDefinitionId,
                 ID = new DomInstanceId(id)
                 {
-                    ModuleId = Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValuesDomMapper.ModuleId
+                    ModuleId = InfraOpsProperties.Models.PropertyValuesDomMapper.ModuleId
                 }
             };
-            var _propertyvaluesproperties = new Section(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValuesDomMapper.PropertyValuesProperties.SectionDefinitionId);
+            var _propertyvaluesproperties = new Section(InfraOpsProperties.Models.PropertyValuesDomMapper.PropertyValuesProperties.SectionDefinitionId);
             if (obj.LinkedObjectID != default)
             {
-                _propertyvaluesproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValuesDomMapper.PropertyValuesProperties.LinkedObjectID, Convert.ToString(obj.LinkedObjectID));
+                _propertyvaluesproperties.AddOrUpdateValue<string>(InfraOpsProperties.Models.PropertyValuesDomMapper.PropertyValuesProperties.LinkedObjectID, Convert.ToString(obj.LinkedObjectID));
             }
 
             if (obj.Scope != default)
             {
-                _propertyvaluesproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValuesDomMapper.PropertyValuesProperties.Scope, Convert.ToString(obj.Scope));
+                _propertyvaluesproperties.AddOrUpdateValue<string>(InfraOpsProperties.Models.PropertyValuesDomMapper.PropertyValuesProperties.Scope, Convert.ToString(obj.Scope));
             }
 
             if (obj.SubID != default)
             {
-                _propertyvaluesproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValuesDomMapper.PropertyValuesProperties.SubID, Convert.ToString(obj.SubID));
+                _propertyvaluesproperties.AddOrUpdateValue<string>(InfraOpsProperties.Models.PropertyValuesDomMapper.PropertyValuesProperties.SubID, Convert.ToString(obj.SubID));
             }
 
             instance.Sections.Add(_propertyvaluesproperties);
             foreach (var values in obj.Values)
             {
-                var _valuesSection = new Section(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValuesDomMapper.Values.SectionDefinitionId);
+                var _valuesSection = new Section(InfraOpsProperties.Models.PropertyValuesDomMapper.Values.SectionDefinitionId);
                 if (values.PropertyName != default)
                 {
-                    _valuesSection.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValuesDomMapper.Values.PropertyName, Convert.ToString(values.PropertyName));
+                    _valuesSection.AddOrUpdateValue<string>(InfraOpsProperties.Models.PropertyValuesDomMapper.Values.PropertyName, Convert.ToString(values.PropertyName));
                 }
 
                 if (values.Value != default)
                 {
-                    _valuesSection.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValuesDomMapper.Values.Value, Convert.ToString(values.Value));
+                    _valuesSection.AddOrUpdateValue<string>(InfraOpsProperties.Models.PropertyValuesDomMapper.Values.Value, Convert.ToString(values.Value));
                 }
 
                 if (values.PropertyId != default && System.Guid.TryParse(values.PropertyId.Identifier, out var propertyGuid) && propertyGuid != System.Guid.Empty)
                 {
-                    _valuesSection.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValuesDomMapper.Values.PropertyId, propertyGuid);
+                    _valuesSection.AddOrUpdateValue<System.Guid>(InfraOpsProperties.Models.PropertyValuesDomMapper.Values.PropertyId, propertyGuid);
                 }
 
                 instance.Sections.Add(_valuesSection);
@@ -633,25 +633,25 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
                 case "Identifier":
                     return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.Id, comparer, Guid.Parse((string)value));
                 case "LinkedObjectID":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValuesDomMapper.PropertyValuesProperties.LinkedObjectID), comparer, Convert.ToString((System.Guid)value));
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(InfraOpsProperties.Models.PropertyValuesDomMapper.PropertyValuesProperties.LinkedObjectID), comparer, Convert.ToString((System.Guid)value));
                 case "Scope" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
-                    return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValuesDomMapper.PropertyValuesProperties.Scope.Id.ToString()).Equal(comparer == Comparer.NotEquals);
+                    return DomInstanceExposers.FieldValues.KeyExists(InfraOpsProperties.Models.PropertyValuesDomMapper.PropertyValuesProperties.Scope.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Scope":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValuesDomMapper.PropertyValuesProperties.Scope), comparer, (string)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(InfraOpsProperties.Models.PropertyValuesDomMapper.PropertyValuesProperties.Scope), comparer, (string)value);
                 case "SubID" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
-                    return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValuesDomMapper.PropertyValuesProperties.SubID.Id.ToString()).Equal(comparer == Comparer.NotEquals);
+                    return DomInstanceExposers.FieldValues.KeyExists(InfraOpsProperties.Models.PropertyValuesDomMapper.PropertyValuesProperties.SubID.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "SubID":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValuesDomMapper.PropertyValuesProperties.SubID), comparer, (string)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(InfraOpsProperties.Models.PropertyValuesDomMapper.PropertyValuesProperties.SubID), comparer, (string)value);
                 case "Values.PropertyName" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
-                    return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValuesDomMapper.Values.PropertyName.Id.ToString()).Equal(comparer == Comparer.NotEquals);
+                    return DomInstanceExposers.FieldValues.KeyExists(InfraOpsProperties.Models.PropertyValuesDomMapper.Values.PropertyName.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Values.PropertyName":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValuesDomMapper.Values.PropertyName), comparer, (string)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(InfraOpsProperties.Models.PropertyValuesDomMapper.Values.PropertyName), comparer, (string)value);
                 case "Values.Value" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
-                    return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValuesDomMapper.Values.Value.Id.ToString()).Equal(comparer == Comparer.NotEquals);
+                    return DomInstanceExposers.FieldValues.KeyExists(InfraOpsProperties.Models.PropertyValuesDomMapper.Values.Value.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Values.Value":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValuesDomMapper.Values.Value), comparer, (string)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(InfraOpsProperties.Models.PropertyValuesDomMapper.Values.Value), comparer, (string)value);
                 case "Values.PropertyId":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValuesDomMapper.Values.PropertyId), comparer, System.Guid.Parse(Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.InfraOpsProperties.Models.Property>.Convert(value).Identifier));
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(InfraOpsProperties.Models.PropertyValuesDomMapper.Values.PropertyId), comparer, System.Guid.Parse(SdmObjectReference<InfraOpsProperties.Models.Property>.Convert(value).Identifier));
                 default:
                     throw new NotImplementedException();
             }
@@ -664,17 +664,17 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
                 case "Identifier":
                     return OrderByElementFactory.Create(DomInstanceExposers.Id, sortOrder, naturalSort);
                 case "LinkedObjectID":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValuesDomMapper.PropertyValuesProperties.LinkedObjectID), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(InfraOpsProperties.Models.PropertyValuesDomMapper.PropertyValuesProperties.LinkedObjectID), sortOrder, naturalSort);
                 case "Scope":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValuesDomMapper.PropertyValuesProperties.Scope), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(InfraOpsProperties.Models.PropertyValuesDomMapper.PropertyValuesProperties.Scope), sortOrder, naturalSort);
                 case "SubID":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValuesDomMapper.PropertyValuesProperties.SubID), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(InfraOpsProperties.Models.PropertyValuesDomMapper.PropertyValuesProperties.SubID), sortOrder, naturalSort);
                 case "Values.PropertyName":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValuesDomMapper.Values.PropertyName), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(InfraOpsProperties.Models.PropertyValuesDomMapper.Values.PropertyName), sortOrder, naturalSort);
                 case "Values.Value":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValuesDomMapper.Values.Value), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(InfraOpsProperties.Models.PropertyValuesDomMapper.Values.Value), sortOrder, naturalSort);
                 case "Values.PropertyId":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValuesDomMapper.Values.PropertyId), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(InfraOpsProperties.Models.PropertyValuesDomMapper.Values.PropertyId), sortOrder, naturalSort);
                 default:
                     throw new NotImplementedException();
             }

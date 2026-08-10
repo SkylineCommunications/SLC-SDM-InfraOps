@@ -31,7 +31,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
         public JobTypeDomRepository(IConnection connection)
         {
             this.connection = connection;
-            this.helper = new DomHelper(connection.HandleMessages, Skyline.DataMiner.SDM.PlanAndBuild.Models.JobTypeDomMapper.ModuleId);
+            this.helper = new DomHelper(connection.HandleMessages, PlanAndBuild.Models.JobTypeDomMapper.ModuleId);
         }
 
         public JobType Create(JobType createObject)
@@ -148,7 +148,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             }
 
             var domFilter = TranslateFullFilter(filter);
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.PlanAndBuild.Models.JobTypeDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(PlanAndBuild.Models.JobTypeDomMapper.DomDefinitionId.Id));
             return helper.DomInstances.Count(domFilter);
         }
 
@@ -160,7 +160,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             }
 
             var domFilter = TranslateFullFilter(query.Filter);
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.PlanAndBuild.Models.JobTypeDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(PlanAndBuild.Models.JobTypeDomMapper.DomDefinitionId.Id));
             var domOrder = TranslateFullOrderBy(query.Order);
             var domQuery = query.WithFilter(domFilter).WithOrder(domOrder);
             return helper.DomInstances.Count(domQuery);
@@ -372,7 +372,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
                 throw new ArgumentNullException(nameof(domFilter));
             }
 
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.PlanAndBuild.Models.JobTypeDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(PlanAndBuild.Models.JobTypeDomMapper.DomDefinitionId.Id));
             var domInstances = helper.DomInstances.Read(domFilter);
             return domInstances.Select(FromInstance);
         }
@@ -384,7 +384,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
                 throw new ArgumentNullException(nameof(domQuery));
             }
 
-            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.PlanAndBuild.Models.JobTypeDomMapper.DomDefinitionId.Id));
+            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(PlanAndBuild.Models.JobTypeDomMapper.DomDefinitionId.Id));
             domQuery = domQuery.WithFilter(domFilter);
             var domInstances = helper.DomInstances.Read(domQuery);
             return domInstances.Select(FromInstance);
@@ -397,7 +397,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
                 throw new ArgumentNullException(nameof(domFilter));
             }
 
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.PlanAndBuild.Models.JobTypeDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(PlanAndBuild.Models.JobTypeDomMapper.DomDefinitionId.Id));
             var pagingHelper = helper.DomInstances.PreparePaging(domFilter, pageSize);
             while (pagingHelper.MoveToNextPage())
             {
@@ -412,7 +412,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
                 throw new ArgumentNullException(nameof(domQuery));
             }
 
-            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.PlanAndBuild.Models.JobTypeDomMapper.DomDefinitionId.Id));
+            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(PlanAndBuild.Models.JobTypeDomMapper.DomDefinitionId.Id));
             domQuery = domQuery.WithFilter(domFilter);
             var pagingHelper = helper.DomInstances.PreparePaging(domQuery, pageSize);
             while (pagingHelper.MoveToNextPage())
@@ -513,22 +513,22 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
                 Identifier = instance.ID.Id.ToString(),
                 IsNewInternal = false,
             };
-            var _jobtypepropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.PlanAndBuild.Models.JobTypeDomMapper.JobTypeProperties.SectionDefinitionId));
+            var _jobtypepropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(PlanAndBuild.Models.JobTypeDomMapper.JobTypeProperties.SectionDefinitionId));
             if (_jobtypepropertiesSection != default)
             {
-                var _name = _jobtypepropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.JobTypeDomMapper.JobTypeProperties.Name);
+                var _name = _jobtypepropertiesSection.GetValue<string>(PlanAndBuild.Models.JobTypeDomMapper.JobTypeProperties.Name);
                 if (_name != null)
                 {
                     obj.Name = _name.Value;
                 }
 
-                var _description = _jobtypepropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.JobTypeDomMapper.JobTypeProperties.Description);
+                var _description = _jobtypepropertiesSection.GetValue<string>(PlanAndBuild.Models.JobTypeDomMapper.JobTypeProperties.Description);
                 if (_description != null)
                 {
                     obj.Description = _description.Value;
                 }
 
-                var _icon = _jobtypepropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.JobTypeDomMapper.JobTypeProperties.Icon);
+                var _icon = _jobtypepropertiesSection.GetValue<string>(PlanAndBuild.Models.JobTypeDomMapper.JobTypeProperties.Icon);
                 if (_icon != null)
                 {
                     obj.Icon = _icon.Value;
@@ -553,26 +553,26 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 
             var instance = new DomInstance
             {
-                DomDefinitionId = Skyline.DataMiner.SDM.PlanAndBuild.Models.JobTypeDomMapper.DomDefinitionId,
+                DomDefinitionId = PlanAndBuild.Models.JobTypeDomMapper.DomDefinitionId,
                 ID = new DomInstanceId(id)
                 {
-                    ModuleId = Skyline.DataMiner.SDM.PlanAndBuild.Models.JobTypeDomMapper.ModuleId
+                    ModuleId = PlanAndBuild.Models.JobTypeDomMapper.ModuleId
                 }
             };
-            var _jobtypeproperties = new Section(Skyline.DataMiner.SDM.PlanAndBuild.Models.JobTypeDomMapper.JobTypeProperties.SectionDefinitionId);
+            var _jobtypeproperties = new Section(PlanAndBuild.Models.JobTypeDomMapper.JobTypeProperties.SectionDefinitionId);
             if (obj.Name != default)
             {
-                _jobtypeproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.JobTypeDomMapper.JobTypeProperties.Name, Convert.ToString(obj.Name));
+                _jobtypeproperties.AddOrUpdateValue<string>(PlanAndBuild.Models.JobTypeDomMapper.JobTypeProperties.Name, Convert.ToString(obj.Name));
             }
 
             if (obj.Description != default)
             {
-                _jobtypeproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.JobTypeDomMapper.JobTypeProperties.Description, Convert.ToString(obj.Description));
+                _jobtypeproperties.AddOrUpdateValue<string>(PlanAndBuild.Models.JobTypeDomMapper.JobTypeProperties.Description, Convert.ToString(obj.Description));
             }
 
             if (obj.Icon != default)
             {
-                _jobtypeproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.JobTypeDomMapper.JobTypeProperties.Icon, Convert.ToString(obj.Icon));
+                _jobtypeproperties.AddOrUpdateValue<string>(PlanAndBuild.Models.JobTypeDomMapper.JobTypeProperties.Icon, Convert.ToString(obj.Icon));
             }
 
             instance.Sections.Add(_jobtypeproperties);
@@ -586,17 +586,17 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
                 case "Identifier":
                     return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.Id, comparer, Guid.Parse((string)value));
                 case "Name" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
-                    return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.PlanAndBuild.Models.JobTypeDomMapper.JobTypeProperties.Name.Id.ToString()).Equal(comparer == Comparer.NotEquals);
+                    return DomInstanceExposers.FieldValues.KeyExists(PlanAndBuild.Models.JobTypeDomMapper.JobTypeProperties.Name.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Name":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.JobTypeDomMapper.JobTypeProperties.Name), comparer, (string)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.JobTypeDomMapper.JobTypeProperties.Name), comparer, (string)value);
                 case "Description" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
-                    return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.PlanAndBuild.Models.JobTypeDomMapper.JobTypeProperties.Description.Id.ToString()).Equal(comparer == Comparer.NotEquals);
+                    return DomInstanceExposers.FieldValues.KeyExists(PlanAndBuild.Models.JobTypeDomMapper.JobTypeProperties.Description.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Description":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.JobTypeDomMapper.JobTypeProperties.Description), comparer, (string)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.JobTypeDomMapper.JobTypeProperties.Description), comparer, (string)value);
                 case "Icon" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
-                    return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.PlanAndBuild.Models.JobTypeDomMapper.JobTypeProperties.Icon.Id.ToString()).Equal(comparer == Comparer.NotEquals);
+                    return DomInstanceExposers.FieldValues.KeyExists(PlanAndBuild.Models.JobTypeDomMapper.JobTypeProperties.Icon.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Icon":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.JobTypeDomMapper.JobTypeProperties.Icon), comparer, (string)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.JobTypeDomMapper.JobTypeProperties.Icon), comparer, (string)value);
                 default:
                     throw new NotImplementedException();
             }
@@ -609,11 +609,11 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
                 case "Identifier":
                     return OrderByElementFactory.Create(DomInstanceExposers.Id, sortOrder, naturalSort);
                 case "Name":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.JobTypeDomMapper.JobTypeProperties.Name), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.JobTypeDomMapper.JobTypeProperties.Name), sortOrder, naturalSort);
                 case "Description":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.JobTypeDomMapper.JobTypeProperties.Description), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.JobTypeDomMapper.JobTypeProperties.Description), sortOrder, naturalSort);
                 case "Icon":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.JobTypeDomMapper.JobTypeProperties.Icon), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.JobTypeDomMapper.JobTypeProperties.Icon), sortOrder, naturalSort);
                 default:
                     throw new NotImplementedException();
             }

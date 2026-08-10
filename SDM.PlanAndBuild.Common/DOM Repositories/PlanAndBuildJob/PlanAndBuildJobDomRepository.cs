@@ -84,7 +84,7 @@
         /// restores validation for the combined transition+update operations. It is intentionally nullable so this
         /// repository remains usable standalone (e.g. in tests) without validation.
         /// </remarks>
-        internal Skyline.DataMiner.SDM.PlanAndBuild.Validation.PlanAndBuildJobValidator Validator { get; set; }
+        internal PlanAndBuild.Validation.PlanAndBuildJobValidator Validator { get; set; }
 
         public PlanAndBuildJob TransitionTo(PlanAndBuildJob job, SlcPlan_And_Build.Behaviors.Job_Behavior.StatusesEnum newState)
         {

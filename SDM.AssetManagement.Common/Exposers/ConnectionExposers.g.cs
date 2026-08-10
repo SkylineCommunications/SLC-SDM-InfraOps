@@ -21,12 +21,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
     public static partial class ConnectionExposers
     {
-        public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Connection, string> Identifier = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Connection, string>((obj) => obj.Identifier, "Identifier");
-        public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Connection, string> Notes = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Connection, string>((obj) => obj.Notes, "Notes");
-        public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Connection, string> Description = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Connection, string>((obj) => obj.Description, "Description");
-        public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Connection, SharedMappers.DomIds.SlcAsset_Management.Enums.ConnectionType?> ConnectionType = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Connection, SharedMappers.DomIds.SlcAsset_Management.Enums.ConnectionType?>((obj) => obj.ConnectionType, "ConnectionType");
-        public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Connection, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.CableType>> CableType = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Connection, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.CableType>>((obj) => obj.CableType, "CableType");
-        public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Connection, double?> CableLength = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Connection, double?>((obj) => obj.CableLength, "CableLength");
+        public static readonly Exposer<AssetManagement.Models.Connection, string> Identifier = new Exposer<AssetManagement.Models.Connection, string>((obj) => obj.Identifier, "Identifier");
+        public static readonly Exposer<AssetManagement.Models.Connection, string> Notes = new Exposer<AssetManagement.Models.Connection, string>((obj) => obj.Notes, "Notes");
+        public static readonly Exposer<AssetManagement.Models.Connection, string> Description = new Exposer<AssetManagement.Models.Connection, string>((obj) => obj.Description, "Description");
+        public static readonly Exposer<AssetManagement.Models.Connection, SharedMappers.DomIds.SlcAsset_Management.Enums.ConnectionType?> ConnectionType = new Exposer<AssetManagement.Models.Connection, SharedMappers.DomIds.SlcAsset_Management.Enums.ConnectionType?>((obj) => obj.ConnectionType, "ConnectionType");
+        public static readonly Exposer<AssetManagement.Models.Connection, SdmObjectReference<AssetManagement.Models.CableType>> CableType = new Exposer<AssetManagement.Models.Connection, SdmObjectReference<AssetManagement.Models.CableType>>((obj) => obj.CableType, "CableType");
+        public static readonly Exposer<AssetManagement.Models.Connection, double?> CableLength = new Exposer<AssetManagement.Models.Connection, double?>((obj) => obj.CableLength, "CableLength");
 
         static ConnectionExposers()
         {
@@ -36,16 +36,16 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
         public static partial class Source
         {
-            public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Connection, string> CableTag = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Connection, string>((obj) => obj.Source.CableTag, "Source.CableTag");
-            public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Connection, System.Guid> Port = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Connection, System.Guid>((obj) => obj.Source.Port, "Source.Port");
-            public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Connection, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.PortType>> PortType = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Connection, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.PortType>>((obj) => obj.Source.PortType, "Source.PortType");
+            public static readonly Exposer<AssetManagement.Models.Connection, string> CableTag = new Exposer<AssetManagement.Models.Connection, string>((obj) => obj.Source.CableTag, "Source.CableTag");
+            public static readonly Exposer<AssetManagement.Models.Connection, System.Guid> Port = new Exposer<AssetManagement.Models.Connection, System.Guid>((obj) => obj.Source.Port, "Source.Port");
+            public static readonly Exposer<AssetManagement.Models.Connection, SdmObjectReference<AssetManagement.Models.PortType>> PortType = new Exposer<AssetManagement.Models.Connection, SdmObjectReference<AssetManagement.Models.PortType>>((obj) => obj.Source.PortType, "Source.PortType");
         }
 
         public static partial class Destination
         {
-            public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Connection, string> CableTag = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Connection, string>((obj) => obj.Destination.CableTag, "Destination.CableTag");
-            public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Connection, System.Guid> Port = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Connection, System.Guid>((obj) => obj.Destination.Port, "Destination.Port");
-            public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Connection, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.PortType>> PortType = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.Connection, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.PortType>>((obj) => obj.Destination.PortType, "Destination.PortType");
+            public static readonly Exposer<AssetManagement.Models.Connection, string> CableTag = new Exposer<AssetManagement.Models.Connection, string>((obj) => obj.Destination.CableTag, "Destination.CableTag");
+            public static readonly Exposer<AssetManagement.Models.Connection, System.Guid> Port = new Exposer<AssetManagement.Models.Connection, System.Guid>((obj) => obj.Destination.Port, "Destination.Port");
+            public static readonly Exposer<AssetManagement.Models.Connection, SdmObjectReference<AssetManagement.Models.PortType>> PortType = new Exposer<AssetManagement.Models.Connection, SdmObjectReference<AssetManagement.Models.PortType>>((obj) => obj.Destination.PortType, "Destination.PortType");
         }
     }
 }

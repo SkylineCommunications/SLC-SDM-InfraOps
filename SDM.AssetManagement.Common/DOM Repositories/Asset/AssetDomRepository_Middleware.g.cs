@@ -23,20 +23,20 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 	using SLDataGateway.API.Querying;
 	using SLDataGateway.API.Types.Querying;
 
-	internal sealed partial class AssetDomRepository_Middleware : Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.SDM.AssetManagement.Models.Asset>
+	internal sealed partial class AssetDomRepository_Middleware : IBulkRepository<AssetManagement.Models.Asset>
 	{
-		private readonly Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.SDM.AssetManagement.Models.Asset> _inner;
-		private readonly IMiddlewareMarker<Skyline.DataMiner.SDM.AssetManagement.Models.Asset> _middleware;
+		private readonly IBulkRepository<AssetManagement.Models.Asset> _inner;
+		private readonly IMiddlewareMarker<AssetManagement.Models.Asset> _middleware;
 
-		public AssetDomRepository_Middleware(Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.SDM.AssetManagement.Models.Asset> inner, IMiddlewareMarker<Skyline.DataMiner.SDM.AssetManagement.Models.Asset> middleware)
+		public AssetDomRepository_Middleware(IBulkRepository<AssetManagement.Models.Asset> inner, IMiddlewareMarker<AssetManagement.Models.Asset> middleware)
 		{
 			_inner = inner ?? throw new ArgumentNullException(nameof(inner));
 			_middleware = middleware;
 		}
 
-		public IEnumerable<IPagedResult<Skyline.DataMiner.SDM.AssetManagement.Models.Asset>> ReadPaged(FilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.Asset> filter)
+		public IEnumerable<IPagedResult<AssetManagement.Models.Asset>> ReadPaged(FilterElement<AssetManagement.Models.Asset> filter)
 		{
-			if (_middleware is IPageableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.Asset> middleware)
+			if (_middleware is IPageableMiddleware<AssetManagement.Models.Asset> middleware)
 			{
 				return middleware.OnReadPaged(filter, _inner.ReadPaged);
 			}
@@ -46,9 +46,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			}
 		}
 
-		public IEnumerable<IPagedResult<Skyline.DataMiner.SDM.AssetManagement.Models.Asset>> ReadPaged(IQuery<Skyline.DataMiner.SDM.AssetManagement.Models.Asset> query)
+		public IEnumerable<IPagedResult<AssetManagement.Models.Asset>> ReadPaged(IQuery<AssetManagement.Models.Asset> query)
 		{
-			if (_middleware is IPageableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.Asset> middleware)
+			if (_middleware is IPageableMiddleware<AssetManagement.Models.Asset> middleware)
 			{
 				return middleware.OnReadPaged(query, _inner.ReadPaged);
 			}
@@ -58,9 +58,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			}
 		}
 
-		public IEnumerable<IPagedResult<Skyline.DataMiner.SDM.AssetManagement.Models.Asset>> ReadPaged(FilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.Asset> filter, int pageSize)
+		public IEnumerable<IPagedResult<AssetManagement.Models.Asset>> ReadPaged(FilterElement<AssetManagement.Models.Asset> filter, int pageSize)
 		{
-			if (_middleware is IPageableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.Asset> middleware)
+			if (_middleware is IPageableMiddleware<AssetManagement.Models.Asset> middleware)
 			{
 				return middleware.OnReadPaged(filter, pageSize, _inner.ReadPaged);
 			}
@@ -70,9 +70,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			}
 		}
 
-		public IEnumerable<IPagedResult<Skyline.DataMiner.SDM.AssetManagement.Models.Asset>> ReadPaged(IQuery<Skyline.DataMiner.SDM.AssetManagement.Models.Asset> query, int pageSize)
+		public IEnumerable<IPagedResult<AssetManagement.Models.Asset>> ReadPaged(IQuery<AssetManagement.Models.Asset> query, int pageSize)
 		{
-			if (_middleware is IPageableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.Asset> middleware)
+			if (_middleware is IPageableMiddleware<AssetManagement.Models.Asset> middleware)
 			{
 				return middleware.OnReadPaged(query, pageSize, _inner.ReadPaged);
 			}
@@ -82,9 +82,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			}
 		}
 
-		public IEnumerable<Skyline.DataMiner.SDM.AssetManagement.Models.Asset> Read(FilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.Asset> filter)
+		public IEnumerable<AssetManagement.Models.Asset> Read(FilterElement<AssetManagement.Models.Asset> filter)
 		{
-			if (_middleware is IReadableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.Asset> middleware)
+			if (_middleware is IReadableMiddleware<AssetManagement.Models.Asset> middleware)
 			{
 				return middleware.OnRead(filter, _inner.Read);
 			}
@@ -94,9 +94,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			}
 		}
 
-		public IEnumerable<Skyline.DataMiner.SDM.AssetManagement.Models.Asset> Read(IQuery<Skyline.DataMiner.SDM.AssetManagement.Models.Asset> query)
+		public IEnumerable<AssetManagement.Models.Asset> Read(IQuery<AssetManagement.Models.Asset> query)
 		{
-			if (_middleware is IReadableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.Asset> middleware)
+			if (_middleware is IReadableMiddleware<AssetManagement.Models.Asset> middleware)
 			{
 				return middleware.OnRead(query, _inner.Read);
 			}
@@ -106,9 +106,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			}
 		}
 
-		public long Count(FilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.Asset> filter)
+		public long Count(FilterElement<AssetManagement.Models.Asset> filter)
 		{
-			if (_middleware is ICountableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.Asset> middleware)
+			if (_middleware is ICountableMiddleware<AssetManagement.Models.Asset> middleware)
 			{
 				return middleware.OnCount(filter, _inner.Count);
 			}
@@ -118,9 +118,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			}
 		}
 
-		public long Count(IQuery<Skyline.DataMiner.SDM.AssetManagement.Models.Asset> query)
+		public long Count(IQuery<AssetManagement.Models.Asset> query)
 		{
-			if (_middleware is ICountableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.Asset> middleware)
+			if (_middleware is ICountableMiddleware<AssetManagement.Models.Asset> middleware)
 			{
 				return middleware.OnCount(query, _inner.Count);
 			}
@@ -130,9 +130,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			}
 		}
 
-		public IReadOnlyCollection<Skyline.DataMiner.SDM.AssetManagement.Models.Asset> Create(IEnumerable<Skyline.DataMiner.SDM.AssetManagement.Models.Asset> oToCreate)
+		public IReadOnlyCollection<AssetManagement.Models.Asset> Create(IEnumerable<AssetManagement.Models.Asset> oToCreate)
 		{
-			if (_middleware is IBulkCreatableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.Asset> middleware)
+			if (_middleware is IBulkCreatableMiddleware<AssetManagement.Models.Asset> middleware)
 			{
 				return middleware.OnCreate(oToCreate, _inner.Create);
 			}
@@ -142,9 +142,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			}
 		}
 
-		public Skyline.DataMiner.SDM.AssetManagement.Models.Asset Create(Skyline.DataMiner.SDM.AssetManagement.Models.Asset oToCreate)
+		public AssetManagement.Models.Asset Create(AssetManagement.Models.Asset oToCreate)
 		{
-			if (_middleware is ICreatableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.Asset> middleware)
+			if (_middleware is ICreatableMiddleware<AssetManagement.Models.Asset> middleware)
 			{
 				return middleware.OnCreate(oToCreate, _inner.Create);
 			}
@@ -154,9 +154,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			}
 		}
 
-		public IReadOnlyCollection<Skyline.DataMiner.SDM.AssetManagement.Models.Asset> Update(IEnumerable<Skyline.DataMiner.SDM.AssetManagement.Models.Asset> oToUpdate)
+		public IReadOnlyCollection<AssetManagement.Models.Asset> Update(IEnumerable<AssetManagement.Models.Asset> oToUpdate)
 		{
-			if (_middleware is IBulkUpdatableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.Asset> middleware)
+			if (_middleware is IBulkUpdatableMiddleware<AssetManagement.Models.Asset> middleware)
 			{
 				return middleware.OnUpdate(oToUpdate, _inner.Update);
 			}
@@ -166,9 +166,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			}
 		}
 
-		public Skyline.DataMiner.SDM.AssetManagement.Models.Asset Update(Skyline.DataMiner.SDM.AssetManagement.Models.Asset oToUpdate)
+		public AssetManagement.Models.Asset Update(AssetManagement.Models.Asset oToUpdate)
 		{
-			if (_middleware is IUpdatableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.Asset> middleware)
+			if (_middleware is IUpdatableMiddleware<AssetManagement.Models.Asset> middleware)
 			{
 				return middleware.OnUpdate(oToUpdate, _inner.Update);
 			}
@@ -178,9 +178,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			}
 		}
 
-		public void Delete(IEnumerable<Skyline.DataMiner.SDM.AssetManagement.Models.Asset> oToDelete)
+		public void Delete(IEnumerable<AssetManagement.Models.Asset> oToDelete)
 		{
-			if (_middleware is IBulkDeletableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.Asset> middleware)
+			if (_middleware is IBulkDeletableMiddleware<AssetManagement.Models.Asset> middleware)
 			{
 				middleware.OnDelete(oToDelete, _inner.Delete);
 			}
@@ -190,9 +190,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			}
 		}
 
-		public void Delete(Skyline.DataMiner.SDM.AssetManagement.Models.Asset oToDelete)
+		public void Delete(AssetManagement.Models.Asset oToDelete)
 		{
-			if (_middleware is IDeletableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.Asset> middleware)
+			if (_middleware is IDeletableMiddleware<AssetManagement.Models.Asset> middleware)
 			{
 				middleware.OnDelete(oToDelete, _inner.Delete);
 			}
@@ -201,9 +201,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				_inner.Delete(oToDelete);
 			}
 		}
-		public System.Collections.Generic.IReadOnlyCollection<Skyline.DataMiner.SDM.AssetManagement.Models.Asset> CreateOrUpdate(System.Collections.Generic.IEnumerable<Skyline.DataMiner.SDM.AssetManagement.Models.Asset> oToCreateOrUpdate)
+		public System.Collections.Generic.IReadOnlyCollection<AssetManagement.Models.Asset> CreateOrUpdate(System.Collections.Generic.IEnumerable<AssetManagement.Models.Asset> oToCreateOrUpdate)
 		{
-            if (_middleware is IBulkRepositoryMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.Asset> middleware)
+            if (_middleware is IBulkRepositoryMiddleware<AssetManagement.Models.Asset> middleware)
             {
                 return middleware.OnCreateOrUpdate(oToCreateOrUpdate, _inner.CreateOrUpdate);
             }

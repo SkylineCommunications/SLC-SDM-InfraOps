@@ -8,9 +8,9 @@ namespace Skyline.DataMiner.SDM
     public static class PlanAndBuildAppSettingsDomRepository_Extensions
     {
 
-        public static Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings> WithMiddleware(
-            this Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings> repository,
-            IMiddlewareMarker<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings> middleware)
+        public static IBulkRepository<PlanAndBuild.Models.PlanAndBuildAppSettings> WithMiddleware(
+            this IBulkRepository<PlanAndBuild.Models.PlanAndBuildAppSettings> repository,
+            IMiddlewareMarker<PlanAndBuild.Models.PlanAndBuildAppSettings> middleware)
         {
             return new PlanAndBuildAppSettingsDomRepository_Middleware(repository, middleware);
         }

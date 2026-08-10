@@ -25,20 +25,20 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     using SLDataGateway.API.Querying;
     using SLDataGateway.API.Types.Querying;
 
-    internal sealed partial class DataPortDomRepository_Middleware : Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort>
+    internal sealed partial class DataPortDomRepository_Middleware : IBulkRepository<AssetManagement.Models.DataPort>
     {
-        private readonly Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort> _inner;
-        private readonly IMiddlewareMarker<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort> _middleware;
+        private readonly IBulkRepository<AssetManagement.Models.DataPort> _inner;
+        private readonly IMiddlewareMarker<AssetManagement.Models.DataPort> _middleware;
 
-        public DataPortDomRepository_Middleware(Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort> inner, IMiddlewareMarker<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort> middleware)
+        public DataPortDomRepository_Middleware(IBulkRepository<AssetManagement.Models.DataPort> inner, IMiddlewareMarker<AssetManagement.Models.DataPort> middleware)
         {
             _inner = inner ?? throw new ArgumentNullException(nameof(inner));
             _middleware = middleware;
         }
 
-        public IEnumerable<IPagedResult<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort>> ReadPaged(FilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort> filter)
+        public IEnumerable<IPagedResult<AssetManagement.Models.DataPort>> ReadPaged(FilterElement<AssetManagement.Models.DataPort> filter)
         {
-            if (_middleware is IPageableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort> middleware)
+            if (_middleware is IPageableMiddleware<AssetManagement.Models.DataPort> middleware)
             {
                 return middleware.OnReadPaged(filter, _inner.ReadPaged);
             }
@@ -48,9 +48,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
         }
 
-        public IEnumerable<IPagedResult<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort>> ReadPaged(IQuery<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort> query)
+        public IEnumerable<IPagedResult<AssetManagement.Models.DataPort>> ReadPaged(IQuery<AssetManagement.Models.DataPort> query)
         {
-            if (_middleware is IPageableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort> middleware)
+            if (_middleware is IPageableMiddleware<AssetManagement.Models.DataPort> middleware)
             {
                 return middleware.OnReadPaged(query, _inner.ReadPaged);
             }
@@ -60,9 +60,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
         }
 
-        public IEnumerable<IPagedResult<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort>> ReadPaged(FilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort> filter, int pageSize)
+        public IEnumerable<IPagedResult<AssetManagement.Models.DataPort>> ReadPaged(FilterElement<AssetManagement.Models.DataPort> filter, int pageSize)
         {
-            if (_middleware is IPageableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort> middleware)
+            if (_middleware is IPageableMiddleware<AssetManagement.Models.DataPort> middleware)
             {
                 return middleware.OnReadPaged(filter, pageSize, _inner.ReadPaged);
             }
@@ -72,9 +72,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
         }
 
-        public IEnumerable<IPagedResult<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort>> ReadPaged(IQuery<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort> query, int pageSize)
+        public IEnumerable<IPagedResult<AssetManagement.Models.DataPort>> ReadPaged(IQuery<AssetManagement.Models.DataPort> query, int pageSize)
         {
-            if (_middleware is IPageableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort> middleware)
+            if (_middleware is IPageableMiddleware<AssetManagement.Models.DataPort> middleware)
             {
                 return middleware.OnReadPaged(query, pageSize, _inner.ReadPaged);
             }
@@ -84,9 +84,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
         }
 
-        public IEnumerable<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort> Read(FilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort> filter)
+        public IEnumerable<AssetManagement.Models.DataPort> Read(FilterElement<AssetManagement.Models.DataPort> filter)
         {
-            if (_middleware is IReadableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort> middleware)
+            if (_middleware is IReadableMiddleware<AssetManagement.Models.DataPort> middleware)
             {
                 return middleware.OnRead(filter, _inner.Read);
             }
@@ -96,9 +96,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
         }
 
-        public IEnumerable<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort> Read(IQuery<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort> query)
+        public IEnumerable<AssetManagement.Models.DataPort> Read(IQuery<AssetManagement.Models.DataPort> query)
         {
-            if (_middleware is IReadableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort> middleware)
+            if (_middleware is IReadableMiddleware<AssetManagement.Models.DataPort> middleware)
             {
                 return middleware.OnRead(query, _inner.Read);
             }
@@ -108,9 +108,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
         }
 
-        public long Count(FilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort> filter)
+        public long Count(FilterElement<AssetManagement.Models.DataPort> filter)
         {
-            if (_middleware is ICountableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort> middleware)
+            if (_middleware is ICountableMiddleware<AssetManagement.Models.DataPort> middleware)
             {
                 return middleware.OnCount(filter, _inner.Count);
             }
@@ -120,9 +120,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
         }
 
-        public long Count(IQuery<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort> query)
+        public long Count(IQuery<AssetManagement.Models.DataPort> query)
         {
-            if (_middleware is ICountableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort> middleware)
+            if (_middleware is ICountableMiddleware<AssetManagement.Models.DataPort> middleware)
             {
                 return middleware.OnCount(query, _inner.Count);
             }
@@ -132,9 +132,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
         }
 
-        public IReadOnlyCollection<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort> Create(IEnumerable<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort> oToCreate)
+        public IReadOnlyCollection<AssetManagement.Models.DataPort> Create(IEnumerable<AssetManagement.Models.DataPort> oToCreate)
         {
-            if (_middleware is IBulkCreatableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort> middleware)
+            if (_middleware is IBulkCreatableMiddleware<AssetManagement.Models.DataPort> middleware)
             {
                 return middleware.OnCreate(oToCreate, _inner.Create);
             }
@@ -144,9 +144,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
         }
 
-        public Skyline.DataMiner.SDM.AssetManagement.Models.DataPort Create(Skyline.DataMiner.SDM.AssetManagement.Models.DataPort oToCreate)
+        public AssetManagement.Models.DataPort Create(AssetManagement.Models.DataPort oToCreate)
         {
-            if (_middleware is ICreatableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort> middleware)
+            if (_middleware is ICreatableMiddleware<AssetManagement.Models.DataPort> middleware)
             {
                 return middleware.OnCreate(oToCreate, _inner.Create);
             }
@@ -156,9 +156,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
         }
 
-        public IReadOnlyCollection<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort> Update(IEnumerable<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort> oToUpdate)
+        public IReadOnlyCollection<AssetManagement.Models.DataPort> Update(IEnumerable<AssetManagement.Models.DataPort> oToUpdate)
         {
-            if (_middleware is IBulkUpdatableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort> middleware)
+            if (_middleware is IBulkUpdatableMiddleware<AssetManagement.Models.DataPort> middleware)
             {
                 return middleware.OnUpdate(oToUpdate, _inner.Update);
             }
@@ -168,9 +168,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
         }
 
-        public Skyline.DataMiner.SDM.AssetManagement.Models.DataPort Update(Skyline.DataMiner.SDM.AssetManagement.Models.DataPort oToUpdate)
+        public AssetManagement.Models.DataPort Update(AssetManagement.Models.DataPort oToUpdate)
         {
-            if (_middleware is IUpdatableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort> middleware)
+            if (_middleware is IUpdatableMiddleware<AssetManagement.Models.DataPort> middleware)
             {
                 return middleware.OnUpdate(oToUpdate, _inner.Update);
             }
@@ -180,9 +180,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
         }
 
-        public void Delete(IEnumerable<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort> oToDelete)
+        public void Delete(IEnumerable<AssetManagement.Models.DataPort> oToDelete)
         {
-            if (_middleware is IBulkDeletableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort> middleware)
+            if (_middleware is IBulkDeletableMiddleware<AssetManagement.Models.DataPort> middleware)
             {
                 middleware.OnDelete(oToDelete, _inner.Delete);
             }
@@ -192,9 +192,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
         }
 
-        public void Delete(Skyline.DataMiner.SDM.AssetManagement.Models.DataPort oToDelete)
+        public void Delete(AssetManagement.Models.DataPort oToDelete)
         {
-            if (_middleware is IDeletableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort> middleware)
+            if (_middleware is IDeletableMiddleware<AssetManagement.Models.DataPort> middleware)
             {
                 middleware.OnDelete(oToDelete, _inner.Delete);
             }
@@ -203,9 +203,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 _inner.Delete(oToDelete);
             }
         }
-        public System.Collections.Generic.IReadOnlyCollection<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort> CreateOrUpdate(System.Collections.Generic.IEnumerable<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort> oToCreateOrUpdate)
+        public System.Collections.Generic.IReadOnlyCollection<AssetManagement.Models.DataPort> CreateOrUpdate(System.Collections.Generic.IEnumerable<AssetManagement.Models.DataPort> oToCreateOrUpdate)
         {
-                if (_middleware is IBulkRepositoryMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort> middleware)
+                if (_middleware is IBulkRepositoryMiddleware<AssetManagement.Models.DataPort> middleware)
                 {
                     return middleware.OnCreateOrUpdate(oToCreateOrUpdate, _inner.CreateOrUpdate);
                 }

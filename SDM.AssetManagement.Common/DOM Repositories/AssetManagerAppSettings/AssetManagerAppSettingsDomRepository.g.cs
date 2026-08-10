@@ -31,7 +31,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         public AssetManagerAppSettingsDomRepository(IConnection connection)
         {
             this.connection = connection;
-            this.helper = new DomHelper(connection.HandleMessages, Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettingsDomMapper.ModuleId);
+            this.helper = new DomHelper(connection.HandleMessages, AssetManagement.Models.AssetManagerAppSettingsDomMapper.ModuleId);
         }
 
         public AssetManagerAppSettings Create(AssetManagerAppSettings createObject)
@@ -144,7 +144,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
 
             var domFilter = TranslateFullFilter(filter);
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettingsDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(AssetManagement.Models.AssetManagerAppSettingsDomMapper.DomDefinitionId.Id));
             return helper.DomInstances.Count(domFilter);
         }
 
@@ -156,7 +156,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
 
             var domFilter = TranslateFullFilter(query.Filter);
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettingsDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(AssetManagement.Models.AssetManagerAppSettingsDomMapper.DomDefinitionId.Id));
             var domOrder = TranslateFullOrderBy(query.Order);
             var domQuery = query.WithFilter(domFilter).WithOrder(domOrder);
             return helper.DomInstances.Count(domQuery);
@@ -365,7 +365,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 throw new ArgumentNullException(nameof(domFilter));
             }
 
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettingsDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(AssetManagement.Models.AssetManagerAppSettingsDomMapper.DomDefinitionId.Id));
             var domInstances = helper.DomInstances.Read(domFilter);
             return domInstances.Select(FromInstance);
         }
@@ -377,7 +377,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 throw new ArgumentNullException(nameof(domQuery));
             }
 
-            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettingsDomMapper.DomDefinitionId.Id));
+            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(AssetManagement.Models.AssetManagerAppSettingsDomMapper.DomDefinitionId.Id));
             domQuery = domQuery.WithFilter(domFilter);
             var domInstances = helper.DomInstances.Read(domQuery);
             return domInstances.Select(FromInstance);
@@ -390,7 +390,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 throw new ArgumentNullException(nameof(domFilter));
             }
 
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettingsDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(AssetManagement.Models.AssetManagerAppSettingsDomMapper.DomDefinitionId.Id));
             var pagingHelper = helper.DomInstances.PreparePaging(domFilter, pageSize);
             while (pagingHelper.MoveToNextPage())
             {
@@ -405,7 +405,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 throw new ArgumentNullException(nameof(domQuery));
             }
 
-            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettingsDomMapper.DomDefinitionId.Id));
+            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(AssetManagement.Models.AssetManagerAppSettingsDomMapper.DomDefinitionId.Id));
             domQuery = domQuery.WithFilter(domFilter);
             var pagingHelper = helper.DomInstances.PreparePaging(domQuery, pageSize);
             while (pagingHelper.MoveToNextPage())
@@ -505,34 +505,34 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             {
                 Identifier = instance.ID.Id.ToString()
             };
-            var _appsettingsSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.SectionDefinitionId));
+            var _appsettingsSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.SectionDefinitionId));
             if (_appsettingsSection != default)
             {
-                var _enableassethistory = _appsettingsSection.GetValue<bool>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.EnableAssetHistory);
+                var _enableassethistory = _appsettingsSection.GetValue<bool>(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.EnableAssetHistory);
                 if (_enableassethistory != null)
                 {
                     obj.EnableAssetHistory = _enableassethistory.Value;
                 }
 
-                var _planandbuildjobprompt = _appsettingsSection.GetValue<int>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.PlanAndBuildJobPrompt);
+                var _planandbuildjobprompt = _appsettingsSection.GetValue<int>(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.PlanAndBuildJobPrompt);
                 if (_planandbuildjobprompt != null)
                 {
                     obj.PlanAndBuildJobPrompt = _planandbuildjobprompt.Value;
                 }
 
-                var _enableconnectionhistory = _appsettingsSection.GetValue<bool>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.EnableConnectionHistory);
+                var _enableconnectionhistory = _appsettingsSection.GetValue<bool>(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.EnableConnectionHistory);
                 if (_enableconnectionhistory != null)
                 {
                     obj.EnableConnectionHistory = _enableconnectionhistory.Value;
                 }
 
-                var _historyttl = _appsettingsSection.GetValue<TimeSpan>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.HistoryTTL);
+                var _historyttl = _appsettingsSection.GetValue<TimeSpan>(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.HistoryTTL);
                 if (_historyttl != null)
                 {
                     obj.HistoryTTL = _historyttl.Value;
                 }
 
-                var _historylimit = _appsettingsSection.GetValue<long>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.HistoryLimit);
+                var _historylimit = _appsettingsSection.GetValue<long>(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.HistoryLimit);
                 if (_historylimit != null)
                 {
                     obj.HistoryLimit = _historylimit.Value;
@@ -556,24 +556,24 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
             var instance = new DomInstance
             {
-                DomDefinitionId = Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettingsDomMapper.DomDefinitionId,
+                DomDefinitionId = AssetManagement.Models.AssetManagerAppSettingsDomMapper.DomDefinitionId,
                 ID = new DomInstanceId(id)
                 {
-                    ModuleId = Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettingsDomMapper.ModuleId
+                    ModuleId = AssetManagement.Models.AssetManagerAppSettingsDomMapper.ModuleId
                 }
             };
-            var _appsettings = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.SectionDefinitionId);
-            _appsettings.AddOrUpdateValue<bool>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.EnableAssetHistory, obj.EnableAssetHistory);
-            _appsettings.AddOrUpdateValue<int>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.PlanAndBuildJobPrompt, obj.PlanAndBuildJobPrompt);
-            _appsettings.AddOrUpdateValue<bool>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.EnableConnectionHistory, obj.EnableConnectionHistory);
+            var _appsettings = new Section(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.SectionDefinitionId);
+            _appsettings.AddOrUpdateValue<bool>(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.EnableAssetHistory, obj.EnableAssetHistory);
+            _appsettings.AddOrUpdateValue<int>(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.PlanAndBuildJobPrompt, obj.PlanAndBuildJobPrompt);
+            _appsettings.AddOrUpdateValue<bool>(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.EnableConnectionHistory, obj.EnableConnectionHistory);
             if (obj.HistoryTTL != default)
             {
-                _appsettings.AddOrUpdateValue<TimeSpan>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.HistoryTTL, (TimeSpan)obj.HistoryTTL.Value);
+                _appsettings.AddOrUpdateValue<TimeSpan>(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.HistoryTTL, (TimeSpan)obj.HistoryTTL.Value);
             }
 
             if (obj.HistoryLimit != default)
             {
-                _appsettings.AddOrUpdateValue<long>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.HistoryLimit, (long)obj.HistoryLimit.Value);
+                _appsettings.AddOrUpdateValue<long>(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.HistoryLimit, (long)obj.HistoryLimit.Value);
             }
 
             instance.Sections.Add(_appsettings);
@@ -587,19 +587,19 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 case "Identifier":
                     return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.Id, comparer, Guid.Parse((string)value));
                 case "EnableAssetHistory":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.EnableAssetHistory), comparer, (bool)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.EnableAssetHistory), comparer, (bool)value);
                 case "PlanAndBuildJobPrompt":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.PlanAndBuildJobPrompt), comparer, (int)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.PlanAndBuildJobPrompt), comparer, (int)value);
                 case "EnableConnectionHistory":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.EnableConnectionHistory), comparer, (bool)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.EnableConnectionHistory), comparer, (bool)value);
                 case "HistoryTTL" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
-                    return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.HistoryTTL.Id.ToString()).Equal(comparer == Comparer.NotEquals);
+                    return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.HistoryTTL.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "HistoryTTL":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.HistoryTTL), comparer, (TimeSpan)(TimeSpan)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.HistoryTTL), comparer, (TimeSpan)(TimeSpan)value);
                 case "HistoryLimit" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
-                    return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.HistoryLimit.Id.ToString()).Equal(comparer == Comparer.NotEquals);
+                    return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.HistoryLimit.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "HistoryLimit":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.HistoryLimit), comparer, ((long?)value).Value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.HistoryLimit), comparer, ((long?)value).Value);
                 default:
                     throw new NotImplementedException();
             }
@@ -612,15 +612,15 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 case "Identifier":
                     return OrderByElementFactory.Create(DomInstanceExposers.Id, sortOrder, naturalSort);
                 case "EnableAssetHistory":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.EnableAssetHistory), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.EnableAssetHistory), sortOrder, naturalSort);
                 case "PlanAndBuildJobPrompt":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.PlanAndBuildJobPrompt), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.PlanAndBuildJobPrompt), sortOrder, naturalSort);
                 case "EnableConnectionHistory":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.EnableConnectionHistory), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.EnableConnectionHistory), sortOrder, naturalSort);
                 case "HistoryTTL":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.HistoryTTL), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.HistoryTTL), sortOrder, naturalSort);
                 case "HistoryLimit":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.HistoryLimit), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.HistoryLimit), sortOrder, naturalSort);
                 default:
                     throw new NotImplementedException();
             }

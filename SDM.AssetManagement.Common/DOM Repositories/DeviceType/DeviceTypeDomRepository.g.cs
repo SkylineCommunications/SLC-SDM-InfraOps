@@ -33,7 +33,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 		public DeviceTypeDomRepository(IConnection connection)
 		{
 			this.connection = connection;
-			this.helper = new DomHelper(connection.HandleMessages, Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.ModuleId);
+			this.helper = new DomHelper(connection.HandleMessages, AssetManagement.Models.DeviceTypeDomMapper.ModuleId);
 		}
 
 		public DeviceType Create(DeviceType createObject)
@@ -150,7 +150,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			}
 
 			var domFilter = TranslateFullFilter(filter);
-			domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.DomDefinitionId.Id));
+			domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(AssetManagement.Models.DeviceTypeDomMapper.DomDefinitionId.Id));
 			return helper.DomInstances.Count(domFilter);
 		}
 
@@ -162,7 +162,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			}
 
 			var domFilter = TranslateFullFilter(query.Filter);
-			domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.DomDefinitionId.Id));
+			domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(AssetManagement.Models.DeviceTypeDomMapper.DomDefinitionId.Id));
 			var domOrder = TranslateFullOrderBy(query.Order);
 			var domQuery = query.WithFilter(domFilter).WithOrder(domOrder);
 			return helper.DomInstances.Count(domQuery);
@@ -374,7 +374,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				throw new ArgumentNullException(nameof(domFilter));
 			}
 
-			domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.DomDefinitionId.Id));
+			domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(AssetManagement.Models.DeviceTypeDomMapper.DomDefinitionId.Id));
 			var domInstances = helper.DomInstances.Read(domFilter);
 			return domInstances.Select(FromInstance);
 		}
@@ -386,7 +386,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				throw new ArgumentNullException(nameof(domQuery));
 			}
 
-			var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.DomDefinitionId.Id));
+			var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(AssetManagement.Models.DeviceTypeDomMapper.DomDefinitionId.Id));
 			domQuery = domQuery.WithFilter(domFilter);
 			var domInstances = helper.DomInstances.Read(domQuery);
 			return domInstances.Select(FromInstance);
@@ -399,7 +399,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				throw new ArgumentNullException(nameof(domFilter));
 			}
 
-			domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.DomDefinitionId.Id));
+			domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(AssetManagement.Models.DeviceTypeDomMapper.DomDefinitionId.Id));
 			var pagingHelper = helper.DomInstances.PreparePaging(domFilter, pageSize);
 			while (pagingHelper.MoveToNextPage())
 			{
@@ -414,7 +414,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				throw new ArgumentNullException(nameof(domQuery));
 			}
 
-			var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.DomDefinitionId.Id));
+			var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(AssetManagement.Models.DeviceTypeDomMapper.DomDefinitionId.Id));
 			domQuery = domQuery.WithFilter(domFilter);
 			var pagingHelper = helper.DomInstances.PreparePaging(domQuery, pageSize);
 			while (pagingHelper.MoveToNextPage())
@@ -515,40 +515,40 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				Identifier = instance.ID.Id.ToString(),
                 IsNewInternal = false,
             };
-			var _devicetypepropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.DeviceTypeProperties.SectionDefinitionId));
+			var _devicetypepropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(AssetManagement.Models.DeviceTypeDomMapper.DeviceTypeProperties.SectionDefinitionId));
 			if (_devicetypepropertiesSection != default)
 			{
-				var _name = _devicetypepropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.DeviceTypeProperties.Name);
+				var _name = _devicetypepropertiesSection.GetValue<string>(AssetManagement.Models.DeviceTypeDomMapper.DeviceTypeProperties.Name);
 				if (_name != null)
 				{
 					obj.Name = _name.Value;
 				}
 
-				var _description = _devicetypepropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.DeviceTypeProperties.Description);
+				var _description = _devicetypepropertiesSection.GetValue<string>(AssetManagement.Models.DeviceTypeDomMapper.DeviceTypeProperties.Description);
 				if (_description != null)
 				{
 					obj.Description = _description.Value;
 				}
 			}
 
-			var _tagsinfoSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.TagsInfo.SectionDefinitionId));
+			var _tagsinfoSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(AssetManagement.Models.DeviceTypeDomMapper.TagsInfo.SectionDefinitionId));
 			if (_tagsinfoSection != default)
 			{
-                obj.TagsInfo = new Skyline.DataMiner.SDM.AssetManagement.Models.TagsInfo();
+                obj.TagsInfo = new AssetManagement.Models.TagsInfo();
 
-				var _tags = _tagsinfoSection.GetListValue<int>(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.TagsInfo.Tags);
+				var _tags = _tagsinfoSection.GetListValue<int>(AssetManagement.Models.DeviceTypeDomMapper.TagsInfo.Tags);
 				if (_tags != null)
 				{
 					obj.TagsInfo.Tags = _tags.Values.Select(v => (SlcAsset_Management.Enums.TagOption)v).ToList();
 				}
 			}
 
-			var _hierarchyinfoSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.HierarchyInfo.SectionDefinitionId));
+			var _hierarchyinfoSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(AssetManagement.Models.DeviceTypeDomMapper.HierarchyInfo.SectionDefinitionId));
 			if (_hierarchyinfoSection != default)
 			{
-                obj.HierarchyInfo = new Skyline.DataMiner.SDM.AssetManagement.Models.HierarchyInfo();
+                obj.HierarchyInfo = new AssetManagement.Models.HierarchyInfo();
 
-				var _hierarchyinfohierarchyrole = _hierarchyinfoSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.HierarchyInfo.HierarchyRole);
+				var _hierarchyinfohierarchyrole = _hierarchyinfoSection.GetValue<string>(AssetManagement.Models.DeviceTypeDomMapper.HierarchyInfo.HierarchyRole);
 				if (_hierarchyinfohierarchyrole != null)
 				{
 					obj.HierarchyInfo.HierarchyRole = FromDomHierarchyRole(_hierarchyinfohierarchyrole.Value);
@@ -595,31 +595,31 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
 			var instance = new DomInstance
 			{
-				DomDefinitionId = Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.DomDefinitionId,
+				DomDefinitionId = AssetManagement.Models.DeviceTypeDomMapper.DomDefinitionId,
 				ID = new DomInstanceId(id)
 				{
-					ModuleId = Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.ModuleId
+					ModuleId = AssetManagement.Models.DeviceTypeDomMapper.ModuleId
 				}
 			};
-			var _devicetypeproperties = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.DeviceTypeProperties.SectionDefinitionId);
+			var _devicetypeproperties = new Section(AssetManagement.Models.DeviceTypeDomMapper.DeviceTypeProperties.SectionDefinitionId);
 			if (obj.Name != default)
 			{
-				_devicetypeproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.DeviceTypeProperties.Name, Convert.ToString(obj.Name));
+				_devicetypeproperties.AddOrUpdateValue<string>(AssetManagement.Models.DeviceTypeDomMapper.DeviceTypeProperties.Name, Convert.ToString(obj.Name));
 			}
 
 			if (obj.Description != default)
 			{
-				_devicetypeproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.DeviceTypeProperties.Description, Convert.ToString(obj.Description));
+				_devicetypeproperties.AddOrUpdateValue<string>(AssetManagement.Models.DeviceTypeDomMapper.DeviceTypeProperties.Description, Convert.ToString(obj.Description));
 			}
 
 			instance.Sections.Add(_devicetypeproperties);
 			if (obj.TagsInfo != null)
 			{
-                var _tagsinfo = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.TagsInfo.SectionDefinitionId);
+                var _tagsinfo = new Section(AssetManagement.Models.DeviceTypeDomMapper.TagsInfo.SectionDefinitionId);
 
 				if (obj.TagsInfo.Tags != null)
 				{
-					_tagsinfo.AddOrUpdateListValue<int>(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.TagsInfo.Tags, obj.TagsInfo.Tags.Select(v => (int)v).ToList());
+					_tagsinfo.AddOrUpdateListValue<int>(AssetManagement.Models.DeviceTypeDomMapper.TagsInfo.Tags, obj.TagsInfo.Tags.Select(v => (int)v).ToList());
 				}
 
 				instance.Sections.Add(_tagsinfo);
@@ -627,11 +627,11 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
 			if (obj.HierarchyInfo != null)
 			{
-                var _hierarchyinfo = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.HierarchyInfo.SectionDefinitionId);
+                var _hierarchyinfo = new Section(AssetManagement.Models.DeviceTypeDomMapper.HierarchyInfo.SectionDefinitionId);
 
                 if (obj.HierarchyInfo.HierarchyRole != null)
                 {
-                    _hierarchyinfo.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.HierarchyInfo.HierarchyRole, ToDomHierarchyRole(obj.HierarchyInfo.HierarchyRole.Value)); 
+                    _hierarchyinfo.AddOrUpdateValue<string>(AssetManagement.Models.DeviceTypeDomMapper.HierarchyInfo.HierarchyRole, ToDomHierarchyRole(obj.HierarchyInfo.HierarchyRole.Value)); 
                 }
 
 				instance.Sections.Add(_hierarchyinfo);
@@ -662,17 +662,17 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				case "Identifier":
 					return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.Id, comparer, Guid.Parse((string)value));
 				case "Name":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.DeviceTypeProperties.Name), comparer, (string)value);
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DeviceTypeDomMapper.DeviceTypeProperties.Name), comparer, (string)value);
 				case "Description":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.DeviceTypeProperties.Description), comparer, (string)value);
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DeviceTypeDomMapper.DeviceTypeProperties.Description), comparer, (string)value);
 				case "TagsInfo.Identifier":
 					return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.SectionIds, comparer, Guid.Parse((string)value));
 				case "TagsInfo.Tags":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.TagsInfo.Tags), comparer, (int)value);
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DeviceTypeDomMapper.TagsInfo.Tags), comparer, (int)value);
 				case "HierarchyInfo.Identifier":
 					return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.SectionIds, comparer, Guid.Parse((string)value));
 				case "HierarchyInfo.HierarchyRole":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.HierarchyInfo.HierarchyRole), comparer, ToDomHierarchyRole((SlcAsset_Management.Enums.HierarchyRoleEnum)(int)value));
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DeviceTypeDomMapper.HierarchyInfo.HierarchyRole), comparer, ToDomHierarchyRole((SlcAsset_Management.Enums.HierarchyRoleEnum)(int)value));
 				default:
 					throw new NotImplementedException();
 			}
@@ -685,17 +685,17 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				case "Identifier":
 					return OrderByElementFactory.Create(DomInstanceExposers.Id, sortOrder, naturalSort);
 				case "Name":
-					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.DeviceTypeProperties.Name), sortOrder, naturalSort);
+					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DeviceTypeDomMapper.DeviceTypeProperties.Name), sortOrder, naturalSort);
 				case "Description":
-					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.DeviceTypeProperties.Description), sortOrder, naturalSort);
+					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DeviceTypeDomMapper.DeviceTypeProperties.Description), sortOrder, naturalSort);
 				case "TagsInfo.Identifier":
 					return OrderByElementFactory.Create(DomInstanceExposers.SectionIds, sortOrder, naturalSort);
 				case "TagsInfo.Tags":
-					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.TagsInfo.Tags), sortOrder, naturalSort);
+					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DeviceTypeDomMapper.TagsInfo.Tags), sortOrder, naturalSort);
 				case "HierarchyInfo.Identifier":
 					return OrderByElementFactory.Create(DomInstanceExposers.SectionIds, sortOrder, naturalSort);
 				case "HierarchyInfo.HierarchyRole":
-					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.HierarchyInfo.HierarchyRole), sortOrder, naturalSort);
+					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DeviceTypeDomMapper.HierarchyInfo.HierarchyRole), sortOrder, naturalSort);
 				default:
 					throw new NotImplementedException();
 			}

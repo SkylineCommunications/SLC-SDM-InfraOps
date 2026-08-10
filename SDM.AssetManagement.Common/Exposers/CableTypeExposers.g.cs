@@ -21,9 +21,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
     public static partial class CableTypeExposers
     {
-        public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.CableType, string> Identifier = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.CableType, string>((obj) => obj.Identifier, "Identifier");
-        public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.CableType, string> Name = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.CableType, string>((obj) => obj.Name, "Name");
-        public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.CableType, string> Description = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.CableType, string>((obj) => obj.Description, "Description");
+        public static readonly Exposer<AssetManagement.Models.CableType, string> Identifier = new Exposer<AssetManagement.Models.CableType, string>((obj) => obj.Identifier, "Identifier");
+        public static readonly Exposer<AssetManagement.Models.CableType, string> Name = new Exposer<AssetManagement.Models.CableType, string>((obj) => obj.Name, "Name");
+        public static readonly Exposer<AssetManagement.Models.CableType, string> Description = new Exposer<AssetManagement.Models.CableType, string>((obj) => obj.Description, "Description");
         static CableTypeExposers()
         {
             RuntimeHelpers.RunClassConstructor(typeof(CategoryLinks).TypeHandle);
@@ -31,7 +31,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
         public static partial class CategoryLinks
         {
-            public static readonly CollectionExposer<Skyline.DataMiner.SDM.AssetManagement.Models.CableType, SharedMappers.DomIds.SlcAsset_Management.Enums.CategoriesEnum> Categories = new CollectionExposer<Skyline.DataMiner.SDM.AssetManagement.Models.CableType, SharedMappers.DomIds.SlcAsset_Management.Enums.CategoriesEnum>((obj) => obj.CategoryLinks.Categories.Where(x => x != null), "CategoryLinks.Categories");
+            public static readonly CollectionExposer<AssetManagement.Models.CableType, SharedMappers.DomIds.SlcAsset_Management.Enums.CategoriesEnum> Categories = new CollectionExposer<AssetManagement.Models.CableType, SharedMappers.DomIds.SlcAsset_Management.Enums.CategoriesEnum>((obj) => obj.CategoryLinks.Categories.Where(x => x != null), "CategoryLinks.Categories");
         }
     }
 }

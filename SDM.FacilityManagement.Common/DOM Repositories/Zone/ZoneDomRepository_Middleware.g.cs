@@ -25,20 +25,20 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
     using SLDataGateway.API.Querying;
     using SLDataGateway.API.Types.Querying;
 
-    internal sealed partial class ZoneDomRepository_Middleware : Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone>
+    internal sealed partial class ZoneDomRepository_Middleware : IBulkRepository<FacilityManagement.Models.Zone>
     {
-        private readonly Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone> _inner;
-        private readonly IMiddlewareMarker<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone> _middleware;
+        private readonly IBulkRepository<FacilityManagement.Models.Zone> _inner;
+        private readonly IMiddlewareMarker<FacilityManagement.Models.Zone> _middleware;
 
-        public ZoneDomRepository_Middleware(Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone> inner, IMiddlewareMarker<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone> middleware)
+        public ZoneDomRepository_Middleware(IBulkRepository<FacilityManagement.Models.Zone> inner, IMiddlewareMarker<FacilityManagement.Models.Zone> middleware)
         {
             _inner = inner ?? throw new ArgumentNullException(nameof(inner));
             _middleware = middleware;
         }
 
-        public IEnumerable<IPagedResult<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone>> ReadPaged(FilterElement<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone> filter)
+        public IEnumerable<IPagedResult<FacilityManagement.Models.Zone>> ReadPaged(FilterElement<FacilityManagement.Models.Zone> filter)
         {
-            if (_middleware is IPageableMiddleware<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone> middleware)
+            if (_middleware is IPageableMiddleware<FacilityManagement.Models.Zone> middleware)
             {
                 return middleware.OnReadPaged(filter, _inner.ReadPaged);
             }
@@ -48,9 +48,9 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             }
         }
 
-        public IEnumerable<IPagedResult<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone>> ReadPaged(IQuery<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone> query)
+        public IEnumerable<IPagedResult<FacilityManagement.Models.Zone>> ReadPaged(IQuery<FacilityManagement.Models.Zone> query)
         {
-            if (_middleware is IPageableMiddleware<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone> middleware)
+            if (_middleware is IPageableMiddleware<FacilityManagement.Models.Zone> middleware)
             {
                 return middleware.OnReadPaged(query, _inner.ReadPaged);
             }
@@ -60,9 +60,9 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             }
         }
 
-        public IEnumerable<IPagedResult<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone>> ReadPaged(FilterElement<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone> filter, int pageSize)
+        public IEnumerable<IPagedResult<FacilityManagement.Models.Zone>> ReadPaged(FilterElement<FacilityManagement.Models.Zone> filter, int pageSize)
         {
-            if (_middleware is IPageableMiddleware<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone> middleware)
+            if (_middleware is IPageableMiddleware<FacilityManagement.Models.Zone> middleware)
             {
                 return middleware.OnReadPaged(filter, pageSize, _inner.ReadPaged);
             }
@@ -72,9 +72,9 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             }
         }
 
-        public IEnumerable<IPagedResult<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone>> ReadPaged(IQuery<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone> query, int pageSize)
+        public IEnumerable<IPagedResult<FacilityManagement.Models.Zone>> ReadPaged(IQuery<FacilityManagement.Models.Zone> query, int pageSize)
         {
-            if (_middleware is IPageableMiddleware<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone> middleware)
+            if (_middleware is IPageableMiddleware<FacilityManagement.Models.Zone> middleware)
             {
                 return middleware.OnReadPaged(query, pageSize, _inner.ReadPaged);
             }
@@ -84,9 +84,9 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             }
         }
 
-        public IEnumerable<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone> Read(FilterElement<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone> filter)
+        public IEnumerable<FacilityManagement.Models.Zone> Read(FilterElement<FacilityManagement.Models.Zone> filter)
         {
-            if (_middleware is IReadableMiddleware<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone> middleware)
+            if (_middleware is IReadableMiddleware<FacilityManagement.Models.Zone> middleware)
             {
                 return middleware.OnRead(filter, _inner.Read);
             }
@@ -96,9 +96,9 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             }
         }
 
-        public IEnumerable<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone> Read(IQuery<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone> query)
+        public IEnumerable<FacilityManagement.Models.Zone> Read(IQuery<FacilityManagement.Models.Zone> query)
         {
-            if (_middleware is IReadableMiddleware<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone> middleware)
+            if (_middleware is IReadableMiddleware<FacilityManagement.Models.Zone> middleware)
             {
                 return middleware.OnRead(query, _inner.Read);
             }
@@ -108,9 +108,9 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             }
         }
 
-        public long Count(FilterElement<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone> filter)
+        public long Count(FilterElement<FacilityManagement.Models.Zone> filter)
         {
-            if (_middleware is ICountableMiddleware<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone> middleware)
+            if (_middleware is ICountableMiddleware<FacilityManagement.Models.Zone> middleware)
             {
                 return middleware.OnCount(filter, _inner.Count);
             }
@@ -120,9 +120,9 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             }
         }
 
-        public long Count(IQuery<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone> query)
+        public long Count(IQuery<FacilityManagement.Models.Zone> query)
         {
-            if (_middleware is ICountableMiddleware<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone> middleware)
+            if (_middleware is ICountableMiddleware<FacilityManagement.Models.Zone> middleware)
             {
                 return middleware.OnCount(query, _inner.Count);
             }
@@ -132,9 +132,9 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             }
         }
 
-        public IReadOnlyCollection<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone> Create(IEnumerable<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone> oToCreate)
+        public IReadOnlyCollection<FacilityManagement.Models.Zone> Create(IEnumerable<FacilityManagement.Models.Zone> oToCreate)
         {
-            if (_middleware is IBulkCreatableMiddleware<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone> middleware)
+            if (_middleware is IBulkCreatableMiddleware<FacilityManagement.Models.Zone> middleware)
             {
                 return middleware.OnCreate(oToCreate, _inner.Create);
             }
@@ -144,9 +144,9 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             }
         }
 
-        public Skyline.DataMiner.SDM.FacilityManagement.Models.Zone Create(Skyline.DataMiner.SDM.FacilityManagement.Models.Zone oToCreate)
+        public FacilityManagement.Models.Zone Create(FacilityManagement.Models.Zone oToCreate)
         {
-            if (_middleware is ICreatableMiddleware<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone> middleware)
+            if (_middleware is ICreatableMiddleware<FacilityManagement.Models.Zone> middleware)
             {
                 return middleware.OnCreate(oToCreate, _inner.Create);
             }
@@ -156,9 +156,9 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             }
         }
 
-        public IReadOnlyCollection<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone> Update(IEnumerable<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone> oToUpdate)
+        public IReadOnlyCollection<FacilityManagement.Models.Zone> Update(IEnumerable<FacilityManagement.Models.Zone> oToUpdate)
         {
-            if (_middleware is IBulkUpdatableMiddleware<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone> middleware)
+            if (_middleware is IBulkUpdatableMiddleware<FacilityManagement.Models.Zone> middleware)
             {
                 return middleware.OnUpdate(oToUpdate, _inner.Update);
             }
@@ -168,9 +168,9 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             }
         }
 
-        public Skyline.DataMiner.SDM.FacilityManagement.Models.Zone Update(Skyline.DataMiner.SDM.FacilityManagement.Models.Zone oToUpdate)
+        public FacilityManagement.Models.Zone Update(FacilityManagement.Models.Zone oToUpdate)
         {
-            if (_middleware is IUpdatableMiddleware<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone> middleware)
+            if (_middleware is IUpdatableMiddleware<FacilityManagement.Models.Zone> middleware)
             {
                 return middleware.OnUpdate(oToUpdate, _inner.Update);
             }
@@ -180,9 +180,9 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             }
         }
 
-        public void Delete(IEnumerable<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone> oToDelete)
+        public void Delete(IEnumerable<FacilityManagement.Models.Zone> oToDelete)
         {
-            if (_middleware is IBulkDeletableMiddleware<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone> middleware)
+            if (_middleware is IBulkDeletableMiddleware<FacilityManagement.Models.Zone> middleware)
             {
                 middleware.OnDelete(oToDelete, _inner.Delete);
             }
@@ -192,9 +192,9 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             }
         }
 
-        public void Delete(Skyline.DataMiner.SDM.FacilityManagement.Models.Zone oToDelete)
+        public void Delete(FacilityManagement.Models.Zone oToDelete)
         {
-            if (_middleware is IDeletableMiddleware<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone> middleware)
+            if (_middleware is IDeletableMiddleware<FacilityManagement.Models.Zone> middleware)
             {
                 middleware.OnDelete(oToDelete, _inner.Delete);
             }
@@ -203,9 +203,9 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 _inner.Delete(oToDelete);
             }
         }
-        public System.Collections.Generic.IReadOnlyCollection<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone> CreateOrUpdate(System.Collections.Generic.IEnumerable<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone> oToCreateOrUpdate)
+        public System.Collections.Generic.IReadOnlyCollection<FacilityManagement.Models.Zone> CreateOrUpdate(System.Collections.Generic.IEnumerable<FacilityManagement.Models.Zone> oToCreateOrUpdate)
         {
-                if (_middleware is IBulkRepositoryMiddleware<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone> middleware)
+                if (_middleware is IBulkRepositoryMiddleware<FacilityManagement.Models.Zone> middleware)
                 {
                     return middleware.OnCreateOrUpdate(oToCreateOrUpdate, _inner.CreateOrUpdate);
                 }

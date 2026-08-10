@@ -21,13 +21,13 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
 
     public static partial class PropertyExposers
     {
-        public static readonly Exposer<Skyline.DataMiner.SDM.InfraOpsProperties.Models.Property, string> Identifier = new Exposer<Skyline.DataMiner.SDM.InfraOpsProperties.Models.Property, string>((obj) => obj.Identifier, "Identifier");
-        public static readonly Exposer<Skyline.DataMiner.SDM.InfraOpsProperties.Models.Property, string> Name = new Exposer<Skyline.DataMiner.SDM.InfraOpsProperties.Models.Property, string>((obj) => obj.Name, "Name");
-        public static readonly Exposer<Skyline.DataMiner.SDM.InfraOpsProperties.Models.Property, SharedMappers.DomIds.InfraopsProperties.Enums.PropertyTypeEnum> PropertyType = new Exposer<Skyline.DataMiner.SDM.InfraOpsProperties.Models.Property, SharedMappers.DomIds.InfraopsProperties.Enums.PropertyTypeEnum>((obj) => obj.PropertyType, "PropertyType");
-        public static readonly Exposer<Skyline.DataMiner.SDM.InfraOpsProperties.Models.Property, string> Scope = new Exposer<Skyline.DataMiner.SDM.InfraOpsProperties.Models.Property, string>((obj) => obj.Scope, "Scope");
-        public static readonly Exposer<Skyline.DataMiner.SDM.InfraOpsProperties.Models.Property, string> Default = new Exposer<Skyline.DataMiner.SDM.InfraOpsProperties.Models.Property, string>((obj) => obj.Default, "Default");
-        public static readonly Exposer<Skyline.DataMiner.SDM.InfraOpsProperties.Models.Property, long?> StringSizeLimit = new Exposer<Skyline.DataMiner.SDM.InfraOpsProperties.Models.Property, long?>((obj) => obj.StringSizeLimit, "StringSizeLimit");
-        public static readonly Exposer<Skyline.DataMiner.SDM.InfraOpsProperties.Models.Property, bool> IsMultiLineString = new Exposer<Skyline.DataMiner.SDM.InfraOpsProperties.Models.Property, bool>((obj) => obj.IsMultiLineString, "IsMultiLineString");
+        public static readonly Exposer<InfraOpsProperties.Models.Property, string> Identifier = new Exposer<InfraOpsProperties.Models.Property, string>((obj) => obj.Identifier, "Identifier");
+        public static readonly Exposer<InfraOpsProperties.Models.Property, string> Name = new Exposer<InfraOpsProperties.Models.Property, string>((obj) => obj.Name, "Name");
+        public static readonly Exposer<InfraOpsProperties.Models.Property, SharedMappers.DomIds.InfraopsProperties.Enums.PropertyTypeEnum> PropertyType = new Exposer<InfraOpsProperties.Models.Property, SharedMappers.DomIds.InfraopsProperties.Enums.PropertyTypeEnum>((obj) => obj.PropertyType, "PropertyType");
+        public static readonly Exposer<InfraOpsProperties.Models.Property, string> Scope = new Exposer<InfraOpsProperties.Models.Property, string>((obj) => obj.Scope, "Scope");
+        public static readonly Exposer<InfraOpsProperties.Models.Property, string> Default = new Exposer<InfraOpsProperties.Models.Property, string>((obj) => obj.Default, "Default");
+        public static readonly Exposer<InfraOpsProperties.Models.Property, long?> StringSizeLimit = new Exposer<InfraOpsProperties.Models.Property, long?>((obj) => obj.StringSizeLimit, "StringSizeLimit");
+        public static readonly Exposer<InfraOpsProperties.Models.Property, bool> IsMultiLineString = new Exposer<InfraOpsProperties.Models.Property, bool>((obj) => obj.IsMultiLineString, "IsMultiLineString");
         static PropertyExposers()
         {
             RuntimeHelpers.RunClassConstructor(typeof(Layout).TypeHandle);
@@ -36,13 +36,13 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
 
         public static partial class Layout
         {
-            public static readonly Exposer<Skyline.DataMiner.SDM.InfraOpsProperties.Models.Property, string> SectionName = new Exposer<Skyline.DataMiner.SDM.InfraOpsProperties.Models.Property, string>((obj) => obj.Layout.SectionName, "Layout.SectionName");
-            public static readonly Exposer<Skyline.DataMiner.SDM.InfraOpsProperties.Models.Property, long?> Order = new Exposer<Skyline.DataMiner.SDM.InfraOpsProperties.Models.Property, long?>((obj) => obj.Layout.Order, "Layout.Order");
+            public static readonly Exposer<InfraOpsProperties.Models.Property, string> SectionName = new Exposer<InfraOpsProperties.Models.Property, string>((obj) => obj.Layout.SectionName, "Layout.SectionName");
+            public static readonly Exposer<InfraOpsProperties.Models.Property, long?> Order = new Exposer<InfraOpsProperties.Models.Property, long?>((obj) => obj.Layout.Order, "Layout.Order");
         }
 
         public static partial class Discreets
         {
-            public static readonly CollectionExposer<Skyline.DataMiner.SDM.InfraOpsProperties.Models.Property, string> Option = new CollectionExposer<Skyline.DataMiner.SDM.InfraOpsProperties.Models.Property, string>((obj) => obj.Discreets.Where(x => x != null).Select(x => x.Option).Where(x => x != null), "Discreets.Option");
+            public static readonly CollectionExposer<InfraOpsProperties.Models.Property, string> Option = new CollectionExposer<InfraOpsProperties.Models.Property, string>((obj) => obj.Discreets.Where(x => x != null).Select(x => x.Option).Where(x => x != null), "Discreets.Option");
         }
     }
 }

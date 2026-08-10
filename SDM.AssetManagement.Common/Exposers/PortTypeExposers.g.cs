@@ -21,9 +21,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
     public static partial class PortTypeExposers
     {
-        public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.PortType, string> Identifier = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.PortType, string>((obj) => obj.Identifier, "Identifier");
-        public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.PortType, string> Name = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.PortType, string>((obj) => obj.Name, "Name");
-        public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.PortType, string> Description = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.PortType, string>((obj) => obj.Description, "Description");
+        public static readonly Exposer<AssetManagement.Models.PortType, string> Identifier = new Exposer<AssetManagement.Models.PortType, string>((obj) => obj.Identifier, "Identifier");
+        public static readonly Exposer<AssetManagement.Models.PortType, string> Name = new Exposer<AssetManagement.Models.PortType, string>((obj) => obj.Name, "Name");
+        public static readonly Exposer<AssetManagement.Models.PortType, string> Description = new Exposer<AssetManagement.Models.PortType, string>((obj) => obj.Description, "Description");
         static PortTypeExposers()
         {
             RuntimeHelpers.RunClassConstructor(typeof(CategoryLinks).TypeHandle);
@@ -32,12 +32,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
         public static partial class CategoryLinks
         {
-            public static readonly CollectionExposer<Skyline.DataMiner.SDM.AssetManagement.Models.PortType, SharedMappers.DomIds.SlcAsset_Management.Enums.CategoriesEnum> Categories = new CollectionExposer<Skyline.DataMiner.SDM.AssetManagement.Models.PortType, SharedMappers.DomIds.SlcAsset_Management.Enums.CategoriesEnum>((obj) => obj.CategoryLinks.Categories.Where(x => x != null), "CategoryLinks.Categories");
+            public static readonly CollectionExposer<AssetManagement.Models.PortType, SharedMappers.DomIds.SlcAsset_Management.Enums.CategoriesEnum> Categories = new CollectionExposer<AssetManagement.Models.PortType, SharedMappers.DomIds.SlcAsset_Management.Enums.CategoriesEnum>((obj) => obj.CategoryLinks.Categories.Where(x => x != null), "CategoryLinks.Categories");
         }
 
         public static partial class CableFKs
         {
-            public static readonly CollectionExposer<Skyline.DataMiner.SDM.AssetManagement.Models.PortType, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.CableType>> CableTypeFks = new CollectionExposer<Skyline.DataMiner.SDM.AssetManagement.Models.PortType, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.CableType>>((obj) => obj.CableFKs.CableTypeFks.Where(x => x != null), "CableFKs.CableTypeFks");
+            public static readonly CollectionExposer<AssetManagement.Models.PortType, SdmObjectReference<AssetManagement.Models.CableType>> CableTypeFks = new CollectionExposer<AssetManagement.Models.PortType, SdmObjectReference<AssetManagement.Models.CableType>>((obj) => obj.CableFKs.CableTypeFks.Where(x => x != null), "CableFKs.CableTypeFks");
         }
     }
 }

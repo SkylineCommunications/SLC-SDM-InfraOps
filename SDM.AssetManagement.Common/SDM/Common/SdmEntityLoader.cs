@@ -645,7 +645,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
                 return new List<AssetClass>();
             }
 
-            var dataPortTypeExposer = new Skyline.DataMiner.SDM.Exposers.CollectionExposer<AssetClass, Guid>(
+            var dataPortTypeExposer = new Exposers.CollectionExposer<AssetClass, Guid>(
                 obj => obj.DataPorts
                     .Where(port => port?.Type != null && port.Type.HasValue())
                     .Select(port => Guid.Parse(port.Type.Identifier)),
@@ -687,7 +687,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
                 return new List<AssetClass>();
             }
 
-            var powerPortTypeExposer = new Skyline.DataMiner.SDM.Exposers.CollectionExposer<AssetClass, Guid>(
+            var powerPortTypeExposer = new Exposers.CollectionExposer<AssetClass, Guid>(
                 obj => obj.PowerPorts
                     .Where(port => port?.PortType != null && port.PortType.HasValue())
                     .Select(port => Guid.Parse(port.PortType.Identifier)),
@@ -729,11 +729,11 @@ namespace Skyline.DataMiner.SDM.Common.Services
                 filter => assetManagerApiHelper.CableTypes.Read(filter).ToList());
         }
 
-        public List<Skyline.DataMiner.SDM.AssetManagement.Models.Connection> GetConnectionsByCableTypeIds(List<string> cableTypeIds)
+        public List<AssetManagement.Models.Connection> GetConnectionsByCableTypeIds(List<string> cableTypeIds)
         {
             if (assetManagerApiHelper?.Connections == null || cableTypeIds == null || !cableTypeIds.Any())
             {
-                return new List<Skyline.DataMiner.SDM.AssetManagement.Models.Connection>();
+                return new List<AssetManagement.Models.Connection>();
             }
 
             return Tools.RetrieveBigOrFilter(
@@ -755,11 +755,11 @@ namespace Skyline.DataMiner.SDM.Common.Services
                 filter => assetManagerApiHelper.PortTypes.Read(filter).ToList());
         }
 
-        public List<Skyline.DataMiner.SDM.AssetManagement.Models.Connection> GetConnectionsByPortIds(List<string> portIds)
+        public List<AssetManagement.Models.Connection> GetConnectionsByPortIds(List<string> portIds)
         {
             if (assetManagerApiHelper?.Connections == null || portIds == null || !portIds.Any())
             {
-                return new List<Skyline.DataMiner.SDM.AssetManagement.Models.Connection>();
+                return new List<AssetManagement.Models.Connection>();
             }
 
             var portGuids = portIds
@@ -770,7 +770,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
 
             if (!portGuids.Any())
             {
-                return new List<Skyline.DataMiner.SDM.AssetManagement.Models.Connection>();
+                return new List<AssetManagement.Models.Connection>();
             }
 
             return Tools.RetrieveBigOrFilter(

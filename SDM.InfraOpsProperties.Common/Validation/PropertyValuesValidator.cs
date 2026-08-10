@@ -364,7 +364,7 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Validation
             return results;
         }
 
-        private static bool IsReferenceSet(Skyline.DataMiner.SDM.SdmObjectReference<Property> reference)
+        private static bool IsReferenceSet(SdmObjectReference<Property> reference)
         {
             return reference != null && !string.IsNullOrWhiteSpace(reference.Identifier);
         }

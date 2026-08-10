@@ -23,8 +23,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
 	public static partial class DataPortExposers
 	{
-		public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort, string> Identifier = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort, string>((obj) => obj.Identifier, "Identifier");
-		public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.Asset>> Asset = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.Asset>>((obj) => obj.Asset, "Asset");
+		public static readonly Exposer<AssetManagement.Models.DataPort, string> Identifier = new Exposer<AssetManagement.Models.DataPort, string>((obj) => obj.Identifier, "Identifier");
+		public static readonly Exposer<AssetManagement.Models.DataPort, SdmObjectReference<AssetManagement.Models.Asset>> Asset = new Exposer<AssetManagement.Models.DataPort, SdmObjectReference<AssetManagement.Models.Asset>>((obj) => obj.Asset, "Asset");
 
         static DataPortExposers()
         {
@@ -35,26 +35,26 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
         public static partial class DataPortInfo
 		{
-			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort, string> Name = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort, string>((obj) => obj.DataPortInfo.Name, "DataPortInfo.Name");
-			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort, long?> PortNumber = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort, long?>((obj) => obj.DataPortInfo.PortNumber, "DataPortInfo.PortNumber");
-			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort, SlcAsset_Management.Enums.Outputtype?> OutputType = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort, SlcAsset_Management.Enums.Outputtype?>((obj) => obj.DataPortInfo.OutputType, "DataPortInfo.OutputType");
-			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort, SlcAsset_Management.Enums.PortExposureEnum> PortExposure = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort, SlcAsset_Management.Enums.PortExposureEnum>((obj) => obj.DataPortInfo.PortExposure, "DataPortInfo.PortExposure");
-			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.PortType>> Type = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.PortType>>((obj) => obj.DataPortInfo.Type, "DataPortInfo.Type");
-			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort, string> Label = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort, string>((obj) => obj.DataPortInfo.Label, "DataPortInfo.Label");
+			public static readonly Exposer<AssetManagement.Models.DataPort, string> Name = new Exposer<AssetManagement.Models.DataPort, string>((obj) => obj.DataPortInfo.Name, "DataPortInfo.Name");
+			public static readonly Exposer<AssetManagement.Models.DataPort, long?> PortNumber = new Exposer<AssetManagement.Models.DataPort, long?>((obj) => obj.DataPortInfo.PortNumber, "DataPortInfo.PortNumber");
+			public static readonly Exposer<AssetManagement.Models.DataPort, SlcAsset_Management.Enums.Outputtype?> OutputType = new Exposer<AssetManagement.Models.DataPort, SlcAsset_Management.Enums.Outputtype?>((obj) => obj.DataPortInfo.OutputType, "DataPortInfo.OutputType");
+			public static readonly Exposer<AssetManagement.Models.DataPort, SlcAsset_Management.Enums.PortExposureEnum> PortExposure = new Exposer<AssetManagement.Models.DataPort, SlcAsset_Management.Enums.PortExposureEnum>((obj) => obj.DataPortInfo.PortExposure, "DataPortInfo.PortExposure");
+			public static readonly Exposer<AssetManagement.Models.DataPort, SdmObjectReference<AssetManagement.Models.PortType>> Type = new Exposer<AssetManagement.Models.DataPort, SdmObjectReference<AssetManagement.Models.PortType>>((obj) => obj.DataPortInfo.Type, "DataPortInfo.Type");
+			public static readonly Exposer<AssetManagement.Models.DataPort, string> Label = new Exposer<AssetManagement.Models.DataPort, string>((obj) => obj.DataPortInfo.Label, "DataPortInfo.Label");
 		}
 
 		public static partial class AddressInfo
 		{
-			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort, string> Ipv4Address = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort, string>((obj) => obj.AddressInfo.Ipv4Address, "AddressInfo.Ipv4Address");
-			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort, string> Ipv6Address = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort, string>((obj) => obj.AddressInfo.Ipv6Address, "AddressInfo.Ipv6Address");
-			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort, string> Hostname = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort, string>((obj) => obj.AddressInfo.Hostname, "AddressInfo.Hostname");
-			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort, bool> DNS = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort, bool>((obj) => obj.AddressInfo.DNS, "AddressInfo.DNS");
+			public static readonly Exposer<AssetManagement.Models.DataPort, string> Ipv4Address = new Exposer<AssetManagement.Models.DataPort, string>((obj) => obj.AddressInfo.Ipv4Address, "AddressInfo.Ipv4Address");
+			public static readonly Exposer<AssetManagement.Models.DataPort, string> Ipv6Address = new Exposer<AssetManagement.Models.DataPort, string>((obj) => obj.AddressInfo.Ipv6Address, "AddressInfo.Ipv6Address");
+			public static readonly Exposer<AssetManagement.Models.DataPort, string> Hostname = new Exposer<AssetManagement.Models.DataPort, string>((obj) => obj.AddressInfo.Hostname, "AddressInfo.Hostname");
+			public static readonly Exposer<AssetManagement.Models.DataPort, bool> DNS = new Exposer<AssetManagement.Models.DataPort, bool>((obj) => obj.AddressInfo.DNS, "AddressInfo.DNS");
 		}
 
 		public static partial class PrimaryPortRelation
 		{
-			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort, bool> IsPrimaryIpv6 = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort, bool>((obj) => obj.PrimaryPortRelation.IsPrimaryIpv6, "PrimaryPortRelation.IsPrimaryIpv6");
-			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort, bool> IsPrimaryIpv4 = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort, bool>((obj) => obj.PrimaryPortRelation.IsPrimaryIpv4, "PrimaryPortRelation.IsPrimaryIpv4");
+			public static readonly Exposer<AssetManagement.Models.DataPort, bool> IsPrimaryIpv6 = new Exposer<AssetManagement.Models.DataPort, bool>((obj) => obj.PrimaryPortRelation.IsPrimaryIpv6, "PrimaryPortRelation.IsPrimaryIpv6");
+			public static readonly Exposer<AssetManagement.Models.DataPort, bool> IsPrimaryIpv4 = new Exposer<AssetManagement.Models.DataPort, bool>((obj) => obj.PrimaryPortRelation.IsPrimaryIpv4, "PrimaryPortRelation.IsPrimaryIpv4");
 		}
 	}
 }

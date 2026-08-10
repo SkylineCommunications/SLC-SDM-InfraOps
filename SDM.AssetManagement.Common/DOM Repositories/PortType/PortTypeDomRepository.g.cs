@@ -33,7 +33,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         public PortTypeDomRepository(IConnection connection)
         {
             this.connection = connection;
-            this.helper = new DomHelper(connection.HandleMessages, Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.ModuleId);
+            this.helper = new DomHelper(connection.HandleMessages, AssetManagement.Models.PortTypeDomMapper.ModuleId);
         }
 
         public PortType Create(PortType createObject)
@@ -150,7 +150,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
 
             var domFilter = TranslateFullFilter(filter);
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(AssetManagement.Models.PortTypeDomMapper.DomDefinitionId.Id));
             return helper.DomInstances.Count(domFilter);
         }
 
@@ -162,7 +162,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
 
             var domFilter = TranslateFullFilter(query.Filter);
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(AssetManagement.Models.PortTypeDomMapper.DomDefinitionId.Id));
             var domOrder = TranslateFullOrderBy(query.Order);
             var domQuery = query.WithFilter(domFilter).WithOrder(domOrder);
             return helper.DomInstances.Count(domQuery);
@@ -374,7 +374,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 throw new ArgumentNullException(nameof(domFilter));
             }
 
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(AssetManagement.Models.PortTypeDomMapper.DomDefinitionId.Id));
             var domInstances = helper.DomInstances.Read(domFilter);
             return domInstances.Select(FromInstance);
         }
@@ -386,7 +386,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 throw new ArgumentNullException(nameof(domQuery));
             }
 
-            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.DomDefinitionId.Id));
+            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(AssetManagement.Models.PortTypeDomMapper.DomDefinitionId.Id));
             domQuery = domQuery.WithFilter(domFilter);
             var domInstances = helper.DomInstances.Read(domQuery);
             return domInstances.Select(FromInstance);
@@ -399,7 +399,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 throw new ArgumentNullException(nameof(domFilter));
             }
 
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(AssetManagement.Models.PortTypeDomMapper.DomDefinitionId.Id));
             var pagingHelper = helper.DomInstances.PreparePaging(domFilter, pageSize);
             while (pagingHelper.MoveToNextPage())
             {
@@ -414,7 +414,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 throw new ArgumentNullException(nameof(domQuery));
             }
 
-            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.DomDefinitionId.Id));
+            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(AssetManagement.Models.PortTypeDomMapper.DomDefinitionId.Id));
             domQuery = domQuery.WithFilter(domFilter);
             var pagingHelper = helper.DomInstances.PreparePaging(domQuery, pageSize);
             while (pagingHelper.MoveToNextPage())
@@ -514,41 +514,41 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             {
                 Identifier = instance.ID.Id.ToString()
             };
-            var _porttypepropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.PortTypeProperties.SectionDefinitionId));
+            var _porttypepropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(AssetManagement.Models.PortTypeDomMapper.PortTypeProperties.SectionDefinitionId));
             if (_porttypepropertiesSection != default)
             {
-                var _name = _porttypepropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.PortTypeProperties.Name);
+                var _name = _porttypepropertiesSection.GetValue<string>(AssetManagement.Models.PortTypeDomMapper.PortTypeProperties.Name);
                 if (_name != null)
                 {
                     obj.Name = _name.Value;
                 }
 
-                var _description = _porttypepropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.PortTypeProperties.Description);
+                var _description = _porttypepropertiesSection.GetValue<string>(AssetManagement.Models.PortTypeDomMapper.PortTypeProperties.Description);
                 if (_description != null)
                 {
                     obj.Description = _description.Value;
                 }
             }
 
-            var _categorylinksSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.CategoryRelation.SectionDefinitionId));
+            var _categorylinksSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(AssetManagement.Models.PortTypeDomMapper.CategoryRelation.SectionDefinitionId));
             if (_categorylinksSection != default)
             {
-                obj.CategoryLinks = new Skyline.DataMiner.SDM.AssetManagement.Models.CategoryRelation();
-                var _categorylinkscategories = _categorylinksSection.GetListValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.CategoryRelation.CategoryLinks);
+                obj.CategoryLinks = new AssetManagement.Models.CategoryRelation();
+                var _categorylinkscategories = _categorylinksSection.GetListValue<string>(AssetManagement.Models.PortTypeDomMapper.CategoryRelation.CategoryLinks);
                 if (_categorylinkscategories != null)
                 {
                     obj.CategoryLinks.Categories = _categorylinkscategories.Values.Select(x => (SharedMappers.DomIds.SlcAsset_Management.Enums.Categories.ToEnum(x))).ToList();
                 }
             }
 
-            var _cablefksSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.CableFKs.SectionDefinitionId));
+            var _cablefksSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(AssetManagement.Models.PortTypeDomMapper.CableFKs.SectionDefinitionId));
             if (_cablefksSection != default)
             {
-                obj.CableFKs = new Skyline.DataMiner.SDM.AssetManagement.Models.CableRelation();
-                var _cablefkscabletypefks = _cablefksSection.GetListValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.CableFKs.CableTypeFks);
+                obj.CableFKs = new AssetManagement.Models.CableRelation();
+                var _cablefkscabletypefks = _cablefksSection.GetListValue<System.Guid>(AssetManagement.Models.PortTypeDomMapper.CableFKs.CableTypeFks);
                 if (_cablefkscabletypefks != null)
                 {
-                    obj.CableFKs.CableTypeFks = _cablefkscabletypefks.Values.Select(x => new Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.CableType>(Convert.ToString(x))).ToList();
+                    obj.CableFKs.CableTypeFks = _cablefkscabletypefks.Values.Select(x => new SdmObjectReference<AssetManagement.Models.CableType>(Convert.ToString(x))).ToList();
                 }
             }
 
@@ -569,30 +569,30 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
             var instance = new DomInstance
             {
-                DomDefinitionId = Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.DomDefinitionId,
+                DomDefinitionId = AssetManagement.Models.PortTypeDomMapper.DomDefinitionId,
                 ID = new DomInstanceId(id)
                 {
-                    ModuleId = Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.ModuleId
+                    ModuleId = AssetManagement.Models.PortTypeDomMapper.ModuleId
                 }
             };
-            var _porttypeproperties = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.PortTypeProperties.SectionDefinitionId);
+            var _porttypeproperties = new Section(AssetManagement.Models.PortTypeDomMapper.PortTypeProperties.SectionDefinitionId);
             if (obj.Name != default)
             {
-                _porttypeproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.PortTypeProperties.Name, Convert.ToString(obj.Name));
+                _porttypeproperties.AddOrUpdateValue<string>(AssetManagement.Models.PortTypeDomMapper.PortTypeProperties.Name, Convert.ToString(obj.Name));
             }
 
             if (obj.Description != default)
             {
-                _porttypeproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.PortTypeProperties.Description, Convert.ToString(obj.Description));
+                _porttypeproperties.AddOrUpdateValue<string>(AssetManagement.Models.PortTypeDomMapper.PortTypeProperties.Description, Convert.ToString(obj.Description));
             }
 
             instance.Sections.Add(_porttypeproperties);
             if (obj.CategoryLinks != null)
             {
-                var _categorylinks = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.CategoryRelation.SectionDefinitionId);
+                var _categorylinks = new Section(AssetManagement.Models.PortTypeDomMapper.CategoryRelation.SectionDefinitionId);
                 if (obj.CategoryLinks.Categories != default)
                 {
-                    _categorylinks.AddOrUpdateListValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.CategoryRelation.CategoryLinks, obj.CategoryLinks.Categories.Select(x => SlcAsset_Management.Enums.Categories.ToValue(x)).ToList());
+                    _categorylinks.AddOrUpdateListValue<string>(AssetManagement.Models.PortTypeDomMapper.CategoryRelation.CategoryLinks, obj.CategoryLinks.Categories.Select(x => SlcAsset_Management.Enums.Categories.ToValue(x)).ToList());
                 }
 
                 instance.Sections.Add(_categorylinks);
@@ -600,10 +600,10 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
             if (obj.CableFKs != null)
             {
-                var _cablefks = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.CableFKs.SectionDefinitionId);
+                var _cablefks = new Section(AssetManagement.Models.PortTypeDomMapper.CableFKs.SectionDefinitionId);
                 if (obj.CableFKs.CableTypeFks != default)
                 {
-                    _cablefks.AddOrUpdateListValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.CableFKs.CableTypeFks, obj.CableFKs.CableTypeFks.Where(x => x != default && System.Guid.TryParse(x.Identifier, out var cableTypeGuid) && cableTypeGuid != System.Guid.Empty).Select(x => System.Guid.Parse(x.Identifier)).ToList());
+                    _cablefks.AddOrUpdateListValue<System.Guid>(AssetManagement.Models.PortTypeDomMapper.CableFKs.CableTypeFks, obj.CableFKs.CableTypeFks.Where(x => x != default && System.Guid.TryParse(x.Identifier, out var cableTypeGuid) && cableTypeGuid != System.Guid.Empty).Select(x => System.Guid.Parse(x.Identifier)).ToList());
                 }
 
                 instance.Sections.Add(_cablefks);
@@ -619,13 +619,13 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 case "Identifier":
                     return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.Id, comparer, Guid.Parse((string)value));
                 case "Name":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.PortTypeProperties.Name), comparer, (string)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.PortTypeDomMapper.PortTypeProperties.Name), comparer, (string)value);
                 case "Description":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.PortTypeProperties.Description), comparer, (string)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.PortTypeDomMapper.PortTypeProperties.Description), comparer, (string)value);
                 case "CableFKs.CableTypeFks":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.CableFKs.CableTypeFks), comparer, System.Guid.Parse(Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.CableType>.Convert(value).Identifier));
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.PortTypeDomMapper.CableFKs.CableTypeFks), comparer, System.Guid.Parse(SdmObjectReference<AssetManagement.Models.CableType>.Convert(value).Identifier));
                 case "CategoryLinks.Categories":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.CategoryRelation.CategoryLinks), comparer, Convert.ToString(value));
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.PortTypeDomMapper.CategoryRelation.CategoryLinks), comparer, Convert.ToString(value));
                 default:
                     throw new NotImplementedException();
             }
@@ -638,13 +638,13 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 case "Identifier":
                     return OrderByElementFactory.Create(DomInstanceExposers.Id, sortOrder, naturalSort);
                 case "Name":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.PortTypeProperties.Name), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.PortTypeDomMapper.PortTypeProperties.Name), sortOrder, naturalSort);
                 case "Description":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.PortTypeProperties.Description), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.PortTypeDomMapper.PortTypeProperties.Description), sortOrder, naturalSort);
                 case "CableFKs.CableTypeFks":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.CableFKs.CableTypeFks), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.PortTypeDomMapper.CableFKs.CableTypeFks), sortOrder, naturalSort);
                 case "CategoryLinks.Categories":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.CategoryRelation.CategoryLinks), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.PortTypeDomMapper.CategoryRelation.CategoryLinks), sortOrder, naturalSort);
                 default:
                     throw new NotImplementedException();
             }
