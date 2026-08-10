@@ -38,7 +38,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
                 .Distinct()
                 .ToList();
             var existingRackIds = _entityLoader.GetRacksByDomIds(rackIds).Select(r => r.Identifier).ToHashSet();
-            var existingJobIds = GetExistingJobs(reservations);
 
             for (int i = 0; i < reservations.Count; i++)
             {
@@ -47,31 +46,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
                 {
                     results[i].AddFailReason("Reservation.Rack", "Rack", $"Referenced Rack '{reservation.RackFk.Rack.Identifier}' does not exist.");
                 }
-
-                if (reservation.JobFk?.Job.HasValue == true
-                    && _entityLoader.ExternalReferenceChecker != null
-                    && !existingJobIds.Contains(reservation.JobFk.Job.Value))
-                {
-                    results[i].AddFailReason("Reservation.Job", "Job", $"Referenced Job '{reservation.JobFk.Job.Value}' does not exist.");
-                }
             }
 
             return results;
-        }
-
-        private HashSet<Guid> GetExistingJobs(IEnumerable<InfraopsReservation> reservations)
-        {
-            var jobIds = reservations
-                .Where(r => r.JobFk?.Job.HasValue == true)
-                .Select(r => r.JobFk.Job.Value)
-                .Distinct()
-                .ToList();
-            if (!jobIds.Any() || _entityLoader.ExternalReferenceChecker == null)
-            {
-                return new HashSet<Guid>();
-            }
-
-            return (_entityLoader.ExternalReferenceChecker.GetExistingIdentifiers(AssetManagementExternalReferenceType.Job, jobIds) ?? new List<Guid>()).ToHashSet();
         }
     }
 }

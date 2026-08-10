@@ -38,8 +38,6 @@ namespace Skyline.DataMiner.SDM.Common.Services
             this.facilityManagerApiHelper = facilityManagerApiHelper;
         }
 
-        public IAssetManagementExternalReferenceChecker ExternalReferenceChecker => assetManagerApiHelper?.ExternalReferenceChecker;
-
         #region Single Entity Loaders
 
         public Asset LoadAsset(SdmObjectReference<Asset> reference)

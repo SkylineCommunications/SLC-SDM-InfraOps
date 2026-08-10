@@ -109,7 +109,12 @@
         /// Validates HeightU in the context of the Device Type's Rack Unit Consumer tag.
         /// A Rack Unit Consumer must have a Height Unit greater than 0.
         /// </summary>
-        public static bool IsHeightUnitValid(AssetClass asset, bool isRackUnitConsumer, out ValidationResult result)
+        /// <remarks>
+        /// Not part of the public surface: whether the Asset Class is a Rack Unit Consumer is derived from the
+        /// AssetClass -> Device Type relation, which requires database access. Callers that have already resolved
+        /// the Device Type pass the flag in; public callers should use <see cref="IsHeightUnitValid(AssetClass, out ValidationResult)"/>.
+        /// </remarks>
+        internal static bool IsHeightUnitValid(AssetClass asset, bool isRackUnitConsumer, out ValidationResult result)
         {
             result = new ValidationResult();
 

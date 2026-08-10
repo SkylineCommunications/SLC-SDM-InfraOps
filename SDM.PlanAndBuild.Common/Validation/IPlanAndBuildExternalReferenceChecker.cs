@@ -5,7 +5,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
     /// <summary>
     /// Optional cross-module reference checker for Plan &amp; Build Job validation.
     /// </summary>
-    public interface IPlanAndBuildExternalReferenceChecker
+    internal interface IPlanAndBuildExternalReferenceChecker
     {
         /// <summary>
         /// Gets the Facility Management location identifiers that exist. Return <c>null</c> to skip this check.

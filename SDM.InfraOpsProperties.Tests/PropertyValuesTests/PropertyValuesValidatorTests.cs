@@ -251,43 +251,6 @@ namespace SDM.InfraOpsProperties.Tests.PropertyValuesTests
 			}
 		}
 
-		[TestMethod]
-		public void Validate_WithUnknownLinkedObjectAndExternalChecker_ShouldReturnInvalid()
-		{
-			var linkedObjectId = Guid.NewGuid();
-			var validator = new PropertyValuesValidator(Helper, new ExternalReferenceCheckerStub());
-			var propertyValues = new PropertyValues
-			{
-				LinkedObjectID = linkedObjectId,
-				Scope = "Asset",
-			};
-
-			var result = validator.Validate(propertyValues, RepositoryAction.Create);
-
-			using (new AssertionScope())
-			{
-				result.IsValid.Should().BeFalse();
-				result.TryGetFailReason(PropertyValuesValidationHandler.PropertyValuesValidationField.LinkedObjectID, out var reason).Should().BeTrue();
-				reason.Should().Be($"Referenced Linked Object '{linkedObjectId}' does not exist.");
-			}
-		}
-
-		[TestMethod]
-		public void Validate_WithExistingLinkedObjectAndExternalChecker_ShouldReturnValid()
-		{
-			var linkedObjectId = Guid.NewGuid();
-			var validator = new PropertyValuesValidator(Helper, new ExternalReferenceCheckerStub(new[] { (linkedObjectId, "Asset") }));
-			var propertyValues = new PropertyValues
-			{
-				LinkedObjectID = linkedObjectId,
-				Scope = "Asset",
-			};
-
-			var result = validator.Validate(propertyValues, RepositoryAction.Create);
-
-			result.IsValid.Should().BeTrue();
-		}
-
 		#endregion
 
 		#region Change Tracking
@@ -581,20 +544,5 @@ namespace SDM.InfraOpsProperties.Tests.PropertyValuesTests
 		}
 
 		#endregion
-
-		private sealed class ExternalReferenceCheckerStub : IInfraOpsPropertiesExternalReferenceChecker
-		{
-			private readonly IReadOnlyCollection<(Guid LinkedObjectID, string Scope)> existingLinkedObjects;
-
-			public ExternalReferenceCheckerStub(IReadOnlyCollection<(Guid LinkedObjectID, string Scope)>? existingLinkedObjects = null)
-			{
-				this.existingLinkedObjects = existingLinkedObjects ?? new List<(Guid LinkedObjectID, string Scope)>();
-			}
-
-			public IReadOnlyCollection<(Guid LinkedObjectID, string Scope)> GetExistingLinkedObjects(IReadOnlyCollection<(Guid LinkedObjectID, string Scope)> linkedObjects)
-			{
-				return existingLinkedObjects;
-			}
-		}
 	}
 }

@@ -8,8 +8,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Helpers
 
     public interface IAssetManagementApiHelper
 	{
-        IAssetManagementExternalReferenceChecker ExternalReferenceChecker { get; }
-
     	IAssetRepository Assets { get; }
 
         IBulkRepository<AssetManagerAppSettings> AppSettings { get; }

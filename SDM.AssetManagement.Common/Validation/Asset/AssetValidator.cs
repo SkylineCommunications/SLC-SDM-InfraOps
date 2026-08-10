@@ -194,11 +194,31 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
         {
             var results = assets.Select(_ => new ValidationResult()).ToList();
 
+            // Cheap in-memory state check first. Assets that fail this can already be discarded, so we skip the
+            // (expensive) connection lookups for them entirely.
+            for (int i = 0; i < assets.Count; i++)
+            {
+                var state = assets[i].State;
+                if (state != SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable
+                    && state != SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Disposed)
+                {
+                    results[i].AddFailReason(
+                        AssetValidationHandler.AssetValidationField.Asset,
+                        "Asset must be in 'Not Available' or 'Disposed' State to Delete");
+                }
+            }
+
             var assetIds = assets
+                .Where((a, i) => results[i].IsValid)
                 .Select(a => a.Identifier)
                 .Where(id => !string.IsNullOrWhiteSpace(id))
                 .Distinct()
                 .ToList();
+
+            if (!assetIds.Any())
+            {
+                return results;
+            }
 
             var portToAssetId = new Dictionary<string, string>();
 
@@ -219,23 +239,14 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             }
 
             var assetIdsWithConnections = _entityLoader.GetConnectionsByPortIds(portToAssetId.Keys.ToList())
-                .SelectMany(GetConnectionPortIds)
+                .SelectMany(connection => connection.GetPortIds())
                 .Where(portToAssetId.ContainsKey)
                 .Select(portId => portToAssetId[portId])
                 .ToHashSet();
 
             for (int i = 0; i < assets.Count; i++)
             {
-                var state = assets[i].State;
-                if (state != SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable
-                    && state != SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Disposed)
-                {
-                    results[i].AddFailReason(
-                        AssetValidationHandler.AssetValidationField.Asset,
-                        "Asset must be in 'Not Available' or 'Disposed' State to Delete");
-                }
-
-                if (assetIdsWithConnections.Contains(assets[i].Identifier))
+                if (results[i].IsValid && assetIdsWithConnections.Contains(assets[i].Identifier))
                 {
                     results[i].AddFailReason(
                         AssetValidationHandler.AssetValidationField.DataPort,
@@ -244,19 +255,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             }
 
             return results;
-        }
-
-        private static IEnumerable<string> GetConnectionPortIds(Connection connection)
-        {
-            if (connection?.Source != null && connection.Source.Port != Guid.Empty)
-            {
-                yield return connection.Source.Port.ToString();
-            }
-
-            if (connection?.Destination != null && connection.Destination.Port != Guid.Empty)
-            {
-                yield return connection.Destination.Port.ToString();
-            }
         }
 
         #endregion

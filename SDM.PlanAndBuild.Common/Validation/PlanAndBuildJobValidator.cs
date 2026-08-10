@@ -24,7 +24,6 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
         private readonly IPeopleAndOrganizationsApi _peopleApi;
         private readonly IPlanAndBuildExternalReferenceChecker _externalReferenceChecker;
         private readonly Validator<PlanAndBuildJob> _validationPipeline;
-        private readonly Validator<PlanAndBuildJob> _creationValidationPipeline;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PlanAndBuildJobValidator"/> class.
@@ -44,7 +43,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
         /// Optional cross-module checker used to verify that referenced Location/Asset/Connection/CableType ids
         /// exist. When <c>null</c>, those reference checks are skipped.
         /// </param>
-        public PlanAndBuildJobValidator(
+        internal PlanAndBuildJobValidator(
             IPlanAndBuildApiHelper helper,
             IPeopleAndOrganizationsApi peopleApi,
             IPlanAndBuildExternalReferenceChecker externalReferenceChecker = null)
@@ -52,9 +51,14 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
             _helper = helper ?? throw new ArgumentNullException(nameof(helper));
             _peopleApi = peopleApi ?? throw new ArgumentNullException(nameof(peopleApi));
             _externalReferenceChecker = externalReferenceChecker;
-            _validationPipeline = BuildValidationPipeline(includeStateGatedChanges: true);
-            _creationValidationPipeline = BuildValidationPipeline(includeStateGatedChanges: false);
+            _validationPipeline = BuildValidationPipeline();
         }
+
+        /// <summary>
+        /// Gets a value indicating whether a cross-module external reference checker was wired in.
+        /// Used by tests to guard against the production API helper regressing to a null (skipped) checker.
+        /// </summary>
+        internal bool HasExternalReferenceChecker => _externalReferenceChecker != null;
 
         #region PlanAndBuildJob Validation
 
@@ -65,23 +69,6 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
         protected override ValidationResult Validate(PlanAndBuildJob job)
         {
             return _validationPipeline.Validate(job);
-        }
-
-        public override ValidationResult Validate(PlanAndBuildJob job, RepositoryAction action)
-        {
-            if (job == null)
-            {
-                throw new ArgumentNullException(nameof(job));
-            }
-
-            if (action == RepositoryAction.Delete)
-            {
-                return new ValidationResult();
-            }
-
-            return action == RepositoryAction.Create
-                ? _creationValidationPipeline.Validate(job)
-                : _validationPipeline.Validate(job);
         }
 
         /// <summary>
@@ -110,23 +97,6 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
         /// OtherChangedEntries check.
         /// </summary>
         protected override List<ValidationResult> ValidateBulk(List<PlanAndBuildJob> jobs)
-        {
-            return ValidateBulk(jobs, includeStateGatedChanges: true);
-        }
-
-        public override List<ValidationResult> ValidateBulk(List<PlanAndBuildJob> jobs, RepositoryAction action)
-        {
-            if (action == RepositoryAction.Delete)
-            {
-                return jobs == null
-                    ? new List<ValidationResult>()
-                    : jobs.Select(_ => new ValidationResult()).ToList();
-            }
-
-            return ValidateBulk(jobs, includeStateGatedChanges: action != RepositoryAction.Create);
-        }
-
-        private List<ValidationResult> ValidateBulk(List<PlanAndBuildJob> jobs, bool includeStateGatedChanges)
         {
             if (jobs == null || !jobs.Any())
             {
@@ -165,7 +135,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
             // ============================================================
             // PHASE 3: DATABASE ACCESS CHECKS (UNIQUENESS) + REMAINING RULES
             // ============================================================
-            ValidateAgainstDatabase(jobs, results, includeStateGatedChanges);
+            ValidateAgainstDatabase(jobs, results);
 
             return results;
         }
@@ -176,7 +146,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
         /// of big-OR queries instead of issuing one query per Job (and, for People/Teams, one remote
         /// People &amp; Organizations call per reference).
         /// </summary>
-        private void ValidateAgainstDatabase(List<PlanAndBuildJob> jobs, List<ValidationResult> results, bool includeStateGatedChanges)
+        private void ValidateAgainstDatabase(List<PlanAndBuildJob> jobs, List<ValidationResult> results)
         {
             var jobNames = jobs
                 .Where(j => j.ShouldValidate(j.JobNameField) && !string.IsNullOrWhiteSpace(j.JobName))
@@ -205,11 +175,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
             for (int i = 0; i < jobs.Count; i++)
             {
                 results[i].AddFailuresFrom(ValidateJobTypeAndDates(jobs[i]));
-                if (includeStateGatedChanges)
-                {
-                    results[i].AddFailuresFrom(ValidateStateGatedChanges(jobs[i]));
-                }
-
+                results[i].AddFailuresFrom(ValidateStateGatedChanges(jobs[i]));
                 results[i].AddFailuresFrom(ValidateJobNameUniqueness(jobs[i], existingByJobName));
                 results[i].AddFailuresFrom(ValidatePeopleAndOrganizations(jobs[i], existingPersonIds, existingTeamIds));
                 results[i].AddFailuresFrom(ValidateJobTypeReference(jobs[i], existingJobTypeIds));
@@ -323,23 +289,20 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
 
         #region Pipeline Construction
 
-        private Validator<PlanAndBuildJob> BuildValidationPipeline(bool includeStateGatedChanges)
+        private Validator<PlanAndBuildJob> BuildValidationPipeline()
         {
             // Critical validations - stop on failure. Uniqueness/other checks are meaningless without a name.
             var criticalValidations = Validator<PlanAndBuildJob>
                 .Create(ValidateInfo)
                 .StopOnFailure();
 
-            // No database access checks - fail fast before hitting the database
+            // No database access checks - fail fast before hitting the database. ValidateStateGatedChanges
+            // self-gates on job.IsNew (it is a no-op for new jobs), so it is safe to include unconditionally
+            // for both create and update.
             var noDatabaseChecks = Validator<PlanAndBuildJob>
-                .Create(ValidateJobTypeAndDates);
-
-            if (includeStateGatedChanges)
-            {
-                noDatabaseChecks = noDatabaseChecks.AndThen(ValidateStateGatedChanges);
-            }
-
-            noDatabaseChecks = noDatabaseChecks.StopOnFailure();
+                .Create(ValidateJobTypeAndDates)
+                .AndThen(ValidateStateGatedChanges)
+                .StopOnFailure();
 
             // Database access checks (uniqueness, People/Team existence)
             var databaseChecks = Validator<PlanAndBuildJob>

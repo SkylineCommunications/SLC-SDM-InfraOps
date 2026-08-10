@@ -313,7 +313,14 @@
                 }
             }
 
-            validations.Add(ValidateReferencesAgainstDatabase(assetClass));
+            // In bulk mode the reference existence checks (device type, port types, manufacturer) were already
+            // resolved in batched form during Phase 3 (ValidateBulkReferencesAgainstDatabase). Re-running the
+            // per-item ValidateReferencesAgainstDatabase here would issue N individual DB reads for data that was
+            // already validated, so it only runs in single-item mode.
+            if (!isBulkValidation)
+            {
+                validations.Add(ValidateReferencesAgainstDatabase(assetClass));
+            }
 
             return validations.MergeAll();
         }
@@ -379,7 +386,6 @@
 
                 ValidateDataPortTypeReferences(assetClass.DataPorts, "AssetClass.DataPorts.Type", "DataPorts", result);
                 ValidatePowerPortTypeReferences(assetClass.PowerPorts, "AssetClass.PowerPorts.PortType", "PowerPorts", result);
-                ValidateExternalGuid(assetClass.Manufacturer, AssetManagementExternalReferenceType.Organization, "AssetClass.Manufacturer", "Manufacturer", result);
 
                 return result;
             }
@@ -406,16 +412,11 @@
                     .ToList();
                 var existingPortTypeIds = _entityLoader.GetPortTypesByDomIds(portTypeIds).Select(pt => pt.Identifier).ToHashSet();
 
-                var existingManufacturers = GetExistingExternalIds(
-                    AssetManagementExternalReferenceType.Organization,
-                    assetClasses.Where(ac => ac.ShouldValidate(ac.ManufacturerField)).Select(ac => ac.Manufacturer));
-
                 for (int i = 0; i < assetClasses.Count; i++)
                 {
                     var assetClass = assetClasses[i];
                     ValidateDeviceTypeReference(assetClass, results[i], existingDeviceTypeIds);
                     ValidatePortTypeReferences(assetClass, results[i], existingPortTypeIds);
-                    ValidateManufacturerReference(assetClass, results[i], existingManufacturers);
                 }
 
                 return results;
@@ -452,17 +453,6 @@
                 }
             }
 
-            private void ValidateManufacturerReference(AssetClass assetClass, ValidationResult result, HashSet<Guid> existingManufacturers)
-            {
-                if (assetClass.ShouldValidate(assetClass.ManufacturerField)
-                    && assetClass.Manufacturer != Guid.Empty
-                    && _entityLoader.ExternalReferenceChecker != null
-                    && !existingManufacturers.Contains(assetClass.Manufacturer))
-                {
-                    result.AddFailReason("AssetClass.Manufacturer", "Manufacturer", $"Referenced Organization '{assetClass.Manufacturer}' does not exist.");
-                }
-            }
-
             private void ValidateDataPortTypeReferences(IEnumerable<DataPortInfo> ports, string fieldId, string fieldName, ValidationResult result)
             {
                 foreach (var port in ports ?? Enumerable.Empty<DataPortInfo>())
@@ -495,35 +485,6 @@
                         result.AddFailReason(fieldId, fieldName, $"Referenced Port Type '{reference.Identifier}' does not exist.");
                     }
                 }
-            }
-
-            private void ValidateExternalGuid(Guid identifier, AssetManagementExternalReferenceType type, string fieldId, string fieldName, ValidationResult result)
-            {
-                if (identifier == Guid.Empty || _entityLoader.ExternalReferenceChecker == null)
-                {
-                    return;
-                }
-
-                if (!GetExistingExternalIds(type, new[] { identifier }).Contains(identifier))
-                {
-                    result.AddFailReason(fieldId, fieldName, $"Referenced {FormatExternalType(type)} '{identifier}' does not exist.");
-                }
-            }
-
-            private HashSet<Guid> GetExistingExternalIds(AssetManagementExternalReferenceType type, IEnumerable<Guid> identifiers)
-            {
-                var ids = identifiers.Where(id => id != Guid.Empty).Distinct().ToList();
-                if (!ids.Any() || _entityLoader.ExternalReferenceChecker == null)
-                {
-                    return new HashSet<Guid>();
-                }
-
-                return (_entityLoader.ExternalReferenceChecker.GetExistingIdentifiers(type, ids) ?? new List<Guid>()).ToHashSet();
-            }
-
-            private static string FormatExternalType(AssetManagementExternalReferenceType type)
-            {
-                return type == AssetManagementExternalReferenceType.ContactPersonRole ? "Contact Person Role" : type.ToString();
             }
 
         private ValidationResult ValidateDimensions(AssetClass assetClass)

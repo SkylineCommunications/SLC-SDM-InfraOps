@@ -17,7 +17,6 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Validation
     public class PropertyValuesValidator : ValidatorBase<PropertyValues>
     {
         private readonly IInfraOpsPropertiesApiHelper _helper;
-        private readonly IInfraOpsPropertiesExternalReferenceChecker _externalReferenceChecker;
         private readonly Validator<PropertyValues> _validationPipeline;
 
         /// <summary>
@@ -30,15 +29,9 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Validation
         /// its repositories are wired up. Only <see cref="Validate"/>/<see cref="ValidateAndThrow"/> (called
         /// after construction completes) access <paramref name="helper"/>'s repositories.
         /// </param>
-        /// <param name="externalReferenceChecker">
-        /// Optional cross-module checker used to verify referenced ids exist. When <c>null</c>, those checks are skipped.
-        /// </param>
-        public PropertyValuesValidator(
-            IInfraOpsPropertiesApiHelper helper,
-            IInfraOpsPropertiesExternalReferenceChecker externalReferenceChecker = null)
+        public PropertyValuesValidator(IInfraOpsPropertiesApiHelper helper)
         {
             _helper = helper ?? throw new ArgumentNullException(nameof(helper));
-            _externalReferenceChecker = externalReferenceChecker;
             _validationPipeline = BuildValidationPipeline();
         }
 
@@ -89,8 +82,7 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Validation
             // Database access checks (uniqueness)
             var databaseChecks = Validator<PropertyValues>
                 .Create(ValidateUniqueness)
-                .AndThen(ValidatePropertyReferences)
-                .AndThen(ValidateLinkedObjectReference);
+                .AndThen(ValidatePropertyReferences);
 
             // Combine: critical first, then no-database checks, then database checks
             return criticalValidations.AndThen(noDatabaseChecks.AndThen(databaseChecks));
@@ -263,48 +255,6 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Validation
                 .ToList();
         }
 
-        private ValidationResult ValidateLinkedObjectReference(PropertyValues propertyValues)
-        {
-            if (_externalReferenceChecker == null)
-            {
-                return new ValidationResult();
-            }
-
-            var references = CollectLinkedObjectReferences(new List<PropertyValues> { propertyValues });
-            return ValidateLinkedObjectReference(propertyValues, _externalReferenceChecker.GetExistingLinkedObjects(references));
-        }
-
-        private ValidationResult ValidateLinkedObjectReference(PropertyValues propertyValues, IReadOnlyCollection<(Guid LinkedObjectID, string Scope)> existingLinkedObjects)
-        {
-            var result = new ValidationResult();
-
-            if (existingLinkedObjects == null ||
-                !propertyValues.ShouldValidateAny(propertyValues.LinkedObjectIDField, propertyValues.ScopeField) ||
-                propertyValues.LinkedObjectID == Guid.Empty ||
-                string.IsNullOrWhiteSpace(propertyValues.Scope))
-            {
-                return result;
-            }
-
-            if (!existingLinkedObjects.Contains((propertyValues.LinkedObjectID, propertyValues.Scope)))
-            {
-                result.AddFailReason(PropertyValuesValidationHandler.PropertyValuesValidationField.LinkedObjectID, $"Referenced Linked Object '{propertyValues.LinkedObjectID}' does not exist.");
-            }
-
-            return result;
-        }
-
-        private static List<(Guid LinkedObjectID, string Scope)> CollectLinkedObjectReferences(List<PropertyValues> propertyValuesList)
-        {
-            return propertyValuesList
-                .Where(pv => pv.ShouldValidateAny(pv.LinkedObjectIDField, pv.ScopeField) &&
-                             pv.LinkedObjectID != Guid.Empty &&
-                             !string.IsNullOrWhiteSpace(pv.Scope))
-                .Select(pv => (pv.LinkedObjectID, pv.Scope))
-                .Distinct()
-                .ToList();
-        }
-
         /// <summary>
         /// Validates multiple PropertyValues in bulk. Results are returned in the same order as the input.
         /// In addition to the per-entry checks, this also detects (LinkedObjectID, Scope, SubID) conflicts
@@ -367,14 +317,12 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Validation
                 .ToDictionary(g => g.Key, g => g.ToList());
 
             var existingPropertyIds = GetExistingPropertyIds(CollectReferencedPropertyIds(propertyValuesList));
-            var existingLinkedObjects = _externalReferenceChecker?.GetExistingLinkedObjects(CollectLinkedObjectReferences(propertyValuesList));
 
             for (int i = 0; i < propertyValuesList.Count; i++)
             {
                 results[i].AddFailuresFrom(ValidateValues(propertyValuesList[i]));
                 results[i].AddFailuresFrom(ValidateUniqueness(propertyValuesList[i], existingByLinkedObjectAndScope));
                 results[i].AddFailuresFrom(ValidatePropertyReferences(propertyValuesList[i], existingPropertyIds));
-                results[i].AddFailuresFrom(ValidateLinkedObjectReference(propertyValuesList[i], existingLinkedObjects));
             }
 
             return results;

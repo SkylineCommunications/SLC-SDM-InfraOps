@@ -12,6 +12,7 @@ namespace SDM.PlanAndBuild.Tests.JobTests
 
 	using Skyline.DataMiner.SDM;
 	using Skyline.DataMiner.SDM.AssetManagement.Models;
+	using Skyline.DataMiner.SDM.PlanAndBuild.Helpers;
 	using Skyline.DataMiner.SDM.PlanAndBuild.Models;
 	using Skyline.DataMiner.SDM.PlanAndBuild.Validation;
 	using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
@@ -536,6 +537,18 @@ namespace SDM.PlanAndBuild.Tests.JobTests
 		#endregion
 
 		#region External References
+
+		[TestMethod]
+		public void ProductionApiHelper_ShouldWireExternalReferenceChecker()
+		{
+			// Guards against regressing to the fail-open path where production never constructed a checker,
+			// so unknown Location/Asset/Connection/CableType references silently passed validation.
+			var connection = ConnectionHelper.CreateConnection();
+
+			var helper = new PlanAndBuildApiHelper(connection);
+
+			helper.JobValidator.HasExternalReferenceChecker.Should().BeTrue();
+		}
 
 		[TestMethod]
 		public void Validate_WithUnknownLocationAndExternalChecker_ShouldReturnInvalid()

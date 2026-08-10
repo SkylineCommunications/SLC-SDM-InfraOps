@@ -23,22 +23,19 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
     private readonly CableTypeValidator _cableTypeValidator;
 
     // Public constructor for production use - creates its own FacilityManagementHelper
-    public AssetManagementApiHelper(IConnection connection, IAssetManagementExternalReferenceChecker externalReferenceChecker = null)
-        : this(connection, new FacilityManagementApiHelper(connection), externalReferenceChecker)
+    public AssetManagementApiHelper(IConnection connection)
+        : this(connection, new FacilityManagementApiHelper(connection))
     {
     }
 
     // Internal constructor for testing - allows injection of shared FacilityManagementHelper
     internal AssetManagementApiHelper(
         IConnection connection,
-        IFacilityManagementApiHelper facilityManagementHelper,
-        IAssetManagementExternalReferenceChecker externalReferenceChecker = null)
+        IFacilityManagementApiHelper facilityManagementHelper)
     {
-        ExternalReferenceChecker = externalReferenceChecker;
-        // DEBUG: Verify this constructor is being called
         if (facilityManagementHelper == null)
         {
-            throw new InvalidOperationException("INTERNAL CONSTRUCTOR CALLED BUT facilityManagementHelper IS NULL!");
+            throw new ArgumentNullException(nameof(facilityManagementHelper));
         }
 
         // Initialize repositories
@@ -99,8 +96,6 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
             .WithMiddleware(new InfraopsReservationValidationMiddleware(reservationValidator))
             .WithMiddleware(new IdentifierMiddleware<InfraopsReservation>());
     }
-
-    public IAssetManagementExternalReferenceChecker ExternalReferenceChecker { get; }
 
     public IAssetRepository Assets { get; }
     public IBulkRepository<AssetManagerAppSettings> AppSettings { get; }

@@ -29,8 +29,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Services
             _helper = helper ?? throw new ArgumentNullException(nameof(helper));
         }
 
-        public IFacilityManagementExternalReferenceChecker ExternalReferenceChecker => _helper.ExternalReferenceChecker;
-
         #region Site
 
         /// <summary>

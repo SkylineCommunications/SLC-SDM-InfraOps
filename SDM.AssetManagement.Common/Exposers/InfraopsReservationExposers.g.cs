@@ -18,7 +18,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
     using SLDataGateway.API.Querying;
     using SLDataGateway.API.Types.Querying;
-    using Skyline.DataMiner.SDM.AssetManagement.Models;
 
     public static partial class InfraopsReservationExposers
     {

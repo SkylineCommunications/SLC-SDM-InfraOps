@@ -79,8 +79,9 @@
         /// </summary>
         private ValidationResult ValidatePortType(PowerPort powerPort)
         {
-            if (powerPort.PowerPortInfo.PortType == null || !powerPort.PowerPortInfo.PortType.HasValue())
+            if (!powerPort.PowerPortInfo.PortType.HasValue())
             {
+                // Passing null intentionally routes through the required-field failure in ValidatePortTypeAgainst.
                 return ValidatePortTypeAgainst(powerPort, null);
             }
 
@@ -107,7 +108,7 @@
         {
             var result = new ValidationResult();
 
-            if (powerPort.PowerPortInfo.PortType == null || !powerPort.PowerPortInfo.PortType.HasValue())
+            if (!powerPort.PowerPortInfo.PortType.HasValue())
             {
                 result.AddFailReason(PowerPortValidationField.PortType,
                     "Port Type cannot be empty.");

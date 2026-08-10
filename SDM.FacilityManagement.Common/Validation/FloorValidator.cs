@@ -31,16 +31,19 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
         {
             var result = new ValidationResult();
 
-            if (!FloorValidationHandler.IsFloorIdValid(entity, out var idResult))
+            if (entity.ShouldValidate(entity.FloorIdField))
             {
-                result.AddFailuresFrom(idResult);
-                return result;
-            }
+                if (!FloorValidationHandler.IsFloorIdValid(entity, out var idResult))
+                {
+                    result.AddFailuresFrom(idResult);
+                    return result;
+                }
 
-            if (entity.ShouldValidate(entity.FloorIdField) && IsIdInUse(entity.FloorId, entity.Identifier))
-            {
-                result.AddFailReason(FloorValidationHandler.FloorValidationField.FloorId,
-                    $"Floor Id '{entity.FloorId}' is already in use.");
+                if (IsIdInUse(entity.FloorId, entity.Identifier))
+                {
+                    result.AddFailReason(FloorValidationHandler.FloorValidationField.FloorId,
+                        $"Floor Id '{entity.FloorId}' is already in use.");
+                }
             }
 
             result.AddFailuresFrom(ValidateReferencesAgainstDatabase(new List<Floor> { entity })[0]);
@@ -188,10 +191,10 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                 {
                     Entity = entity,
                     Index = index,
-                    FacilityIdentifier = entity.FacilityFk == null ? null : FacilityReferenceValidationHelper.GetId(entity.FacilityFk.Facility),
+                    FacilityIdentifier = entity.FacilityFk == null ? null : ReferenceValidationHelper.GetId(entity.FacilityFk.Facility),
                 })
-                .Where(x => FacilityReferenceValidationHelper.ShouldValidateReferences(x.Entity) &&
-                    FacilityReferenceValidationHelper.HasId(x.FacilityIdentifier))
+                .Where(x => ReferenceValidationHelper.ShouldValidateReferences(x.Entity) &&
+                    ReferenceValidationHelper.HasId(x.FacilityIdentifier))
                 .ToList();
 
             if (!candidates.Any())
@@ -199,14 +202,14 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                 return results;
             }
 
-            var existingFacilityIds = FacilityReferenceValidationHelper.ToIdentifierSet(
+            var existingFacilityIds = ReferenceValidationHelper.ToIdentifierSet(
                 _entityLoader.GetFacilitiesByIdentifiers(candidates.Select(x => x.FacilityIdentifier).Distinct().ToList()));
 
             foreach (var candidate in candidates)
             {
                 if (!existingFacilityIds.Contains(candidate.FacilityIdentifier))
                 {
-                    FacilityReferenceValidationHelper.AddMissingReference(
+                    ReferenceValidationHelper.AddMissingReference(
                         results[candidate.Index],
                         FloorValidationHandler.FloorValidationField.FloorId,
                         "Facility",
