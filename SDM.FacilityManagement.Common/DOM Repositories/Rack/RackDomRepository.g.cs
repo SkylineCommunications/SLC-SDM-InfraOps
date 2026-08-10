@@ -513,9 +513,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 Identifier = instance.ID.Id.ToString(),
                 IsNewInternal = false,
             };
-            obj.State = String.IsNullOrWhiteSpace(instance.StatusId)
-                ? SharedMappers.DomIds.SlcFacility_Management.Behaviors.Rack_Behaviour.StatusesEnum.Draft
-                : SharedMappers.DomIds.SlcFacility_Management.Behaviors.Rack_Behaviour.Statuses.ToEnum(instance.StatusId);
+            obj.State = SharedMappers.DomIds.SlcFacility_Management.Behaviors.Rack_Behaviour.Statuses.ToEnum(instance.StatusId);
             var _rackpropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(FacilityManagement.Models.RackDomMapper.RackProperties.SectionDefinitionId));
             if (_rackpropertiesSection != default)
             {
@@ -697,6 +695,11 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     ModuleId = FacilityManagement.Models.RackDomMapper.ModuleId
                 }
             };
+
+            if (obj.IsNew || String.IsNullOrWhiteSpace(obj.Identifier))
+            {
+                instance.StatusId = SharedMappers.DomIds.SlcFacility_Management.Behaviors.Rack_Behaviour.Statuses.ToValue(obj.State);
+            }
             var _rackproperties = new Section(FacilityManagement.Models.RackDomMapper.RackProperties.SectionDefinitionId);
             if (obj.Name != default)
             {

@@ -512,9 +512,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             {
                 Identifier = instance.ID.Id.ToString()
             };
-            obj.State = String.IsNullOrWhiteSpace(instance.StatusId)
-                ? SharedMappers.DomIds.SlcFacility_Management.Behaviors.Room_Behaviour.StatusesEnum.Draft
-                : SharedMappers.DomIds.SlcFacility_Management.Behaviors.Room_Behaviour.Statuses.ToEnum(instance.StatusId);
+            obj.State = SharedMappers.DomIds.SlcFacility_Management.Behaviors.Room_Behaviour.Statuses.ToEnum(instance.StatusId);
             var _roompropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(FacilityManagement.Models.RoomDomMapper.RoomProperties.SectionDefinitionId));
             if (_roompropertiesSection != default)
             {
@@ -617,6 +615,11 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     ModuleId = FacilityManagement.Models.RoomDomMapper.ModuleId
                 }
             };
+
+            if (obj.IsNew || String.IsNullOrWhiteSpace(obj.Identifier))
+            {
+                instance.StatusId = SharedMappers.DomIds.SlcFacility_Management.Behaviors.Room_Behaviour.Statuses.ToValue(obj.State);
+            }
             var _roomproperties = new Section(FacilityManagement.Models.RoomDomMapper.RoomProperties.SectionDefinitionId);
             if (obj.Name != default)
             {
