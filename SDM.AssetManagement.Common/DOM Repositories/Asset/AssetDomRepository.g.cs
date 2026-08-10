@@ -905,9 +905,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 _assetproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.AssetName, Convert.ToString(obj.Name));
             }
 
-            if (obj.AssetClassId != default)
+            if (obj.AssetClassId != default && System.Guid.TryParse(obj.AssetClassId.Identifier, out var assetClassGuid) && assetClassGuid != System.Guid.Empty)
             {
-                _assetproperties.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.AssetClass, System.Guid.Parse(obj.AssetClassId.Identifier));
+                _assetproperties.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.AssetProperties.AssetClass, assetClassGuid);
             }
 
             if (obj.Description != default)
@@ -950,9 +950,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     _location.AddOrUpdateValue<long>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.HolderNumber, (long)(obj.Location.HolderNumber).Value);
                 }
 
-                if (obj.Location.ParentAsset != default)
+                if (obj.Location.ParentAsset != default && System.Guid.TryParse(obj.Location.ParentAsset.Identifier, out var locationParentAssetGuid) && locationParentAssetGuid != System.Guid.Empty)
                 {
-                    _location.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.ParentAsset, System.Guid.Parse(obj.Location.ParentAsset.Identifier));
+                    _location.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.ParentAsset, locationParentAssetGuid);
                 }
 
                 if (obj.Location.RackPosition != default)
@@ -960,9 +960,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     _location.AddOrUpdateValue<long>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.RackPosition, (long)(obj.Location.RackPosition).Value);
                 }
 
-                if (obj.Location.RackId != default)
+                if (obj.Location.RackId != default && System.Guid.TryParse(obj.Location.RackId.Identifier, out var locationRackGuid) && locationRackGuid != System.Guid.Empty)
                 {
-                    _location.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Rack, System.Guid.Parse(obj.Location.RackId.Identifier));
+                    _location.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Rack, locationRackGuid);
                 }
 
                 if (obj.Location.DeskId != default)
@@ -970,14 +970,14 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     _location.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Desk, obj.Location.DeskId);
                 }
 
-                if (obj.Location.ContainerId != default)
+                if (obj.Location.ContainerId != default && System.Guid.TryParse(obj.Location.ContainerId.Identifier, out var locationContainerGuid) && locationContainerGuid != System.Guid.Empty)
                 {
-                    _location.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Container, System.Guid.Parse(obj.Location.ContainerId.Identifier));
+                    _location.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Container, locationContainerGuid);
                 }
 
-                if (obj.Location.RoomId != default)
+                if (obj.Location.RoomId != default && System.Guid.TryParse(obj.Location.RoomId.Identifier, out var locationRoomGuid) && locationRoomGuid != System.Guid.Empty)
                 {
-                    _location.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Room, System.Guid.Parse(obj.Location.RoomId.Identifier));
+                    _location.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.Location.Room, locationRoomGuid);
                 }
 
                 if (obj.Location.Side != default)
@@ -996,9 +996,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     _destinationlocation.AddOrUpdateValue<long>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.HolderNumber, (long)(obj.DestinationLocation.HolderNumber).Value);
                 }
 
-                if (obj.DestinationLocation.ParentAsset != default)
+                if (obj.DestinationLocation.ParentAsset != default && System.Guid.TryParse(obj.DestinationLocation.ParentAsset.Identifier, out var destinationParentAssetGuid) && destinationParentAssetGuid != System.Guid.Empty)
                 {
-                    _destinationlocation.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.ParentAsset, System.Guid.Parse(obj.DestinationLocation.ParentAsset.Identifier));
+                    _destinationlocation.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.ParentAsset, destinationParentAssetGuid);
                 }
 
                 if (obj.DestinationLocation.RackPosition != default)
@@ -1006,9 +1006,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     _destinationlocation.AddOrUpdateValue<long>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.RackPosition, (long)(obj.DestinationLocation.RackPosition).Value);
                 }
 
-                if (obj.DestinationLocation.RackId != default)
+                if (obj.DestinationLocation.RackId != default && System.Guid.TryParse(obj.DestinationLocation.RackId.Identifier, out var destinationRackGuid) && destinationRackGuid != System.Guid.Empty)
                 {
-                    _destinationlocation.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.Rack, System.Guid.Parse(obj.DestinationLocation.RackId.Identifier));
+                    _destinationlocation.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.Rack, destinationRackGuid);
                 }
 
                 if (obj.DestinationLocation.DeskId != default)
@@ -1016,14 +1016,14 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     _destinationlocation.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.Desk, obj.DestinationLocation.DeskId);
                 }
 
-                if (obj.DestinationLocation.ContainerId != default)
+                if (obj.DestinationLocation.ContainerId != default && System.Guid.TryParse(obj.DestinationLocation.ContainerId.Identifier, out var destinationContainerGuid) && destinationContainerGuid != System.Guid.Empty)
                 {
-                    _destinationlocation.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.Container, System.Guid.Parse(obj.DestinationLocation.ContainerId.Identifier));
+                    _destinationlocation.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.Container, destinationContainerGuid);
                 }
 
-                if (obj.DestinationLocation.RoomId != default)
+                if (obj.DestinationLocation.RoomId != default && System.Guid.TryParse(obj.DestinationLocation.RoomId.Identifier, out var destinationRoomGuid) && destinationRoomGuid != System.Guid.Empty)
                 {
-                    _destinationlocation.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.Room, System.Guid.Parse(obj.DestinationLocation.RoomId.Identifier));
+                    _destinationlocation.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper.DestinationLocation.Room, destinationRoomGuid);
                 }
 
                 if (obj.DestinationLocation.Side != default)

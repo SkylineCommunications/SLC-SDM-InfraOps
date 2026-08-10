@@ -587,9 +587,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             if (obj.RackFk != null)
             {
                 var _rackfk = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.ReservationDomMapper.RackFk.SectionDefinitionId);
-                if (obj.RackFk.Rack != default)
+                if (obj.RackFk.Rack != default && System.Guid.TryParse(obj.RackFk.Rack.Identifier, out var rackGuid) && rackGuid != System.Guid.Empty)
                 {
-                    _rackfk.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.ReservationDomMapper.RackFk.Rack, System.Guid.Parse(obj.RackFk.Rack.Identifier));
+                    _rackfk.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.ReservationDomMapper.RackFk.Rack, rackGuid);
                 }
 
                 instance.Sections.Add(_rackfk);

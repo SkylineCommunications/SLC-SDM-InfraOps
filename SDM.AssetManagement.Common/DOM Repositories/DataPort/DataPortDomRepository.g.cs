@@ -20,7 +20,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     using Skyline.DataMiner.Net.Sections;
     using Skyline.DataMiner.Net.SubscriptionFilters;
     using Skyline.DataMiner.SDM;
-    using Skyline.DataMiner.SDM.Extensions;
 
     using SLDataGateway.API.Querying;
     using SLDataGateway.API.Types.Querying;
@@ -656,9 +655,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
                 _dataportinfo.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.PortExposure, SharedMappers.DomIds.SlcAsset_Management.Enums.Portexposure.ToValue(obj.DataPortInfo.PortExposure));
 
-                if (obj.DataPortInfo.Type != default)
+                if (obj.DataPortInfo.Type != default && System.Guid.TryParse(obj.DataPortInfo.Type.Identifier, out var dataPortInfoTypeGuid) && dataPortInfoTypeGuid != System.Guid.Empty)
                 {
-                    _dataportinfo.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.Type, System.Guid.Parse(obj.DataPortInfo.Type.Identifier));
+                    _dataportinfo.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.Type, dataPortInfoTypeGuid);
                 }
 
                 if (obj.DataPortInfo.Label != default)
@@ -672,9 +671,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             if (obj.Asset != null)
             {
                 var _assetrelation = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.AssetFk.SectionDefinitionId);
-                if (obj.Asset != default)
+                if (obj.Asset != default && System.Guid.TryParse(obj.Asset.Identifier, out var assetGuid) && assetGuid != System.Guid.Empty)
                 {
-                    _assetrelation.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.AssetFk.Asset, System.Guid.Parse(obj.Asset.Identifier));
+                    _assetrelation.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.AssetFk.Asset, assetGuid);
                 }
 
                 instance.Sections.Add(_assetrelation);

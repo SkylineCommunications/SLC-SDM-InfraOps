@@ -603,7 +603,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 var _cablefks = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.CableFKs.SectionDefinitionId);
                 if (obj.CableFKs.CableTypeFks != default)
                 {
-                    _cablefks.AddOrUpdateListValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.CableFKs.CableTypeFks, obj.CableFKs.CableTypeFks.Select(x => System.Guid.Parse(x.Identifier)).ToList());
+                    _cablefks.AddOrUpdateListValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.PortTypeDomMapper.CableFKs.CableTypeFks, obj.CableFKs.CableTypeFks.Where(x => x != default && System.Guid.TryParse(x.Identifier, out var cableTypeGuid) && cableTypeGuid != System.Guid.Empty).Select(x => System.Guid.Parse(x.Identifier)).ToList());
                 }
 
                 instance.Sections.Add(_cablefks);

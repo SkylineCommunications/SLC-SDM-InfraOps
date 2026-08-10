@@ -679,9 +679,9 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             if (obj.FloorFk != null)
             {
                 var _floorfk = new Section(Skyline.DataMiner.SDM.FacilityManagement.Models.RoomDomMapper.FloorFk.SectionDefinitionId);
-                if (obj.FloorFk.Floor != default)
+                if (obj.FloorFk.Floor != default && System.Guid.TryParse(obj.FloorFk.Floor.Identifier, out var floorGuid) && floorGuid != System.Guid.Empty)
                 {
-                    _floorfk.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.FacilityManagement.Models.RoomDomMapper.FloorFk.Floor, System.Guid.Parse(obj.FloorFk.Floor.Identifier));
+                    _floorfk.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.FacilityManagement.Models.RoomDomMapper.FloorFk.Floor, floorGuid);
                 }
 
                 instance.Sections.Add(_floorfk);

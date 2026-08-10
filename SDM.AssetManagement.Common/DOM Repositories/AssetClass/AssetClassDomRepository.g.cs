@@ -21,7 +21,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 	using Skyline.DataMiner.Net.Sections;
 	using Skyline.DataMiner.Net.SubscriptionFilters;
 	using Skyline.DataMiner.SDM;
-    using Skyline.DataMiner.SDM.AssetManagement.Validation;
+	using Skyline.DataMiner.SDM.AssetManagement.Validation;
 
     using SLDataGateway.API.Querying;
 	using SLDataGateway.API.Types.Querying;
@@ -831,9 +831,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				_assetclassproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.DeviceName, Convert.ToString(obj.Name));
 			}
 
-			if (obj.DeviceTypeId != default)
+			if (obj.DeviceTypeId != default && System.Guid.TryParse(obj.DeviceTypeId.Identifier, out var deviceTypeGuid) && deviceTypeGuid != System.Guid.Empty)
 			{
-				_assetclassproperties.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.DeviceType, System.Guid.Parse(obj.DeviceTypeId.Identifier));
+				_assetclassproperties.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.DeviceType, deviceTypeGuid);
 			}
 
 			if (obj.Manufacturer != default)
@@ -934,9 +934,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
 				_dataportsSection.AddOrUpdateValue<int>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.DataPorts.OutputType, (int)dataports.OutputType);
 				_dataportsSection.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.DataPorts.PortExposure, SharedMappers.DomIds.SlcAsset_Management.Enums.Portexposure.ToValue(dataports.PortExposure));
-				if (dataports.Type != default)
+				if (dataports.Type != default && System.Guid.TryParse(dataports.Type.Identifier, out var dataPortTypeGuid) && dataPortTypeGuid != System.Guid.Empty)
 				{
-					_dataportsSection.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.DataPorts.Type, System.Guid.Parse(dataports.Type.Identifier));
+					_dataportsSection.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.DataPorts.Type, dataPortTypeGuid);
 				}
 
 				if (dataports.Label != default)
@@ -963,9 +963,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
 				_powerportsSection.AddOrUpdateValue<int>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.PowerPorts.OutputType, (int)powerports.OutputType);
 				_powerportsSection.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.PowerPorts.PortExposure, SharedMappers.DomIds.SlcAsset_Management.Enums.Portexposure.ToValue(powerports.PortExposure));
-				if (powerports.PortType != default)
+				if (powerports.PortType != default && System.Guid.TryParse(powerports.PortType.Identifier, out var powerPortTypeGuid) && powerPortTypeGuid != System.Guid.Empty)
 				{
-					_powerportsSection.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.PowerPorts.PortType, System.Guid.Parse(powerports.PortType.Identifier));
+					_powerportsSection.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetClassDomMapper.PowerPorts.PortType, powerPortTypeGuid);
 				}
 
 				if (powerports.Label != default)

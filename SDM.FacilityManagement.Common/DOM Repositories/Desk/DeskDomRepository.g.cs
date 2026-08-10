@@ -606,9 +606,9 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             if (obj.RoomFk != null)
             {
                 var _roomfk = new Section(Skyline.DataMiner.SDM.FacilityManagement.Models.DeskDomMapper.RoomFk.SectionDefinitionId);
-                if (obj.RoomFk.Room != default)
+                if (obj.RoomFk.Room != default && System.Guid.TryParse(obj.RoomFk.Room.Identifier, out var roomGuid) && roomGuid != System.Guid.Empty)
                 {
-                    _roomfk.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.FacilityManagement.Models.DeskDomMapper.RoomFk.Room, System.Guid.Parse(obj.RoomFk.Room.Identifier));
+                    _roomfk.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.FacilityManagement.Models.DeskDomMapper.RoomFk.Room, roomGuid);
                 }
 
                 instance.Sections.Add(_roomfk);

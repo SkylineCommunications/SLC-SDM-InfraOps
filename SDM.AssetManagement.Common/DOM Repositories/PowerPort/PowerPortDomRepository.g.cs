@@ -623,9 +623,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			if (obj.Asset != null)
 			{
 				var _assetrelation = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortDomMapper.AssetRelationProperties.SectionDefinitionId);
-				if (obj.Asset != default)
+				if (obj.Asset != default && System.Guid.TryParse(obj.Asset.Identifier, out var assetGuid) && assetGuid != System.Guid.Empty)
 				{
-					_assetrelation.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortDomMapper.AssetRelationProperties.Asset, System.Guid.Parse(obj.Asset.Identifier));
+					_assetrelation.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortDomMapper.AssetRelationProperties.Asset, assetGuid);
 				}
 
 				instance.Sections.Add(_assetrelation);

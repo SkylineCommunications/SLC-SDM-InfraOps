@@ -615,9 +615,9 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
                     _valuesSection.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValuesDomMapper.Values.Value, Convert.ToString(values.Value));
                 }
 
-                if (values.PropertyId != default)
+                if (values.PropertyId != default && System.Guid.TryParse(values.PropertyId.Identifier, out var propertyGuid) && propertyGuid != System.Guid.Empty)
                 {
-                    _valuesSection.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValuesDomMapper.Values.PropertyId, System.Guid.Parse(values.PropertyId.Identifier));
+                    _valuesSection.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValuesDomMapper.Values.PropertyId, propertyGuid);
                 }
 
                 instance.Sections.Add(_valuesSection);

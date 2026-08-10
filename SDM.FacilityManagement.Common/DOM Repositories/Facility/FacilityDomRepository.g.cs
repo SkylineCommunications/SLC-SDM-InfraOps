@@ -667,9 +667,9 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             if (obj.SiteFk != null)
             {
                 var _sitefk = new Section(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityDomMapper.SiteFk.SectionDefinitionId);
-                if (obj.SiteFk.Site != default)
+                if (obj.SiteFk.Site != default && System.Guid.TryParse(obj.SiteFk.Site.Identifier, out var siteGuid) && siteGuid != System.Guid.Empty)
                 {
-                    _sitefk.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityDomMapper.SiteFk.Site, System.Guid.Parse(obj.SiteFk.Site.Identifier));
+                    _sitefk.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityDomMapper.SiteFk.Site, siteGuid);
                 }
 
                 instance.Sections.Add(_sitefk);

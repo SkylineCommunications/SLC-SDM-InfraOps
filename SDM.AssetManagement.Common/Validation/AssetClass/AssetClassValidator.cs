@@ -115,14 +115,10 @@
 
             // ============================================================
             // PHASE 3: DATABASE ACCESS CHECKS
+            // Load device types once and reuse the same map for both the
+            // reference existence checks and the per-item behavioral checks,
+            // avoiding a second GetDeviceTypesByDomIds query for the same data.
             // ============================================================
-            results.MergeFrom(ValidateBulkReferencesAgainstDatabase(assetClasses));
-
-            if (results.AnyInvalid())
-            {
-                return results;
-            }
-
             var deviceTypeMap = _entityLoader.GetDeviceTypesByDomIds(
                     assetClasses
                         .Where(ac => ac.DeviceTypeId != null && ac.DeviceTypeId.HasValue())
@@ -130,6 +126,13 @@
                         .Distinct()
                         .ToList())
                 .ToDictionary(dt => dt.Identifier);
+
+            results.MergeFrom(ValidateBulkReferencesAgainstDatabase(assetClasses, deviceTypeMap));
+
+            if (results.AnyInvalid())
+            {
+                return results;
+            }
 
             for (int i = 0; i < assetClasses.Count; i++)
             {
@@ -390,16 +393,13 @@
                 return result;
             }
 
-            private List<ValidationResult> ValidateBulkReferencesAgainstDatabase(List<AssetClass> assetClasses)
+            private List<ValidationResult> ValidateBulkReferencesAgainstDatabase(List<AssetClass> assetClasses, Dictionary<string, DeviceType> deviceTypeMap)
             {
                 var results = assetClasses.Select(_ => new ValidationResult()).ToList();
 
-                var deviceTypeIds = assetClasses
-                    .Where(ac => ac.ShouldValidate(ac.DeviceTypeIdField) && ac.DeviceTypeId != null && ac.DeviceTypeId.HasValue())
-                    .Select(ac => ac.DeviceTypeId.Identifier)
-                    .Distinct()
-                    .ToList();
-                var existingDeviceTypeIds = _entityLoader.GetDeviceTypesByDomIds(deviceTypeIds).Select(dt => dt.Identifier).ToHashSet();
+                // Existence is derived from the already-loaded device-type map (its keys are the
+                // identifiers that actually exist), so no second device-type query is issued here.
+                var existingDeviceTypeIds = deviceTypeMap.Keys.ToHashSet();
 
                 var portTypeIds = assetClasses
                     .SelectMany(ac => (ac.DataPorts ?? new List<DataPortInfo>())
