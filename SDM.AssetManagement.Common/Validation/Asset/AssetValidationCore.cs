@@ -291,9 +291,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
         {
             var validations = new List<ValidationResult>
             {
+                ValidateUniquenessChecks(asset),
                 ValidateAssetClassState(asset),
                 ValidateReferencesAgainstDatabase(asset),
-                ValidateUniquenessChecks(asset),
                 ValidateLocationPlacement(asset),
             };
 
