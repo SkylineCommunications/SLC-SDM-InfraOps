@@ -1,15 +1,14 @@
-﻿namespace Skyline.DataMiner.SDM.AssetManagement.Validation
+namespace Skyline.DataMiner.SDM.AssetManagement.Validation
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
 
-    using SharedCommonLibrary.AssetManagement.Models;
+    using Skyline.DataMiner.SDM.AssetManagement.Models;
 
     using SharedMappers.DomIds;
 
     using Skyline.DataMiner.SDM.AssetManagement.Common.Validation;
-    using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.Common.Services;
     using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
@@ -233,6 +232,10 @@
             var validations = new List<ValidationResult>();
 
             if (asset.ShouldValidateAny(asset.InstallationUserIdField, asset.InstallationDateField)
+                && !AssetValidationHandler.IsInstallationInformationChangeAllowed(asset, out var installationChangeResult))
+                validations.Add(installationChangeResult);
+
+            if (asset.ShouldValidateAny(asset.InstallationUserIdField, asset.InstallationDateField)
                 && !AssetValidationHandler.IsInstallationInfoValid(asset, out var installationResult))
                 validations.Add(installationResult);
 
@@ -289,10 +292,37 @@
             var validations = new List<ValidationResult>
             {
                 ValidateUniquenessChecks(asset),
+                ValidateAssetClassState(asset),
+                ValidateReferencesAgainstDatabase(asset),
                 ValidateLocationPlacement(asset),
             };
 
             return validations.MergeAll();
+        }
+
+        private ValidationResult ValidateAssetClassState(Asset asset)
+        {
+            var result = new ValidationResult();
+
+            if (!asset.ShouldValidate(asset.AssetClassIdField) || !asset.AssetClassId.HasValue())
+            {
+                return result;
+            }
+
+            var assetClass = _entityLoader.LoadAssetClass(asset.AssetClassId);
+            if (assetClass == null)
+            {
+                result.AddFailReason(AssetValidationField.AssetClass,
+                    $"Referenced Asset Class '{asset.AssetClassId.Identifier}' does not exist.");
+                return result;
+            }
+
+            if (assetClass.State != SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Active)
+            {
+                result.AddFailReason(AssetValidationField.AssetClass, "Asset Class must be Active.");
+            }
+
+            return result;
         }
 
         /// <summary>
@@ -322,6 +352,75 @@
             }
 
             return validations.MergeAll();
+        }
+
+        public List<ValidationResult> ValidateBulkReferencesAgainstDatabase(List<Asset> assets)
+        {
+            var results = assets.Select(_ => new ValidationResult()).ToList();
+            var batchAssetIds = assets.Select(a => a.Identifier).Where(id => !string.IsNullOrWhiteSpace(id)).ToHashSet();
+
+            var assetClassIds = assets
+                .Where(a => a.ShouldValidate(a.AssetClassIdField) && a.AssetClassId != null && a.AssetClassId.HasValue())
+                .Select(a => a.AssetClassId.Identifier)
+                .Distinct()
+                .ToList();
+            var existingAssetClassIds = _entityLoader.GetAssetClassesByDomIds(assetClassIds).Select(ac => ac.Identifier).ToHashSet();
+
+            var parentAssetIds = assets
+                .SelectMany(a => GetLocationReferences(a, includeDestination: true, l => l.ParentAsset))
+                .Distinct()
+                .ToList();
+            var existingAssetIds = _entityLoader.GetAssetsByDomIds(parentAssetIds).Select(a => a.Identifier).Concat(batchAssetIds).ToHashSet();
+
+            var rackIds = assets
+                .SelectMany(a => GetLocationReferences(a, includeDestination: true, l => l.RackId))
+                .Distinct()
+                .ToList();
+            var existingRackIds = _entityLoader.GetRacksByDomIds(rackIds).Select(r => r.Identifier).ToHashSet();
+
+            var facilityIds = assets
+                .SelectMany(a => GetLocationReferences(a, includeDestination: true, l => l.ContainerId))
+                .Distinct()
+                .ToList();
+            var existingFacilityIds = _entityLoader.GetFacilitiesByDomIds(facilityIds).Select(f => f.Identifier).ToHashSet();
+
+            var roomIds = assets
+                .SelectMany(a => GetLocationReferences(a, includeDestination: true, l => l.RoomId))
+                .Distinct()
+                .ToList();
+            var existingRoomIds = _entityLoader.GetRoomsByDomIds(roomIds).Select(r => r.Identifier).ToHashSet();
+
+            var deskIds = assets
+                .SelectMany(a => GetDeskIds(a, includeDestination: true))
+                .Select(id => id.ToString())
+                .Distinct()
+                .ToList();
+            var existingDeskIds = _entityLoader.GetDesksByDomIds(deskIds).Select(d => d.Identifier).ToHashSet();
+
+            var locationLookups = new LocationReferenceLookups(
+                existingAssetIds, existingRackIds, existingFacilityIds, existingRoomIds, existingDeskIds);
+
+            for (int i = 0; i < assets.Count; i++)
+            {
+                var asset = assets[i];
+                AddReferenceFailure(asset.ShouldValidate(asset.AssetClassIdField), asset.AssetClassId, existingAssetClassIds, AssetValidationField.AssetClass, "Asset Class", results[i]);
+
+                 if (asset.State == SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit)
+                {
+                    ValidateLocationReferences(asset.DestinationLocation, true, locationLookups, results[i]);
+                }
+                else
+                {
+                    ValidateLocationReferences(asset.Location, false, locationLookups, results[i]);
+                }
+            }
+
+            return results;
+        }
+
+        private ValidationResult ValidateReferencesAgainstDatabase(Asset asset)
+        {
+            return ValidateBulkReferencesAgainstDatabase(new List<Asset> { asset })[0];
         }
 
         /// <summary>
@@ -546,6 +645,139 @@
             }
 
             return results;
+        }
+
+        private static IEnumerable<string> GetLocationReferences(Asset asset, bool includeDestination, Func<AssetLocation, SdmObjectReference<Asset>> selector)
+        {
+            return GetLocations(asset, includeDestination)
+                .Select(selector)
+                .Where(reference => reference != null && reference.HasValue())
+                .Select(reference => reference.Identifier);
+        }
+
+        private static IEnumerable<string> GetLocationReferences(Asset asset, bool includeDestination, Func<AssetLocation, SdmObjectReference<Rack>> selector)
+        {
+            return GetLocations(asset, includeDestination)
+                .Select(selector)
+                .Where(reference => reference != null && reference.HasValue())
+                .Select(reference => reference.Identifier);
+        }
+
+        private static IEnumerable<string> GetLocationReferences(Asset asset, bool includeDestination, Func<AssetLocation, SdmObjectReference<Facility>> selector)
+        {
+            return GetLocations(asset, includeDestination)
+                .Select(selector)
+                .Where(reference => reference != null && reference.HasValue())
+                .Select(reference => reference.Identifier);
+        }
+
+        private static IEnumerable<string> GetLocationReferences(Asset asset, bool includeDestination, Func<AssetLocation, SdmObjectReference<Room>> selector)
+        {
+            return GetLocations(asset, includeDestination)
+                .Select(selector)
+                .Where(reference => reference != null && reference.HasValue())
+                .Select(reference => reference.Identifier);
+        }
+
+        private static IEnumerable<Guid> GetDeskIds(Asset asset, bool includeDestination)
+        {
+            return GetLocations(asset, includeDestination)
+                .Select(location => location.DeskId)
+                .Where(id => id != Guid.Empty);
+        }
+
+        private static IEnumerable<AssetLocation> GetLocations(Asset asset, bool includeDestination)
+        {
+            if (asset.Location != null)
+            {
+                yield return asset.Location;
+            }
+
+            if (includeDestination
+                && asset.State == SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit
+                && asset.DestinationLocation != null)
+            {
+                yield return asset.DestinationLocation;
+            }
+        }
+
+        private static void AddReferenceFailure<T>(
+            bool shouldValidate,
+            SdmObjectReference<T> reference,
+            HashSet<string> existingIds,
+            AssetValidationField field,
+            string targetName,
+            ValidationResult result)
+            where T : SdmObject<T>
+        {
+            if (shouldValidate && reference != null && reference.HasValue() && !existingIds.Contains(reference.Identifier))
+            {
+                result.AddFailReason(field, $"Referenced {targetName} '{reference.Identifier}' does not exist.");
+            }
+        }
+
+        private static void ValidateLocationReferences(
+            AssetLocation location,
+            bool isDestination,
+            LocationReferenceLookups lookups,
+            ValidationResult result)
+        {
+            if (location == null)
+            {
+                return;
+            }
+
+            AddLocationReferenceFailure(location.ParentAsset, lookups.AssetIds, isDestination ? AssetValidationField.DestinationParentAsset : AssetValidationField.ParentAsset, "Asset", result);
+            AddLocationReferenceFailure(location.RackId, lookups.RackIds, isDestination ? AssetValidationField.DestinationRackId : AssetValidationField.RackId, "Rack", result);
+            AddLocationReferenceFailure(location.ContainerId, lookups.FacilityIds, isDestination ? AssetValidationField.DestinationContainerId : AssetValidationField.ContainerId, "Facility", result);
+            AddLocationReferenceFailure(location.RoomId, lookups.RoomIds, isDestination ? AssetValidationField.DestinationRoomId : AssetValidationField.RoomId, "Room", result);
+
+            if (location.DeskId != Guid.Empty && !lookups.DeskIds.Contains(location.DeskId.ToString()))
+            {
+                result.AddFailReason(isDestination ? AssetValidationField.DestinationDeskId : AssetValidationField.DeskId,
+                    $"Referenced Desk '{location.DeskId}' does not exist.");
+            }
+        }
+
+        private sealed class LocationReferenceLookups
+        {
+            public LocationReferenceLookups(
+                HashSet<string> assetIds,
+                HashSet<string> rackIds,
+                HashSet<string> facilityIds,
+                HashSet<string> roomIds,
+                HashSet<string> deskIds)
+            {
+                AssetIds = assetIds;
+                RackIds = rackIds;
+                FacilityIds = facilityIds;
+                RoomIds = roomIds;
+                DeskIds = deskIds;
+            }
+
+            public HashSet<string> AssetIds { get; }
+
+            public HashSet<string> RackIds { get; }
+
+            public HashSet<string> FacilityIds { get; }
+
+            public HashSet<string> RoomIds { get; }
+
+            public HashSet<string> DeskIds { get; }
+        }
+
+        private static void AddLocationReferenceFailure<T>(
+            SdmObjectReference<T> reference,
+            HashSet<string> existingIds,
+            AssetValidationField field,
+            string targetName,
+            ValidationResult result)
+            where T : SdmObject<T>
+        {
+            if (reference != null && reference.HasValue() && !existingIds.Contains(reference.Identifier))
+            {
+                result.AddFailReason(field, $"Referenced {targetName} '{reference.Identifier}' does not exist.");
+            }
         }
 
         /// <summary>

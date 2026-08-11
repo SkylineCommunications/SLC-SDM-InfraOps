@@ -21,7 +21,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
     public static partial class DeskExposers
     {
-        public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Desk, string> Identifier = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Desk, string>((obj) => obj.Identifier, "Identifier");
+        public static readonly Exposer<FacilityManagement.Models.Desk, string> Identifier = new Exposer<FacilityManagement.Models.Desk, string>((obj) => obj.Identifier, "Identifier");
         static DeskExposers()
         {
             RuntimeHelpers.RunClassConstructor(typeof(DeskInformation).TypeHandle);
@@ -31,20 +31,20 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
         public static partial class DeskInformation
         {
-            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Desk, string> Name = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Desk, string>((obj) => obj.Name, "DeskInformation.Name");
-            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Desk, string> Plan = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Desk, string>((obj) => obj.Plan, "DeskInformation.Plan");
-            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Desk, string> Description = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Desk, string>((obj) => obj.Description, "DeskInformation.Description");
-            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Desk, string> DeskID = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Desk, string>((obj) => obj.DeskID, "DeskInformation.DeskID");
+            public static readonly Exposer<FacilityManagement.Models.Desk, string> Name = new Exposer<FacilityManagement.Models.Desk, string>((obj) => obj.Name, "DeskInformation.Name");
+            public static readonly Exposer<FacilityManagement.Models.Desk, string> Plan = new Exposer<FacilityManagement.Models.Desk, string>((obj) => obj.Plan, "DeskInformation.Plan");
+            public static readonly Exposer<FacilityManagement.Models.Desk, string> Description = new Exposer<FacilityManagement.Models.Desk, string>((obj) => obj.Description, "DeskInformation.Description");
+            public static readonly Exposer<FacilityManagement.Models.Desk, string> DeskID = new Exposer<FacilityManagement.Models.Desk, string>((obj) => obj.DeskID, "DeskInformation.DeskID");
         }
 
         public static partial class RoomFk
         {
-            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Desk, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.FacilityManagement.Models.Room>> Room = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Desk, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.FacilityManagement.Models.Room>>((obj) => obj.RoomFk.Room, "RoomFk.Room");
+            public static readonly Exposer<FacilityManagement.Models.Desk, SdmObjectReference<FacilityManagement.Models.Room>> Room = new Exposer<FacilityManagement.Models.Desk, SdmObjectReference<FacilityManagement.Models.Room>>((obj) => obj.RoomFk.Room, "RoomFk.Room");
         }
 
         public static partial class Resource
         {
-            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Desk, System.Guid> ResourceId = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Desk, System.Guid>((obj) => obj.Resource.ResourceId, "Resource.ResourceId");
+            public static readonly Exposer<FacilityManagement.Models.Desk, System.Guid> ResourceId = new Exposer<FacilityManagement.Models.Desk, System.Guid>((obj) => obj.Resource.ResourceId, "Resource.ResourceId");
         }
     }
 }

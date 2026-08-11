@@ -5,6 +5,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
     using System.Linq;
 
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
+    using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.InfraOps.Common.Validation;
     using Skyline.DataMiner.SDM.PlanAndBuild.Helpers;
     using Skyline.DataMiner.SDM.PlanAndBuild.Models;
@@ -21,6 +22,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
     {
         private readonly IPlanAndBuildApiHelper _helper;
         private readonly IPeopleAndOrganizationsApi _peopleApi;
+        private readonly IPlanAndBuildExternalReferenceChecker _externalReferenceChecker;
         private readonly Validator<PlanAndBuildJob> _validationPipeline;
 
         /// <summary>
@@ -29,7 +31,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
         /// <param name="helper">
         /// The Plan &amp; Build API helper used to query existing Jobs for uniqueness checks.
         /// Note: this is captured by reference during <see cref="PlanAndBuildApiHelper"/> construction, before
-        /// its repositories are wired up. Only <see cref="Validate"/>/<see cref="ValidateAndThrow"/> (called
+        /// its repositories are wired up. Only <see cref="Validate(PlanAndBuildJob)"/>/<see cref="ValidateAndThrow"/> (called
         /// after construction completes) access <paramref name="helper"/>'s repositories.
         /// </param>
         /// <param name="peopleApi">
@@ -37,12 +39,26 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
         /// Kept separate from the helper so validation does not require <see cref="IPeopleAndOrganizationsApi"/>
         /// to be part of the public <see cref="IPlanAndBuildApiHelper"/> contract.
         /// </param>
-        public PlanAndBuildJobValidator(IPlanAndBuildApiHelper helper, IPeopleAndOrganizationsApi peopleApi)
+        /// <param name="externalReferenceChecker">
+        /// Optional cross-module checker used to verify that referenced Location/Asset/Connection/CableType ids
+        /// exist. When <c>null</c>, those reference checks are skipped.
+        /// </param>
+        internal PlanAndBuildJobValidator(
+            IPlanAndBuildApiHelper helper,
+            IPeopleAndOrganizationsApi peopleApi,
+            IPlanAndBuildExternalReferenceChecker externalReferenceChecker = null)
         {
             _helper = helper ?? throw new ArgumentNullException(nameof(helper));
             _peopleApi = peopleApi ?? throw new ArgumentNullException(nameof(peopleApi));
+            _externalReferenceChecker = externalReferenceChecker;
             _validationPipeline = BuildValidationPipeline();
         }
+
+        /// <summary>
+        /// Gets a value indicating whether a cross-module external reference checker was wired in.
+        /// Used by tests to guard against the production API helper regressing to a null (skipped) checker.
+        /// </summary>
+        internal bool HasExternalReferenceChecker => _externalReferenceChecker != null;
 
         #region PlanAndBuildJob Validation
 
@@ -119,9 +135,19 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
             // ============================================================
             // PHASE 3: DATABASE ACCESS CHECKS (UNIQUENESS) + REMAINING RULES
             // ============================================================
-            // Batch-fetch every JobName that needs a uniqueness check, and every Person/Team id referenced by
-            // AssignedTo/AssignmentGroup/Attachments, in a handful of big-OR queries instead of issuing one
-            // query per Job (and, for People/Teams, one remote People &amp; Organizations call per reference).
+            ValidateAgainstDatabase(jobs, results);
+
+            return results;
+        }
+
+        /// <summary>
+        /// Runs the database-backed validation phase. Batch-fetches every JobName that needs a uniqueness
+        /// check, and every Person/Team id referenced by AssignedTo/AssignmentGroup/Attachments, in a handful
+        /// of big-OR queries instead of issuing one query per Job (and, for People/Teams, one remote
+        /// People &amp; Organizations call per reference).
+        /// </summary>
+        private void ValidateAgainstDatabase(List<PlanAndBuildJob> jobs, List<ValidationResult> results)
+        {
             var jobNames = jobs
                 .Where(j => j.ShouldValidate(j.JobNameField) && !string.IsNullOrWhiteSpace(j.JobName))
                 .Select(j => j.JobName)
@@ -130,38 +156,107 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
 
             var existingByJobName = _helper.Jobs.GetByJobNames(jobNames).ToLookup(j => j.JobName);
 
-            var personIds = new List<Guid>();
-            var teamIds = new List<Guid>();
-
-            foreach (var job in jobs)
-            {
-                if (job.ShouldValidate(job.Ownership.AssignedToField) && job.Ownership.AssignedTo.HasValue)
-                {
-                    personIds.Add(job.Ownership.AssignedTo.Value);
-                }
-
-                if (job.ShouldValidate(job.Ownership.AssignmentGroupField) && job.Ownership.AssignmentGroup.HasValue)
-                {
-                    teamIds.Add(job.Ownership.AssignmentGroup.Value);
-                }
-
-                if (job.ShouldValidateAny(job.AttachmentsField) && job.Attachments != null)
-                {
-                    personIds.AddRange(job.Attachments.Where(a => a?.AttachedBy.HasValue == true).Select(a => a.AttachedBy.Value));
-                }
-            }
+            var personIds = CollectReferencedPersonIds(jobs);
+            var teamIds = CollectReferencedTeamIds(jobs);
+            var jobTypeIds = CollectReferencedJobTypeIds(jobs);
+            var locationIds = CollectReferencedLocationIds(jobs);
+            var assetIds = CollectReferencedAssetIds(jobs);
+            var connectionIds = CollectReferencedConnectionIds(jobs);
+            var cableTypeIds = CollectReferencedCableTypeIds(jobs);
 
             var existingPersonIds = GetExistingPersonIds(personIds);
             var existingTeamIds = GetExistingTeamIds(teamIds);
+            var existingJobTypeIds = GetExistingJobTypeIds(jobTypeIds);
+            var existingLocationIds = _externalReferenceChecker?.GetExistingLocationIds(locationIds);
+            var existingAssetIds = _externalReferenceChecker?.GetExistingAssetIds(assetIds);
+            var existingConnectionIds = _externalReferenceChecker?.GetExistingConnectionIds(connectionIds);
+            var existingCableTypeIds = _externalReferenceChecker?.GetExistingCableTypeIds(cableTypeIds);
 
             for (int i = 0; i < jobs.Count; i++)
             {
                 results[i].AddFailuresFrom(ValidateJobTypeAndDates(jobs[i]));
+                results[i].AddFailuresFrom(ValidateStateGatedChanges(jobs[i]));
                 results[i].AddFailuresFrom(ValidateJobNameUniqueness(jobs[i], existingByJobName));
                 results[i].AddFailuresFrom(ValidatePeopleAndOrganizations(jobs[i], existingPersonIds, existingTeamIds));
+                results[i].AddFailuresFrom(ValidateJobTypeReference(jobs[i], existingJobTypeIds));
+                results[i].AddFailuresFrom(ValidateExternalReferences(jobs[i], existingLocationIds, existingAssetIds, existingConnectionIds, existingCableTypeIds));
             }
+        }
 
-            return results;
+        private static List<string> CollectReferencedJobTypeIds(List<PlanAndBuildJob> jobs)
+        {
+            return jobs
+                .Where(j => j.ShouldValidate(j.TypeField) && IsReferenceSet(j.Type))
+                .Select(j => j.Type.Identifier)
+                .ToList();
+        }
+
+        private static List<Guid> CollectReferencedLocationIds(List<PlanAndBuildJob> jobs)
+        {
+            return jobs
+                .Where(j => j.ShouldValidateAny(j.LocationsField) && j.Locations != null)
+                .SelectMany(j => j.Locations)
+                .Where(id => id != Guid.Empty)
+                .ToList();
+        }
+
+        private static List<string> CollectReferencedAssetIds(List<PlanAndBuildJob> jobs)
+        {
+            return jobs
+                .Where(j => j.ShouldValidateAny(j.AssetsUsedField) && j.AssetsUsed != null)
+                .SelectMany(j => j.AssetsUsed)
+                .Where(asset => asset != null && IsReferenceSet(asset.AssetId))
+                .Select(asset => asset.AssetId.Identifier)
+                .ToList();
+        }
+
+        private static List<string> CollectReferencedConnectionIds(List<PlanAndBuildJob> jobs)
+        {
+            return jobs
+                .Where(j => j.ShouldValidateAny(j.ConnectionsOnJobField) && j.ConnectionsOnJob != null)
+                .SelectMany(j => j.ConnectionsOnJob)
+                .Where(connection => connection != null && IsReferenceSet(connection.ConnectionId))
+                .Select(connection => connection.ConnectionId.Identifier)
+                .ToList();
+        }
+
+        private static List<string> CollectReferencedCableTypeIds(List<PlanAndBuildJob> jobs)
+        {
+            return jobs
+                .Where(j => j.ShouldValidateAny(j.ConnectionsOnJobField) && j.ConnectionsOnJob != null)
+                .SelectMany(j => j.ConnectionsOnJob)
+                .Where(connection => connection != null && IsReferenceSet(connection.CableType))
+                .Select(connection => connection.CableType.Identifier)
+                .ToList();
+        }
+
+        /// <summary>
+        /// Collects every Person id referenced by AssignedTo or attachment AttachedBy fields that require validation.
+        /// </summary>
+        private static List<Guid> CollectReferencedPersonIds(List<PlanAndBuildJob> jobs)
+        {
+            var assignedTo = jobs
+                .Where(j => j.ShouldValidate(j.Ownership.AssignedToField) && j.Ownership.AssignedTo.HasValue)
+                .Select(j => j.Ownership.AssignedTo.Value);
+
+            var attachedBy = jobs
+                .Where(j => j.ShouldValidateAny(j.AttachmentsField) && j.Attachments != null)
+                .SelectMany(j => j.Attachments)
+                .Where(a => a?.AttachedBy.HasValue == true)
+                .Select(a => a.AttachedBy.Value);
+
+            return assignedTo.Concat(attachedBy).ToList();
+        }
+
+        /// <summary>
+        /// Collects every Team id referenced by AssignmentGroup fields that require validation.
+        /// </summary>
+        private static List<Guid> CollectReferencedTeamIds(List<PlanAndBuildJob> jobs)
+        {
+            return jobs
+                .Where(j => j.ShouldValidate(j.Ownership.AssignmentGroupField) && j.Ownership.AssignmentGroup.HasValue)
+                .Select(j => j.Ownership.AssignmentGroup.Value)
+                .ToList();
         }
 
         /// <summary>
@@ -201,15 +296,20 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
                 .Create(ValidateInfo)
                 .StopOnFailure();
 
-            // No database access checks - fail fast before hitting the database
+            // No database access checks - fail fast before hitting the database. ValidateStateGatedChanges
+            // self-gates on job.IsNew (it is a no-op for new jobs), so it is safe to include unconditionally
+            // for both create and update.
             var noDatabaseChecks = Validator<PlanAndBuildJob>
                 .Create(ValidateJobTypeAndDates)
+                .AndThen(ValidateStateGatedChanges)
                 .StopOnFailure();
 
             // Database access checks (uniqueness, People/Team existence)
             var databaseChecks = Validator<PlanAndBuildJob>
                 .Create(ValidateJobNameUniqueness)
-                .AndThen(ValidatePeopleAndOrganizations);
+                .AndThen(ValidatePeopleAndOrganizations)
+                .AndThen(ValidateJobTypeReference)
+                .AndThen(ValidateExternalReferences);
 
             // Combine: critical first, then no-database checks, then database checks
             return criticalValidations.AndThen(noDatabaseChecks.AndThen(databaseChecks));
@@ -248,6 +348,13 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
             return result;
         }
 
+        private ValidationResult ValidateStateGatedChanges(PlanAndBuildJob job)
+        {
+            return AreStateGatedChangesAllowed(job, out var result)
+                ? new ValidationResult()
+                : result;
+        }
+
         private ValidationResult ValidateJobNameUniqueness(PlanAndBuildJob job)
         {
             var result = new ValidationResult();
@@ -279,7 +386,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
 
         /// <summary>
         /// Batch variant of <see cref="ValidateJobNameUniqueness(PlanAndBuildJob)"/>, used by
-        /// <see cref="ValidateBulk"/>. Checks the pre-fetched <paramref name="existingByJobName"/> lookup (built
+        /// <see cref="ValidateBulk(System.Collections.Generic.List{PlanAndBuildJob})"/>. Checks the pre-fetched <paramref name="existingByJobName"/> lookup (built
         /// once for the whole batch via <see cref="IPlanAndBuildJobRepository.GetByJobNames"/>) instead of
         /// issuing its own DB query.
         /// </summary>
@@ -309,6 +416,34 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
 
             return existingByJobName[jobName ?? string.Empty]
                 .Any(j => string.IsNullOrEmpty(exceptIdentifier) || !string.Equals(j.Identifier, exceptIdentifier, StringComparison.Ordinal));
+        }
+
+        private ValidationResult ValidateJobTypeReference(PlanAndBuildJob job)
+        {
+            return ValidateJobTypeReference(job, GetExistingJobTypeIds(new[] { job.Type == null ? null : job.Type.Identifier }));
+        }
+
+        private ValidationResult ValidateJobTypeReference(PlanAndBuildJob job, HashSet<string> existingJobTypeIds)
+        {
+            var result = new ValidationResult();
+
+            if (job.ShouldValidate(job.TypeField) &&
+                IsReferenceSet(job.Type) &&
+                existingJobTypeIds?.Contains(job.Type.Identifier) != true)
+            {
+                result.AddFailReason(PlanAndBuildJobValidationField.JobType, $"Referenced JobType '{job.Type.Identifier}' does not exist.");
+            }
+
+            return result;
+        }
+
+        private HashSet<string> GetExistingJobTypeIds(IEnumerable<string> jobTypeIds)
+        {
+            var keys = jobTypeIds?.Where(id => !string.IsNullOrWhiteSpace(id)).Distinct().ToList() ?? new List<string>();
+
+            return _helper.JobTypes.GetByIdentifiers(keys)
+                .Select(jobType => jobType.Identifier)
+                .ToHashSet();
         }
 
         /// <summary>
@@ -353,7 +488,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
 
         /// <summary>
         /// Batch variant of <see cref="ValidatePeopleAndOrganizations(PlanAndBuildJob)"/>, used by
-        /// <see cref="ValidateBulk"/>. Checks the pre-fetched <paramref name="existingPersonIds"/>/
+        /// <see cref="ValidateBulk(System.Collections.Generic.List{PlanAndBuildJob})"/>. Checks the pre-fetched <paramref name="existingPersonIds"/>/
         /// <paramref name="existingTeamIds"/> sets (built once for the whole batch via
         /// <see cref="GetExistingPersonIds"/>/<see cref="GetExistingTeamIds"/>) instead of issuing a People
         /// &amp; Organizations query per Person/Team reference.
@@ -388,6 +523,104 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
             }
 
             return result;
+        }
+
+        private ValidationResult ValidateExternalReferences(PlanAndBuildJob job)
+        {
+            if (_externalReferenceChecker == null)
+            {
+                return new ValidationResult();
+            }
+
+            return ValidateExternalReferences(
+                job,
+                _externalReferenceChecker.GetExistingLocationIds(CollectReferencedLocationIds(new List<PlanAndBuildJob> { job })),
+                _externalReferenceChecker.GetExistingAssetIds(CollectReferencedAssetIds(new List<PlanAndBuildJob> { job })),
+                _externalReferenceChecker.GetExistingConnectionIds(CollectReferencedConnectionIds(new List<PlanAndBuildJob> { job })),
+                _externalReferenceChecker.GetExistingCableTypeIds(CollectReferencedCableTypeIds(new List<PlanAndBuildJob> { job })));
+        }
+
+        private ValidationResult ValidateExternalReferences(
+            PlanAndBuildJob job,
+            IReadOnlyCollection<Guid> existingLocationIds,
+            IReadOnlyCollection<string> existingAssetIds,
+            IReadOnlyCollection<string> existingConnectionIds,
+            IReadOnlyCollection<string> existingCableTypeIds)
+        {
+            var result = new ValidationResult();
+            ValidateLocationReferences(job, existingLocationIds, result);
+            ValidateAssetReferences(job, existingAssetIds, result);
+            ValidateConnectionReferences(job, existingConnectionIds, result);
+            ValidateCableTypeReferences(job, existingCableTypeIds, result);
+            return result;
+        }
+
+        private static void ValidateLocationReferences(PlanAndBuildJob job, IReadOnlyCollection<Guid> existingLocationIds, ValidationResult result)
+        {
+            if (existingLocationIds == null || !job.ShouldValidateAny(job.LocationsField) || job.Locations == null)
+            {
+                return;
+            }
+
+            var existing = existingLocationIds.ToHashSet();
+            foreach (var locationId in job.Locations.Where(id => id != Guid.Empty))
+            {
+                if (!existing.Contains(locationId))
+                {
+                    result.AddFailReason(PlanAndBuildJobValidationField.Locations, $"Referenced Location '{locationId}' does not exist.");
+                }
+            }
+        }
+
+        private static void ValidateAssetReferences(PlanAndBuildJob job, IReadOnlyCollection<string> existingAssetIds, ValidationResult result)
+        {
+            if (existingAssetIds == null || !job.ShouldValidateAny(job.AssetsUsedField) || job.AssetsUsed == null)
+            {
+                return;
+            }
+
+            var existing = existingAssetIds.ToHashSet();
+            foreach (var assetId in job.AssetsUsed.Where(asset => asset != null && IsReferenceSet(asset.AssetId)).Select(asset => asset.AssetId.Identifier))
+            {
+                if (!existing.Contains(assetId))
+                {
+                    result.AddFailReason(PlanAndBuildJobValidationField.AssetsUsed, $"Referenced Asset '{assetId}' does not exist.");
+                }
+            }
+        }
+
+        private static void ValidateConnectionReferences(PlanAndBuildJob job, IReadOnlyCollection<string> existingConnectionIds, ValidationResult result)
+        {
+            if (existingConnectionIds == null || !job.ShouldValidateAny(job.ConnectionsOnJobField) || job.ConnectionsOnJob == null)
+            {
+                return;
+            }
+
+            var existing = existingConnectionIds.ToHashSet();
+            foreach (var connectionId in job.ConnectionsOnJob.Where(connection => connection != null && IsReferenceSet(connection.ConnectionId)).Select(connection => connection.ConnectionId.Identifier))
+            {
+                if (!existing.Contains(connectionId))
+                {
+                    result.AddFailReason(PlanAndBuildJobValidationField.Connections, $"Referenced Connection '{connectionId}' does not exist.");
+                }
+            }
+        }
+
+        private static void ValidateCableTypeReferences(PlanAndBuildJob job, IReadOnlyCollection<string> existingCableTypeIds, ValidationResult result)
+        {
+            if (existingCableTypeIds == null || !job.ShouldValidateAny(job.ConnectionsOnJobField) || job.ConnectionsOnJob == null)
+            {
+                return;
+            }
+
+            var existing = existingCableTypeIds.ToHashSet();
+            foreach (var cableTypeId in job.ConnectionsOnJob.Where(connection => connection != null && IsReferenceSet(connection.CableType)).Select(connection => connection.CableType.Identifier))
+            {
+                if (!existing.Contains(cableTypeId))
+                {
+                    result.AddFailReason(PlanAndBuildJobValidationField.Connections, $"Referenced CableType '{cableTypeId}' does not exist.");
+                }
+            }
         }
 
         private bool IsPersonValid(Guid personId)
@@ -426,6 +659,12 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
                 .ReadByBigOrFilter(keys, id => TeamExposers.Id.Equal(id))
                 .Select(t => t.Id)
                 .ToHashSet();
+        }
+
+        private static bool IsReferenceSet<T>(SdmObjectReference<T> reference)
+            where T : SdmObject<T>
+        {
+            return reference != null && !string.IsNullOrWhiteSpace(reference.Identifier);
         }
 
         #endregion

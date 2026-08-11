@@ -86,36 +86,63 @@
         /// </summary>
         private ValidationResult ValidatePortType(DataPort dataPort)
         {
-            var result = new ValidationResult();
-
             if (dataPort.DataPortInfo.Type == null || !dataPort.DataPortInfo.Type.HasValue())
             {
-                result.AddFailReason(DataPortValidationField.PortType,
-                    "Port Type cannot be empty.");
-                return result;
+                return PortTypeRequiredFailure();
             }
 
             try
             {
                 var portType = _entityLoader.LoadPortType(dataPort.DataPortInfo.Type);
-                if (portType == null)
-                {
-                    result.AddFailReason(DataPortValidationField.PortType,
-                        "Port Type not found.");
-                    return result;
-                }
-
-                if (!portType.IsDataPortType())
-                {
-                    result.AddFailReason(DataPortValidationField.PortType,
-                        "Port Type must be a Data Port Type.");
-                    return result;
-                }
+                return ValidatePortTypeAgainst(dataPort, portType);
             }
             catch (Exception ex)
             {
+                var result = new ValidationResult();
                 result.AddFailReason(DataPortValidationField.PortType,
                     $"Error validating Port Type: {ex.Message}");
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Builds the required-field failure for a missing Port Type reference.
+        /// Shared by the single-item and bulk validation paths so the message stays consistent.
+        /// </summary>
+        private static ValidationResult PortTypeRequiredFailure()
+        {
+            var result = new ValidationResult();
+            result.AddFailReason(DataPortValidationField.PortType,
+                "Port Type cannot be empty.");
+            return result;
+        }
+
+        /// <summary>
+        /// Validates a DataPort's Port Type reference against an already-loaded PortType
+        /// (or null when the referenced type could not be found). Pure in-memory checks,
+        /// so it can be reused by the bulk path after a batched port-type load.
+        /// </summary>
+        public ValidationResult ValidatePortTypeAgainst(DataPort dataPort, PortType loadedPortType)
+        {
+            var result = new ValidationResult();
+
+            if (dataPort.DataPortInfo.Type == null || !dataPort.DataPortInfo.Type.HasValue())
+            {
+                return PortTypeRequiredFailure();
+            }
+
+            if (loadedPortType == null)
+            {
+                result.AddFailReason(DataPortValidationField.PortType,
+                    $"Port Type not found. Referenced Port Type '{dataPort.DataPortInfo.Type.Identifier}' does not exist.");
+                return result;
+            }
+
+            if (!loadedPortType.IsDataPortType())
+            {
+                result.AddFailReason(DataPortValidationField.PortType,
+                    "Port Type must be a Data Port Type.");
+                return result;
             }
 
             return result;
@@ -134,7 +161,7 @@
                 if (asset == null)
                 {
                     result.AddFailReason(DataPortValidationField.Asset,
-                        $"Parent Asset '{dataPort.Asset.Identifier}' not found.");
+                        $"Referenced Asset '{dataPort.Asset.Identifier}' does not exist.");
                     return result;
                 }
 
@@ -229,48 +256,14 @@
         public Dictionary<string, ValidationResult> ValidateDataPortsForAsset(
             List<DataPort> portsToValidate, Asset asset)
         {
-            if (asset == null)
-            {
-                throw new ArgumentNullException(nameof(asset));
-            }
-
-            if (portsToValidate == null || !portsToValidate.Any())
-            {
-                return new Dictionary<string, ValidationResult>();
-            }
-
-            // DEFENSIVE CHECK: Ensure all ports belong to this asset
-            var mismatchedPorts = portsToValidate
-                .Where(p => p.Asset.Identifier != asset.Identifier)
-                .ToList();
-
-            if (mismatchedPorts.Any())
-            {
-                throw new ArgumentException(
-                    $"All DataPorts must belong to Asset '{asset.Identifier}'. Found {mismatchedPorts.Count} port(s) belonging to different assets. ",
-                    nameof(portsToValidate));
-            }
-
-            var results = portsToValidate.ToDictionary(p => p.Identifier, p => new ValidationResult());
-
-            var validatedIds = portsToValidate.Select(p => p.Identifier).ToList();
-            var existingPorts = _entityLoader.LoadDataPorts(asset)
-                .Where(p => !validatedIds.Contains(p.Identifier))
-                .ToList();
-
-            var allPorts = existingPorts.Concat(portsToValidate).ToList();
-
-            var collectionResult = ValidateDataPortCollection(allPorts);
-
-            if (!collectionResult.IsValid)
-            {
-                foreach (var port in portsToValidate)
-                {
-                    results[port.Identifier].AddFailuresFrom(collectionResult);
-                }
-            }
-
-            return results;
+            return PortBulkValidationHelper.ValidatePortsForAsset(
+                portsToValidate,
+                asset,
+                "DataPorts",
+                p => p.Identifier,
+                p => p.Asset.Identifier,
+                a => _entityLoader.LoadDataPorts(a),
+                ValidateDataPortCollection);
         }
 
         #endregion

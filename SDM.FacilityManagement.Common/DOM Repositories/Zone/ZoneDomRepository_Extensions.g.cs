@@ -8,9 +8,9 @@ namespace Skyline.DataMiner.SDM
     public static class ZoneDomRepository_Extensions
     {
 
-        public static Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone> WithMiddleware(
-            this Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone> repository,
-            IMiddlewareMarker<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone> middleware)
+        public static IBulkRepository<FacilityManagement.Models.Zone> WithMiddleware(
+            this IBulkRepository<FacilityManagement.Models.Zone> repository,
+            IMiddlewareMarker<FacilityManagement.Models.Zone> middleware)
         {
             return new ZoneDomRepository_Middleware(repository, middleware);
         }

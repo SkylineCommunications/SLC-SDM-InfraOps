@@ -1,6 +1,8 @@
 namespace Skyline.DataMiner.SDM.PlanAndBuild.Helpers
 {
     using Skyline.DataMiner.Net;
+    using Skyline.DataMiner.SDM.AssetManagement.Helpers;
+    using Skyline.DataMiner.SDM.FacilityManagement.Helpers;
     using Skyline.DataMiner.SDM.PlanAndBuild.Middleware;
     using Skyline.DataMiner.SDM.PlanAndBuild.Models;
     using Skyline.DataMiner.SDM.PlanAndBuild.Validation;
@@ -10,7 +12,12 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Helpers
     public class PlanAndBuildApiHelper : IPlanAndBuildApiHelper
     {
         public PlanAndBuildApiHelper(IConnection connection)
-            : this(connection, connection.GetPeopleAndOrganizationsApi())
+            : this(
+                connection,
+                connection.GetPeopleAndOrganizationsApi(),
+                new PlanAndBuildExternalReferenceChecker(
+                    new FacilityManagementApiHelper(connection),
+                    new AssetManagementApiHelper(connection)))
         {
         }
 
@@ -19,7 +26,10 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Helpers
         /// <see cref="IPeopleAndOrganizationsApi"/> instance. Mainly intended for unit tests, where a mocked
         /// People &amp; Organizations API is supplied instead of the real one resolved from <paramref name="connection"/>.
         /// </summary>
-        public PlanAndBuildApiHelper(IConnection connection, IPeopleAndOrganizationsApi peopleApi)
+        internal PlanAndBuildApiHelper(
+            IConnection connection,
+            IPeopleAndOrganizationsApi peopleApi,
+            IPlanAndBuildExternalReferenceChecker externalReferenceChecker = null)
         {
             Connection = connection;
             PandOApiHelper = peopleApi;
@@ -29,7 +39,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Helpers
             var jobTypeRepository = new JobTypeDomRepository(connection);
             var appSettingsRepository = new PlanAndBuildAppSettingsDomRepository(connection);
 
-            var jobValidator = new PlanAndBuildJobValidator(this, PandOApiHelper);
+            var jobValidator = new PlanAndBuildJobValidator(this, PandOApiHelper, externalReferenceChecker);
             var jobTypeValidator = new JobTypeValidator(this);
             var appSettingsValidator = new PlanAndBuildAppSettingsValidator();
 

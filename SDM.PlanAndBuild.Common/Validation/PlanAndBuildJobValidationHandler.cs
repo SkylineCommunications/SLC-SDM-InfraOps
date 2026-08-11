@@ -1,5 +1,7 @@
 namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
 {
+    using SharedMappers.DomIds;
+
     using Skyline.DataMiner.SDM.PlanAndBuild.Models;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
@@ -20,6 +22,10 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
             AssignedTo,
             AssignmentGroup,
             Attachments,
+            Locations,
+            AssetsUsed,
+            Connections,
+            Start,
         }
 
         #region Info Validation
@@ -85,6 +91,72 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
             }
 
             return result.IsValid;
+        }
+
+        #endregion
+
+        #region State-Gated Edit Validation
+
+        public static bool AreStateGatedChangesAllowed(PlanAndBuildJob job, out ValidationResult result)
+        {
+            result = new ValidationResult();
+
+            if (job == null)
+            {
+                result.AddFailReason(PlanAndBuildJobValidationField.Job, "Job cannot be null.");
+                return result.IsValid;
+            }
+
+            if (job.IsNew)
+            {
+                return result.IsValid;
+            }
+
+            var originalState = job.StateField.OriginalValue;
+
+            if (job.LocationsField.Changed && !CanEditLocations(originalState))
+            {
+                result.AddFailReason(PlanAndBuildJobValidationField.Locations, "Cannot edit job locations. This action is only available for jobs in 'New' or 'Assigned' state.");
+            }
+
+            if (job.AssetsUsedField.Changed && IsTerminal(originalState))
+            {
+                result.AddFailReason(PlanAndBuildJobValidationField.AssetsUsed, "Cannot edit job assets used. This action is not available for 'Resolved' or 'Cancelled' jobs.");
+            }
+
+            if (job.ConnectionsOnJobField.Changed && IsTerminal(originalState))
+            {
+                result.AddFailReason(PlanAndBuildJobValidationField.Connections, "Cannot edit job connections. This action is not available for 'Resolved' or 'Cancelled' jobs.");
+            }
+
+            if (job.JobNameField.Changed && originalState != SlcPlan_And_Build.Behaviors.Job_Behavior.StatusesEnum.New)
+            {
+                result.AddFailReason(PlanAndBuildJobValidationField.JobName, "Cannot edit the Job Name unless the Job is in 'New' state.");
+            }
+
+            if (job.StartField.Changed && originalState != SlcPlan_And_Build.Behaviors.Job_Behavior.StatusesEnum.New)
+            {
+                result.AddFailReason(PlanAndBuildJobValidationField.Start, "Cannot edit the Start time unless the Job is in 'New' state.");
+            }
+
+            if (job.TypeField.Changed && originalState != SlcPlan_And_Build.Behaviors.Job_Behavior.StatusesEnum.New)
+            {
+                result.AddFailReason(PlanAndBuildJobValidationField.JobType, "Cannot edit the Job Type unless the Job is in 'New' state.");
+            }
+
+            return result.IsValid;
+        }
+
+        private static bool CanEditLocations(SlcPlan_And_Build.Behaviors.Job_Behavior.StatusesEnum state)
+        {
+            return state == SlcPlan_And_Build.Behaviors.Job_Behavior.StatusesEnum.New ||
+                state == SlcPlan_And_Build.Behaviors.Job_Behavior.StatusesEnum.Assigned;
+        }
+
+        private static bool IsTerminal(SlcPlan_And_Build.Behaviors.Job_Behavior.StatusesEnum state)
+        {
+            return state == SlcPlan_And_Build.Behaviors.Job_Behavior.StatusesEnum.Resolved ||
+                state == SlcPlan_And_Build.Behaviors.Job_Behavior.StatusesEnum.Canceled;
         }
 
         #endregion

@@ -81,7 +81,8 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Validation
 
             // Database access checks (uniqueness)
             var databaseChecks = Validator<PropertyValues>
-                .Create(ValidateUniqueness);
+                .Create(ValidateUniqueness)
+                .AndThen(ValidatePropertyReferences);
 
             // Combine: critical first, then no-database checks, then database checks
             return criticalValidations.AndThen(noDatabaseChecks.AndThen(databaseChecks));
@@ -208,6 +209,52 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Validation
                 (string.IsNullOrEmpty(exceptIdentifier) || !string.Equals(pv.Identifier, exceptIdentifier, StringComparison.Ordinal)));
         }
 
+        private ValidationResult ValidatePropertyReferences(PropertyValues propertyValues)
+        {
+            return ValidatePropertyReferences(propertyValues, GetExistingPropertyIds(CollectReferencedPropertyIds(new List<PropertyValues> { propertyValues })));
+        }
+
+        private ValidationResult ValidatePropertyReferences(PropertyValues propertyValues, HashSet<string> existingPropertyIds)
+        {
+            var result = new ValidationResult();
+
+            if (!propertyValues.ShouldValidate(propertyValues.ValuesField) || propertyValues.Values == null)
+            {
+                return result;
+            }
+
+            foreach (var propertyId in propertyValues.Values
+                .Where(value => value != null && IsReferenceSet(value.PropertyId))
+                .Select(value => value.PropertyId.Identifier))
+            {
+                if (existingPropertyIds?.Contains(propertyId) != true)
+                {
+                    result.AddFailReason(PropertyValuesValidationHandler.PropertyValuesValidationField.Values, $"Referenced Property '{propertyId}' does not exist.");
+                }
+            }
+
+            return result;
+        }
+
+        private HashSet<string> GetExistingPropertyIds(IEnumerable<string> propertyIds)
+        {
+            var keys = propertyIds?.Where(id => !string.IsNullOrWhiteSpace(id)).Distinct().ToList() ?? new List<string>();
+
+            return _helper.Properties.GetByIdentifiers(keys)
+                .Select(property => property.Identifier)
+                .ToHashSet();
+        }
+
+        private static List<string> CollectReferencedPropertyIds(List<PropertyValues> propertyValuesList)
+        {
+            return propertyValuesList
+                .Where(pv => pv.ShouldValidate(pv.ValuesField) && pv.Values != null)
+                .SelectMany(pv => pv.Values)
+                .Where(value => value != null && IsReferenceSet(value.PropertyId))
+                .Select(value => value.PropertyId.Identifier)
+                .ToList();
+        }
+
         /// <summary>
         /// Validates multiple PropertyValues in bulk. Results are returned in the same order as the input.
         /// In addition to the per-entry checks, this also detects (LinkedObjectID, Scope, SubID) conflicts
@@ -269,10 +316,13 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Validation
                 .GroupBy(pv => (pv.LinkedObjectID, pv.Scope))
                 .ToDictionary(g => g.Key, g => g.ToList());
 
+            var existingPropertyIds = GetExistingPropertyIds(CollectReferencedPropertyIds(propertyValuesList));
+
             for (int i = 0; i < propertyValuesList.Count; i++)
             {
                 results[i].AddFailuresFrom(ValidateValues(propertyValuesList[i]));
                 results[i].AddFailuresFrom(ValidateUniqueness(propertyValuesList[i], existingByLinkedObjectAndScope));
+                results[i].AddFailuresFrom(ValidatePropertyReferences(propertyValuesList[i], existingPropertyIds));
             }
 
             return results;
@@ -312,6 +362,11 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Validation
             }
 
             return results;
+        }
+
+        private static bool IsReferenceSet(SdmObjectReference<Property> reference)
+        {
+            return reference != null && !string.IsNullOrWhiteSpace(reference.Identifier);
         }
 
         #endregion

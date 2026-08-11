@@ -21,7 +21,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
     public static partial class FloorExposers
     {
-        public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Floor, string> Identifier = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Floor, string>((obj) => obj.Identifier, "Identifier");
+        public static readonly Exposer<FacilityManagement.Models.Floor, string> Identifier = new Exposer<FacilityManagement.Models.Floor, string>((obj) => obj.Identifier, "Identifier");
         static FloorExposers()
         {
             RuntimeHelpers.RunClassConstructor(typeof(FloorProperties).TypeHandle);
@@ -30,15 +30,15 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
         public static partial class FloorProperties
         {
-            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Floor, string> Name = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Floor, string>((obj) => obj.Name, "Name");
-            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Floor, string> Plan = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Floor, string>((obj) => obj.Plan, "Plan");
-            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Floor, string> Description = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Floor, string>((obj) => obj.Description, "Description");
-            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Floor, string> FloorId = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Floor, string>((obj) => obj.FloorId, "FloorId");
+            public static readonly Exposer<FacilityManagement.Models.Floor, string> Name = new Exposer<FacilityManagement.Models.Floor, string>((obj) => obj.Name, "Name");
+            public static readonly Exposer<FacilityManagement.Models.Floor, string> Plan = new Exposer<FacilityManagement.Models.Floor, string>((obj) => obj.Plan, "Plan");
+            public static readonly Exposer<FacilityManagement.Models.Floor, string> Description = new Exposer<FacilityManagement.Models.Floor, string>((obj) => obj.Description, "Description");
+            public static readonly Exposer<FacilityManagement.Models.Floor, string> FloorId = new Exposer<FacilityManagement.Models.Floor, string>((obj) => obj.FloorId, "FloorProperties.FloorId");
         }
 
         public static partial class FacilityFk
         {
-            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Floor, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.FacilityManagement.Models.Facility>> Facility = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Floor, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.FacilityManagement.Models.Facility>>((obj) => obj.FacilityFk.Facility, "FacilityFk.Facility");
+            public static readonly Exposer<FacilityManagement.Models.Floor, SdmObjectReference<FacilityManagement.Models.Facility>> Facility = new Exposer<FacilityManagement.Models.Floor, SdmObjectReference<FacilityManagement.Models.Facility>>((obj) => obj.FacilityFk.Facility, "FacilityFk.Facility");
         }
     }
 }

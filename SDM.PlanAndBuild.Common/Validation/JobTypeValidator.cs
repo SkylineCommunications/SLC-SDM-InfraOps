@@ -39,44 +39,30 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
         #region JobType Validation
 
         /// <summary>
-        /// Validates a JobType and returns a ValidationResult.
-        /// For <see cref="RepositoryAction.Delete"/>, checks whether the JobType is in use by existing Jobs.
-        /// For all other actions, runs standard field validation.
+        /// Delete guard: blocks deleting a JobType that is in use by existing Jobs.
         /// </summary>
-        public override ValidationResult Validate(JobType jobType, RepositoryAction action)
+        protected override ValidationResult ValidateForDelete(JobType jobType)
         {
             if (jobType == null)
             {
                 throw new ArgumentNullException(nameof(jobType));
             }
 
-            if (action == RepositoryAction.Delete)
-            {
-                return ValidateNotInUseWhenDeleted(jobType);
-            }
-
-            return base.Validate(jobType, action);
+            return ValidateNotInUseWhenDeleted(jobType);
         }
 
         /// <summary>
-        /// Validates multiple JobTypes in bulk for the given action.
-        /// For <see cref="RepositoryAction.Delete"/>, checks whether any of the JobTypes are in use
-        /// by existing Jobs (batch-fetched in a single query to avoid N+1).
-        /// For all other actions, delegates to the standard bulk field/uniqueness checks.
+        /// Bulk delete guard: blocks deleting JobTypes that are in use by existing Jobs
+        /// (batch-fetched in a single query to avoid N+1).
         /// </summary>
-        public override List<ValidationResult> ValidateBulk(List<JobType> jobTypes, RepositoryAction action)
+        protected override List<ValidationResult> ValidateBulkForDelete(List<JobType> jobTypes)
         {
             if (jobTypes == null || !jobTypes.Any())
             {
                 return new List<ValidationResult>();
             }
 
-            if (action == RepositoryAction.Delete)
-            {
-                return ValidateNotInUseWhenDeleted(jobTypes);
-            }
-
-            return base.ValidateBulk(jobTypes, action);
+            return ValidateNotInUseWhenDeleted(jobTypes);
         }
 
         protected override ValidationResult Validate(JobType jobType)

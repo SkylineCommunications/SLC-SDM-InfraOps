@@ -10,9 +10,10 @@ namespace SDM.InfraOpsProperties.Tests.PropertyValuesTests
 
 	using SDM.InfraOpsProperties.Tests.Setup;
 
+	using Skyline.DataMiner.SDM;
 	using Skyline.DataMiner.SDM.InfraOpsProperties.Models;
 	using Skyline.DataMiner.SDM.InfraOpsProperties.Validation;
-using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
+	using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
 	/// <summary>
 	/// Tests for PropertyValuesValidator which validates PropertyValues business rules.
@@ -77,7 +78,8 @@ using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 			using (new AssertionScope())
 			{
 				result.IsValid.Should().BeFalse();
-				result.TryGetFailReason(PropertyValuesValidationHandler.PropertyValuesValidationField.LinkedObjectID, out _).Should().BeTrue();
+				result.TryGetFailReason(PropertyValuesValidationHandler.PropertyValuesValidationField.LinkedObjectID, out var reason).Should().BeTrue();
+				reason.Should().Be("PropertyValues Linked Object ID cannot be empty.");
 			}
 		}
 
@@ -95,7 +97,8 @@ using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 			using (new AssertionScope())
 			{
 				result.IsValid.Should().BeFalse();
-				result.TryGetFailReason(PropertyValuesValidationHandler.PropertyValuesValidationField.Scope, out _).Should().BeTrue();
+				result.TryGetFailReason(PropertyValuesValidationHandler.PropertyValuesValidationField.Scope, out var reason).Should().BeTrue();
+				reason.Should().Be("PropertyValues Scope cannot be empty or whitespace.");
 			}
 		}
 
@@ -123,7 +126,128 @@ using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 			{
 				result.IsValid.Should().BeFalse();
 				result.TryGetFailReason(PropertyValuesValidationHandler.PropertyValuesValidationField.Values, out var reason).Should().BeTrue();
-				reason.Should().Contain("Duplicate Property Name");
+				reason.Should().Be("Duplicate Property Name(s) found in Values: Owner.");
+			}
+		}
+
+		[TestMethod]
+		public void Validate_WithMissingPropertyNameInValues_ShouldReturnExactFailureMessage()
+		{
+			var propertyValues = new PropertyValues
+			{
+				LinkedObjectID = Guid.NewGuid(),
+				Scope = "Asset",
+				Values = new List<PropertyValue>
+				{
+					new PropertyValue { PropertyName = string.Empty, Value = "Alice" },
+				},
+			};
+
+			var result = _validator.Validate(propertyValues, RepositoryAction.Create);
+
+			using (new AssertionScope())
+			{
+				result.IsValid.Should().BeFalse();
+				result.TryGetFailReason(PropertyValuesValidationHandler.PropertyValuesValidationField.Values, out var reason).Should().BeTrue();
+				reason.Should().Be("Every entry in Values must have a non-empty Property Name.");
+			}
+		}
+
+		#endregion
+
+		#region Property References
+
+		[TestMethod]
+		public void Validate_WithExistingPropertyReference_ShouldReturnValid()
+		{
+			var property = Helper.Properties.Create(new Property { Name = "Owner", Scope = "Asset" });
+			var propertyValues = new PropertyValues
+			{
+				LinkedObjectID = Guid.NewGuid(),
+				Scope = "Asset",
+				Values = new List<PropertyValue>
+				{
+					new PropertyValue { PropertyName = "Owner", Value = "Alice", PropertyId = new SdmObjectReference<Property>(property.Identifier) },
+				},
+			};
+
+			var result = _validator.Validate(propertyValues, RepositoryAction.Create);
+
+			result.IsValid.Should().BeTrue();
+		}
+
+		[TestMethod]
+		public void Validate_WithUnknownPropertyReference_ShouldReturnInvalid()
+		{
+			var propertyId = Guid.NewGuid().ToString();
+			var propertyValues = new PropertyValues
+			{
+				LinkedObjectID = Guid.NewGuid(),
+				Scope = "Asset",
+				Values = new List<PropertyValue>
+				{
+					new PropertyValue { PropertyName = "Owner", Value = "Alice", PropertyId = new SdmObjectReference<Property>(propertyId) },
+				},
+			};
+
+			var result = _validator.Validate(propertyValues, RepositoryAction.Create);
+
+			using (new AssertionScope())
+			{
+				result.IsValid.Should().BeFalse();
+				result.TryGetFailReason(PropertyValuesValidationHandler.PropertyValuesValidationField.Values, out var reason).Should().BeTrue();
+				reason.Should().Be($"Referenced Property '{propertyId}' does not exist.");
+			}
+		}
+
+		[TestMethod]
+		public void Validate_WithNullPropertyReference_ShouldReturnValid()
+		{
+			var propertyValues = new PropertyValues
+			{
+				LinkedObjectID = Guid.NewGuid(),
+				Scope = "Asset",
+				Values = new List<PropertyValue>
+				{
+					new PropertyValue { PropertyName = "Owner", Value = "Alice", PropertyId = null },
+				},
+			};
+
+			var result = _validator.Validate(propertyValues, RepositoryAction.Create);
+
+			result.IsValid.Should().BeTrue();
+		}
+
+		[TestMethod]
+		public void ValidateBulk_WithUnknownPropertyReference_ShouldFlagOnlyThatEntry()
+		{
+			var property = Helper.Properties.Create(new Property { Name = "Owner", Scope = "Asset" });
+			var unknownPropertyId = Guid.NewGuid().ToString();
+			var propertyValuesList = new List<PropertyValues>
+			{
+				new PropertyValues
+				{
+					LinkedObjectID = Guid.NewGuid(),
+					Scope = "Asset",
+					Values = new List<PropertyValue> { new PropertyValue { PropertyName = "Owner", PropertyId = new SdmObjectReference<Property>(unknownPropertyId) } },
+				},
+				new PropertyValues
+				{
+					LinkedObjectID = Guid.NewGuid(),
+					Scope = "Asset",
+					Values = new List<PropertyValue> { new PropertyValue { PropertyName = "Owner", PropertyId = new SdmObjectReference<Property>(property.Identifier) } },
+				},
+			};
+
+			var results = _validator.ValidateBulk(propertyValuesList, RepositoryAction.Create);
+
+			using (new AssertionScope())
+			{
+				results.Should().HaveCount(2);
+				results[0].IsValid.Should().BeFalse();
+				results[0].TryGetFailReason(PropertyValuesValidationHandler.PropertyValuesValidationField.Values, out var reason).Should().BeTrue();
+				reason.Should().Be($"Referenced Property '{unknownPropertyId}' does not exist.");
+				results[1].IsValid.Should().BeTrue();
 			}
 		}
 
@@ -172,7 +296,7 @@ using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 			{
 				result.IsValid.Should().BeFalse();
 				result.TryGetFailReason(PropertyValuesValidationHandler.PropertyValuesValidationField.PropertyValues, out var reason).Should().BeTrue();
-				reason.Should().Contain("already exist");
+				reason.Should().Be($"PropertyValues for Linked Object '{linkedObjectId}', Scope 'Asset' (no SubID) already exist.");
 			}
 		}
 
@@ -186,7 +310,12 @@ using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
 			var result = _validator.Validate(newPropertyValues, RepositoryAction.Create);
 
-			result.IsValid.Should().BeFalse("a PropertyValues row already exists for this (LinkedObjectID, Scope, SubID) combo");
+			using (new AssertionScope())
+			{
+				result.IsValid.Should().BeFalse("a PropertyValues row already exists for this (LinkedObjectID, Scope, SubID) combo");
+				result.TryGetFailReason(PropertyValuesValidationHandler.PropertyValuesValidationField.PropertyValues, out var reason).Should().BeTrue();
+				reason.Should().Be($"PropertyValues for Linked Object '{linkedObjectId}', Scope 'Asset', SubID 'Port1' already exist.");
+			}
 		}
 
 		[TestMethod]
@@ -311,9 +440,9 @@ using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 				results[0].IsValid.Should().BeFalse();
 				results[1].IsValid.Should().BeFalse();
 				results[0].TryGetFailReason(PropertyValuesValidationHandler.PropertyValuesValidationField.PropertyValues, out var reason0).Should().BeTrue();
-				reason0.Should().Contain("duplicated within the validation batch");
+				reason0.Should().Be($"PropertyValues for Linked Object '{linkedObjectId}', Scope 'Asset', SubID 'Port1' is duplicated within the validation batch.");
 				results[1].TryGetFailReason(PropertyValuesValidationHandler.PropertyValuesValidationField.PropertyValues, out var reason1).Should().BeTrue();
-				reason1.Should().Contain("duplicated within the validation batch");
+				reason1.Should().Be($"PropertyValues for Linked Object '{linkedObjectId}', Scope 'Asset', SubID 'Port1' is duplicated within the validation batch.");
 			}
 		}
 
@@ -368,7 +497,7 @@ using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 				results.Should().HaveCount(2);
 				results[0].IsValid.Should().BeFalse();
 				results[0].TryGetFailReason(PropertyValuesValidationHandler.PropertyValuesValidationField.PropertyValues, out var reason).Should().BeTrue();
-				reason.Should().Contain("already exist");
+				reason.Should().Be($"PropertyValues for Linked Object '{linkedObjectId}', Scope 'Asset' (no SubID) already exist.");
 				results[1].IsValid.Should().BeTrue();
 			}
 		}

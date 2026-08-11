@@ -24,20 +24,20 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
     using SLDataGateway.API.Querying;
     using SLDataGateway.API.Types.Querying;
 
-    internal sealed partial class FacilityManagerAppSettingsDomRepository_Middleware : Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettings>
+    internal sealed partial class FacilityManagerAppSettingsDomRepository_Middleware : IBulkRepository<FacilityManagement.Models.FacilityManagerAppSettings>
     {
-        private readonly Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettings> _inner;
-        private readonly IMiddlewareMarker<Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettings> _middleware;
+        private readonly IBulkRepository<FacilityManagement.Models.FacilityManagerAppSettings> _inner;
+        private readonly IMiddlewareMarker<FacilityManagement.Models.FacilityManagerAppSettings> _middleware;
 
-        public FacilityManagerAppSettingsDomRepository_Middleware(Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettings> inner, IMiddlewareMarker<Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettings> middleware)
+        public FacilityManagerAppSettingsDomRepository_Middleware(IBulkRepository<FacilityManagement.Models.FacilityManagerAppSettings> inner, IMiddlewareMarker<FacilityManagement.Models.FacilityManagerAppSettings> middleware)
         {
             _inner = inner ?? throw new ArgumentNullException(nameof(inner));
             _middleware = middleware;
         }
 
-        public IEnumerable<IPagedResult<Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettings>> ReadPaged(FilterElement<Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettings> filter)
+        public IEnumerable<IPagedResult<FacilityManagement.Models.FacilityManagerAppSettings>> ReadPaged(FilterElement<FacilityManagement.Models.FacilityManagerAppSettings> filter)
         {
-            if (_middleware is IPageableMiddleware<Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettings> middleware)
+            if (_middleware is IPageableMiddleware<FacilityManagement.Models.FacilityManagerAppSettings> middleware)
             {
                 return middleware.OnReadPaged(filter, _inner.ReadPaged);
             }
@@ -47,9 +47,9 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             }
         }
 
-        public IEnumerable<IPagedResult<Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettings>> ReadPaged(IQuery<Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettings> query)
+        public IEnumerable<IPagedResult<FacilityManagement.Models.FacilityManagerAppSettings>> ReadPaged(IQuery<FacilityManagement.Models.FacilityManagerAppSettings> query)
         {
-            if (_middleware is IPageableMiddleware<Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettings> middleware)
+            if (_middleware is IPageableMiddleware<FacilityManagement.Models.FacilityManagerAppSettings> middleware)
             {
                 return middleware.OnReadPaged(query, _inner.ReadPaged);
             }
@@ -59,9 +59,9 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             }
         }
 
-        public IEnumerable<IPagedResult<Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettings>> ReadPaged(FilterElement<Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettings> filter, int pageSize)
+        public IEnumerable<IPagedResult<FacilityManagement.Models.FacilityManagerAppSettings>> ReadPaged(FilterElement<FacilityManagement.Models.FacilityManagerAppSettings> filter, int pageSize)
         {
-            if (_middleware is IPageableMiddleware<Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettings> middleware)
+            if (_middleware is IPageableMiddleware<FacilityManagement.Models.FacilityManagerAppSettings> middleware)
             {
                 return middleware.OnReadPaged(filter, pageSize, _inner.ReadPaged);
             }
@@ -71,9 +71,9 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             }
         }
 
-        public IEnumerable<IPagedResult<Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettings>> ReadPaged(IQuery<Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettings> query, int pageSize)
+        public IEnumerable<IPagedResult<FacilityManagement.Models.FacilityManagerAppSettings>> ReadPaged(IQuery<FacilityManagement.Models.FacilityManagerAppSettings> query, int pageSize)
         {
-            if (_middleware is IPageableMiddleware<Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettings> middleware)
+            if (_middleware is IPageableMiddleware<FacilityManagement.Models.FacilityManagerAppSettings> middleware)
             {
                 return middleware.OnReadPaged(query, pageSize, _inner.ReadPaged);
             }
@@ -83,9 +83,9 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             }
         }
 
-        public IEnumerable<Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettings> Read(FilterElement<Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettings> filter)
+        public IEnumerable<FacilityManagement.Models.FacilityManagerAppSettings> Read(FilterElement<FacilityManagement.Models.FacilityManagerAppSettings> filter)
         {
-            if (_middleware is IReadableMiddleware<Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettings> middleware)
+            if (_middleware is IReadableMiddleware<FacilityManagement.Models.FacilityManagerAppSettings> middleware)
             {
                 return middleware.OnRead(filter, _inner.Read);
             }
@@ -95,9 +95,9 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             }
         }
 
-        public IEnumerable<Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettings> Read(IQuery<Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettings> query)
+        public IEnumerable<FacilityManagement.Models.FacilityManagerAppSettings> Read(IQuery<FacilityManagement.Models.FacilityManagerAppSettings> query)
         {
-            if (_middleware is IReadableMiddleware<Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettings> middleware)
+            if (_middleware is IReadableMiddleware<FacilityManagement.Models.FacilityManagerAppSettings> middleware)
             {
                 return middleware.OnRead(query, _inner.Read);
             }
@@ -107,9 +107,9 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             }
         }
 
-        public long Count(FilterElement<Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettings> filter)
+        public long Count(FilterElement<FacilityManagement.Models.FacilityManagerAppSettings> filter)
         {
-            if (_middleware is ICountableMiddleware<Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettings> middleware)
+            if (_middleware is ICountableMiddleware<FacilityManagement.Models.FacilityManagerAppSettings> middleware)
             {
                 return middleware.OnCount(filter, _inner.Count);
             }
@@ -119,9 +119,9 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             }
         }
 
-        public long Count(IQuery<Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettings> query)
+        public long Count(IQuery<FacilityManagement.Models.FacilityManagerAppSettings> query)
         {
-            if (_middleware is ICountableMiddleware<Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettings> middleware)
+            if (_middleware is ICountableMiddleware<FacilityManagement.Models.FacilityManagerAppSettings> middleware)
             {
                 return middleware.OnCount(query, _inner.Count);
             }
@@ -131,9 +131,9 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             }
         }
 
-        public IReadOnlyCollection<Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettings> Create(IEnumerable<Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettings> oToCreate)
+        public IReadOnlyCollection<FacilityManagement.Models.FacilityManagerAppSettings> Create(IEnumerable<FacilityManagement.Models.FacilityManagerAppSettings> oToCreate)
         {
-            if (_middleware is IBulkCreatableMiddleware<Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettings> middleware)
+            if (_middleware is IBulkCreatableMiddleware<FacilityManagement.Models.FacilityManagerAppSettings> middleware)
             {
                 return middleware.OnCreate(oToCreate, _inner.Create);
             }
@@ -143,9 +143,9 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             }
         }
 
-        public Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettings Create(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettings oToCreate)
+        public FacilityManagement.Models.FacilityManagerAppSettings Create(FacilityManagement.Models.FacilityManagerAppSettings oToCreate)
         {
-            if (_middleware is ICreatableMiddleware<Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettings> middleware)
+            if (_middleware is ICreatableMiddleware<FacilityManagement.Models.FacilityManagerAppSettings> middleware)
             {
                 return middleware.OnCreate(oToCreate, _inner.Create);
             }
@@ -155,9 +155,9 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             }
         }
 
-        public IReadOnlyCollection<Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettings> Update(IEnumerable<Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettings> oToUpdate)
+        public IReadOnlyCollection<FacilityManagement.Models.FacilityManagerAppSettings> Update(IEnumerable<FacilityManagement.Models.FacilityManagerAppSettings> oToUpdate)
         {
-            if (_middleware is IBulkUpdatableMiddleware<Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettings> middleware)
+            if (_middleware is IBulkUpdatableMiddleware<FacilityManagement.Models.FacilityManagerAppSettings> middleware)
             {
                 return middleware.OnUpdate(oToUpdate, _inner.Update);
             }
@@ -167,9 +167,9 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             }
         }
 
-        public Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettings Update(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettings oToUpdate)
+        public FacilityManagement.Models.FacilityManagerAppSettings Update(FacilityManagement.Models.FacilityManagerAppSettings oToUpdate)
         {
-            if (_middleware is IUpdatableMiddleware<Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettings> middleware)
+            if (_middleware is IUpdatableMiddleware<FacilityManagement.Models.FacilityManagerAppSettings> middleware)
             {
                 return middleware.OnUpdate(oToUpdate, _inner.Update);
             }
@@ -179,9 +179,9 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             }
         }
 
-        public void Delete(IEnumerable<Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettings> oToDelete)
+        public void Delete(IEnumerable<FacilityManagement.Models.FacilityManagerAppSettings> oToDelete)
         {
-            if (_middleware is IBulkDeletableMiddleware<Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettings> middleware)
+            if (_middleware is IBulkDeletableMiddleware<FacilityManagement.Models.FacilityManagerAppSettings> middleware)
             {
                 middleware.OnDelete(oToDelete, _inner.Delete);
             }
@@ -191,9 +191,9 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             }
         }
 
-        public void Delete(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettings oToDelete)
+        public void Delete(FacilityManagement.Models.FacilityManagerAppSettings oToDelete)
         {
-            if (_middleware is IDeletableMiddleware<Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettings> middleware)
+            if (_middleware is IDeletableMiddleware<FacilityManagement.Models.FacilityManagerAppSettings> middleware)
             {
                 middleware.OnDelete(oToDelete, _inner.Delete);
             }
@@ -203,9 +203,16 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             }
         }
 
-        public System.Collections.Generic.IReadOnlyCollection<Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettings> CreateOrUpdate(System.Collections.Generic.IEnumerable<Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettings> oToCreateOrUpdate)
+        public System.Collections.Generic.IReadOnlyCollection<FacilityManagement.Models.FacilityManagerAppSettings> CreateOrUpdate(System.Collections.Generic.IEnumerable<FacilityManagement.Models.FacilityManagerAppSettings> oToCreateOrUpdate)
         {
-            return _inner.CreateOrUpdate(oToCreateOrUpdate);
+                if (_middleware is IBulkRepositoryMiddleware<FacilityManagement.Models.FacilityManagerAppSettings> middleware)
+                {
+                    return middleware.OnCreateOrUpdate(oToCreateOrUpdate, _inner.CreateOrUpdate);
+                }
+                else
+                {
+                    return _inner.CreateOrUpdate(oToCreateOrUpdate);
+                }
         }
     }
 }

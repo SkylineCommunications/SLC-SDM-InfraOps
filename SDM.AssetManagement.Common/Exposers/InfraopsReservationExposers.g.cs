@@ -4,7 +4,7 @@
 //     Changes to this file will be lost if the code is regenerated.
 // </auto-generated>
 //------------------------------------------------------------------------------
-namespace SharedCommonLibrary.AssetManagement.Models
+namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
     using System;
     using System.Collections;
@@ -18,12 +18,11 @@ namespace SharedCommonLibrary.AssetManagement.Models
 
     using SLDataGateway.API.Querying;
     using SLDataGateway.API.Types.Querying;
-    using SharedCommonLibrary.AssetManagement.Models;
 
     public static partial class InfraopsReservationExposers
     {
-        public static readonly Exposer<SharedCommonLibrary.AssetManagement.Models.InfraopsReservation, string> Identifier = new Exposer<SharedCommonLibrary.AssetManagement.Models.InfraopsReservation, string>((obj) => obj.Identifier, "Identifier");
-        public static readonly Exposer<SharedCommonLibrary.AssetManagement.Models.InfraopsReservation, string> Description = new Exposer<SharedCommonLibrary.AssetManagement.Models.InfraopsReservation, string>((obj) => obj.Description, "Description");
+        public static readonly Exposer<AssetManagement.Models.InfraopsReservation, string> Identifier = new Exposer<AssetManagement.Models.InfraopsReservation, string>((obj) => obj.Identifier, "Identifier");
+        public static readonly Exposer<AssetManagement.Models.InfraopsReservation, string> Description = new Exposer<AssetManagement.Models.InfraopsReservation, string>((obj) => obj.Description, "Description");
         static InfraopsReservationExposers()
         {
             RuntimeHelpers.RunClassConstructor(typeof(RackFk).TypeHandle);
@@ -32,13 +31,13 @@ namespace SharedCommonLibrary.AssetManagement.Models
 
         public static partial class RackFk
         {
-            public static readonly Exposer<SharedCommonLibrary.AssetManagement.Models.InfraopsReservation, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.FacilityManagement.Models.Rack>> Rack = new Exposer<SharedCommonLibrary.AssetManagement.Models.InfraopsReservation, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.FacilityManagement.Models.Rack>>((obj) => obj.RackFk.Rack, "RackFk.Rack");
+            public static readonly Exposer<AssetManagement.Models.InfraopsReservation, SdmObjectReference<FacilityManagement.Models.Rack>> Rack = new Exposer<AssetManagement.Models.InfraopsReservation, SdmObjectReference<FacilityManagement.Models.Rack>>((obj) => obj.RackFk.Rack, "RackFk.Rack");
         }
 
         public static partial class ReservedPositions
         {
-            public static readonly CollectionExposer<SharedCommonLibrary.AssetManagement.Models.InfraopsReservation, long?> LowerBound = new CollectionExposer<SharedCommonLibrary.AssetManagement.Models.InfraopsReservation, long?>((obj) => obj.ReservedPositions.Where(x => x != null).Select(x => x.LowerBound), "ReservedPositions.LowerBound");
-            public static readonly CollectionExposer<SharedCommonLibrary.AssetManagement.Models.InfraopsReservation, long?> UpperBound = new CollectionExposer<SharedCommonLibrary.AssetManagement.Models.InfraopsReservation, long?>((obj) => obj.ReservedPositions.Where(x => x != null).Select(x => x.UpperBound), "ReservedPositions.UpperBound");
+            public static readonly CollectionExposer<AssetManagement.Models.InfraopsReservation, long?> LowerBound = new CollectionExposer<AssetManagement.Models.InfraopsReservation, long?>((obj) => obj.ReservedPositions.Where(x => x != null).Select(x => x.LowerBound), "ReservedPositions.LowerBound");
+            public static readonly CollectionExposer<AssetManagement.Models.InfraopsReservation, long?> UpperBound = new CollectionExposer<AssetManagement.Models.InfraopsReservation, long?>((obj) => obj.ReservedPositions.Where(x => x != null).Select(x => x.UpperBound), "ReservedPositions.UpperBound");
         }
     }
 }

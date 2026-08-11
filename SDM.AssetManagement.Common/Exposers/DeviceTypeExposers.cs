@@ -23,9 +23,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
 	public static partial class DeviceTypeExposers
 	{
-		public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType, string> Identifier = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType, string>((obj) => obj.Identifier, "Identifier");
-		public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType, string> Name = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType, string>((obj) => obj.Name, "Name");
-		public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType, string> Description = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType, string>((obj) => obj.Description, "Description");
+		public static readonly Exposer<AssetManagement.Models.DeviceType, string> Identifier = new Exposer<AssetManagement.Models.DeviceType, string>((obj) => obj.Identifier, "Identifier");
+		public static readonly Exposer<AssetManagement.Models.DeviceType, string> Name = new Exposer<AssetManagement.Models.DeviceType, string>((obj) => obj.Name, "Name");
+		public static readonly Exposer<AssetManagement.Models.DeviceType, string> Description = new Exposer<AssetManagement.Models.DeviceType, string>((obj) => obj.Description, "Description");
 
         static DeviceTypeExposers()
         {
@@ -35,12 +35,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
         public static partial class TagsInfo
 		{
-			public static readonly CollectionExposer<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType, SlcAsset_Management.Enums.TagOption> Tags = new CollectionExposer<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType, SlcAsset_Management.Enums.TagOption>((obj) => obj.TagsInfo.Tags, "TagsInfo.Tags");
+			public static readonly CollectionExposer<AssetManagement.Models.DeviceType, SlcAsset_Management.Enums.TagOption> Tags = new CollectionExposer<AssetManagement.Models.DeviceType, SlcAsset_Management.Enums.TagOption>((obj) => obj.TagsInfo.Tags, "TagsInfo.Tags");
 		}
 
 		public static partial class HierarchyInfo
 		{
-			public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType, SlcAsset_Management.Enums.HierarchyRoleEnum?> HierarchyRole = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType, SlcAsset_Management.Enums.HierarchyRoleEnum?>((obj) => obj.HierarchyInfo.HierarchyRole, "HierarchyInfo.HierarchyRole");
+			public static readonly Exposer<AssetManagement.Models.DeviceType, SlcAsset_Management.Enums.HierarchyRoleEnum?> HierarchyRole = new Exposer<AssetManagement.Models.DeviceType, SlcAsset_Management.Enums.HierarchyRoleEnum?>((obj) => obj.HierarchyInfo.HierarchyRole, "HierarchyInfo.HierarchyRole");
 		}
 	}
 }

@@ -43,10 +43,7 @@
                 },
                 CableFKs = new CableRelation
                 {
-                    CableTypeFks = new List<SdmObjectReference<CableType>>
-                    {
-                        new SdmObjectReference<CableType>(Guid.NewGuid().ToString()),
-                    },
+                    CableTypeFks = new List<SdmObjectReference<CableType>>(),
                 },
             };
         }
@@ -60,6 +57,37 @@
             Helper.AssetManagement.PortTypes.Create(referencePortType);
 
             // Assert
+            AssertCreated();
+        }
+
+        [TestMethod]
+        public void PortTypeDomStorageProvider_Create_WithNonExistingCableType_ShouldFail()
+        {
+            var missingId = Guid.NewGuid().ToString();
+            referencePortType.CableFKs.CableTypeFks.Add(new SdmObjectReference<CableType>(missingId));
+
+            Action act = () => Helper.AssetManagement.PortTypes.Create(referencePortType);
+
+            act.Should().Throw<Exception>()
+                .WithMessage($"*Referenced Cable Type '{missingId}' does not exist*");
+        }
+
+        [TestMethod]
+        public void PortTypeDomStorageProvider_Create_WithExistingCableType_ShouldPass()
+        {
+            var cableType = Helper.AssetManagement.CableTypes.Create(new CableType
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                Name = "Existing Port Type Cable",
+                CategoryLinks = new CategoryRelation
+                {
+                    Categories = new List<SlcAsset_Management.Enums.CategoriesEnum> { SlcAsset_Management.Enums.CategoriesEnum.Data },
+                },
+            });
+            referencePortType.CableFKs.CableTypeFks.Add(new SdmObjectReference<CableType>(cableType.Identifier));
+
+            Helper.AssetManagement.PortTypes.Create(referencePortType);
+
             AssertCreated();
         }
 
@@ -94,11 +122,7 @@
                 },
                 CableFKs = new CableRelation
                 {
-                    CableTypeFks = new List<SdmObjectReference<CableType>>
-                    {
-                        new SdmObjectReference<CableType>(Guid.NewGuid().ToString()),
-                        new SdmObjectReference<CableType>(Guid.NewGuid().ToString()),
-                    },
+                    CableTypeFks = new List<SdmObjectReference<CableType>>(),
                 },
             };
 
@@ -149,6 +173,8 @@
         {
             // Arrange
             Helper.PopulateWithDemoData(upTo: DemoDataLayer.PortTypes);
+            Helper.AssetManagement.DataPorts.Delete(Helper.AssetManagement.DataPorts.Read(new TRUEFilterElement<DataPort>()).ToList());
+            Helper.AssetManagement.PowerPorts.Delete(Helper.AssetManagement.PowerPorts.Read(new TRUEFilterElement<PowerPort>()).ToList());
 
             var initialCount = Helper.TestData.PortTypes.Count;
 
@@ -181,6 +207,8 @@
         {
             // Arrange
             Helper.PopulateWithDemoData(upTo: DemoDataLayer.PortTypes);
+            Helper.AssetManagement.DataPorts.Delete(Helper.AssetManagement.DataPorts.Read(new TRUEFilterElement<DataPort>()).ToList());
+            Helper.AssetManagement.PowerPorts.Delete(Helper.AssetManagement.PowerPorts.Read(new TRUEFilterElement<PowerPort>()).ToList());
 
             var initialCount = Helper.TestData.PortTypes.Count;
             var portTypeToDelete = Helper.AssetManagement.PortTypes
@@ -225,7 +253,7 @@
                 });
 
                 // CableFKs changes
-                updated.CableFKs.CableTypeFks.Should().HaveCount(2);
+                updated.CableFKs.CableTypeFks.Should().BeEmpty();
             }
         }
 

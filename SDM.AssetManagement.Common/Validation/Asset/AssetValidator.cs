@@ -1,12 +1,13 @@
-﻿namespace Skyline.DataMiner.SDM.AssetManagement.Validation
+namespace Skyline.DataMiner.SDM.AssetManagement.Validation
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
 
-    using SharedCommonLibrary.AssetManagement.Models;
-
+    using SharedMappers.DomIds;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
+
+    using Skyline.DataMiner.SDM.AssetManagement.Common.Validation;
     using Skyline.DataMiner.SDM.Common.Services;
     using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
@@ -152,6 +153,7 @@
             results.MergeFrom(_validationCore.ValidateBulkNameUniquenessAgainstDatabase(assets));
             results.MergeFrom(_validationCore.ValidateBulkAssetIdUniquenessAgainstDatabase(assets));
             results.MergeFrom(_validationCore.ValidateBulkSerialNumberUniquenessAgainstDatabase(assets));
+            results.MergeFrom(_validationCore.ValidateBulkReferencesAgainstDatabase(assets));
 
             if (results.AnyInvalid())
             {
@@ -164,6 +166,93 @@
             var placementValidator = new PlacementValidator(_entityLoader);
             var placementResults = placementValidator.ValidateBulkPlacements(assets);
             results.MergeFrom(placementResults);
+
+            return results;
+        }
+
+        protected override ValidationResult ValidateForDelete(Asset asset)
+        {
+            if (asset == null)
+            {
+                throw new ArgumentNullException(nameof(asset));
+            }
+
+            return ValidateCanDelete(new List<Asset> { asset })[0];
+        }
+
+        protected override List<ValidationResult> ValidateBulkForDelete(List<Asset> assets)
+        {
+            if (assets == null || !assets.Any())
+            {
+                return new List<ValidationResult>();
+            }
+
+            return ValidateCanDelete(assets);
+        }
+
+        private List<ValidationResult> ValidateCanDelete(List<Asset> assets)
+        {
+            var results = assets.Select(_ => new ValidationResult()).ToList();
+
+            // Cheap in-memory state check first. Assets that fail this can already be discarded, so we skip the
+            // (expensive) connection lookups for them entirely.
+            for (int i = 0; i < assets.Count; i++)
+            {
+                var state = assets[i].State;
+                if (state != SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable
+                    && state != SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Disposed)
+                {
+                    results[i].AddFailReason(
+                        AssetValidationHandler.AssetValidationField.Asset,
+                        "Asset must be in 'Not Available' or 'Disposed' State to Delete");
+                }
+            }
+
+            var assetIds = assets
+                .Where((a, i) => results[i].IsValid)
+                .Select(a => a.Identifier)
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .Distinct()
+                .ToList();
+
+            if (!assetIds.Any())
+            {
+                return results;
+            }
+
+            var portToAssetId = new Dictionary<string, string>();
+
+            foreach (var dataPort in _entityLoader.GetDataPortsByAssetIds(assetIds))
+            {
+                if (!string.IsNullOrWhiteSpace(dataPort.Identifier) && dataPort.Asset != null && dataPort.Asset.HasValue())
+                {
+                    portToAssetId[dataPort.Identifier] = dataPort.Asset.Identifier;
+                }
+            }
+
+            foreach (var powerPort in _entityLoader.GetPowerPortsByAssetIds(assetIds))
+            {
+                if (!string.IsNullOrWhiteSpace(powerPort.Identifier) && powerPort.Asset != null && powerPort.Asset.HasValue())
+                {
+                    portToAssetId[powerPort.Identifier] = powerPort.Asset.Identifier;
+                }
+            }
+
+            var assetIdsWithConnections = _entityLoader.GetConnectionsByPortIds(portToAssetId.Keys.ToList())
+                .SelectMany(connection => connection.GetPortIds())
+                .Where(portToAssetId.ContainsKey)
+                .Select(portId => portToAssetId[portId])
+                .ToHashSet();
+
+            for (int i = 0; i < assets.Count; i++)
+            {
+                if (results[i].IsValid && assetIdsWithConnections.Contains(assets[i].Identifier))
+                {
+                    results[i].AddFailReason(
+                        AssetValidationHandler.AssetValidationField.DataPort,
+                        "This asset has connections assigned. Please delete all of the connections first.");
+                }
+            }
 
             return results;
         }

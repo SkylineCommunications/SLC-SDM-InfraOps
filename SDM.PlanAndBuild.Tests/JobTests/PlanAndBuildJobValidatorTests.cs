@@ -1,6 +1,7 @@
 namespace SDM.PlanAndBuild.Tests.JobTests
 {
 	using System;
+	using System.Collections.Generic;
 
 	using FluentAssertions;
 	using FluentAssertions.Execution;
@@ -10,9 +11,13 @@ namespace SDM.PlanAndBuild.Tests.JobTests
 	using SDM.PlanAndBuild.Tests.Setup;
 
 	using Skyline.DataMiner.SDM;
+	using Skyline.DataMiner.SDM.AssetManagement.Models;
+	using Skyline.DataMiner.SDM.PlanAndBuild.Helpers;
 	using Skyline.DataMiner.SDM.PlanAndBuild.Models;
 	using Skyline.DataMiner.SDM.PlanAndBuild.Validation;
-using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
+	using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
+
+	using Statuses = SharedMappers.DomIds.SlcPlan_And_Build.Behaviors.Job_Behavior.StatusesEnum;
 
 	/// <summary>
 	/// Tests for PlanAndBuildJobValidator, which validates PlanAndBuildJob business rules including
@@ -137,6 +142,26 @@ using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 			{
 				result.IsValid.Should().BeFalse();
 				result.TryGetFailReason(PlanAndBuildJobValidationHandler.PlanAndBuildJobValidationField.JobType, out var reason).Should().BeTrue();
+			}
+		}
+
+		[TestMethod]
+		public void Validate_WithUnknownJobTypeReference_ShouldReturnInvalid()
+		{
+			var jobTypeId = Guid.NewGuid().ToString();
+			var job = new PlanAndBuildJob
+			{
+				JobName = "Some Job",
+				Type = new SdmObjectReference<JobType>(jobTypeId),
+			};
+
+			var result = _validator.Validate(job, RepositoryAction.Create);
+
+			using (new AssertionScope())
+			{
+				result.IsValid.Should().BeFalse();
+				result.TryGetFailReason(PlanAndBuildJobValidationHandler.PlanAndBuildJobValidationField.JobType, out var reason).Should().BeTrue();
+				reason.Should().Be($"Referenced JobType '{jobTypeId}' does not exist.");
 			}
 		}
 
@@ -507,6 +532,372 @@ using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 			var result = validator.Validate(job, RepositoryAction.Create);
 
 			result.IsValid.Should().BeTrue();
+		}
+
+		#endregion
+
+		#region External References
+
+		[TestMethod]
+		public void ProductionApiHelper_ShouldWireExternalReferenceChecker()
+		{
+			// Guards against regressing to the fail-open path where production never constructed a checker,
+			// so unknown Location/Asset/Connection/CableType references silently passed validation.
+			var connection = ConnectionHelper.CreateConnection();
+
+			var helper = new PlanAndBuildApiHelper(connection);
+
+			helper.JobValidator.HasExternalReferenceChecker.Should().BeTrue();
+		}
+
+		[TestMethod]
+		public void Validate_WithUnknownLocationAndExternalChecker_ShouldReturnInvalid()
+		{
+			var locationId = Guid.NewGuid();
+			var validator = new PlanAndBuildJobValidator(Helper, ConnectionHelper.CreateDefaultPeopleApiMock(), new ExternalReferenceCheckerStub());
+			var job = CreateValidJob();
+			job.Locations = new List<Guid> { locationId };
+
+			var result = validator.Validate(job, RepositoryAction.Create);
+
+			using (new AssertionScope())
+			{
+				result.IsValid.Should().BeFalse();
+				result.TryGetFailReason(PlanAndBuildJobValidationHandler.PlanAndBuildJobValidationField.Locations, out var reason).Should().BeTrue();
+				reason.Should().Be($"Referenced Location '{locationId}' does not exist.");
+			}
+		}
+
+		[TestMethod]
+		public void Validate_WithUnknownAssetAndExternalChecker_ShouldReturnInvalid()
+		{
+			var assetId = Guid.NewGuid().ToString();
+			var validator = new PlanAndBuildJobValidator(Helper, ConnectionHelper.CreateDefaultPeopleApiMock(), new ExternalReferenceCheckerStub());
+			var job = CreateValidJob();
+			job.AssetsUsed = new List<JobAsset> { new JobAsset { AssetId = new SdmObjectReference<Asset>(assetId) } };
+
+			var result = validator.Validate(job, RepositoryAction.Create);
+
+			using (new AssertionScope())
+			{
+				result.IsValid.Should().BeFalse();
+				result.TryGetFailReason(PlanAndBuildJobValidationHandler.PlanAndBuildJobValidationField.AssetsUsed, out var reason).Should().BeTrue();
+				reason.Should().Be($"Referenced Asset '{assetId}' does not exist.");
+			}
+		}
+
+		[TestMethod]
+		public void Validate_WithUnknownConnectionAndExternalChecker_ShouldReturnInvalid()
+		{
+			var connectionId = Guid.NewGuid().ToString();
+			var validator = new PlanAndBuildJobValidator(Helper, ConnectionHelper.CreateDefaultPeopleApiMock(), new ExternalReferenceCheckerStub());
+			var job = CreateValidJob();
+			job.ConnectionsOnJob = new List<JobConnection> { new JobConnection { ConnectionId = new SdmObjectReference<Connection>(connectionId) } };
+
+			var result = validator.Validate(job, RepositoryAction.Create);
+
+			using (new AssertionScope())
+			{
+				result.IsValid.Should().BeFalse();
+				result.TryGetFailReason(PlanAndBuildJobValidationHandler.PlanAndBuildJobValidationField.Connections, out var reason).Should().BeTrue();
+				reason.Should().Be($"Referenced Connection '{connectionId}' does not exist.");
+			}
+		}
+
+		[TestMethod]
+		public void Validate_WithValidExternalReferencesAndExternalChecker_ShouldReturnValid()
+		{
+			var locationId = Guid.NewGuid();
+			var assetId = Guid.NewGuid().ToString();
+			var connectionId = Guid.NewGuid().ToString();
+			var cableTypeId = Guid.NewGuid().ToString();
+			var validator = new PlanAndBuildJobValidator(
+				Helper,
+				ConnectionHelper.CreateDefaultPeopleApiMock(),
+				new ExternalReferenceCheckerStub(
+					locationIds: new[] { locationId },
+					assetIds: new[] { assetId },
+					connectionIds: new[] { connectionId },
+					cableTypeIds: new[] { cableTypeId }));
+			var job = CreateValidJob();
+			job.Locations = new List<Guid> { locationId };
+			job.AssetsUsed = new List<JobAsset> { new JobAsset { AssetId = new SdmObjectReference<Asset>(assetId) } };
+			job.ConnectionsOnJob = new List<JobConnection>
+			{
+				new JobConnection
+				{
+					ConnectionId = new SdmObjectReference<Connection>(connectionId),
+					CableType = new SdmObjectReference<CableType>(cableTypeId),
+				},
+			};
+
+			var result = validator.Validate(job, RepositoryAction.Create);
+
+			result.IsValid.Should().BeTrue();
+		}
+
+		[TestMethod]
+		public void Validate_WithUnknownExternalReferencesAndNoExternalChecker_ShouldReturnValid()
+		{
+			var job = CreateValidJob();
+			job.Locations = new List<Guid> { Guid.NewGuid() };
+			job.AssetsUsed = new List<JobAsset> { new JobAsset { AssetId = new SdmObjectReference<Asset>(Guid.NewGuid().ToString()) } };
+			job.ConnectionsOnJob = new List<JobConnection> { new JobConnection { ConnectionId = new SdmObjectReference<Connection>(Guid.NewGuid().ToString()) } };
+
+			var result = _validator.Validate(job, RepositoryAction.Create);
+
+			result.IsValid.Should().BeTrue();
+		}
+
+		#endregion
+
+		#region State-Gated Edits
+
+		[TestMethod]
+		public void Validate_UpdateWithLocationsChangedOutsideNewOrAssigned_ShouldReturnInvalid()
+		{
+			var job = CreateJobAt(Statuses.Active);
+			job.Locations = new List<Guid> { Guid.NewGuid() };
+
+			var result = _validator.Validate(job, RepositoryAction.Update);
+
+			using (new AssertionScope())
+			{
+				result.IsValid.Should().BeFalse();
+				result.TryGetFailReason(PlanAndBuildJobValidationHandler.PlanAndBuildJobValidationField.Locations, out var reason).Should().BeTrue();
+				reason.Should().Be("Cannot edit job locations. This action is only available for jobs in 'New' or 'Assigned' state.");
+			}
+		}
+
+		[TestMethod]
+		public void Validate_UpdateWithLocationsChangedInAssigned_ShouldReturnValid()
+		{
+			var job = CreateJobAt(Statuses.Assigned);
+			job.Locations = new List<Guid> { Guid.NewGuid() };
+
+			var result = _validator.Validate(job, RepositoryAction.Update);
+
+			result.IsValid.Should().BeTrue();
+		}
+
+		[TestMethod]
+		public void Validate_UpdateWithAssetsUsedChangedInResolvedOrCanceled_ShouldReturnInvalid()
+		{
+			var job = CreateJobAt(Statuses.Resolved);
+			job.AssetsUsed = new List<JobAsset> { new JobAsset { AssetId = new SdmObjectReference<Asset>(Guid.NewGuid().ToString()) } };
+
+			var result = _validator.Validate(job, RepositoryAction.Update);
+
+			using (new AssertionScope())
+			{
+				result.IsValid.Should().BeFalse();
+				result.TryGetFailReason(PlanAndBuildJobValidationHandler.PlanAndBuildJobValidationField.AssetsUsed, out var reason).Should().BeTrue();
+				reason.Should().Be("Cannot edit job assets used. This action is not available for 'Resolved' or 'Cancelled' jobs.");
+			}
+		}
+
+		[TestMethod]
+		public void Validate_UpdateWithAssetsUsedChangedOutsideResolvedOrCanceled_ShouldReturnValid()
+		{
+			var job = CreateJobAt(Statuses.Review);
+			job.AssetsUsed = new List<JobAsset> { new JobAsset { AssetId = new SdmObjectReference<Asset>(Guid.NewGuid().ToString()) } };
+
+			var result = _validator.Validate(job, RepositoryAction.Update);
+
+			result.IsValid.Should().BeTrue();
+		}
+
+		[TestMethod]
+		public void Validate_UpdateWithConnectionsChangedInResolvedOrCanceled_ShouldReturnInvalid()
+		{
+			var job = CreateJobAt(Statuses.Canceled);
+			job.ConnectionsOnJob = new List<JobConnection> { new JobConnection { ConnectionId = new SdmObjectReference<Connection>(Guid.NewGuid().ToString()) } };
+
+			var result = _validator.Validate(job, RepositoryAction.Update);
+
+			using (new AssertionScope())
+			{
+				result.IsValid.Should().BeFalse();
+				result.TryGetFailReason(PlanAndBuildJobValidationHandler.PlanAndBuildJobValidationField.Connections, out var reason).Should().BeTrue();
+				reason.Should().Be("Cannot edit job connections. This action is not available for 'Resolved' or 'Cancelled' jobs.");
+			}
+		}
+
+		[TestMethod]
+		public void Validate_UpdateWithConnectionsChangedOutsideResolvedOrCanceled_ShouldReturnValid()
+		{
+			var job = CreateJobAt(Statuses.Active);
+			job.ConnectionsOnJob = new List<JobConnection> { new JobConnection { ConnectionId = new SdmObjectReference<Connection>(Guid.NewGuid().ToString()) } };
+
+			var result = _validator.Validate(job, RepositoryAction.Update);
+
+			result.IsValid.Should().BeTrue();
+		}
+
+		[DataTestMethod]
+		[DataRow("JobName", "Cannot edit the Job Name unless the Job is in 'New' state.")]
+		[DataRow("Start", "Cannot edit the Start time unless the Job is in 'New' state.")]
+		[DataRow("Type", "Cannot edit the Job Type unless the Job is in 'New' state.")]
+		public void Validate_UpdateWithCoreFieldChangedOutsideNew_ShouldReturnInvalid(string fieldName, string expectedMessage)
+		{
+			var job = CreateJobAt(Statuses.Assigned);
+			ChangeCoreField(job, fieldName);
+
+			var result = _validator.Validate(job, RepositoryAction.Update);
+
+			using (new AssertionScope())
+			{
+				result.IsValid.Should().BeFalse();
+				result.TryGetFailReason(GetCoreField(fieldName), out var reason).Should().BeTrue();
+				reason.Should().Be(expectedMessage);
+			}
+		}
+
+		[DataTestMethod]
+		[DataRow("JobName")]
+		[DataRow("Start")]
+		[DataRow("Type")]
+		public void Validate_UpdateWithCoreFieldChangedInNew_ShouldReturnValid(string fieldName)
+		{
+			var job = CreateJobAt(Statuses.New);
+			ChangeCoreField(job, fieldName);
+
+			var result = _validator.Validate(job, RepositoryAction.Update);
+
+			result.IsValid.Should().BeTrue();
+		}
+
+		[DataTestMethod]
+		[DataRow("Locations")]
+		[DataRow("AssetsUsed")]
+		[DataRow("Connections")]
+		[DataRow("JobName")]
+		[DataRow("Start")]
+		[DataRow("Type")]
+		public void Validate_CreateWithStateGatedFieldChanged_ShouldReturnValid(string fieldName)
+		{
+			var job = CreateValidJob();
+			ChangeStateGatedField(job, fieldName);
+
+			var result = _validator.Validate(job, RepositoryAction.Create);
+
+			result.IsValid.Should().BeTrue();
+		}
+
+		private PlanAndBuildJob CreateJobAt(Statuses status)
+		{
+			return Helper.Jobs.Create(CreateValidJob(status));
+		}
+
+		private PlanAndBuildJob CreateValidJob(Statuses status = Statuses.New)
+		{
+			return new PlanAndBuildJob
+			{
+				JobName = $"Job {Guid.NewGuid()}",
+				Type = new SdmObjectReference<JobType>(_jobType.Identifier),
+				Start = new DateTime(2026, 1, 10),
+				End = new DateTime(2026, 1, 15),
+				State = status,
+			};
+		}
+
+		private void ChangeStateGatedField(PlanAndBuildJob job, string fieldName)
+		{
+			if (fieldName == "Locations")
+			{
+				job.Locations = new List<Guid> { Guid.NewGuid() };
+				return;
+			}
+
+			if (fieldName == "AssetsUsed")
+			{
+				job.AssetsUsed = new List<JobAsset> { new JobAsset { AssetId = new SdmObjectReference<Asset>(Guid.NewGuid().ToString()) } };
+				return;
+			}
+
+			if (fieldName == "Connections")
+			{
+				job.ConnectionsOnJob = new List<JobConnection> { new JobConnection { ConnectionId = new SdmObjectReference<Connection>(Guid.NewGuid().ToString()) } };
+				return;
+			}
+
+			ChangeCoreField(job, fieldName);
+		}
+
+		private void ChangeCoreField(PlanAndBuildJob job, string fieldName)
+		{
+			if (fieldName == "JobName")
+			{
+				job.JobName = $"Updated {Guid.NewGuid()}";
+				return;
+			}
+
+			if (fieldName == "Start")
+			{
+				job.Start = job.Start.GetValueOrDefault().AddHours(1);
+				return;
+			}
+
+			if (fieldName == "Type")
+			{
+				var otherJobType = Helper.JobTypes.Create(new JobType { Name = $"JobType {Guid.NewGuid()}" });
+				job.Type = new SdmObjectReference<JobType>(otherJobType.Identifier);
+			}
+		}
+
+		private static PlanAndBuildJobValidationHandler.PlanAndBuildJobValidationField GetCoreField(string fieldName)
+		{
+			if (fieldName == "JobName")
+			{
+				return PlanAndBuildJobValidationHandler.PlanAndBuildJobValidationField.JobName;
+			}
+
+			if (fieldName == "Start")
+			{
+				return PlanAndBuildJobValidationHandler.PlanAndBuildJobValidationField.Start;
+			}
+
+			return PlanAndBuildJobValidationHandler.PlanAndBuildJobValidationField.JobType;
+		}
+
+		private sealed class ExternalReferenceCheckerStub : IPlanAndBuildExternalReferenceChecker
+		{
+			private readonly IReadOnlyCollection<Guid> locationIds;
+			private readonly IReadOnlyCollection<string> assetIds;
+			private readonly IReadOnlyCollection<string> connectionIds;
+			private readonly IReadOnlyCollection<string> cableTypeIds;
+
+			public ExternalReferenceCheckerStub(
+				IReadOnlyCollection<Guid>? locationIds = null,
+				IReadOnlyCollection<string>? assetIds = null,
+				IReadOnlyCollection<string>? connectionIds = null,
+				IReadOnlyCollection<string>? cableTypeIds = null)
+			{
+				this.locationIds = locationIds ?? new List<Guid>();
+				this.assetIds = assetIds ?? new List<string>();
+				this.connectionIds = connectionIds ?? new List<string>();
+				this.cableTypeIds = cableTypeIds ?? new List<string>();
+			}
+
+			public IReadOnlyCollection<Guid> GetExistingLocationIds(IReadOnlyCollection<Guid> locationIds)
+			{
+				return this.locationIds;
+			}
+
+			public IReadOnlyCollection<string> GetExistingAssetIds(IReadOnlyCollection<string> assetIds)
+			{
+				return this.assetIds;
+			}
+
+			public IReadOnlyCollection<string> GetExistingConnectionIds(IReadOnlyCollection<string> connectionIds)
+			{
+				return this.connectionIds;
+			}
+
+			public IReadOnlyCollection<string> GetExistingCableTypeIds(IReadOnlyCollection<string> cableTypeIds)
+			{
+				return this.cableTypeIds;
+			}
 		}
 
 		#endregion

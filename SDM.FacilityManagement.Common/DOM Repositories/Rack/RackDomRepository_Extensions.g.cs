@@ -8,9 +8,9 @@ namespace Skyline.DataMiner.SDM
     public static class RackDomRepository_Extensions
     {
 
-        public static Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.SDM.FacilityManagement.Models.Rack> WithMiddleware(
-            this Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.SDM.FacilityManagement.Models.Rack> repository,
-            IMiddlewareMarker<Skyline.DataMiner.SDM.FacilityManagement.Models.Rack> middleware)
+        public static IBulkRepository<FacilityManagement.Models.Rack> WithMiddleware(
+            this IBulkRepository<FacilityManagement.Models.Rack> repository,
+            IMiddlewareMarker<FacilityManagement.Models.Rack> middleware)
         {
             return new RackDomRepository_Middleware(repository, middleware);
         }

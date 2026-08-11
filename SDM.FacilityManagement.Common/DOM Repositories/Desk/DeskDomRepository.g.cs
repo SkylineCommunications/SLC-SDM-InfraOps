@@ -31,7 +31,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
         public DeskDomRepository(IConnection connection)
         {
             this.connection = connection;
-            this.helper = new DomHelper(connection.HandleMessages, Skyline.DataMiner.SDM.FacilityManagement.Models.DeskDomMapper.ModuleId);
+            this.helper = new DomHelper(connection.HandleMessages, FacilityManagement.Models.DeskDomMapper.ModuleId);
         }
 
         public Desk Create(Desk createObject)
@@ -144,7 +144,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             }
 
             var domFilter = TranslateFullFilter(filter);
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.FacilityManagement.Models.DeskDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(FacilityManagement.Models.DeskDomMapper.DomDefinitionId.Id));
             return helper.DomInstances.Count(domFilter);
         }
 
@@ -156,7 +156,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             }
 
             var domFilter = TranslateFullFilter(query.Filter);
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.FacilityManagement.Models.DeskDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(FacilityManagement.Models.DeskDomMapper.DomDefinitionId.Id));
             var domOrder = TranslateFullOrderBy(query.Order);
             var domQuery = query.WithFilter(domFilter).WithOrder(domOrder);
             return helper.DomInstances.Count(domQuery);
@@ -365,7 +365,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 throw new ArgumentNullException(nameof(domFilter));
             }
 
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.FacilityManagement.Models.DeskDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(FacilityManagement.Models.DeskDomMapper.DomDefinitionId.Id));
             var domInstances = helper.DomInstances.Read(domFilter);
             return domInstances.Select(FromInstance);
         }
@@ -377,7 +377,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 throw new ArgumentNullException(nameof(domQuery));
             }
 
-            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.FacilityManagement.Models.DeskDomMapper.DomDefinitionId.Id));
+            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(FacilityManagement.Models.DeskDomMapper.DomDefinitionId.Id));
             domQuery = domQuery.WithFilter(domFilter);
             var domInstances = helper.DomInstances.Read(domQuery);
             return domInstances.Select(FromInstance);
@@ -390,7 +390,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 throw new ArgumentNullException(nameof(domFilter));
             }
 
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.FacilityManagement.Models.DeskDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(FacilityManagement.Models.DeskDomMapper.DomDefinitionId.Id));
             var pagingHelper = helper.DomInstances.PreparePaging(domFilter, pageSize);
             while (pagingHelper.MoveToNextPage())
             {
@@ -405,7 +405,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 throw new ArgumentNullException(nameof(domQuery));
             }
 
-            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.FacilityManagement.Models.DeskDomMapper.DomDefinitionId.Id));
+            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(FacilityManagement.Models.DeskDomMapper.DomDefinitionId.Id));
             domQuery = domQuery.WithFilter(domFilter);
             var pagingHelper = helper.DomInstances.PreparePaging(domQuery, pageSize);
             while (pagingHelper.MoveToNextPage())
@@ -505,53 +505,51 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             {
                 Identifier = instance.ID.Id.ToString()
             };
-            obj.State = String.IsNullOrWhiteSpace(instance.StatusId)
-                ? SharedMappers.DomIds.SlcFacility_Management.Behaviors.Desk_Behaviour.StatusesEnum.Draft
-                : SharedMappers.DomIds.SlcFacility_Management.Behaviors.Desk_Behaviour.Statuses.ToEnum(instance.StatusId);
-            var _deskinformationSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.FacilityManagement.Models.DeskDomMapper.DeskInformation.SectionDefinitionId));
+            obj.State = SharedMappers.DomIds.SlcFacility_Management.Behaviors.Desk_Behaviour.Statuses.ToEnum(instance.StatusId);
+            var _deskinformationSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(FacilityManagement.Models.DeskDomMapper.DeskInformation.SectionDefinitionId));
             if (_deskinformationSection != default)
             {
-                var _deskinformationname = _deskinformationSection.GetValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.DeskDomMapper.DeskInformation.Name);
+                var _deskinformationname = _deskinformationSection.GetValue<string>(FacilityManagement.Models.DeskDomMapper.DeskInformation.Name);
                 if (_deskinformationname != null)
                 {
                     obj.Name = _deskinformationname.Value;
                 }
 
-                var _deskinformationplan = _deskinformationSection.GetValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.DeskDomMapper.DeskInformation.Plan);
+                var _deskinformationplan = _deskinformationSection.GetValue<string>(FacilityManagement.Models.DeskDomMapper.DeskInformation.Plan);
                 if (_deskinformationplan != null)
                 {
                     obj.Plan = _deskinformationplan.Value;
                 }
 
-                var _deskinformationdescription = _deskinformationSection.GetValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.DeskDomMapper.DeskInformation.Description);
+                var _deskinformationdescription = _deskinformationSection.GetValue<string>(FacilityManagement.Models.DeskDomMapper.DeskInformation.Description);
                 if (_deskinformationdescription != null)
                 {
                     obj.Description = _deskinformationdescription.Value;
                 }
 
-                var _deskinformationdeskid = _deskinformationSection.GetValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.DeskDomMapper.DeskInformation.DeskID);
+                var _deskinformationdeskid = _deskinformationSection.GetValue<string>(FacilityManagement.Models.DeskDomMapper.DeskInformation.DeskID);
                 if (_deskinformationdeskid != null)
                 {
                     obj.DeskID = _deskinformationdeskid.Value;
                 }
             }
 
-            var _roomfkSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.FacilityManagement.Models.DeskDomMapper.RoomFk.SectionDefinitionId));
+            var _roomfkSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(FacilityManagement.Models.DeskDomMapper.RoomFk.SectionDefinitionId));
             if (_roomfkSection != default)
             {
-                obj.RoomFk = new Skyline.DataMiner.SDM.FacilityManagement.Models.RoomRelation();
-                var _roomfkroom = _roomfkSection.GetValue<System.Guid>(Skyline.DataMiner.SDM.FacilityManagement.Models.DeskDomMapper.RoomFk.Room);
+                obj.RoomFk = new FacilityManagement.Models.RoomRelation();
+                var _roomfkroom = _roomfkSection.GetValue<System.Guid>(FacilityManagement.Models.DeskDomMapper.RoomFk.Room);
                 if (_roomfkroom != null)
                 {
-                    obj.RoomFk.Room = new Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.FacilityManagement.Models.Room>(Convert.ToString(_roomfkroom.Value));
+                    obj.RoomFk.Room = new SdmObjectReference<FacilityManagement.Models.Room>(Convert.ToString(_roomfkroom.Value));
                 }
             }
 
-            var _resourceSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.FacilityManagement.Models.DeskDomMapper.Resource.SectionDefinitionId));
+            var _resourceSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(FacilityManagement.Models.DeskDomMapper.Resource.SectionDefinitionId));
             if (_resourceSection != default)
             {
-                obj.Resource = new Skyline.DataMiner.SDM.FacilityManagement.Models.ResourceLink();
-                var _resourceresourceid = _resourceSection.GetValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.DeskDomMapper.Resource.ResourceId);
+                obj.Resource = new FacilityManagement.Models.ResourceLink();
+                var _resourceresourceid = _resourceSection.GetValue<string>(FacilityManagement.Models.DeskDomMapper.Resource.ResourceId);
                 if (_resourceresourceid != null)
                 {
                     obj.Resource.ResourceId = System.Guid.Parse(Convert.ToString(_resourceresourceid.Value));
@@ -575,40 +573,45 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
             var instance = new DomInstance
             {
-                DomDefinitionId = Skyline.DataMiner.SDM.FacilityManagement.Models.DeskDomMapper.DomDefinitionId,
+                DomDefinitionId = FacilityManagement.Models.DeskDomMapper.DomDefinitionId,
                 ID = new DomInstanceId(id)
                 {
-                    ModuleId = Skyline.DataMiner.SDM.FacilityManagement.Models.DeskDomMapper.ModuleId
+                    ModuleId = FacilityManagement.Models.DeskDomMapper.ModuleId
                 }
             };
-            var _deskinformation = new Section(Skyline.DataMiner.SDM.FacilityManagement.Models.DeskDomMapper.DeskInformation.SectionDefinitionId);
+
+            if (obj.IsNew || String.IsNullOrWhiteSpace(obj.Identifier))
+            {
+                instance.StatusId = SharedMappers.DomIds.SlcFacility_Management.Behaviors.Desk_Behaviour.Statuses.ToValue(obj.State);
+            }
+            var _deskinformation = new Section(FacilityManagement.Models.DeskDomMapper.DeskInformation.SectionDefinitionId);
             if (obj.Name != default)
             {
-                _deskinformation.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.DeskDomMapper.DeskInformation.Name, Convert.ToString(obj.Name));
+                _deskinformation.AddOrUpdateValue<string>(FacilityManagement.Models.DeskDomMapper.DeskInformation.Name, Convert.ToString(obj.Name));
             }
 
             if (obj.Plan != default)
             {
-                _deskinformation.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.DeskDomMapper.DeskInformation.Plan, Convert.ToString(obj.Plan));
+                _deskinformation.AddOrUpdateValue<string>(FacilityManagement.Models.DeskDomMapper.DeskInformation.Plan, Convert.ToString(obj.Plan));
             }
 
             if (obj.Description != default)
             {
-                _deskinformation.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.DeskDomMapper.DeskInformation.Description, Convert.ToString(obj.Description));
+                _deskinformation.AddOrUpdateValue<string>(FacilityManagement.Models.DeskDomMapper.DeskInformation.Description, Convert.ToString(obj.Description));
             }
 
             if (obj.DeskID != default)
             {
-                _deskinformation.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.DeskDomMapper.DeskInformation.DeskID, Convert.ToString(obj.DeskID));
+                _deskinformation.AddOrUpdateValue<string>(FacilityManagement.Models.DeskDomMapper.DeskInformation.DeskID, Convert.ToString(obj.DeskID));
             }
 
             instance.Sections.Add(_deskinformation);
             if (obj.RoomFk != null)
             {
-                var _roomfk = new Section(Skyline.DataMiner.SDM.FacilityManagement.Models.DeskDomMapper.RoomFk.SectionDefinitionId);
-                if (obj.RoomFk.Room != default)
+                var _roomfk = new Section(FacilityManagement.Models.DeskDomMapper.RoomFk.SectionDefinitionId);
+                if (obj.RoomFk.Room != default && System.Guid.TryParse(obj.RoomFk.Room.Identifier, out var roomGuid) && roomGuid != System.Guid.Empty)
                 {
-                    _roomfk.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.FacilityManagement.Models.DeskDomMapper.RoomFk.Room, System.Guid.Parse(obj.RoomFk.Room.Identifier));
+                    _roomfk.AddOrUpdateValue<System.Guid>(FacilityManagement.Models.DeskDomMapper.RoomFk.Room, roomGuid);
                 }
 
                 instance.Sections.Add(_roomfk);
@@ -616,10 +619,10 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
             if (obj.Resource != null)
             {
-                var _resource = new Section(Skyline.DataMiner.SDM.FacilityManagement.Models.DeskDomMapper.Resource.SectionDefinitionId);
+                var _resource = new Section(FacilityManagement.Models.DeskDomMapper.Resource.SectionDefinitionId);
                 if (obj.Resource.ResourceId != default)
                 {
-                    _resource.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.DeskDomMapper.Resource.ResourceId, Convert.ToString(obj.Resource.ResourceId));
+                    _resource.AddOrUpdateValue<string>(FacilityManagement.Models.DeskDomMapper.Resource.ResourceId, Convert.ToString(obj.Resource.ResourceId));
                 }
 
                 instance.Sections.Add(_resource);
@@ -635,17 +638,17 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 case "Identifier":
                     return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.Id, comparer, Guid.Parse((string)value));
                 case "DeskInformation.Name":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.DeskDomMapper.DeskInformation.Name), comparer, (string)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.DeskDomMapper.DeskInformation.Name), comparer, (string)value);
                 case "DeskInformation.Plan":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.DeskDomMapper.DeskInformation.Plan), comparer, (string)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.DeskDomMapper.DeskInformation.Plan), comparer, (string)value);
                 case "DeskInformation.Description":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.DeskDomMapper.DeskInformation.Description), comparer, (string)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.DeskDomMapper.DeskInformation.Description), comparer, (string)value);
                 case "DeskInformation.DeskID":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.DeskDomMapper.DeskInformation.DeskID), comparer, (string)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.DeskDomMapper.DeskInformation.DeskID), comparer, (string)value);
                 case "RoomFk.Room":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.DeskDomMapper.RoomFk.Room), comparer, System.Guid.Parse(Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.FacilityManagement.Models.Room>.Convert(value).Identifier));
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.DeskDomMapper.RoomFk.Room), comparer, System.Guid.Parse(SdmObjectReference<FacilityManagement.Models.Room>.Convert(value).Identifier));
                 case "Resource.ResourceId":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.DeskDomMapper.Resource.ResourceId), comparer, Convert.ToString((System.Guid)value));
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.DeskDomMapper.Resource.ResourceId), comparer, Convert.ToString((System.Guid)value));
                 default:
                     throw new NotImplementedException();
             }
@@ -658,17 +661,17 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 case "Identifier":
                     return OrderByElementFactory.Create(DomInstanceExposers.Id, sortOrder, naturalSort);
                 case "DeskInformation.Name":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.DeskDomMapper.DeskInformation.Name), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.DeskDomMapper.DeskInformation.Name), sortOrder, naturalSort);
                 case "DeskInformation.Plan":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.DeskDomMapper.DeskInformation.Plan), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.DeskDomMapper.DeskInformation.Plan), sortOrder, naturalSort);
                 case "DeskInformation.Description":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.DeskDomMapper.DeskInformation.Description), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.DeskDomMapper.DeskInformation.Description), sortOrder, naturalSort);
                 case "DeskInformation.DeskID":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.DeskDomMapper.DeskInformation.DeskID), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.DeskDomMapper.DeskInformation.DeskID), sortOrder, naturalSort);
                 case "RoomFk.Room":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.DeskDomMapper.RoomFk.Room), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.DeskDomMapper.RoomFk.Room), sortOrder, naturalSort);
                 case "Resource.ResourceId":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.DeskDomMapper.Resource.ResourceId), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.DeskDomMapper.Resource.ResourceId), sortOrder, naturalSort);
                 default:
                     throw new NotImplementedException();
             }

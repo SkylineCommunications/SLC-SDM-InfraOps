@@ -21,7 +21,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
     public static partial class SiteExposers
     {
-        public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Site, string> Identifier = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Site, string>((obj) => obj.Identifier, "Identifier");
+        public static readonly Exposer<FacilityManagement.Models.Site, string> Identifier = new Exposer<FacilityManagement.Models.Site, string>((obj) => obj.Identifier, "Identifier");
         static SiteExposers()
         {
             RuntimeHelpers.RunClassConstructor(typeof(SiteProperties).TypeHandle);
@@ -29,15 +29,15 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
         public static partial class SiteProperties
         {
-            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Site, string> Name = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Site, string>((obj) => obj.Name, "Name");
-            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Site, string> Description = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Site, string>((obj) => obj.Description, "Description");
-            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Site, string> Address = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Site, string>((obj) => obj.Address, "Address");
-            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Site, string> City = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Site, string>((obj) => obj.City, "City");
-            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Site, string> ZipCode = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Site, string>((obj) => obj.ZipCode, "ZipCode");
-            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Site, string> Country = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Site, string>((obj) => obj.Country, "Country");
-            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Site, double?> Latitude = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Site, double?>((obj) => obj.Latitude, "Latitude");
-            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Site, double?> Longitude = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Site, double?>((obj) => obj.Longitude, "Longitude");
-            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Site, string> SiteId = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Site, string>((obj) => obj.SiteId, "SiteId");
+            public static readonly Exposer<FacilityManagement.Models.Site, string> Name = new Exposer<FacilityManagement.Models.Site, string>((obj) => obj.Name, "Name");
+            public static readonly Exposer<FacilityManagement.Models.Site, string> Description = new Exposer<FacilityManagement.Models.Site, string>((obj) => obj.Description, "Description");
+            public static readonly Exposer<FacilityManagement.Models.Site, string> Address = new Exposer<FacilityManagement.Models.Site, string>((obj) => obj.Address, "Address");
+            public static readonly Exposer<FacilityManagement.Models.Site, string> City = new Exposer<FacilityManagement.Models.Site, string>((obj) => obj.City, "City");
+            public static readonly Exposer<FacilityManagement.Models.Site, string> ZipCode = new Exposer<FacilityManagement.Models.Site, string>((obj) => obj.ZipCode, "ZipCode");
+            public static readonly Exposer<FacilityManagement.Models.Site, string> Country = new Exposer<FacilityManagement.Models.Site, string>((obj) => obj.Country, "Country");
+            public static readonly Exposer<FacilityManagement.Models.Site, double?> Latitude = new Exposer<FacilityManagement.Models.Site, double?>((obj) => obj.Latitude, "Latitude");
+            public static readonly Exposer<FacilityManagement.Models.Site, double?> Longitude = new Exposer<FacilityManagement.Models.Site, double?>((obj) => obj.Longitude, "Longitude");
+            public static readonly Exposer<FacilityManagement.Models.Site, string> SiteId = new Exposer<FacilityManagement.Models.Site, string>((obj) => obj.SiteId, "SiteProperties.SiteId");
         }
     }
 }

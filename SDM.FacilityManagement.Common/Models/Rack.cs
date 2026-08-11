@@ -164,6 +164,9 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
         public List<ImageInfo> ImageDetails { get; set; } = new List<ImageInfo>();
 
+        [SdmIgnore]
+        public SlcFacility_Management.Behaviors.Rack_Behaviour.StatusesEnum State { get; internal set; }
+
         // INTERNAL: Change tracking fields (validation handler uses these)
         [JsonIgnore]
         [SdmIgnore]

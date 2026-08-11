@@ -23,6 +23,7 @@
             PrimaryPort,
             Ipv4Address,
             Ipv6Address,
+            OutputType,
         }
 
         #region Info Validation
@@ -58,6 +59,13 @@
             {
                 result.AddFailReason(DataPortValidationField.PortNumber,
                     $"DataPort Number cannot be negative. Found: {dataPort.DataPortInfo.PortNumber}");
+                return result.IsValid;
+            }
+
+            if (dataPort.DataPortInfo?.OutputType == null)
+            {
+                result.AddFailReason(DataPortValidationField.OutputType,
+                    "DataPort Output Type must be provided.");
                 return result.IsValid;
             }
 

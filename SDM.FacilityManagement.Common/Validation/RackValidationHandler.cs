@@ -28,6 +28,25 @@
             RackSpaceOccupied,
         }
 
+        #region Identity Validation
+
+        /// <summary>
+        /// Validates that the Rack id is not empty or whitespace.
+        /// </summary>
+        public static bool IsRackIdValid(Rack rack, out ValidationResult result)
+        {
+            result = new ValidationResult();
+
+            if (rack == null || string.IsNullOrWhiteSpace(rack.RackId))
+            {
+                result.AddFailReason(RackValidationField.RackId, "Rack Id cannot be empty or whitespace.");
+            }
+
+            return result.IsValid;
+        }
+
+        #endregion
+
         #region Dimensions Validation
 
         public static bool IsRackHeightValid(Rack rack, out ValidationResult result)

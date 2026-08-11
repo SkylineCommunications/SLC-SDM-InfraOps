@@ -303,6 +303,7 @@
             var assetClassToDelete = Helper.AssetManagement.AssetClasses
                 .Read(AssetClassExposers.DeviceName.Equal("Router"))
                 .First();
+            assetClassToDelete.State = SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Draft;
 
             // Act
             Helper.AssetManagement.AssetClasses.Delete(assetClassToDelete);
@@ -332,6 +333,7 @@
                 AssetClassExposers.DeviceDescription.Contains("Ethernet", StringComparison.OrdinalIgnoreCase));
 
             var assetClassesToDelete = Helper.AssetManagement.AssetClasses.Read(filter).ToList();
+            assetClassesToDelete.ForEach(assetClass => assetClass.State = SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Draft);
             var deleteCount = assetClassesToDelete.Count;
 
             // Act

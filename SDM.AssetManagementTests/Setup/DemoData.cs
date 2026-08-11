@@ -305,15 +305,7 @@
                 AllCategories[(i + 3) % AllCategories.Length],
             };
 
-            var cableTypeFks = new List<SdmObjectReference<CableType>>
-            {
-                new SdmObjectReference<CableType>(Guid.NewGuid().ToString()),
-            };
-
-            if (i % 3 == 0)
-            {
-                cableTypeFks.Add(new SdmObjectReference<CableType>(Guid.NewGuid().ToString()));
-            }
+            var cableTypeFks = new List<SdmObjectReference<CableType>>();
 
             return new PortType
             {
@@ -404,6 +396,7 @@
             {
                 DeviceTypeId = new SdmObjectReference<DeviceType>(deviceTypeName),
                 Name = deviceName,
+                State = SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Active,
                 // DeviceTypeId will be set at runtime
                 Description = deviceDescription,
                 Manufacturer = Guid.NewGuid(),

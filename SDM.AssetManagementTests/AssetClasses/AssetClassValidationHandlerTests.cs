@@ -103,7 +103,12 @@
         public void PhysicalDimension_WithNegativeValue_ShouldBeInvalid(double value, string property)
         {
             // Arrange
-            var assetClass = new AssetClass();
+            var deviceType = new DeviceType();
+            var assetClass = new AssetClass()
+            {
+                DeviceTypeId = deviceType,
+            };
+
             switch (property)
             {
                 case "Depth": assetClass.Depth = value; break;
@@ -119,13 +124,111 @@
                 "Depth" => AssetClassValidationHandler.IsDepthValid(assetClass, out var r1),
                 "Width" => AssetClassValidationHandler.IsWidthValid(assetClass, out var r2),
                 "Height" => AssetClassValidationHandler.IsHeightValid(assetClass, out var r3),
-                "HeightU" => AssetClassValidationHandler.IsHeightUnitValid(assetClass, out var r4),
+                "HeightU" => AssetClassValidationHandler.IsHeightUnitValid(assetClass, deviceType, out var r4),
                 "Weight" => AssetClassValidationHandler.IsWeightValid(assetClass, out var r5),
                 _ => false
             };
 
             // Assert - All negative dimension validations should fail
             isValid.Should().BeFalse($"{property} cannot be negative");
+        }
+
+        [TestMethod]
+        [DataRow(null, DisplayName = "Null HeightU")]
+        [DataRow(0.0, DisplayName = "Zero HeightU")]
+        [DataRow(-1.0, DisplayName = "Negative HeightU")]
+        public void HeightU_RackUnitConsumer_WithoutPositiveValue_ShouldBeInvalid(double? heightU)
+        {
+            // Arrange
+            var deviceType = new DeviceType
+            {
+                TagsInfo = new TagsInfo
+                {
+                    Tags = new List<SlcAsset_Management.Enums.TagOption>
+                    {
+                        SlcAsset_Management.Enums.TagOption.RackUnitConsumer
+                    },
+                },
+            };
+            var assetClass = new AssetClass
+            {
+                HeightU = heightU,
+                DeviceTypeId = deviceType,
+            };
+
+            // Act
+            var isValid = AssetClassValidationHandler.IsHeightUnitValid(assetClass, deviceType, out var result);
+
+            // Assert
+            using (new AssertionScope())
+            {
+                isValid.Should().BeFalse();
+                result.TryGetFailReason(
+                    AssetClassValidationHandler.AssetClassValidationField.HeightU,
+                    out var reason).Should().BeTrue();
+                reason.Should().Contain("Rack Unit Consumer");
+            }
+        }
+
+        [TestMethod]
+        public void HeightU_RackUnitConsumer_WithPositiveValue_ShouldBeValid()
+        {
+            // Arrange
+            var deviceType = new DeviceType
+            {
+                TagsInfo = new TagsInfo
+                {
+                    Tags = new List<SlcAsset_Management.Enums.TagOption>
+                    {
+                        SlcAsset_Management.Enums.TagOption.RackUnitConsumer
+                    },
+                },
+            };
+            var assetClass = new AssetClass
+            {
+                HeightU = 2.0,
+                DeviceTypeId = deviceType,
+            };
+            // Act
+            var isValid = AssetClassValidationHandler.IsHeightUnitValid(assetClass, deviceType, out var result);
+
+            // Assert
+            using (new AssertionScope())
+            {
+                isValid.Should().BeTrue();
+                result.IsValid.Should().BeTrue();
+            }
+        }
+
+        [TestMethod]
+        [DataRow(null, DisplayName = "Null HeightU")]
+        [DataRow(0.0, DisplayName = "Zero HeightU")]
+        public void HeightU_NonRackUnitConsumer_WithoutPositiveValue_ShouldBeValid(double? heightU)
+        {
+            // Arrange
+            var deviceType = new DeviceType
+            {
+                TagsInfo = new TagsInfo
+                {
+                    Tags = new List<SlcAsset_Management.Enums.TagOption>
+                    {
+                    },
+                },
+            };
+            var assetClass = new AssetClass
+            {
+                HeightU = heightU,
+                DeviceTypeId = deviceType,
+            };
+            // Act
+            var isValid = AssetClassValidationHandler.IsHeightUnitValid(assetClass, deviceType, out var result);
+
+            // Assert
+            using (new AssertionScope())
+            {
+                isValid.Should().BeTrue();
+                result.IsValid.Should().BeTrue();
+            }
         }
 
         #endregion

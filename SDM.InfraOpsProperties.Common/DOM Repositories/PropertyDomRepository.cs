@@ -22,6 +22,12 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
         /// </summary>
         /// <param name="scopeNamePairs">The (Scope, Name) pairs to look up. Duplicates are handled gracefully.</param>
         List<Property> GetByScopeAndNames(IEnumerable<(string Scope, string Name)> scopeNamePairs);
+
+        /// <summary>
+        /// Reads all Properties matching any of the given identifiers, using a single batched big-OR query.
+        /// </summary>
+        /// <param name="identifiers">The identifiers to look up. Duplicates are handled gracefully.</param>
+        List<Property> GetByIdentifiers(IEnumerable<string> identifiers);
     }
 
     internal partial class PropertyDomRepository : IPropertyRepository
@@ -33,6 +39,17 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
             return this.ReadByBigOrFilter(
                 keys,
                 key => PropertyExposers.Scope.Equal(key.Scope).AND(PropertyExposers.Name.Equal(key.Name)));
+        }
+
+        public List<Property> GetByIdentifiers(IEnumerable<string> identifiers)
+        {
+            var keys = identifiers?.Where(id => !string.IsNullOrWhiteSpace(id)).Distinct().ToList() ?? new List<string>();
+            if (keys.Count == 0)
+            {
+                return new List<Property>();
+            }
+
+            return this.ReadByBigOrFilter(keys, identifier => PropertyExposers.Identifier.Equal(identifier));
         }
     }
 }

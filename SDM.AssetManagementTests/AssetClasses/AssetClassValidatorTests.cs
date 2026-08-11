@@ -263,13 +263,30 @@ namespace SDM.AssetManagement.Tests.AssetClasses
         }
 
         [TestMethod]
+        public void Validate_WithNonExistingDeviceTypeGuid_ShouldReturnInvalid()
+        {
+            var missingId = Guid.NewGuid().ToString();
+            var assetClass = new AssetClass
+            {
+                Name = "Missing Device Type",
+                DeviceTypeId = new SdmObjectReference<DeviceType>(missingId),
+            };
+
+            var result = _validator.Validate(assetClass, RepositoryAction.Create);
+
+            result.IsValid.Should().BeFalse();
+            result.FailureReasons.Should().Contain(reason => reason.ToString().Contains($"Referenced Device Type '{missingId}' does not exist."));
+        }
+
+        [TestMethod]
         public void Validate_WithPowerProviderDeviceType_AndPowerSupply_ShouldReturnValid()
         {
             // Arrange
             _helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
             
             var powerProviderDeviceType = _helper.TestData.DeviceTypes
-                .FirstOrDefault(dt => dt.TagsInfo.Tags.Contains(SlcAsset_Management.Enums.TagOption.PowerProvider));
+                .FirstOrDefault(dt => dt.TagsInfo.Tags.Contains(SlcAsset_Management.Enums.TagOption.PowerProvider)
+                    && !dt.TagsInfo.Tags.Contains(SlcAsset_Management.Enums.TagOption.RackUnitConsumer));
 
             if (powerProviderDeviceType == null)
             {
@@ -414,6 +431,7 @@ namespace SDM.AssetManagement.Tests.AssetClasses
             {
                 Name = "Test Change Tracking",
                 DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier),
+                HeightU = 1,     // Required when the device type is a Rack Unit Consumer
                 Depth = 5,       // Valid initially
                 Width = 20       // Valid
             };
@@ -456,6 +474,7 @@ namespace SDM.AssetManagement.Tests.AssetClasses
             {
                 Name = "Brand New Device",
                 DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier),
+                HeightU = 1, // Required when the device type is a Rack Unit Consumer
                 Depth = 10,
                 Width = 20
             };
@@ -465,6 +484,36 @@ namespace SDM.AssetManagement.Tests.AssetClasses
 
             // Assert
             result.IsValid.Should().BeTrue("new asset class should be valid with existing repository data");
+        }
+
+        [TestMethod]
+        public void Validate_RackUnitConsumer_WithoutHeightU_ShouldBeInvalid()
+        {
+            // Arrange
+            _helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
+
+            var rackUnitConsumerDeviceType = _helper.TestData.DeviceTypes
+                .First(dt => dt.TagsInfo.Tags.Contains(SlcAsset_Management.Enums.TagOption.RackUnitConsumer)
+                    && !dt.TagsInfo.Tags.Contains(SlcAsset_Management.Enums.TagOption.PowerProvider));
+
+            var assetClass = new AssetClass
+            {
+                Name = "Rack Consumer Without HeightU",
+                DeviceTypeId = new SdmObjectReference<DeviceType>(rackUnitConsumerDeviceType.Identifier),
+            };
+
+            // Act
+            var result = _validator.Validate(assetClass, RepositoryAction.Create);
+
+            // Assert
+            using (new AssertionScope())
+            {
+                result.IsValid.Should().BeFalse("a Rack Unit Consumer asset class must have a Height Unit greater than 0");
+                result.TryGetFailReason(
+                    AssetClassValidationHandler.AssetClassValidationField.HeightU,
+                    out var reason).Should().BeTrue();
+                reason.Should().Contain("Rack Unit Consumer");
+            }
         }
 
         #endregion

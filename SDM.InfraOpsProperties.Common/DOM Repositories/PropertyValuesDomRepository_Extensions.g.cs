@@ -8,9 +8,9 @@ namespace Skyline.DataMiner.SDM
     public static class PropertyValuesDomRepository_Extensions
     {
 
-        public static Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValues> WithMiddleware(
-            this Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValues> repository,
-            IMiddlewareMarker<Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValues> middleware)
+        public static IBulkRepository<InfraOpsProperties.Models.PropertyValues> WithMiddleware(
+            this IBulkRepository<InfraOpsProperties.Models.PropertyValues> repository,
+            IMiddlewareMarker<InfraOpsProperties.Models.PropertyValues> middleware)
         {
             return new PropertyValuesDomRepository_Middleware(repository, middleware);
         }

@@ -20,7 +20,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     using Skyline.DataMiner.Net.Sections;
     using Skyline.DataMiner.Net.SubscriptionFilters;
     using Skyline.DataMiner.SDM;
-    using Skyline.DataMiner.SDM.Extensions;
 
     using SLDataGateway.API.Querying;
     using SLDataGateway.API.Types.Querying;
@@ -32,7 +31,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         public DataPortDomRepository(IConnection connection)
         {
             this.connection = connection;
-            this.helper = new DomHelper(connection.HandleMessages, Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.ModuleId);
+            this.helper = new DomHelper(connection.HandleMessages, AssetManagement.Models.DataPortDomMapper.ModuleId);
         }
 
         public DataPort Create(DataPort createObject)
@@ -149,7 +148,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
 
             var domFilter = TranslateFullFilter(filter);
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(AssetManagement.Models.DataPortDomMapper.DomDefinitionId.Id));
             return helper.DomInstances.Count(domFilter);
         }
 
@@ -161,7 +160,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
 
             var domFilter = TranslateFullFilter(query.Filter);
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(AssetManagement.Models.DataPortDomMapper.DomDefinitionId.Id));
             var domOrder = TranslateFullOrderBy(query.Order);
             var domQuery = query.WithFilter(domFilter).WithOrder(domOrder);
             return helper.DomInstances.Count(domQuery);
@@ -373,7 +372,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 throw new ArgumentNullException(nameof(domFilter));
             }
 
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(AssetManagement.Models.DataPortDomMapper.DomDefinitionId.Id));
             var domInstances = helper.DomInstances.Read(domFilter);
             return domInstances.Select(FromInstance);
         }
@@ -385,7 +384,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 throw new ArgumentNullException(nameof(domQuery));
             }
 
-            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DomDefinitionId.Id));
+            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(AssetManagement.Models.DataPortDomMapper.DomDefinitionId.Id));
             domQuery = domQuery.WithFilter(domFilter);
             var domInstances = helper.DomInstances.Read(domQuery);
             return domInstances.Select(FromInstance);
@@ -398,7 +397,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 throw new ArgumentNullException(nameof(domFilter));
             }
 
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(AssetManagement.Models.DataPortDomMapper.DomDefinitionId.Id));
             var pagingHelper = helper.DomInstances.PreparePaging(domFilter, pageSize);
             while (pagingHelper.MoveToNextPage())
             {
@@ -413,7 +412,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 throw new ArgumentNullException(nameof(domQuery));
             }
 
-            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DomDefinitionId.Id));
+            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(AssetManagement.Models.DataPortDomMapper.DomDefinitionId.Id));
             domQuery = domQuery.WithFilter(domFilter);
             var pagingHelper = helper.DomInstances.PreparePaging(domQuery, pageSize);
             while (pagingHelper.MoveToNextPage())
@@ -515,98 +514,98 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 IsNewInternal = false,
             };
 
-            var _dataportinfoSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.SectionDefinitionId));
+            var _dataportinfoSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(AssetManagement.Models.DataPortDomMapper.DataPortInfo.SectionDefinitionId));
             if (_dataportinfoSection != default)
             {
-                obj.DataPortInfo = new Skyline.DataMiner.SDM.AssetManagement.Models.DataPortInfo();
-                var _dataportinfoname = _dataportinfoSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.Name);
+                obj.DataPortInfo = new AssetManagement.Models.DataPortInfo();
+                var _dataportinfoname = _dataportinfoSection.GetValue<string>(AssetManagement.Models.DataPortDomMapper.DataPortInfo.Name);
                 if (_dataportinfoname != null)
                 {
                     obj.DataPortInfo.Name = _dataportinfoname.Value;
                 }
 
-                var _dataportinfoportnumber = _dataportinfoSection.GetValue<long>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.PortNumber);
+                var _dataportinfoportnumber = _dataportinfoSection.GetValue<long>(AssetManagement.Models.DataPortDomMapper.DataPortInfo.PortNumber);
                 if (_dataportinfoportnumber != null)
                 {
                     obj.DataPortInfo.PortNumber = (long?)_dataportinfoportnumber.Value;
                 }
 
-                var _dataportinfooutputtype = _dataportinfoSection.GetValue<int>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.OutputType);
+                var _dataportinfooutputtype = _dataportinfoSection.GetValue<int>(AssetManagement.Models.DataPortDomMapper.DataPortInfo.OutputType);
                 if (_dataportinfooutputtype != null)
                 {
                     obj.DataPortInfo.OutputType = (SharedMappers.DomIds.SlcAsset_Management.Enums.Outputtype?)_dataportinfooutputtype.Value;
                 }
 
-                var _dataportinfoportexposure = _dataportinfoSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.PortExposure);
+                var _dataportinfoportexposure = _dataportinfoSection.GetValue<string>(AssetManagement.Models.DataPortDomMapper.DataPortInfo.PortExposure);
                 if (_dataportinfoportexposure != null)
                 {
                     obj.DataPortInfo.PortExposure = SharedMappers.DomIds.SlcAsset_Management.Enums.Portexposure.ToEnum(_dataportinfoportexposure.Value);
                 }
 
-                var _dataportinfotype = _dataportinfoSection.GetValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.Type);
+                var _dataportinfotype = _dataportinfoSection.GetValue<System.Guid>(AssetManagement.Models.DataPortDomMapper.DataPortInfo.Type);
                 if (_dataportinfotype != null)
                 {
-                    obj.DataPortInfo.Type = new Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.PortType>(Convert.ToString(_dataportinfotype.Value));
+                    obj.DataPortInfo.Type = new SdmObjectReference<AssetManagement.Models.PortType>(Convert.ToString(_dataportinfotype.Value));
                 }
 
-                var _dataportinfolabel = _dataportinfoSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.Label);
+                var _dataportinfolabel = _dataportinfoSection.GetValue<string>(AssetManagement.Models.DataPortDomMapper.DataPortInfo.Label);
                 if (_dataportinfolabel != null)
                 {
                     obj.DataPortInfo.Label = _dataportinfolabel.Value;
                 }
             }
 
-            var _assetfkSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.AssetFk.SectionDefinitionId));
+            var _assetfkSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(AssetManagement.Models.DataPortDomMapper.AssetFk.SectionDefinitionId));
             if (_assetfkSection != default)
             {
-                obj.Asset = new Skyline.DataMiner.SDM.AssetManagement.Models.Asset();
-                var _assetfkasset = _assetfkSection.GetValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.AssetFk.Asset);
+                obj.Asset = new AssetManagement.Models.Asset();
+                var _assetfkasset = _assetfkSection.GetValue<System.Guid>(AssetManagement.Models.DataPortDomMapper.AssetFk.Asset);
                 if (_assetfkasset != null)
                 {
-                    obj.Asset = new Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.Asset>(Convert.ToString(_assetfkasset.Value));
+                    obj.Asset = new SdmObjectReference<AssetManagement.Models.Asset>(Convert.ToString(_assetfkasset.Value));
                 }
             }
 
-            var _addressinfoSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.AddressInfo.SectionDefinitionId));
+            var _addressinfoSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(AssetManagement.Models.DataPortDomMapper.AddressInfo.SectionDefinitionId));
             if (_addressinfoSection != default)
             {
-                obj.AddressInfo = new Skyline.DataMiner.SDM.AssetManagement.Models.AddressInfo();
-                var _addressinfoipv4address = _addressinfoSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.AddressInfo.Ipv4Address);
+                obj.AddressInfo = new AssetManagement.Models.AddressInfo();
+                var _addressinfoipv4address = _addressinfoSection.GetValue<string>(AssetManagement.Models.DataPortDomMapper.AddressInfo.Ipv4Address);
                 if (_addressinfoipv4address != null)
                 {
                     obj.AddressInfo.Ipv4Address = _addressinfoipv4address.Value;
                 }
 
-                var _addressinfoipv6address = _addressinfoSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.AddressInfo.Ipv6Address);
+                var _addressinfoipv6address = _addressinfoSection.GetValue<string>(AssetManagement.Models.DataPortDomMapper.AddressInfo.Ipv6Address);
                 if (_addressinfoipv6address != null)
                 {
                     obj.AddressInfo.Ipv6Address = _addressinfoipv6address.Value;
                 }
 
-                var _addressinfohostname = _addressinfoSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.AddressInfo.Hostname);
+                var _addressinfohostname = _addressinfoSection.GetValue<string>(AssetManagement.Models.DataPortDomMapper.AddressInfo.Hostname);
                 if (_addressinfohostname != null)
                 {
                     obj.AddressInfo.Hostname = _addressinfohostname.Value;
                 }
 
-                var _addressinfodns = _addressinfoSection.GetValue<bool>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.AddressInfo.DNS);
+                var _addressinfodns = _addressinfoSection.GetValue<bool>(AssetManagement.Models.DataPortDomMapper.AddressInfo.DNS);
                 if (_addressinfodns != null)
                 {
                     obj.AddressInfo.DNS = _addressinfodns.Value;
                 }
             }
 
-            var _primaryportrelationSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.PrimaryPortRelation.SectionDefinitionId));
+            var _primaryportrelationSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(AssetManagement.Models.DataPortDomMapper.PrimaryPortRelation.SectionDefinitionId));
             if (_primaryportrelationSection != default)
             {
-                obj.PrimaryPortRelation = new Skyline.DataMiner.SDM.AssetManagement.Models.PrimaryPortRelation();
-                var _primaryportrelationisprimaryipv6 = _primaryportrelationSection.GetValue<bool>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.PrimaryPortRelation.IsPrimaryIpv6);
+                obj.PrimaryPortRelation = new AssetManagement.Models.PrimaryPortRelation();
+                var _primaryportrelationisprimaryipv6 = _primaryportrelationSection.GetValue<bool>(AssetManagement.Models.DataPortDomMapper.PrimaryPortRelation.IsPrimaryIpv6);
                 if (_primaryportrelationisprimaryipv6 != null)
                 {
                     obj.PrimaryPortRelation.IsPrimaryIpv6 = _primaryportrelationisprimaryipv6.Value;
                 }
 
-                var _primaryportrelationisprimaryipv4 = _primaryportrelationSection.GetValue<bool>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.PrimaryPortRelation.IsPrimaryIpv4);
+                var _primaryportrelationisprimaryipv4 = _primaryportrelationSection.GetValue<bool>(AssetManagement.Models.DataPortDomMapper.PrimaryPortRelation.IsPrimaryIpv4);
                 if (_primaryportrelationisprimaryipv4 != null)
                 {
                     obj.PrimaryPortRelation.IsPrimaryIpv4 = _primaryportrelationisprimaryipv4.Value;
@@ -630,40 +629,40 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
             var instance = new DomInstance
             {
-                DomDefinitionId = Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DomDefinitionId,
+                DomDefinitionId = AssetManagement.Models.DataPortDomMapper.DomDefinitionId,
                 ID = new DomInstanceId(id)
                 {
-                    ModuleId = Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.ModuleId
+                    ModuleId = AssetManagement.Models.DataPortDomMapper.ModuleId
                 }
             };
             if (obj.DataPortInfo != null)
             {
-                var _dataportinfo = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.SectionDefinitionId);
+                var _dataportinfo = new Section(AssetManagement.Models.DataPortDomMapper.DataPortInfo.SectionDefinitionId);
                 if (obj.DataPortInfo.Name != default)
                 {
-                    _dataportinfo.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.Name, Convert.ToString(obj.DataPortInfo.Name));
+                    _dataportinfo.AddOrUpdateValue<string>(AssetManagement.Models.DataPortDomMapper.DataPortInfo.Name, Convert.ToString(obj.DataPortInfo.Name));
                 }
 
                 if (obj.DataPortInfo.PortNumber != default)
                 {
-                    _dataportinfo.AddOrUpdateValue<long>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.PortNumber, (long)(obj.DataPortInfo.PortNumber).Value);
+                    _dataportinfo.AddOrUpdateValue<long>(AssetManagement.Models.DataPortDomMapper.DataPortInfo.PortNumber, (long)(obj.DataPortInfo.PortNumber).Value);
                 }
 
                 if (obj.DataPortInfo.OutputType != default)
                 {
-                    _dataportinfo.AddOrUpdateValue<int>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.OutputType, (int)(obj.DataPortInfo.OutputType).Value);
+                    _dataportinfo.AddOrUpdateValue<int>(AssetManagement.Models.DataPortDomMapper.DataPortInfo.OutputType, (int)(obj.DataPortInfo.OutputType).Value);
                 }
 
-                _dataportinfo.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.PortExposure, SharedMappers.DomIds.SlcAsset_Management.Enums.Portexposure.ToValue(obj.DataPortInfo.PortExposure));
+                _dataportinfo.AddOrUpdateValue<string>(AssetManagement.Models.DataPortDomMapper.DataPortInfo.PortExposure, SharedMappers.DomIds.SlcAsset_Management.Enums.Portexposure.ToValue(obj.DataPortInfo.PortExposure));
 
-                if (obj.DataPortInfo.Type != default)
+                if (obj.DataPortInfo.Type != default && System.Guid.TryParse(obj.DataPortInfo.Type.Identifier, out var dataPortInfoTypeGuid) && dataPortInfoTypeGuid != System.Guid.Empty)
                 {
-                    _dataportinfo.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.Type, System.Guid.Parse(obj.DataPortInfo.Type.Identifier));
+                    _dataportinfo.AddOrUpdateValue<System.Guid>(AssetManagement.Models.DataPortDomMapper.DataPortInfo.Type, dataPortInfoTypeGuid);
                 }
 
                 if (obj.DataPortInfo.Label != default)
                 {
-                    _dataportinfo.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.Label, Convert.ToString(obj.DataPortInfo.Label));
+                    _dataportinfo.AddOrUpdateValue<string>(AssetManagement.Models.DataPortDomMapper.DataPortInfo.Label, Convert.ToString(obj.DataPortInfo.Label));
                 }
 
                 instance.Sections.Add(_dataportinfo);
@@ -671,10 +670,10 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
             if (obj.Asset != null)
             {
-                var _assetrelation = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.AssetFk.SectionDefinitionId);
-                if (obj.Asset != default)
+                var _assetrelation = new Section(AssetManagement.Models.DataPortDomMapper.AssetFk.SectionDefinitionId);
+                if (obj.Asset != default && System.Guid.TryParse(obj.Asset.Identifier, out var assetGuid) && assetGuid != System.Guid.Empty)
                 {
-                    _assetrelation.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.AssetFk.Asset, System.Guid.Parse(obj.Asset.Identifier));
+                    _assetrelation.AddOrUpdateValue<System.Guid>(AssetManagement.Models.DataPortDomMapper.AssetFk.Asset, assetGuid);
                 }
 
                 instance.Sections.Add(_assetrelation);
@@ -682,25 +681,25 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
             if (obj.AddressInfo != null)
             {
-                var _addressinfo = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.AddressInfo.SectionDefinitionId);
+                var _addressinfo = new Section(AssetManagement.Models.DataPortDomMapper.AddressInfo.SectionDefinitionId);
                 if (obj.AddressInfo.Ipv4Address != default)
                 {
-                    _addressinfo.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.AddressInfo.Ipv4Address, Convert.ToString(obj.AddressInfo.Ipv4Address));
+                    _addressinfo.AddOrUpdateValue<string>(AssetManagement.Models.DataPortDomMapper.AddressInfo.Ipv4Address, Convert.ToString(obj.AddressInfo.Ipv4Address));
                 }
 
                 if (obj.AddressInfo.Ipv6Address != default)
                 {
-                    _addressinfo.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.AddressInfo.Ipv6Address, Convert.ToString(obj.AddressInfo.Ipv6Address));
+                    _addressinfo.AddOrUpdateValue<string>(AssetManagement.Models.DataPortDomMapper.AddressInfo.Ipv6Address, Convert.ToString(obj.AddressInfo.Ipv6Address));
                 }
 
                 if (obj.AddressInfo.Hostname != default)
                 {
-                    _addressinfo.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.AddressInfo.Hostname, Convert.ToString(obj.AddressInfo.Hostname));
+                    _addressinfo.AddOrUpdateValue<string>(AssetManagement.Models.DataPortDomMapper.AddressInfo.Hostname, Convert.ToString(obj.AddressInfo.Hostname));
                 }
 
                 if (obj.AddressInfo.DNS != default)
                 {
-                    _addressinfo.AddOrUpdateValue<bool>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.AddressInfo.DNS, (bool)obj.AddressInfo.DNS);
+                    _addressinfo.AddOrUpdateValue<bool>(AssetManagement.Models.DataPortDomMapper.AddressInfo.DNS, (bool)obj.AddressInfo.DNS);
                 }
 
                 instance.Sections.Add(_addressinfo);
@@ -708,15 +707,15 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
             if (obj.PrimaryPortRelation != null)
             {
-                var _primaryportrelation = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.PrimaryPortRelation.SectionDefinitionId);
+                var _primaryportrelation = new Section(AssetManagement.Models.DataPortDomMapper.PrimaryPortRelation.SectionDefinitionId);
                 if (obj.PrimaryPortRelation.IsPrimaryIpv6 != default)
                 {
-                    _primaryportrelation.AddOrUpdateValue<bool>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.PrimaryPortRelation.IsPrimaryIpv6, (bool)obj.PrimaryPortRelation.IsPrimaryIpv6);
+                    _primaryportrelation.AddOrUpdateValue<bool>(AssetManagement.Models.DataPortDomMapper.PrimaryPortRelation.IsPrimaryIpv6, (bool)obj.PrimaryPortRelation.IsPrimaryIpv6);
                 }
 
                 if (obj.PrimaryPortRelation.IsPrimaryIpv4 != default)
                 {
-                    _primaryportrelation.AddOrUpdateValue<bool>(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.PrimaryPortRelation.IsPrimaryIpv4, (bool)obj.PrimaryPortRelation.IsPrimaryIpv4);
+                    _primaryportrelation.AddOrUpdateValue<bool>(AssetManagement.Models.DataPortDomMapper.PrimaryPortRelation.IsPrimaryIpv4, (bool)obj.PrimaryPortRelation.IsPrimaryIpv4);
                 }
 
                 instance.Sections.Add(_primaryportrelation);
@@ -732,35 +731,35 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 case "Identifier":
                     return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.Id, comparer, Guid.Parse((string)value));
                 case "DataPortInfo.Name":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.Name), comparer, (string)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DataPortDomMapper.DataPortInfo.Name), comparer, (string)value);
                 case "DataPortInfo.PortNumber" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
-                    return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.PortNumber.Id.ToString()).Equal(comparer == Comparer.NotEquals);
+                    return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.DataPortDomMapper.DataPortInfo.PortNumber.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "DataPortInfo.PortNumber":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.PortNumber), comparer, ((long?)value).Value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DataPortDomMapper.DataPortInfo.PortNumber), comparer, ((long?)value).Value);
                 case "DataPortInfo.OutputType" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
-                    return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.OutputType.Id.ToString()).Equal(comparer == Comparer.NotEquals);
+                    return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.DataPortDomMapper.DataPortInfo.OutputType.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "DataPortInfo.OutputType":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.OutputType), comparer, (int)((SharedMappers.DomIds.SlcAsset_Management.Enums.Outputtype?)value).Value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DataPortDomMapper.DataPortInfo.OutputType), comparer, (int)((SharedMappers.DomIds.SlcAsset_Management.Enums.Outputtype?)value).Value);
                 case "DataPortInfo.PortExposure":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.PortExposure), comparer, SharedMappers.DomIds.SlcAsset_Management.Enums.Portexposure.ToValue((SharedMappers.DomIds.SlcAsset_Management.Enums.PortExposureEnum)value));
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DataPortDomMapper.DataPortInfo.PortExposure), comparer, SharedMappers.DomIds.SlcAsset_Management.Enums.Portexposure.ToValue((SharedMappers.DomIds.SlcAsset_Management.Enums.PortExposureEnum)value));
                 case "DataPortInfo.Type":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.Type), comparer, System.Guid.Parse(Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.PortType>.Convert(value).Identifier));
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DataPortDomMapper.DataPortInfo.Type), comparer, System.Guid.Parse(SdmObjectReference<AssetManagement.Models.PortType>.Convert(value).Identifier));
                 case "DataPortInfo.Label":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.Label), comparer, (string)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DataPortDomMapper.DataPortInfo.Label), comparer, (string)value);
                 case "Asset":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortDomMapper.AssetRelationProperties.Asset), comparer, System.Guid.Parse(Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.AssetManagement.Models.Asset>.Convert(value).Identifier));
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.PowerPortDomMapper.AssetRelationProperties.Asset), comparer, System.Guid.Parse(SdmObjectReference<AssetManagement.Models.Asset>.Convert(value).Identifier));
                 case "AddressInfo.Ipv4Address":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.AddressInfo.Ipv4Address), comparer, (string)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DataPortDomMapper.AddressInfo.Ipv4Address), comparer, (string)value);
                 case "AddressInfo.Ipv6Address":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.AddressInfo.Ipv6Address), comparer, (string)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DataPortDomMapper.AddressInfo.Ipv6Address), comparer, (string)value);
                 case "AddressInfo.Hostname":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.AddressInfo.Hostname), comparer, (string)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DataPortDomMapper.AddressInfo.Hostname), comparer, (string)value);
                 case "AddressInfo.DNS":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.AddressInfo.DNS), comparer, (bool)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DataPortDomMapper.AddressInfo.DNS), comparer, (bool)value);
                 case "PrimaryPortRelation.IsPrimaryIpv6":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.PrimaryPortRelation.IsPrimaryIpv6), comparer, (bool)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DataPortDomMapper.PrimaryPortRelation.IsPrimaryIpv6), comparer, (bool)value);
                 case "PrimaryPortRelation.IsPrimaryIpv4":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.PrimaryPortRelation.IsPrimaryIpv4), comparer, (bool)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DataPortDomMapper.PrimaryPortRelation.IsPrimaryIpv4), comparer, (bool)value);
                 default:
                     throw new NotImplementedException();
             }
@@ -773,31 +772,31 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 case "Identifier":
                     return OrderByElementFactory.Create(DomInstanceExposers.Id, sortOrder, naturalSort);
                 case "DataPortInfo.Name":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.Name), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DataPortDomMapper.DataPortInfo.Name), sortOrder, naturalSort);
                 case "DataPortInfo.PortNumber":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.PortNumber), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DataPortDomMapper.DataPortInfo.PortNumber), sortOrder, naturalSort);
                 case "DataPortInfo.OutputType":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.OutputType), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DataPortDomMapper.DataPortInfo.OutputType), sortOrder, naturalSort);
                 case "DataPortInfo.PortExposure":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.PortExposure), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DataPortDomMapper.DataPortInfo.PortExposure), sortOrder, naturalSort);
                 case "DataPortInfo.Type":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.Type), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DataPortDomMapper.DataPortInfo.Type), sortOrder, naturalSort);
                 case "DataPortInfo.Label":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.DataPortInfo.Label), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DataPortDomMapper.DataPortInfo.Label), sortOrder, naturalSort);
                 case "Asset":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.AssetFk.Asset), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DataPortDomMapper.AssetFk.Asset), sortOrder, naturalSort);
                 case "AddressInfo.Ipv4Address":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.AddressInfo.Ipv4Address), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DataPortDomMapper.AddressInfo.Ipv4Address), sortOrder, naturalSort);
                 case "AddressInfo.Ipv6Address":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.AddressInfo.Ipv6Address), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DataPortDomMapper.AddressInfo.Ipv6Address), sortOrder, naturalSort);
                 case "AddressInfo.Hostname":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.AddressInfo.Hostname), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DataPortDomMapper.AddressInfo.Hostname), sortOrder, naturalSort);
                 case "AddressInfo.DNS":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.AddressInfo.DNS), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DataPortDomMapper.AddressInfo.DNS), sortOrder, naturalSort);
                 case "PrimaryPortRelation.IsPrimaryIpv6":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.PrimaryPortRelation.IsPrimaryIpv6), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DataPortDomMapper.PrimaryPortRelation.IsPrimaryIpv6), sortOrder, naturalSort);
                 case "PrimaryPortRelation.IsPrimaryIpv4":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.DataPortDomMapper.PrimaryPortRelation.IsPrimaryIpv4), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DataPortDomMapper.PrimaryPortRelation.IsPrimaryIpv4), sortOrder, naturalSort);
                 default:
                     throw new NotImplementedException();
             }

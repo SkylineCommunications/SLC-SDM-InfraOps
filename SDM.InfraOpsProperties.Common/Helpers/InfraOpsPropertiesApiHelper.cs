@@ -16,7 +16,9 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Helpers
 		/// When <c>true</c> (default), deleting a Property removes any PropertyValue entries referencing it from
 		/// all PropertyValues instances first, preventing orphaned references. Set to <c>false</c> to opt out.
 		/// </param>
-		public InfraOpsPropertiesApiHelper(IConnection connection, bool cascadeDeleteOnProperty = true)
+		public InfraOpsPropertiesApiHelper(
+			IConnection connection,
+			bool cascadeDeleteOnProperty = true)
 		{
 			Connection = connection;
 

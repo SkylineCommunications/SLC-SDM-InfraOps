@@ -511,6 +511,54 @@
         }
 
         /// <summary>
+        /// Validates if installation information can be edited based on asset state.
+        /// </summary>
+        public static bool IsInstallationInformationChangeAllowed(Asset asset, out ValidationResult result)
+        {
+            result = new ValidationResult();
+
+            if (asset == null)
+            {
+                result.AddFailReason(AssetValidationField.Asset, "Asset cannot be null.");
+                return result.IsValid;
+            }
+
+            if (InstallationInformationChanged(asset) && !CanEditInstallationInformation(asset))
+            {
+                result.AddFailReason(AssetValidationField.Asset, $"Cannot change Installation information in current State '{asset.StateField.OriginalValue}'.");
+            }
+
+            return result.IsValid;
+        }
+
+        /// <summary>
+        /// Validates that an asset has the required installation information before installing.
+        /// </summary>
+        public static bool IsReadyForInstall(Asset asset, out ValidationResult result)
+        {
+            result = new ValidationResult();
+
+            if (asset == null)
+            {
+                result.AddFailReason(AssetValidationField.Asset, "Asset cannot be null.");
+                return result.IsValid;
+            }
+
+            if (asset.InstallationUserId == Guid.Empty || !asset.InstallationDate.HasValue || asset.InstallationDate == DateTime.MinValue)
+            {
+                result.AddFailReason(AssetValidationField.Asset, "Please assign an installation user and date to the asset before installing.");
+            }
+
+            return result.IsValid;
+        }
+
+        private static bool InstallationInformationChanged(Asset asset)
+        {
+            return asset.InstallationUserIdField.Changed ||
+                   asset.InstallationDateField.Changed;
+        }
+
+        /// <summary>
         /// Validates modification info - both user and date must be set together or both empty.
         /// </summary>
         public static bool IsModificationInfoValid(Asset asset, out ValidationResult result)
@@ -737,6 +785,26 @@
                 || asset.State == SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.BuildPlanReady
                 || asset.State == SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InRepair
                 || asset.State == SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Disposed;
+        }
+
+        /// <summary>
+        /// Checks if the asset is in a state where installation information can be edited.
+        /// </summary>
+        public static bool CanEditInstallationInformation(Asset asset)
+        {
+            if (asset == null)
+            {
+                return false;
+            }
+
+            if (asset.IsNew)
+            {
+                return true;
+            }
+
+            return asset.StateField.OriginalValue != SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Installed
+                && asset.StateField.OriginalValue != SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InService
+                && asset.StateField.OriginalValue != SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Disposed;
         }
 
         /// <summary>

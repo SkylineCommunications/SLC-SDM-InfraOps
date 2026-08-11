@@ -15,20 +15,20 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
     using System;
     using System.Collections.Generic;
 
-    internal sealed partial class PlanAndBuildJobDomRepository_Middleware : Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob>
+    internal sealed partial class PlanAndBuildJobDomRepository_Middleware : IBulkRepository<PlanAndBuild.Models.PlanAndBuildJob>
     {
-        private readonly Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob> _inner;
-        private readonly IMiddlewareMarker<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob> _middleware;
+        private readonly IBulkRepository<PlanAndBuild.Models.PlanAndBuildJob> _inner;
+        private readonly IMiddlewareMarker<PlanAndBuild.Models.PlanAndBuildJob> _middleware;
 
-        public PlanAndBuildJobDomRepository_Middleware(Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob> inner, IMiddlewareMarker<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob> middleware)
+        public PlanAndBuildJobDomRepository_Middleware(IBulkRepository<PlanAndBuild.Models.PlanAndBuildJob> inner, IMiddlewareMarker<PlanAndBuild.Models.PlanAndBuildJob> middleware)
         {
             _inner = inner ?? throw new ArgumentNullException(nameof(inner));
             _middleware = middleware;
         }
 
-        public IEnumerable<IPagedResult<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob>> ReadPaged(FilterElement<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob> filter)
+        public IEnumerable<IPagedResult<PlanAndBuild.Models.PlanAndBuildJob>> ReadPaged(FilterElement<PlanAndBuild.Models.PlanAndBuildJob> filter)
         {
-            if (_middleware is IPageableMiddleware<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob> middleware)
+            if (_middleware is IPageableMiddleware<PlanAndBuild.Models.PlanAndBuildJob> middleware)
             {
                 return middleware.OnReadPaged(filter, _inner.ReadPaged);
             }
@@ -38,9 +38,9 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             }
         }
 
-        public IEnumerable<IPagedResult<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob>> ReadPaged(IQuery<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob> query)
+        public IEnumerable<IPagedResult<PlanAndBuild.Models.PlanAndBuildJob>> ReadPaged(IQuery<PlanAndBuild.Models.PlanAndBuildJob> query)
         {
-            if (_middleware is IPageableMiddleware<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob> middleware)
+            if (_middleware is IPageableMiddleware<PlanAndBuild.Models.PlanAndBuildJob> middleware)
             {
                 return middleware.OnReadPaged(query, _inner.ReadPaged);
             }
@@ -50,9 +50,9 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             }
         }
 
-        public IEnumerable<IPagedResult<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob>> ReadPaged(FilterElement<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob> filter, int pageSize)
+        public IEnumerable<IPagedResult<PlanAndBuild.Models.PlanAndBuildJob>> ReadPaged(FilterElement<PlanAndBuild.Models.PlanAndBuildJob> filter, int pageSize)
         {
-            if (_middleware is IPageableMiddleware<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob> middleware)
+            if (_middleware is IPageableMiddleware<PlanAndBuild.Models.PlanAndBuildJob> middleware)
             {
                 return middleware.OnReadPaged(filter, pageSize, _inner.ReadPaged);
             }
@@ -62,9 +62,9 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             }
         }
 
-        public IEnumerable<IPagedResult<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob>> ReadPaged(IQuery<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob> query, int pageSize)
+        public IEnumerable<IPagedResult<PlanAndBuild.Models.PlanAndBuildJob>> ReadPaged(IQuery<PlanAndBuild.Models.PlanAndBuildJob> query, int pageSize)
         {
-            if (_middleware is IPageableMiddleware<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob> middleware)
+            if (_middleware is IPageableMiddleware<PlanAndBuild.Models.PlanAndBuildJob> middleware)
             {
                 return middleware.OnReadPaged(query, pageSize, _inner.ReadPaged);
             }
@@ -74,9 +74,9 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             }
         }
 
-        public IEnumerable<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob> Read(FilterElement<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob> filter)
+        public IEnumerable<PlanAndBuild.Models.PlanAndBuildJob> Read(FilterElement<PlanAndBuild.Models.PlanAndBuildJob> filter)
         {
-            if (_middleware is IReadableMiddleware<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob> middleware)
+            if (_middleware is IReadableMiddleware<PlanAndBuild.Models.PlanAndBuildJob> middleware)
             {
                 return middleware.OnRead(filter, _inner.Read);
             }
@@ -86,9 +86,9 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             }
         }
 
-        public IEnumerable<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob> Read(IQuery<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob> query)
+        public IEnumerable<PlanAndBuild.Models.PlanAndBuildJob> Read(IQuery<PlanAndBuild.Models.PlanAndBuildJob> query)
         {
-            if (_middleware is IReadableMiddleware<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob> middleware)
+            if (_middleware is IReadableMiddleware<PlanAndBuild.Models.PlanAndBuildJob> middleware)
             {
                 return middleware.OnRead(query, _inner.Read);
             }
@@ -98,9 +98,9 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             }
         }
 
-        public long Count(FilterElement<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob> filter)
+        public long Count(FilterElement<PlanAndBuild.Models.PlanAndBuildJob> filter)
         {
-            if (_middleware is ICountableMiddleware<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob> middleware)
+            if (_middleware is ICountableMiddleware<PlanAndBuild.Models.PlanAndBuildJob> middleware)
             {
                 return middleware.OnCount(filter, _inner.Count);
             }
@@ -110,9 +110,9 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             }
         }
 
-        public long Count(IQuery<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob> query)
+        public long Count(IQuery<PlanAndBuild.Models.PlanAndBuildJob> query)
         {
-            if (_middleware is ICountableMiddleware<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob> middleware)
+            if (_middleware is ICountableMiddleware<PlanAndBuild.Models.PlanAndBuildJob> middleware)
             {
                 return middleware.OnCount(query, _inner.Count);
             }
@@ -122,9 +122,9 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             }
         }
 
-        public IReadOnlyCollection<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob> Create(IEnumerable<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob> oToCreate)
+        public IReadOnlyCollection<PlanAndBuild.Models.PlanAndBuildJob> Create(IEnumerable<PlanAndBuild.Models.PlanAndBuildJob> oToCreate)
         {
-            if (_middleware is IBulkCreatableMiddleware<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob> middleware)
+            if (_middleware is IBulkCreatableMiddleware<PlanAndBuild.Models.PlanAndBuildJob> middleware)
             {
                 return middleware.OnCreate(oToCreate, _inner.Create);
             }
@@ -134,9 +134,9 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             }
         }
 
-        public Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob Create(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob oToCreate)
+        public PlanAndBuild.Models.PlanAndBuildJob Create(PlanAndBuild.Models.PlanAndBuildJob oToCreate)
         {
-            if (_middleware is ICreatableMiddleware<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob> middleware)
+            if (_middleware is ICreatableMiddleware<PlanAndBuild.Models.PlanAndBuildJob> middleware)
             {
                 return middleware.OnCreate(oToCreate, _inner.Create);
             }
@@ -146,9 +146,9 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             }
         }
 
-        public IReadOnlyCollection<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob> Update(IEnumerable<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob> oToUpdate)
+        public IReadOnlyCollection<PlanAndBuild.Models.PlanAndBuildJob> Update(IEnumerable<PlanAndBuild.Models.PlanAndBuildJob> oToUpdate)
         {
-            if (_middleware is IBulkUpdatableMiddleware<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob> middleware)
+            if (_middleware is IBulkUpdatableMiddleware<PlanAndBuild.Models.PlanAndBuildJob> middleware)
             {
                 return middleware.OnUpdate(oToUpdate, _inner.Update);
             }
@@ -158,9 +158,9 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             }
         }
 
-        public Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob Update(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob oToUpdate)
+        public PlanAndBuild.Models.PlanAndBuildJob Update(PlanAndBuild.Models.PlanAndBuildJob oToUpdate)
         {
-            if (_middleware is IUpdatableMiddleware<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob> middleware)
+            if (_middleware is IUpdatableMiddleware<PlanAndBuild.Models.PlanAndBuildJob> middleware)
             {
                 return middleware.OnUpdate(oToUpdate, _inner.Update);
             }
@@ -170,9 +170,9 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             }
         }
 
-        public void Delete(IEnumerable<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob> oToDelete)
+        public void Delete(IEnumerable<PlanAndBuild.Models.PlanAndBuildJob> oToDelete)
         {
-            if (_middleware is IBulkDeletableMiddleware<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob> middleware)
+            if (_middleware is IBulkDeletableMiddleware<PlanAndBuild.Models.PlanAndBuildJob> middleware)
             {
                 middleware.OnDelete(oToDelete, _inner.Delete);
             }
@@ -182,9 +182,9 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             }
         }
 
-        public void Delete(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob oToDelete)
+        public void Delete(PlanAndBuild.Models.PlanAndBuildJob oToDelete)
         {
-            if (_middleware is IDeletableMiddleware<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob> middleware)
+            if (_middleware is IDeletableMiddleware<PlanAndBuild.Models.PlanAndBuildJob> middleware)
             {
                 middleware.OnDelete(oToDelete, _inner.Delete);
             }
@@ -193,9 +193,16 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
                 _inner.Delete(oToDelete);
             }
         }
-        public System.Collections.Generic.IReadOnlyCollection<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob> CreateOrUpdate(System.Collections.Generic.IEnumerable<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob> oToCreateOrUpdate)
+        public System.Collections.Generic.IReadOnlyCollection<PlanAndBuild.Models.PlanAndBuildJob> CreateOrUpdate(System.Collections.Generic.IEnumerable<PlanAndBuild.Models.PlanAndBuildJob> oToCreateOrUpdate)
         {
-            return _inner.CreateOrUpdate(oToCreateOrUpdate);
+                if (_middleware is IBulkRepositoryMiddleware<PlanAndBuild.Models.PlanAndBuildJob> middleware)
+                {
+                    return middleware.OnCreateOrUpdate(oToCreateOrUpdate, _inner.CreateOrUpdate);
+                }
+                else
+                {
+                    return _inner.CreateOrUpdate(oToCreateOrUpdate);
+                }
         }
 
     }

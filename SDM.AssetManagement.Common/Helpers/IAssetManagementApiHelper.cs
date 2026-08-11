@@ -1,15 +1,14 @@
-﻿namespace Skyline.DataMiner.SDM.AssetManagement.Helpers
+namespace Skyline.DataMiner.SDM.AssetManagement.Helpers
 {
-    using SharedCommonLibrary.AssetManagement.Models;
-
     using Skyline.DataMiner.SDM.AssetManagement.Models;
+
     using Skyline.DataMiner.SDM.AssetManagement.Validation;
 
     using Connection = Skyline.DataMiner.SDM.AssetManagement.Models.Connection;
 
     public interface IAssetManagementApiHelper
 	{
-		IAssetRepository Assets { get; }
+    	IAssetRepository Assets { get; }
 
         IBulkRepository<AssetManagerAppSettings> AppSettings { get; }
 
@@ -32,5 +31,15 @@
         AssetClassValidator AssetClassValidator { get; }
 
         AssetValidator AssetValidator { get; }
+
+        DataPortValidator DataPortValidator { get; }
+
+        PowerPortValidator PowerPortValidator { get; }
+
+        DeviceTypeValidator DeviceTypeValidator { get; }
+
+        PortTypeValidator PortTypeValidator { get; }
+
+        CableTypeValidator CableTypeValidator { get; }
     }
 }

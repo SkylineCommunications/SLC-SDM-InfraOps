@@ -1,5 +1,7 @@
 ﻿namespace SDM.AssetManagement.Tests.PortTypes
 {
+    using System;
+    using System.Collections.Generic;
     using System.Linq;
 
     using FluentAssertions;
@@ -133,7 +135,28 @@
             // Arrange
             Helper.PopulateWithDemoData(upTo: DemoDataLayer.PortTypes);
 
-            var targetPortType = Helper.TestData.PortTypes.First(pt => pt.CableFKs.CableTypeFks.Any());
+            var cableType = Helper.AssetManagement.CableTypes.Create(new CableType
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                Name = "Filter Cable Type",
+                CategoryLinks = new CategoryRelation
+                {
+                    Categories = new List<SlcAsset_Management.Enums.CategoriesEnum> { SlcAsset_Management.Enums.CategoriesEnum.Data },
+                },
+            });
+            var targetPortType = Helper.AssetManagement.PortTypes.Create(new PortType
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                Name = "Port Type With Cable FK",
+                CategoryLinks = new CategoryRelation
+                {
+                    Categories = new List<SlcAsset_Management.Enums.CategoriesEnum> { SlcAsset_Management.Enums.CategoriesEnum.Data },
+                },
+                CableFKs = new CableRelation
+                {
+                    CableTypeFks = new List<SdmObjectReference<CableType>> { new SdmObjectReference<CableType>(cableType.Identifier) },
+                },
+            });
             var targetCableTypeFk = targetPortType.CableFKs.CableTypeFks.First();
             var filter = PortTypeExposers.CableFKs.CableTypeFks.Contains(targetCableTypeFk);
 

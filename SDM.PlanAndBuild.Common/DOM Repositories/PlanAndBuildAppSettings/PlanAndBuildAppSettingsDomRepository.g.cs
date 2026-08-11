@@ -31,7 +31,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
         public PlanAndBuildAppSettingsDomRepository(IConnection connection)
         {
             this.connection = connection;
-            this.helper = new DomHelper(connection.HandleMessages, Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.ModuleId);
+            this.helper = new DomHelper(connection.HandleMessages, PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.ModuleId);
         }
 
         public PlanAndBuildAppSettings Create(PlanAndBuildAppSettings createObject)
@@ -148,7 +148,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             }
 
             var domFilter = TranslateFullFilter(filter);
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.DomDefinitionId.Id));
             return helper.DomInstances.Count(domFilter);
         }
 
@@ -160,7 +160,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             }
 
             var domFilter = TranslateFullFilter(query.Filter);
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.DomDefinitionId.Id));
             var domOrder = TranslateFullOrderBy(query.Order);
             var domQuery = query.WithFilter(domFilter).WithOrder(domOrder);
             return helper.DomInstances.Count(domQuery);
@@ -372,7 +372,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
                 throw new ArgumentNullException(nameof(domFilter));
             }
 
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.DomDefinitionId.Id));
             var domInstances = helper.DomInstances.Read(domFilter);
             return domInstances.Select(FromInstance);
         }
@@ -384,7 +384,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
                 throw new ArgumentNullException(nameof(domQuery));
             }
 
-            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.DomDefinitionId.Id));
+            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.DomDefinitionId.Id));
             domQuery = domQuery.WithFilter(domFilter);
             var domInstances = helper.DomInstances.Read(domQuery);
             return domInstances.Select(FromInstance);
@@ -397,7 +397,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
                 throw new ArgumentNullException(nameof(domFilter));
             }
 
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.DomDefinitionId.Id));
             var pagingHelper = helper.DomInstances.PreparePaging(domFilter, pageSize);
             while (pagingHelper.MoveToNextPage())
             {
@@ -412,7 +412,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
                 throw new ArgumentNullException(nameof(domQuery));
             }
 
-            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.DomDefinitionId.Id));
+            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.DomDefinitionId.Id));
             domQuery = domQuery.WithFilter(domFilter);
             var pagingHelper = helper.DomInstances.PreparePaging(domQuery, pageSize);
             while (pagingHelper.MoveToNextPage())
@@ -513,34 +513,34 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
                 Identifier = instance.ID.Id.ToString(),
                 IsNewInternal = false,
             };
-            var _planandbuildappsettingspropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.SectionDefinitionId));
+            var _planandbuildappsettingspropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.SectionDefinitionId));
             if (_planandbuildappsettingspropertiesSection != default)
             {
-                var _jobidprefix = _planandbuildappsettingspropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDPrefix);
+                var _jobidprefix = _planandbuildappsettingspropertiesSection.GetValue<string>(PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDPrefix);
                 if (_jobidprefix != null)
                 {
                     obj.JobIDPrefix = _jobidprefix.Value;
                 }
 
-                var _jobidnextsequence = _planandbuildappsettingspropertiesSection.GetValue<long>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDNextSequence);
+                var _jobidnextsequence = _planandbuildappsettingspropertiesSection.GetValue<long>(PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDNextSequence);
                 if (_jobidnextsequence != null)
                 {
                     obj.JobIDNextSequence = _jobidnextsequence.Value;
                 }
 
-                var _jobidincrement = _planandbuildappsettingspropertiesSection.GetValue<long>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDIncrement);
+                var _jobidincrement = _planandbuildappsettingspropertiesSection.GetValue<long>(PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDIncrement);
                 if (_jobidincrement != null)
                 {
                     obj.JobIDIncrement = _jobidincrement.Value;
                 }
 
-                var _jobidstartingseed = _planandbuildappsettingspropertiesSection.GetValue<long>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDStartingSeed);
+                var _jobidstartingseed = _planandbuildappsettingspropertiesSection.GetValue<long>(PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDStartingSeed);
                 if (_jobidstartingseed != null)
                 {
                     obj.JobIDStartingSeed = _jobidstartingseed.Value;
                 }
 
-                var _jobidminimumdigits = _planandbuildappsettingspropertiesSection.GetValue<long>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDMinimumDigits);
+                var _jobidminimumdigits = _planandbuildappsettingspropertiesSection.GetValue<long>(PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDMinimumDigits);
                 if (_jobidminimumdigits != null)
                 {
                     obj.JobIDMinimumDigits = _jobidminimumdigits.Value;
@@ -565,36 +565,36 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 
             var instance = new DomInstance
             {
-                DomDefinitionId = Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.DomDefinitionId,
+                DomDefinitionId = PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.DomDefinitionId,
                 ID = new DomInstanceId(id)
                 {
-                    ModuleId = Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.ModuleId
+                    ModuleId = PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.ModuleId
                 }
             };
-            var _planandbuildappsettingsproperties = new Section(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.SectionDefinitionId);
+            var _planandbuildappsettingsproperties = new Section(PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.SectionDefinitionId);
             if (obj.JobIDPrefix != default)
             {
-                _planandbuildappsettingsproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDPrefix, Convert.ToString(obj.JobIDPrefix));
+                _planandbuildappsettingsproperties.AddOrUpdateValue<string>(PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDPrefix, Convert.ToString(obj.JobIDPrefix));
             }
 
             if (obj.JobIDNextSequence != default)
             {
-                _planandbuildappsettingsproperties.AddOrUpdateValue<long>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDNextSequence, (long)obj.JobIDNextSequence);
+                _planandbuildappsettingsproperties.AddOrUpdateValue<long>(PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDNextSequence, (long)obj.JobIDNextSequence);
             }
 
             if (obj.JobIDIncrement != default)
             {
-                _planandbuildappsettingsproperties.AddOrUpdateValue<long>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDIncrement, (long)obj.JobIDIncrement);
+                _planandbuildappsettingsproperties.AddOrUpdateValue<long>(PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDIncrement, (long)obj.JobIDIncrement);
             }
 
             if (obj.JobIDStartingSeed != default)
             {
-                _planandbuildappsettingsproperties.AddOrUpdateValue<long>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDStartingSeed, (long)obj.JobIDStartingSeed);
+                _planandbuildappsettingsproperties.AddOrUpdateValue<long>(PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDStartingSeed, (long)obj.JobIDStartingSeed);
             }
 
             if (obj.JobIDMinimumDigits != default)
             {
-                _planandbuildappsettingsproperties.AddOrUpdateValue<long>(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDMinimumDigits, (long)obj.JobIDMinimumDigits);
+                _planandbuildappsettingsproperties.AddOrUpdateValue<long>(PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDMinimumDigits, (long)obj.JobIDMinimumDigits);
             }
 
             instance.Sections.Add(_planandbuildappsettingsproperties);
@@ -608,17 +608,17 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
                 case "Identifier":
                     return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.Id, comparer, Guid.Parse((string)value));
                 case "JobIDPrefix" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
-                    return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDPrefix.Id.ToString()).Equal(comparer == Comparer.NotEquals);
+                    return DomInstanceExposers.FieldValues.KeyExists(PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDPrefix.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "JobIDPrefix":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDPrefix), comparer, (string)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDPrefix), comparer, (string)value);
                 case "JobIDNextSequence":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDNextSequence), comparer, (long)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDNextSequence), comparer, (long)value);
                 case "JobIDIncrement":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDIncrement), comparer, (long)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDIncrement), comparer, (long)value);
                 case "JobIDStartingSeed":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDStartingSeed), comparer, (long)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDStartingSeed), comparer, (long)value);
                 case "JobIDMinimumDigits":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDMinimumDigits), comparer, (long)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDMinimumDigits), comparer, (long)value);
                 default:
                     throw new NotImplementedException();
             }
@@ -631,15 +631,15 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
                 case "Identifier":
                     return OrderByElementFactory.Create(DomInstanceExposers.Id, sortOrder, naturalSort);
                 case "JobIDPrefix":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDPrefix), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDPrefix), sortOrder, naturalSort);
                 case "JobIDNextSequence":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDNextSequence), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDNextSequence), sortOrder, naturalSort);
                 case "JobIDIncrement":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDIncrement), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDIncrement), sortOrder, naturalSort);
                 case "JobIDStartingSeed":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDStartingSeed), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDStartingSeed), sortOrder, naturalSort);
                 case "JobIDMinimumDigits":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDMinimumDigits), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDMinimumDigits), sortOrder, naturalSort);
                 default:
                     throw new NotImplementedException();
             }

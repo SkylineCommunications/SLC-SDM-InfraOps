@@ -15,20 +15,20 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
     using System;
     using System.Collections.Generic;
 
-    internal sealed partial class PlanAndBuildAppSettingsDomRepository_Middleware : Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings>
+    internal sealed partial class PlanAndBuildAppSettingsDomRepository_Middleware : IBulkRepository<PlanAndBuild.Models.PlanAndBuildAppSettings>
     {
-        private readonly Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings> _inner;
-        private readonly IMiddlewareMarker<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings> _middleware;
+        private readonly IBulkRepository<PlanAndBuild.Models.PlanAndBuildAppSettings> _inner;
+        private readonly IMiddlewareMarker<PlanAndBuild.Models.PlanAndBuildAppSettings> _middleware;
 
-        public PlanAndBuildAppSettingsDomRepository_Middleware(Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings> inner, IMiddlewareMarker<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings> middleware)
+        public PlanAndBuildAppSettingsDomRepository_Middleware(IBulkRepository<PlanAndBuild.Models.PlanAndBuildAppSettings> inner, IMiddlewareMarker<PlanAndBuild.Models.PlanAndBuildAppSettings> middleware)
         {
             _inner = inner ?? throw new ArgumentNullException(nameof(inner));
             _middleware = middleware;
         }
 
-        public IEnumerable<IPagedResult<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings>> ReadPaged(FilterElement<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings> filter)
+        public IEnumerable<IPagedResult<PlanAndBuild.Models.PlanAndBuildAppSettings>> ReadPaged(FilterElement<PlanAndBuild.Models.PlanAndBuildAppSettings> filter)
         {
-            if (_middleware is IPageableMiddleware<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings> middleware)
+            if (_middleware is IPageableMiddleware<PlanAndBuild.Models.PlanAndBuildAppSettings> middleware)
             {
                 return middleware.OnReadPaged(filter, _inner.ReadPaged);
             }
@@ -38,9 +38,9 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             }
         }
 
-        public IEnumerable<IPagedResult<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings>> ReadPaged(IQuery<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings> query)
+        public IEnumerable<IPagedResult<PlanAndBuild.Models.PlanAndBuildAppSettings>> ReadPaged(IQuery<PlanAndBuild.Models.PlanAndBuildAppSettings> query)
         {
-            if (_middleware is IPageableMiddleware<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings> middleware)
+            if (_middleware is IPageableMiddleware<PlanAndBuild.Models.PlanAndBuildAppSettings> middleware)
             {
                 return middleware.OnReadPaged(query, _inner.ReadPaged);
             }
@@ -50,9 +50,9 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             }
         }
 
-        public IEnumerable<IPagedResult<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings>> ReadPaged(FilterElement<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings> filter, int pageSize)
+        public IEnumerable<IPagedResult<PlanAndBuild.Models.PlanAndBuildAppSettings>> ReadPaged(FilterElement<PlanAndBuild.Models.PlanAndBuildAppSettings> filter, int pageSize)
         {
-            if (_middleware is IPageableMiddleware<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings> middleware)
+            if (_middleware is IPageableMiddleware<PlanAndBuild.Models.PlanAndBuildAppSettings> middleware)
             {
                 return middleware.OnReadPaged(filter, pageSize, _inner.ReadPaged);
             }
@@ -62,9 +62,9 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             }
         }
 
-        public IEnumerable<IPagedResult<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings>> ReadPaged(IQuery<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings> query, int pageSize)
+        public IEnumerable<IPagedResult<PlanAndBuild.Models.PlanAndBuildAppSettings>> ReadPaged(IQuery<PlanAndBuild.Models.PlanAndBuildAppSettings> query, int pageSize)
         {
-            if (_middleware is IPageableMiddleware<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings> middleware)
+            if (_middleware is IPageableMiddleware<PlanAndBuild.Models.PlanAndBuildAppSettings> middleware)
             {
                 return middleware.OnReadPaged(query, pageSize, _inner.ReadPaged);
             }
@@ -74,9 +74,9 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             }
         }
 
-        public IEnumerable<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings> Read(FilterElement<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings> filter)
+        public IEnumerable<PlanAndBuild.Models.PlanAndBuildAppSettings> Read(FilterElement<PlanAndBuild.Models.PlanAndBuildAppSettings> filter)
         {
-            if (_middleware is IReadableMiddleware<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings> middleware)
+            if (_middleware is IReadableMiddleware<PlanAndBuild.Models.PlanAndBuildAppSettings> middleware)
             {
                 return middleware.OnRead(filter, _inner.Read);
             }
@@ -86,9 +86,9 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             }
         }
 
-        public IEnumerable<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings> Read(IQuery<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings> query)
+        public IEnumerable<PlanAndBuild.Models.PlanAndBuildAppSettings> Read(IQuery<PlanAndBuild.Models.PlanAndBuildAppSettings> query)
         {
-            if (_middleware is IReadableMiddleware<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings> middleware)
+            if (_middleware is IReadableMiddleware<PlanAndBuild.Models.PlanAndBuildAppSettings> middleware)
             {
                 return middleware.OnRead(query, _inner.Read);
             }
@@ -98,9 +98,9 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             }
         }
 
-        public long Count(FilterElement<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings> filter)
+        public long Count(FilterElement<PlanAndBuild.Models.PlanAndBuildAppSettings> filter)
         {
-            if (_middleware is ICountableMiddleware<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings> middleware)
+            if (_middleware is ICountableMiddleware<PlanAndBuild.Models.PlanAndBuildAppSettings> middleware)
             {
                 return middleware.OnCount(filter, _inner.Count);
             }
@@ -110,9 +110,9 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             }
         }
 
-        public long Count(IQuery<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings> query)
+        public long Count(IQuery<PlanAndBuild.Models.PlanAndBuildAppSettings> query)
         {
-            if (_middleware is ICountableMiddleware<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings> middleware)
+            if (_middleware is ICountableMiddleware<PlanAndBuild.Models.PlanAndBuildAppSettings> middleware)
             {
                 return middleware.OnCount(query, _inner.Count);
             }
@@ -122,9 +122,9 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             }
         }
 
-        public IReadOnlyCollection<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings> Create(IEnumerable<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings> oToCreate)
+        public IReadOnlyCollection<PlanAndBuild.Models.PlanAndBuildAppSettings> Create(IEnumerable<PlanAndBuild.Models.PlanAndBuildAppSettings> oToCreate)
         {
-            if (_middleware is IBulkCreatableMiddleware<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings> middleware)
+            if (_middleware is IBulkCreatableMiddleware<PlanAndBuild.Models.PlanAndBuildAppSettings> middleware)
             {
                 return middleware.OnCreate(oToCreate, _inner.Create);
             }
@@ -134,9 +134,9 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             }
         }
 
-        public Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings Create(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings oToCreate)
+        public PlanAndBuild.Models.PlanAndBuildAppSettings Create(PlanAndBuild.Models.PlanAndBuildAppSettings oToCreate)
         {
-            if (_middleware is ICreatableMiddleware<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings> middleware)
+            if (_middleware is ICreatableMiddleware<PlanAndBuild.Models.PlanAndBuildAppSettings> middleware)
             {
                 return middleware.OnCreate(oToCreate, _inner.Create);
             }
@@ -146,9 +146,9 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             }
         }
 
-        public IReadOnlyCollection<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings> Update(IEnumerable<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings> oToUpdate)
+        public IReadOnlyCollection<PlanAndBuild.Models.PlanAndBuildAppSettings> Update(IEnumerable<PlanAndBuild.Models.PlanAndBuildAppSettings> oToUpdate)
         {
-            if (_middleware is IBulkUpdatableMiddleware<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings> middleware)
+            if (_middleware is IBulkUpdatableMiddleware<PlanAndBuild.Models.PlanAndBuildAppSettings> middleware)
             {
                 return middleware.OnUpdate(oToUpdate, _inner.Update);
             }
@@ -158,9 +158,9 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             }
         }
 
-        public Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings Update(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings oToUpdate)
+        public PlanAndBuild.Models.PlanAndBuildAppSettings Update(PlanAndBuild.Models.PlanAndBuildAppSettings oToUpdate)
         {
-            if (_middleware is IUpdatableMiddleware<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings> middleware)
+            if (_middleware is IUpdatableMiddleware<PlanAndBuild.Models.PlanAndBuildAppSettings> middleware)
             {
                 return middleware.OnUpdate(oToUpdate, _inner.Update);
             }
@@ -170,9 +170,9 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             }
         }
 
-        public void Delete(IEnumerable<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings> oToDelete)
+        public void Delete(IEnumerable<PlanAndBuild.Models.PlanAndBuildAppSettings> oToDelete)
         {
-            if (_middleware is IBulkDeletableMiddleware<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings> middleware)
+            if (_middleware is IBulkDeletableMiddleware<PlanAndBuild.Models.PlanAndBuildAppSettings> middleware)
             {
                 middleware.OnDelete(oToDelete, _inner.Delete);
             }
@@ -182,9 +182,9 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             }
         }
 
-        public void Delete(Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings oToDelete)
+        public void Delete(PlanAndBuild.Models.PlanAndBuildAppSettings oToDelete)
         {
-            if (_middleware is IDeletableMiddleware<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings> middleware)
+            if (_middleware is IDeletableMiddleware<PlanAndBuild.Models.PlanAndBuildAppSettings> middleware)
             {
                 middleware.OnDelete(oToDelete, _inner.Delete);
             }
@@ -193,9 +193,16 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
                 _inner.Delete(oToDelete);
             }
         }
-        public System.Collections.Generic.IReadOnlyCollection<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings> CreateOrUpdate(System.Collections.Generic.IEnumerable<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings> oToCreateOrUpdate)
+        public System.Collections.Generic.IReadOnlyCollection<PlanAndBuild.Models.PlanAndBuildAppSettings> CreateOrUpdate(System.Collections.Generic.IEnumerable<PlanAndBuild.Models.PlanAndBuildAppSettings> oToCreateOrUpdate)
         {
-            return _inner.CreateOrUpdate(oToCreateOrUpdate);
+                if (_middleware is IBulkRepositoryMiddleware<PlanAndBuild.Models.PlanAndBuildAppSettings> middleware)
+                {
+                    return middleware.OnCreateOrUpdate(oToCreateOrUpdate, _inner.CreateOrUpdate);
+                }
+                else
+                {
+                    return _inner.CreateOrUpdate(oToCreateOrUpdate);
+                }
         }
 
     }

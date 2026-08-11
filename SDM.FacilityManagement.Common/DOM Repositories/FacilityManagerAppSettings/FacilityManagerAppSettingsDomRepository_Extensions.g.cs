@@ -12,9 +12,9 @@ namespace Skyline.DataMiner.SDM
 
     public static class FacilityManagerAppSettingsDomRepository_Extensions
     {
-        public static Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettings> WithMiddleware(
-            this Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettings> repository,
-            IMiddlewareMarker<Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettings> middleware)
+        public static IBulkRepository<FacilityManagement.Models.FacilityManagerAppSettings> WithMiddleware(
+            this IBulkRepository<FacilityManagement.Models.FacilityManagerAppSettings> repository,
+            IMiddlewareMarker<FacilityManagement.Models.FacilityManagerAppSettings> middleware)
         {
             return new FacilityManagerAppSettingsDomRepository_Middleware(repository, middleware);
         }
