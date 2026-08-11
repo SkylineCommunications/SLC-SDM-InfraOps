@@ -343,7 +343,7 @@
                 return result;
             }
 
-                DeviceType deviceType;
+            DeviceType deviceType;
             if (deviceTypeCache != null && deviceTypeCache.TryGetValue(assetClass.DeviceTypeId, out var cached))
             {
                 deviceType = cached;
@@ -370,8 +370,7 @@
                     "Asset Class with 'Power Provider' Device Type must have a Power Supply.");
             }
 
-            bool isRackUnitConsumer = deviceType.TagsInfo.Tags.Contains(SlcAsset_Management.Enums.TagOption.RackUnitConsumer);
-            if (!AssetClassValidationHandler.IsHeightUnitValid(assetClass, isRackUnitConsumer, out var heightUResult))
+            if (!AssetClassValidationHandler.IsHeightUnitValid(assetClass, deviceType, out var heightUResult))
             {
                 result.AddFailuresFrom(heightUResult);
             }
@@ -379,8 +378,6 @@
             return result;
 
         }
-
-
 
         private ValidationResult ValidateReferencesAgainstDatabase(AssetClass assetClass)
             {
@@ -513,7 +510,7 @@
                 validations.Add(heightResult);
 
             if (assetClass.ShouldValidate(assetClass.HeightUField)
-                && !AssetClassValidationHandler.IsHeightUnitValid(assetClass, out var heightUResult))
+                && !AssetClassValidationHandler.ValidateHeightUnitBusinessRules(assetClass, out var heightUResult))
                 validations.Add(heightUResult);
 
             if (assetClass.ShouldValidate(assetClass.WeightField)

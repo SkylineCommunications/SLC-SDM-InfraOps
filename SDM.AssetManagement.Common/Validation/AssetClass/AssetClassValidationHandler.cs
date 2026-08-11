@@ -1,5 +1,6 @@
 ﻿namespace Skyline.DataMiner.SDM.AssetManagement.Validation
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
 
@@ -39,133 +40,147 @@
 
         #region Info Validators
 
-        public static bool IsAssetClassDeviceTypeValid(AssetClass asset, out ValidationResult result)
+        public static bool IsAssetClassDeviceTypeValid(AssetClass assetClass, out ValidationResult result)
         {
             result = new ValidationResult();
-            if (!asset.DeviceTypeId.HasValue())
+            if (!assetClass.DeviceTypeId.HasValue())
             {
                 result.AddFailReason(AssetClassValidationField.DeviceTypeId, "Asset Class Device Type id needs to be a Guid.");
             }
             return result.IsValid;
         }
 
-        public static bool IsDepthValid(AssetClass asset, out ValidationResult result)
+        public static bool IsDepthValid(AssetClass assetClass, out ValidationResult result)
         {
-            if(!asset.Depth.HasValue)
+            if(!assetClass.Depth.HasValue)
             {
                 result = new ValidationResult();
                 return true;
             }
 
             return NumericValidators.ValidateNonNegative(
-                asset.Depth.Value,
+                assetClass.Depth.Value,
                 AssetClassValidationField.Depth,
                 out result);
         }
 
-        public static bool IsWidthValid(AssetClass asset, out ValidationResult result)
+        public static bool IsWidthValid(AssetClass assetClass, out ValidationResult result)
         {
-            if(!asset.Width.HasValue)
+            if(!assetClass.Width.HasValue)
             {
                 result = new ValidationResult();
                 return true;
             }
 
             return NumericValidators.ValidateNonNegative(
-                asset.Width.Value,
+                assetClass.Width.Value,
                 AssetClassValidationField.Width,
                 out result);
         }
 
-        public static bool IsHeightValid(AssetClass asset, out ValidationResult result)
+        public static bool IsHeightValid(AssetClass assetClass, out ValidationResult result)
         {
-            if(!asset.Height.HasValue)
+            if(!assetClass.Height.HasValue)
             {
                 result = new ValidationResult();
                 return true;
             }
 
             return NumericValidators.ValidateNonNegative(
-                asset.Height.Value,
+                assetClass.Height.Value,
                 AssetClassValidationField.Height,
                 out result);
         }
 
-        public static bool IsHeightUnitValid(AssetClass asset, out ValidationResult result)
+        public static bool IsHeightUnitValid(AssetClass assetClass, DeviceType deviceType, out ValidationResult result)
         {
-            if(!asset.HeightU.HasValue)
+            if(assetClass.DeviceTypeId != deviceType.Identifier)
+            {
+                throw new InvalidOperationException("The provided DeviceType does not match the DeviceTypeId of the AssetClass. Please ensure that the correct DeviceType is provided for validation.");
+            }
+
+            bool isRackUnitConsumer = deviceType.TagsInfo?.Tags?.Contains(SlcAsset_Management.Enums.TagOption.RackUnitConsumer) ?? false;
+            if (!isRackUnitConsumer)
+            {
+                return ValidateHeightUnitBusinessRules(assetClass, out result);
+            }
+            else
+            {
+                return IsHeightUnitValidForRackConsumer(assetClass, out result);
+            }
+        }
+
+
+        internal static bool ValidateHeightUnitBusinessRules(AssetClass assetClass, out ValidationResult result)
+        {
+            if (!assetClass.HeightU.HasValue)
             {
                 result = new ValidationResult();
                 return true;
             }
 
             return NumericValidators.ValidateNonNegative(
-                asset.HeightU.Value,
-                AssetClassValidationField.HeightU,
-                out result);
+                    assetClass.HeightU.Value,
+                    AssetClassValidationField.HeightU,
+                    out result);
         }
 
         /// <summary>
         /// Validates HeightU in the context of the Device Type's Rack Unit Consumer tag.
         /// A Rack Unit Consumer must have a Height Unit greater than 0.
         /// </summary>
-        /// <remarks>
-        /// Not part of the public surface: whether the Asset Class is a Rack Unit Consumer is derived from the
-        /// AssetClass -> Device Type relation, which requires database access. Callers that have already resolved
-        /// the Device Type pass the flag in; public callers should use <see cref="IsHeightUnitValid(AssetClass, out ValidationResult)"/>.
-        /// </remarks>
-        internal static bool IsHeightUnitValid(AssetClass asset, bool isRackUnitConsumer, out ValidationResult result)
+        private static bool IsHeightUnitValidForRackConsumer(AssetClass assetClass, out ValidationResult result)
         {
             result = new ValidationResult();
 
-            if (isRackUnitConsumer && (!asset.HeightU.HasValue || asset.HeightU.Value <= 0))
+            if (!assetClass.HeightU.HasValue || assetClass.HeightU.Value <= 0)
             {
                 result.AddFailReason(AssetClassValidationField.HeightU,
                     "Asset Class with 'Rack Unit Consumer' Device Type must have a Height Unit greater than 0.");
                 return result.IsValid;
             }
 
-            return IsHeightUnitValid(asset, out result);
+            return true;
         }
 
-        public static bool IsWeightValid(AssetClass asset, out ValidationResult result)
+        public static bool IsWeightValid(AssetClass assetClass, out ValidationResult result)
         {
-            if(!asset.Weight.HasValue)
+            if(!assetClass.Weight.HasValue)
             {
                 result = new ValidationResult();
                 return true;
             }
 
             return NumericValidators.ValidateNonNegative(
-                asset.Weight.Value,
+                assetClass.Weight.Value,
                 AssetClassValidationField.Weight,
                 out result);
         }
 
-        public static bool IsTypicalPowerConsumptionValid(AssetClass asset, out ValidationResult result)
+        public static bool IsTypicalPowerConsumptionValid(AssetClass assetClass, out ValidationResult result)
         {
-            if(!asset.TypicalPowerConsumption.HasValue)
+            if(!assetClass.TypicalPowerConsumption.HasValue)
             {
                 result = new ValidationResult();
                 return true;
             }
 
             return NumericValidators.ValidateNonNegative(
-                asset.TypicalPowerConsumption.Value,
+                assetClass.TypicalPowerConsumption.Value,
                 AssetClassValidationField.TypicalPowerConsumption,
                 out result);
         }
 
-        public static bool IsMaxPowerConsumptionValid(AssetClass asset, out ValidationResult result)
+        public static bool IsMaxPowerConsumptionValid(AssetClass assetClass, out ValidationResult result)
         {
-            if(!asset.MaximumPowerConsumption.HasValue)
+            if(!assetClass.MaximumPowerConsumption.HasValue)
             {
                 result = new ValidationResult();
                 return true;
             }
 
             return NumericValidators.ValidateNonNegative(
-                asset.MaximumPowerConsumption.Value,
+                assetClass.MaximumPowerConsumption.Value,
                 AssetClassValidationField.MaxPowerConsumption,
                 out result);
         }
