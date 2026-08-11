@@ -127,17 +127,34 @@
                         .ToList())
                 .ToDictionary(dt => dt.Identifier);
 
-            results.MergeFrom(ValidateBulkReferencesAgainstDatabase(assetClasses, deviceTypeMap));
+            for (int assetIdx = 0; assetIdx < assetClasses.Count; assetIdx++)
+            {
+                var assetClass = assetClasses[assetIdx];
+
+                // TODO: code duplicated in "ValidateWithDatabaseAccess". There should only be one.
+                if ((assetClass.DeviceTypeIdField.Changed || assetClass.PowerSupplyField.Changed || assetClass.HeightUField.Changed)
+                && assetClass.DeviceTypeId.HasValue())
+                {
+                    try
+                    {
+                        results[assetIdx].AddFailuresFrom(ValidateAgainstDeviceType(assetClass, deviceTypeMap));
+                    }
+                    catch (Exception ex)
+                    {
+                        var r = new ValidationResult();
+                        r.AddFailReason(AssetClassValidationHandler.AssetClassValidationField.DeviceTypeId,
+                            $"Error validating against device type: {ex.Message}");
+                        results[assetIdx].AddFailuresFrom(r);
+                    }
+                }
+            }
 
             if (results.AnyInvalid())
             {
                 return results;
             }
 
-            for (int i = 0; i < assetClasses.Count; i++)
-            {
-                results[i].AddFailuresFrom(ValidateWithDatabaseAccess(assetClasses[i], deviceTypeMap));
-            }
+            results.MergeFrom(ValidateBulkReferencesAgainstDatabase(assetClasses, deviceTypeMap));
 
             return results;
         }
@@ -290,11 +307,7 @@
         {
             var validations = new List<ValidationResult>();
 
-            bool isBulkValidation = deviceTypeCache != null;    
-
-            // Name uniqueness: in bulk mode it was already resolved in Phase 2.5 via bulk DB query.
-            // In single mode, use the standard per-item check (1 exclude ID — safe).
-            if (!isBulkValidation && assetClass.ShouldValidate(assetClass.NameField))
+            if (assetClass.ShouldValidate(assetClass.NameField))
             {
                 validations.Add(IsAssetClassNameValid(assetClass.Name, assetClass.Identifier));
             }
@@ -316,14 +329,7 @@
                 }
             }
 
-            // In bulk mode the reference existence checks (device type, port types, manufacturer) were already
-            // resolved in batched form during Phase 3 (ValidateBulkReferencesAgainstDatabase). Re-running the
-            // per-item ValidateReferencesAgainstDatabase here would issue N individual DB reads for data that was
-            // already validated, so it only runs in single-item mode.
-            if (!isBulkValidation)
-            {
-                validations.Add(ValidateReferencesAgainstDatabase(assetClass));
-            }
+            validations.Add(ValidateReferencesAgainstDatabase(assetClass));
 
             return validations.MergeAll();
         }
@@ -370,9 +376,12 @@
                 result.AddFailuresFrom(heightUResult);
             }
 
-            return result;
-        }
-
+            return result;
+
+        }
+
+
+
         private ValidationResult ValidateReferencesAgainstDatabase(AssetClass assetClass)
             {
                 var result = new ValidationResult();
