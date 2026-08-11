@@ -517,7 +517,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             if (_reservationpropertiesSection != default)
             {
                 obj.ReservationPropertiesSectionId = _reservationpropertiesSection.ID.Id;
-                var _description = _reservationpropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.ReservationDomMapper.ReservationProperties.Description);
+                var _description = _reservationpropertiesSection.GetValue<string>(AssetManagement.Models.ReservationDomMapper.ReservationProperties.Description);
                 if (_description != null)
                 {
                     obj.Description = _description.Value;
@@ -527,9 +527,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             var _rackfkSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(AssetManagement.Models.ReservationDomMapper.RackFk.SectionDefinitionId));
             if (_rackfkSection != default)
             {
-                obj.RackFk = new Skyline.DataMiner.SDM.AssetManagement.Models.RackRelation();
+                obj.RackFk = new AssetManagement.Models.RackRelation();
                 ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.RackFk).SectionId = _rackfkSection.ID.Id;
-                var _rackfkrack = _rackfkSection.GetValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.ReservationDomMapper.RackFk.Rack);
+                var _rackfkrack = _rackfkSection.GetValue<System.Guid>(AssetManagement.Models.ReservationDomMapper.RackFk.Rack);
                 if (_rackfkrack != null)
                 {
                     obj.RackFk.Rack = new SdmObjectReference<FacilityManagement.Models.Rack>(Convert.ToString(_rackfkrack.Value));
@@ -539,9 +539,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             var _reservedpositionsList = new System.Collections.Generic.List<AssetManagement.Models.InfraopsReservationBounderies>();
             foreach (var _reservedpositionsSection in instance.Sections.Where(s => s.SectionDefinitionID.Equals(AssetManagement.Models.ReservationDomMapper.ReservedPositions.SectionDefinitionId)))
             {
-                var reservedpositions = new Skyline.DataMiner.SDM.AssetManagement.Models.InfraopsReservationBounderies();
+                var reservedpositions = new AssetManagement.Models.InfraopsReservationBounderies();
                 ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)reservedpositions).SectionId = _reservedpositionsSection.ID.Id;
-                var _reservedpositionslowerbound = _reservedpositionsSection.GetValue<long>(Skyline.DataMiner.SDM.AssetManagement.Models.ReservationDomMapper.ReservedPositions.LowerBound);
+                var _reservedpositionslowerbound = _reservedpositionsSection.GetValue<long>(AssetManagement.Models.ReservationDomMapper.ReservedPositions.LowerBound);
                 if (_reservedpositionslowerbound != null)
                 {
                     reservedpositions.LowerBound = _reservedpositionslowerbound.Value;
@@ -580,7 +580,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     ModuleId = AssetManagement.Models.ReservationDomMapper.ModuleId
                 }
             };
-            var _reservationproperties = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.ReservationDomMapper.ReservationProperties.SectionDefinitionId);
+            var _reservationproperties = new Section(AssetManagement.Models.ReservationDomMapper.ReservationProperties.SectionDefinitionId);
             if (obj.ReservationPropertiesSectionId.HasValue)
             {
                 _reservationproperties.ID = new SectionID(obj.ReservationPropertiesSectionId.Value);
@@ -593,13 +593,13 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             instance.Sections.Add(_reservationproperties);
             if (obj.RackFk != null)
             {
-                var _rackfk = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.ReservationDomMapper.RackFk.SectionDefinitionId);
+                var _rackfk = new Section(AssetManagement.Models.ReservationDomMapper.RackFk.SectionDefinitionId);
                 var _rackfkSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.RackFk).SectionId;
                 if (_rackfkSectionId.HasValue)
                 {
                     _rackfk.ID = new SectionID(_rackfkSectionId.Value);
                 }
-                if (obj.RackFk.Rack != default)
+                if (obj.RackFk.Rack != default && System.Guid.TryParse(obj.RackFk.Rack.Identifier, out var rackGuid) && rackGuid != System.Guid.Empty)
                 {
                     _rackfk.AddOrUpdateValue<System.Guid>(AssetManagement.Models.ReservationDomMapper.RackFk.Rack, rackGuid);
                 }
@@ -609,7 +609,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
             foreach (var reservedpositions in obj.ReservedPositions)
             {
-                var _reservedpositionsSection = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.ReservationDomMapper.ReservedPositions.SectionDefinitionId);
+                var _reservedpositionsSection = new Section(AssetManagement.Models.ReservationDomMapper.ReservedPositions.SectionDefinitionId);
                 var _reservedpositionsSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)reservedpositions).SectionId;
                 if (_reservedpositionsSectionId.HasValue)
                 {

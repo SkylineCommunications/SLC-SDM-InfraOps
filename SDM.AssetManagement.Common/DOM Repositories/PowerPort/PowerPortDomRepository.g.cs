@@ -519,7 +519,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			var _powerportinfoSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.SectionDefinitionId));
 			if (_powerportinfoSection != default)
 			{
-				obj.PowerPortInfo = new Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortInfo();
+				obj.PowerPortInfo = new AssetManagement.Models.PowerPortInfo();
 				((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.PowerPortInfo).SectionId = _powerportinfoSection.ID.Id;
 
 				var _powerportinfoname = _powerportinfoSection.GetValue<string>(AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.Name);
@@ -563,8 +563,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			if (_assetrelationSection != default)
 			{
 				obj.AssetRelationPropertiesSectionId = _assetrelationSection.ID.Id;
-				obj.Asset = new Skyline.DataMiner.SDM.AssetManagement.Models.Asset();
-				var _asset = _assetrelationSection.GetValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortDomMapper.AssetRelationProperties.Asset);
+				obj.Asset = new AssetManagement.Models.Asset();
+				var _asset = _assetrelationSection.GetValue<System.Guid>(AssetManagement.Models.PowerPortDomMapper.AssetRelationProperties.Asset);
 				if (_asset != null)
 				{
 					obj.Asset = new SdmObjectReference<AssetManagement.Models.Asset>(Convert.ToString(_asset.Value));
@@ -596,7 +596,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			};
 			if (obj.PowerPortInfo != null)
 			{
-				var _powerportinfo = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.SectionDefinitionId);
+				var _powerportinfo = new Section(AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.SectionDefinitionId);
 				var _powerportinfoSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.PowerPortInfo).SectionId;
 				if (_powerportinfoSectionId.HasValue)
 				{
@@ -629,12 +629,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
 			if (obj.Asset != null)
 			{
-				var _assetrelation = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPortDomMapper.AssetRelationProperties.SectionDefinitionId);
+				var _assetrelation = new Section(AssetManagement.Models.PowerPortDomMapper.AssetRelationProperties.SectionDefinitionId);
 				if (obj.AssetRelationPropertiesSectionId.HasValue)
 				{
 					_assetrelation.ID = new SectionID(obj.AssetRelationPropertiesSectionId.Value);
 				}
-				if (obj.Asset != default)
+				if (obj.Asset != default && System.Guid.TryParse(obj.Asset.Identifier, out var assetGuid) && assetGuid != System.Guid.Empty)
 				{
 					_assetrelation.AddOrUpdateValue<System.Guid>(AssetManagement.Models.PowerPortDomMapper.AssetRelationProperties.Asset, assetGuid);
 				}

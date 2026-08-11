@@ -519,7 +519,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			if (_devicetypepropertiesSection != default)
 			{
 				obj.DeviceTypePropertiesSectionId = _devicetypepropertiesSection.ID.Id;
-				var _name = _devicetypepropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.DeviceTypeProperties.Name);
+				var _name = _devicetypepropertiesSection.GetValue<string>(AssetManagement.Models.DeviceTypeDomMapper.DeviceTypeProperties.Name);
 				if (_name != null)
 				{
 					obj.Name = _name.Value;
@@ -535,7 +535,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			var _tagsinfoSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(AssetManagement.Models.DeviceTypeDomMapper.TagsInfo.SectionDefinitionId));
 			if (_tagsinfoSection != default)
 			{
-                obj.TagsInfo = new Skyline.DataMiner.SDM.AssetManagement.Models.TagsInfo();
+                obj.TagsInfo = new AssetManagement.Models.TagsInfo();
                 ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.TagsInfo).SectionId = _tagsinfoSection.ID.Id;
 
 				var _tags = _tagsinfoSection.GetListValue<int>(AssetManagement.Models.DeviceTypeDomMapper.TagsInfo.Tags);
@@ -548,7 +548,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			var _hierarchyinfoSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(AssetManagement.Models.DeviceTypeDomMapper.HierarchyInfo.SectionDefinitionId));
 			if (_hierarchyinfoSection != default)
 			{
-                obj.HierarchyInfo = new Skyline.DataMiner.SDM.AssetManagement.Models.HierarchyInfo();
+                obj.HierarchyInfo = new AssetManagement.Models.HierarchyInfo();
                 ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.HierarchyInfo).SectionId = _hierarchyinfoSection.ID.Id;
 
 				var _hierarchyinfohierarchyrole = _hierarchyinfoSection.GetValue<string>(AssetManagement.Models.DeviceTypeDomMapper.HierarchyInfo.HierarchyRole);
@@ -604,7 +604,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 					ModuleId = AssetManagement.Models.DeviceTypeDomMapper.ModuleId
 				}
 			};
-			var _devicetypeproperties = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.DeviceTypeProperties.SectionDefinitionId);
+			var _devicetypeproperties = new Section(AssetManagement.Models.DeviceTypeDomMapper.DeviceTypeProperties.SectionDefinitionId);
 			if (obj.DeviceTypePropertiesSectionId.HasValue)
 			{
 				_devicetypeproperties.ID = new SectionID(obj.DeviceTypePropertiesSectionId.Value);
@@ -622,7 +622,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			instance.Sections.Add(_devicetypeproperties);
 			if (obj.TagsInfo != null)
 			{
-                var _tagsinfo = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.TagsInfo.SectionDefinitionId);
+                var _tagsinfo = new Section(AssetManagement.Models.DeviceTypeDomMapper.TagsInfo.SectionDefinitionId);
                 var _tagsinfoSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.TagsInfo).SectionId;
                 if (_tagsinfoSectionId.HasValue)
                 {
@@ -639,7 +639,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
 			if (obj.HierarchyInfo != null)
 			{
-                var _hierarchyinfo = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceTypeDomMapper.HierarchyInfo.SectionDefinitionId);
+                var _hierarchyinfo = new Section(AssetManagement.Models.DeviceTypeDomMapper.HierarchyInfo.SectionDefinitionId);
                 var _hierarchyinfoSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.HierarchyInfo).SectionId;
                 if (_hierarchyinfoSectionId.HasValue)
                 {

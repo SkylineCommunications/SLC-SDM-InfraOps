@@ -509,7 +509,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             if (_appsettingsSection != default)
             {
                 obj.AppSettingsSectionId = _appsettingsSection.ID.Id;
-                var _enableassethistory = _appsettingsSection.GetValue<bool>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.EnableAssetHistory);
+                var _enableassethistory = _appsettingsSection.GetValue<bool>(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.EnableAssetHistory);
                 if (_enableassethistory != null)
                 {
                     obj.EnableAssetHistory = _enableassethistory.Value;
@@ -563,14 +563,14 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     ModuleId = AssetManagement.Models.AssetManagerAppSettingsDomMapper.ModuleId
                 }
             };
-            var _appsettings = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.SectionDefinitionId);
+            var _appsettings = new Section(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.SectionDefinitionId);
             if (obj.AppSettingsSectionId.HasValue)
             {
                 _appsettings.ID = new SectionID(obj.AppSettingsSectionId.Value);
             }
-            _appsettings.AddOrUpdateValue<bool>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.EnableAssetHistory, obj.EnableAssetHistory);
-            _appsettings.AddOrUpdateValue<int>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.PlanAndBuildJobPrompt, obj.PlanAndBuildJobPrompt);
-            _appsettings.AddOrUpdateValue<bool>(Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.EnableConnectionHistory, obj.EnableConnectionHistory);
+            _appsettings.AddOrUpdateValue<bool>(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.EnableAssetHistory, obj.EnableAssetHistory);
+            _appsettings.AddOrUpdateValue<int>(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.PlanAndBuildJobPrompt, obj.PlanAndBuildJobPrompt);
+            _appsettings.AddOrUpdateValue<bool>(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.EnableConnectionHistory, obj.EnableConnectionHistory);
             if (obj.HistoryTTL != default)
             {
                 _appsettings.AddOrUpdateValue<TimeSpan>(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.HistoryTTL, (TimeSpan)obj.HistoryTTL.Value);
