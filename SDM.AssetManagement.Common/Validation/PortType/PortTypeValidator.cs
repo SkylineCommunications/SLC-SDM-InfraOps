@@ -21,7 +21,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
 
         protected override ValidationResult Validate(PortType entity)
         {
-            return ValidateCableTypeReferences(entity);
+            return entity == null
+                ? new ValidationResult()
+                : ValidateBulk(new List<PortType> { entity })[0];
         }
 
         protected override List<ValidationResult> ValidateBulk(List<PortType> entities)
@@ -33,8 +35,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
 
             var results = entities.Select(_ => new ValidationResult()).ToList();
             var cableTypeIds = entities
-                .SelectMany(pt => pt.CableFKs?.CableTypeFks ?? new List<SdmObjectReference<CableType>>())
-                .Where(reference => reference != null && reference.HasValue())
+                .SelectMany(pt => pt?.CableFKs?.CableTypeFks ?? new List<SdmObjectReference<CableType>>())
+                .Where(reference => reference.HasValue())
                 .Select(reference => reference.Identifier)
                 .Distinct()
                 .ToList();
@@ -42,9 +44,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
 
             for (int i = 0; i < entities.Count; i++)
             {
-                foreach (var reference in entities[i].CableFKs?.CableTypeFks ?? new List<SdmObjectReference<CableType>>())
+                foreach (var reference in entities[i]?.CableFKs?.CableTypeFks ?? new List<SdmObjectReference<CableType>>())
                 {
-                    if (reference != null && reference.HasValue() && !existingCableTypeIds.Contains(reference.Identifier))
+                    if (reference.HasValue() && !existingCableTypeIds.Contains(reference.Identifier))
                     {
                         results[i].AddFailReason("PortType.CableFKs.CableTypeFks", "CableTypeFks", $"Referenced Cable Type '{reference.Identifier}' does not exist.");
                     }
@@ -85,20 +87,20 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
                 .ToList();
 
             var portTypeIdsUsedByAssetPorts = _entityLoader.GetDataPortsByPortTypeIds(identifiers)
-                .Where(port => port.DataPortInfo?.Type != null && port.DataPortInfo.Type.HasValue())
+                .Where(port => port.DataPortInfo != null && port.DataPortInfo.Type.HasValue())
                 .Select(port => port.DataPortInfo.Type.Identifier)
                 .Concat(_entityLoader.GetPowerPortsByPortTypeIds(identifiers)
-                    .Where(port => port.PowerPortInfo?.PortType != null && port.PowerPortInfo.PortType.HasValue())
+                    .Where(port => port.PowerPortInfo != null && port.PowerPortInfo.PortType.HasValue())
                     .Select(port => port.PowerPortInfo.PortType.Identifier))
                 .ToHashSet();
 
             var portTypeIdsUsedByAssetClassPorts = _entityLoader.GetAssetClassesByDataPortTypeIds(identifiers)
                 .SelectMany(assetClass => assetClass.DataPorts ?? new List<DataPortInfo>())
-                .Where(port => port?.Type != null && port.Type.HasValue())
+                .Where(port => port != null && port.Type.HasValue())
                 .Select(port => port.Type.Identifier)
                 .Concat(_entityLoader.GetAssetClassesByPowerPortTypeIds(identifiers)
                     .SelectMany(assetClass => assetClass.PowerPorts ?? new List<PowerPortInfo>())
-                    .Where(port => port?.PortType != null && port.PortType.HasValue())
+                    .Where(port => port != null && port.PortType.HasValue())
                     .Select(port => port.PortType.Identifier))
                 .ToHashSet();
 
@@ -122,28 +124,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             }
 
             return results;
-        }
-
-        private ValidationResult ValidateCableTypeReferences(PortType portType)
-        {
-            var result = new ValidationResult();
-            var references = portType?.CableFKs?.CableTypeFks ?? new List<SdmObjectReference<CableType>>();
-            var identifiers = references
-                .Where(reference => reference != null && reference.HasValue())
-                .Select(reference => reference.Identifier)
-                .Distinct()
-                .ToList();
-
-            var existingCableTypeIds = _entityLoader.GetCableTypesByDomIds(identifiers).Select(ct => ct.Identifier).ToHashSet();
-            foreach (var reference in references)
-            {
-                if (reference != null && reference.HasValue() && !existingCableTypeIds.Contains(reference.Identifier))
-                {
-                    result.AddFailReason("PortType.CableFKs.CableTypeFks", "CableTypeFks", $"Referenced Cable Type '{reference.Identifier}' does not exist.");
-                }
-            }
-
-            return result;
         }
     }
 }

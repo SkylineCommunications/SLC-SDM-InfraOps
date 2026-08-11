@@ -5,7 +5,6 @@
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Messages;
 	using Skyline.DataMiner.SDM.FacilityManagement.Helpers;
-	using Skyline.DataMiner.SDM.FacilityManagement.Validation;
 	using Skyline.DataMiner.Utils.DOM.UnitTesting;
 
 	internal static class ConnectionHelper
@@ -34,11 +33,6 @@
 		internal static IFacilityManagementApiHelper GetMockedHelper(this IConnection connection)
 		{
 			return new FacilityManagementApiHelper(connection);
-		}
-
-		internal static IFacilityManagementApiHelper GetMockedHelper(this IConnection connection, IFacilityManagementExternalReferenceChecker externalReferenceChecker)
-		{
-			return new FacilityManagementApiHelper(connection, externalReferenceChecker);
 		}
 
 		private static DMSMessage[] HandleSLNetMessages(DomSLNetMessageHandler messageHandler, DMSMessage[] messages)

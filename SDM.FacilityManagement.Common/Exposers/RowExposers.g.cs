@@ -21,7 +21,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
     public static partial class RowExposers
     {
-        public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Row, string> Identifier = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Row, string>((obj) => obj.Identifier, "Identifier");
+        public static readonly Exposer<FacilityManagement.Models.Row, string> Identifier = new Exposer<FacilityManagement.Models.Row, string>((obj) => obj.Identifier, "Identifier");
         static RowExposers()
         {
             RuntimeHelpers.RunClassConstructor(typeof(RowProperties).TypeHandle);
@@ -31,22 +31,22 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
         public static partial class RowProperties
         {
-            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Row, string> Name = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Row, string>((obj) => obj.Name, "Name");
-            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Row, string> Plan = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Row, string>((obj) => obj.Plan, "Plan");
-            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Row, string> Description = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Row, string>((obj) => obj.Description, "Description");
-            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Row, string> Label = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Row, string>((obj) => obj.Label, "Label");
-            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Row, string> RowId = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Row, string>((obj) => obj.RowId, "RowProperties.RowId");
-            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Row, double?> YPosition = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Row, double?>((obj) => obj.YPosition, "YPosition");
+            public static readonly Exposer<FacilityManagement.Models.Row, string> Name = new Exposer<FacilityManagement.Models.Row, string>((obj) => obj.Name, "Name");
+            public static readonly Exposer<FacilityManagement.Models.Row, string> Plan = new Exposer<FacilityManagement.Models.Row, string>((obj) => obj.Plan, "Plan");
+            public static readonly Exposer<FacilityManagement.Models.Row, string> Description = new Exposer<FacilityManagement.Models.Row, string>((obj) => obj.Description, "Description");
+            public static readonly Exposer<FacilityManagement.Models.Row, string> Label = new Exposer<FacilityManagement.Models.Row, string>((obj) => obj.Label, "Label");
+            public static readonly Exposer<FacilityManagement.Models.Row, string> RowId = new Exposer<FacilityManagement.Models.Row, string>((obj) => obj.RowId, "RowProperties.RowId");
+            public static readonly Exposer<FacilityManagement.Models.Row, double?> YPosition = new Exposer<FacilityManagement.Models.Row, double?>((obj) => obj.YPosition, "YPosition");
         }
 
         public static partial class RoomFk
         {
-            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Row, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.FacilityManagement.Models.Room>> Room = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Row, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.FacilityManagement.Models.Room>>((obj) => obj.RoomFk.Room, "RoomFk.Room");
+            public static readonly Exposer<FacilityManagement.Models.Row, SdmObjectReference<FacilityManagement.Models.Room>> Room = new Exposer<FacilityManagement.Models.Row, SdmObjectReference<FacilityManagement.Models.Room>>((obj) => obj.RoomFk.Room, "RoomFk.Room");
         }
 
         public static partial class Resource
         {
-            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Row, System.Guid> ResourceId = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Row, System.Guid>((obj) => obj.Resource.ResourceId, "Resource.ResourceId");
+            public static readonly Exposer<FacilityManagement.Models.Row, System.Guid> ResourceId = new Exposer<FacilityManagement.Models.Row, System.Guid>((obj) => obj.Resource.ResourceId, "Resource.ResourceId");
         }
     }
 }

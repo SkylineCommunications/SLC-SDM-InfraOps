@@ -21,7 +21,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
     public static partial class ZoneExposers
     {
-        public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, string> Identifier = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, string>((obj) => obj.Identifier, "Identifier");
+        public static readonly Exposer<FacilityManagement.Models.Zone, string> Identifier = new Exposer<FacilityManagement.Models.Zone, string>((obj) => obj.Identifier, "Identifier");
         static ZoneExposers()
         {
             RuntimeHelpers.RunClassConstructor(typeof(ZoneProperties).TypeHandle);
@@ -32,29 +32,29 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
         public static partial class ZoneProperties
         {
-            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, string> Name = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, string>((obj) => obj.Name, "Name");
-            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, string> Plan = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, string>((obj) => obj.Plan, "Plan");
-            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, string> Description = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, string>((obj) => obj.Description, "Description");
-            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, SharedMappers.DomIds.SlcFacility_Management.Enums.ThermalType> ThermalType = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, SharedMappers.DomIds.SlcFacility_Management.Enums.ThermalType>((obj) => obj.ThermalType ?? default, "ThermalType");
-            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, double?> XPosition = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, double?>((obj) => obj.XPosition, "XPosition");
-            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, double?> YPosition = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, double?>((obj) => obj.YPosition, "YPosition");
-            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, double?> Width = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, double?>((obj) => obj.Width, "Width");
-            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, string> ZoneId = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, string>((obj) => obj.ZoneId, "ZoneProperties.ZoneId");
+            public static readonly Exposer<FacilityManagement.Models.Zone, string> Name = new Exposer<FacilityManagement.Models.Zone, string>((obj) => obj.Name, "Name");
+            public static readonly Exposer<FacilityManagement.Models.Zone, string> Plan = new Exposer<FacilityManagement.Models.Zone, string>((obj) => obj.Plan, "Plan");
+            public static readonly Exposer<FacilityManagement.Models.Zone, string> Description = new Exposer<FacilityManagement.Models.Zone, string>((obj) => obj.Description, "Description");
+            public static readonly Exposer<FacilityManagement.Models.Zone, SharedMappers.DomIds.SlcFacility_Management.Enums.ThermalType> ThermalType = new Exposer<FacilityManagement.Models.Zone, SharedMappers.DomIds.SlcFacility_Management.Enums.ThermalType>((obj) => obj.ThermalType ?? default, "ThermalType");
+            public static readonly Exposer<FacilityManagement.Models.Zone, double?> XPosition = new Exposer<FacilityManagement.Models.Zone, double?>((obj) => obj.XPosition, "XPosition");
+            public static readonly Exposer<FacilityManagement.Models.Zone, double?> YPosition = new Exposer<FacilityManagement.Models.Zone, double?>((obj) => obj.YPosition, "YPosition");
+            public static readonly Exposer<FacilityManagement.Models.Zone, double?> Width = new Exposer<FacilityManagement.Models.Zone, double?>((obj) => obj.Width, "Width");
+            public static readonly Exposer<FacilityManagement.Models.Zone, string> ZoneId = new Exposer<FacilityManagement.Models.Zone, string>((obj) => obj.ZoneId, "ZoneProperties.ZoneId");
         }
 
         public static partial class ZoneCapacity
         {
-            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, double?> CoolingCapacity = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, double?>((obj) => obj.ZoneCapacity.CoolingCapacity, "ZoneCapacity.CoolingCapacity");
+            public static readonly Exposer<FacilityManagement.Models.Zone, double?> CoolingCapacity = new Exposer<FacilityManagement.Models.Zone, double?>((obj) => obj.ZoneCapacity.CoolingCapacity, "ZoneCapacity.CoolingCapacity");
         }
 
         public static partial class RoomFk
         {
-            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.FacilityManagement.Models.Room>> Room = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.FacilityManagement.Models.Room>>((obj) => obj.RoomFk.Room, "RoomFk.Room");
+            public static readonly Exposer<FacilityManagement.Models.Zone, SdmObjectReference<FacilityManagement.Models.Room>> Room = new Exposer<FacilityManagement.Models.Zone, SdmObjectReference<FacilityManagement.Models.Room>>((obj) => obj.RoomFk.Room, "RoomFk.Room");
         }
 
         public static partial class Resource
         {
-            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, System.Guid> ResourceId = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Zone, System.Guid>((obj) => obj.Resource.ResourceId, "Resource.ResourceId");
+            public static readonly Exposer<FacilityManagement.Models.Zone, System.Guid> ResourceId = new Exposer<FacilityManagement.Models.Zone, System.Guid>((obj) => obj.Resource.ResourceId, "Resource.ResourceId");
         }
     }
 }

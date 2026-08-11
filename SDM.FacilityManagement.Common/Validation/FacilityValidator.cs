@@ -31,16 +31,19 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
         {
             var result = new ValidationResult();
 
-            if (!FacilityValidationHandler.IsFacilityIdValid(entity, out var idResult))
+            if (entity.ShouldValidate(entity.FacilityIdField))
             {
-                result.AddFailuresFrom(idResult);
-                return result;
-            }
+                if (!FacilityValidationHandler.IsFacilityIdValid(entity, out var idResult))
+                {
+                    result.AddFailuresFrom(idResult);
+                    return result;
+                }
 
-            if (entity.ShouldValidate(entity.FacilityIdField) && IsIdInUse(entity.FacilityId, entity.Identifier))
-            {
-                result.AddFailReason(FacilityValidationHandler.FacilityValidationField.FacilityId,
-                    $"Facility Id '{entity.FacilityId}' is already in use.");
+                if (IsIdInUse(entity.FacilityId, entity.Identifier))
+                {
+                    result.AddFailReason(FacilityValidationHandler.FacilityValidationField.FacilityId,
+                        $"Facility Id '{entity.FacilityId}' is already in use.");
+                }
             }
 
             result.AddFailuresFrom(ValidateReferencesAgainstDatabase(new List<Facility> { entity })[0]);
@@ -128,8 +131,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                 .Where(id => !string.IsNullOrWhiteSpace(id))
                 .ToHashSet();
 
-            var facilitiesWithAssets = GetIdentifiersWithAssets(FacilityManagementEntityType.Facility, identifiers);
-
             for (int i = 0; i < facilities.Count; i++)
             {
                 if (facilitiesWithFloors.Contains(facilities[i].Identifier))
@@ -138,29 +139,9 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                         FacilityValidationHandler.FacilityValidationField.FacilityId,
                         "Can't remove facility, since it still has floors assigned to it. Please remove all the floors assigned to this facility before removing it.");
                 }
-
-                if (facilitiesWithAssets.Contains(facilities[i].Identifier))
-                {
-                    results[i].AddFailReason(
-                        FacilityValidationHandler.FacilityValidationField.FacilityId,
-                        "Can't remove facility, since it still has assets assigned to it. Please remove all the assets assigned to this facility before removing it.");
-                }
             }
 
             return results;
-        }
-
-        private HashSet<string> GetIdentifiersWithAssets(FacilityManagementEntityType entityType, List<string> identifiers)
-        {
-            var checker = _entityLoader.ExternalReferenceChecker;
-            if (checker == null)
-            {
-                return new HashSet<string>();
-            }
-
-            return (checker.GetIdentifiersWithAssets(entityType, identifiers) ?? new List<string>())
-                .Where(id => !string.IsNullOrWhiteSpace(id))
-                .ToHashSet();
         }
 
         private List<ValidationResult> ValidateBulkIdsAgainstDatabase(List<Facility> entities)
@@ -210,10 +191,10 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                 {
                     Entity = entity,
                     Index = index,
-                    SiteIdentifier = entity.SiteFk == null ? null : FacilityReferenceValidationHelper.GetId(entity.SiteFk.Site),
+                    SiteIdentifier = entity.SiteFk == null ? null : ReferenceValidationHelper.GetId(entity.SiteFk.Site),
                 })
-                .Where(x => FacilityReferenceValidationHelper.ShouldValidateReferences(x.Entity) &&
-                    FacilityReferenceValidationHelper.HasId(x.SiteIdentifier))
+                .Where(x => ReferenceValidationHelper.ShouldValidateReferences(x.Entity) &&
+                    ReferenceValidationHelper.HasId(x.SiteIdentifier))
                 .ToList();
 
             if (!candidates.Any())
@@ -221,14 +202,14 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                 return results;
             }
 
-            var existingSiteIds = FacilityReferenceValidationHelper.ToIdentifierSet(
+            var existingSiteIds = ReferenceValidationHelper.ToIdentifierSet(
                 _entityLoader.GetSitesByIdentifiers(candidates.Select(x => x.SiteIdentifier).Distinct().ToList()));
 
             foreach (var candidate in candidates)
             {
                 if (!existingSiteIds.Contains(candidate.SiteIdentifier))
                 {
-                    FacilityReferenceValidationHelper.AddMissingReference(
+                    ReferenceValidationHelper.AddMissingReference(
                         results[candidate.Index],
                         FacilityValidationHandler.FacilityValidationField.FacilityId,
                         "Site",

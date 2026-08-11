@@ -211,7 +211,7 @@
                 .ToList();
 
             var connectedPortIds = _entityLoader.GetConnectionsByPortIds(portIds)
-                .SelectMany(GetConnectionPortIds)
+                .SelectMany(connection => connection.GetPortIds())
                 .ToHashSet();
 
             for (int i = 0; i < powerPorts.Count; i++)
@@ -225,19 +225,6 @@
             }
 
             return results;
-        }
-
-        private static IEnumerable<string> GetConnectionPortIds(Connection connection)
-        {
-            if (connection?.Source != null && connection.Source.Port != Guid.Empty)
-            {
-                yield return connection.Source.Port.ToString();
-            }
-
-            if (connection?.Destination != null && connection.Destination.Port != Guid.Empty)
-            {
-                yield return connection.Destination.Port.ToString();
-            }
         }
 
         #endregion

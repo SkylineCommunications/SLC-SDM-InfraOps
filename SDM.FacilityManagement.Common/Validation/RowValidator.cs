@@ -31,16 +31,19 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
         {
             var result = new ValidationResult();
 
-            if (!RowValidationHandler.IsRowIdValid(entity, out var idResult))
+            if (entity.ShouldValidate(entity.RowIdField))
             {
-                result.AddFailuresFrom(idResult);
-                return result;
-            }
+                if (!RowValidationHandler.IsRowIdValid(entity, out var idResult))
+                {
+                    result.AddFailuresFrom(idResult);
+                    return result;
+                }
 
-            if (entity.ShouldValidate(entity.RowIdField) && IsIdInUse(entity.RowId, entity.Identifier))
-            {
-                result.AddFailReason(RowValidationHandler.RowValidationField.RowId,
-                    $"Row Id '{entity.RowId}' is already in use.");
+                if (IsIdInUse(entity.RowId, entity.Identifier))
+                {
+                    result.AddFailReason(RowValidationHandler.RowValidationField.RowId,
+                        $"Row Id '{entity.RowId}' is already in use.");
+                }
             }
 
             result.AddFailuresFrom(ValidateReferencesAgainstDatabase(new List<Row> { entity })[0]);
@@ -182,14 +185,11 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
 
         private List<ValidationResult> ValidateReferencesAgainstDatabase(List<Row> entities)
         {
-            var checker = _entityLoader.ExternalReferenceChecker;
-            return FacilityReferenceValidationHelper.ValidateRoomAndResourceReferences(
+            return FacilityReferenceValidationHelper.ValidateRoomReferences(
                 entities,
                 RowValidationHandler.RowValidationField.RowId,
-                entity => entity.RoomFk == null ? null : FacilityReferenceValidationHelper.GetId(entity.RoomFk.Room),
-                entity => entity.Resource?.ResourceId ?? Guid.Empty,
-                ids => FacilityReferenceValidationHelper.ToIdentifierSet(_entityLoader.GetRoomsByIdentifiers(ids)),
-                checker == null ? (Func<IReadOnlyCollection<Guid>, IReadOnlyCollection<Guid>>)null : checker.GetExistingResourceIds);
+                entity => entity.RoomFk == null ? null : ReferenceValidationHelper.GetId(entity.RoomFk.Room),
+                ids => ReferenceValidationHelper.ToIdentifierSet(_entityLoader.GetRoomsByIdentifiers(ids)));
         }
 
         private static List<ValidationResult> ValidateIdDuplicatesInBatch(List<Row> entities)

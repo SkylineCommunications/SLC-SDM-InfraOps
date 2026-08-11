@@ -21,7 +21,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
     public static partial class FacilityManagerAppSettingsExposers
     {
-        public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettings, string> Identifier = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettings, string>((obj) => obj.Identifier, "Identifier");
+        public static readonly Exposer<FacilityManagement.Models.FacilityManagerAppSettings, string> Identifier = new Exposer<FacilityManagement.Models.FacilityManagerAppSettings, string>((obj) => obj.Identifier, "Identifier");
         static FacilityManagerAppSettingsExposers()
         {
             RuntimeHelpers.RunClassConstructor(typeof(AppSettings).TypeHandle);
@@ -29,7 +29,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
         public static partial class AppSettings
         {
-            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettings, string> GoogleMapsAPIKey = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettings, string>((obj) => obj.GoogleMapsAPIKey, "AppSettings.GoogleMapsAPIKey");
+            public static readonly Exposer<FacilityManagement.Models.FacilityManagerAppSettings, string> GoogleMapsAPIKey = new Exposer<FacilityManagement.Models.FacilityManagerAppSettings, string>((obj) => obj.GoogleMapsAPIKey, "AppSettings.GoogleMapsAPIKey");
         }
     }
 }

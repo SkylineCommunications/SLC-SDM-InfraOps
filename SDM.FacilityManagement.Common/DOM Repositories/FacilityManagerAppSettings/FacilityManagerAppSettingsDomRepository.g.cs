@@ -31,7 +31,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
         public FacilityManagerAppSettingsDomRepository(IConnection connection)
         {
             this.connection = connection;
-            this.helper = new DomHelper(connection.HandleMessages, Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettingsDomMapper.ModuleId);
+            this.helper = new DomHelper(connection.HandleMessages, FacilityManagement.Models.FacilityManagerAppSettingsDomMapper.ModuleId);
         }
 
         public FacilityManagerAppSettings Create(FacilityManagerAppSettings createObject)
@@ -144,7 +144,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             }
 
             var domFilter = TranslateFullFilter(filter);
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettingsDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(FacilityManagement.Models.FacilityManagerAppSettingsDomMapper.DomDefinitionId.Id));
             return helper.DomInstances.Count(domFilter);
         }
 
@@ -156,7 +156,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             }
 
             var domFilter = TranslateFullFilter(query.Filter);
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettingsDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(FacilityManagement.Models.FacilityManagerAppSettingsDomMapper.DomDefinitionId.Id));
             var domOrder = TranslateFullOrderBy(query.Order);
             var domQuery = query.WithFilter(domFilter).WithOrder(domOrder);
             return helper.DomInstances.Count(domQuery);
@@ -365,7 +365,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 throw new ArgumentNullException(nameof(domFilter));
             }
 
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettingsDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(FacilityManagement.Models.FacilityManagerAppSettingsDomMapper.DomDefinitionId.Id));
             var domInstances = helper.DomInstances.Read(domFilter);
             return domInstances.Select(FromInstance);
         }
@@ -377,7 +377,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 throw new ArgumentNullException(nameof(domQuery));
             }
 
-            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettingsDomMapper.DomDefinitionId.Id));
+            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(FacilityManagement.Models.FacilityManagerAppSettingsDomMapper.DomDefinitionId.Id));
             domQuery = domQuery.WithFilter(domFilter);
             var domInstances = helper.DomInstances.Read(domQuery);
             return domInstances.Select(FromInstance);
@@ -390,7 +390,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 throw new ArgumentNullException(nameof(domFilter));
             }
 
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettingsDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(FacilityManagement.Models.FacilityManagerAppSettingsDomMapper.DomDefinitionId.Id));
             var pagingHelper = helper.DomInstances.PreparePaging(domFilter, pageSize);
             while (pagingHelper.MoveToNextPage())
             {
@@ -405,7 +405,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 throw new ArgumentNullException(nameof(domQuery));
             }
 
-            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettingsDomMapper.DomDefinitionId.Id));
+            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(FacilityManagement.Models.FacilityManagerAppSettingsDomMapper.DomDefinitionId.Id));
             domQuery = domQuery.WithFilter(domFilter);
             var pagingHelper = helper.DomInstances.PreparePaging(domQuery, pageSize);
             while (pagingHelper.MoveToNextPage())
@@ -505,7 +505,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             {
                 Identifier = instance.ID.Id.ToString()
             };
-            var _appsettingsSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettingsDomMapper.AppSettings.SectionDefinitionId));
+            var _appsettingsSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(FacilityManagement.Models.FacilityManagerAppSettingsDomMapper.AppSettings.SectionDefinitionId));
             if (_appsettingsSection != default)
             {
                 obj.AppSettingsSectionId = _appsettingsSection.ID.Id;
@@ -533,10 +533,10 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
             var instance = new DomInstance
             {
-                DomDefinitionId = Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettingsDomMapper.DomDefinitionId,
+                DomDefinitionId = FacilityManagement.Models.FacilityManagerAppSettingsDomMapper.DomDefinitionId,
                 ID = new DomInstanceId(id)
                 {
-                    ModuleId = Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettingsDomMapper.ModuleId
+                    ModuleId = FacilityManagement.Models.FacilityManagerAppSettingsDomMapper.ModuleId
                 }
             };
             var _appsettings = new Section(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettingsDomMapper.AppSettings.SectionDefinitionId);
@@ -547,7 +547,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
             if (obj.GoogleMapsAPIKey != default)
             {
-                _appsettings.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettingsDomMapper.AppSettings.GoogleMapsAPIKey, Convert.ToString(obj.GoogleMapsAPIKey));
+                _appsettings.AddOrUpdateValue<string>(FacilityManagement.Models.FacilityManagerAppSettingsDomMapper.AppSettings.GoogleMapsAPIKey, Convert.ToString(obj.GoogleMapsAPIKey));
             }
 
             instance.Sections.Add(_appsettings);
@@ -561,7 +561,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 case "Identifier":
                     return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.Id, comparer, Guid.Parse((string)value));
                 case "AppSettings.GoogleMapsAPIKey":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettingsDomMapper.AppSettings.GoogleMapsAPIKey), comparer, (string)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.FacilityManagerAppSettingsDomMapper.AppSettings.GoogleMapsAPIKey), comparer, (string)value);
                 default:
                     throw new NotImplementedException();
             }
@@ -574,7 +574,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 case "Identifier":
                     return OrderByElementFactory.Create(DomInstanceExposers.Id, sortOrder, naturalSort);
                 case "AppSettings.GoogleMapsAPIKey":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.FacilityManagerAppSettingsDomMapper.AppSettings.GoogleMapsAPIKey), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.FacilityManagerAppSettingsDomMapper.AppSettings.GoogleMapsAPIKey), sortOrder, naturalSort);
                 default:
                     throw new NotImplementedException();
             }

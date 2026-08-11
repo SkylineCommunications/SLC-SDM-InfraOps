@@ -11,7 +11,6 @@ namespace SDM.FacilityManagement.Tests.Validation
 	using Skyline.DataMiner.SDM;
 	using Skyline.DataMiner.SDM.FacilityManagement.Helpers;
 	using Skyline.DataMiner.SDM.FacilityManagement.Models;
-	using Skyline.DataMiner.SDM.FacilityManagement.Validation;
 
 	[TestClass]
 	public class DeleteGuardValidationTests : BaseRepositoryTest
@@ -165,42 +164,6 @@ namespace SDM.FacilityManagement.Tests.Validation
 		}
 
 		[TestMethod]
-		public void Facility_Delete_WithAssignedAsset_ShouldThrow()
-		{
-			var checker = NewHelperWithAssets(out var helper);
-			var entity = helper.Facilities.Create(NewFacility("FAC-1"));
-			checker.AddReference(FacilityManagementEntityType.Facility, entity.Identifier);
-
-			var action = () => helper.Facilities.Delete(entity);
-
-			action.Should().Throw<Exception>().WithMessage("*Can't remove facility, since it still has assets assigned to it. Please remove all the assets assigned to this facility before removing it.*");
-		}
-
-		[TestMethod]
-		public void Room_Delete_WithAssignedAsset_ShouldThrow()
-		{
-			var checker = NewHelperWithAssets(out var helper);
-			var entity = helper.Rooms.Create(NewRoom("ROOM-1"));
-			checker.AddReference(FacilityManagementEntityType.Room, entity.Identifier);
-
-			var action = () => helper.Rooms.Delete(entity);
-
-			action.Should().Throw<Exception>().WithMessage("*Can't remove room, since it still has assets assigned to it. Please remove all the assets assigned to this room before removing it.*");
-		}
-
-		[TestMethod]
-		public void Desk_Delete_WithAssignedAsset_ShouldThrow()
-		{
-			var checker = NewHelperWithAssets(out var helper);
-			var entity = helper.Desks.Create(NewDesk("DSK-1"));
-			checker.AddReference(FacilityManagementEntityType.Desk, entity.Identifier);
-
-			var action = () => helper.Desks.Delete(entity);
-
-			action.Should().Throw<Exception>().WithMessage("*Can't remove desk, since it still has assets assigned to it. Please remove all the assets assigned to this desk before removing it.*");
-		}
-
-		[TestMethod]
 		public void Desk_Delete_WithoutAssignedAssets_ShouldSucceed()
 		{
 			var desk = Helper.Desks.Create(NewDesk("DSK-1"));
@@ -211,18 +174,6 @@ namespace SDM.FacilityManagement.Tests.Validation
 		}
 
 		[TestMethod]
-		public void Rack_Delete_WithAssignedAsset_ShouldThrow()
-		{
-			var checker = NewHelperWithAssets(out var helper);
-			var entity = helper.Racks.Create(NewRack("RACK-1"));
-			checker.AddReference(FacilityManagementEntityType.Rack, entity.Identifier);
-
-			var action = () => helper.Racks.Delete(entity);
-
-			action.Should().Throw<Exception>().WithMessage("*Can't remove rack, since it still has assets assigned to it. Please remove all the assets assigned to this rack before removing it.*");
-		}
-
-		[TestMethod]
 		public void Rack_Delete_WithoutAssignedAssets_ShouldSucceed()
 		{
 			var rack = Helper.Racks.Create(NewRack("RACK-1"));
@@ -230,13 +181,6 @@ namespace SDM.FacilityManagement.Tests.Validation
 			Action action = () => Helper.Racks.Delete(rack);
 
 			action.Should().NotThrow();
-		}
-
-		private static ExternalReferenceCheckerStub NewHelperWithAssets(out IFacilityManagementApiHelper helper)
-		{
-			var checker = new ExternalReferenceCheckerStub();
-			helper = ConnectionHelper.CreateConnection().GetMockedHelper(checker);
-			return checker;
 		}
 
 		private static Site NewSite(string id)
@@ -314,48 +258,6 @@ namespace SDM.FacilityManagement.Tests.Validation
 				RowFk = row == null ? null : new RowRelation { Row = new SdmObjectReference<Row>(row.Identifier) },
 				ZoneFk = zone == null ? null : new ZoneRelation { Zone = new SdmObjectReference<Zone>(zone.Identifier) },
 			};
-		}
-
-		private sealed class ExternalReferenceCheckerStub : IFacilityManagementExternalReferenceChecker
-		{
-			private readonly Dictionary<FacilityManagementEntityType, HashSet<string>> _references =
-				new Dictionary<FacilityManagementEntityType, HashSet<string>>();
-
-			public IReadOnlyCollection<string> GetIdentifiersWithAssets(FacilityManagementEntityType entityType, IReadOnlyCollection<string> identifiers)
-			{
-				if (!_references.TryGetValue(entityType, out var referencedIdentifiers))
-				{
-					return Array.Empty<string>();
-				}
-
-				return identifiers.Where(id => referencedIdentifiers.Contains(id)).ToList();
-			}
-
-			public IReadOnlyCollection<Guid> GetExistingPersonIds(IReadOnlyCollection<Guid> personIds)
-			{
-				return personIds;
-			}
-
-			public IReadOnlyCollection<Guid> GetExistingTeamIds(IReadOnlyCollection<Guid> teamIds)
-			{
-				return teamIds;
-			}
-
-			public IReadOnlyCollection<Guid> GetExistingResourceIds(IReadOnlyCollection<Guid> resourceIds)
-			{
-				return resourceIds;
-			}
-
-			public void AddReference(FacilityManagementEntityType entityType, string identifier)
-			{
-				if (!_references.TryGetValue(entityType, out var referencedIdentifiers))
-				{
-					referencedIdentifiers = new HashSet<string>();
-					_references[entityType] = referencedIdentifiers;
-				}
-
-				referencedIdentifiers.Add(identifier);
-			}
 		}
 	}
 }

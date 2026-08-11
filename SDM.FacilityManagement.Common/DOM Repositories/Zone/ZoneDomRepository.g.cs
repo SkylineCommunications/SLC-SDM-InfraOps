@@ -31,7 +31,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
         public ZoneDomRepository(IConnection connection)
         {
             this.connection = connection;
-            this.helper = new DomHelper(connection.HandleMessages, Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ModuleId);
+            this.helper = new DomHelper(connection.HandleMessages, FacilityManagement.Models.ZoneDomMapper.ModuleId);
         }
 
         public Zone Create(Zone createObject)
@@ -148,7 +148,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             }
 
             var domFilter = TranslateFullFilter(filter);
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(FacilityManagement.Models.ZoneDomMapper.DomDefinitionId.Id));
             return helper.DomInstances.Count(domFilter);
         }
 
@@ -160,7 +160,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             }
 
             var domFilter = TranslateFullFilter(query.Filter);
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(FacilityManagement.Models.ZoneDomMapper.DomDefinitionId.Id));
             var domOrder = TranslateFullOrderBy(query.Order);
             var domQuery = query.WithFilter(domFilter).WithOrder(domOrder);
             return helper.DomInstances.Count(domQuery);
@@ -372,7 +372,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 throw new ArgumentNullException(nameof(domFilter));
             }
 
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(FacilityManagement.Models.ZoneDomMapper.DomDefinitionId.Id));
             var domInstances = helper.DomInstances.Read(domFilter);
             return domInstances.Select(FromInstance);
         }
@@ -384,7 +384,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 throw new ArgumentNullException(nameof(domQuery));
             }
 
-            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.DomDefinitionId.Id));
+            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(FacilityManagement.Models.ZoneDomMapper.DomDefinitionId.Id));
             domQuery = domQuery.WithFilter(domFilter);
             var domInstances = helper.DomInstances.Read(domQuery);
             return domInstances.Select(FromInstance);
@@ -397,7 +397,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 throw new ArgumentNullException(nameof(domFilter));
             }
 
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(FacilityManagement.Models.ZoneDomMapper.DomDefinitionId.Id));
             var pagingHelper = helper.DomInstances.PreparePaging(domFilter, pageSize);
             while (pagingHelper.MoveToNextPage())
             {
@@ -412,7 +412,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 throw new ArgumentNullException(nameof(domQuery));
             }
 
-            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.DomDefinitionId.Id));
+            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(FacilityManagement.Models.ZoneDomMapper.DomDefinitionId.Id));
             domQuery = domQuery.WithFilter(domFilter);
             var pagingHelper = helper.DomInstances.PreparePaging(domQuery, pageSize);
             while (pagingHelper.MoveToNextPage())
@@ -512,10 +512,8 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             {
                 Identifier = instance.ID.Id.ToString()
             };
-            obj.State = String.IsNullOrWhiteSpace(instance.StatusId)
-                ? SharedMappers.DomIds.SlcFacility_Management.Behaviors.Zone_Behaviour.StatusesEnum.Draft
-                : SharedMappers.DomIds.SlcFacility_Management.Behaviors.Zone_Behaviour.Statuses.ToEnum(instance.StatusId);
-            var _zonepropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.SectionDefinitionId));
+            obj.State = SharedMappers.DomIds.SlcFacility_Management.Behaviors.Zone_Behaviour.Statuses.ToEnum(instance.StatusId);
+            var _zonepropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.SectionDefinitionId));
             if (_zonepropertiesSection != default)
             {
                 obj.ZonePropertiesSectionId = _zonepropertiesSection.ID.Id;
@@ -525,50 +523,50 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     obj.Name = _zonepropertiesname.Value;
                 }
 
-                var _zonepropertiesplan = _zonepropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Plan);
+                var _zonepropertiesplan = _zonepropertiesSection.GetValue<string>(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Plan);
                 if (_zonepropertiesplan != null)
                 {
                     obj.Plan = _zonepropertiesplan.Value;
                 }
 
-                var _zonepropertiesdescription = _zonepropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Description);
+                var _zonepropertiesdescription = _zonepropertiesSection.GetValue<string>(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Description);
                 if (_zonepropertiesdescription != null)
                 {
                     obj.Description = _zonepropertiesdescription.Value;
                 }
 
-                var _zonepropertiesthermaltype = _zonepropertiesSection.GetValue<int>(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.ThermalType);
+                var _zonepropertiesthermaltype = _zonepropertiesSection.GetValue<int>(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.ThermalType);
                 if (_zonepropertiesthermaltype != null)
                 {
                     obj.ThermalType = (SharedMappers.DomIds.SlcFacility_Management.Enums.ThermalType)_zonepropertiesthermaltype.Value;
                 }
 
-                var _zonepropertiesxposition = _zonepropertiesSection.GetValue<double>(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.XPosition);
+                var _zonepropertiesxposition = _zonepropertiesSection.GetValue<double>(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.XPosition);
                 if (_zonepropertiesxposition != null)
                 {
                     obj.XPosition = _zonepropertiesxposition.Value;
                 }
 
-                var _zonepropertiesyposition = _zonepropertiesSection.GetValue<double>(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.YPosition);
+                var _zonepropertiesyposition = _zonepropertiesSection.GetValue<double>(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.YPosition);
                 if (_zonepropertiesyposition != null)
                 {
                     obj.YPosition = _zonepropertiesyposition.Value;
                 }
 
-                var _zonepropertieswidth = _zonepropertiesSection.GetValue<double>(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Width);
+                var _zonepropertieswidth = _zonepropertiesSection.GetValue<double>(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Width);
                 if (_zonepropertieswidth != null)
                 {
                     obj.Width = _zonepropertieswidth.Value;
                 }
 
-                var _zonepropertieszoneid = _zonepropertiesSection.GetValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.ZoneId);
+                var _zonepropertieszoneid = _zonepropertiesSection.GetValue<string>(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.ZoneId);
                 if (_zonepropertieszoneid != null)
                 {
                     obj.ZoneId = _zonepropertieszoneid.Value;
                 }
             }
 
-            var _zonecapacitySection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneCapacity.SectionDefinitionId));
+            var _zonecapacitySection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(FacilityManagement.Models.ZoneDomMapper.ZoneCapacity.SectionDefinitionId));
             if (_zonecapacitySection != default)
             {
                 obj.ZoneCapacity = new Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneCapacity();
@@ -580,7 +578,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 }
             }
 
-            var _roomfkSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.RoomFk.SectionDefinitionId));
+            var _roomfkSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(FacilityManagement.Models.ZoneDomMapper.RoomFk.SectionDefinitionId));
             if (_roomfkSection != default)
             {
                 obj.RoomFk = new Skyline.DataMiner.SDM.FacilityManagement.Models.RoomRelation();
@@ -588,11 +586,11 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 var _roomfkroom = _roomfkSection.GetValue<System.Guid>(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.RoomFk.Room);
                 if (_roomfkroom != null)
                 {
-                    obj.RoomFk.Room = new Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.FacilityManagement.Models.Room>(Convert.ToString(_roomfkroom.Value));
+                    obj.RoomFk.Room = new SdmObjectReference<FacilityManagement.Models.Room>(Convert.ToString(_roomfkroom.Value));
                 }
             }
 
-            var _resourceSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.Resource.SectionDefinitionId));
+            var _resourceSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(FacilityManagement.Models.ZoneDomMapper.Resource.SectionDefinitionId));
             if (_resourceSection != default)
             {
                 obj.Resource = new Skyline.DataMiner.SDM.FacilityManagement.Models.ResourceLink();
@@ -621,10 +619,10 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
             var instance = new DomInstance
             {
-                DomDefinitionId = Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.DomDefinitionId,
+                DomDefinitionId = FacilityManagement.Models.ZoneDomMapper.DomDefinitionId,
                 ID = new DomInstanceId(id)
                 {
-                    ModuleId = Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ModuleId
+                    ModuleId = FacilityManagement.Models.ZoneDomMapper.ModuleId
                 }
             };
             var _zoneproperties = new Section(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.SectionDefinitionId);
@@ -635,41 +633,41 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
             if (obj.Name != default)
             {
-                _zoneproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Name, Convert.ToString(obj.Name));
+                _zoneproperties.AddOrUpdateValue<string>(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Name, Convert.ToString(obj.Name));
             }
 
             if (obj.Plan != default)
             {
-                _zoneproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Plan, Convert.ToString(obj.Plan));
+                _zoneproperties.AddOrUpdateValue<string>(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Plan, Convert.ToString(obj.Plan));
             }
 
             if (obj.Description != default)
             {
-                _zoneproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Description, Convert.ToString(obj.Description));
+                _zoneproperties.AddOrUpdateValue<string>(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Description, Convert.ToString(obj.Description));
             }
 
             if (obj.ThermalType != default)
             {
-                _zoneproperties.AddOrUpdateValue<int>(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.ThermalType, (int)(obj.ThermalType).Value);
+                _zoneproperties.AddOrUpdateValue<int>(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.ThermalType, (int)(obj.ThermalType).Value);
             }
             if (obj.XPosition != default)
             {
-                _zoneproperties.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.XPosition, (double)(obj.XPosition).Value);
+                _zoneproperties.AddOrUpdateValue<double>(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.XPosition, (double)(obj.XPosition).Value);
             }
 
             if (obj.YPosition != default)
             {
-                _zoneproperties.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.YPosition, (double)(obj.YPosition).Value);
+                _zoneproperties.AddOrUpdateValue<double>(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.YPosition, (double)(obj.YPosition).Value);
             }
 
             if (obj.Width != default)
             {
-                _zoneproperties.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Width, (double)(obj.Width).Value);
+                _zoneproperties.AddOrUpdateValue<double>(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Width, (double)(obj.Width).Value);
             }
 
             if (obj.ZoneId != default)
             {
-                _zoneproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.ZoneId, Convert.ToString(obj.ZoneId));
+                _zoneproperties.AddOrUpdateValue<string>(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.ZoneId, Convert.ToString(obj.ZoneId));
             }
 
             instance.Sections.Add(_zoneproperties);
@@ -684,7 +682,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
                 if (obj.ZoneCapacity.CoolingCapacity != default)
                 {
-                    _zonecapacity.AddOrUpdateValue<double>(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneCapacity.CoolingCapacity, (double)(obj.ZoneCapacity.CoolingCapacity).Value);
+                    _zonecapacity.AddOrUpdateValue<double>(FacilityManagement.Models.ZoneDomMapper.ZoneCapacity.CoolingCapacity, (double)(obj.ZoneCapacity.CoolingCapacity).Value);
                 }
 
                 instance.Sections.Add(_zonecapacity);
@@ -701,7 +699,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
                 if (obj.RoomFk.Room != default)
                 {
-                    _roomfk.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.RoomFk.Room, System.Guid.Parse(obj.RoomFk.Room.Identifier));
+                    _roomfk.AddOrUpdateValue<System.Guid>(FacilityManagement.Models.ZoneDomMapper.RoomFk.Room, roomGuid);
                 }
 
                 instance.Sections.Add(_roomfk);
@@ -718,7 +716,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
                 if (obj.Resource.ResourceId != default)
                 {
-                    _resource.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.Resource.ResourceId, Convert.ToString(obj.Resource.ResourceId));
+                    _resource.AddOrUpdateValue<string>(FacilityManagement.Models.ZoneDomMapper.Resource.ResourceId, Convert.ToString(obj.Resource.ResourceId));
                 }
 
                 instance.Sections.Add(_resource);
@@ -734,37 +732,37 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 case "Identifier":
                     return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.Id, comparer, Guid.Parse((string)value));
                 case "ZoneProperties.Name":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Name), comparer, (string)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Name), comparer, (string)value);
                 case "ZoneProperties.Plan":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Plan), comparer, (string)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Plan), comparer, (string)value);
                 case "ZoneProperties.Description":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Description), comparer, (string)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Description), comparer, (string)value);
                 case "ZoneProperties.ThermalType" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
-                    return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.ThermalType.Id.ToString()).Equal(comparer == Comparer.NotEquals);
+                    return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.ThermalType.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "ZoneProperties.ThermalType":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.ThermalType), comparer, (int)((SharedMappers.DomIds.SlcFacility_Management.Enums.ThermalType?)value).Value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.ThermalType), comparer, (int)((SharedMappers.DomIds.SlcFacility_Management.Enums.ThermalType?)value).Value);
                 case "ZoneProperties.XPosition" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
-                    return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.XPosition.Id.ToString()).Equal(comparer == Comparer.NotEquals);
+                    return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.XPosition.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "ZoneProperties.XPosition":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.XPosition), comparer, (double)((double?)value).Value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.XPosition), comparer, (double)((double?)value).Value);
                 case "ZoneProperties.YPosition" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
-                    return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.YPosition.Id.ToString()).Equal(comparer == Comparer.NotEquals);
+                    return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.YPosition.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "ZoneProperties.YPosition":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.YPosition), comparer, (double)((double?)value).Value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.YPosition), comparer, (double)((double?)value).Value);
                 case "ZoneProperties.Width" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
-                    return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Width.Id.ToString()).Equal(comparer == Comparer.NotEquals);
+                    return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Width.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "ZoneProperties.Width":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Width), comparer, (double)((double?)value).Value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Width), comparer, (double)((double?)value).Value);
                 case "ZoneProperties.ZoneId":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.ZoneId), comparer, (string)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.ZoneId), comparer, (string)value);
                 case "ZoneCapacity.CoolingCapacity" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
-                    return DomInstanceExposers.FieldValues.KeyExists(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneCapacity.CoolingCapacity.Id.ToString()).Equal(comparer == Comparer.NotEquals);
+                    return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.ZoneDomMapper.ZoneCapacity.CoolingCapacity.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "ZoneCapacity.CoolingCapacity":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneCapacity.CoolingCapacity), comparer, (double)((double?)value).Value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.ZoneCapacity.CoolingCapacity), comparer, (double)((double?)value).Value);
                 case "RoomFk.Room":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.RoomFk.Room), comparer, System.Guid.Parse(Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.FacilityManagement.Models.Room>.Convert(value).Identifier));
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.RoomFk.Room), comparer, System.Guid.Parse(SdmObjectReference<FacilityManagement.Models.Room>.Convert(value).Identifier));
                 case "Resource.ResourceId":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.Resource.ResourceId), comparer, Convert.ToString((System.Guid)value));
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.Resource.ResourceId), comparer, Convert.ToString((System.Guid)value));
                 default:
                     throw new NotImplementedException();
             }
@@ -777,27 +775,27 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 case "Identifier":
                     return OrderByElementFactory.Create(DomInstanceExposers.Id, sortOrder, naturalSort);
                 case "ZoneProperties.Name":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Name), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Name), sortOrder, naturalSort);
                 case "ZoneProperties.Plan":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Plan), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Plan), sortOrder, naturalSort);
                 case "ZoneProperties.Description":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Description), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Description), sortOrder, naturalSort);
                 case "ZoneProperties.ThermalType":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.ThermalType), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.ThermalType), sortOrder, naturalSort);
                 case "ZoneProperties.XPosition":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.XPosition), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.XPosition), sortOrder, naturalSort);
                 case "ZoneProperties.YPosition":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.YPosition), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.YPosition), sortOrder, naturalSort);
                 case "ZoneProperties.Width":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Width), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Width), sortOrder, naturalSort);
                 case "ZoneProperties.ZoneId":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneProperties.ZoneId), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.ZoneId), sortOrder, naturalSort);
                 case "ZoneCapacity.CoolingCapacity":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.ZoneCapacity.CoolingCapacity), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.ZoneCapacity.CoolingCapacity), sortOrder, naturalSort);
                 case "RoomFk.Room":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.RoomFk.Room), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.RoomFk.Room), sortOrder, naturalSort);
                 case "Resource.ResourceId":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.FacilityManagement.Models.ZoneDomMapper.Resource.ResourceId), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.Resource.ResourceId), sortOrder, naturalSort);
                 default:
                     throw new NotImplementedException();
             }

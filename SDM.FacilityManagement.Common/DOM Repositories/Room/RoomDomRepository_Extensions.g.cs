@@ -8,9 +8,9 @@ namespace Skyline.DataMiner.SDM
     public static class RoomDomRepository_Extensions
     {
 
-        public static Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.SDM.FacilityManagement.Models.Room> WithMiddleware(
-            this Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.SDM.FacilityManagement.Models.Room> repository,
-            IMiddlewareMarker<Skyline.DataMiner.SDM.FacilityManagement.Models.Room> middleware)
+        public static IBulkRepository<FacilityManagement.Models.Room> WithMiddleware(
+            this IBulkRepository<FacilityManagement.Models.Room> repository,
+            IMiddlewareMarker<FacilityManagement.Models.Room> middleware)
         {
             return new RoomDomRepository_Middleware(repository, middleware);
         }

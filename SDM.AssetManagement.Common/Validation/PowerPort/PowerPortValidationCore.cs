@@ -79,9 +79,9 @@
         /// </summary>
         private ValidationResult ValidatePortType(PowerPort powerPort)
         {
-            if (powerPort.PowerPortInfo.PortType == null || !powerPort.PowerPortInfo.PortType.HasValue())
+            if (!powerPort.PowerPortInfo.PortType.HasValue())
             {
-                return ValidatePortTypeAgainst(powerPort, null);
+                return PortTypeRequiredFailure();
             }
 
             try
@@ -99,6 +99,18 @@
         }
 
         /// <summary>
+        /// Builds the required-field failure for a missing Port Type reference.
+        /// Shared by the single-item and bulk validation paths so the message stays consistent.
+        /// </summary>
+        private static ValidationResult PortTypeRequiredFailure()
+        {
+            var result = new ValidationResult();
+            result.AddFailReason(PowerPortValidationField.PortType,
+                "Port Type cannot be empty.");
+            return result;
+        }
+
+        /// <summary>
         /// Validates a PowerPort's Port Type reference against an already-loaded PortType
         /// (or null when the referenced type could not be found). Pure in-memory checks,
         /// so it can be reused by the bulk path after a batched port-type load.
@@ -107,11 +119,9 @@
         {
             var result = new ValidationResult();
 
-            if (powerPort.PowerPortInfo.PortType == null || !powerPort.PowerPortInfo.PortType.HasValue())
+            if (!powerPort.PowerPortInfo.PortType.HasValue())
             {
-                result.AddFailReason(PowerPortValidationField.PortType,
-                    "Port Type cannot be empty.");
-                return result;
+                return PortTypeRequiredFailure();
             }
 
             if (loadedPortType == null)

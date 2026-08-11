@@ -233,14 +233,8 @@
                 .ToList();
 
             var cableTypeIdsUsedByConnections = _entityLoader.GetConnectionsByCableTypeIds(identifiers)
-                .Where(connection => connection.CableType != null && connection.CableType.HasValue())
+                .Where(connection => connection.CableType.HasValue())
                 .Select(connection => connection.CableType.Identifier)
-                .ToHashSet();
-
-            var cableTypeIdsUsedByPortTypes = _entityLoader.GetPortTypesByCableTypeIds(identifiers)
-                .SelectMany(portType => portType.CableFKs?.CableTypeFks ?? new List<SdmObjectReference<CableType>>())
-                .Where(reference => reference != null && reference.HasValue())
-                .Select(reference => reference.Identifier)
                 .ToHashSet();
 
             for (int i = 0; i < cableTypes.Count; i++)
@@ -251,8 +245,30 @@
                         CableTypeValidationHandler.CableTypeValidationField.Connection,
                         "There are still connections using this cable type. Please remove them first.");
                 }
+            }
 
-                if (cableTypeIdsUsedByPortTypes.Contains(cableTypes[i].Identifier))
+            var remainingIdentifiers = cableTypes
+                .Select((cableType, index) => new { CableType = cableType, Index = index })
+                .Where(x => results[x.Index].IsValid)
+                .Select(x => x.CableType.Identifier)
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .Distinct()
+                .ToList();
+
+            if (!remainingIdentifiers.Any())
+            {
+                return results;
+            }
+
+            var cableTypeIdsUsedByPortTypes = _entityLoader.GetPortTypesByCableTypeIds(remainingIdentifiers)
+                .SelectMany(portType => portType.CableFKs?.CableTypeFks ?? new List<SdmObjectReference<CableType>>())
+                .Where(reference => reference.HasValue())
+                .Select(reference => reference.Identifier)
+                .ToHashSet();
+
+            for (int i = 0; i < cableTypes.Count; i++)
+            {
+                if (results[i].IsValid && cableTypeIdsUsedByPortTypes.Contains(cableTypes[i].Identifier))
                 {
                     results[i].AddFailReason(
                         CableTypeValidationHandler.CableTypeValidationField.PortType,

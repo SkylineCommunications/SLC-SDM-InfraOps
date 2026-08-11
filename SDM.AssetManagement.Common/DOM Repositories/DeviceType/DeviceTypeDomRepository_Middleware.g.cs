@@ -23,20 +23,20 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 	using SLDataGateway.API.Querying;
 	using SLDataGateway.API.Types.Querying;
 
-	internal sealed partial class DeviceTypeDomRepository_Middleware : Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType>
+	internal sealed partial class DeviceTypeDomRepository_Middleware : IBulkRepository<AssetManagement.Models.DeviceType>
 	{
-		private readonly Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType> _inner;
-		private readonly IMiddlewareMarker<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType> _middleware;
+		private readonly IBulkRepository<AssetManagement.Models.DeviceType> _inner;
+		private readonly IMiddlewareMarker<AssetManagement.Models.DeviceType> _middleware;
 
-		public DeviceTypeDomRepository_Middleware(Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType> inner, IMiddlewareMarker<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType> middleware)
+		public DeviceTypeDomRepository_Middleware(IBulkRepository<AssetManagement.Models.DeviceType> inner, IMiddlewareMarker<AssetManagement.Models.DeviceType> middleware)
 		{
 			_inner = inner ?? throw new ArgumentNullException(nameof(inner));
 			_middleware = middleware;
 		}
 
-		public IEnumerable<IPagedResult<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType>> ReadPaged(FilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType> filter)
+		public IEnumerable<IPagedResult<AssetManagement.Models.DeviceType>> ReadPaged(FilterElement<AssetManagement.Models.DeviceType> filter)
 		{
-			if (_middleware is IPageableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType> middleware)
+			if (_middleware is IPageableMiddleware<AssetManagement.Models.DeviceType> middleware)
 			{
 				return middleware.OnReadPaged(filter, _inner.ReadPaged);
 			}
@@ -46,9 +46,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			}
 		}
 
-		public IEnumerable<IPagedResult<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType>> ReadPaged(IQuery<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType> query)
+		public IEnumerable<IPagedResult<AssetManagement.Models.DeviceType>> ReadPaged(IQuery<AssetManagement.Models.DeviceType> query)
 		{
-			if (_middleware is IPageableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType> middleware)
+			if (_middleware is IPageableMiddleware<AssetManagement.Models.DeviceType> middleware)
 			{
 				return middleware.OnReadPaged(query, _inner.ReadPaged);
 			}
@@ -58,9 +58,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			}
 		}
 
-		public IEnumerable<IPagedResult<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType>> ReadPaged(FilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType> filter, int pageSize)
+		public IEnumerable<IPagedResult<AssetManagement.Models.DeviceType>> ReadPaged(FilterElement<AssetManagement.Models.DeviceType> filter, int pageSize)
 		{
-			if (_middleware is IPageableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType> middleware)
+			if (_middleware is IPageableMiddleware<AssetManagement.Models.DeviceType> middleware)
 			{
 				return middleware.OnReadPaged(filter, pageSize, _inner.ReadPaged);
 			}
@@ -70,9 +70,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			}
 		}
 
-		public IEnumerable<IPagedResult<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType>> ReadPaged(IQuery<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType> query, int pageSize)
+		public IEnumerable<IPagedResult<AssetManagement.Models.DeviceType>> ReadPaged(IQuery<AssetManagement.Models.DeviceType> query, int pageSize)
 		{
-			if (_middleware is IPageableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType> middleware)
+			if (_middleware is IPageableMiddleware<AssetManagement.Models.DeviceType> middleware)
 			{
 				return middleware.OnReadPaged(query, pageSize, _inner.ReadPaged);
 			}
@@ -82,9 +82,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			}
 		}
 
-		public IEnumerable<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType> Read(FilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType> filter)
+		public IEnumerable<AssetManagement.Models.DeviceType> Read(FilterElement<AssetManagement.Models.DeviceType> filter)
 		{
-			if (_middleware is IReadableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType> middleware)
+			if (_middleware is IReadableMiddleware<AssetManagement.Models.DeviceType> middleware)
 			{
 				return middleware.OnRead(filter, _inner.Read);
 			}
@@ -94,9 +94,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			}
 		}
 
-		public IEnumerable<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType> Read(IQuery<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType> query)
+		public IEnumerable<AssetManagement.Models.DeviceType> Read(IQuery<AssetManagement.Models.DeviceType> query)
 		{
-			if (_middleware is IReadableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType> middleware)
+			if (_middleware is IReadableMiddleware<AssetManagement.Models.DeviceType> middleware)
 			{
 				return middleware.OnRead(query, _inner.Read);
 			}
@@ -106,9 +106,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			}
 		}
 
-		public long Count(FilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType> filter)
+		public long Count(FilterElement<AssetManagement.Models.DeviceType> filter)
 		{
-			if (_middleware is ICountableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType> middleware)
+			if (_middleware is ICountableMiddleware<AssetManagement.Models.DeviceType> middleware)
 			{
 				return middleware.OnCount(filter, _inner.Count);
 			}
@@ -118,9 +118,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			}
 		}
 
-		public long Count(IQuery<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType> query)
+		public long Count(IQuery<AssetManagement.Models.DeviceType> query)
 		{
-			if (_middleware is ICountableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType> middleware)
+			if (_middleware is ICountableMiddleware<AssetManagement.Models.DeviceType> middleware)
 			{
 				return middleware.OnCount(query, _inner.Count);
 			}
@@ -130,9 +130,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			}
 		}
 
-		public IReadOnlyCollection<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType> Create(IEnumerable<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType> oToCreate)
+		public IReadOnlyCollection<AssetManagement.Models.DeviceType> Create(IEnumerable<AssetManagement.Models.DeviceType> oToCreate)
 		{
-			if (_middleware is IBulkCreatableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType> middleware)
+			if (_middleware is IBulkCreatableMiddleware<AssetManagement.Models.DeviceType> middleware)
 			{
 				return middleware.OnCreate(oToCreate, _inner.Create);
 			}
@@ -142,9 +142,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			}
 		}
 
-		public Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType Create(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType oToCreate)
+		public AssetManagement.Models.DeviceType Create(AssetManagement.Models.DeviceType oToCreate)
 		{
-			if (_middleware is ICreatableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType> middleware)
+			if (_middleware is ICreatableMiddleware<AssetManagement.Models.DeviceType> middleware)
 			{
 				return middleware.OnCreate(oToCreate, _inner.Create);
 			}
@@ -154,9 +154,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			}
 		}
 
-		public IReadOnlyCollection<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType> Update(IEnumerable<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType> oToUpdate)
+		public IReadOnlyCollection<AssetManagement.Models.DeviceType> Update(IEnumerable<AssetManagement.Models.DeviceType> oToUpdate)
 		{
-			if (_middleware is IBulkUpdatableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType> middleware)
+			if (_middleware is IBulkUpdatableMiddleware<AssetManagement.Models.DeviceType> middleware)
 			{
 				return middleware.OnUpdate(oToUpdate, _inner.Update);
 			}
@@ -166,9 +166,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			}
 		}
 
-		public Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType Update(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType oToUpdate)
+		public AssetManagement.Models.DeviceType Update(AssetManagement.Models.DeviceType oToUpdate)
 		{
-			if (_middleware is IUpdatableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType> middleware)
+			if (_middleware is IUpdatableMiddleware<AssetManagement.Models.DeviceType> middleware)
 			{
 				return middleware.OnUpdate(oToUpdate, _inner.Update);
 			}
@@ -178,9 +178,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			}
 		}
 
-		public void Delete(IEnumerable<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType> oToDelete)
+		public void Delete(IEnumerable<AssetManagement.Models.DeviceType> oToDelete)
 		{
-			if (_middleware is IBulkDeletableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType> middleware)
+			if (_middleware is IBulkDeletableMiddleware<AssetManagement.Models.DeviceType> middleware)
 			{
 				middleware.OnDelete(oToDelete, _inner.Delete);
 			}
@@ -190,9 +190,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			}
 		}
 
-		public void Delete(Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType oToDelete)
+		public void Delete(AssetManagement.Models.DeviceType oToDelete)
 		{
-			if (_middleware is IDeletableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType> middleware)
+			if (_middleware is IDeletableMiddleware<AssetManagement.Models.DeviceType> middleware)
 			{
 				middleware.OnDelete(oToDelete, _inner.Delete);
 			}
@@ -201,9 +201,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				_inner.Delete(oToDelete);
 			}
 		}
-		public System.Collections.Generic.IReadOnlyCollection<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType> CreateOrUpdate(System.Collections.Generic.IEnumerable<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType> oToCreateOrUpdate)
+		public System.Collections.Generic.IReadOnlyCollection<AssetManagement.Models.DeviceType> CreateOrUpdate(System.Collections.Generic.IEnumerable<AssetManagement.Models.DeviceType> oToCreateOrUpdate)
 		{
-                if (_middleware is IBulkRepositoryMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType> middleware)
+                if (_middleware is IBulkRepositoryMiddleware<AssetManagement.Models.DeviceType> middleware)
                 {
                     return middleware.OnCreateOrUpdate(oToCreateOrUpdate, _inner.CreateOrUpdate);
                 }

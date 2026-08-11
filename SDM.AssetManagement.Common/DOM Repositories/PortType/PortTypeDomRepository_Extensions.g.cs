@@ -8,9 +8,9 @@ namespace Skyline.DataMiner.SDM
     public static class PortTypeDomRepository_Extensions
     {
 
-        public static Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.SDM.AssetManagement.Models.PortType> WithMiddleware(
-            this Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.SDM.AssetManagement.Models.PortType> repository,
-            IMiddlewareMarker<Skyline.DataMiner.SDM.AssetManagement.Models.PortType> middleware)
+        public static IBulkRepository<AssetManagement.Models.PortType> WithMiddleware(
+            this IBulkRepository<AssetManagement.Models.PortType> repository,
+            IMiddlewareMarker<AssetManagement.Models.PortType> middleware)
         {
             return new PortTypeDomRepository_Middleware(repository, middleware);
         }

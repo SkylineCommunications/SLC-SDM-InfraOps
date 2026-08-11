@@ -25,20 +25,20 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     using SLDataGateway.API.Querying;
     using SLDataGateway.API.Types.Querying;
 
-    internal sealed partial class CableTypeDomRepository_Middleware : Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.SDM.AssetManagement.Models.CableType>
+    internal sealed partial class CableTypeDomRepository_Middleware : IBulkRepository<AssetManagement.Models.CableType>
     {
-        private readonly Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.SDM.AssetManagement.Models.CableType> _inner;
-        private readonly IMiddlewareMarker<Skyline.DataMiner.SDM.AssetManagement.Models.CableType> _middleware;
+        private readonly IBulkRepository<AssetManagement.Models.CableType> _inner;
+        private readonly IMiddlewareMarker<AssetManagement.Models.CableType> _middleware;
 
-        public CableTypeDomRepository_Middleware(Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.SDM.AssetManagement.Models.CableType> inner, IMiddlewareMarker<Skyline.DataMiner.SDM.AssetManagement.Models.CableType> middleware)
+        public CableTypeDomRepository_Middleware(IBulkRepository<AssetManagement.Models.CableType> inner, IMiddlewareMarker<AssetManagement.Models.CableType> middleware)
         {
             _inner = inner ?? throw new ArgumentNullException(nameof(inner));
             _middleware = middleware;
         }
 
-        public IEnumerable<IPagedResult<Skyline.DataMiner.SDM.AssetManagement.Models.CableType>> ReadPaged(FilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.CableType> filter)
+        public IEnumerable<IPagedResult<AssetManagement.Models.CableType>> ReadPaged(FilterElement<AssetManagement.Models.CableType> filter)
         {
-            if (_middleware is IPageableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.CableType> middleware)
+            if (_middleware is IPageableMiddleware<AssetManagement.Models.CableType> middleware)
             {
                 return middleware.OnReadPaged(filter, _inner.ReadPaged);
             }
@@ -48,9 +48,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
         }
 
-        public IEnumerable<IPagedResult<Skyline.DataMiner.SDM.AssetManagement.Models.CableType>> ReadPaged(IQuery<Skyline.DataMiner.SDM.AssetManagement.Models.CableType> query)
+        public IEnumerable<IPagedResult<AssetManagement.Models.CableType>> ReadPaged(IQuery<AssetManagement.Models.CableType> query)
         {
-            if (_middleware is IPageableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.CableType> middleware)
+            if (_middleware is IPageableMiddleware<AssetManagement.Models.CableType> middleware)
             {
                 return middleware.OnReadPaged(query, _inner.ReadPaged);
             }
@@ -60,9 +60,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
         }
 
-        public IEnumerable<IPagedResult<Skyline.DataMiner.SDM.AssetManagement.Models.CableType>> ReadPaged(FilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.CableType> filter, int pageSize)
+        public IEnumerable<IPagedResult<AssetManagement.Models.CableType>> ReadPaged(FilterElement<AssetManagement.Models.CableType> filter, int pageSize)
         {
-            if (_middleware is IPageableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.CableType> middleware)
+            if (_middleware is IPageableMiddleware<AssetManagement.Models.CableType> middleware)
             {
                 return middleware.OnReadPaged(filter, pageSize, _inner.ReadPaged);
             }
@@ -72,9 +72,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
         }
 
-        public IEnumerable<IPagedResult<Skyline.DataMiner.SDM.AssetManagement.Models.CableType>> ReadPaged(IQuery<Skyline.DataMiner.SDM.AssetManagement.Models.CableType> query, int pageSize)
+        public IEnumerable<IPagedResult<AssetManagement.Models.CableType>> ReadPaged(IQuery<AssetManagement.Models.CableType> query, int pageSize)
         {
-            if (_middleware is IPageableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.CableType> middleware)
+            if (_middleware is IPageableMiddleware<AssetManagement.Models.CableType> middleware)
             {
                 return middleware.OnReadPaged(query, pageSize, _inner.ReadPaged);
             }
@@ -84,9 +84,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
         }
 
-        public IEnumerable<Skyline.DataMiner.SDM.AssetManagement.Models.CableType> Read(FilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.CableType> filter)
+        public IEnumerable<AssetManagement.Models.CableType> Read(FilterElement<AssetManagement.Models.CableType> filter)
         {
-            if (_middleware is IReadableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.CableType> middleware)
+            if (_middleware is IReadableMiddleware<AssetManagement.Models.CableType> middleware)
             {
                 return middleware.OnRead(filter, _inner.Read);
             }
@@ -96,9 +96,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
         }
 
-        public IEnumerable<Skyline.DataMiner.SDM.AssetManagement.Models.CableType> Read(IQuery<Skyline.DataMiner.SDM.AssetManagement.Models.CableType> query)
+        public IEnumerable<AssetManagement.Models.CableType> Read(IQuery<AssetManagement.Models.CableType> query)
         {
-            if (_middleware is IReadableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.CableType> middleware)
+            if (_middleware is IReadableMiddleware<AssetManagement.Models.CableType> middleware)
             {
                 return middleware.OnRead(query, _inner.Read);
             }
@@ -108,9 +108,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
         }
 
-        public long Count(FilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.CableType> filter)
+        public long Count(FilterElement<AssetManagement.Models.CableType> filter)
         {
-            if (_middleware is ICountableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.CableType> middleware)
+            if (_middleware is ICountableMiddleware<AssetManagement.Models.CableType> middleware)
             {
                 return middleware.OnCount(filter, _inner.Count);
             }
@@ -120,9 +120,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
         }
 
-        public long Count(IQuery<Skyline.DataMiner.SDM.AssetManagement.Models.CableType> query)
+        public long Count(IQuery<AssetManagement.Models.CableType> query)
         {
-            if (_middleware is ICountableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.CableType> middleware)
+            if (_middleware is ICountableMiddleware<AssetManagement.Models.CableType> middleware)
             {
                 return middleware.OnCount(query, _inner.Count);
             }
@@ -132,9 +132,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
         }
 
-        public IReadOnlyCollection<Skyline.DataMiner.SDM.AssetManagement.Models.CableType> Create(IEnumerable<Skyline.DataMiner.SDM.AssetManagement.Models.CableType> oToCreate)
+        public IReadOnlyCollection<AssetManagement.Models.CableType> Create(IEnumerable<AssetManagement.Models.CableType> oToCreate)
         {
-            if (_middleware is IBulkCreatableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.CableType> middleware)
+            if (_middleware is IBulkCreatableMiddleware<AssetManagement.Models.CableType> middleware)
             {
                 return middleware.OnCreate(oToCreate, _inner.Create);
             }
@@ -144,9 +144,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
         }
 
-        public Skyline.DataMiner.SDM.AssetManagement.Models.CableType Create(Skyline.DataMiner.SDM.AssetManagement.Models.CableType oToCreate)
+        public AssetManagement.Models.CableType Create(AssetManagement.Models.CableType oToCreate)
         {
-            if (_middleware is ICreatableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.CableType> middleware)
+            if (_middleware is ICreatableMiddleware<AssetManagement.Models.CableType> middleware)
             {
                 return middleware.OnCreate(oToCreate, _inner.Create);
             }
@@ -156,9 +156,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
         }
 
-        public IReadOnlyCollection<Skyline.DataMiner.SDM.AssetManagement.Models.CableType> Update(IEnumerable<Skyline.DataMiner.SDM.AssetManagement.Models.CableType> oToUpdate)
+        public IReadOnlyCollection<AssetManagement.Models.CableType> Update(IEnumerable<AssetManagement.Models.CableType> oToUpdate)
         {
-            if (_middleware is IBulkUpdatableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.CableType> middleware)
+            if (_middleware is IBulkUpdatableMiddleware<AssetManagement.Models.CableType> middleware)
             {
                 return middleware.OnUpdate(oToUpdate, _inner.Update);
             }
@@ -168,9 +168,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
         }
 
-        public Skyline.DataMiner.SDM.AssetManagement.Models.CableType Update(Skyline.DataMiner.SDM.AssetManagement.Models.CableType oToUpdate)
+        public AssetManagement.Models.CableType Update(AssetManagement.Models.CableType oToUpdate)
         {
-            if (_middleware is IUpdatableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.CableType> middleware)
+            if (_middleware is IUpdatableMiddleware<AssetManagement.Models.CableType> middleware)
             {
                 return middleware.OnUpdate(oToUpdate, _inner.Update);
             }
@@ -180,9 +180,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
         }
 
-        public void Delete(IEnumerable<Skyline.DataMiner.SDM.AssetManagement.Models.CableType> oToDelete)
+        public void Delete(IEnumerable<AssetManagement.Models.CableType> oToDelete)
         {
-            if (_middleware is IBulkDeletableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.CableType> middleware)
+            if (_middleware is IBulkDeletableMiddleware<AssetManagement.Models.CableType> middleware)
             {
                 middleware.OnDelete(oToDelete, _inner.Delete);
             }
@@ -192,9 +192,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
         }
 
-        public void Delete(Skyline.DataMiner.SDM.AssetManagement.Models.CableType oToDelete)
+        public void Delete(AssetManagement.Models.CableType oToDelete)
         {
-            if (_middleware is IDeletableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.CableType> middleware)
+            if (_middleware is IDeletableMiddleware<AssetManagement.Models.CableType> middleware)
             {
                 middleware.OnDelete(oToDelete, _inner.Delete);
             }
@@ -203,9 +203,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 _inner.Delete(oToDelete);
             }
         }
-        public System.Collections.Generic.IReadOnlyCollection<Skyline.DataMiner.SDM.AssetManagement.Models.CableType> CreateOrUpdate(System.Collections.Generic.IEnumerable<Skyline.DataMiner.SDM.AssetManagement.Models.CableType> oToCreateOrUpdate)
+        public System.Collections.Generic.IReadOnlyCollection<AssetManagement.Models.CableType> CreateOrUpdate(System.Collections.Generic.IEnumerable<AssetManagement.Models.CableType> oToCreateOrUpdate)
         {
-                if (_middleware is IBulkRepositoryMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.CableType> middleware)
+                if (_middleware is IBulkRepositoryMiddleware<AssetManagement.Models.CableType> middleware)
                 {
                     return middleware.OnCreateOrUpdate(oToCreateOrUpdate, _inner.CreateOrUpdate);
                 }

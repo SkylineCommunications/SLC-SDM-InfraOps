@@ -9,6 +9,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.Common.Services;
     using Skyline.DataMiner.SDM.Extensions;
+    using Skyline.DataMiner.SDM.InfraOps.Common.Validation;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
     public class DeviceTypeValidator : ValidatorBase<DeviceType>
@@ -22,14 +23,14 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
 
         protected override ValidationResult Validate(DeviceType entity)
         {
-            return new ValidationResult();
+            return ValidateInfo(entity);
         }
 
         protected override List<ValidationResult> ValidateBulk(List<DeviceType> entities)
         {
             return entities == null
                 ? new List<ValidationResult>()
-                : entities.Select(_ => new ValidationResult()).ToList();
+                : entities.Select(ValidateInfo).ToList();
         }
 
         protected override ValidationResult ValidateForDelete(DeviceType deviceType)
@@ -64,42 +65,76 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
 
             var assetClasses = _entityLoader.GetAssetClassesByDeviceTypeIds(deviceTypeIds);
             var deviceTypeIdsUsedByAssetClasses = assetClasses
-                .Where(assetClass => assetClass.DeviceTypeId != null && assetClass.DeviceTypeId.HasValue())
+                .Where(assetClass => assetClass.DeviceTypeId.HasValue())
                 .Select(assetClass => assetClass.DeviceTypeId.Identifier)
                 .ToHashSet();
 
             var assetClassesByDeviceType = assetClasses
-                .Where(assetClass => assetClass.DeviceTypeId != null && assetClass.DeviceTypeId.HasValue())
+                .Where(assetClass => assetClass.DeviceTypeId.HasValue())
                 .GroupBy(assetClass => assetClass.DeviceTypeId.Identifier)
                 .ToDictionary(group => group.Key, group => group.ToList());
 
-            var assetsByAssetClassId = _entityLoader.GetAssetsByAssetClassIds(assetClasses.Select(ac => ac.Identifier).ToList())
-                .Where(asset => asset.AssetClassId != null && asset.AssetClassId.HasValue())
+            for (int i = 0; i < deviceTypes.Count; i++)
+            {
+                if (deviceTypeIdsUsedByAssetClasses.Contains(deviceTypes[i].Identifier))
+                {
+                    results[i].AddFailReason(
+                        DeviceTypeValidationHandler.DeviceTypeValidationField.AssetClass,
+                        "There are still asset classes associated with this device type. Please remove them first.");
+                }
+            }
+
+            var remainingAssetClassIds = deviceTypes
+                .SelectMany(deviceType => assetClassesByDeviceType.TryGetValue(deviceType.Identifier, out var referencingAssetClasses)
+                    ? referencingAssetClasses
+                    : new List<AssetClass>())
+                .Select(assetClass => assetClass.Identifier)
+                .Distinct()
+                .ToList();
+
+            if (!remainingAssetClassIds.Any())
+            {
+                return results;
+            }
+
+            var assetsByAssetClassId = _entityLoader.GetAssetsByAssetClassIds(remainingAssetClassIds)
+                .Where(asset => asset.AssetClassId.HasValue())
                 .GroupBy(asset => asset.AssetClassId.Identifier)
                 .ToDictionary(group => group.Key, group => group.ToList());
 
             for (int i = 0; i < deviceTypes.Count; i++)
             {
-                ValidateDeviceTypeNotInUse(deviceTypes[i], results[i], deviceTypeIdsUsedByAssetClasses, assetClassesByDeviceType, assetsByAssetClassId);
+                ValidateDeviceTypeNotInUse(deviceTypes[i], results[i], assetClassesByDeviceType, assetsByAssetClassId);
             }
 
             return results;
         }
 
+        private static ValidationResult ValidateInfo(DeviceType deviceType)
+        {
+            var result = new ValidationResult();
+
+            if (deviceType == null)
+            {
+                return result;
+            }
+
+            if (deviceType.ShouldValidate(deviceType.NameField) && string.IsNullOrWhiteSpace(deviceType.Name))
+            {
+                result.AddFailReason(
+                    DeviceTypeValidationHandler.DeviceTypeValidationField.Name,
+                    "Device Type Name cannot be empty or whitespace.");
+            }
+
+            return result;
+        }
+
         private static void ValidateDeviceTypeNotInUse(
             DeviceType deviceType,
             ValidationResult result,
-            HashSet<string> deviceTypeIdsUsedByAssetClasses,
             Dictionary<string, List<AssetClass>> assetClassesByDeviceType,
             Dictionary<string, List<Asset>> assetsByAssetClassId)
         {
-            if (deviceTypeIdsUsedByAssetClasses.Contains(deviceType.Identifier))
-            {
-                result.AddFailReason(
-                    DeviceTypeValidationHandler.DeviceTypeValidationField.AssetClass,
-                    "There are still asset classes associated with this device type. Please remove them first.");
-            }
-
             var referencingAssets = CollectReferencingAssets(deviceType.Identifier, assetClassesByDeviceType, assetsByAssetClassId);
             if (!DeviceTypeValidationHandler.CanDelete(referencingAssets, out var deviceTypeResult))
             {

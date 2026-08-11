@@ -8,9 +8,9 @@ namespace Skyline.DataMiner.SDM
     public static class CableTypeDomRepository_Extensions
     {
 
-        public static Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.SDM.AssetManagement.Models.CableType> WithMiddleware(
-            this Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.SDM.AssetManagement.Models.CableType> repository,
-            IMiddlewareMarker<Skyline.DataMiner.SDM.AssetManagement.Models.CableType> middleware)
+        public static IBulkRepository<AssetManagement.Models.CableType> WithMiddleware(
+            this IBulkRepository<AssetManagement.Models.CableType> repository,
+            IMiddlewareMarker<AssetManagement.Models.CableType> middleware)
         {
             return new CableTypeDomRepository_Middleware(repository, middleware);
         }

@@ -12,9 +12,9 @@ namespace Skyline.DataMiner.SDM
 
     public static class DeskDomRepository_Extensions
     {
-        public static Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.SDM.FacilityManagement.Models.Desk> WithMiddleware(
-            this Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.SDM.FacilityManagement.Models.Desk> repository,
-            IMiddlewareMarker<Skyline.DataMiner.SDM.FacilityManagement.Models.Desk> middleware)
+        public static IBulkRepository<FacilityManagement.Models.Desk> WithMiddleware(
+            this IBulkRepository<FacilityManagement.Models.Desk> repository,
+            IMiddlewareMarker<FacilityManagement.Models.Desk> middleware)
         {
             return new DeskDomRepository_Middleware(repository, middleware);
         }

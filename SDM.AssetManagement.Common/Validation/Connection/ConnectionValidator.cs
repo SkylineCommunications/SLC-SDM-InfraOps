@@ -42,21 +42,35 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             }
 
             var results = connections.Select(_ => new ValidationResult()).ToList();
-            var lookups = BuildLookups(connections);
+            var indexesRequiringDatabaseAccess = new List<int>();
 
             for (int i = 0; i < connections.Count; i++)
             {
-                ValidateConnection(connections[i], lookups, results[i]);
+                ValidateWithoutDatabaseAccess(connections[i], results[i]);
+                if (results[i].IsValid)
+                {
+                    indexesRequiringDatabaseAccess.Add(i);
+                }
+            }
+
+            if (!indexesRequiringDatabaseAccess.Any())
+            {
+                return results;
+            }
+
+            var connectionsRequiringDatabaseAccess = indexesRequiringDatabaseAccess.Select(index => connections[index]).ToList();
+            var lookups = BuildLookups(connectionsRequiringDatabaseAccess);
+
+            foreach (var index in indexesRequiringDatabaseAccess)
+            {
+                ValidateWithDatabaseAccess(connections[index], lookups, results[index]);
             }
 
             return results;
         }
 
-        private void ValidateConnection(Connection connection, Lookups lookups, ValidationResult result)
+        private static void ValidateWithoutDatabaseAccess(Connection connection, ValidationResult result)
         {
-            ValidateCableType(connection, lookups, result);
-            ValidatePortTypeReferences(connection, lookups, result);
-
             if (ConnectionValidationHandler.IsCableLengthValid(connection.CableLength, out var cableLengthResult) == false)
             {
                 result.AddFailuresFrom(cableLengthResult);
@@ -70,6 +84,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
                 result.AddFailuresFrom(selfResult);
                 return;
             }
+        }
+
+        private void ValidateWithDatabaseAccess(Connection connection, Lookups lookups, ValidationResult result)
+        {
+            ValidateCableType(connection, lookups, result);
+            ValidatePortTypeReferences(connection, lookups, result);
 
             var connectionType = ResolveConnectionType(connection, lookups);
 

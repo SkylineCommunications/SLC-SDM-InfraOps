@@ -78,7 +78,7 @@
 		/// <returns><see cref="IInfraOpsPropertiesApiHelper"/> API helper interface with populated data.</returns>
 		public static IInfraOpsPropertiesApiHelper PopulatePropertyValues(this IInfraOpsPropertiesApiHelper helper)
 		{
-			if (!helper.Properties.Read(new TRUEFilterElement<Property>()).Any())
+			if (helper.Properties.Count(new TRUEFilterElement<Property>()) <= 0)
 			{
 				helper.Properties.Create(DemoData.Properties);
 			}

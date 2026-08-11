@@ -8,9 +8,9 @@ namespace Skyline.DataMiner.SDM
     public static class JobTypeDomRepository_Extensions
     {
 
-        public static Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.SDM.PlanAndBuild.Models.JobType> WithMiddleware(
-            this Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.SDM.PlanAndBuild.Models.JobType> repository,
-            IMiddlewareMarker<Skyline.DataMiner.SDM.PlanAndBuild.Models.JobType> middleware)
+        public static IBulkRepository<PlanAndBuild.Models.JobType> WithMiddleware(
+            this IBulkRepository<PlanAndBuild.Models.JobType> repository,
+            IMiddlewareMarker<PlanAndBuild.Models.JobType> middleware)
         {
             return new JobTypeDomRepository_Middleware(repository, middleware);
         }

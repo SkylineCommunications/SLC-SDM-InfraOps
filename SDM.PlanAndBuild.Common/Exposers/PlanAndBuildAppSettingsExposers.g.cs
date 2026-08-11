@@ -21,11 +21,11 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 
     public static partial class PlanAndBuildAppSettingsExposers
     {
-        public static readonly Exposer<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings, string> Identifier = new Exposer<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings, string>((obj) => obj.Identifier, "Identifier");
-        public static readonly Exposer<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings, string> JobIDPrefix = new Exposer<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings, string>((obj) => obj.JobIDPrefix, "JobIDPrefix");
-        public static readonly Exposer<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings, long> JobIDNextSequence = new Exposer<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings, long>((obj) => obj.JobIDNextSequence, "JobIDNextSequence");
-        public static readonly Exposer<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings, long> JobIDIncrement = new Exposer<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings, long>((obj) => obj.JobIDIncrement, "JobIDIncrement");
-        public static readonly Exposer<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings, long> JobIDStartingSeed = new Exposer<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings, long>((obj) => obj.JobIDStartingSeed, "JobIDStartingSeed");
-        public static readonly Exposer<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings, long> JobIDMinimumDigits = new Exposer<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildAppSettings, long>((obj) => obj.JobIDMinimumDigits, "JobIDMinimumDigits");
+        public static readonly Exposer<PlanAndBuild.Models.PlanAndBuildAppSettings, string> Identifier = new Exposer<PlanAndBuild.Models.PlanAndBuildAppSettings, string>((obj) => obj.Identifier, "Identifier");
+        public static readonly Exposer<PlanAndBuild.Models.PlanAndBuildAppSettings, string> JobIDPrefix = new Exposer<PlanAndBuild.Models.PlanAndBuildAppSettings, string>((obj) => obj.JobIDPrefix, "JobIDPrefix");
+        public static readonly Exposer<PlanAndBuild.Models.PlanAndBuildAppSettings, long> JobIDNextSequence = new Exposer<PlanAndBuild.Models.PlanAndBuildAppSettings, long>((obj) => obj.JobIDNextSequence, "JobIDNextSequence");
+        public static readonly Exposer<PlanAndBuild.Models.PlanAndBuildAppSettings, long> JobIDIncrement = new Exposer<PlanAndBuild.Models.PlanAndBuildAppSettings, long>((obj) => obj.JobIDIncrement, "JobIDIncrement");
+        public static readonly Exposer<PlanAndBuild.Models.PlanAndBuildAppSettings, long> JobIDStartingSeed = new Exposer<PlanAndBuild.Models.PlanAndBuildAppSettings, long>((obj) => obj.JobIDStartingSeed, "JobIDStartingSeed");
+        public static readonly Exposer<PlanAndBuild.Models.PlanAndBuildAppSettings, long> JobIDMinimumDigits = new Exposer<PlanAndBuild.Models.PlanAndBuildAppSettings, long>((obj) => obj.JobIDMinimumDigits, "JobIDMinimumDigits");
     }
 }

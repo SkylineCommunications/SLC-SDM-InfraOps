@@ -21,10 +21,10 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
 
     public static partial class PropertyValuesExposers
     {
-        public static readonly Exposer<Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValues, string> Identifier = new Exposer<Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValues, string>((obj) => obj.Identifier, "Identifier");
-        public static readonly Exposer<Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValues, System.Guid> LinkedObjectID = new Exposer<Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValues, System.Guid>((obj) => obj.LinkedObjectID, "LinkedObjectID");
-        public static readonly Exposer<Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValues, string> Scope = new Exposer<Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValues, string>((obj) => obj.Scope, "Scope");
-        public static readonly Exposer<Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValues, string> SubID = new Exposer<Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValues, string>((obj) => obj.SubID, "SubID");
+        public static readonly Exposer<InfraOpsProperties.Models.PropertyValues, string> Identifier = new Exposer<InfraOpsProperties.Models.PropertyValues, string>((obj) => obj.Identifier, "Identifier");
+        public static readonly Exposer<InfraOpsProperties.Models.PropertyValues, System.Guid> LinkedObjectID = new Exposer<InfraOpsProperties.Models.PropertyValues, System.Guid>((obj) => obj.LinkedObjectID, "LinkedObjectID");
+        public static readonly Exposer<InfraOpsProperties.Models.PropertyValues, string> Scope = new Exposer<InfraOpsProperties.Models.PropertyValues, string>((obj) => obj.Scope, "Scope");
+        public static readonly Exposer<InfraOpsProperties.Models.PropertyValues, string> SubID = new Exposer<InfraOpsProperties.Models.PropertyValues, string>((obj) => obj.SubID, "SubID");
         static PropertyValuesExposers()
         {
             RuntimeHelpers.RunClassConstructor(typeof(Values).TypeHandle);
@@ -32,9 +32,9 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
 
         public static partial class Values
         {
-            public static readonly CollectionExposer<Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValues, string> PropertyName = new CollectionExposer<Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValues, string>((obj) => obj.Values.Where(x => x != null).Select(x => x.PropertyName).Where(x => x != null), "Values.PropertyName");
-            public static readonly CollectionExposer<Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValues, string> Value = new CollectionExposer<Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValues, string>((obj) => obj.Values.Where(x => x != null).Select(x => x.Value).Where(x => x != null), "Values.Value");
-            public static readonly CollectionExposer<Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValues, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.InfraOpsProperties.Models.Property>> PropertyId = new CollectionExposer<Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValues, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.InfraOpsProperties.Models.Property>>((obj) => obj.Values.Where(x => x != null).Select(x => x.PropertyId).Where(x => x != null), "Values.PropertyId");
+            public static readonly CollectionExposer<InfraOpsProperties.Models.PropertyValues, string> PropertyName = new CollectionExposer<InfraOpsProperties.Models.PropertyValues, string>((obj) => obj.Values.Where(x => x != null).Select(x => x.PropertyName).Where(x => x != null), "Values.PropertyName");
+            public static readonly CollectionExposer<InfraOpsProperties.Models.PropertyValues, string> Value = new CollectionExposer<InfraOpsProperties.Models.PropertyValues, string>((obj) => obj.Values.Where(x => x != null).Select(x => x.Value).Where(x => x != null), "Values.Value");
+            public static readonly CollectionExposer<InfraOpsProperties.Models.PropertyValues, SdmObjectReference<InfraOpsProperties.Models.Property>> PropertyId = new CollectionExposer<InfraOpsProperties.Models.PropertyValues, SdmObjectReference<InfraOpsProperties.Models.Property>>((obj) => obj.Values.Where(x => x != null).Select(x => x.PropertyId).Where(x => x != null), "Values.PropertyId");
         }
     }
 }

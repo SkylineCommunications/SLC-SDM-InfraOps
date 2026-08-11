@@ -27,20 +27,20 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     using SLDataGateway.API.Querying;
     using SLDataGateway.API.Types.Querying;
 
-    internal sealed partial class InfraopsReservationDomRepository_Middleware : Skyline.DataMiner.SDM.IBulkRepository<InfraopsReservation>
+    internal sealed partial class InfraopsReservationDomRepository_Middleware : IBulkRepository<InfraopsReservation>
     {
-        private readonly Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.SDM.AssetManagement.Models.InfraopsReservation> _inner;
-        private readonly IMiddlewareMarker<Skyline.DataMiner.SDM.AssetManagement.Models.InfraopsReservation> _middleware;
+        private readonly IBulkRepository<AssetManagement.Models.InfraopsReservation> _inner;
+        private readonly IMiddlewareMarker<AssetManagement.Models.InfraopsReservation> _middleware;
 
-        public InfraopsReservationDomRepository_Middleware(Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.SDM.AssetManagement.Models.InfraopsReservation> inner, IMiddlewareMarker<Skyline.DataMiner.SDM.AssetManagement.Models.InfraopsReservation> middleware)
+        public InfraopsReservationDomRepository_Middleware(IBulkRepository<AssetManagement.Models.InfraopsReservation> inner, IMiddlewareMarker<AssetManagement.Models.InfraopsReservation> middleware)
         {
             _inner = inner ?? throw new ArgumentNullException(nameof(inner));
             _middleware = middleware;
         }
 
-        public IEnumerable<IPagedResult<Skyline.DataMiner.SDM.AssetManagement.Models.InfraopsReservation>> ReadPaged(FilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.InfraopsReservation> filter)
+        public IEnumerable<IPagedResult<AssetManagement.Models.InfraopsReservation>> ReadPaged(FilterElement<AssetManagement.Models.InfraopsReservation> filter)
         {
-            if (_middleware is IPageableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.InfraopsReservation> middleware)
+            if (_middleware is IPageableMiddleware<AssetManagement.Models.InfraopsReservation> middleware)
             {
                 return middleware.OnReadPaged(filter, _inner.ReadPaged);
             }
@@ -50,9 +50,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
         }
 
-        public IEnumerable<IPagedResult<Skyline.DataMiner.SDM.AssetManagement.Models.InfraopsReservation>> ReadPaged(IQuery<Skyline.DataMiner.SDM.AssetManagement.Models.InfraopsReservation> query)
+        public IEnumerable<IPagedResult<AssetManagement.Models.InfraopsReservation>> ReadPaged(IQuery<AssetManagement.Models.InfraopsReservation> query)
         {
-            if (_middleware is IPageableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.InfraopsReservation> middleware)
+            if (_middleware is IPageableMiddleware<AssetManagement.Models.InfraopsReservation> middleware)
             {
                 return middleware.OnReadPaged(query, _inner.ReadPaged);
             }
@@ -62,9 +62,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
         }
 
-        public IEnumerable<IPagedResult<Skyline.DataMiner.SDM.AssetManagement.Models.InfraopsReservation>> ReadPaged(FilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.InfraopsReservation> filter, int pageSize)
+        public IEnumerable<IPagedResult<AssetManagement.Models.InfraopsReservation>> ReadPaged(FilterElement<AssetManagement.Models.InfraopsReservation> filter, int pageSize)
         {
-            if (_middleware is IPageableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.InfraopsReservation> middleware)
+            if (_middleware is IPageableMiddleware<AssetManagement.Models.InfraopsReservation> middleware)
             {
                 return middleware.OnReadPaged(filter, pageSize, _inner.ReadPaged);
             }
@@ -74,9 +74,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
         }
 
-        public IEnumerable<IPagedResult<Skyline.DataMiner.SDM.AssetManagement.Models.InfraopsReservation>> ReadPaged(IQuery<Skyline.DataMiner.SDM.AssetManagement.Models.InfraopsReservation> query, int pageSize)
+        public IEnumerable<IPagedResult<AssetManagement.Models.InfraopsReservation>> ReadPaged(IQuery<AssetManagement.Models.InfraopsReservation> query, int pageSize)
         {
-            if (_middleware is IPageableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.InfraopsReservation> middleware)
+            if (_middleware is IPageableMiddleware<AssetManagement.Models.InfraopsReservation> middleware)
             {
                 return middleware.OnReadPaged(query, pageSize, _inner.ReadPaged);
             }
@@ -86,9 +86,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
         }
 
-        public IEnumerable<Skyline.DataMiner.SDM.AssetManagement.Models.InfraopsReservation> Read(FilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.InfraopsReservation> filter)
+        public IEnumerable<AssetManagement.Models.InfraopsReservation> Read(FilterElement<AssetManagement.Models.InfraopsReservation> filter)
         {
-            if (_middleware is IReadableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.InfraopsReservation> middleware)
+            if (_middleware is IReadableMiddleware<AssetManagement.Models.InfraopsReservation> middleware)
             {
                 return middleware.OnRead(filter, _inner.Read);
             }
@@ -98,9 +98,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
         }
 
-        public IEnumerable<Skyline.DataMiner.SDM.AssetManagement.Models.InfraopsReservation> Read(IQuery<Skyline.DataMiner.SDM.AssetManagement.Models.InfraopsReservation> query)
+        public IEnumerable<AssetManagement.Models.InfraopsReservation> Read(IQuery<AssetManagement.Models.InfraopsReservation> query)
         {
-            if (_middleware is IReadableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.InfraopsReservation> middleware)
+            if (_middleware is IReadableMiddleware<AssetManagement.Models.InfraopsReservation> middleware)
             {
                 return middleware.OnRead(query, _inner.Read);
             }
@@ -110,9 +110,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
         }
 
-        public long Count(FilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.InfraopsReservation> filter)
+        public long Count(FilterElement<AssetManagement.Models.InfraopsReservation> filter)
         {
-            if (_middleware is ICountableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.InfraopsReservation> middleware)
+            if (_middleware is ICountableMiddleware<AssetManagement.Models.InfraopsReservation> middleware)
             {
                 return middleware.OnCount(filter, _inner.Count);
             }
@@ -122,9 +122,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
         }
 
-        public long Count(IQuery<Skyline.DataMiner.SDM.AssetManagement.Models.InfraopsReservation> query)
+        public long Count(IQuery<AssetManagement.Models.InfraopsReservation> query)
         {
-            if (_middleware is ICountableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.InfraopsReservation> middleware)
+            if (_middleware is ICountableMiddleware<AssetManagement.Models.InfraopsReservation> middleware)
             {
                 return middleware.OnCount(query, _inner.Count);
             }
@@ -134,9 +134,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
         }
 
-        public IReadOnlyCollection<Skyline.DataMiner.SDM.AssetManagement.Models.InfraopsReservation> Create(IEnumerable<Skyline.DataMiner.SDM.AssetManagement.Models.InfraopsReservation> oToCreate)
+        public IReadOnlyCollection<AssetManagement.Models.InfraopsReservation> Create(IEnumerable<AssetManagement.Models.InfraopsReservation> oToCreate)
         {
-            if (_middleware is IBulkCreatableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.InfraopsReservation> middleware)
+            if (_middleware is IBulkCreatableMiddleware<AssetManagement.Models.InfraopsReservation> middleware)
             {
                 return middleware.OnCreate(oToCreate, _inner.Create);
             }
@@ -146,9 +146,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
         }
 
-        public Skyline.DataMiner.SDM.AssetManagement.Models.InfraopsReservation Create(Skyline.DataMiner.SDM.AssetManagement.Models.InfraopsReservation oToCreate)
+        public AssetManagement.Models.InfraopsReservation Create(AssetManagement.Models.InfraopsReservation oToCreate)
         {
-            if (_middleware is ICreatableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.InfraopsReservation> middleware)
+            if (_middleware is ICreatableMiddleware<AssetManagement.Models.InfraopsReservation> middleware)
             {
                 return middleware.OnCreate(oToCreate, _inner.Create);
             }
@@ -158,9 +158,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
         }
 
-        public IReadOnlyCollection<Skyline.DataMiner.SDM.AssetManagement.Models.InfraopsReservation> Update(IEnumerable<Skyline.DataMiner.SDM.AssetManagement.Models.InfraopsReservation> oToUpdate)
+        public IReadOnlyCollection<AssetManagement.Models.InfraopsReservation> Update(IEnumerable<AssetManagement.Models.InfraopsReservation> oToUpdate)
         {
-            if (_middleware is IBulkUpdatableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.InfraopsReservation> middleware)
+            if (_middleware is IBulkUpdatableMiddleware<AssetManagement.Models.InfraopsReservation> middleware)
             {
                 return middleware.OnUpdate(oToUpdate, _inner.Update);
             }
@@ -170,9 +170,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
         }
 
-        public Skyline.DataMiner.SDM.AssetManagement.Models.InfraopsReservation Update(Skyline.DataMiner.SDM.AssetManagement.Models.InfraopsReservation oToUpdate)
+        public AssetManagement.Models.InfraopsReservation Update(AssetManagement.Models.InfraopsReservation oToUpdate)
         {
-            if (_middleware is IUpdatableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.InfraopsReservation> middleware)
+            if (_middleware is IUpdatableMiddleware<AssetManagement.Models.InfraopsReservation> middleware)
             {
                 return middleware.OnUpdate(oToUpdate, _inner.Update);
             }
@@ -182,9 +182,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
         }
 
-        public void Delete(IEnumerable<Skyline.DataMiner.SDM.AssetManagement.Models.InfraopsReservation> oToDelete)
+        public void Delete(IEnumerable<AssetManagement.Models.InfraopsReservation> oToDelete)
         {
-            if (_middleware is IBulkDeletableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.InfraopsReservation> middleware)
+            if (_middleware is IBulkDeletableMiddleware<AssetManagement.Models.InfraopsReservation> middleware)
             {
                 middleware.OnDelete(oToDelete, _inner.Delete);
             }
@@ -194,9 +194,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
         }
 
-        public void Delete(Skyline.DataMiner.SDM.AssetManagement.Models.InfraopsReservation oToDelete)
+        public void Delete(AssetManagement.Models.InfraopsReservation oToDelete)
         {
-            if (_middleware is IDeletableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.InfraopsReservation> middleware)
+            if (_middleware is IDeletableMiddleware<AssetManagement.Models.InfraopsReservation> middleware)
             {
                 middleware.OnDelete(oToDelete, _inner.Delete);
             }
@@ -205,9 +205,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 _inner.Delete(oToDelete);
             }
         }
-        public System.Collections.Generic.IReadOnlyCollection<Skyline.DataMiner.SDM.AssetManagement.Models.InfraopsReservation> CreateOrUpdate(System.Collections.Generic.IEnumerable<Skyline.DataMiner.SDM.AssetManagement.Models.InfraopsReservation> oToCreateOrUpdate)
+        public System.Collections.Generic.IReadOnlyCollection<AssetManagement.Models.InfraopsReservation> CreateOrUpdate(System.Collections.Generic.IEnumerable<AssetManagement.Models.InfraopsReservation> oToCreateOrUpdate)
         {
-                if (_middleware is IBulkRepositoryMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.InfraopsReservation> middleware)
+                if (_middleware is IBulkRepositoryMiddleware<AssetManagement.Models.InfraopsReservation> middleware)
                 {
                     return middleware.OnCreateOrUpdate(oToCreateOrUpdate, _inner.CreateOrUpdate);
                 }

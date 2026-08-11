@@ -103,7 +103,12 @@
         public void PhysicalDimension_WithNegativeValue_ShouldBeInvalid(double value, string property)
         {
             // Arrange
-            var assetClass = new AssetClass();
+            var deviceType = new DeviceType();
+            var assetClass = new AssetClass()
+            {
+                DeviceTypeId = deviceType,
+            };
+
             switch (property)
             {
                 case "Depth": assetClass.Depth = value; break;
@@ -119,7 +124,7 @@
                 "Depth" => AssetClassValidationHandler.IsDepthValid(assetClass, out var r1),
                 "Width" => AssetClassValidationHandler.IsWidthValid(assetClass, out var r2),
                 "Height" => AssetClassValidationHandler.IsHeightValid(assetClass, out var r3),
-                "HeightU" => AssetClassValidationHandler.IsHeightUnitValid(assetClass, out var r4),
+                "HeightU" => AssetClassValidationHandler.IsHeightUnitValid(assetClass, deviceType, out var r4),
                 "Weight" => AssetClassValidationHandler.IsWeightValid(assetClass, out var r5),
                 _ => false
             };
@@ -135,10 +140,24 @@
         public void HeightU_RackUnitConsumer_WithoutPositiveValue_ShouldBeInvalid(double? heightU)
         {
             // Arrange
-            var assetClass = new AssetClass { HeightU = heightU };
+            var deviceType = new DeviceType
+            {
+                TagsInfo = new TagsInfo
+                {
+                    Tags = new List<SlcAsset_Management.Enums.TagOption>
+                    {
+                        SlcAsset_Management.Enums.TagOption.RackUnitConsumer
+                    },
+                },
+            };
+            var assetClass = new AssetClass
+            {
+                HeightU = heightU,
+                DeviceTypeId = deviceType,
+            };
 
             // Act
-            var isValid = AssetClassValidationHandler.IsHeightUnitValid(assetClass, isRackUnitConsumer: true, out var result);
+            var isValid = AssetClassValidationHandler.IsHeightUnitValid(assetClass, deviceType, out var result);
 
             // Assert
             using (new AssertionScope())
@@ -155,10 +174,23 @@
         public void HeightU_RackUnitConsumer_WithPositiveValue_ShouldBeValid()
         {
             // Arrange
-            var assetClass = new AssetClass { HeightU = 2.0 };
-
+            var deviceType = new DeviceType
+            {
+                TagsInfo = new TagsInfo
+                {
+                    Tags = new List<SlcAsset_Management.Enums.TagOption>
+                    {
+                        SlcAsset_Management.Enums.TagOption.RackUnitConsumer
+                    },
+                },
+            };
+            var assetClass = new AssetClass
+            {
+                HeightU = 2.0,
+                DeviceTypeId = deviceType,
+            };
             // Act
-            var isValid = AssetClassValidationHandler.IsHeightUnitValid(assetClass, isRackUnitConsumer: true, out var result);
+            var isValid = AssetClassValidationHandler.IsHeightUnitValid(assetClass, deviceType, out var result);
 
             // Assert
             using (new AssertionScope())
@@ -174,10 +206,22 @@
         public void HeightU_NonRackUnitConsumer_WithoutPositiveValue_ShouldBeValid(double? heightU)
         {
             // Arrange
-            var assetClass = new AssetClass { HeightU = heightU };
-
+            var deviceType = new DeviceType
+            {
+                TagsInfo = new TagsInfo
+                {
+                    Tags = new List<SlcAsset_Management.Enums.TagOption>
+                    {
+                    },
+                },
+            };
+            var assetClass = new AssetClass
+            {
+                HeightU = heightU,
+                DeviceTypeId = deviceType,
+            };
             // Act
-            var isValid = AssetClassValidationHandler.IsHeightUnitValid(assetClass, isRackUnitConsumer: false, out var result);
+            var isValid = AssetClassValidationHandler.IsHeightUnitValid(assetClass, deviceType, out var result);
 
             // Assert
             using (new AssertionScope())

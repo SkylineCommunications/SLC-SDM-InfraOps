@@ -15,7 +15,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
     /// <summary>
     /// Default cross-module reference checker backed by Facility Management and Asset Management helpers.
     /// </summary>
-    public sealed class PlanAndBuildExternalReferenceChecker : IPlanAndBuildExternalReferenceChecker
+    internal sealed class PlanAndBuildExternalReferenceChecker : IPlanAndBuildExternalReferenceChecker
     {
         private readonly IFacilityManagementApiHelper _facilityManagementHelper;
         private readonly IAssetManagementApiHelper _assetManagementHelper;

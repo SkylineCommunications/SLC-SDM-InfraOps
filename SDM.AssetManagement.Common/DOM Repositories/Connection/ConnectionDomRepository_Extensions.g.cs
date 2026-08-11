@@ -8,9 +8,9 @@ namespace Skyline.DataMiner.SDM
     public static class ConnectionDomRepository_Extensions
     {
 
-        public static Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.SDM.AssetManagement.Models.Connection> WithMiddleware(
-            this Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.SDM.AssetManagement.Models.Connection> repository,
-            IMiddlewareMarker<Skyline.DataMiner.SDM.AssetManagement.Models.Connection> middleware)
+        public static IBulkRepository<AssetManagement.Models.Connection> WithMiddleware(
+            this IBulkRepository<AssetManagement.Models.Connection> repository,
+            IMiddlewareMarker<AssetManagement.Models.Connection> middleware)
         {
             return new ConnectionDomRepository_Middleware(repository, middleware);
         }

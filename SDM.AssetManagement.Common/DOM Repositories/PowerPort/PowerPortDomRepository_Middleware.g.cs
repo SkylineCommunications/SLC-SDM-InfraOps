@@ -23,20 +23,20 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 	using SLDataGateway.API.Querying;
 	using SLDataGateway.API.Types.Querying;
 
-	internal sealed partial class PowerPortDomRepository_Middleware : Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort>
+	internal sealed partial class PowerPortDomRepository_Middleware : IBulkRepository<AssetManagement.Models.PowerPort>
 	{
-		private readonly Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort> _inner;
-		private readonly IMiddlewareMarker<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort> _middleware;
+		private readonly IBulkRepository<AssetManagement.Models.PowerPort> _inner;
+		private readonly IMiddlewareMarker<AssetManagement.Models.PowerPort> _middleware;
 
-		public PowerPortDomRepository_Middleware(Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort> inner, IMiddlewareMarker<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort> middleware)
+		public PowerPortDomRepository_Middleware(IBulkRepository<AssetManagement.Models.PowerPort> inner, IMiddlewareMarker<AssetManagement.Models.PowerPort> middleware)
 		{
 			_inner = inner ?? throw new ArgumentNullException(nameof(inner));
 			_middleware = middleware;
 		}
 
-		public IEnumerable<IPagedResult<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort>> ReadPaged(FilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort> filter)
+		public IEnumerable<IPagedResult<AssetManagement.Models.PowerPort>> ReadPaged(FilterElement<AssetManagement.Models.PowerPort> filter)
 		{
-			if (_middleware is IPageableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort> middleware)
+			if (_middleware is IPageableMiddleware<AssetManagement.Models.PowerPort> middleware)
 			{
 				return middleware.OnReadPaged(filter, _inner.ReadPaged);
 			}
@@ -46,9 +46,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			}
 		}
 
-		public IEnumerable<IPagedResult<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort>> ReadPaged(IQuery<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort> query)
+		public IEnumerable<IPagedResult<AssetManagement.Models.PowerPort>> ReadPaged(IQuery<AssetManagement.Models.PowerPort> query)
 		{
-			if (_middleware is IPageableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort> middleware)
+			if (_middleware is IPageableMiddleware<AssetManagement.Models.PowerPort> middleware)
 			{
 				return middleware.OnReadPaged(query, _inner.ReadPaged);
 			}
@@ -58,9 +58,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			}
 		}
 
-		public IEnumerable<IPagedResult<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort>> ReadPaged(FilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort> filter, int pageSize)
+		public IEnumerable<IPagedResult<AssetManagement.Models.PowerPort>> ReadPaged(FilterElement<AssetManagement.Models.PowerPort> filter, int pageSize)
 		{
-			if (_middleware is IPageableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort> middleware)
+			if (_middleware is IPageableMiddleware<AssetManagement.Models.PowerPort> middleware)
 			{
 				return middleware.OnReadPaged(filter, pageSize, _inner.ReadPaged);
 			}
@@ -70,9 +70,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			}
 		}
 
-		public IEnumerable<IPagedResult<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort>> ReadPaged(IQuery<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort> query, int pageSize)
+		public IEnumerable<IPagedResult<AssetManagement.Models.PowerPort>> ReadPaged(IQuery<AssetManagement.Models.PowerPort> query, int pageSize)
 		{
-			if (_middleware is IPageableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort> middleware)
+			if (_middleware is IPageableMiddleware<AssetManagement.Models.PowerPort> middleware)
 			{
 				return middleware.OnReadPaged(query, pageSize, _inner.ReadPaged);
 			}
@@ -82,9 +82,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			}
 		}
 
-		public IEnumerable<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort> Read(FilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort> filter)
+		public IEnumerable<AssetManagement.Models.PowerPort> Read(FilterElement<AssetManagement.Models.PowerPort> filter)
 		{
-			if (_middleware is IReadableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort> middleware)
+			if (_middleware is IReadableMiddleware<AssetManagement.Models.PowerPort> middleware)
 			{
 				return middleware.OnRead(filter, _inner.Read);
 			}
@@ -94,9 +94,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			}
 		}
 
-		public IEnumerable<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort> Read(IQuery<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort> query)
+		public IEnumerable<AssetManagement.Models.PowerPort> Read(IQuery<AssetManagement.Models.PowerPort> query)
 		{
-			if (_middleware is IReadableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort> middleware)
+			if (_middleware is IReadableMiddleware<AssetManagement.Models.PowerPort> middleware)
 			{
 				return middleware.OnRead(query, _inner.Read);
 			}
@@ -106,9 +106,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			}
 		}
 
-		public long Count(FilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort> filter)
+		public long Count(FilterElement<AssetManagement.Models.PowerPort> filter)
 		{
-			if (_middleware is ICountableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort> middleware)
+			if (_middleware is ICountableMiddleware<AssetManagement.Models.PowerPort> middleware)
 			{
 				return middleware.OnCount(filter, _inner.Count);
 			}
@@ -118,9 +118,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			}
 		}
 
-		public long Count(IQuery<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort> query)
+		public long Count(IQuery<AssetManagement.Models.PowerPort> query)
 		{
-			if (_middleware is ICountableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort> middleware)
+			if (_middleware is ICountableMiddleware<AssetManagement.Models.PowerPort> middleware)
 			{
 				return middleware.OnCount(query, _inner.Count);
 			}
@@ -130,9 +130,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			}
 		}
 
-		public IReadOnlyCollection<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort> Create(IEnumerable<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort> oToCreate)
+		public IReadOnlyCollection<AssetManagement.Models.PowerPort> Create(IEnumerable<AssetManagement.Models.PowerPort> oToCreate)
 		{
-			if (_middleware is IBulkCreatableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort> middleware)
+			if (_middleware is IBulkCreatableMiddleware<AssetManagement.Models.PowerPort> middleware)
 			{
 				return middleware.OnCreate(oToCreate, _inner.Create);
 			}
@@ -142,9 +142,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			}
 		}
 
-		public Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort Create(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort oToCreate)
+		public AssetManagement.Models.PowerPort Create(AssetManagement.Models.PowerPort oToCreate)
 		{
-			if (_middleware is ICreatableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort> middleware)
+			if (_middleware is ICreatableMiddleware<AssetManagement.Models.PowerPort> middleware)
 			{
 				return middleware.OnCreate(oToCreate, _inner.Create);
 			}
@@ -154,9 +154,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			}
 		}
 
-		public IReadOnlyCollection<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort> Update(IEnumerable<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort> oToUpdate)
+		public IReadOnlyCollection<AssetManagement.Models.PowerPort> Update(IEnumerable<AssetManagement.Models.PowerPort> oToUpdate)
 		{
-			if (_middleware is IBulkUpdatableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort> middleware)
+			if (_middleware is IBulkUpdatableMiddleware<AssetManagement.Models.PowerPort> middleware)
 			{
 				return middleware.OnUpdate(oToUpdate, _inner.Update);
 			}
@@ -166,9 +166,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			}
 		}
 
-		public Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort Update(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort oToUpdate)
+		public AssetManagement.Models.PowerPort Update(AssetManagement.Models.PowerPort oToUpdate)
 		{
-			if (_middleware is IUpdatableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort> middleware)
+			if (_middleware is IUpdatableMiddleware<AssetManagement.Models.PowerPort> middleware)
 			{
 				return middleware.OnUpdate(oToUpdate, _inner.Update);
 			}
@@ -178,9 +178,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			}
 		}
 
-		public void Delete(IEnumerable<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort> oToDelete)
+		public void Delete(IEnumerable<AssetManagement.Models.PowerPort> oToDelete)
 		{
-			if (_middleware is IBulkDeletableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort> middleware)
+			if (_middleware is IBulkDeletableMiddleware<AssetManagement.Models.PowerPort> middleware)
 			{
 				middleware.OnDelete(oToDelete, _inner.Delete);
 			}
@@ -190,9 +190,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			}
 		}
 
-		public void Delete(Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort oToDelete)
+		public void Delete(AssetManagement.Models.PowerPort oToDelete)
 		{
-			if (_middleware is IDeletableMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort> middleware)
+			if (_middleware is IDeletableMiddleware<AssetManagement.Models.PowerPort> middleware)
 			{
 				middleware.OnDelete(oToDelete, _inner.Delete);
 			}
@@ -201,9 +201,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				_inner.Delete(oToDelete);
 			}
 		}
-		public System.Collections.Generic.IReadOnlyCollection<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort> CreateOrUpdate(System.Collections.Generic.IEnumerable<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort> oToCreateOrUpdate)
+		public System.Collections.Generic.IReadOnlyCollection<AssetManagement.Models.PowerPort> CreateOrUpdate(System.Collections.Generic.IEnumerable<AssetManagement.Models.PowerPort> oToCreateOrUpdate)
 		{
-                if (_middleware is IBulkRepositoryMiddleware<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort> middleware)
+                if (_middleware is IBulkRepositoryMiddleware<AssetManagement.Models.PowerPort> middleware)
                 {
                     return middleware.OnCreateOrUpdate(oToCreateOrUpdate, _inner.CreateOrUpdate);
                 }

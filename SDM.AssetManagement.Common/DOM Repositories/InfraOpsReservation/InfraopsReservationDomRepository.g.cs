@@ -32,7 +32,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         public InfraopsReservationDomRepository(IConnection connection)
         {
             this.connection = connection;
-            this.helper = new DomHelper(connection.HandleMessages, Skyline.DataMiner.SDM.AssetManagement.Models.ReservationDomMapper.ModuleId);
+            this.helper = new DomHelper(connection.HandleMessages, AssetManagement.Models.ReservationDomMapper.ModuleId);
         }
 
         public InfraopsReservation Create(InfraopsReservation createObject)
@@ -149,7 +149,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
 
             var domFilter = TranslateFullFilter(filter);
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.AssetManagement.Models.ReservationDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(AssetManagement.Models.ReservationDomMapper.DomDefinitionId.Id));
             return helper.DomInstances.Count(domFilter);
         }
 
@@ -161,7 +161,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
 
             var domFilter = TranslateFullFilter(query.Filter);
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.AssetManagement.Models.ReservationDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(AssetManagement.Models.ReservationDomMapper.DomDefinitionId.Id));
             var domOrder = TranslateFullOrderBy(query.Order);
             var domQuery = query.WithFilter(domFilter).WithOrder(domOrder);
             return helper.DomInstances.Count(domQuery);
@@ -373,7 +373,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 throw new ArgumentNullException(nameof(domFilter));
             }
 
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.AssetManagement.Models.ReservationDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(AssetManagement.Models.ReservationDomMapper.DomDefinitionId.Id));
             var domInstances = helper.DomInstances.Read(domFilter);
             return domInstances.Select(FromInstance);
         }
@@ -385,7 +385,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 throw new ArgumentNullException(nameof(domQuery));
             }
 
-            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.AssetManagement.Models.ReservationDomMapper.DomDefinitionId.Id));
+            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(AssetManagement.Models.ReservationDomMapper.DomDefinitionId.Id));
             domQuery = domQuery.WithFilter(domFilter);
             var domInstances = helper.DomInstances.Read(domQuery);
             return domInstances.Select(FromInstance);
@@ -398,7 +398,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 throw new ArgumentNullException(nameof(domFilter));
             }
 
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.AssetManagement.Models.ReservationDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(AssetManagement.Models.ReservationDomMapper.DomDefinitionId.Id));
             var pagingHelper = helper.DomInstances.PreparePaging(domFilter, pageSize);
             while (pagingHelper.MoveToNextPage())
             {
@@ -413,7 +413,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 throw new ArgumentNullException(nameof(domQuery));
             }
 
-            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.SDM.AssetManagement.Models.ReservationDomMapper.DomDefinitionId.Id));
+            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(AssetManagement.Models.ReservationDomMapper.DomDefinitionId.Id));
             domQuery = domQuery.WithFilter(domFilter);
             var pagingHelper = helper.DomInstances.PreparePaging(domQuery, pageSize);
             while (pagingHelper.MoveToNextPage())
@@ -513,7 +513,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             {
                 Identifier = instance.ID.Id.ToString()
             };
-            var _reservationpropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.ReservationDomMapper.ReservationProperties.SectionDefinitionId));
+            var _reservationpropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(AssetManagement.Models.ReservationDomMapper.ReservationProperties.SectionDefinitionId));
             if (_reservationpropertiesSection != default)
             {
                 obj.ReservationPropertiesSectionId = _reservationpropertiesSection.ID.Id;
@@ -524,7 +524,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 }
             }
 
-            var _rackfkSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.ReservationDomMapper.RackFk.SectionDefinitionId));
+            var _rackfkSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(AssetManagement.Models.ReservationDomMapper.RackFk.SectionDefinitionId));
             if (_rackfkSection != default)
             {
                 obj.RackFk = new Skyline.DataMiner.SDM.AssetManagement.Models.RackRelation();
@@ -532,12 +532,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 var _rackfkrack = _rackfkSection.GetValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.ReservationDomMapper.RackFk.Rack);
                 if (_rackfkrack != null)
                 {
-                    obj.RackFk.Rack = new Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.FacilityManagement.Models.Rack>(Convert.ToString(_rackfkrack.Value));
+                    obj.RackFk.Rack = new SdmObjectReference<FacilityManagement.Models.Rack>(Convert.ToString(_rackfkrack.Value));
                 }
             }
 
-            var _reservedpositionsList = new System.Collections.Generic.List<Skyline.DataMiner.SDM.AssetManagement.Models.InfraopsReservationBounderies>();
-            foreach (var _reservedpositionsSection in instance.Sections.Where(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.SDM.AssetManagement.Models.ReservationDomMapper.ReservedPositions.SectionDefinitionId)))
+            var _reservedpositionsList = new System.Collections.Generic.List<AssetManagement.Models.InfraopsReservationBounderies>();
+            foreach (var _reservedpositionsSection in instance.Sections.Where(s => s.SectionDefinitionID.Equals(AssetManagement.Models.ReservationDomMapper.ReservedPositions.SectionDefinitionId)))
             {
                 var reservedpositions = new Skyline.DataMiner.SDM.AssetManagement.Models.InfraopsReservationBounderies();
                 ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)reservedpositions).SectionId = _reservedpositionsSection.ID.Id;
@@ -547,7 +547,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     reservedpositions.LowerBound = _reservedpositionslowerbound.Value;
                 }
 
-                var _reservedpositionsupperbound = _reservedpositionsSection.GetValue<long>(Skyline.DataMiner.SDM.AssetManagement.Models.ReservationDomMapper.ReservedPositions.UpperBound);
+                var _reservedpositionsupperbound = _reservedpositionsSection.GetValue<long>(AssetManagement.Models.ReservationDomMapper.ReservedPositions.UpperBound);
                 if (_reservedpositionsupperbound != null)
                 {
                     reservedpositions.UpperBound = _reservedpositionsupperbound.Value;
@@ -574,10 +574,10 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
             var instance = new DomInstance
             {
-                DomDefinitionId = Skyline.DataMiner.SDM.AssetManagement.Models.ReservationDomMapper.DomDefinitionId,
+                DomDefinitionId = AssetManagement.Models.ReservationDomMapper.DomDefinitionId,
                 ID = new DomInstanceId(id)
                 {
-                    ModuleId = Skyline.DataMiner.SDM.AssetManagement.Models.ReservationDomMapper.ModuleId
+                    ModuleId = AssetManagement.Models.ReservationDomMapper.ModuleId
                 }
             };
             var _reservationproperties = new Section(Skyline.DataMiner.SDM.AssetManagement.Models.ReservationDomMapper.ReservationProperties.SectionDefinitionId);
@@ -587,7 +587,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
             if (obj.Description != default)
             {
-                _reservationproperties.AddOrUpdateValue<string>(Skyline.DataMiner.SDM.AssetManagement.Models.ReservationDomMapper.ReservationProperties.Description, Convert.ToString(obj.Description));
+                _reservationproperties.AddOrUpdateValue<string>(AssetManagement.Models.ReservationDomMapper.ReservationProperties.Description, Convert.ToString(obj.Description));
             }
 
             instance.Sections.Add(_reservationproperties);
@@ -601,7 +601,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 }
                 if (obj.RackFk.Rack != default)
                 {
-                    _rackfk.AddOrUpdateValue<System.Guid>(Skyline.DataMiner.SDM.AssetManagement.Models.ReservationDomMapper.RackFk.Rack, System.Guid.Parse(obj.RackFk.Rack.Identifier));
+                    _rackfk.AddOrUpdateValue<System.Guid>(AssetManagement.Models.ReservationDomMapper.RackFk.Rack, rackGuid);
                 }
 
                 instance.Sections.Add(_rackfk);
@@ -617,12 +617,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 }
                 if (reservedpositions.LowerBound != default)
                 {
-                    _reservedpositionsSection.AddOrUpdateValue<long>(Skyline.DataMiner.SDM.AssetManagement.Models.ReservationDomMapper.ReservedPositions.LowerBound, (long)reservedpositions.LowerBound);
+                    _reservedpositionsSection.AddOrUpdateValue<long>(AssetManagement.Models.ReservationDomMapper.ReservedPositions.LowerBound, (long)reservedpositions.LowerBound);
                 }
 
                 if (reservedpositions.UpperBound != default)
                 {
-                    _reservedpositionsSection.AddOrUpdateValue<long>(Skyline.DataMiner.SDM.AssetManagement.Models.ReservationDomMapper.ReservedPositions.UpperBound, (long)reservedpositions.UpperBound);
+                    _reservedpositionsSection.AddOrUpdateValue<long>(AssetManagement.Models.ReservationDomMapper.ReservedPositions.UpperBound, (long)reservedpositions.UpperBound);
                 }
 
                 instance.Sections.Add(_reservedpositionsSection);
@@ -638,13 +638,13 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 case "Identifier":
                     return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.Id, comparer, Guid.Parse((string)value));
                 case "Description":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.ReservationDomMapper.ReservationProperties.Description), comparer, (string)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ReservationDomMapper.ReservationProperties.Description), comparer, (string)value);
                 case "RackFk.Rack":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.ReservationDomMapper.RackFk.Rack), comparer, System.Guid.Parse(Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.FacilityManagement.Models.Rack>.Convert(value).Identifier));
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ReservationDomMapper.RackFk.Rack), comparer, System.Guid.Parse(SdmObjectReference<FacilityManagement.Models.Rack>.Convert(value).Identifier));
                 case "ReservedPositions.LowerBound":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.ReservationDomMapper.ReservedPositions.LowerBound), comparer, (long)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ReservationDomMapper.ReservedPositions.LowerBound), comparer, (long)value);
                 case "ReservedPositions.UpperBound":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.ReservationDomMapper.ReservedPositions.UpperBound), comparer, (long)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ReservationDomMapper.ReservedPositions.UpperBound), comparer, (long)value);
                 default:
                     throw new NotImplementedException();
             }
@@ -657,13 +657,13 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 case "Identifier":
                     return OrderByElementFactory.Create(DomInstanceExposers.Id, sortOrder, naturalSort);
                 case "Description":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.ReservationDomMapper.ReservationProperties.Description), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ReservationDomMapper.ReservationProperties.Description), sortOrder, naturalSort);
                 case "RackFk.Rack":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.ReservationDomMapper.RackFk.Rack), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ReservationDomMapper.RackFk.Rack), sortOrder, naturalSort);
                 case "ReservedPositions.LowerBound":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.ReservationDomMapper.ReservedPositions.LowerBound), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ReservationDomMapper.ReservedPositions.LowerBound), sortOrder, naturalSort);
                 case "ReservedPositions.UpperBound":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.SDM.AssetManagement.Models.ReservationDomMapper.ReservedPositions.UpperBound), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ReservationDomMapper.ReservedPositions.UpperBound), sortOrder, naturalSort);
                 default:
                     throw new NotImplementedException();
             }

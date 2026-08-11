@@ -31,16 +31,19 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
         {
             var result = new ValidationResult();
 
-            if (!RoomValidationHandler.IsRoomIdValid(entity, out var idResult))
+            if (entity.ShouldValidate(entity.RoomIdField))
             {
-                result.AddFailuresFrom(idResult);
-                return result;
-            }
+                if (!RoomValidationHandler.IsRoomIdValid(entity, out var idResult))
+                {
+                    result.AddFailuresFrom(idResult);
+                    return result;
+                }
 
-            if (entity.ShouldValidate(entity.RoomIdField) && IsIdInUse(entity.RoomId, entity.Identifier))
-            {
-                result.AddFailReason(RoomValidationHandler.RoomValidationField.RoomId,
-                    $"Room Id '{entity.RoomId}' is already in use.");
+                if (IsIdInUse(entity.RoomId, entity.Identifier))
+                {
+                    result.AddFailReason(RoomValidationHandler.RoomValidationField.RoomId,
+                        $"Room Id '{entity.RoomId}' is already in use.");
+                }
             }
 
             result.AddFailuresFrom(ValidateReferencesAgainstDatabase(new List<Room> { entity })[0]);
@@ -135,7 +138,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                 .Select(d => d.RoomFk == null ? null : d.RoomFk.Room.Identifier)
                 .Where(id => !string.IsNullOrWhiteSpace(id))
                 .ToHashSet();
-            var roomsWithAssets = GetIdentifiersWithAssets(FacilityManagementEntityType.Room, identifiers);
 
             for (int i = 0; i < rooms.Count; i++)
             {
@@ -146,8 +148,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                     "Can't remove room, since it still has zones assigned to it. Please remove all the zones assigned to this room before removing it.");
                 AddDeleteBlockIfPresent(roomsWithDesks, identifier, results[i],
                     "Can't remove room, since it still has desks assigned to it. Please remove all the desks assigned to this room before removing it.");
-                AddDeleteBlockIfPresent(roomsWithAssets, identifier, results[i],
-                    "Can't remove room, since it still has assets assigned to it. Please remove all the assets assigned to this room before removing it.");
             }
 
             return results;
@@ -159,19 +159,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
             {
                 result.AddFailReason(RoomValidationHandler.RoomValidationField.RoomId, message);
             }
-        }
-
-        private HashSet<string> GetIdentifiersWithAssets(FacilityManagementEntityType entityType, List<string> identifiers)
-        {
-            var checker = _entityLoader.ExternalReferenceChecker;
-            if (checker == null)
-            {
-                return new HashSet<string>();
-            }
-
-            return (checker.GetIdentifiersWithAssets(entityType, identifiers) ?? new List<string>())
-                .Where(id => !string.IsNullOrWhiteSpace(id))
-                .ToHashSet();
         }
 
         private List<ValidationResult> ValidateBulkIdsAgainstDatabase(List<Room> entities)
@@ -221,42 +208,18 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                 {
                     Entity = entity,
                     Index = index,
-                    FloorIdentifier = entity.FloorFk == null ? null : FacilityReferenceValidationHelper.GetId(entity.FloorFk.Floor),
+                    FloorIdentifier = entity.FloorFk == null ? null : ReferenceValidationHelper.GetId(entity.FloorFk.Floor),
                 })
-                .Where(x => FacilityReferenceValidationHelper.ShouldValidateReferences(x.Entity) &&
-                    FacilityReferenceValidationHelper.HasId(x.FloorIdentifier))
+                .Where(x => ReferenceValidationHelper.ShouldValidateReferences(x.Entity) &&
+                    ReferenceValidationHelper.HasId(x.FloorIdentifier))
                 .Select(x => (x.Index, x.FloorIdentifier))
-                .ToList();
-            var ownerCandidates = entities
-                .Select((entity, index) => new { Entity = entity, Index = index, OwnerId = entity.Ownership?.Owner ?? Guid.Empty })
-                .Where(x => FacilityReferenceValidationHelper.ShouldValidateReferences(x.Entity) &&
-                    FacilityReferenceValidationHelper.HasId(x.OwnerId))
-                .Select(x => (x.Index, x.OwnerId))
-                .ToList();
-            var teamCandidates = entities
-                .Select((entity, index) => new { Entity = entity, Index = index, TeamId = entity.Ownership?.Team ?? Guid.Empty })
-                .Where(x => FacilityReferenceValidationHelper.ShouldValidateReferences(x.Entity) &&
-                    FacilityReferenceValidationHelper.HasId(x.TeamId))
-                .Select(x => (x.Index, x.TeamId))
-                .ToList();
-            var resourceCandidates = entities
-                .Select((entity, index) => new { Entity = entity, Index = index, ResourceId = entity.ResourceLink?.ResourceId ?? Guid.Empty })
-                .Where(x => FacilityReferenceValidationHelper.ShouldValidateReferences(x.Entity) &&
-                    FacilityReferenceValidationHelper.HasId(x.ResourceId))
-                .Select(x => (x.Index, x.ResourceId))
                 .ToList();
 
             var existingFloorIds = floorCandidates.Any()
-                ? FacilityReferenceValidationHelper.ToIdentifierSet(_entityLoader.GetFloorsByIdentifiers(floorCandidates.Select(x => x.FloorIdentifier).Distinct().ToList()))
+                ? ReferenceValidationHelper.ToIdentifierSet(_entityLoader.GetFloorsByIdentifiers(floorCandidates.Select(x => x.FloorIdentifier).Distinct().ToList()))
                 : new HashSet<string>();
-            var existingPersonIds = GetExistingPersonIds(ownerCandidates.Select(x => x.OwnerId));
-            var existingTeamIds = GetExistingTeamIds(teamCandidates.Select(x => x.TeamId));
-            var existingResourceIds = GetExistingResourceIds(resourceCandidates.Select(x => x.ResourceId));
 
             ValidateStringReferences(floorCandidates, existingFloorIds, "Floor", results);
-            ValidateGuidReferences(ownerCandidates, existingPersonIds, "Person", results);
-            ValidateGuidReferences(teamCandidates, existingTeamIds, "Team", results);
-            ValidateGuidReferences(resourceCandidates, existingResourceIds, "Resource", results);
 
             return results;
         }
@@ -267,62 +230,9 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
             {
                 if (!existingIds.Contains(identifier))
                 {
-                    FacilityReferenceValidationHelper.AddMissingReference(results[index], RoomValidationHandler.RoomValidationField.RoomId, referenceType, identifier);
+                    ReferenceValidationHelper.AddMissingReference(results[index], RoomValidationHandler.RoomValidationField.RoomId, referenceType, identifier);
                 }
             }
-        }
-
-        private static void ValidateGuidReferences(List<(int Index, Guid Id)> candidates, HashSet<Guid> existingIds, string referenceType, List<ValidationResult> results)
-        {
-            foreach (var (index, id) in candidates)
-            {
-                if (!existingIds.Contains(id))
-                {
-                    FacilityReferenceValidationHelper.AddMissingReference(results[index], RoomValidationHandler.RoomValidationField.RoomId, referenceType, id);
-                }
-            }
-        }
-
-        private HashSet<Guid> GetExistingPersonIds(IEnumerable<Guid> personIds)
-        {
-            var checker = _entityLoader.ExternalReferenceChecker;
-            var keys = personIds?.Where(FacilityReferenceValidationHelper.HasId).Distinct().ToList() ?? new List<Guid>();
-            if (checker == null || !keys.Any())
-            {
-                // No reference checker available: treat all referenced ids as existing so the
-                // reference check is effectively skipped instead of reporting false errors.
-                return new HashSet<Guid>(keys);
-            }
-
-            return FacilityReferenceValidationHelper.ToGuidSet(checker.GetExistingPersonIds(keys));
-        }
-
-        private HashSet<Guid> GetExistingTeamIds(IEnumerable<Guid> teamIds)
-        {
-            var checker = _entityLoader.ExternalReferenceChecker;
-            var keys = teamIds?.Where(FacilityReferenceValidationHelper.HasId).Distinct().ToList() ?? new List<Guid>();
-            if (checker == null || !keys.Any())
-            {
-                // No reference checker available: treat all referenced ids as existing so the
-                // reference check is effectively skipped instead of reporting false errors.
-                return new HashSet<Guid>(keys);
-            }
-
-            return FacilityReferenceValidationHelper.ToGuidSet(checker.GetExistingTeamIds(keys));
-        }
-
-        private HashSet<Guid> GetExistingResourceIds(IEnumerable<Guid> resourceIds)
-        {
-            var checker = _entityLoader.ExternalReferenceChecker;
-            var keys = resourceIds?.Where(FacilityReferenceValidationHelper.HasId).Distinct().ToList() ?? new List<Guid>();
-            if (checker == null || !keys.Any())
-            {
-                // No reference checker available: treat all referenced ids as existing so the
-                // reference check is effectively skipped instead of reporting false errors.
-                return new HashSet<Guid>(keys);
-            }
-
-            return FacilityReferenceValidationHelper.ToGuidSet(checker.GetExistingResourceIds(keys));
         }
 
         private static List<ValidationResult> ValidateIdDuplicatesInBatch(List<Room> entities)

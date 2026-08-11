@@ -21,17 +21,17 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
     public static partial class FacilityExposers
     {
-        public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Facility, string> Identifier = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Facility, string>((obj) => obj.Identifier, "Identifier");
-        public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Facility, string> FacilityId = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Facility, string>((obj) => obj.FacilityId, "FacilityId");
-        public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Facility, string> Name = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Facility, string>((obj) => obj.Name, "Name");
-        public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Facility, string> Description = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Facility, string>((obj) => obj.Description, "Description");
-        public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Facility, SharedMappers.DomIds.SlcFacility_Management.Enums.FacilityTypeEnum?> FacilityType = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Facility, SharedMappers.DomIds.SlcFacility_Management.Enums.FacilityTypeEnum?>((obj) => obj.FacilityType, "FacilityType");
-        public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Facility, string> Address = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Facility, string>((obj) => obj.Address, "Address");
-        public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Facility, string> City = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Facility, string>((obj) => obj.City, "City");
-        public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Facility, string> ZipCode = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Facility, string>((obj) => obj.ZipCode, "ZipCode");
-        public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Facility, string> Country = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Facility, string>((obj) => obj.Country, "Country");
-        public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Facility, double?> Latitude = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Facility, double?>((obj) => obj.Latitude, "Latitude");
-        public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Facility, double?> Longitude = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Facility, double?>((obj) => obj.Longitude, "Longitude");
+        public static readonly Exposer<FacilityManagement.Models.Facility, string> Identifier = new Exposer<FacilityManagement.Models.Facility, string>((obj) => obj.Identifier, "Identifier");
+        public static readonly Exposer<FacilityManagement.Models.Facility, string> FacilityId = new Exposer<FacilityManagement.Models.Facility, string>((obj) => obj.FacilityId, "FacilityId");
+        public static readonly Exposer<FacilityManagement.Models.Facility, string> Name = new Exposer<FacilityManagement.Models.Facility, string>((obj) => obj.Name, "Name");
+        public static readonly Exposer<FacilityManagement.Models.Facility, string> Description = new Exposer<FacilityManagement.Models.Facility, string>((obj) => obj.Description, "Description");
+        public static readonly Exposer<FacilityManagement.Models.Facility, SharedMappers.DomIds.SlcFacility_Management.Enums.FacilityTypeEnum?> FacilityType = new Exposer<FacilityManagement.Models.Facility, SharedMappers.DomIds.SlcFacility_Management.Enums.FacilityTypeEnum?>((obj) => obj.FacilityType, "FacilityType");
+        public static readonly Exposer<FacilityManagement.Models.Facility, string> Address = new Exposer<FacilityManagement.Models.Facility, string>((obj) => obj.Address, "Address");
+        public static readonly Exposer<FacilityManagement.Models.Facility, string> City = new Exposer<FacilityManagement.Models.Facility, string>((obj) => obj.City, "City");
+        public static readonly Exposer<FacilityManagement.Models.Facility, string> ZipCode = new Exposer<FacilityManagement.Models.Facility, string>((obj) => obj.ZipCode, "ZipCode");
+        public static readonly Exposer<FacilityManagement.Models.Facility, string> Country = new Exposer<FacilityManagement.Models.Facility, string>((obj) => obj.Country, "Country");
+        public static readonly Exposer<FacilityManagement.Models.Facility, double?> Latitude = new Exposer<FacilityManagement.Models.Facility, double?>((obj) => obj.Latitude, "Latitude");
+        public static readonly Exposer<FacilityManagement.Models.Facility, double?> Longitude = new Exposer<FacilityManagement.Models.Facility, double?>((obj) => obj.Longitude, "Longitude");
         static FacilityExposers()
         {
             RuntimeHelpers.RunClassConstructor(typeof(SiteFk).TypeHandle);
@@ -39,7 +39,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
         public static partial class SiteFk
         {
-            public static readonly Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Facility, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.FacilityManagement.Models.Site>> Site = new Exposer<Skyline.DataMiner.SDM.FacilityManagement.Models.Facility, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.SDM.FacilityManagement.Models.Site>>((obj) => obj.SiteFk.Site, "SiteFk.Site");
+            public static readonly Exposer<FacilityManagement.Models.Facility, SdmObjectReference<FacilityManagement.Models.Site>> Site = new Exposer<FacilityManagement.Models.Facility, SdmObjectReference<FacilityManagement.Models.Site>>((obj) => obj.SiteFk.Site, "SiteFk.Site");
         }
     }
 }

@@ -18,10 +18,9 @@
 		private readonly DeskValidator _deskValidator;
 		private readonly RackValidator _rackValidator;
 
-		public FacilityManagementApiHelper(IConnection connection, IFacilityManagementExternalReferenceChecker externalReferenceChecker = null)
+		public FacilityManagementApiHelper(IConnection connection)
 		{
 			Connection = connection;
-            ExternalReferenceChecker = externalReferenceChecker;
             AppSettings = new FacilityManagerAppSettingsDomRepository(connection);
 
             var entityLoader = new FacilityEntityLoader(this);
@@ -70,8 +69,6 @@
         }
 
 		public IConnection Connection { get; }
-
-        public IFacilityManagementExternalReferenceChecker ExternalReferenceChecker { get; }
 
         public IBulkRepository<FacilityManagerAppSettings> AppSettings { get; }
 

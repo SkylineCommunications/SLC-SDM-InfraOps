@@ -20,11 +20,11 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
     public static partial class AssetManagerAppSettingsExposers
     {
-        public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettings, string> Identifier = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettings, string>((obj) => obj.Identifier, "Identifier");
-        public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettings, bool> EnableAssetHistory = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettings, bool>((obj) => obj.EnableAssetHistory, "EnableAssetHistory");
-        public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettings, int> PlanAndBuildJobPrompt = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettings, int>((obj) => obj.PlanAndBuildJobPrompt, "PlanAndBuildJobPrompt");
-        public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettings, bool> EnableConnectionHistory = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettings, bool>((obj) => obj.EnableConnectionHistory, "EnableConnectionHistory");
-        public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettings, TimeSpan?> HistoryTTL = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettings, TimeSpan?>((obj) => obj.HistoryTTL, "HistoryTTL");
-        public static readonly Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettings, long?> HistoryLimit = new Exposer<Skyline.DataMiner.SDM.AssetManagement.Models.AssetManagerAppSettings, long?>((obj) => obj.HistoryLimit, "HistoryLimit");
+        public static readonly Exposer<AssetManagement.Models.AssetManagerAppSettings, string> Identifier = new Exposer<AssetManagement.Models.AssetManagerAppSettings, string>((obj) => obj.Identifier, "Identifier");
+        public static readonly Exposer<AssetManagement.Models.AssetManagerAppSettings, bool> EnableAssetHistory = new Exposer<AssetManagement.Models.AssetManagerAppSettings, bool>((obj) => obj.EnableAssetHistory, "EnableAssetHistory");
+        public static readonly Exposer<AssetManagement.Models.AssetManagerAppSettings, int> PlanAndBuildJobPrompt = new Exposer<AssetManagement.Models.AssetManagerAppSettings, int>((obj) => obj.PlanAndBuildJobPrompt, "PlanAndBuildJobPrompt");
+        public static readonly Exposer<AssetManagement.Models.AssetManagerAppSettings, bool> EnableConnectionHistory = new Exposer<AssetManagement.Models.AssetManagerAppSettings, bool>((obj) => obj.EnableConnectionHistory, "EnableConnectionHistory");
+        public static readonly Exposer<AssetManagement.Models.AssetManagerAppSettings, TimeSpan?> HistoryTTL = new Exposer<AssetManagement.Models.AssetManagerAppSettings, TimeSpan?>((obj) => obj.HistoryTTL, "HistoryTTL");
+        public static readonly Exposer<AssetManagement.Models.AssetManagerAppSettings, long?> HistoryLimit = new Exposer<AssetManagement.Models.AssetManagerAppSettings, long?>((obj) => obj.HistoryLimit, "HistoryLimit");
     }
 }

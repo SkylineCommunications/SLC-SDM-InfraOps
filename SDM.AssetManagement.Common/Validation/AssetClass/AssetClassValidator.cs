@@ -115,14 +115,10 @@
 
             // ============================================================
             // PHASE 3: DATABASE ACCESS CHECKS
+            // Load device types once and reuse the same map for both the
+            // reference existence checks and the per-item behavioral checks,
+            // avoiding a second GetDeviceTypesByDomIds query for the same data.
             // ============================================================
-            results.MergeFrom(ValidateBulkReferencesAgainstDatabase(assetClasses));
-
-            if (results.AnyInvalid())
-            {
-                return results;
-            }
-
             var deviceTypeMap = _entityLoader.GetDeviceTypesByDomIds(
                     assetClasses
                         .Where(ac => ac.DeviceTypeId != null && ac.DeviceTypeId.HasValue())
@@ -131,10 +127,34 @@
                         .ToList())
                 .ToDictionary(dt => dt.Identifier);
 
-            for (int i = 0; i < assetClasses.Count; i++)
+            for (int assetIdx = 0; assetIdx < assetClasses.Count; assetIdx++)
             {
-                results[i].AddFailuresFrom(ValidateWithDatabaseAccess(assetClasses[i], deviceTypeMap));
+                var assetClass = assetClasses[assetIdx];
+
+                // TODO: code duplicated in "ValidateWithDatabaseAccess". There should only be one.
+                if ((assetClass.DeviceTypeIdField.Changed || assetClass.PowerSupplyField.Changed || assetClass.HeightUField.Changed)
+                && assetClass.DeviceTypeId.HasValue())
+                {
+                    try
+                    {
+                        results[assetIdx].AddFailuresFrom(ValidateAgainstDeviceType(assetClass, deviceTypeMap));
+                    }
+                    catch (Exception ex)
+                    {
+                        var r = new ValidationResult();
+                        r.AddFailReason(AssetClassValidationHandler.AssetClassValidationField.DeviceTypeId,
+                            $"Error validating against device type: {ex.Message}");
+                        results[assetIdx].AddFailuresFrom(r);
+                    }
+                }
             }
+
+            if (results.AnyInvalid())
+            {
+                return results;
+            }
+
+            results.MergeFrom(ValidateBulkReferencesAgainstDatabase(assetClasses, deviceTypeMap));
 
             return results;
         }
@@ -287,11 +307,7 @@
         {
             var validations = new List<ValidationResult>();
 
-            bool isBulkValidation = deviceTypeCache != null;    
-
-            // Name uniqueness: in bulk mode it was already resolved in Phase 2.5 via bulk DB query.
-            // In single mode, use the standard per-item check (1 exclude ID — safe).
-            if (!isBulkValidation && assetClass.ShouldValidate(assetClass.NameField))
+            if (assetClass.ShouldValidate(assetClass.NameField))
             {
                 validations.Add(IsAssetClassNameValid(assetClass.Name, assetClass.Identifier));
             }
@@ -327,7 +343,7 @@
                 return result;
             }
 
-                DeviceType deviceType;
+            DeviceType deviceType;
             if (deviceTypeCache != null && deviceTypeCache.TryGetValue(assetClass.DeviceTypeId, out var cached))
             {
                 deviceType = cached;
@@ -354,15 +370,15 @@
                     "Asset Class with 'Power Provider' Device Type must have a Power Supply.");
             }
 
-            bool isRackUnitConsumer = deviceType.TagsInfo.Tags.Contains(SlcAsset_Management.Enums.TagOption.RackUnitConsumer);
-            if (!AssetClassValidationHandler.IsHeightUnitValid(assetClass, isRackUnitConsumer, out var heightUResult))
+            if (!AssetClassValidationHandler.IsHeightUnitValid(assetClass, deviceType, out var heightUResult))
             {
                 result.AddFailuresFrom(heightUResult);
             }
 
-            return result;
-        }
-
+            return result;
+
+        }
+
         private ValidationResult ValidateReferencesAgainstDatabase(AssetClass assetClass)
             {
                 var result = new ValidationResult();
@@ -379,21 +395,17 @@
 
                 ValidateDataPortTypeReferences(assetClass.DataPorts, "AssetClass.DataPorts.Type", "DataPorts", result);
                 ValidatePowerPortTypeReferences(assetClass.PowerPorts, "AssetClass.PowerPorts.PortType", "PowerPorts", result);
-                ValidateExternalGuid(assetClass.Manufacturer, AssetManagementExternalReferenceType.Organization, "AssetClass.Manufacturer", "Manufacturer", result);
 
                 return result;
             }
 
-            private List<ValidationResult> ValidateBulkReferencesAgainstDatabase(List<AssetClass> assetClasses)
+            private List<ValidationResult> ValidateBulkReferencesAgainstDatabase(List<AssetClass> assetClasses, Dictionary<string, DeviceType> deviceTypeMap)
             {
                 var results = assetClasses.Select(_ => new ValidationResult()).ToList();
 
-                var deviceTypeIds = assetClasses
-                    .Where(ac => ac.ShouldValidate(ac.DeviceTypeIdField) && ac.DeviceTypeId != null && ac.DeviceTypeId.HasValue())
-                    .Select(ac => ac.DeviceTypeId.Identifier)
-                    .Distinct()
-                    .ToList();
-                var existingDeviceTypeIds = _entityLoader.GetDeviceTypesByDomIds(deviceTypeIds).Select(dt => dt.Identifier).ToHashSet();
+                // Existence is derived from the already-loaded device-type map (its keys are the
+                // identifiers that actually exist), so no second device-type query is issued here.
+                var existingDeviceTypeIds = deviceTypeMap.Keys.ToHashSet();
 
                 var portTypeIds = assetClasses
                     .SelectMany(ac => (ac.DataPorts ?? new List<DataPortInfo>())
@@ -406,16 +418,11 @@
                     .ToList();
                 var existingPortTypeIds = _entityLoader.GetPortTypesByDomIds(portTypeIds).Select(pt => pt.Identifier).ToHashSet();
 
-                var existingManufacturers = GetExistingExternalIds(
-                    AssetManagementExternalReferenceType.Organization,
-                    assetClasses.Where(ac => ac.ShouldValidate(ac.ManufacturerField)).Select(ac => ac.Manufacturer));
-
                 for (int i = 0; i < assetClasses.Count; i++)
                 {
                     var assetClass = assetClasses[i];
                     ValidateDeviceTypeReference(assetClass, results[i], existingDeviceTypeIds);
                     ValidatePortTypeReferences(assetClass, results[i], existingPortTypeIds);
-                    ValidateManufacturerReference(assetClass, results[i], existingManufacturers);
                 }
 
                 return results;
@@ -449,17 +456,6 @@
                     {
                         result.AddFailReason("AssetClass.PowerPorts.PortType", "PowerPorts", $"Referenced Port Type '{port.PortType.Identifier}' does not exist.");
                     }
-                }
-            }
-
-            private void ValidateManufacturerReference(AssetClass assetClass, ValidationResult result, HashSet<Guid> existingManufacturers)
-            {
-                if (assetClass.ShouldValidate(assetClass.ManufacturerField)
-                    && assetClass.Manufacturer != Guid.Empty
-                    && _entityLoader.ExternalReferenceChecker != null
-                    && !existingManufacturers.Contains(assetClass.Manufacturer))
-                {
-                    result.AddFailReason("AssetClass.Manufacturer", "Manufacturer", $"Referenced Organization '{assetClass.Manufacturer}' does not exist.");
                 }
             }
 
@@ -497,35 +493,6 @@
                 }
             }
 
-            private void ValidateExternalGuid(Guid identifier, AssetManagementExternalReferenceType type, string fieldId, string fieldName, ValidationResult result)
-            {
-                if (identifier == Guid.Empty || _entityLoader.ExternalReferenceChecker == null)
-                {
-                    return;
-                }
-
-                if (!GetExistingExternalIds(type, new[] { identifier }).Contains(identifier))
-                {
-                    result.AddFailReason(fieldId, fieldName, $"Referenced {FormatExternalType(type)} '{identifier}' does not exist.");
-                }
-            }
-
-            private HashSet<Guid> GetExistingExternalIds(AssetManagementExternalReferenceType type, IEnumerable<Guid> identifiers)
-            {
-                var ids = identifiers.Where(id => id != Guid.Empty).Distinct().ToList();
-                if (!ids.Any() || _entityLoader.ExternalReferenceChecker == null)
-                {
-                    return new HashSet<Guid>();
-                }
-
-                return (_entityLoader.ExternalReferenceChecker.GetExistingIdentifiers(type, ids) ?? new List<Guid>()).ToHashSet();
-            }
-
-            private static string FormatExternalType(AssetManagementExternalReferenceType type)
-            {
-                return type == AssetManagementExternalReferenceType.ContactPersonRole ? "Contact Person Role" : type.ToString();
-            }
-
         private ValidationResult ValidateDimensions(AssetClass assetClass)
         {
             var validations = new List<ValidationResult>();
@@ -543,7 +510,7 @@
                 validations.Add(heightResult);
 
             if (assetClass.ShouldValidate(assetClass.HeightUField)
-                && !AssetClassValidationHandler.IsHeightUnitValid(assetClass, out var heightUResult))
+                && !AssetClassValidationHandler.ValidateHeightUnitBusinessRules(assetClass, out var heightUResult))
                 validations.Add(heightUResult);
 
             if (assetClass.ShouldValidate(assetClass.WeightField)
