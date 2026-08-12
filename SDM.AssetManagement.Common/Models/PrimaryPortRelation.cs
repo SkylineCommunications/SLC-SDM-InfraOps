@@ -1,14 +1,18 @@
-﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
+namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
     using System;
     using Newtonsoft.Json;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
-    public sealed class PrimaryPortRelation : ChangeTrackingBase, IEquatable<PrimaryPortRelation>, ISectionTrackable
+    public sealed class PrimaryPortRelation : ChangeTrackingBase, IEquatable<PrimaryPortRelation>, ISectionTrackable, ISectionEmptyState
     {
         [JsonIgnore]
         [SdmIgnore]
         Guid? ISectionTrackable.SectionId { get; set; }
+        [JsonIgnore]
+        [SdmIgnore]
+        public bool IsEmpty => IsPrimaryIpv6 == default &&
+            IsPrimaryIpv4 == default;
 
         public bool IsPrimaryIpv6
         {

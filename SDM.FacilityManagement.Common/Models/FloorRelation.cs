@@ -7,11 +7,16 @@
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
-    public class FloorRelation : ISectionTrackable
+    public class FloorRelation : ISectionTrackable, ISectionEmptyState
     {
         [JsonIgnore]
         [SdmIgnore]
         Guid? ISectionTrackable.SectionId { get; set; }
+
+        [JsonIgnore]
+        [SdmIgnore]
+        public bool IsEmpty =>
+            Floor == default;
 
         public SdmObjectReference<Floor> Floor { get; set; }
     }

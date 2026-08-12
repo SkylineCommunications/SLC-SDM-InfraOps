@@ -1,4 +1,4 @@
-﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
+namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
 	using System;
 
@@ -6,11 +6,19 @@
     using Newtonsoft.Json;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
-    public sealed class PowerPortInfo : IEquatable<PowerPortInfo>, ISectionTrackable
+    public sealed class PowerPortInfo : IEquatable<PowerPortInfo>, ISectionTrackable, ISectionEmptyState
 	{
         [JsonIgnore]
         [SdmIgnore]
         Guid? ISectionTrackable.SectionId { get; set; }
+        [JsonIgnore]
+        [SdmIgnore]
+        public bool IsEmpty => Name == default &&
+            PortNumber == default &&
+            OutputType == default &&
+            PortExposure == default &&
+            PortType == default &&
+            Label == default;
 
 		public string Name { get; set; }
 

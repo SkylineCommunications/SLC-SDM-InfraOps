@@ -674,7 +674,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             }
 
             instance.Sections.Add(_facilityproperties);
-            if (obj.SiteFk != null)
+            if (obj.SiteFk != null && !obj.SiteFk.IsEmpty)
             {
                 var _sitefk = new Section(FacilityManagement.Models.FacilityDomMapper.SiteFk.SectionDefinitionId);
                 var _sitefkSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.SiteFk).SectionId;

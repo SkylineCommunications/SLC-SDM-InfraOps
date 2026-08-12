@@ -1,4 +1,4 @@
-﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
+namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
 	using System;
 
@@ -6,11 +6,15 @@
 
 	using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
-	public sealed class ElementLink : ISectionTrackable
+	public sealed class ElementLink : ISectionTrackable, ISectionEmptyState
 	{
 		[JsonIgnore]
 		[SdmIgnore]
 		Guid? ISectionTrackable.SectionId { get; set; }
+		[JsonIgnore]
+		[SdmIgnore]
+		public bool IsEmpty => ElementID == default &&
+			IsPrimary == default;
 
 		public string ElementID { get; set; }
 

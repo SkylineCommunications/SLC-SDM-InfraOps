@@ -1,4 +1,4 @@
-﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
+namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
     using System;
 
@@ -8,11 +8,16 @@
 
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
-    public sealed class AssetHolder : IEquatable<AssetHolder>, ISectionTrackable
+    public sealed class AssetHolder : IEquatable<AssetHolder>, ISectionTrackable, ISectionEmptyState
 	{
 		[JsonIgnore]
 		[SdmIgnore]
 		Guid? ISectionTrackable.SectionId { get; set; }
+		[JsonIgnore]
+		[SdmIgnore]
+		public bool IsEmpty => SlotNumber == default &&
+			Label == default &&
+			HierarchyRole == default;
 
 		public long SlotNumber { get; set; }
 

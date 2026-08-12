@@ -10,11 +10,17 @@
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
-    public sealed class JobAsset : IEquatable<JobAsset>, ISectionTrackable
+    public sealed class JobAsset : IEquatable<JobAsset>, ISectionTrackable, ISectionEmptyState
     {
         [JsonIgnore]
         [SdmIgnore]
         Guid? ISectionTrackable.SectionId { get; set; }
+
+        [JsonIgnore]
+        [SdmIgnore]
+        public bool IsEmpty =>
+            AssetId == default &&
+            Action == default;
 
         public SdmObjectReference<Asset> AssetId { get; set; }
 

@@ -13,11 +13,21 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
     /// its cabling details at the time of the Job. Ported from InfraOpsShared's
     /// DOM_Classes.DOM.Applications.Plan_And_Build.Sections.ConnectionsOnJob.
     /// </summary>
-    public sealed class JobConnection : IEquatable<JobConnection>, ISectionTrackable
+    public sealed class JobConnection : IEquatable<JobConnection>, ISectionTrackable, ISectionEmptyState
     {
         [JsonIgnore]
         [SdmIgnore]
         Guid? ISectionTrackable.SectionId { get; set; }
+
+        [JsonIgnore]
+        [SdmIgnore]
+        public bool IsEmpty =>
+            ConnectionId == default &&
+            Source == default &&
+            Destination == default &&
+            Status == default &&
+            CableType == default &&
+            CableLength == default;
 
         public SdmObjectReference<Connection> ConnectionId { get; set; }
 

@@ -614,7 +614,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             }
 
             instance.Sections.Add(_deskinformation);
-            if (obj.RoomFk != null)
+            if (obj.RoomFk != null && !obj.RoomFk.IsEmpty)
             {
                 var _roomfk = new Section(FacilityManagement.Models.DeskDomMapper.RoomFk.SectionDefinitionId);
                 var _roomfkSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.RoomFk).SectionId;
@@ -631,7 +631,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 instance.Sections.Add(_roomfk);
             }
 
-            if (obj.Resource != null)
+            if (obj.Resource != null && !obj.Resource.IsEmpty)
             {
                 var _resource = new Section(FacilityManagement.Models.DeskDomMapper.Resource.SectionDefinitionId);
                 var _resourceSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Resource).SectionId;

@@ -7,7 +7,7 @@
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
-    public sealed class PropertyValue : IEquatable<PropertyValue>, ISectionTrackable
+    public sealed class PropertyValue : IEquatable<PropertyValue>, ISectionTrackable, ISectionEmptyState
     {
         public string PropertyName { get; set; }
 
@@ -21,6 +21,10 @@
         [JsonIgnore]
         [SdmIgnore]
         Guid? ISectionTrackable.SectionId { get; set; }
+
+        [JsonIgnore]
+        [SdmIgnore]
+        public bool IsEmpty => PropertyName == default && Value == default && PropertyId == default;
 
         public static bool operator ==(PropertyValue left, PropertyValue right)
         {

@@ -644,7 +644,7 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
             }
 
             instance.Sections.Add(_propertyproperties);
-            if (obj.Layout != null)
+            if (obj.Layout != null && !obj.Layout.IsEmpty)
             {
                 var _layout = new Section(InfraOpsProperties.Models.PropertyDomMapper.Layout.SectionDefinitionId);
                 var _layoutSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Layout).SectionId;

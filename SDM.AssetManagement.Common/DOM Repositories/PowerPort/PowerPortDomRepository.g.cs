@@ -594,7 +594,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 					ModuleId = AssetManagement.Models.PowerPortDomMapper.ModuleId
 				}
 			};
-			if (obj.PowerPortInfo != null)
+			if (obj.PowerPortInfo != null && !obj.PowerPortInfo.IsEmpty)
 			{
 				var _powerportinfo = new Section(AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.SectionDefinitionId);
 				var _powerportinfoSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.PowerPortInfo).SectionId;

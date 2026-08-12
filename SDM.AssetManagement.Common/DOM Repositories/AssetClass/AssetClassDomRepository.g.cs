@@ -906,7 +906,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			}
 
 			instance.Sections.Add(_assetclassproperties);
-			if (obj.Lifecycle != null)
+			if (obj.Lifecycle != null && !obj.Lifecycle.IsEmpty)
 			{
 				var _lifecycle = new Section(AssetManagement.Models.AssetClassDomMapper.Lifecycle.SectionDefinitionId);
 				var _lifecycleSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Lifecycle).SectionId;

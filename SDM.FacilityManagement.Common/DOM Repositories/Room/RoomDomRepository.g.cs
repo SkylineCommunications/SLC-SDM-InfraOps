@@ -661,7 +661,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             }
 
             instance.Sections.Add(_roomproperties);
-            if (obj.Ownership != null)
+            if (obj.Ownership != null && !obj.Ownership.IsEmpty)
             {
                 var _Ownership = new Section(FacilityManagement.Models.RoomDomMapper.Ownership.SectionDefinitionId);
                 var _OwnershipSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Ownership).SectionId;
@@ -683,7 +683,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 instance.Sections.Add(_Ownership);
             }
 
-            if (obj.ResourceLink != null)
+            if (obj.ResourceLink != null && !obj.ResourceLink.IsEmpty)
             {
                 var _resourcelink = new Section(FacilityManagement.Models.RoomDomMapper.ResourceLink.SectionDefinitionId);
                 var _resourcelinkSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.ResourceLink).SectionId;
@@ -700,7 +700,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 instance.Sections.Add(_resourcelink);
             }
 
-            if (obj.FloorFk != null)
+            if (obj.FloorFk != null && !obj.FloorFk.IsEmpty)
             {
                 var _floorfk = new Section(FacilityManagement.Models.RoomDomMapper.FloorFk.SectionDefinitionId);
                 var _floorfkSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.FloorFk).SectionId;

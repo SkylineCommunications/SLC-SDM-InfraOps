@@ -962,7 +962,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             instance.Sections.Add(_networkdetails);
 
 
-            if (obj.Location != null)
+            if (obj.Location != null && !obj.Location.IsEmpty)
             {
                 var _location = new Section(AssetManagement.Models.AssetDomMapper.Location.SectionDefinitionId);
                 var _locationSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Location).SectionId;
@@ -1014,7 +1014,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 instance.Sections.Add(_location);
             }
 
-            if (obj.DestinationLocation != null && obj.State == SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit)
+            if (obj.DestinationLocation != null && !obj.DestinationLocation.IsEmpty && obj.State == SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit)
             {
                 var _destinationlocation = new Section(AssetManagement.Models.AssetDomMapper.DestinationLocation.SectionDefinitionId);
                 var _destinationlocationSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.DestinationLocation).SectionId;
@@ -1116,7 +1116,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             instance.Sections.Add(_lifecycle);
 
 
-            if (obj.Ownership != null)
+            if (obj.Ownership != null && !obj.Ownership.IsEmpty)
             {
                 var _ownership = new Section(AssetManagement.Models.AssetDomMapper.Ownership.SectionDefinitionId);
                 var _ownershipSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Ownership).SectionId;
@@ -1148,7 +1148,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 instance.Sections.Add(_ownership);
             }
 
-            if (obj.Custody != null)
+            if (obj.Custody != null && !obj.Custody.IsEmpty)
             {
                 var _custody = new Section(AssetManagement.Models.AssetDomMapper.Custody.SectionDefinitionId);
                 var _custodySectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Custody).SectionId;

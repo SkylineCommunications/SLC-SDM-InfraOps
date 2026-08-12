@@ -252,8 +252,9 @@
                     SlcAsset_Management.Enums.CategoriesEnum.Video,
                 });
 
-                // CableFKs changes
-                updated.CableFKs.CableTypeFks.Should().BeEmpty();
+                // CableFKs changes - updated with an empty CableTypeFks list, so the section is
+                // empty (ISectionEmptyState.IsEmpty) and omitted from the persisted DOM instance.
+                updated.CableFKs.Should().BeNull();
             }
         }
 
@@ -274,9 +275,18 @@
                 created.CategoryLinks.Should().NotBeNull();
                 created.CategoryLinks.Categories.Should().BeEquivalentTo(referencePortType.CategoryLinks.Categories);
 
-                // CableFKs
-                created.CableFKs.Should().NotBeNull();
-                created.CableFKs.CableTypeFks.Should().HaveCount(referencePortType.CableFKs.CableTypeFks.Count);
+                // CableFKs - an empty CableTypeFks list makes the section empty
+                // (ISectionEmptyState.IsEmpty), so it is omitted from the persisted DOM instance;
+                // a populated list is persisted as usual.
+                if (referencePortType.CableFKs == null || referencePortType.CableFKs.CableTypeFks.Count == 0)
+                {
+                    created.CableFKs.Should().BeNull();
+                }
+                else
+                {
+                    created.CableFKs.Should().NotBeNull();
+                    created.CableFKs.CableTypeFks.Should().HaveCount(referencePortType.CableFKs.CableTypeFks.Count);
+                }
             }
         }
 

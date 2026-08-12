@@ -7,11 +7,21 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
-    public class AssetLocation : ChangeTrackingBase, ISectionTrackable
+    public class AssetLocation : ChangeTrackingBase, ISectionTrackable, ISectionEmptyState
     {
         [JsonIgnore]
         [SdmIgnore]
         Guid? ISectionTrackable.SectionId { get; set; }
+        [JsonIgnore]
+        [SdmIgnore]
+        public bool IsEmpty => ParentAsset == default &&
+            HolderNumber == default &&
+            RackId == default &&
+            RackPosition == default &&
+            Side == default &&
+            DeskId == default &&
+            ContainerId == default &&
+            RoomId == default;
 
         public SdmObjectReference<Asset> ParentAsset
         {
@@ -96,7 +106,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         internal IChangeTrackingField<Guid> DeskIdField => FieldHandler.GetOrCreateField(
             nameof(DeskId),
             () => new ChangeTrackingField<Guid>(Guid.Empty));
-
 
         [JsonIgnore]
         [SdmIgnore]

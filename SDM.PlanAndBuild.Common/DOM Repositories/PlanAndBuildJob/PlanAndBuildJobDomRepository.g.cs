@@ -784,7 +784,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             }
 
             instance.Sections.Add(_planandbuildjobproperties);
-            if (obj.Ownership != null)
+            if (obj.Ownership != null && !obj.Ownership.IsEmpty)
             {
                 var _ownership = new Section(PlanAndBuild.Models.PlanAndBuildJobDomMapper.Ownership.SectionDefinitionId);
                 var _ownershipSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Ownership).SectionId;

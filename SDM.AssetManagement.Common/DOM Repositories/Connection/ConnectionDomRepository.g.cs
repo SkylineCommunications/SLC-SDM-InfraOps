@@ -661,7 +661,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
             instance.Sections.Add(_cableinformation);
 
-            if (obj.Source != null)
+            if (obj.Source != null && !obj.Source.IsEmpty)
             {
                 var _source = new Section(AssetManagement.Models.ConnectionDomMapper.Source.SectionDefinitionId);
                 var _sourceSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Source).SectionId;
@@ -687,7 +687,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 instance.Sections.Add(_source);
             }
 
-            if (obj.Destination != null)
+            if (obj.Destination != null && !obj.Destination.IsEmpty)
             {
                 var _destination = new Section(AssetManagement.Models.ConnectionDomMapper.Destination.SectionDefinitionId);
                 var _destinationSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Destination).SectionId;

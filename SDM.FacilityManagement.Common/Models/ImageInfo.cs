@@ -6,11 +6,17 @@
 
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
-    public class ImageInfo : ISectionTrackable
+    public class ImageInfo : ISectionTrackable, ISectionEmptyState
     {
         [JsonIgnore]
         [SdmIgnore]
         Guid? ISectionTrackable.SectionId { get; set; }
+
+        [JsonIgnore]
+        [SdmIgnore]
+        public bool IsEmpty =>
+            ImageFilePath == default &&
+            UploadTimestamp == default;
 
         public string ImageFilePath { get; set; }
 

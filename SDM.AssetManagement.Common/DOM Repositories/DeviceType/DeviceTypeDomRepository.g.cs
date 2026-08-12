@@ -620,7 +620,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			}
 
 			instance.Sections.Add(_devicetypeproperties);
-			if (obj.TagsInfo != null)
+			if (obj.TagsInfo != null && !obj.TagsInfo.IsEmpty)
 			{
                 var _tagsinfo = new Section(AssetManagement.Models.DeviceTypeDomMapper.TagsInfo.SectionDefinitionId);
                 var _tagsinfoSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.TagsInfo).SectionId;
@@ -637,7 +637,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				instance.Sections.Add(_tagsinfo);
 			}
 
-			if (obj.HierarchyInfo != null)
+			if (obj.HierarchyInfo != null && !obj.HierarchyInfo.IsEmpty)
 			{
                 var _hierarchyinfo = new Section(AssetManagement.Models.DeviceTypeDomMapper.HierarchyInfo.SectionDefinitionId);
                 var _hierarchyinfoSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.HierarchyInfo).SectionId;

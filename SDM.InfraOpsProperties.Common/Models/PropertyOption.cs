@@ -6,7 +6,7 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
 
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
-    public sealed class PropertyOption : IEquatable<PropertyOption>, ISectionTrackable
+    public sealed class PropertyOption : IEquatable<PropertyOption>, ISectionTrackable, ISectionEmptyState
     {
         public string Option { get; set; }
 
@@ -16,6 +16,10 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
         [JsonIgnore]
         [SdmIgnore]
         Guid? ISectionTrackable.SectionId { get; set; }
+
+        [JsonIgnore]
+        [SdmIgnore]
+        public bool IsEmpty => Option == default;
 
         public static bool operator ==(PropertyOption left, PropertyOption right)
         {

@@ -591,7 +591,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
 
             instance.Sections.Add(_reservationproperties);
-            if (obj.RackFk != null)
+            if (obj.RackFk != null && !obj.RackFk.IsEmpty)
             {
                 var _rackfk = new Section(AssetManagement.Models.ReservationDomMapper.RackFk.SectionDefinitionId);
                 var _rackfkSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.RackFk).SectionId;

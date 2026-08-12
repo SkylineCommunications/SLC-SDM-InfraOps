@@ -1,4 +1,4 @@
-namespace Skyline.DataMiner.SDM.FacilityManagement.Models
+﻿namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 {
     using System;
 
@@ -7,11 +7,16 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
-    public class RoomRelation : ISectionTrackable
+    public class RoomRelation : ISectionTrackable, ISectionEmptyState
     {
         [JsonIgnore]
         [SdmIgnore]
         Guid? ISectionTrackable.SectionId { get; set; }
+
+        [JsonIgnore]
+        [SdmIgnore]
+        public bool IsEmpty =>
+            Room == default;
 
         public SdmObjectReference<Room> Room { get; set; }
     } 

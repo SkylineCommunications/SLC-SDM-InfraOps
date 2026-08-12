@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 using Newtonsoft.Json;
 
@@ -8,11 +8,19 @@ using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
 namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
-    public sealed class DataPortInfo : ChangeTrackingBase, IEquatable<DataPortInfo>, ISectionTrackable
+    public sealed class DataPortInfo : ChangeTrackingBase, IEquatable<DataPortInfo>, ISectionTrackable, ISectionEmptyState
     {
         [JsonIgnore]
         [SdmIgnore]
         Guid? ISectionTrackable.SectionId { get; set; }
+        [JsonIgnore]
+        [SdmIgnore]
+        public bool IsEmpty => Name == default &&
+            PortNumber == default &&
+            OutputType == default &&
+            PortExposure == default &&
+            Type == default &&
+            Label == default;
 
         public DataPortInfo() : base()
         {
