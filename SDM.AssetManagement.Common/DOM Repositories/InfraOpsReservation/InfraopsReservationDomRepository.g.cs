@@ -527,7 +527,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             var _rackfkSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(AssetManagement.Models.ReservationDomMapper.RackFk.SectionDefinitionId));
             if (_rackfkSection != default)
             {
-                obj.RackFk = new AssetManagement.Models.RackRelation();
                 ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.RackFk).SectionId = _rackfkSection.ID.Id;
                 var _rackfkrack = _rackfkSection.GetValue<System.Guid>(AssetManagement.Models.ReservationDomMapper.RackFk.Rack);
                 if (_rackfkrack != null)
@@ -591,7 +590,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
 
             instance.Sections.Add(_reservationproperties);
-            if (obj.RackFk != null && !obj.RackFk.IsEmpty)
+            if (!obj.RackFk.IsEmpty)
             {
                 var _rackfk = new Section(AssetManagement.Models.ReservationDomMapper.RackFk.SectionDefinitionId);
                 var _rackfkSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.RackFk).SectionId;

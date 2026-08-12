@@ -588,7 +588,6 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             var _ownershipSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(PlanAndBuild.Models.PlanAndBuildJobDomMapper.Ownership.SectionDefinitionId));
             if (_ownershipSection != default)
             {
-                obj.Ownership = new PlanAndBuild.Models.JobOwnership();
                 ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Ownership).SectionId = _ownershipSection.ID.Id;
                 var _ownershipassignedto = _ownershipSection.GetValue<string>(PlanAndBuild.Models.PlanAndBuildJobDomMapper.Ownership.AssignedTo);
                 if (_ownershipassignedto != null)
@@ -784,7 +783,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             }
 
             instance.Sections.Add(_planandbuildjobproperties);
-            if (obj.Ownership != null && !obj.Ownership.IsEmpty)
+            if (!obj.Ownership.IsEmpty)
             {
                 var _ownership = new Section(PlanAndBuild.Models.PlanAndBuildJobDomMapper.Ownership.SectionDefinitionId);
                 var _ownershipSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Ownership).SectionId;

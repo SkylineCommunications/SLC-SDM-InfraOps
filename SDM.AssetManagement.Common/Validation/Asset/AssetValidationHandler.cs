@@ -129,11 +129,11 @@
 
             bool[] locationExists = new bool[]
             {
-                asset.Location?.ParentAsset != null && asset.Location.ParentAsset.HasValue(),
-                asset.Location?.RackId != default && asset.Location.RackId.HasValue(),
-                 asset.Location?.DeskId != null && asset.Location.DeskId != System.Guid.Empty,
-                asset.Location?.ContainerId != null && asset.Location.ContainerId.HasValue(),
-                asset.Location?.RoomId != default && asset.Location.RoomId.HasValue(),
+                asset.Location.ParentAsset != null && asset.Location.ParentAsset.HasValue(),
+                asset.Location.RackId != default && asset.Location.RackId.HasValue(),
+                 asset.Location.DeskId != null && asset.Location.DeskId != System.Guid.Empty,
+                asset.Location.ContainerId != null && asset.Location.ContainerId.HasValue(),
+                asset.Location.RoomId != default && asset.Location.RoomId.HasValue(),
             };
 
             if (locationExists.Count(entry => entry) > 1)
@@ -158,8 +158,8 @@
                 return result.IsValid;
             }
 
-            var hasParentAsset = asset.Location?.ParentAsset != null && asset.Location.ParentAsset.HasValue();
-            var hasHolderNumber = asset.Location?.HolderNumber != null;
+            var hasParentAsset = asset.Location.ParentAsset != null && asset.Location.ParentAsset.HasValue();
+            var hasHolderNumber = asset.Location.HolderNumber != null;
 
             // If no parent asset, holder number must not be set
             if (!hasParentAsset && hasHolderNumber)
@@ -201,10 +201,10 @@
                 return result.IsValid;
             }
 
-            var hasRack = asset.Location?.RackId != null && asset.Location.RackId != default;
+            var hasRack = asset.Location.RackId != null && asset.Location.RackId != default;
             //TODO SDM-1234: Change rack check to only check for HasValue() once all code is updated to use nullable DomIds
-            var hasPosition = asset.Location?.RackPosition != null;
-            var hasSide = asset.Location?.Side != null;
+            var hasPosition = asset.Location.RackPosition != null;
+            var hasSide = asset.Location.Side != null;
 
             // If no rack, position and side must not be set
             if (!hasRack)
@@ -303,11 +303,11 @@
 
             bool[] locationExists = new bool[]
             {
-                asset.DestinationLocation?.ParentAsset != null && asset.DestinationLocation.ParentAsset.HasValue(),
-                asset.DestinationLocation?.RackId != default && asset.DestinationLocation.RackId.HasValue(),
-                asset.DestinationLocation?.DeskId != null && asset.DestinationLocation.DeskId != System.Guid.Empty,
-                asset.DestinationLocation?.ContainerId != default && asset.DestinationLocation.ContainerId.HasValue(),
-                asset.DestinationLocation?.RoomId != default && asset.DestinationLocation.RoomId.HasValue(),
+                asset.DestinationLocation.ParentAsset != null && asset.DestinationLocation.ParentAsset.HasValue(),
+                asset.DestinationLocation.RackId != default && asset.DestinationLocation.RackId.HasValue(),
+                asset.DestinationLocation.DeskId != null && asset.DestinationLocation.DeskId != System.Guid.Empty,
+                asset.DestinationLocation.ContainerId != default && asset.DestinationLocation.ContainerId.HasValue(),
+                asset.DestinationLocation.RoomId != default && asset.DestinationLocation.RoomId.HasValue(),
             };
 
             if (locationExists.Count(entry => entry) > 1)
@@ -332,8 +332,8 @@
                 return result.IsValid;
             }
 
-            var hasParentAsset = asset.DestinationLocation?.ParentAsset != null && asset.DestinationLocation.ParentAsset.HasValue();
-            var hasHolderNumber = asset.DestinationLocation?.HolderNumber != null;
+            var hasParentAsset = asset.DestinationLocation.ParentAsset != null && asset.DestinationLocation.ParentAsset.HasValue();
+            var hasHolderNumber = asset.DestinationLocation.HolderNumber != null;
 
             // If no parent asset, holder number must not be set
             if (!hasParentAsset && hasHolderNumber)
@@ -381,9 +381,9 @@
                 return result.IsValid;
             }
 
-            var hasRack = asset.DestinationLocation?.RackId != null && asset.DestinationLocation.RackId != default;
-            var hasPosition = asset.DestinationLocation?.RackPosition != null;
-            var hasSide = asset.DestinationLocation?.Side != null;
+            var hasRack = asset.DestinationLocation.RackId != null && asset.DestinationLocation.RackId != default;
+            var hasPosition = asset.DestinationLocation.RackPosition != null;
+            var hasSide = asset.DestinationLocation.Side != null;
 
             // If no rack, position and side must not be set
             if (!hasRack)
@@ -609,8 +609,8 @@
                 return result.IsValid;
             }
 
-            var hasContactPerson = asset.Ownership?.ContactPerson != null && asset.Ownership.ContactPerson != Guid.Empty;
-            var hasRole = asset.Ownership?.ContactPersonRole != null && asset.Ownership.ContactPersonRole != Guid.Empty;
+            var hasContactPerson = asset.Ownership.ContactPerson != null && asset.Ownership.ContactPerson != Guid.Empty;
+            var hasRole = asset.Ownership.ContactPersonRole != null && asset.Ownership.ContactPersonRole != Guid.Empty;
 
             // Both must be set or both must be empty
             if (hasContactPerson && !hasRole)
@@ -643,8 +643,8 @@
                 return result.IsValid;
             }
 
-            var hasContactPerson = asset.Custody?.ContactPerson != null && asset.Custody.ContactPerson != Guid.Empty;
-            var hasRole = asset.Custody?.ContactPersonRole != null && asset.Custody.ContactPersonRole != Guid.Empty;
+            var hasContactPerson = asset.Custody.ContactPerson != null && asset.Custody.ContactPerson != Guid.Empty;
+            var hasRole = asset.Custody.ContactPersonRole != null && asset.Custody.ContactPersonRole != Guid.Empty;
 
             // Both must be set or both must be empty
             if (hasContactPerson && !hasRole)
@@ -874,7 +874,7 @@
         /// </summary>
         private static bool HasDestinationLocation(Asset asset)
         {
-            if (asset.DestinationLocation == null)
+            if (asset.DestinationLocation.IsEmpty)
             {
                 return false;
             }

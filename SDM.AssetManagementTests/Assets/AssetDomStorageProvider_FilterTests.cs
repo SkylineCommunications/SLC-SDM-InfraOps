@@ -198,7 +198,7 @@
             using (new AssertionScope())
             {
                 results.Should().NotBeEmpty("should find assets not at position 7");
-                results.Should().OnlyContain(a => a.Location == null || a.Location.RackPosition != excludedPosition);
+                results.Should().OnlyContain(a => a.Location.IsEmpty || a.Location.RackPosition != excludedPosition);
             }
         }
 

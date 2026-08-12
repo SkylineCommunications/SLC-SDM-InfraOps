@@ -190,74 +190,120 @@ namespace SDM.FacilityManagement.Tests.Validation
 
 		private static Facility NewFacility(string id, Site? site = null)
 		{
-			return new Facility
+			var facility = new Facility
 			{
 				Identifier = Guid.NewGuid().ToString(),
 				FacilityId = id,
-				SiteFk = site == null ? null : new SiteRelation { Site = new SdmObjectReference<Site>(site.Identifier) },
 			};
+
+			if (site != null)
+			{
+				facility.SiteFk.Site = new SdmObjectReference<Site>(site.Identifier);
+			}
+
+			return facility;
 		}
 
 		private static Floor NewFloor(string id, Facility? facility = null)
 		{
-			return new Floor
+			var floor = new Floor
 			{
 				Identifier = Guid.NewGuid().ToString(),
 				FloorId = id,
-				FacilityFk = facility == null ? null : new FacilityRelation { Facility = new SdmObjectReference<Facility>(facility.Identifier) },
 			};
+
+			if (facility != null)
+			{
+				floor.FacilityFk.Facility = new SdmObjectReference<Facility>(facility.Identifier);
+			}
+
+			return floor;
 		}
 
 		private static Room NewRoom(string id, Floor? floor = null)
 		{
-			return new Room
+			var room = new Room
 			{
 				Identifier = Guid.NewGuid().ToString(),
 				RoomId = id,
-				FloorFk = floor == null ? null : new FloorRelation { Floor = new SdmObjectReference<Floor>(floor.Identifier) },
 			};
+
+			if (floor != null)
+			{
+				room.FloorFk.Floor = new SdmObjectReference<Floor>(floor.Identifier);
+			}
+
+			return room;
 		}
 
 		private static Row NewRow(string id, Room? room = null)
 		{
-			return new Row
+			var row = new Row
 			{
 				Identifier = Guid.NewGuid().ToString(),
 				RowId = id,
-				RoomFk = room == null ? null : new RoomRelation { Room = new SdmObjectReference<Room>(room.Identifier) },
 			};
+
+			if (room != null)
+			{
+				row.RoomFk.Room = new SdmObjectReference<Room>(room.Identifier);
+			}
+
+			return row;
 		}
 
 		private static Zone NewZone(string id, Room? room = null)
 		{
-			return new Zone
+			var zone = new Zone
 			{
 				Identifier = Guid.NewGuid().ToString(),
 				ZoneId = id,
-				RoomFk = room == null ? null : new RoomRelation { Room = new SdmObjectReference<Room>(room.Identifier) },
 			};
+
+			if (room != null)
+			{
+				zone.RoomFk.Room = new SdmObjectReference<Room>(room.Identifier);
+			}
+
+			return zone;
 		}
 
 		private static Desk NewDesk(string id, Room? room = null)
 		{
-			return new Desk
+			var desk = new Desk
 			{
 				Identifier = Guid.NewGuid().ToString(),
 				DeskID = id,
-				RoomFk = room == null ? null : new RoomRelation { Room = new SdmObjectReference<Room>(room.Identifier) },
 			};
+
+			if (room != null)
+			{
+				desk.RoomFk.Room = new SdmObjectReference<Room>(room.Identifier);
+			}
+
+			return desk;
 		}
 
 		private static Rack NewRack(string id, Row? row = null, Zone? zone = null)
 		{
-			return new Rack
+			var rack = new Rack
 			{
 				Identifier = Guid.NewGuid().ToString(),
 				RackId = id,
-				Capacity = new RackCapacity { MaximumRackCapacity = 42 },
-				RowFk = row == null ? null : new RowRelation { Row = new SdmObjectReference<Row>(row.Identifier) },
-				ZoneFk = zone == null ? null : new ZoneRelation { Zone = new SdmObjectReference<Zone>(zone.Identifier) },
 			};
+
+			rack.Capacity.MaximumRackCapacity = 42;
+			if (row != null)
+			{
+				rack.RowFk.Row = new SdmObjectReference<Row>(row.Identifier);
+			}
+
+			if (zone != null)
+			{
+				rack.ZoneFk.Zone = new SdmObjectReference<Zone>(zone.Identifier);
+			}
+
+			return rack;
 		}
 	}
 }

@@ -555,7 +555,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             var _sourceSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(AssetManagement.Models.ConnectionDomMapper.Source.SectionDefinitionId));
             if (_sourceSection != default)
             {
-                obj.Source = new AssetManagement.Models.SourceInfo();
                 ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Source).SectionId = _sourceSection.ID.Id;
                 var _sourcecabletag = _sourceSection.GetValue<string>(AssetManagement.Models.ConnectionDomMapper.Source.CableTag);
                 if (_sourcecabletag != null)
@@ -579,7 +578,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             var _destinationSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(AssetManagement.Models.ConnectionDomMapper.Destination.SectionDefinitionId));
             if (_destinationSection != default)
             {
-                obj.Destination = new AssetManagement.Models.DestinationInfo();
                 ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Destination).SectionId = _destinationSection.ID.Id;
                 var _destinationcabletag = _destinationSection.GetValue<string>(AssetManagement.Models.ConnectionDomMapper.Destination.CableTag);
                 if (_destinationcabletag != null)
@@ -661,7 +659,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
             instance.Sections.Add(_cableinformation);
 
-            if (obj.Source != null && !obj.Source.IsEmpty)
+            if (!obj.Source.IsEmpty)
             {
                 var _source = new Section(AssetManagement.Models.ConnectionDomMapper.Source.SectionDefinitionId);
                 var _sourceSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Source).SectionId;
@@ -687,7 +685,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 instance.Sections.Add(_source);
             }
 
-            if (obj.Destination != null && !obj.Destination.IsEmpty)
+            if (!obj.Destination.IsEmpty)
             {
                 var _destination = new Section(AssetManagement.Models.ConnectionDomMapper.Destination.SectionDefinitionId);
                 var _destinationSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Destination).SectionId;

@@ -133,11 +133,7 @@
             set => PowerSupplyField.Value = value;
         }
 
-        public AssetClassLifecycle Lifecycle
-        {
-            get => _lifecycle ?? (_lifecycle = new AssetClassLifecycle());
-            set => _lifecycle = value ?? new AssetClassLifecycle();
-        }
+        public AssetClassLifecycle Lifecycle => _lifecycle ?? (_lifecycle = new AssetClassLifecycle());
 
         public List<DataPortInfo> DataPorts
         {

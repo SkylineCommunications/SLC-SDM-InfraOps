@@ -581,7 +581,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             var _sitefkSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(FacilityManagement.Models.FacilityDomMapper.SiteFk.SectionDefinitionId));
             if (_sitefkSection != default)
             {
-                obj.SiteFk = new FacilityManagement.Models.SiteRelation();
                 ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.SiteFk).SectionId = _sitefkSection.ID.Id;
                 var _sitefksite = _sitefkSection.GetValue<System.Guid>(FacilityManagement.Models.FacilityDomMapper.SiteFk.Site);
                 if (_sitefksite != null)
@@ -674,7 +673,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             }
 
             instance.Sections.Add(_facilityproperties);
-            if (obj.SiteFk != null && !obj.SiteFk.IsEmpty)
+            if (!obj.SiteFk.IsEmpty)
             {
                 var _sitefk = new Section(FacilityManagement.Models.FacilityDomMapper.SiteFk.SectionDefinitionId);
                 var _sitefkSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.SiteFk).SectionId;

@@ -538,7 +538,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             var _roomfkSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(FacilityManagement.Models.DeskDomMapper.RoomFk.SectionDefinitionId));
             if (_roomfkSection != default)
             {
-                obj.RoomFk = new FacilityManagement.Models.RoomRelation();
                 ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.RoomFk).SectionId = _roomfkSection.ID.Id;
                 var _roomfkroom = _roomfkSection.GetValue<System.Guid>(FacilityManagement.Models.DeskDomMapper.RoomFk.Room);
                 if (_roomfkroom != null)
@@ -550,7 +549,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             var _resourceSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(FacilityManagement.Models.DeskDomMapper.Resource.SectionDefinitionId));
             if (_resourceSection != default)
             {
-                obj.Resource = new FacilityManagement.Models.ResourceLink();
                 ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Resource).SectionId = _resourceSection.ID.Id;
                 var _resourceresourceid = _resourceSection.GetValue<string>(FacilityManagement.Models.DeskDomMapper.Resource.ResourceId);
                 if (_resourceresourceid != null)
@@ -614,7 +612,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             }
 
             instance.Sections.Add(_deskinformation);
-            if (obj.RoomFk != null && !obj.RoomFk.IsEmpty)
+            if (!obj.RoomFk.IsEmpty)
             {
                 var _roomfk = new Section(FacilityManagement.Models.DeskDomMapper.RoomFk.SectionDefinitionId);
                 var _roomfkSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.RoomFk).SectionId;
@@ -631,7 +629,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 instance.Sections.Add(_roomfk);
             }
 
-            if (obj.Resource != null && !obj.Resource.IsEmpty)
+            if (!obj.Resource.IsEmpty)
             {
                 var _resource = new Section(FacilityManagement.Models.DeskDomMapper.Resource.SectionDefinitionId);
                 var _resourceSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Resource).SectionId;

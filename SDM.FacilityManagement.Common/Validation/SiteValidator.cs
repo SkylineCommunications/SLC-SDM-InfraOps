@@ -162,7 +162,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
             }
 
             var referencedIdentifiers = _entityLoader.GetFacilitiesBySiteIdentifiers(identifiers)
-                .Select(f => f.SiteFk == null ? null : f.SiteFk.Site.Identifier)
+                .Select(f => f.SiteFk.IsEmpty ? null : f.SiteFk.Site.Identifier)
                 .Where(id => !string.IsNullOrWhiteSpace(id))
                 .ToHashSet();
 
@@ -242,4 +242,3 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
         }
     }
 }
-

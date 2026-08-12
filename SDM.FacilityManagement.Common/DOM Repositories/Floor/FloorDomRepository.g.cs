@@ -512,7 +512,9 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             {
                 Identifier = instance.ID.Id.ToString()
             };
-            obj.State = SharedMappers.DomIds.SlcFacility_Management.Behaviors.Floor_Behaviour.Statuses.ToEnum(instance.StatusId);
+            obj.State = String.IsNullOrWhiteSpace(instance.StatusId)
+                ? SharedMappers.DomIds.SlcFacility_Management.Behaviors.Floor_Behaviour.StatusesEnum.Draft
+                : SharedMappers.DomIds.SlcFacility_Management.Behaviors.Floor_Behaviour.Statuses.ToEnum(instance.StatusId);
             var _floorpropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(FacilityManagement.Models.FloorDomMapper.FloorProperties.SectionDefinitionId));
             if (_floorpropertiesSection != default)
             {
@@ -545,7 +547,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             var _facilityfkSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(FacilityManagement.Models.FloorDomMapper.FacilityFk.SectionDefinitionId));
             if (_facilityfkSection != default)
             {
-                obj.FacilityFk = new FacilityManagement.Models.FacilityRelation();
                 ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.FacilityFk).SectionId = _facilityfkSection.ID.Id;
                 var _facilityfkfacility = _facilityfkSection.GetValue<System.Guid>(FacilityManagement.Models.FloorDomMapper.FacilityFk.Facility);
                 if (_facilityfkfacility != null)
@@ -609,7 +610,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             }
 
             instance.Sections.Add(_floorproperties);
-            if (obj.FacilityFk != null && !obj.FacilityFk.IsEmpty)
+            if (!obj.FacilityFk.IsEmpty)
             {
                 var _facilityfk = new Section(FacilityManagement.Models.FloorDomMapper.FacilityFk.SectionDefinitionId);
                 var _facilityfkSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.FacilityFk).SectionId;

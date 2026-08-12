@@ -6,7 +6,10 @@
     // [SdmDomStorage("(slc)asset_management")]
     public class PowerPort : SdmObject<PowerPort>
 	{
-		public PowerPortInfo PowerPortInfo { get; set; } = new PowerPortInfo();
+        [JsonIgnore]
+        private PowerPortInfo _powerPortInfo;
+
+		public PowerPortInfo PowerPortInfo => _powerPortInfo ?? (_powerPortInfo = new PowerPortInfo());
 
 		// within AssetRelation section definition
 		public SdmObjectReference<Asset> Asset { get; set; }

@@ -127,7 +127,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
             }
 
             var referencedIdentifiers = _entityLoader.GetRoomsByFloorIdentifiers(identifiers)
-                .Select(r => r.FloorFk == null ? null : r.FloorFk.Floor.Identifier)
+                .Select(r => r.FloorFk.IsEmpty ? null : r.FloorFk.Floor.Identifier)
                 .Where(id => !string.IsNullOrWhiteSpace(id))
                 .ToHashSet();
 
@@ -191,7 +191,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                 {
                     Entity = entity,
                     Index = index,
-                    FacilityIdentifier = entity.FacilityFk == null ? null : ReferenceValidationHelper.GetId(entity.FacilityFk.Facility),
+                    FacilityIdentifier = entity.FacilityFk.IsEmpty ? null : ReferenceValidationHelper.GetId(entity.FacilityFk.Facility),
                 })
                 .Where(x => ReferenceValidationHelper.ShouldValidateReferences(x.Entity) &&
                     ReferenceValidationHelper.HasId(x.FacilityIdentifier))

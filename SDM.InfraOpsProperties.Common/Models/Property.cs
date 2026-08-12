@@ -105,7 +105,9 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
 
         #region Layout
 
-        public PropertyLayout Layout { get; set; }
+        private PropertyLayout _layout;
+
+        public PropertyLayout Layout => _layout ?? (_layout = new PropertyLayout());
 
         #endregion
 

@@ -35,7 +35,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
 
             var results = entities.Select(_ => new ValidationResult()).ToList();
             var cableTypeIds = entities
-                .SelectMany(pt => pt?.CableFKs?.CableTypeFks ?? new List<SdmObjectReference<CableType>>())
+                .SelectMany(pt => pt?.CableFKs.CableTypeFks ?? new List<SdmObjectReference<CableType>>())
                 .Where(reference => reference.HasValue())
                 .Select(reference => reference.Identifier)
                 .Distinct()
@@ -44,7 +44,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
 
             for (int i = 0; i < entities.Count; i++)
             {
-                foreach (var reference in entities[i]?.CableFKs?.CableTypeFks ?? new List<SdmObjectReference<CableType>>())
+                foreach (var reference in entities[i]?.CableFKs.CableTypeFks ?? new List<SdmObjectReference<CableType>>())
                 {
                     if (reference.HasValue() && !existingCableTypeIds.Contains(reference.Identifier))
                     {
@@ -87,10 +87,10 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
                 .ToList();
 
             var portTypeIdsUsedByAssetPorts = _entityLoader.GetDataPortsByPortTypeIds(identifiers)
-                .Where(port => port.DataPortInfo != null && port.DataPortInfo.Type.HasValue())
+                .Where(port => !port.DataPortInfo.IsEmpty && port.DataPortInfo.Type.HasValue())
                 .Select(port => port.DataPortInfo.Type.Identifier)
                 .Concat(_entityLoader.GetPowerPortsByPortTypeIds(identifiers)
-                    .Where(port => port.PowerPortInfo != null && port.PowerPortInfo.PortType.HasValue())
+                    .Where(port => !port.PowerPortInfo.IsEmpty && port.PowerPortInfo.PortType.HasValue())
                     .Select(port => port.PowerPortInfo.PortType.Identifier))
                 .ToHashSet();
 

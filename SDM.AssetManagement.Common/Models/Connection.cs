@@ -8,6 +8,11 @@
     //[SdmDomStorage("(slc)asset_management")]
     public class Connection : SdmObject<Connection>
     {
+        [JsonIgnore]
+        private SourceInfo _source;
+        [JsonIgnore]
+        private DestinationInfo _destination;
+
         public string Notes { get; set; }
 
         public string Description { get; set; }
@@ -21,9 +26,9 @@
         /// </summary>
         public double? CableLength { get; set; }
 
-        public SourceInfo Source { get; set; }
+        public SourceInfo Source => _source ?? (_source = new SourceInfo());
 
-        public DestinationInfo Destination { get; set; }
+        public DestinationInfo Destination => _destination ?? (_destination = new DestinationInfo());
 
         #region Section Tracking
 

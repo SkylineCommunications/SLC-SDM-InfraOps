@@ -32,7 +32,7 @@
                 Name = "Reference Class",
                 DeviceTypeId = new SdmObjectReference<DeviceType>(Guid.NewGuid().ToString()), // Will be updated in tests
                 Manufacturer = Guid.NewGuid(),
-                Lifecycle = new AssetClassLifecycle
+                Lifecycle =
                 {
                     EndOfLife = DateTime.UtcNow.AddYears(5),
                     EndOfService = DateTime.UtcNow.AddYears(3),
@@ -158,7 +158,7 @@
                 TypicalPowerConsumption = 3494.876107564041,
                 MaximumPowerConsumption = 4408.18848273218,
                 PowerSupply = SlcAsset_Management.Enums.PowerSupplyEnum.AC,
-                Lifecycle = new AssetClassLifecycle
+                Lifecycle =
                 {
                     EndOfLife = DateTime.Now,
                     EndOfService = DateTime.Now,
@@ -224,7 +224,7 @@
                 Name = "Updated Class Name",
                 DeviceTypeId = referenceAssetClass.DeviceTypeId,
                 Manufacturer = Guid.NewGuid(),
-                Lifecycle = new AssetClassLifecycle
+                Lifecycle =
                 {
                     EndOfLife = DateTime.UtcNow.AddYears(10),
                     EndOfService = DateTime.UtcNow.AddYears(8),

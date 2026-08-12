@@ -19,6 +19,14 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         private ChangeTrackingFieldHandler _fieldHandler;
         [JsonIgnore]
         private bool _isNew = true;
+        [JsonIgnore]
+        private AssetLocation _location;
+        [JsonIgnore]
+        private AssetLocation _destinationLocation;
+        [JsonIgnore]
+        private AssetOwnership _ownership;
+        [JsonIgnore]
+        private AssetCustody _custody;
 
         public Asset()
         {
@@ -147,9 +155,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
         #region Location Properties
 
-        public AssetLocation Location { get; set; }
+        public AssetLocation Location => _location ?? (_location = new AssetLocation());
 
-        public AssetLocation DestinationLocation { get; set; }
+        public AssetLocation DestinationLocation => _destinationLocation ?? (_destinationLocation = new AssetLocation());
 
         #endregion
 
@@ -207,9 +215,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
         #region Ownership Properties
 
-        public AssetOwnership Ownership { get; set; }
+        public AssetOwnership Ownership => _ownership ?? (_ownership = new AssetOwnership());
 
-        public AssetCustody Custody { get; set; }
+        public AssetCustody Custody => _custody ?? (_custody = new AssetCustody());
 
         #endregion
 

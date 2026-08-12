@@ -535,7 +535,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			var _tagsinfoSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(AssetManagement.Models.DeviceTypeDomMapper.TagsInfo.SectionDefinitionId));
 			if (_tagsinfoSection != default)
 			{
-                obj.TagsInfo = new AssetManagement.Models.TagsInfo();
                 ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.TagsInfo).SectionId = _tagsinfoSection.ID.Id;
 
 				var _tags = _tagsinfoSection.GetListValue<int>(AssetManagement.Models.DeviceTypeDomMapper.TagsInfo.Tags);
@@ -548,7 +547,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			var _hierarchyinfoSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(AssetManagement.Models.DeviceTypeDomMapper.HierarchyInfo.SectionDefinitionId));
 			if (_hierarchyinfoSection != default)
 			{
-                obj.HierarchyInfo = new AssetManagement.Models.HierarchyInfo();
                 ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.HierarchyInfo).SectionId = _hierarchyinfoSection.ID.Id;
 
 				var _hierarchyinfohierarchyrole = _hierarchyinfoSection.GetValue<string>(AssetManagement.Models.DeviceTypeDomMapper.HierarchyInfo.HierarchyRole);
@@ -620,7 +618,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			}
 
 			instance.Sections.Add(_devicetypeproperties);
-			if (obj.TagsInfo != null && !obj.TagsInfo.IsEmpty)
+			if (!obj.TagsInfo.IsEmpty)
 			{
                 var _tagsinfo = new Section(AssetManagement.Models.DeviceTypeDomMapper.TagsInfo.SectionDefinitionId);
                 var _tagsinfoSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.TagsInfo).SectionId;
@@ -637,7 +635,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				instance.Sections.Add(_tagsinfo);
 			}
 
-			if (obj.HierarchyInfo != null && !obj.HierarchyInfo.IsEmpty)
+			if (!obj.HierarchyInfo.IsEmpty)
 			{
                 var _hierarchyinfo = new Section(AssetManagement.Models.DeviceTypeDomMapper.HierarchyInfo.SectionDefinitionId);
                 var _hierarchyinfoSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.HierarchyInfo).SectionId;

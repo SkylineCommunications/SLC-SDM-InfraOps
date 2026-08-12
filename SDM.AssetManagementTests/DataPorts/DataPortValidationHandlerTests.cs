@@ -17,7 +17,7 @@ namespace SDM.AssetManagement.Tests.DataPorts
         {
             return new DataPort
             {
-                DataPortInfo = new DataPortInfo
+                DataPortInfo =
                 {
                     Name = "ETH-1",
                     PortNumber = 1,
@@ -100,7 +100,7 @@ namespace SDM.AssetManagement.Tests.DataPorts
         public void AddressInfo_WithInvalidIpv4Address_ShouldFail()
         {
             var dataPort = CreateValidDataPort();
-            dataPort.AddressInfo = new AddressInfo { Ipv4Address = "not-an-ipv4-address" };
+            dataPort.AddressInfo.Ipv4Address = "not-an-ipv4-address";
 
             var isValid = DataPortValidationHandler.IsAddressInfoValid(dataPort, out var result);
 
@@ -112,7 +112,7 @@ namespace SDM.AssetManagement.Tests.DataPorts
         public void AddressInfo_WithInvalidIpv6Address_ShouldFail()
         {
             var dataPort = CreateValidDataPort();
-            dataPort.AddressInfo = new AddressInfo { Ipv6Address = "not-an-ipv6-address" };
+            dataPort.AddressInfo.Ipv6Address = "not-an-ipv6-address";
 
             var isValid = DataPortValidationHandler.IsAddressInfoValid(dataPort, out var result);
 
@@ -124,7 +124,7 @@ namespace SDM.AssetManagement.Tests.DataPorts
         public void AddressInfo_WithPrimaryIpv4ButNoIpv4Address_ShouldFail()
         {
             var dataPort = CreateValidDataPort();
-            dataPort.PrimaryPortRelation = new PrimaryPortRelation { IsPrimaryIpv4 = true };
+            dataPort.PrimaryPortRelation.IsPrimaryIpv4 = true;
 
             var isValid = DataPortValidationHandler.IsAddressInfoValid(dataPort, out var result);
 
@@ -136,7 +136,7 @@ namespace SDM.AssetManagement.Tests.DataPorts
         public void AddressInfo_WithPrimaryIpv6ButNoIpv6Address_ShouldFail()
         {
             var dataPort = CreateValidDataPort();
-            dataPort.PrimaryPortRelation = new PrimaryPortRelation { IsPrimaryIpv6 = true };
+            dataPort.PrimaryPortRelation.IsPrimaryIpv6 = true;
 
             var isValid = DataPortValidationHandler.IsAddressInfoValid(dataPort, out var result);
 

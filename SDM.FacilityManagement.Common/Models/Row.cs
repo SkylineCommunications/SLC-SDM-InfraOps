@@ -96,9 +96,13 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             set => YPositionField.Value = value;
         }
 
-        public RoomRelation RoomFk { get; set; }
+        private RoomRelation _roomFk;
 
-        public ResourceLink Resource { get; set; }
+        public RoomRelation RoomFk => _roomFk ?? (_roomFk = new RoomRelation());
+
+        private ResourceLink _resource;
+
+        public ResourceLink Resource => _resource ?? (_resource = new ResourceLink());
 
         [SdmIgnore]
         public SlcFacility_Management.Behaviors.Row_Behaviour.StatusesEnum State { get; internal set; }

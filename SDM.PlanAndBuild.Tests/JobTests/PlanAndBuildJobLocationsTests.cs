@@ -93,7 +93,8 @@
 		[TestMethod]
 		public void IsAssignedToPerson_WithAssignedTo_ShouldBeTrue()
 		{
-			var job = new PlanAndBuildJob { Ownership = new JobOwnership { AssignedTo = Guid.NewGuid() } };
+			var job = new PlanAndBuildJob();
+			job.Ownership.AssignedTo = Guid.NewGuid();
 
 			job.Ownership.IsAssignedToPerson().Should().BeTrue();
 		}
@@ -109,7 +110,8 @@
 		[TestMethod]
 		public void HasAssignmentGroup_WithAssignmentGroup_ShouldBeTrue()
 		{
-			var job = new PlanAndBuildJob { Ownership = new JobOwnership { AssignmentGroup = Guid.NewGuid() } };
+			var job = new PlanAndBuildJob();
+			job.Ownership.AssignmentGroup = Guid.NewGuid();
 
 			job.Ownership.HasAssignmentGroup().Should().BeTrue();
 		}

@@ -24,7 +24,7 @@ namespace SDM.AssetManagement.Tests.Assets
         {
             var asset = new Asset
             {
-                Location = new AssetLocation
+                Location =
                 {
                     ParentAsset = new SdmObjectReference<Asset>(Guid.NewGuid().ToString()),
                 },
@@ -41,7 +41,7 @@ namespace SDM.AssetManagement.Tests.Assets
         {
             var asset = new Asset
             {
-                DestinationLocation = new AssetLocation
+                DestinationLocation =
                 {
                     HolderNumber = 1,
                 },
@@ -58,7 +58,7 @@ namespace SDM.AssetManagement.Tests.Assets
         {
             var asset = new Asset
             {
-                DestinationLocation = new AssetLocation
+                DestinationLocation =
                 {
                     RackId = new SdmObjectReference<Rack>(Guid.NewGuid().ToString()),
                     RackPosition = 1,
@@ -77,7 +77,7 @@ namespace SDM.AssetManagement.Tests.Assets
         {
             var asset = new Asset
             {
-                DestinationLocation = new AssetLocation
+                DestinationLocation =
                 {
                     RackId = new SdmObjectReference<Rack>(Guid.NewGuid().ToString()),
                     RackPosition = 1,
@@ -98,7 +98,7 @@ namespace SDM.AssetManagement.Tests.Assets
             var asset = new Asset
             {
                 State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available,
-                DestinationLocation = new AssetLocation(),
+                DestinationLocation = { },
             };
             asset.IsNewInternal = false;
             asset.ResetChangeTracking();
@@ -138,7 +138,7 @@ namespace SDM.AssetManagement.Tests.Assets
             var validator = new AssetValidator(new SdmEntityLoader());
             var reservation = new InfraopsReservation
             {
-                RackFk = new RackRelation
+                RackFk =
                 {
                     Rack = new SdmObjectReference<Rack>(Guid.NewGuid().ToString()),
                 },
@@ -157,7 +157,7 @@ namespace SDM.AssetManagement.Tests.Assets
             var validator = new AssetValidator(new SdmEntityLoader());
             var reservation = new InfraopsReservation
             {
-                RackFk = new RackRelation
+                RackFk =
                 {
                     Rack = new SdmObjectReference<Rack>(Guid.NewGuid().ToString()),
                 },
@@ -212,15 +212,13 @@ namespace SDM.AssetManagement.Tests.Assets
 
         private static Rack CreateRack()
         {
-            return new Rack
+            var rack = new Rack
             {
                 Identifier = Guid.NewGuid().ToString(),
-                Capacity = new RackCapacity
-                {
-                    MaximumRackCapacity = 10,
-                },
                 Position = SlcFacility_Management.Enums.RackpositionenumEnum.Bottom,
             };
+            rack.Capacity.MaximumRackCapacity = 10;
+            return rack;
         }
     }
 }

@@ -122,13 +122,13 @@
                 return result.IsValid;
             }
 
-            var rackUnits = rack.Capacity?.MaximumRackCapacity;
-
-            if (rackUnits == null)
+            if (rack.Capacity.IsEmpty)
             {
                 result.AddFailReason(RackValidationField.RackUnits, "Rack Units cannot be empty.");
                 return result.IsValid;
             }
+
+            var rackUnits = rack.Capacity.MaximumRackCapacity;
 
             if (rackUnits > MAX_RACK_CAPACITY_U || rackUnits < 1)
             {
@@ -149,9 +149,9 @@
                 return result.IsValid;
             }
 
-            var powerCapacity = rack.Capacity?.MaximumPowerCapacity;
+            var powerCapacity = rack.Capacity.MaximumPowerCapacity;
 
-            if (powerCapacity != null && powerCapacity < 0)
+            if (powerCapacity < 0)
             {
                 result.AddFailReason(RackValidationField.PowerCapacity,
                     "Rack Power Capacity cannot be negative.");

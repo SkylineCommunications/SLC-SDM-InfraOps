@@ -164,13 +164,21 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             set => RackIdField.Value = value;
         }
 
-        public RackCapacity Capacity { get; set; }
+        private RackCapacity _capacity;
 
-        public RowRelation RowFk { get; set; }
+        public RackCapacity Capacity => _capacity ?? (_capacity = new RackCapacity());
 
-        public ZoneRelation ZoneFk { get; set; }
+        private RowRelation _rowFk;
 
-        public ResourceLink Resource { get; set; }
+        public RowRelation RowFk => _rowFk ?? (_rowFk = new RowRelation());
+
+        private ZoneRelation _zoneFk;
+
+        public ZoneRelation ZoneFk => _zoneFk ?? (_zoneFk = new ZoneRelation());
+
+        private ResourceLink _resource;
+
+        public ResourceLink Resource => _resource ?? (_resource = new ResourceLink());
 
         public List<ImageInfo> ImageDetails { get; set; } = new List<ImageInfo>();
 

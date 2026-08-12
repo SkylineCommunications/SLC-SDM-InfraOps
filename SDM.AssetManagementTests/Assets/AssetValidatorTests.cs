@@ -300,7 +300,7 @@
                 AssetID = "TEST-LOC-001",
                 Name = "Asset With Multiple Locations",
                 AssetClassId = new SdmObjectReference<AssetClass>(testAssetClass.Identifier),
-                Location = new AssetLocation
+                Location =
                 {
                     RackId = new SdmObjectReference<Rack>(rack.Identifier),
                     RackPosition = 10,
@@ -330,7 +330,7 @@
                 AssetID = "TEST-HOLDER-001",
                 Name = "Asset With Holder But No Parent",
                 AssetClassId = new SdmObjectReference<AssetClass>(testAssetClass.Identifier),
-                Location = new AssetLocation
+                Location =
                 {
                     HolderNumber = 5,
                     // ParentAsset not set
@@ -356,7 +356,7 @@
                 AssetID = "TEST-HOLDER-003",
                 Name = "Asset With Negative Holder",
                 AssetClassId = new SdmObjectReference<AssetClass>(testAssetClass.Identifier),
-                Location = new AssetLocation
+                Location =
                 {
                     ParentAsset = new SdmObjectReference<Asset>(parentAsset.Identifier),
                     HolderNumber = -5,
@@ -384,7 +384,7 @@
                 AssetID = "TEST-RACK-001",
                 Name = "Asset With Position But No Rack",
                 AssetClassId = new SdmObjectReference<AssetClass>(testAssetClass.Identifier),
-                Location = new AssetLocation
+                Location =
                 {
                     RackPosition = 10,
                     // RackId not set
@@ -408,7 +408,7 @@
                 AssetID = "TEST-RACK-002",
                 Name = "Asset With Side But No Rack",
                 AssetClassId = new SdmObjectReference<AssetClass>(testAssetClass.Identifier),
-                Location = new AssetLocation
+                Location =
                 {
                     Side = SlcAsset_Management.Enums.SideEnum.Front,
                     // RackId not set
@@ -435,7 +435,7 @@
                 AssetID = "TEST-RACK-003",
                 Name = "Asset With Rack But No Position",
                 AssetClassId = new SdmObjectReference<AssetClass>(testAssetClass.Identifier),
-                Location = new AssetLocation
+                Location =
                 {
                     RackId = new SdmObjectReference<Rack>(rack.Identifier),
                     // RackPosition not set
@@ -463,7 +463,7 @@
                 AssetID = "TEST-RACK-004",
                 Name = "Asset With Rack But No Side",
                 AssetClassId = new SdmObjectReference<AssetClass>(testAssetClass.Identifier),
-                Location = new AssetLocation
+                Location =
                 {
                     RackId = new SdmObjectReference<Rack>(rack.Identifier),
                     RackPosition = 10,
@@ -491,7 +491,7 @@
                 AssetID = "TEST-RACK-005",
                 Name = "Asset With Zero Position",
                 AssetClassId = new SdmObjectReference<AssetClass>(testAssetClass.Identifier),
-                Location = new AssetLocation
+                Location =
                 {
                     RackId = new SdmObjectReference<Rack>(rack.Identifier),
                     RackPosition = 0,
@@ -519,7 +519,7 @@
                 AssetID = "TEST-RACK-006",
                 Name = "Asset With Negative Position",
                 AssetClassId = new SdmObjectReference<AssetClass>(testAssetClass.Identifier),
-                Location = new AssetLocation
+                Location =
                 {
                     RackId = new SdmObjectReference<Rack>(rack.Identifier),
                     RackPosition = -5,
@@ -549,7 +549,7 @@
                 Name = "Asset With Destination But Not In Transit",
                 AssetClassId = new SdmObjectReference<AssetClass>(testAssetClass.Identifier),
                 State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available,
-                DestinationLocation = new AssetLocation
+                DestinationLocation =
                 {
                     RoomId = new SdmObjectReference<Room>(Guid.NewGuid().ToString()),
                 },
@@ -559,7 +559,7 @@
             var created = Helper.AssetManagement.Assets.Create(asset);
 
             // Assert - Destination location should be discarded
-            created.DestinationLocation.Should().Be(default);
+            created.DestinationLocation.IsEmpty.Should().BeTrue();
         }
 
         [TestMethod]
@@ -596,7 +596,7 @@
                 Name = "Asset With Multiple Destination Locations",
                 AssetClassId = new SdmObjectReference<AssetClass>(testAssetClass.Identifier),
                 State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit,
-                DestinationLocation = new AssetLocation
+                DestinationLocation =
                 {
                     RackId = new SdmObjectReference<Rack>(rack.Identifier),
                     RackPosition = 10,
@@ -627,7 +627,7 @@
                 Name = "In Transit With Holder But No Parent",
                 AssetClassId = new SdmObjectReference<AssetClass>(testAssetClass.Identifier),
                 State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit,
-                DestinationLocation = new AssetLocation
+                DestinationLocation =
                 {
                     ParentAsset = new SdmObjectReference<Asset>(Guid.NewGuid().ToString()),
                 },
@@ -653,7 +653,7 @@
                 Name = "In Transit With Negative Holder",
                 AssetClassId = new SdmObjectReference<AssetClass>(testAssetClass.Identifier),
                 State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit,
-                DestinationLocation = new AssetLocation
+                DestinationLocation =
                 {
                     ParentAsset = new SdmObjectReference<Asset>(parentAsset.Identifier),
                     HolderNumber = -3,
@@ -682,7 +682,7 @@
                 Name = "In Transit With Position But No Rack",
                 AssetClassId = new SdmObjectReference<AssetClass>(testAssetClass.Identifier),
                 State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit,
-                DestinationLocation = new AssetLocation
+                DestinationLocation =
                 {
                     RackId = new SdmObjectReference<Rack>(Guid.NewGuid().ToString())
                 },
@@ -709,7 +709,7 @@
                 Name = "In Transit With Rack But No Position",
                 AssetClassId = new SdmObjectReference<AssetClass>(testAssetClass.Identifier),
                 State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit,
-                DestinationLocation = new AssetLocation
+                DestinationLocation =
                 {
                     RackId = new SdmObjectReference<Rack>(rack.Identifier),
                     // RackPosition not set
@@ -738,7 +738,7 @@
                 Name = "In Transit With Rack But No Side",
                 AssetClassId = new SdmObjectReference<AssetClass>(testAssetClass.Identifier),
                 State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit,
-                DestinationLocation = new AssetLocation
+                DestinationLocation =
                 {
                     RackId = new SdmObjectReference<Rack>(rack.Identifier),
                     RackPosition = 10,
@@ -767,7 +767,7 @@
                 Name = "In Transit With Zero Position",
                 AssetClassId = new SdmObjectReference<AssetClass>(testAssetClass.Identifier),
                 State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit,
-                DestinationLocation = new AssetLocation
+                DestinationLocation =
                 {
                     RackId = new SdmObjectReference<Rack>(rack.Identifier),
                     RackPosition = 0,
@@ -989,7 +989,7 @@
                 AssetID = "TEST-OWNERSHIP-001",
                 Name = "Asset With Owner Person But No Role",
                 AssetClassId = new SdmObjectReference<AssetClass>(testAssetClass.Identifier),
-                Ownership = new AssetOwnership
+                Ownership =
                 {
                     ContactPerson = Guid.NewGuid(),
                     // ContactPersonRole not set
@@ -1013,7 +1013,7 @@
                 AssetID = "TEST-OWNERSHIP-002",
                 Name = "Asset With Owner Role But No Person",
                 AssetClassId = new SdmObjectReference<AssetClass>(testAssetClass.Identifier),
-                Ownership = new AssetOwnership
+                Ownership =
                 {
                     ContactPersonRole = Guid.NewGuid(),
                     // ContactPerson not set
@@ -1041,7 +1041,7 @@
                 AssetID = "TEST-CUSTODY-001",
                 Name = "Asset With Custody Person But No Role",
                 AssetClassId = new SdmObjectReference<AssetClass>(testAssetClass.Identifier),
-                Custody = new AssetCustody
+                Custody =
                 {
                     ContactPerson = Guid.NewGuid(),
                     // ContactPersonRole not set
@@ -1065,7 +1065,7 @@
                 AssetID = "TEST-CUSTODY-002",
                 Name = "Asset With Custody Role But No Person",
                 AssetClassId = new SdmObjectReference<AssetClass>(testAssetClass.Identifier),
-                Custody = new AssetCustody
+                Custody =
                 {
                     ContactPersonRole = Guid.NewGuid(),
                     // ContactPerson not set
@@ -1316,7 +1316,7 @@
                 AssetID = "TEST-RACK-CAPACITY-001",
                 Name = "Asset Exceeding Rack Capacity",
                 AssetClassId = new SdmObjectReference<AssetClass>(testAssetClass.Identifier),
-                Location = new AssetLocation
+                Location =
                 {
                     RackId = new SdmObjectReference<Rack>(rack.Identifier),
                     RackPosition = (long)maxCapacity + 10, // Exceeds capacity
@@ -1340,7 +1340,7 @@
             
             // Find an existing asset that's in a rack
             var existingAsset = Helper.TestData.Assets
-                .FirstOrDefault(a => a.Location?.RackId != null && a.Location.RackPosition > 0);
+                .FirstOrDefault(a => a.Location.RackId != null && a.Location.RackPosition > 0);
             
             if (existingAsset == null)
             {
@@ -1354,7 +1354,7 @@
                 AssetID = "TEST-RACK-CONFLICT-001",
                 Name = "Conflicting Rack Position Asset",
                 AssetClassId = existingAsset.AssetClassId,
-                Location = new AssetLocation
+                Location =
                 {
                     RackId = existingAsset.Location.RackId,
                     RackPosition = existingAsset.Location.RackPosition, // Same position
@@ -1392,7 +1392,7 @@
                 AssetID = "TEST-OVERLAP-FIRST",
                 Name = "First Asset Occupying Space",
                 AssetClassId = new SdmObjectReference<AssetClass>(assetClass.Identifier),
-                Location = new AssetLocation
+                Location =
                 {
                     RackId = new SdmObjectReference<Rack>(rack.Identifier),
                     RackPosition = 10,
@@ -1407,7 +1407,7 @@
                 AssetID = "TEST-OVERLAP-SECOND",
                 Name = "Overlapping Asset",
                 AssetClassId = new SdmObjectReference<AssetClass>(assetClass.Identifier),
-                Location = new AssetLocation
+                Location =
                 {
                     RackId = new SdmObjectReference<Rack>(rack.Identifier),
                     RackPosition = 11, // Overlaps with first asset (10-12)
@@ -1456,7 +1456,7 @@
                 AssetID = "TEST-RACK-OVERFLOW-001",
                 Name = "Asset Causing Rack Overflow",
                 AssetClassId = new SdmObjectReference<AssetClass>(tallAssetClass.Identifier),
-                Location = new AssetLocation
+                Location =
                 {
                     RackId = new SdmObjectReference<Rack>(bottomRack.Identifier),
                     RackPosition = overflowPosition, // Calculated to exceed capacity
@@ -1503,7 +1503,7 @@
                 AssetID = "TEST-TOP-RACK-OVERFLOW-001",
                 Name = "Asset Causing Top Rack Overflow",
                 AssetClassId = new SdmObjectReference<AssetClass>(tallAssetClass.Identifier),
-                Location = new AssetLocation
+                Location =
                 {
                     RackId = new SdmObjectReference<Rack>(topRack.Identifier),
                     RackPosition = overflowPosition,
@@ -1543,7 +1543,7 @@
                     AssetID = "BATCH-RACK-001",
                     Name = "First Batch Asset",
                     AssetClassId = new SdmObjectReference<AssetClass>(assetClass.Identifier),
-                    Location = new AssetLocation
+                    Location =
                     {
                         RackId = new SdmObjectReference<Rack>(rack.Identifier),
                         RackPosition = 10,
@@ -1555,7 +1555,7 @@
                     AssetID = "BATCH-RACK-002",
                     Name = "Second Batch Asset",
                     AssetClassId = new SdmObjectReference<AssetClass>(assetClass.Identifier),
-                    Location = new AssetLocation
+                    Location =
                     {
                         RackId = new SdmObjectReference<Rack>(rack.Identifier),
                         RackPosition = 11,
@@ -1610,7 +1610,7 @@
                 AssetID = "CHILD-IN-HOLDER-1",
                 Name = "First Child Asset",
                 AssetClassId = new SdmObjectReference<AssetClass>(testAssetClass.Identifier),
-                Location = new AssetLocation
+                Location =
                 {
                     ParentAsset = new SdmObjectReference<Asset>(createdParent.Identifier),
                     HolderNumber = 1,
@@ -1624,7 +1624,7 @@
                 AssetID = "CHILD-CONFLICT-HOLDER-1",
                 Name = "Conflicting Child Asset",
                 AssetClassId = new SdmObjectReference<AssetClass>(testAssetClass.Identifier),
-                Location = new AssetLocation
+                Location =
                 {
                     ParentAsset = new SdmObjectReference<Asset>(createdParent.Identifier),
                     HolderNumber = 1, // Same holder as first child
@@ -1670,7 +1670,7 @@
                 AssetID = "CHILD-INVALID-HOLDER",
                 Name = "Child With Invalid Holder",
                 AssetClassId = new SdmObjectReference<AssetClass>(testAssetClass.Identifier),
-                Location = new AssetLocation
+                Location =
                 {
                     ParentAsset = new SdmObjectReference<Asset>(createdParent.Identifier),
                     HolderNumber = 5, // Slot 5 doesn't exist on parent
@@ -1725,7 +1725,7 @@
                 AssetID = "CHILD-WRONG-ROLE",
                 Name = "Child With Mismatched Role",
                 AssetClassId = new SdmObjectReference<AssetClass>(fanAssetClass.Identifier),
-                Location = new AssetLocation
+                Location =
                 {
                     ParentAsset = new SdmObjectReference<Asset>(createdParent.Identifier),
                     HolderNumber = 1, // Slot 1 expects Card, but child is Fan
@@ -1767,7 +1767,7 @@
                     AssetID = "BATCH-CHILD-001",
                     Name = "First Batch Child",
                     AssetClassId = new SdmObjectReference<AssetClass>(testAssetClass.Identifier),
-                    Location = new AssetLocation
+                    Location =
                     {
                         ParentAsset = new SdmObjectReference<Asset>(createdParent.Identifier),
                         HolderNumber = 1,
@@ -1778,7 +1778,7 @@
                     AssetID = "BATCH-CHILD-002",
                     Name = "Second Batch Child",
                     AssetClassId = new SdmObjectReference<AssetClass>(testAssetClass.Identifier),
-                    Location = new AssetLocation
+                    Location =
                     {
                         ParentAsset = new SdmObjectReference<Asset>(createdParent.Identifier),
                         HolderNumber = 1, // Same holder as first child

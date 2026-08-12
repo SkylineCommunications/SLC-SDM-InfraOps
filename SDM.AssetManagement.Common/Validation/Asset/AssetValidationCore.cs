@@ -132,7 +132,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
         /// </summary>
         private bool HasLocationChanged(Asset asset)
         {
-            if (asset.Location == null)
+            if (asset.Location.IsEmpty)
             {
                 return false;
             }
@@ -152,7 +152,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
         /// </summary>
         private bool HasDestinationLocationChanged(Asset asset)
         {
-            if (asset.DestinationLocation == null)
+            if (asset.DestinationLocation.IsEmpty)
             {
                 return false;
             }
@@ -431,7 +431,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
         {
             var validations = new List<ValidationResult>();
 
-            if(asset.Location == null)
+            if(asset.Location.IsEmpty)
             {
                 return new ValidationResult();
             }
@@ -688,14 +688,14 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
 
         private static IEnumerable<AssetLocation> GetLocations(Asset asset, bool includeDestination)
         {
-            if (asset.Location != null)
+            if (!asset.Location.IsEmpty)
             {
                 yield return asset.Location;
             }
 
             if (includeDestination
                 && asset.State == SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit
-                && asset.DestinationLocation != null)
+                && !asset.DestinationLocation.IsEmpty)
             {
                 yield return asset.DestinationLocation;
             }
@@ -820,7 +820,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
         {
             var holderGroups = assets
                             .Select((asset, index) => new { asset, index })
-                            .Where(x => x.asset.Location?.ParentAsset.HasValue() == true && x.asset.Location?.HolderNumber != null)
+                            .Where(x => x.asset.Location.ParentAsset.HasValue() == true && x.asset.Location.HolderNumber != null)
                             .GroupBy(x => new { ParentId = x.asset.Location.ParentAsset.Identifier, x.asset.Location.HolderNumber })
                             .Where(g => g.Count() > 1);
 
@@ -901,7 +901,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
 
             var rackGroups = assets
                 .Select((asset, index) => (asset, index))
-                .Where(x => x.asset.Location != null && x.asset.Location.RackId.HasValue() && x.asset.Location.RackPosition.HasValue && x.asset.Location.RackPosition.Value > 0)
+                .Where(x => !x.asset.Location.IsEmpty && x.asset.Location.RackId.HasValue() && x.asset.Location.RackPosition.HasValue && x.asset.Location.RackPosition.Value > 0)
                 .GroupBy(x => x.asset.Location.RackId);
 
             foreach (var rackGroup in rackGroups)
@@ -1069,7 +1069,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
         {
             var result = new ValidationResult();
 
-            if (!asset.Location.ParentAsset.HasValue() || asset.Location?.HolderNumber == null)
+            if (!asset.Location.ParentAsset.HasValue() || asset.Location.HolderNumber == null)
             {
                 return result;
             }
@@ -1084,7 +1084,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
                 }
 
                 var deviceType = _entityLoader.LoadDeviceType(assetClass.DeviceTypeId);
-                if (deviceType?.HierarchyInfo?.HierarchyRole == null)
+                if (deviceType?.HierarchyInfo.HierarchyRole == null)
                 {
                     result.AddFailReason(AssetValidationField.AssetClass,
                         "Asset Class Device Type must have a Hierarchy Role to be attached to a parent asset.");
@@ -1132,7 +1132,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
         {
             var result = new ValidationResult();
 
-            if (asset.Location.RackId == default || asset.Location?.RackPosition == null)
+            if (asset.Location.RackId == default || asset.Location.RackPosition == null)
             {
                 return result;
             }
@@ -1301,7 +1301,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
 
             var occupationList = new List<(Asset, int, int)>();
 
-            foreach (var asset in assets.Where(a => a.Location?.RackPosition != null))
+            foreach (var asset in assets.Where(a => a.Location.RackPosition != null))
             {
                 try
                 {

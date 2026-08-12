@@ -78,7 +78,9 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 
         #region Ownership Properties
 
-        public JobOwnership Ownership { get; set; } = new JobOwnership();
+        private JobOwnership _ownership;
+
+        public JobOwnership Ownership => _ownership ?? (_ownership = new JobOwnership());
 
         #endregion
 

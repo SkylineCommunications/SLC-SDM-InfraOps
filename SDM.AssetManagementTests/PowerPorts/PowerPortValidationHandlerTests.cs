@@ -22,7 +22,7 @@
         {
             return new PowerPort
             {
-                PowerPortInfo = new PowerPortInfo
+                PowerPortInfo =
                 {
                     Name = "PSU-1",
                     PortNumber = 1,

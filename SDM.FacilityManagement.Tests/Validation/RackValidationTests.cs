@@ -15,7 +15,8 @@
         [TestMethod]
         public void Rack_Create_WithEmptyId_ShouldThrow()
         {
-            var entity = new Rack { Identifier = Guid.NewGuid().ToString(), RackId = string.Empty, Capacity = new RackCapacity { MaximumRackCapacity = 42 } };
+            var entity = new Rack { Identifier = Guid.NewGuid().ToString(), RackId = string.Empty };
+            entity.Capacity.MaximumRackCapacity = 42;
 
             var action = () => Helper.Racks.Create(entity);
 
@@ -25,8 +26,10 @@
         [TestMethod]
         public void Rack_CreateOrUpdate_WithDuplicateIdInBatch_ShouldThrow()
         {
-            var first = new Rack { Identifier = Guid.NewGuid().ToString(), RackId = "DUP-1", Capacity = new RackCapacity { MaximumRackCapacity = 42 } };
-            var second = new Rack { Identifier = Guid.NewGuid().ToString(), RackId = "DUP-1", Capacity = new RackCapacity { MaximumRackCapacity = 42 } };
+            var first = new Rack { Identifier = Guid.NewGuid().ToString(), RackId = "DUP-1" };
+            first.Capacity.MaximumRackCapacity = 42;
+            var second = new Rack { Identifier = Guid.NewGuid().ToString(), RackId = "DUP-1" };
+            second.Capacity.MaximumRackCapacity = 42;
 
             var action = () => Helper.Racks.CreateOrUpdate(new[] { first, second });
 
@@ -36,10 +39,12 @@
         [TestMethod]
         public void Rack_Create_WithDuplicateIdInDatabase_ShouldThrow()
         {
-            var existing = new Rack { Identifier = Guid.NewGuid().ToString(), RackId = "EXIST-1", Capacity = new RackCapacity { MaximumRackCapacity = 42 } };
+            var existing = new Rack { Identifier = Guid.NewGuid().ToString(), RackId = "EXIST-1" };
+            existing.Capacity.MaximumRackCapacity = 42;
             Helper.Racks.Create(existing);
 
-            var duplicate = new Rack { Identifier = Guid.NewGuid().ToString(), RackId = "EXIST-1", Capacity = new RackCapacity { MaximumRackCapacity = 42 } };
+            var duplicate = new Rack { Identifier = Guid.NewGuid().ToString(), RackId = "EXIST-1" };
+            duplicate.Capacity.MaximumRackCapacity = 42;
             var action = () => Helper.Racks.Create(duplicate);
 
             action.Should().Throw<Exception>().WithMessage("*already in use*");
@@ -96,7 +101,8 @@
         [TestMethod]
         public void RackValidationHandler_WithInvalidRackUnits_ShouldReturnExactMessage()
         {
-            var rack = new Rack { Capacity = new RackCapacity { MaximumRackCapacity = 71 } };
+            var rack = new Rack();
+            rack.Capacity.MaximumRackCapacity = 71;
 
             RackValidationHandler.IsRackUnitCapacityValid(rack, out var result).Should().BeFalse();
 
@@ -106,7 +112,8 @@
         [TestMethod]
         public void RackValidationHandler_WithNegativePowerCapacity_ShouldReturnExactMessage()
         {
-            var rack = new Rack { Capacity = new RackCapacity { MaximumPowerCapacity = -1 } };
+            var rack = new Rack();
+            rack.Capacity.MaximumPowerCapacity = -1;
 
             RackValidationHandler.IsRackPowerCapacityValid(rack, out var result).Should().BeFalse();
 

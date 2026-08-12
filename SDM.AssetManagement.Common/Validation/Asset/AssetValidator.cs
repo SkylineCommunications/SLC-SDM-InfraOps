@@ -275,7 +275,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
                 return result;
             }
 
-            if (reservation.RackFk == null || !reservation.RackFk.Rack.HasValue())
+            if (reservation.RackFk.IsEmpty || !reservation.RackFk.Rack.HasValue())
             {
                 result.AddFailReason(RackValidationField.Rack, "Reservation must have a Rack specified.");
                 return result;

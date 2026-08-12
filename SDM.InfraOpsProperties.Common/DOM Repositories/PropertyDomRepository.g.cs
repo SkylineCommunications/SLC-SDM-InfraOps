@@ -557,7 +557,6 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
             var _layoutSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(InfraOpsProperties.Models.PropertyDomMapper.Layout.SectionDefinitionId));
             if (_layoutSection != default)
             {
-                obj.Layout = new InfraOpsProperties.Models.PropertyLayout();
                 ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Layout).SectionId = _layoutSection.ID.Id;
                 var _layoutsectionname = _layoutSection.GetValue<string>(InfraOpsProperties.Models.PropertyDomMapper.Layout.SectionName);
                 if (_layoutsectionname != null)
@@ -644,7 +643,7 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
             }
 
             instance.Sections.Add(_propertyproperties);
-            if (obj.Layout != null && !obj.Layout.IsEmpty)
+            if (!obj.Layout.IsEmpty)
             {
                 var _layout = new Section(InfraOpsProperties.Models.PropertyDomMapper.Layout.SectionDefinitionId);
                 var _layoutSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Layout).SectionId;

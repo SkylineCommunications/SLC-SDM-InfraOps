@@ -84,7 +84,9 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             set => FloorIdField.Value = value;
         }
 
-        public FacilityRelation FacilityFk { get; set; }
+        private FacilityRelation _facilityFk;
+
+        public FacilityRelation FacilityFk => _facilityFk ?? (_facilityFk = new FacilityRelation());
 
         [SdmIgnore]
         public SlcFacility_Management.Behaviors.Floor_Behaviour.StatusesEnum State { get; internal set; }

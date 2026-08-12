@@ -33,7 +33,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
 
             var results = reservations.Select(_ => new ValidationResult()).ToList();
             var rackIds = reservations
-                .Where(r => r.RackFk?.Rack != null && r.RackFk.Rack.HasValue())
+                .Where(r => r.RackFk.Rack != null && r.RackFk.Rack.HasValue())
                 .Select(r => r.RackFk.Rack.Identifier)
                 .Distinct()
                 .ToList();
@@ -42,7 +42,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             for (int i = 0; i < reservations.Count; i++)
             {
                 var reservation = reservations[i];
-                if (reservation.RackFk?.Rack != null && reservation.RackFk.Rack.HasValue() && !existingRackIds.Contains(reservation.RackFk.Rack.Identifier))
+                if (reservation.RackFk.Rack != null && reservation.RackFk.Rack.HasValue() && !existingRackIds.Contains(reservation.RackFk.Rack.Identifier))
                 {
                     results[i].AddFailReason("Reservation.Rack", "Rack", $"Referenced Rack '{reservation.RackFk.Rack.Identifier}' does not exist.");
                 }

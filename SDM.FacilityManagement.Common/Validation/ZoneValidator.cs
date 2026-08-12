@@ -127,7 +127,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
             }
 
             var referencedIdentifiers = _entityLoader.GetRacksByZoneIdentifiers(identifiers)
-                .Select(r => r.ZoneFk == null ? null : r.ZoneFk.Zone.Identifier)
+                .Select(r => r.ZoneFk.IsEmpty ? null : r.ZoneFk.Zone.Identifier)
                 .Where(id => !string.IsNullOrWhiteSpace(id))
                 .ToHashSet();
 
@@ -188,7 +188,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
             return FacilityReferenceValidationHelper.ValidateRoomReferences(
                 entities,
                 ZoneValidationHandler.ZoneValidationField.ZoneId,
-                entity => entity.RoomFk == null ? null : ReferenceValidationHelper.GetId(entity.RoomFk.Room),
+                entity => entity.RoomFk.IsEmpty ? null : ReferenceValidationHelper.GetId(entity.RoomFk.Room),
                 ids => ReferenceValidationHelper.ToIdentifierSet(_entityLoader.GetRoomsByIdentifiers(ids)));
         }
 

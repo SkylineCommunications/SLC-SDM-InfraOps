@@ -48,7 +48,7 @@ namespace SDM.AssetManagement.Tests.DataPorts
             dataPort.DataPortInfo.Type = new SdmObjectReference<PortType>(Guid.NewGuid().ToString());
             var powerPortType = new PortType
             {
-                CategoryLinks = new CategoryRelation
+                CategoryLinks =
                 {
                     Categories = [SharedMappers.DomIds.SlcAsset_Management.Enums.CategoriesEnum.Power],
                 },
@@ -112,13 +112,13 @@ namespace SDM.AssetManagement.Tests.DataPorts
             {
                 Identifier = Guid.NewGuid().ToString(),
                 Asset = AssetReference,
-                DataPortInfo = new DataPortInfo
+                DataPortInfo =
                 {
                     Name = "ETH",
                     PortNumber = portNumber,
                     OutputType = SharedMappers.DomIds.SlcAsset_Management.Enums.Outputtype.IO,
                 },
-                PrimaryPortRelation = new PrimaryPortRelation
+                PrimaryPortRelation =
                 {
                     IsPrimaryIpv4 = primaryIpv4,
                     IsPrimaryIpv6 = primaryIpv6,

@@ -664,7 +664,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			var _lifecycleSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(AssetManagement.Models.AssetClassDomMapper.Lifecycle.SectionDefinitionId));
 			if (_lifecycleSection != default)
 			{
-				obj.Lifecycle = new AssetManagement.Models.AssetClassLifecycle();
 				((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Lifecycle).SectionId = _lifecycleSection.ID.Id;
 				var _lifecycleendoflife = _lifecycleSection.GetValue<DateTime>(AssetManagement.Models.AssetClassDomMapper.Lifecycle.EndOfLife);
 				if (_lifecycleendoflife != null)
@@ -906,7 +905,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			}
 
 			instance.Sections.Add(_assetclassproperties);
-			if (obj.Lifecycle != null && !obj.Lifecycle.IsEmpty)
+			if (!obj.Lifecycle.IsEmpty)
 			{
 				var _lifecycle = new Section(AssetManagement.Models.AssetClassDomMapper.Lifecycle.SectionDefinitionId);
 				var _lifecycleSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Lifecycle).SectionId;

@@ -74,12 +74,12 @@ namespace SDM.AssetManagement.Tests.Connections
             {
                 Identifier = Guid.NewGuid().ToString(),
                 ConnectionType = SlcAsset_Management.Enums.ConnectionType.Data,
-                Source = new SourceInfo
+                Source =
                 {
                     Port = Guid.Parse(sourcePort.PortId),
                     PortType = new SdmObjectReference<PortType>(sourcePort.PortType.Identifier),
                 },
-                Destination = new DestinationInfo { Port = Guid.Empty },
+                Destination = { Port = Guid.Empty },
             };
 
             Action act = () => Helper.AssetManagement.Connections.Create(connection);
@@ -96,8 +96,8 @@ namespace SDM.AssetManagement.Tests.Connections
             {
                 Identifier = Guid.NewGuid().ToString(),
                 ConnectionType = SlcAsset_Management.Enums.ConnectionType.Data,
-                Source = new SourceInfo { Port = Guid.Parse(sourcePort.PortId) },
-                Destination = new DestinationInfo { Port = Guid.Parse(sourcePort.PortId) },
+                Source = { Port = Guid.Parse(sourcePort.PortId) },
+                Destination = { Port = Guid.Parse(sourcePort.PortId) },
             };
 
             Action act = () => Helper.AssetManagement.Connections.Create(connection);
@@ -215,12 +215,12 @@ namespace SDM.AssetManagement.Tests.Connections
                 Identifier = Guid.NewGuid().ToString(),
                 ConnectionType = SlcAsset_Management.Enums.ConnectionType.Data,
                 CableLength = cableLength,
-                Source = new SourceInfo
+                Source =
                 {
                     Port = Guid.Parse(source.PortId),
                     PortType = new SdmObjectReference<PortType>(source.PortType.Identifier),
                 },
-                Destination = new DestinationInfo
+                Destination =
                 {
                     Port = Guid.Parse(destination.PortId),
                     PortType = new SdmObjectReference<PortType>(destination.PortType.Identifier),
@@ -237,12 +237,12 @@ namespace SDM.AssetManagement.Tests.Connections
                 Identifier = Guid.NewGuid().ToString(),
                 ConnectionType = SlcAsset_Management.Enums.ConnectionType.Power,
                 CableLength = cableLength,
-                Source = new SourceInfo
+                Source =
                 {
                     Port = Guid.Parse(source.PortId),
                     PortType = new SdmObjectReference<PortType>(source.PortType.Identifier),
                 },
-                Destination = new DestinationInfo
+                Destination =
                 {
                     Port = Guid.Parse(destination.PortId),
                     PortType = new SdmObjectReference<PortType>(destination.PortType.Identifier),
@@ -259,11 +259,11 @@ namespace SDM.AssetManagement.Tests.Connections
                 Identifier = Guid.NewGuid().ToString(),
                 Name = name,
                 Description = $"{name} description",
-                HierarchyInfo = new HierarchyInfo
+                HierarchyInfo =
                 {
                     HierarchyRole = SlcAsset_Management.Enums.HierarchyRoleEnum.None,
                 },
-                TagsInfo = new TagsInfo
+                TagsInfo =
                 {
                     Tags = tags,
                 },
@@ -314,11 +314,11 @@ namespace SDM.AssetManagement.Tests.Connections
             {
                 Identifier = Guid.NewGuid().ToString(),
                 Name = name,
-                CategoryLinks = new CategoryRelation
+                CategoryLinks =
                 {
                     Categories = new List<SlcAsset_Management.Enums.CategoriesEnum> { category },
                 },
-                CableFKs = new CableRelation
+                CableFKs =
                 {
                     CableTypeFks = new List<SdmObjectReference<CableType>>(),
                 },
@@ -333,7 +333,7 @@ namespace SDM.AssetManagement.Tests.Connections
             {
                 Identifier = Guid.NewGuid().ToString(),
                 Asset = new SdmObjectReference<Asset>(asset.Identifier),
-                DataPortInfo = new DataPortInfo
+                DataPortInfo =
                 {
                     Name = $"{name} Data {Guid.NewGuid()}",
                     PortNumber = 1,
@@ -352,7 +352,7 @@ namespace SDM.AssetManagement.Tests.Connections
             {
                 Identifier = Guid.NewGuid().ToString(),
                 Asset = new SdmObjectReference<Asset>(asset.Identifier),
-                PowerPortInfo = new PowerPortInfo
+                PowerPortInfo =
                 {
                     Name = $"{name} Power {Guid.NewGuid()}",
                     PortNumber = 1,

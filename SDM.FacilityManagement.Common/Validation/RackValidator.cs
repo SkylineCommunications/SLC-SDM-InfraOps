@@ -235,7 +235,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                 {
                     Rack = rack,
                     Index = index,
-                    RowIdentifier = rack.RowFk == null ? null : ReferenceValidationHelper.GetId(rack.RowFk.Row),
+                    RowIdentifier = rack.RowFk.IsEmpty ? null : ReferenceValidationHelper.GetId(rack.RowFk.Row),
                 })
                 .Where(x => ReferenceValidationHelper.ShouldValidateReferences(x.Rack) &&
                     ReferenceValidationHelper.HasId(x.RowIdentifier))
@@ -246,7 +246,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                 {
                     Rack = rack,
                     Index = index,
-                    ZoneIdentifier = rack.ZoneFk == null ? null : ReferenceValidationHelper.GetId(rack.ZoneFk.Zone),
+                    ZoneIdentifier = rack.ZoneFk.IsEmpty ? null : ReferenceValidationHelper.GetId(rack.ZoneFk.Zone),
                 })
                 .Where(x => ReferenceValidationHelper.ShouldValidateReferences(x.Rack) &&
                     ReferenceValidationHelper.HasId(x.ZoneIdentifier))

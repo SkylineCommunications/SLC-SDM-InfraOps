@@ -200,8 +200,6 @@
                         // Validate rack index is within bounds
                         if (racks.TryGetValue(rackid, out Rack rack))
                         {
-                            if (asset.Location == null) asset.Location = new AssetLocation();
-
                             asset.Location.RackId = new SdmObjectReference<Rack>(rack.Identifier);
                             asset.Location.RackPosition = assignment.Position;
                             asset.Location.Side = SlcAsset_Management.Enums.SideEnum.Front;
@@ -215,7 +213,14 @@
                 }
                 else
                 {
-                    asset.Location = null;
+                    asset.Location.ParentAsset = default;
+                    asset.Location.HolderNumber = default;
+                    asset.Location.RackId = default;
+                    asset.Location.RackPosition = default;
+                    asset.Location.Side = default;
+                    asset.Location.DeskId = default;
+                    asset.Location.ContainerId = default;
+                    asset.Location.RoomId = default;
                 }
 
                 assets.Add(asset);
@@ -586,7 +591,7 @@
 
         private static AssetClass CloneAssetClass(AssetClass source)
         {
-            return new AssetClass
+            var clone = new AssetClass
             {
                 Name = source.Name,
                 State = source.State,
@@ -602,22 +607,22 @@
                 TypicalPowerConsumption = source.TypicalPowerConsumption,
                 MaximumPowerConsumption = source.MaximumPowerConsumption,
                 PowerSupply = source.PowerSupply,
-                Lifecycle = source.Lifecycle != null ? new AssetClassLifecycle
-                {
-                    EndOfLife = source.Lifecycle.EndOfLife,
-                    EndOfService = source.Lifecycle.EndOfService,
-                    NominalLifetime = source.Lifecycle.NominalLifetime,
-                } : null,
                 DataPorts = source.DataPorts != null ? new List<DataPortInfo>(source.DataPorts) : new List<DataPortInfo>(),
                 PowerPorts = source.PowerPorts != null ? new List<PowerPortInfo>(source.PowerPorts) : new List<PowerPortInfo>(),
                 Holders = source.Holders != null ? new List<AssetHolder>(source.Holders) : new List<AssetHolder>(),
                 // DeviceTypeId will be set by caller
             };
+
+            clone.Lifecycle.EndOfLife = source.Lifecycle.EndOfLife;
+            clone.Lifecycle.EndOfService = source.Lifecycle.EndOfService;
+            clone.Lifecycle.NominalLifetime = source.Lifecycle.NominalLifetime;
+
+            return clone;
         }
 
         private static Asset CloneAsset(Asset source)
         {
-            return new Asset
+            var clone = new Asset
             {
                 State = source.State,
                 AssetID = source.AssetID,
@@ -627,12 +632,6 @@
                 SerialNumber = source.SerialNumber,
                 HardwareVersion = source.HardwareVersion,
                 MacAddress = source.MacAddress,
-                Location = source.Location != null ? new AssetLocation
-                {
-                    RackPosition = source.Location.RackPosition,
-                    Side = source.Location.Side,
-                    // RackId will be set by caller
-                } : null,
                 PurchaseDate = source.PurchaseDate,
                 FirstUseDate = source.FirstUseDate,
                 EndOfWarrantyDate = source.EndOfWarrantyDate,
@@ -641,70 +640,80 @@
                 ModificationDate = source.ModificationDate,
                 ModificationUserId = source.ModificationUserId,
                 EndOfLifeDate = source.EndOfLifeDate,
-                Ownership = source.Ownership != null ? new AssetOwnership
-                {
-                    Organization = source.Ownership.Organization,
-                    ContactPerson = source.Ownership.ContactPerson,
-                    ContactPersonRole = source.Ownership.ContactPersonRole,
-                    Team = source.Ownership.Team,
-                } : null,
-                Custody = source.Custody != null ? new AssetCustody
-                {
-                    From = source.Custody.From,
-                    Till = source.Custody.Till,
-                    ContactPerson = source.Custody.ContactPerson,
-                    Team = source.Custody.Team,
-                    Organization = source.Custody.Organization,
-                    ContactPersonRole = source.Custody.ContactPersonRole,
-                } : null,
                 Holders = source.Holders != null ? new List<AssetHolder>(source.Holders) : null,
                 ElementLinks = source.ElementLinks != null ? new List<ElementLink>(source.ElementLinks) : new List<ElementLink>(),
                 // AssetClassId will be set by caller
             };
+
+            clone.Location.RackPosition = source.Location.RackPosition;
+            clone.Location.Side = source.Location.Side;
+            clone.Location.ParentAsset = source.Location.ParentAsset;
+            clone.Location.HolderNumber = source.Location.HolderNumber;
+            clone.Location.RackId = source.Location.RackId;
+            clone.Location.DeskId = source.Location.DeskId;
+            clone.Location.ContainerId = source.Location.ContainerId;
+            clone.Location.RoomId = source.Location.RoomId;
+            // RackId will be set by caller
+
+            clone.DestinationLocation.RackPosition = source.DestinationLocation.RackPosition;
+            clone.DestinationLocation.Side = source.DestinationLocation.Side;
+            clone.DestinationLocation.ParentAsset = source.DestinationLocation.ParentAsset;
+            clone.DestinationLocation.HolderNumber = source.DestinationLocation.HolderNumber;
+            clone.DestinationLocation.RackId = source.DestinationLocation.RackId;
+            clone.DestinationLocation.DeskId = source.DestinationLocation.DeskId;
+            clone.DestinationLocation.ContainerId = source.DestinationLocation.ContainerId;
+            clone.DestinationLocation.RoomId = source.DestinationLocation.RoomId;
+
+            clone.Ownership.Organization = source.Ownership.Organization;
+            clone.Ownership.ContactPerson = source.Ownership.ContactPerson;
+            clone.Ownership.ContactPersonRole = source.Ownership.ContactPersonRole;
+            clone.Ownership.Team = source.Ownership.Team;
+
+            clone.Custody.From = source.Custody.From;
+            clone.Custody.Till = source.Custody.Till;
+            clone.Custody.ContactPerson = source.Custody.ContactPerson;
+            clone.Custody.Team = source.Custody.Team;
+            clone.Custody.Organization = source.Custody.Organization;
+            clone.Custody.ContactPersonRole = source.Custody.ContactPersonRole;
+
+            return clone;
         }
 
         private static DataPort CloneDataPort(DataPort source)
         {
-            return new DataPort
-            {
-                DataPortInfo = source.DataPortInfo != null ? new DataPortInfo
-                {
-                    Name = source.DataPortInfo.Name,
-                    PortNumber = source.DataPortInfo.PortNumber,
-                    OutputType = source.DataPortInfo.OutputType,
-                    PortExposure = source.DataPortInfo.PortExposure,
-                    Label = source.DataPortInfo.Label,
-                } : new DataPortInfo(),
-                AddressInfo = source.AddressInfo != null ? new AddressInfo
-                {
-                    Ipv4Address = source.AddressInfo.Ipv4Address,
-                    Ipv6Address = source.AddressInfo.Ipv6Address,
-                    Hostname = source.AddressInfo.Hostname,
-                    DNS = source.AddressInfo.DNS,
-                } : null,
-                PrimaryPortRelation = source.PrimaryPortRelation != null ? new PrimaryPortRelation
-                {
-                    IsPrimaryIpv4 = source.PrimaryPortRelation.IsPrimaryIpv4,
-                    IsPrimaryIpv6 = source.PrimaryPortRelation.IsPrimaryIpv6,
-                } : null,
-                // AssetFk will be set by caller
-            };
+            var clone = new DataPort();
+            // AssetFk will be set by caller
+
+            clone.DataPortInfo.Name = source.DataPortInfo.Name;
+            clone.DataPortInfo.PortNumber = source.DataPortInfo.PortNumber;
+            clone.DataPortInfo.OutputType = source.DataPortInfo.OutputType;
+            clone.DataPortInfo.PortExposure = source.DataPortInfo.PortExposure;
+            clone.DataPortInfo.Type = source.DataPortInfo.Type;
+            clone.DataPortInfo.Label = source.DataPortInfo.Label;
+
+            clone.AddressInfo.Ipv4Address = source.AddressInfo.Ipv4Address;
+            clone.AddressInfo.Ipv6Address = source.AddressInfo.Ipv6Address;
+            clone.AddressInfo.Hostname = source.AddressInfo.Hostname;
+            clone.AddressInfo.DNS = source.AddressInfo.DNS;
+
+            clone.PrimaryPortRelation.IsPrimaryIpv4 = source.PrimaryPortRelation.IsPrimaryIpv4;
+            clone.PrimaryPortRelation.IsPrimaryIpv6 = source.PrimaryPortRelation.IsPrimaryIpv6;
+
+            return clone;
         }
 
         private static PowerPort ClonePowerPort(PowerPort source)
         {
-            return new PowerPort
-            {
-                PowerPortInfo = source.PowerPortInfo != null ? new PowerPortInfo
-                {
-                    Name = source.PowerPortInfo.Name,
-                    PortNumber = source.PowerPortInfo.PortNumber,
-                    PortExposure = source.PowerPortInfo.PortExposure,
-                    OutputType = source.PowerPortInfo.OutputType,
-                    Label = source.PowerPortInfo.Label,
-                } : new PowerPortInfo(),
-                // Asset will be set by caller
-            };
+            var clone = new PowerPort();
+            // Asset will be set by caller
+
+            clone.PowerPortInfo.Name = source.PowerPortInfo.Name;
+            clone.PowerPortInfo.PortNumber = source.PowerPortInfo.PortNumber;
+            clone.PowerPortInfo.PortExposure = source.PowerPortInfo.PortExposure;
+            clone.PowerPortInfo.OutputType = source.PowerPortInfo.OutputType;
+            clone.PowerPortInfo.Label = source.PowerPortInfo.Label;
+
+            return clone;
         }
 
         #endregion

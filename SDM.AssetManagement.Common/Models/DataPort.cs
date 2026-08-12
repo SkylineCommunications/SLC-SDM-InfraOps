@@ -27,11 +27,7 @@
 
         #region Properties
 
-        public DataPortInfo DataPortInfo
-        {
-            get => _dataPortInfo ?? (_dataPortInfo = new DataPortInfo());
-            set => _dataPortInfo = value ?? new DataPortInfo();
-        }
+        public DataPortInfo DataPortInfo => _dataPortInfo ?? (_dataPortInfo = new DataPortInfo());
 
         public SdmObjectReference<Asset> Asset
         {
@@ -39,17 +35,9 @@
             set => (_assetFk ?? (_assetFk = new AssetRelation())).Asset = value;
         }
 
-        public AddressInfo AddressInfo
-        {
-            get => _addressInfo ?? (_addressInfo = new AddressInfo());
-            set => _addressInfo = value ?? new AddressInfo();
-        }
+        public AddressInfo AddressInfo => _addressInfo ?? (_addressInfo = new AddressInfo());
 
-        public PrimaryPortRelation PrimaryPortRelation
-        {
-            get => _primaryPortRelation ?? (_primaryPortRelation = new PrimaryPortRelation());
-            set => _primaryPortRelation = value ?? new PrimaryPortRelation();
-        }
+        public PrimaryPortRelation PrimaryPortRelation => _primaryPortRelation ?? (_primaryPortRelation = new PrimaryPortRelation());
 
         [JsonIgnore]
         [SdmIgnore]

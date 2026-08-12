@@ -20,7 +20,7 @@ namespace SDM.FacilityManagement.Tests.Validation
 		{
 			var missingSiteId = Guid.NewGuid().ToString();
 			var facility = NewFacility("FAC-1");
-			facility.SiteFk = new SiteRelation { Site = new SdmObjectReference<Site>(missingSiteId) };
+			facility.SiteFk.Site = new SdmObjectReference<Site>(missingSiteId);
 
 			var action = () => Helper.Facilities.Create(facility);
 
@@ -32,7 +32,7 @@ namespace SDM.FacilityManagement.Tests.Validation
 		{
 			var site = Helper.Sites.Create(NewSite("SITE-1"));
 			var facility = NewFacility("FAC-1");
-			facility.SiteFk = new SiteRelation { Site = new SdmObjectReference<Site>(site.Identifier) };
+			facility.SiteFk.Site = new SdmObjectReference<Site>(site.Identifier);
 
 			Action action = () => Helper.Facilities.Create(facility);
 
@@ -44,7 +44,7 @@ namespace SDM.FacilityManagement.Tests.Validation
 		{
 			var missingFacilityId = Guid.NewGuid().ToString();
 			var floor = NewFloor("FLR-1");
-			floor.FacilityFk = new FacilityRelation { Facility = new SdmObjectReference<Facility>(missingFacilityId) };
+			floor.FacilityFk.Facility = new SdmObjectReference<Facility>(missingFacilityId);
 
 			var action = () => Helper.Floors.Create(floor);
 
@@ -56,7 +56,7 @@ namespace SDM.FacilityManagement.Tests.Validation
 		{
 			var facility = Helper.Facilities.Create(NewFacility("FAC-1"));
 			var floor = NewFloor("FLR-1");
-			floor.FacilityFk = new FacilityRelation { Facility = new SdmObjectReference<Facility>(facility.Identifier) };
+			floor.FacilityFk.Facility = new SdmObjectReference<Facility>(facility.Identifier);
 
 			Action action = () => Helper.Floors.Create(floor);
 
@@ -68,7 +68,7 @@ namespace SDM.FacilityManagement.Tests.Validation
 		{
 			var missingFloorId = Guid.NewGuid().ToString();
 			var room = NewRoom("ROOM-1");
-			room.FloorFk = new FloorRelation { Floor = new SdmObjectReference<Floor>(missingFloorId) };
+			room.FloorFk.Floor = new SdmObjectReference<Floor>(missingFloorId);
 
 			var action = () => Helper.Rooms.Create(room);
 
@@ -80,7 +80,7 @@ namespace SDM.FacilityManagement.Tests.Validation
 		{
 			var floor = Helper.Floors.Create(NewFloor("FLR-1"));
 			var room = NewRoom("ROOM-1");
-			room.FloorFk = new FloorRelation { Floor = new SdmObjectReference<Floor>(floor.Identifier) };
+			room.FloorFk.Floor = new SdmObjectReference<Floor>(floor.Identifier);
 
 			Action action = () => Helper.Rooms.Create(room);
 
@@ -91,8 +91,9 @@ namespace SDM.FacilityManagement.Tests.Validation
 		public void Room_Create_WithExternalReferencesAndNullChecker_ShouldSucceed()
 		{
 			var room = NewRoom("ROOM-1");
-			room.Ownership = new RoomOwnership { Owner = Guid.NewGuid(), Team = Guid.NewGuid() };
-			room.ResourceLink = new ResourceLink { ResourceId = Guid.NewGuid() };
+			room.Ownership.Owner = Guid.NewGuid();
+			room.Ownership.Team = Guid.NewGuid();
+			room.ResourceLink.ResourceId = Guid.NewGuid();
 
 			Action action = () => Helper.Rooms.Create(room);
 
@@ -104,7 +105,7 @@ namespace SDM.FacilityManagement.Tests.Validation
 		{
 			var missingRoomId = Guid.NewGuid().ToString();
 			var row = NewRow("ROW-1");
-			row.RoomFk = new RoomRelation { Room = new SdmObjectReference<Room>(missingRoomId) };
+			row.RoomFk.Room = new SdmObjectReference<Room>(missingRoomId);
 
 			var action = () => Helper.Rows.Create(row);
 
@@ -116,7 +117,7 @@ namespace SDM.FacilityManagement.Tests.Validation
 		{
 			var room = Helper.Rooms.Create(NewRoom("ROOM-1"));
 			var row = NewRow("ROW-1");
-			row.RoomFk = new RoomRelation { Room = new SdmObjectReference<Room>(room.Identifier) };
+			row.RoomFk.Room = new SdmObjectReference<Room>(room.Identifier);
 
 			Action action = () => Helper.Rows.Create(row);
 
@@ -128,7 +129,7 @@ namespace SDM.FacilityManagement.Tests.Validation
 		{
 			var missingRoomId = Guid.NewGuid().ToString();
 			var zone = NewZone("ZONE-1");
-			zone.RoomFk = new RoomRelation { Room = new SdmObjectReference<Room>(missingRoomId) };
+			zone.RoomFk.Room = new SdmObjectReference<Room>(missingRoomId);
 
 			var action = () => Helper.Zones.Create(zone);
 
@@ -140,7 +141,7 @@ namespace SDM.FacilityManagement.Tests.Validation
 		{
 			var room = Helper.Rooms.Create(NewRoom("ROOM-1"));
 			var zone = NewZone("ZONE-1");
-			zone.RoomFk = new RoomRelation { Room = new SdmObjectReference<Room>(room.Identifier) };
+			zone.RoomFk.Room = new SdmObjectReference<Room>(room.Identifier);
 
 			Action action = () => Helper.Zones.Create(zone);
 
@@ -152,7 +153,7 @@ namespace SDM.FacilityManagement.Tests.Validation
 		{
 			var missingRoomId = Guid.NewGuid().ToString();
 			var desk = NewDesk("DSK-1");
-			desk.RoomFk = new RoomRelation { Room = new SdmObjectReference<Room>(missingRoomId) };
+			desk.RoomFk.Room = new SdmObjectReference<Room>(missingRoomId);
 
 			var action = () => Helper.Desks.Create(desk);
 
@@ -164,7 +165,7 @@ namespace SDM.FacilityManagement.Tests.Validation
 		{
 			var room = Helper.Rooms.Create(NewRoom("ROOM-1"));
 			var desk = NewDesk("DSK-1");
-			desk.RoomFk = new RoomRelation { Room = new SdmObjectReference<Room>(room.Identifier) };
+			desk.RoomFk.Room = new SdmObjectReference<Room>(room.Identifier);
 
 			Action action = () => Helper.Desks.Create(desk);
 
@@ -176,7 +177,7 @@ namespace SDM.FacilityManagement.Tests.Validation
 		{
 			var missingRowId = Guid.NewGuid().ToString();
 			var rack = NewRack("RACK-1");
-			rack.RowFk = new RowRelation { Row = new SdmObjectReference<Row>(missingRowId) };
+			rack.RowFk.Row = new SdmObjectReference<Row>(missingRowId);
 
 			var action = () => Helper.Racks.Create(rack);
 
@@ -188,7 +189,7 @@ namespace SDM.FacilityManagement.Tests.Validation
 		{
 			var row = Helper.Rows.Create(NewRow("ROW-1"));
 			var rack = NewRack("RACK-1");
-			rack.RowFk = new RowRelation { Row = new SdmObjectReference<Row>(row.Identifier) };
+			rack.RowFk.Row = new SdmObjectReference<Row>(row.Identifier);
 
 			Action action = () => Helper.Racks.Create(rack);
 
@@ -200,7 +201,7 @@ namespace SDM.FacilityManagement.Tests.Validation
 		{
 			var missingZoneId = Guid.NewGuid().ToString();
 			var rack = NewRack("RACK-1");
-			rack.ZoneFk = new ZoneRelation { Zone = new SdmObjectReference<Zone>(missingZoneId) };
+			rack.ZoneFk.Zone = new SdmObjectReference<Zone>(missingZoneId);
 
 			var action = () => Helper.Racks.Create(rack);
 
@@ -212,7 +213,7 @@ namespace SDM.FacilityManagement.Tests.Validation
 		{
 			var zone = Helper.Zones.Create(NewZone("ZONE-1"));
 			var rack = NewRack("RACK-1");
-			rack.ZoneFk = new ZoneRelation { Zone = new SdmObjectReference<Zone>(zone.Identifier) };
+			rack.ZoneFk.Zone = new SdmObjectReference<Zone>(zone.Identifier);
 
 			Action action = () => Helper.Racks.Create(rack);
 
@@ -256,12 +257,14 @@ namespace SDM.FacilityManagement.Tests.Validation
 
 		private static Rack NewRack(string id)
 		{
-			return new Rack
+			var rack = new Rack
 			{
 				Identifier = Guid.NewGuid().ToString(),
 				RackId = id,
-				Capacity = new RackCapacity { MaximumRackCapacity = 42 },
 			};
+
+			rack.Capacity.MaximumRackCapacity = 42;
+			return rack;
 		}
 	}
 }

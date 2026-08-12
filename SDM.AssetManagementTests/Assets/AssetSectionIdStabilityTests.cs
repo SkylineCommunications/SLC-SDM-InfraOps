@@ -61,21 +61,21 @@
                 InstallationUserId = Guid.NewGuid(),
                 EndOfLifeDate = DateTime.UtcNow.AddYears(5),
                 State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit,
-                Location = new AssetLocation
+                Location =
                 {
                     RoomId = new SdmObjectReference<Room>(originRoom.Identifier),
                 },
-                DestinationLocation = new AssetLocation
+                DestinationLocation =
                 {
                     RoomId = new SdmObjectReference<Room>(destinationRoom.Identifier),
                 },
-                Ownership = new AssetOwnership
+                Ownership =
                 {
                     Organization = Guid.NewGuid(),
                     ContactPerson = Guid.NewGuid(),
                     ContactPersonRole = Guid.NewGuid(),
                 },
-                Custody = new AssetCustody
+                Custody =
                 {
                     From = DateTime.UtcNow.AddMonths(-6),
                     Till = DateTime.UtcNow.AddMonths(6),
@@ -102,8 +102,8 @@
                 AssetProperties = asset.AssetPropertiesSectionId,
                 NetworkDetails = asset.NetworkDetailsSectionId,
                 Lifecycle = asset.LifecycleSectionId,
-                Location = asset.Location == null ? null : ((ISectionTrackable)asset.Location).SectionId,
-                DestinationLocation = asset.DestinationLocation == null ? null : ((ISectionTrackable)asset.DestinationLocation).SectionId,
+                Location = asset.Location.IsEmpty ? null : ((ISectionTrackable)asset.Location).SectionId,
+                DestinationLocation = asset.DestinationLocation.IsEmpty ? null : ((ISectionTrackable)asset.DestinationLocation).SectionId,
                 Ownership = ((ISectionTrackable)asset.Ownership).SectionId,
                 Custody = ((ISectionTrackable)asset.Custody).SectionId,
                 Holders = asset.Holders.Select(h => ((ISectionTrackable)h).SectionId).ToList(),

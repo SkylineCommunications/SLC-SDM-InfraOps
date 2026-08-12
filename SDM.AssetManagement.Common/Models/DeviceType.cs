@@ -75,17 +75,9 @@
             set => DescriptionField.Value = value;
         }
 
-        public TagsInfo TagsInfo
-        {
-            get => _tagsInfo ?? (_tagsInfo = new TagsInfo());
-            set => _tagsInfo = value ?? new TagsInfo();
-        }
+        public TagsInfo TagsInfo => _tagsInfo ?? (_tagsInfo = new TagsInfo());
 
-        public HierarchyInfo HierarchyInfo
-        {
-            get => _hierarchyInfo ?? (_hierarchyInfo = new HierarchyInfo());
-            set => _hierarchyInfo = value ?? new HierarchyInfo();
-        }
+        public HierarchyInfo HierarchyInfo => _hierarchyInfo ?? (_hierarchyInfo = new HierarchyInfo());
 
         [JsonIgnore]
         [SdmIgnore]

@@ -97,11 +97,17 @@
             set => RoomIdField.Value = value;
         }
 
-        public RoomOwnership Ownership { get; set; }
+        private RoomOwnership _ownership;
 
-        public ResourceLink ResourceLink { get; set; }
+        public RoomOwnership Ownership => _ownership ?? (_ownership = new RoomOwnership());
 
-        public FloorRelation FloorFk { get; set; }
+        private ResourceLink _resourceLink;
+
+        public ResourceLink ResourceLink => _resourceLink ?? (_resourceLink = new ResourceLink());
+
+        private FloorRelation _floorFk;
+
+        public FloorRelation FloorFk => _floorFk ?? (_floorFk = new FloorRelation());
 
         [SdmIgnore]
         public SlcFacility_Management.Behaviors.Room_Behaviour.StatusesEnum State { get; internal set; }

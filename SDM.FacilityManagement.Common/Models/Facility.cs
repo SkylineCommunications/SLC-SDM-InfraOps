@@ -120,7 +120,9 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             set => LongitudeField.Value = value;
         }
 
-        public SiteRelation SiteFk { get; set; }
+        private SiteRelation _siteFk;
+
+        public SiteRelation SiteFk => _siteFk ?? (_siteFk = new SiteRelation());
 
         [SdmIgnore]
         public SlcFacility_Management.Behaviors.Facility_Behaviour.StatusesEnum State { get; internal set; }

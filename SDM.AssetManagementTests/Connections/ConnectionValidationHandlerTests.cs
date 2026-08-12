@@ -241,7 +241,7 @@ namespace SDM.AssetManagement.Tests.Connections
             var assetClass = new AssetClass { State = SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Active };
             var deviceType = new DeviceType
             {
-                TagsInfo = new TagsInfo
+                TagsInfo =
                 {
                     Tags = new System.Collections.Generic.List<SlcAsset_Management.Enums.TagOption> { SlcAsset_Management.Enums.TagOption.AcceptsDataConnection },
                 },
@@ -273,7 +273,7 @@ namespace SDM.AssetManagement.Tests.Connections
             var assetClass = new AssetClass { State = SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Active };
             var deviceType = new DeviceType
             {
-                TagsInfo = new TagsInfo
+                TagsInfo =
                 {
                     Tags = new System.Collections.Generic.List<SlcAsset_Management.Enums.TagOption> { SlcAsset_Management.Enums.TagOption.PowerProvider },
                 },

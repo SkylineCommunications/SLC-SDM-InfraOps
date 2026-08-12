@@ -10,11 +10,14 @@
     //[SdmDomStorage("(slc)asset_management")]
     public class InfraopsReservation : SdmObject<InfraopsReservation>
     {
+        [JsonIgnore]
+        private RackRelation _rackFk;
+
         public string Description { get; set; }
 
         public JobRelation JobFk { get; set; }
 
-        public RackRelation RackFk { get; set; }
+        public RackRelation RackFk => _rackFk ?? (_rackFk = new RackRelation());
 
         public List<InfraopsReservationBounderies> ReservedPositions { get; set; }
 

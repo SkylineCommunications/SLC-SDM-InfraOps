@@ -142,7 +142,7 @@
             // Arrange
             var deviceType = new DeviceType
             {
-                TagsInfo = new TagsInfo
+                TagsInfo =
                 {
                     Tags = new List<SlcAsset_Management.Enums.TagOption>
                     {
@@ -176,7 +176,7 @@
             // Arrange
             var deviceType = new DeviceType
             {
-                TagsInfo = new TagsInfo
+                TagsInfo =
                 {
                     Tags = new List<SlcAsset_Management.Enums.TagOption>
                     {
@@ -208,7 +208,7 @@
             // Arrange
             var deviceType = new DeviceType
             {
-                TagsInfo = new TagsInfo
+                TagsInfo =
                 {
                     Tags = new List<SlcAsset_Management.Enums.TagOption>
                     {

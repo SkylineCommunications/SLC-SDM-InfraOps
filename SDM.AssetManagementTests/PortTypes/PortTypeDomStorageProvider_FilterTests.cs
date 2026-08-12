@@ -148,11 +148,11 @@
             {
                 Identifier = Guid.NewGuid().ToString(),
                 Name = "Port Type With Cable FK",
-                CategoryLinks = new CategoryRelation
+                CategoryLinks =
                 {
                     Categories = new List<SlcAsset_Management.Enums.CategoriesEnum> { SlcAsset_Management.Enums.CategoriesEnum.Data },
                 },
-                CableFKs = new CableRelation
+                CableFKs =
                 {
                     CableTypeFks = new List<SdmObjectReference<CableType>> { new SdmObjectReference<CableType>(cableType.Identifier) },
                 },

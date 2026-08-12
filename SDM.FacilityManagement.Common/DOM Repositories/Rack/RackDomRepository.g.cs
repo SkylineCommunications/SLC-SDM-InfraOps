@@ -606,7 +606,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             var _capacitySection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(FacilityManagement.Models.RackDomMapper.Capacity.SectionDefinitionId));
             if (_capacitySection != default)
             {
-                obj.Capacity = new FacilityManagement.Models.RackCapacity();
                 ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Capacity).SectionId = _capacitySection.ID.Id;
                 var _capacitymaximumrackcapacity = _capacitySection.GetValue<double>(FacilityManagement.Models.RackDomMapper.Capacity.MaximumRackCapacity);
                 if (_capacitymaximumrackcapacity != null)
@@ -624,7 +623,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             var _rowfkSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(FacilityManagement.Models.RackDomMapper.RowFk.SectionDefinitionId));
             if (_rowfkSection != default)
             {
-                obj.RowFk = new FacilityManagement.Models.RowRelation();
                 ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.RowFk).SectionId = _rowfkSection.ID.Id;
                 var _rowfkrow = _rowfkSection.GetValue<System.Guid>(FacilityManagement.Models.RackDomMapper.RowFk.Row);
                 if (_rowfkrow != null)
@@ -636,7 +634,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             var _zonefkSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(FacilityManagement.Models.RackDomMapper.ZoneFk.SectionDefinitionId));
             if (_zonefkSection != default)
             {
-                obj.ZoneFk = new FacilityManagement.Models.ZoneRelation();
                 ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.ZoneFk).SectionId = _zonefkSection.ID.Id;
                 var _zonefkzone = _zonefkSection.GetValue<System.Guid>(FacilityManagement.Models.RackDomMapper.ZoneFk.Zone);
                 if (_zonefkzone != null)
@@ -648,7 +645,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             var _resourceSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(FacilityManagement.Models.RackDomMapper.Resource.SectionDefinitionId));
             if (_resourceSection != default)
             {
-                obj.Resource = new FacilityManagement.Models.ResourceLink();
                 ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Resource).SectionId = _resourceSection.ID.Id;
                 var _resourceresourceid = _resourceSection.GetValue<string>(FacilityManagement.Models.RackDomMapper.Resource.ResourceId);
                 if (_resourceresourceid != null)
@@ -780,7 +776,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             }
 
             instance.Sections.Add(_rackproperties);
-            if (obj.Capacity != null && !obj.Capacity.IsEmpty)
+            if (!obj.Capacity.IsEmpty)
             {
                 var _capacity = new Section(FacilityManagement.Models.RackDomMapper.Capacity.SectionDefinitionId);
                 var _capacitySectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Capacity).SectionId;
@@ -802,7 +798,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 instance.Sections.Add(_capacity);
             }
 
-            if (obj.RowFk != null && !obj.RowFk.IsEmpty)
+            if (!obj.RowFk.IsEmpty)
             {
                 var _rowfk = new Section(FacilityManagement.Models.RackDomMapper.RowFk.SectionDefinitionId);
                 var _rowfkSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.RowFk).SectionId;
@@ -819,7 +815,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 instance.Sections.Add(_rowfk);
             }
 
-            if (obj.ZoneFk != null && !obj.ZoneFk.IsEmpty)
+            if (!obj.ZoneFk.IsEmpty)
             {
                 var _zonefk = new Section(FacilityManagement.Models.RackDomMapper.ZoneFk.SectionDefinitionId);
                 var _zonefkSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.ZoneFk).SectionId;
@@ -836,7 +832,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 instance.Sections.Add(_zonefk);
             }
 
-            if (obj.Resource != null && !obj.Resource.IsEmpty)
+            if (!obj.Resource.IsEmpty)
             {
                 var _resource = new Section(FacilityManagement.Models.RackDomMapper.Resource.SectionDefinitionId);
                 var _resourceSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Resource).SectionId;

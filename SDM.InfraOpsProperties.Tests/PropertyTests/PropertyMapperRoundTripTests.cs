@@ -35,8 +35,9 @@ namespace SDM.InfraOpsProperties.Tests.Properties
 				Default = "N/A",
 				StringSizeLimit = 256,
 				IsMultiLineString = true,
-				Layout = new PropertyLayout { SectionName = "General", Order = 7 },
 			};
+			original.Layout.SectionName = "General";
+			original.Layout.Order = 7;
 
 			Helper.Properties.Create(original);
 
@@ -69,8 +70,9 @@ namespace SDM.InfraOpsProperties.Tests.Properties
 				Default = string.Empty,
 				StringSizeLimit = null,
 				IsMultiLineString = true,
-				Layout = new PropertyLayout { SectionName = "General", Order = 1 },
 			};
+			original.Layout.SectionName = "General";
+			original.Layout.Order = 1;
 
 			Helper.Properties.Create(original);
 
@@ -91,8 +93,9 @@ namespace SDM.InfraOpsProperties.Tests.Properties
 				Scope = "Asset",
 				Default = "Low",
 				Discreets = options.Select(o => new PropertyOption { Option = o }).ToList(),
-				Layout = new PropertyLayout { SectionName = "General", Order = 3 },
 			};
+			original.Layout.SectionName = "General";
+			original.Layout.Order = 3;
 
 			Helper.Properties.Create(original);
 
@@ -112,8 +115,9 @@ namespace SDM.InfraOpsProperties.Tests.Properties
 				PropertyType = InfraopsProperties.Enums.PropertyTypeEnum.String,
 				Scope = "Facility",
 				Default = string.Empty,
-				Layout = new PropertyLayout { SectionName = "General", Order = 1 },
 			};
+			original.Layout.SectionName = "General";
+			original.Layout.Order = 1;
 
 			Helper.Properties.Create(original);
 

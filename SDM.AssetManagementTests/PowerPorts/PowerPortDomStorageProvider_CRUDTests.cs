@@ -36,7 +36,7 @@
             {
                 Identifier = Guid.NewGuid().ToString(),
                 Name = "Test Power Port Type",
-                CategoryLinks = new CategoryRelation
+                CategoryLinks =
                 {
                     Categories = [SlcAsset_Management.Enums.CategoriesEnum.Power],
                 },
@@ -46,7 +46,7 @@
             referencePowerPort = new PowerPort
             {
                 Identifier = Guid.NewGuid().ToString(),
-                PowerPortInfo = new PowerPortInfo
+                PowerPortInfo =
                 {
                     Name = "Test PowerPort",
                     PortNumber = 1,
@@ -97,7 +97,7 @@
             var updatedPowerPort = new PowerPort
             {
                 Identifier = referencePowerPort.Identifier,
-                PowerPortInfo = new PowerPortInfo
+                PowerPortInfo =
                 {
                     Name = "Updated PowerPort Name",
                     PortNumber = 2,
