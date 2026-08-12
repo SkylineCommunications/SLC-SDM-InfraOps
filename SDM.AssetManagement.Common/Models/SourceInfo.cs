@@ -2,6 +2,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
     using System;
     using Newtonsoft.Json;
+    using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     public class SourceInfo : ISectionTrackable, ISectionEmptyState
@@ -13,7 +14,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         [SdmIgnore]
         public bool IsEmpty => CableTag == default &&
             Port == default &&
-            PortType == default;
+            !PortType.HasValue();
 
         public string CableTag { get; set; }
 

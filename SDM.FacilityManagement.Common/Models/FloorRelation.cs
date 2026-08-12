@@ -5,6 +5,7 @@
     using Newtonsoft.Json;
 
     using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     public class FloorRelation : ISectionTrackable, ISectionEmptyState
@@ -16,7 +17,7 @@
         [JsonIgnore]
         [SdmIgnore]
         public bool IsEmpty =>
-            Floor == default;
+            !Floor.HasValue();
 
         public SdmObjectReference<Floor> Floor { get; set; }
     }

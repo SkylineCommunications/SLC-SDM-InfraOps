@@ -4,6 +4,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     using Newtonsoft.Json;
     using SharedMappers.DomIds;
     using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
@@ -14,14 +15,14 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         Guid? ISectionTrackable.SectionId { get; set; }
         [JsonIgnore]
         [SdmIgnore]
-        public bool IsEmpty => ParentAsset == default &&
+        public bool IsEmpty => !ParentAsset.HasValue() &&
             HolderNumber == default &&
-            RackId == default &&
+            !RackId.HasValue() &&
             RackPosition == default &&
             Side == default &&
             DeskId == default &&
-            ContainerId == default &&
-            RoomId == default;
+            !ContainerId.HasValue() &&
+            !RoomId.HasValue();
 
         public SdmObjectReference<Asset> ParentAsset
         {

@@ -5,6 +5,7 @@
     using Newtonsoft.Json;
 
     using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     public class ZoneRelation : ISectionTrackable, ISectionEmptyState
@@ -16,7 +17,7 @@
         [JsonIgnore]
         [SdmIgnore]
         public bool IsEmpty =>
-            Zone == default;
+            !Zone.HasValue();
 
         public SdmObjectReference<Zone> Zone { get; set; }
     }

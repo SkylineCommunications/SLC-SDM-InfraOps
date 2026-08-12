@@ -4,6 +4,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
     using SharedMappers.DomIds;
     using Newtonsoft.Json;
+    using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     public sealed class PowerPortInfo : IEquatable<PowerPortInfo>, ISectionTrackable, ISectionEmptyState
@@ -17,7 +18,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             PortNumber == default &&
             OutputType == default &&
             PortExposure == default &&
-            PortType == default &&
+            !PortType.HasValue() &&
             Label == default;
 
 		public string Name { get; set; }

@@ -5,6 +5,7 @@
     using Newtonsoft.Json;
 
     using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     public sealed class PropertyValue : IEquatable<PropertyValue>, ISectionTrackable, ISectionEmptyState
@@ -24,7 +25,7 @@
 
         [JsonIgnore]
         [SdmIgnore]
-        public bool IsEmpty => PropertyName == default && Value == default && PropertyId == default;
+        public bool IsEmpty => PropertyName == default && Value == default && !PropertyId.HasValue();
 
         public static bool operator ==(PropertyValue left, PropertyValue right)
         {

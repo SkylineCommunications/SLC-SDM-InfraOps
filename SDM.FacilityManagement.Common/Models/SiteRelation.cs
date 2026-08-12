@@ -4,6 +4,7 @@
 
     using Newtonsoft.Json;
 
+    using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     public class SiteRelation : ISectionTrackable, ISectionEmptyState
@@ -15,7 +16,7 @@
         [JsonIgnore]
         [SdmIgnore]
         public bool IsEmpty =>
-            Site == default;
+            !Site.HasValue();
 
         public SdmObjectReference<Site> Site { get; set; }
     }

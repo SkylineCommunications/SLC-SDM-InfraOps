@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 
 using SharedMappers.DomIds;
 
+using Skyline.DataMiner.SDM.Extensions;
 using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
 namespace Skyline.DataMiner.SDM.AssetManagement.Models
@@ -19,7 +20,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             PortNumber == default &&
             OutputType == default &&
             PortExposure == default &&
-            Type == default &&
+            !Type.HasValue() &&
             Label == default;
 
         public DataPortInfo() : base()

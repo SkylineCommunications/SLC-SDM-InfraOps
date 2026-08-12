@@ -6,6 +6,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
+    using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     /// <summary>
@@ -22,11 +23,11 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
         [JsonIgnore]
         [SdmIgnore]
         public bool IsEmpty =>
-            ConnectionId == default &&
+            !ConnectionId.HasValue() &&
             Source == default &&
             Destination == default &&
             Status == default &&
-            CableType == default &&
+            !CableType.HasValue() &&
             CableLength == default;
 
         public SdmObjectReference<Connection> ConnectionId { get; set; }

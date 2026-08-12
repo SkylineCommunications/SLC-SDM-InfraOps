@@ -5,6 +5,7 @@
     using Newtonsoft.Json;
 
     using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     public class RoomRelation : ISectionTrackable, ISectionEmptyState
@@ -16,7 +17,7 @@
         [JsonIgnore]
         [SdmIgnore]
         public bool IsEmpty =>
-            Room == default;
+            !Room.HasValue();
 
         public SdmObjectReference<Room> Room { get; set; }
     } 

@@ -1,3 +1,4 @@
+using Skyline.DataMiner.SDM.Extensions;
 using Skyline.DataMiner.SDM.FacilityManagement.Models;
 using System;
 using Newtonsoft.Json;
@@ -12,7 +13,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         Guid? ISectionTrackable.SectionId { get; set; }
         [JsonIgnore]
         [SdmIgnore]
-        public bool IsEmpty => Rack == default;
+        public bool IsEmpty => !Rack.HasValue();
 
         public SdmObjectReference<Rack> Rack { get; set; }
     } 
