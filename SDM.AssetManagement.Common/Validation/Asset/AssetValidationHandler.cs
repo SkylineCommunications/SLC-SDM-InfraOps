@@ -131,7 +131,7 @@
             {
                 asset.Location.ParentAsset != null && asset.Location.ParentAsset.HasValue(),
                 asset.Location.RackId != default && asset.Location.RackId.HasValue(),
-                 asset.Location.DeskId != null && asset.Location.DeskId != System.Guid.Empty,
+                 asset.Location.DeskId != System.Guid.Empty,
                 asset.Location.ContainerId != null && asset.Location.ContainerId.HasValue(),
                 asset.Location.RoomId != default && asset.Location.RoomId.HasValue(),
             };
@@ -305,7 +305,7 @@
             {
                 asset.DestinationLocation.ParentAsset != null && asset.DestinationLocation.ParentAsset.HasValue(),
                 asset.DestinationLocation.RackId != default && asset.DestinationLocation.RackId.HasValue(),
-                asset.DestinationLocation.DeskId != null && asset.DestinationLocation.DeskId != System.Guid.Empty,
+                asset.DestinationLocation.DeskId != System.Guid.Empty,
                 asset.DestinationLocation.ContainerId != default && asset.DestinationLocation.ContainerId.HasValue(),
                 asset.DestinationLocation.RoomId != default && asset.DestinationLocation.RoomId.HasValue(),
             };
@@ -609,8 +609,8 @@
                 return result.IsValid;
             }
 
-            var hasContactPerson = asset.Ownership.ContactPerson != null && asset.Ownership.ContactPerson != Guid.Empty;
-            var hasRole = asset.Ownership.ContactPersonRole != null && asset.Ownership.ContactPersonRole != Guid.Empty;
+            var hasContactPerson = asset.Ownership.ContactPerson != Guid.Empty;
+            var hasRole = asset.Ownership.ContactPersonRole != Guid.Empty;
 
             // Both must be set or both must be empty
             if (hasContactPerson && !hasRole)
@@ -643,8 +643,8 @@
                 return result.IsValid;
             }
 
-            var hasContactPerson = asset.Custody.ContactPerson != null && asset.Custody.ContactPerson != Guid.Empty;
-            var hasRole = asset.Custody.ContactPersonRole != null && asset.Custody.ContactPersonRole != Guid.Empty;
+            var hasContactPerson = asset.Custody.ContactPerson != Guid.Empty;
+            var hasRole = asset.Custody.ContactPersonRole != Guid.Empty;
 
             // Both must be set or both must be empty
             if (hasContactPerson && !hasRole)

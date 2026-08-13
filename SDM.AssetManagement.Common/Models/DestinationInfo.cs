@@ -13,7 +13,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         [JsonIgnore]
         [SdmIgnore]
         public bool IsEmpty => CableTag == default &&
-            Port == default &&
+            Port == Guid.Empty &&
             !PortType.HasValue();
 
         public string CableTag { get; set; }

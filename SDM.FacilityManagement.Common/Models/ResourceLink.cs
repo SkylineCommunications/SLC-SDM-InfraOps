@@ -15,7 +15,7 @@
         [JsonIgnore]
         [SdmIgnore]
         public bool IsEmpty =>
-            ResourceId == default;
+            ResourceId == Guid.Empty;
 
         public Guid ResourceId { get; set; }
     }

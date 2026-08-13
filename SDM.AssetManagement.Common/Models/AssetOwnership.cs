@@ -13,10 +13,10 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         Guid? ISectionTrackable.SectionId { get; set; }
         [JsonIgnore]
         [SdmIgnore]
-        public bool IsEmpty => Organization == default &&
-            ContactPerson == default &&
-            ContactPersonRole == default &&
-            Team == default;
+        public bool IsEmpty => Organization == Guid.Empty &&
+            ContactPerson == Guid.Empty &&
+            ContactPersonRole == Guid.Empty &&
+            Team == Guid.Empty;
 
         public Guid Organization
         {

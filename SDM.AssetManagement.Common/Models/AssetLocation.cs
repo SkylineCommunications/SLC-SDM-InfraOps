@@ -20,7 +20,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             !RackId.HasValue() &&
             RackPosition == default &&
             Side == default &&
-            DeskId == default &&
+            DeskId == Guid.Empty &&
             !ContainerId.HasValue() &&
             !RoomId.HasValue();
 

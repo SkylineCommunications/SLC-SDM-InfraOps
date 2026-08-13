@@ -15,10 +15,10 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         [SdmIgnore]
         public bool IsEmpty => From == default &&
             Till == default &&
-            ContactPerson == default &&
-            Team == default &&
-            Organization == default &&
-            ContactPersonRole == default;
+            ContactPerson == Guid.Empty &&
+            Team == Guid.Empty &&
+            Organization == Guid.Empty &&
+            ContactPersonRole == Guid.Empty;
 
         public DateTime? From
         {

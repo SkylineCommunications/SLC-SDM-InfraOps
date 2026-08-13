@@ -15,8 +15,8 @@
         [JsonIgnore]
         [SdmIgnore]
         public bool IsEmpty =>
-            Team == default &&
-            Owner == default;
+            Team == Guid.Empty &&
+            Owner == Guid.Empty;
 
         public Guid Team { get; set; }
 
