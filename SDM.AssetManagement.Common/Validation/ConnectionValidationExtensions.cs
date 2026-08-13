@@ -15,12 +15,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
         /// </summary>
         public static IEnumerable<string> GetPortIds(this Connection connection)
         {
-            if (connection != null && !connection.Source.IsEmpty && connection.Source.Port != Guid.Empty)
+            if (connection != null && connection.Source.Port != Guid.Empty)
             {
                 yield return connection.Source.Port.ToString();
             }
 
-            if (connection != null && !connection.Destination.IsEmpty && connection.Destination.Port != Guid.Empty)
+            if (connection != null && connection.Destination.Port != Guid.Empty)
             {
                 yield return connection.Destination.Port.ToString();
             }
