@@ -139,7 +139,7 @@
 
 			var sectionName = "General";
 			var filter = PropertyExposers.Layout.SectionName.Equal(sectionName);
-			var expected = DemoData.Properties.Where(p => p.Layout?.SectionName == sectionName).ToArray();
+			var expected = DemoData.Properties.Where(p => p.Layout.SectionName == sectionName).ToArray();
 
 			var propertiesRetrieved = Helper.Properties.Read(filter);
 
@@ -157,7 +157,7 @@
 
 			long threshold = 1;
 			var filter = PropertyExposers.Layout.Order.LessThanOrEqual(threshold);
-			var expected = DemoData.Properties.Where(p => p.Layout?.Order != null && p.Layout.Order <= threshold).ToArray();
+			var expected = DemoData.Properties.Where(p => p.Layout.Order != null && p.Layout.Order <= threshold).ToArray();
 
 			var propertiesRetrieved = Helper.Properties.Read(filter);
 
