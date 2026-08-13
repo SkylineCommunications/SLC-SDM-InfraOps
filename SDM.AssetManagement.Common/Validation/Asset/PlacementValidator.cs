@@ -94,8 +94,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             var parentAssetIds = new HashSet<SdmObjectReference<Asset>>();
             foreach (var asset in assets)
             {
-                // Explicit null check for Location
-                if (!asset.Location.IsEmpty && asset.Location.ParentAsset.HasValue())
+                if (asset.Location.ParentAsset.HasValue())
                 {
                     parentAssetIds.Add(asset.Location.ParentAsset);
                 }
@@ -119,8 +118,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             var rackIds = new HashSet<string>();
             foreach (var asset in assets)
             {
-                // Explicit null check for Location
-                if (!asset.Location.IsEmpty && asset.Location.RackId != default && asset.Location.RackId.HasValue())
+                if (asset.Location.RackId.HasValue())
                 {
                     rackIds.Add(asset.Location.RackId.Identifier);
                 }
@@ -154,7 +152,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
         {
             var result = new ValidationResult();
 
-            if (asset.Location.IsEmpty || !asset.Location.ParentAsset.HasValue())
+            if (!asset.Location.ParentAsset.HasValue())
             {
                 return result;
             }

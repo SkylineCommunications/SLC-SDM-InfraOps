@@ -87,10 +87,10 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
                 .ToList();
 
             var portTypeIdsUsedByAssetPorts = _entityLoader.GetDataPortsByPortTypeIds(identifiers)
-                .Where(port => !port.DataPortInfo.IsEmpty && port.DataPortInfo.Type.HasValue())
+                .Where(port => port.DataPortInfo.Type.HasValue())
                 .Select(port => port.DataPortInfo.Type.Identifier)
                 .Concat(_entityLoader.GetPowerPortsByPortTypeIds(identifiers)
-                    .Where(port => !port.PowerPortInfo.IsEmpty && port.PowerPortInfo.PortType.HasValue())
+                    .Where(port => port.PowerPortInfo.PortType.HasValue())
                     .Select(port => port.PowerPortInfo.PortType.Identifier))
                 .ToHashSet();
 

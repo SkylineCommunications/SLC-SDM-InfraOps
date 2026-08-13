@@ -901,7 +901,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
 
             var rackGroups = assets
                 .Select((asset, index) => (asset, index))
-                .Where(x => !x.asset.Location.IsEmpty && x.asset.Location.RackId.HasValue() && x.asset.Location.RackPosition.HasValue && x.asset.Location.RackPosition.Value > 0)
+                .Where(x => x.asset.Location.RackId.HasValue() && x.asset.Location.RackPosition.HasValue && x.asset.Location.RackPosition.Value > 0)
                 .GroupBy(x => x.asset.Location.RackId);
 
             foreach (var rackGroup in rackGroups)
