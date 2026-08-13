@@ -640,9 +640,15 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				if (_backimage != null)
 				{
 					obj.BackImage = _backimage.Value;
-				}
+                }
 
-				var _typicalpowerconsumption = _assetclasspropertiesSection.GetValue<double>(AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.TypicalPowerConsumption);
+                var _isBookable = _assetclasspropertiesSection.GetValue<bool>(AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.IsBookable);
+                if (_isBookable != null)
+                {
+                    obj.IsBookable = _isBookable.Value;
+                }
+
+                var _typicalpowerconsumption = _assetclasspropertiesSection.GetValue<double>(AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.TypicalPowerConsumption);
 				if (_typicalpowerconsumption != null)
 				{
 					obj.TypicalPowerConsumption = _typicalpowerconsumption.Value;
@@ -799,7 +805,18 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			obj.Holders = _holdersList;
             obj.ResetChangeTracking();
 
-			return obj;
+            var _protocolLinkSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(AssetManagement.Models.AssetClassDomMapper.ProtocolLink.SectionDefinitionId));
+            if (_protocolLinkSection != default)
+            {
+                obj.ProtocolLink = new AssetManagement.Models.ProtocolLink();
+                var _protocolLinkProtocol = _protocolLinkSection.GetValue<string>(AssetManagement.Models.AssetClassDomMapper.ProtocolLink.Protocol);
+                if (_protocolLinkProtocol != null)
+                {
+                    obj.ProtocolLink.Protocol = _protocolLinkProtocol.Value;
+                }
+            }
+
+            return obj;
 		}
 
 		private DomInstance ToInstance(AssetClass obj)

@@ -38,6 +38,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             internal static FieldDescriptorID FrontImage = SharedMappers.DomIds.SlcAsset_Management.Sections.AssetClassInfo.FrontImage;
             internal static FieldDescriptorID BackImage = SharedMappers.DomIds.SlcAsset_Management.Sections.AssetClassInfo.BackImage;
             internal static FieldDescriptorID PowerSupply = SharedMappers.DomIds.SlcAsset_Management.Sections.AssetClassInfo.PowerSupply;
+            internal static FieldDescriptorID IsBookable = SharedMappers.DomIds.SlcAsset_Management.Sections.AssetClassInfo.Isbookable;
         }
 
         internal static class Lifecycle
@@ -81,6 +82,13 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
             internal static FieldDescriptorID SlotNumber = SharedMappers.DomIds.SlcAsset_Management.Sections.Holders.SlotNumber;
             internal static FieldDescriptorID HierarchyRole = SharedMappers.DomIds.SlcAsset_Management.Sections.Holders.HierarchyRole;
+        }
+
+        internal static class ProtocolLink
+        {
+            internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(SharedMappers.DomIds.SlcAsset_Management.Sections.ProtocolLink.Id.Id)
+            { ModuleId = ModuleId };
+            internal static FieldDescriptorID Protocol = SharedMappers.DomIds.SlcAsset_Management.Sections.ProtocolLink.Protocol;
         }
     }
 }
