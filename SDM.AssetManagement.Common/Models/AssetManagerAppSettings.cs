@@ -1,6 +1,7 @@
-namespace Skyline.DataMiner.SDM.AssetManagement.Models
+﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
     using System;
+    using Newtonsoft.Json;
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)asset_management")]
@@ -15,5 +16,14 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         public TimeSpan? HistoryTTL { get; set; }
 
         public long? HistoryLimit { get; set; }
+
+        #region Section Tracking
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal Guid? AppSettingsSectionId { get; set; }
+
+        #endregion
+
     }
 }

@@ -10,7 +10,7 @@
 	{
 		public static readonly List<Property> Properties =
 		[
-			new Property
+			WithLayout(new Property
 			{
 				Identifier = Guid.NewGuid().ToString(),
 				Name = "Asset Owner",
@@ -19,9 +19,8 @@
 				Default = "Unassigned",
 				StringSizeLimit = 128,
 				IsMultiLineString = false,
-				Layout = new PropertyLayout { SectionName = "General", Order = 1 },
-			},
-			new Property
+			}, "General", 1),
+			WithLayout(new Property
 			{
 				Identifier = Guid.NewGuid().ToString(),
 				Name = "Maintenance Notes",
@@ -30,9 +29,8 @@
 				Default = string.Empty,
 				StringSizeLimit = 2000,
 				IsMultiLineString = true,
-				Layout = new PropertyLayout { SectionName = "Maintenance", Order = 2 },
-			},
-			new Property
+			}, "Maintenance", 2),
+			WithLayout(new Property
 			{
 				Identifier = Guid.NewGuid().ToString(),
 				Name = "Criticality",
@@ -40,18 +38,16 @@
 				Scope = "Asset",
 				Default = "Low",
 				Discreets = new List<PropertyOption> { new PropertyOption { Option = "Low" }, new PropertyOption { Option = "Medium" }, new PropertyOption { Option = "High" } },
-				Layout = new PropertyLayout { SectionName = "General", Order = 3 },
-			},
-			new Property
+			}, "General", 3),
+			WithLayout(new Property
 			{
 				Identifier = Guid.NewGuid().ToString(),
 				Name = "Is Bookable",
 				PropertyType = InfraopsProperties.Enums.PropertyTypeEnum.Boolean,
 				Scope = "Facility",
 				Default = "false",
-				Layout = new PropertyLayout { SectionName = "Booking", Order = 1 },
-			},
-			new Property
+			}, "Booking", 1),
+			WithLayout(new Property
 			{
 				Identifier = Guid.NewGuid().ToString(),
 				Name = "Region",
@@ -59,9 +55,15 @@
 				Scope = "Facility",
 				Default = "EMEA",
 				Discreets = new List<PropertyOption> { new PropertyOption { Option = "EMEA" }, new PropertyOption { Option = "APAC" }, new PropertyOption { Option = "AMER" } },
-				Layout = new PropertyLayout { SectionName = "General", Order = 2 },
-			},
+			}, "General", 2),
 		];
+
+		private static Property WithLayout(Property property, string sectionName, int order)
+		{
+			property.Layout.SectionName = sectionName;
+			property.Layout.Order = order;
+			return property;
+		}
 
 		public static readonly List<PropertyValues> PropertyValuesList =
 		[

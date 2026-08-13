@@ -2,9 +2,24 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
 {
     using System;
 
-    public sealed class PropertyOption : IEquatable<PropertyOption>
+    using Newtonsoft.Json;
+
+    using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
+
+    public sealed class PropertyOption : IEquatable<PropertyOption>, ISectionTrackable, ISectionEmptyState
     {
         public string Option { get; set; }
+
+        /// <summary>
+        /// Gets or sets the DOM Section ID this element was read from, so it can be reused on update.
+        /// </summary>
+        [JsonIgnore]
+        [SdmIgnore]
+        Guid? ISectionTrackable.SectionId { get; set; }
+
+        [JsonIgnore]
+        [SdmIgnore]
+        public bool IsEmpty => Option == default;
 
         public static bool operator ==(PropertyOption left, PropertyOption right)
         {

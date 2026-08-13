@@ -1,4 +1,4 @@
-namespace Skyline.DataMiner.SDM.AssetManagement.Models
+﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
     using System;
 
@@ -27,11 +27,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
         #region Properties
 
-        public DataPortInfo DataPortInfo
-        {
-            get => _dataPortInfo ?? (_dataPortInfo = new DataPortInfo());
-            set => _dataPortInfo = value ?? new DataPortInfo();
-        }
+        public DataPortInfo DataPortInfo => _dataPortInfo ?? (_dataPortInfo = new DataPortInfo());
 
         public SdmObjectReference<Asset> Asset
         {
@@ -39,17 +35,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             set => (_assetFk ?? (_assetFk = new AssetRelation())).Asset = value;
         }
 
-        public AddressInfo AddressInfo
-        {
-            get => _addressInfo ?? (_addressInfo = new AddressInfo());
-            set => _addressInfo = value ?? new AddressInfo();
-        }
+        public AddressInfo AddressInfo => _addressInfo ?? (_addressInfo = new AddressInfo());
 
-        public PrimaryPortRelation PrimaryPortRelation
-        {
-            get => _primaryPortRelation ?? (_primaryPortRelation = new PrimaryPortRelation());
-            set => _primaryPortRelation = value ?? new PrimaryPortRelation();
-        }
+        public PrimaryPortRelation PrimaryPortRelation => _primaryPortRelation ?? (_primaryPortRelation = new PrimaryPortRelation());
 
         [JsonIgnore]
         [SdmIgnore]
@@ -133,5 +121,14 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             _addressInfo?.ResetChangeTracking();
             _primaryPortRelation?.ResetChangeTracking();
         }
+
+        #region Section Tracking
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal Guid? AssetFkSectionId { get; set; }
+
+        #endregion
+
     }
 }

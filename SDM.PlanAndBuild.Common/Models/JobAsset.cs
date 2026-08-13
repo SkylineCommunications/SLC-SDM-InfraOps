@@ -2,13 +2,27 @@
 {
     using System;
 
+    using Newtonsoft.Json;
+
     using SharedMappers.DomIds;
 
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
+    using Skyline.DataMiner.SDM.Extensions;
+    using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
-    public sealed class JobAsset : IEquatable<JobAsset>
+    public sealed class JobAsset : IEquatable<JobAsset>, ISectionTrackable, ISectionEmptyState
     {
+        [JsonIgnore]
+        [SdmIgnore]
+        Guid? ISectionTrackable.SectionId { get; set; }
+
+        [JsonIgnore]
+        [SdmIgnore]
+        public bool IsEmpty =>
+            !AssetId.HasValue() &&
+            Action == default;
+
         public SdmObjectReference<Asset> AssetId { get; set; }
 
         public SlcPlan_And_Build.Enums.ActionforassetenumEnum Action { get; set; }

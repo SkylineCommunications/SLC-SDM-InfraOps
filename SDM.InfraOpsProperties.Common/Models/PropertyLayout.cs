@@ -4,8 +4,19 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
 
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
-    public class PropertyLayout : ChangeTrackingBase
+    public class PropertyLayout : ChangeTrackingBase, ISectionTrackable, ISectionEmptyState
     {
+        /// <summary>
+        /// Gets or sets the DOM Section ID this model was read from, so it can be reused on update.
+        /// </summary>
+        [JsonIgnore]
+        [SdmIgnore]
+        System.Guid? ISectionTrackable.SectionId { get; set; }
+
+        [JsonIgnore]
+        [SdmIgnore]
+        public bool IsEmpty => SectionName == default && Order == default;
+
         public string SectionName
         {
             get => SectionNameField.Value;

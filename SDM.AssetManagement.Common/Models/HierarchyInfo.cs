@@ -5,9 +5,17 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     using SharedMappers.DomIds;
 
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
+    using System;
 
-    public class HierarchyInfo : ChangeTrackingBase
+    public class HierarchyInfo : ChangeTrackingBase, ISectionTrackable, ISectionEmptyState
     {
+        [JsonIgnore]
+        [SdmIgnore]
+        Guid? ISectionTrackable.SectionId { get; set; }
+        [JsonIgnore]
+        [SdmIgnore]
+        public bool IsEmpty => HierarchyRole == default;
+
         public SlcAsset_Management.Enums.HierarchyRoleEnum? HierarchyRole
         {
             get => HierarchyRoleField.Value;

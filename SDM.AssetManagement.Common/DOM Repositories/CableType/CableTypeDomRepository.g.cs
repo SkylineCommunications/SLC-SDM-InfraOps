@@ -515,6 +515,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             var _cabletypepropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(AssetManagement.Models.CableTypeDomMapper.CableTypeProperties.SectionDefinitionId));
             if (_cabletypepropertiesSection != default)
             {
+                obj.CableTypePropertiesSectionId = _cabletypepropertiesSection.ID.Id;
                 var _name = _cabletypepropertiesSection.GetValue<string>(AssetManagement.Models.CableTypeDomMapper.CableTypeProperties.Name);
                 if (_name != null)
                 {
@@ -552,6 +553,10 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 }
             };
             var _cabletypeproperties = new Section(AssetManagement.Models.CableTypeDomMapper.CableTypeProperties.SectionDefinitionId);
+            if (obj.CableTypePropertiesSectionId.HasValue)
+            {
+                _cabletypeproperties.ID = new SectionID(obj.CableTypePropertiesSectionId.Value);
+            }
             if (obj.Name != default)
             {
                 _cabletypeproperties.AddOrUpdateValue<string>(AssetManagement.Models.CableTypeDomMapper.CableTypeProperties.Name, Convert.ToString(obj.Name));

@@ -1,5 +1,7 @@
 ﻿namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 {
+    using System;
+
     using Newtonsoft.Json;
 
     using Skyline.DataMiner.SDM;
@@ -114,6 +116,14 @@
         internal IChangeTrackingField<long> JobIDMinimumDigitsField => FieldHandler.GetOrCreateField(
             nameof(JobIDMinimumDigits),
             () => new ChangeTrackingField<long>(0));
+
+        #region Section Tracking
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal Guid? PlanAndBuildAppSettingsPropertiesSectionId { get; set; }
+
+        #endregion
 
         public void ResetChangeTracking()
         {

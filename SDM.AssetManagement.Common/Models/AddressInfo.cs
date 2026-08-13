@@ -6,8 +6,18 @@ using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
 namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
-    public sealed class AddressInfo : ChangeTrackingBase, IEquatable<AddressInfo>
+    public sealed class AddressInfo : ChangeTrackingBase, IEquatable<AddressInfo>, ISectionTrackable, ISectionEmptyState
     {
+        [JsonIgnore]
+        [SdmIgnore]
+        Guid? ISectionTrackable.SectionId { get; set; }
+        [JsonIgnore]
+        [SdmIgnore]
+        public bool IsEmpty => Ipv4Address == default &&
+            Ipv6Address == default &&
+            Hostname == default &&
+            DNS == default;
+
         public string Ipv4Address
         {
             get => Ipv4AddressField.Value;

@@ -261,7 +261,7 @@
             }
 
             var cableTypeIdsUsedByPortTypes = _entityLoader.GetPortTypesByCableTypeIds(remainingIdentifiers)
-                .SelectMany(portType => portType.CableFKs?.CableTypeFks ?? new List<SdmObjectReference<CableType>>())
+                .SelectMany(portType => portType.CableFKs.CableTypeFks ?? new List<SdmObjectReference<CableType>>())
                 .Where(reference => reference.HasValue())
                 .Select(reference => reference.Identifier)
                 .ToHashSet();

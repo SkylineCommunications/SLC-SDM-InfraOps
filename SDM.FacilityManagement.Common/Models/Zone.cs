@@ -1,5 +1,7 @@
 namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 {
+    using System;
+
     using Newtonsoft.Json;
 
     using SharedMappers.DomIds;
@@ -49,6 +51,14 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
         [JsonIgnore]
         [SdmIgnore]
         public bool IsNew => _isNew;
+
+        #region Section Tracking
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal Guid? ZonePropertiesSectionId { get; set; }
+
+        #endregion
 
         public string Name
         {
@@ -104,11 +114,17 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             set => ZoneIdField.Value = value;
         }
 
-        public ZoneCapacity ZoneCapacity { get; set; }
+        private ZoneCapacity _zoneCapacity;
 
-        public RoomRelation RoomFk { get; set; }
+        public ZoneCapacity ZoneCapacity => _zoneCapacity ?? (_zoneCapacity = new ZoneCapacity());
 
-        public ResourceLink Resource { get; set; }
+        private RoomRelation _roomFk;
+
+        public RoomRelation RoomFk => _roomFk ?? (_roomFk = new RoomRelation());
+
+        private ResourceLink _resource;
+
+        public ResourceLink Resource => _resource ?? (_resource = new ResourceLink());
 
         [SdmIgnore]
         public SlcFacility_Management.Behaviors.Zone_Behaviour.StatusesEnum State { get; internal set; }

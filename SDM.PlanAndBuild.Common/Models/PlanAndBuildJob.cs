@@ -78,7 +78,9 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 
         #region Ownership Properties
 
-        public JobOwnership Ownership { get; set; } = new JobOwnership();
+        private JobOwnership _ownership;
+
+        public JobOwnership Ownership => _ownership ?? (_ownership = new JobOwnership());
 
         #endregion
 
@@ -277,6 +279,14 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
         internal IChangeTrackingField<SlcPlan_And_Build.Behaviors.Job_Behavior.StatusesEnum> StateField => FieldHandler.GetOrCreateField(
             nameof(State),
             () => new ChangeTrackingField<SlcPlan_And_Build.Behaviors.Job_Behavior.StatusesEnum>(SlcPlan_And_Build.Behaviors.Job_Behavior.StatusesEnum.New));
+
+        #endregion
+
+        #region Section Tracking
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal Guid? PlanAndBuildJobPropertiesSectionId { get; set; }
 
         #endregion
 

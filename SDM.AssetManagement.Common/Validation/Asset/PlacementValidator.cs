@@ -94,8 +94,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             var parentAssetIds = new HashSet<SdmObjectReference<Asset>>();
             foreach (var asset in assets)
             {
-                // Explicit null check for Location
-                if (asset.Location != null && asset.Location.ParentAsset.HasValue())
+                if (asset.Location.ParentAsset.HasValue())
                 {
                     parentAssetIds.Add(asset.Location.ParentAsset);
                 }
@@ -119,8 +118,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             var rackIds = new HashSet<string>();
             foreach (var asset in assets)
             {
-                // Explicit null check for Location
-                if (asset.Location != null && asset.Location.RackId != default && asset.Location.RackId.HasValue())
+                if (asset.Location.RackId.HasValue())
                 {
                     rackIds.Add(asset.Location.RackId.Identifier);
                 }
@@ -154,7 +152,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
         {
             var result = new ValidationResult();
 
-            if (asset.Location == null || !asset.Location.ParentAsset.HasValue())
+            if (!asset.Location.ParentAsset.HasValue())
             {
                 return result;
             }
@@ -173,7 +171,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             var assetClass = _entityLoader.LoadAssetClass(asset.AssetClassId);
             var deviceType = _entityLoader.LoadDeviceType(assetClass.DeviceTypeId);
 
-            if (deviceType?.HierarchyInfo?.HierarchyRole == null)
+            if (deviceType?.HierarchyInfo.HierarchyRole == null)
             {
                 result.AddFailReason(AssetValidationField.AssetClass,
                     "Asset Class Device Type must have a Hierarchy Role to be attached to a parent asset.");
@@ -197,7 +195,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             if (context.ExistingChildrenInParents.TryGetValue(parentId, out var existingChildren))
             {
                 var occupied = existingChildren
-                    .FirstOrDefault(c => c.Location?.HolderNumber == holderNumber);
+                    .FirstOrDefault(c => c.Location.HolderNumber == holderNumber);
 
                 if (occupied != null)
                 {
@@ -213,8 +211,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
                 if (i == assetIndex) continue; // Skip self
 
                 var other = context.AssetsBeingValidated[i];
-                if (other.Location?.ParentAsset.Identifier == parentId &&
-                    other.Location?.HolderNumber == holderNumber)
+                if (other.Location.ParentAsset.Identifier == parentId &&
+                    other.Location.HolderNumber == holderNumber)
                 {
                     result.AddFailReason(AssetValidationField.HolderNumber,
                         $"Holder Number '{holderNumber}' conflicts with another asset in the same batch.");
@@ -232,7 +230,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
         {
             var result = new ValidationResult();
 
-            if (asset.Location == null || asset.Location.RackId == default)
+            if (asset.Location.IsEmpty || asset.Location.RackId == default)
             {
                 return result;
             }
@@ -286,7 +284,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             {
                 foreach (var a in existing)
                 {
-                    TryAddToList(list, a, a.Location?.RackPosition);
+                    TryAddToList(list, a, a.Location.RackPosition);
                 }
             }
 
@@ -294,9 +292,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             {
                 if (other.Identifier == asset.Identifier) continue;
                     
-                if (other.Location?.RackId.Identifier == rackId)
+                if (other.Location.RackId.Identifier == rackId)
                 {
-                    TryAddToList(list, other, other.Location?.RackPosition);
+                    TryAddToList(list, other, other.Location.RackPosition);
                 }
             }
 

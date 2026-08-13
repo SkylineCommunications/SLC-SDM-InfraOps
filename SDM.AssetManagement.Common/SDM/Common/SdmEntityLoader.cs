@@ -880,7 +880,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
 
                 // Filter in memory for assets in this rack
                 return allAssets
-                    .Where(a => (a.Location?.RackId != null && a.Location.RackId.HasValue() && a.Location.RackId.Identifier == rackIdentifier)).ToList();
+                    .Where(a => (a.Location.RackId != null && a.Location.RackId.HasValue() && a.Location.RackId.Identifier == rackIdentifier)).ToList();
             }
             catch (Exception ex)
             {

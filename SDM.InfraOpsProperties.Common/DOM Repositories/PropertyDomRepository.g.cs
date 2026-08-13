@@ -516,6 +516,7 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
             var _propertypropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(InfraOpsProperties.Models.PropertyDomMapper.PropertyProperties.SectionDefinitionId));
             if (_propertypropertiesSection != default)
             {
+                obj.PropertyPropertiesSectionId = _propertypropertiesSection.ID.Id;
                 var _name = _propertypropertiesSection.GetValue<string>(InfraOpsProperties.Models.PropertyDomMapper.PropertyProperties.Name);
                 if (_name != null)
                 {
@@ -556,7 +557,7 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
             var _layoutSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(InfraOpsProperties.Models.PropertyDomMapper.Layout.SectionDefinitionId));
             if (_layoutSection != default)
             {
-                obj.Layout = new InfraOpsProperties.Models.PropertyLayout();
+                ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Layout).SectionId = _layoutSection.ID.Id;
                 var _layoutsectionname = _layoutSection.GetValue<string>(InfraOpsProperties.Models.PropertyDomMapper.Layout.SectionName);
                 if (_layoutsectionname != null)
                 {
@@ -574,6 +575,7 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
             foreach (var _discreetsSection in instance.Sections.Where(s => s.SectionDefinitionID.Equals(InfraOpsProperties.Models.PropertyDomMapper.Discreets.SectionDefinitionId)))
             {
                 var discreets = new InfraOpsProperties.Models.PropertyOption();
+                ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)discreets).SectionId = _discreetsSection.ID.Id;
                 var _discreetsoption = _discreetsSection.GetValue<string>(InfraOpsProperties.Models.PropertyDomMapper.Discreets.Option);
                 if (_discreetsoption != null)
                 {
@@ -609,6 +611,11 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
                 }
             };
             var _propertyproperties = new Section(InfraOpsProperties.Models.PropertyDomMapper.PropertyProperties.SectionDefinitionId);
+            if (obj.PropertyPropertiesSectionId.HasValue)
+            {
+                _propertyproperties.ID = new SectionID(obj.PropertyPropertiesSectionId.Value);
+            }
+
             if (obj.Name != default)
             {
                 _propertyproperties.AddOrUpdateValue<string>(InfraOpsProperties.Models.PropertyDomMapper.PropertyProperties.Name, Convert.ToString(obj.Name));
@@ -636,9 +643,15 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
             }
 
             instance.Sections.Add(_propertyproperties);
-            if (obj.Layout != null)
+            if (!obj.Layout.IsEmpty)
             {
                 var _layout = new Section(InfraOpsProperties.Models.PropertyDomMapper.Layout.SectionDefinitionId);
+                var _layoutSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Layout).SectionId;
+                if (_layoutSectionId.HasValue)
+                {
+                    _layout.ID = new SectionID(_layoutSectionId.Value);
+                }
+
                 if (obj.Layout.SectionName != default)
                 {
                     _layout.AddOrUpdateValue<string>(InfraOpsProperties.Models.PropertyDomMapper.Layout.SectionName, Convert.ToString(obj.Layout.SectionName));
@@ -655,6 +668,12 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
             foreach (var discreets in obj.Discreets)
             {
                 var _discreetsSection = new Section(InfraOpsProperties.Models.PropertyDomMapper.Discreets.SectionDefinitionId);
+                var _discreetsSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)discreets).SectionId;
+                if (_discreetsSectionId.HasValue)
+                {
+                    _discreetsSection.ID = new SectionID(_discreetsSectionId.Value);
+                }
+
                 if (discreets.Option != default)
                 {
                     _discreetsSection.AddOrUpdateValue<string>(InfraOpsProperties.Models.PropertyDomMapper.Discreets.Option, Convert.ToString(discreets.Option));

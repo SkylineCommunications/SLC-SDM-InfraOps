@@ -35,14 +35,14 @@
                 return result.IsValid;
             }
 
-            if (string.IsNullOrWhiteSpace(powerPort.PowerPortInfo?.Name))
+            if (string.IsNullOrWhiteSpace(powerPort.PowerPortInfo.Name))
             {
                 result.AddFailReason(PowerPortValidationField.Name,
                     "PowerPort Name cannot be empty.");
                 return result.IsValid;
             }
 
-            if (powerPort.PowerPortInfo?.PortNumber == null)
+            if (powerPort.PowerPortInfo.PortNumber == null)
             {
                 result.AddFailReason(PowerPortValidationField.PortNumber,
                     "PowerPort Number must be provided.");
@@ -56,7 +56,7 @@
                 return result.IsValid;
             }
 
-            if (powerPort.PowerPortInfo?.OutputType == null)
+            if (powerPort.PowerPortInfo.OutputType == null)
             {
                 result.AddFailReason(PowerPortValidationField.OutputType,
                     "PowerPort Output Type must be provided.");

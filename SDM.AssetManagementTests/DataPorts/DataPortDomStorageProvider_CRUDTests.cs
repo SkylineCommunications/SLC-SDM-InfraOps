@@ -38,7 +38,7 @@
             {
                 Identifier = Guid.NewGuid().ToString(),
                 Name = "Test Data Port Type",
-                CategoryLinks = new CategoryRelation
+                CategoryLinks =
                 {
                     Categories = [SlcAsset_Management.Enums.CategoriesEnum.Data],
                 },
@@ -50,7 +50,7 @@
             {
                 Identifier = Guid.NewGuid().ToString(),
                 Name = "Test Data Port Type (Update)",
-                CategoryLinks = new CategoryRelation
+                CategoryLinks =
                 {
                     Categories = [SlcAsset_Management.Enums.CategoriesEnum.Data],
                 },
@@ -61,7 +61,7 @@
             referenceDataPort = new DataPort
             {
                 Identifier = Guid.NewGuid().ToString(),
-                DataPortInfo = new DataPortInfo
+                DataPortInfo =
                 {
                     Name = "Test DataPort",
                     PortNumber = 1,
@@ -71,14 +71,14 @@
                     Label = "Ethernet Port 1",
                 },
                 Asset = new SdmObjectReference<Asset>(asset.Identifier),
-                AddressInfo = new AddressInfo
+                AddressInfo =
                 {
                     Ipv4Address = "192.168.1.100",
                     Ipv6Address = "2001:0db8:85a3:0000:0000:8a2e:0370:7334",
                     Hostname = "test-hostname",
                     DNS = true,
                 },
-                PrimaryPortRelation = new PrimaryPortRelation
+                PrimaryPortRelation =
                 {
                     IsPrimaryIpv4 = true,
                     IsPrimaryIpv6 = false,
@@ -180,7 +180,7 @@
             var updatedDataPort = new DataPort
             {
                 Identifier = created.Identifier,
-                DataPortInfo = new DataPortInfo
+                DataPortInfo =
                 {
                     Name = "Updated DataPort Name",
                     PortNumber = 2,
@@ -190,14 +190,14 @@
                     Label = "Fiber Port 2",
                 },
                 Asset = created.Asset ,
-                AddressInfo = new AddressInfo
+                AddressInfo =
                 {
                     Ipv4Address = "10.0.0.50",
                     Ipv6Address = "2001:0db8:85a3:0000:0000:8a2e:0370:1234",
                     Hostname = "updated-hostname",
                     DNS = false,
                 },
-                PrimaryPortRelation = new PrimaryPortRelation
+                PrimaryPortRelation =
                 {
                     IsPrimaryIpv4 = false,
                     IsPrimaryIpv6 = true,

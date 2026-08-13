@@ -31,8 +31,9 @@
 				Default = string.Empty,
 				StringSizeLimit = 64,
 				IsMultiLineString = false,
-				Layout = new PropertyLayout { SectionName = "General", Order = 1 },
 			};
+			referenceProperty.Layout.SectionName = "General";
+			referenceProperty.Layout.Order = 1;
 		}
 
 		[TestMethod]
@@ -64,8 +65,9 @@
 				Scope = "Facility",
 				Default = "N/A",
 				Discreets = new System.Collections.Generic.List<PropertyOption> { new PropertyOption { Option = "N/A" }, new PropertyOption { Option = "Assigned" } },
-				Layout = new PropertyLayout { SectionName = "Updated Section", Order = 2 },
 			};
+			updatedProperty.Layout.SectionName = "Updated Section";
+			updatedProperty.Layout.Order = 2;
 
 			Helper.Properties.CreateOrUpdate([updatedProperty]);
 			AssertPropertyUpdateDifferences(updatedProperty);

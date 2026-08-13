@@ -4,8 +4,17 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     using Newtonsoft.Json;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
-    public sealed class AssetClassLifecycle : ChangeTrackingBase, IEquatable<AssetClassLifecycle>
+    public sealed class AssetClassLifecycle : ChangeTrackingBase, IEquatable<AssetClassLifecycle>, ISectionTrackable, ISectionEmptyState
     {
+        [JsonIgnore]
+        [SdmIgnore]
+        Guid? ISectionTrackable.SectionId { get; set; }
+        [JsonIgnore]
+        [SdmIgnore]
+        public bool IsEmpty => EndOfLife == default &&
+            EndOfService == default &&
+            NominalLifetime == default;
+
         public DateTime? EndOfLife
         {
             get => EndOfLifeField.Value;

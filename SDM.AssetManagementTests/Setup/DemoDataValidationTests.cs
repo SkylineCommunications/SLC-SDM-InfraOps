@@ -154,7 +154,7 @@
                     {
                         AssetClass = ac,
                         DeviceType = deviceType,
-                        HasRackUnitConsumerTag = deviceType?.TagsInfo?.Tags?.Contains(
+                        HasRackUnitConsumerTag = deviceType?.TagsInfo.Tags?.Contains(
                             SlcAsset_Management.Enums.TagOption.RackUnitConsumer) == true
                     };
                 })
@@ -172,7 +172,7 @@
                     }
                     else
                     {
-                        var tags = x.DeviceType.TagsInfo?.Tags?.Any() == true
+                        var tags = x.DeviceType.TagsInfo.Tags?.Any() == true
                             ? string.Join(", ", x.DeviceType.TagsInfo.Tags)
                             : "none";
                         return $"  - '{x.AssetClass.Name}' (HeightU: {x.AssetClass.HeightU}U) uses DeviceType '{x.DeviceType.Name}' which lacks RackUnitConsumer tag (has tags: {tags})";

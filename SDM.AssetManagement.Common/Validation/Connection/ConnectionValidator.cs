@@ -76,8 +76,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
                 result.AddFailuresFrom(cableLengthResult);
             }
 
-            var sourcePort = connection.Source?.Port ?? Guid.Empty;
-            var destinationPort = connection.Destination?.Port ?? Guid.Empty;
+            var sourcePort = connection.Source.Port;
+            var destinationPort = connection.Destination.Port;
 
             if (ConnectionValidationHandler.IsNotSelfConnection(sourcePort, destinationPort, out var selfResult) == false)
             {
@@ -109,12 +109,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
 
         private void ValidatePortTypeReferences(Connection connection, Lookups lookups, ValidationResult result)
         {
-            if (connection.Source != null)
+            if (!connection.Source.IsEmpty)
             {
                 ValidatePortTypeReference(connection.Source.PortType, isSource: true, lookups, result);
             }
 
-            if (connection.Destination != null)
+            if (!connection.Destination.IsEmpty)
             {
                 ValidatePortTypeReference(connection.Destination.PortType, isSource: false, lookups, result);
             }
@@ -132,7 +132,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
 
         private void ValidateEndpoint(Connection connection, bool isSource, SlcAsset_Management.Enums.ConnectionType? connectionType, Lookups lookups, ValidationResult result)
         {
-            var endpointPort = isSource ? (connection.Source?.Port ?? Guid.Empty) : (connection.Destination?.Port ?? Guid.Empty);
+            var endpointPort = isSource ? connection.Source.Port : connection.Destination.Port;
             var field = isSource ? ConnectionValidationHandler.ConnectionValidationField.SourcePort : ConnectionValidationHandler.ConnectionValidationField.DestinationPort;
 
             // Connections may legitimately be patched on a single end. Because the Connection model does not
@@ -194,7 +194,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
                 return connection.ConnectionType;
             }
 
-            var sourcePort = connection.Source?.Port ?? Guid.Empty;
+            var sourcePort = connection.Source.Port;
             if (sourcePort != Guid.Empty)
             {
                 if (lookups.DataPorts.ContainsKey(sourcePort.ToString()))
@@ -221,8 +221,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
                 {
                     Found = true,
                     Asset = dataPort.Asset,
-                    OutputType = dataPort.DataPortInfo?.OutputType,
-                    PortNumber = dataPort.DataPortInfo?.PortNumber,
+                    OutputType = dataPort.DataPortInfo.OutputType,
+                    PortNumber = dataPort.DataPortInfo.PortNumber,
                 };
             }
 
@@ -232,8 +232,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
                 {
                     Found = true,
                     Asset = powerPort.Asset,
-                    OutputType = powerPort.PowerPortInfo?.OutputType,
-                    PortNumber = powerPort.PowerPortInfo?.PortNumber,
+                    OutputType = powerPort.PowerPortInfo.OutputType,
+                    PortNumber = powerPort.PowerPortInfo.PortNumber,
                 };
             }
 
@@ -282,7 +282,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             lookups.PortTypeIds = _entityLoader.GetPortTypesByDomIds(portTypeIds).Select(pt => pt.Identifier).ToHashSet();
 
             var portIds = connections
-                .SelectMany(c => new[] { c.Source?.Port ?? Guid.Empty, c.Destination?.Port ?? Guid.Empty })
+                .SelectMany(c => new[] { c.Source.Port, c.Destination.Port })
                 .Where(id => id != Guid.Empty)
                 .Select(id => id.ToString())
                 .Distinct()
@@ -334,8 +334,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
 
             foreach (var existing in _entityLoader.GetConnectionsByPortIds(portIds))
             {
-                AddPortUsage(usage, existing.Source?.Port ?? Guid.Empty, existing.Identifier);
-                AddPortUsage(usage, existing.Destination?.Port ?? Guid.Empty, existing.Identifier);
+                AddPortUsage(usage, existing.Source.Port, existing.Identifier);
+                AddPortUsage(usage, existing.Destination.Port, existing.Identifier);
             }
 
             return usage;
@@ -343,12 +343,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
 
         private static IEnumerable<SdmObjectReference<PortType>> GetEndpointPortTypes(Connection connection)
         {
-            if (connection.Source != null)
+            if (!connection.Source.IsEmpty)
             {
                 yield return connection.Source.PortType;
             }
 
-            if (connection.Destination != null)
+            if (!connection.Destination.IsEmpty)
             {
                 yield return connection.Destination.PortType;
             }

@@ -2,8 +2,21 @@
 {
     using System;
 
-    public class ResourceLink
+    using Newtonsoft.Json;
+
+    using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
+
+    public class ResourceLink : ISectionTrackable, ISectionEmptyState
     {
+        [JsonIgnore]
+        [SdmIgnore]
+        Guid? ISectionTrackable.SectionId { get; set; }
+
+        [JsonIgnore]
+        [SdmIgnore]
+        public bool IsEmpty =>
+            ResourceId == Guid.Empty;
+
         public Guid ResourceId { get; set; }
     }
 }

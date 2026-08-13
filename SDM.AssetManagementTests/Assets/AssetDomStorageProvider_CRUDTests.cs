@@ -48,14 +48,14 @@
                 ModificationDate = DateTime.UtcNow,
                 ModificationUserId = Guid.NewGuid(),
                 EndOfLifeDate = DateTime.UtcNow.AddYears(5),
-                Ownership = new AssetOwnership
+                Ownership =
                 {
                     Organization = Guid.NewGuid(),
                     ContactPerson = Guid.NewGuid(),
                     ContactPersonRole = Guid.NewGuid(),
                     Team = Guid.NewGuid(),
                 },
-                Custody = new AssetCustody
+                Custody =
                 {
                     From = DateTime.UtcNow.AddMonths(-6),
                     Till = DateTime.UtcNow.AddMonths(6),
@@ -159,11 +159,11 @@
                 ModificationDate = DateTime.UtcNow,
                 ModificationUserId = Guid.NewGuid(),
                 EndOfLifeDate = DateTime.UtcNow.AddYears(5),
-                Ownership = new AssetOwnership
+                Ownership =
                 {
                     Organization = Guid.NewGuid(),
                 },
-                Custody = new AssetCustody
+                Custody =
                 {
                     From = DateTime.UtcNow.AddMonths(-6),
                     Till = DateTime.UtcNow.AddMonths(6),
@@ -298,10 +298,7 @@
                 RoomId = $"ROOM-{roomId}",
                 Name = "Asset Location Room",
             });
-            referenceAsset.Location = new AssetLocation
-            {
-                RoomId = new SdmObjectReference<Room>(room.Identifier),
-            };
+            referenceAsset.Location.RoomId = new SdmObjectReference<Room>(room.Identifier);
 
             // Act
             Helper.AssetManagement.Assets.Create(referenceAsset);
@@ -339,7 +336,7 @@
                 updated.MacAddress.Should().BeNullOrEmpty();
 
                 // Location changes
-                updated.Location.Should().BeNull();
+                updated.Location.IsEmpty.Should().BeTrue();
 
                 // Ownership changes
                 updated.Ownership.Should().NotBeNull();

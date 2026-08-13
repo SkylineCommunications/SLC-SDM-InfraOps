@@ -116,7 +116,7 @@
         private void ValidatePortTypesInBulk(List<PowerPort> powerPorts, List<ValidationResult> results)
         {
             var distinctPortTypeIds = powerPorts
-                .Where(p => p.PowerPortInfo?.PortType != null && p.PowerPortInfo.PortType.HasValue())
+                .Where(p => p.PowerPortInfo.PortType != null && p.PowerPortInfo.PortType.HasValue())
                 .Select(p => p.PowerPortInfo.PortType.Identifier)
                 .Distinct()
                 .ToList();
@@ -129,7 +129,7 @@
                 var port = powerPorts[i];
 
                 PortType loadedPortType = null;
-                if (port.PowerPortInfo?.PortType != null && port.PowerPortInfo.PortType.HasValue())
+                if (port.PowerPortInfo.PortType != null && port.PowerPortInfo.PortType.HasValue())
                 {
                     portTypeMap.TryGetValue(port.PowerPortInfo.PortType.Identifier, out loadedPortType);
                 }

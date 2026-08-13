@@ -19,6 +19,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Common.Middleware
             => new BulkValidationException<DataPort>(
                 entities,
                 results,
-                p => string.IsNullOrEmpty(p.DataPortInfo?.Name) ? $"DataPort '{p.Identifier}'" : $"DataPort '{p.DataPortInfo.Name}'");
+                p => string.IsNullOrEmpty(p.DataPortInfo.Name) ? $"DataPort '{p.Identifier}'" : $"DataPort '{p.DataPortInfo.Name}'");
     }
 }

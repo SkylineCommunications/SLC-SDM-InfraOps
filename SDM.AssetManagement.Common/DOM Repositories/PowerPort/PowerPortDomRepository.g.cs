@@ -519,7 +519,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			var _powerportinfoSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.SectionDefinitionId));
 			if (_powerportinfoSection != default)
 			{
-				obj.PowerPortInfo = new AssetManagement.Models.PowerPortInfo();
+				((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.PowerPortInfo).SectionId = _powerportinfoSection.ID.Id;
 
 				var _powerportinfoname = _powerportinfoSection.GetValue<string>(AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.Name);
 				if (_powerportinfoname != null)
@@ -561,6 +561,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			var _assetrelationSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(AssetManagement.Models.PowerPortDomMapper.AssetRelationProperties.SectionDefinitionId));
 			if (_assetrelationSection != default)
 			{
+				obj.AssetRelationPropertiesSectionId = _assetrelationSection.ID.Id;
 				obj.Asset = new AssetManagement.Models.Asset();
 				var _asset = _assetrelationSection.GetValue<System.Guid>(AssetManagement.Models.PowerPortDomMapper.AssetRelationProperties.Asset);
 				if (_asset != null)
@@ -592,9 +593,14 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 					ModuleId = AssetManagement.Models.PowerPortDomMapper.ModuleId
 				}
 			};
-			if (obj.PowerPortInfo != null)
+			if (!obj.PowerPortInfo.IsEmpty)
 			{
 				var _powerportinfo = new Section(AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.SectionDefinitionId);
+				var _powerportinfoSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.PowerPortInfo).SectionId;
+				if (_powerportinfoSectionId.HasValue)
+				{
+					_powerportinfo.ID = new SectionID(_powerportinfoSectionId.Value);
+				}
 
 				if (obj.PowerPortInfo.Name != default)
 				{
@@ -623,6 +629,10 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			if (obj.Asset != null)
 			{
 				var _assetrelation = new Section(AssetManagement.Models.PowerPortDomMapper.AssetRelationProperties.SectionDefinitionId);
+				if (obj.AssetRelationPropertiesSectionId.HasValue)
+				{
+					_assetrelation.ID = new SectionID(obj.AssetRelationPropertiesSectionId.Value);
+				}
 				if (obj.Asset != default && System.Guid.TryParse(obj.Asset.Identifier, out var assetGuid) && assetGuid != System.Guid.Empty)
 				{
 					_assetrelation.AddOrUpdateValue<System.Guid>(AssetManagement.Models.PowerPortDomMapper.AssetRelationProperties.Asset, assetGuid);

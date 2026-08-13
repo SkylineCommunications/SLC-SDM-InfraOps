@@ -6,8 +6,18 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
-    public class AssetOwnership : ChangeTrackingBase
+    public class AssetOwnership : ChangeTrackingBase, ISectionTrackable, ISectionEmptyState
     {
+        [JsonIgnore]
+        [SdmIgnore]
+        Guid? ISectionTrackable.SectionId { get; set; }
+        [JsonIgnore]
+        [SdmIgnore]
+        public bool IsEmpty => Organization == Guid.Empty &&
+            ContactPerson == Guid.Empty &&
+            ContactPersonRole == Guid.Empty &&
+            Team == Guid.Empty;
+
         public Guid Organization
         {
             get => OrganizationField.Value;

@@ -516,6 +516,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             var _roompropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(FacilityManagement.Models.RoomDomMapper.RoomProperties.SectionDefinitionId));
             if (_roompropertiesSection != default)
             {
+                obj.RoomPropertiesSectionId = _roompropertiesSection.ID.Id;
                 var _roompropertiesname = _roompropertiesSection.GetValue<string>(FacilityManagement.Models.RoomDomMapper.RoomProperties.Name);
                 if (_roompropertiesname != null)
                 {
@@ -556,7 +557,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             var _OwnershipSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(FacilityManagement.Models.RoomDomMapper.Ownership.SectionDefinitionId));
             if (_OwnershipSection != default)
             {
-                obj.Ownership = new FacilityManagement.Models.RoomOwnership();
+                ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Ownership).SectionId = _OwnershipSection.ID.Id;
                 var _Ownershipteam = _OwnershipSection.GetValue<string>(FacilityManagement.Models.RoomDomMapper.Ownership.Team);
                 if (_Ownershipteam != null)
                 {
@@ -573,7 +574,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             var _resourcelinkSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(FacilityManagement.Models.RoomDomMapper.ResourceLink.SectionDefinitionId));
             if (_resourcelinkSection != default)
             {
-                obj.ResourceLink = new FacilityManagement.Models.ResourceLink();
+                ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.ResourceLink).SectionId = _resourcelinkSection.ID.Id;
                 var _resourcelinkresourceid = _resourcelinkSection.GetValue<string>(FacilityManagement.Models.RoomDomMapper.ResourceLink.ResourceId);
                 if (_resourcelinkresourceid != null)
                 {
@@ -584,7 +585,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             var _floorfkSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(FacilityManagement.Models.RoomDomMapper.FloorFk.SectionDefinitionId));
             if (_floorfkSection != default)
             {
-                obj.FloorFk = new FacilityManagement.Models.FloorRelation();
+                ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.FloorFk).SectionId = _floorfkSection.ID.Id;
                 var _floorfkfloor = _floorfkSection.GetValue<System.Guid>(FacilityManagement.Models.RoomDomMapper.FloorFk.Floor);
                 if (_floorfkfloor != null)
                 {
@@ -621,6 +622,11 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 instance.StatusId = SharedMappers.DomIds.SlcFacility_Management.Behaviors.Room_Behaviour.Statuses.ToValue(obj.State);
             }
             var _roomproperties = new Section(FacilityManagement.Models.RoomDomMapper.RoomProperties.SectionDefinitionId);
+            if (obj.RoomPropertiesSectionId.HasValue)
+            {
+                _roomproperties.ID = new SectionID(obj.RoomPropertiesSectionId.Value);
+            }
+
             if (obj.Name != default)
             {
                 _roomproperties.AddOrUpdateValue<string>(FacilityManagement.Models.RoomDomMapper.RoomProperties.Name, Convert.ToString(obj.Name));
@@ -652,9 +658,15 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             }
 
             instance.Sections.Add(_roomproperties);
-            if (obj.Ownership != null)
+            if (!obj.Ownership.IsEmpty)
             {
                 var _Ownership = new Section(FacilityManagement.Models.RoomDomMapper.Ownership.SectionDefinitionId);
+                var _OwnershipSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Ownership).SectionId;
+                if (_OwnershipSectionId.HasValue)
+                {
+                    _Ownership.ID = new SectionID(_OwnershipSectionId.Value);
+                }
+
                 if (obj.Ownership.Team != default)
                 {
                     _Ownership.AddOrUpdateValue<string>(FacilityManagement.Models.RoomDomMapper.Ownership.Team, Convert.ToString(obj.Ownership.Team));
@@ -668,9 +680,15 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 instance.Sections.Add(_Ownership);
             }
 
-            if (obj.ResourceLink != null)
+            if (!obj.ResourceLink.IsEmpty)
             {
                 var _resourcelink = new Section(FacilityManagement.Models.RoomDomMapper.ResourceLink.SectionDefinitionId);
+                var _resourcelinkSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.ResourceLink).SectionId;
+                if (_resourcelinkSectionId.HasValue)
+                {
+                    _resourcelink.ID = new SectionID(_resourcelinkSectionId.Value);
+                }
+
                 if (obj.ResourceLink.ResourceId != default)
                 {
                     _resourcelink.AddOrUpdateValue<string>(FacilityManagement.Models.RoomDomMapper.ResourceLink.ResourceId, Convert.ToString(obj.ResourceLink.ResourceId));
@@ -679,9 +697,15 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 instance.Sections.Add(_resourcelink);
             }
 
-            if (obj.FloorFk != null)
+            if (!obj.FloorFk.IsEmpty)
             {
                 var _floorfk = new Section(FacilityManagement.Models.RoomDomMapper.FloorFk.SectionDefinitionId);
+                var _floorfkSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.FloorFk).SectionId;
+                if (_floorfkSectionId.HasValue)
+                {
+                    _floorfk.ID = new SectionID(_floorfkSectionId.Value);
+                }
+
                 if (obj.FloorFk.Floor != default && System.Guid.TryParse(obj.FloorFk.Floor.Identifier, out var floorGuid) && floorGuid != System.Guid.Empty)
                 {
                     _floorfk.AddOrUpdateValue<System.Guid>(FacilityManagement.Models.RoomDomMapper.FloorFk.Floor, floorGuid);

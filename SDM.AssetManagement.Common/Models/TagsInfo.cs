@@ -7,9 +7,17 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     using SharedMappers.DomIds;
 
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
+    using System;
 
-    public class TagsInfo : IChangeTracking
+    public class TagsInfo : IChangeTracking, ISectionTrackable, ISectionEmptyState
     {
+        [JsonIgnore]
+        [SdmIgnore]
+        Guid? ISectionTrackable.SectionId { get; set; }
+        [JsonIgnore]
+        [SdmIgnore]
+        public bool IsEmpty => (Tags == null || Tags.Count == 0);
+
         [JsonIgnore]
         private ChangeTrackingFieldHandler _fieldHandler;
 

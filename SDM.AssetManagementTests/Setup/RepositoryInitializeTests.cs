@@ -100,7 +100,7 @@
             var assets = Helper.TestData.Assets;
             Assert.IsTrue(assets.Any(), "Assets should be populated");
             Assert.IsTrue(Helper.TestData.Racks.Any(), "Racks should be populated");
-            Assert.IsTrue(assets.All(a => a.Location?.RackId != null && a.Location.RackId.HasValue()),
+            Assert.IsTrue(assets.All(a => a.Location.RackId != null && a.Location.RackId.HasValue()),
                 "All assets should be assigned to racks");
         }
 
@@ -237,7 +237,7 @@
             {
                 Identifier = Guid.NewGuid().ToString(),
                 Name = "Custom Data Port Type",
-                CategoryLinks = new CategoryRelation
+                CategoryLinks =
                 {
                     Categories = [SlcAsset_Management.Enums.CategoriesEnum.Data],
                 },

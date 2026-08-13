@@ -99,7 +99,7 @@
                 throw new InvalidOperationException("The provided DeviceType does not match the DeviceTypeId of the AssetClass. Please ensure that the correct DeviceType is provided for validation.");
             }
 
-            bool isRackUnitConsumer = deviceType.TagsInfo?.Tags?.Contains(SlcAsset_Management.Enums.TagOption.RackUnitConsumer) ?? false;
+            bool isRackUnitConsumer = deviceType.TagsInfo.Tags?.Contains(SlcAsset_Management.Enums.TagOption.RackUnitConsumer) ?? false;
             if (!isRackUnitConsumer)
             {
                 return ValidateHeightUnitBusinessRules(assetClass, out result);

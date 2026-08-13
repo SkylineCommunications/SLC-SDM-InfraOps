@@ -257,7 +257,7 @@
         {
             return new DataPort
             {
-                DataPortInfo = new DataPortInfo
+                DataPortInfo =
                 {
                     Name = $"Data Port {i}",
                     PortNumber = i,
@@ -265,7 +265,7 @@
                     PortExposure = (SlcAsset_Management.Enums.PortExposureEnum)(i % 2),
                     Label = $"Data Port Label {i}",
                 },
-                AddressInfo = new AddressInfo
+                AddressInfo =
                 {
                     Ipv4Address = $"192.168.1.{i}",
                     Ipv6Address = $"2001:0db8:85a3:0000:0000:8a2e:0370:7{i:D3}",
@@ -273,7 +273,7 @@
                     DNS = true,
                 },
                 // AssetFk will be set at runtime
-                PrimaryPortRelation = new PrimaryPortRelation
+                PrimaryPortRelation =
                 {
                     IsPrimaryIpv4 = true,
                     IsPrimaryIpv6 = false,
@@ -285,7 +285,7 @@
         {
             return new PowerPort
             {
-                PowerPortInfo = new PowerPortInfo
+                PowerPortInfo =
                 {
                     Name = $"Power Port {i}",
                     PortNumber = i,
@@ -312,11 +312,11 @@
                 Identifier = Guid.NewGuid().ToString(),
                 Name = $"Port Type {i}",
                 Description = $"Description for port type {i}",
-                CategoryLinks = new CategoryRelation
+                CategoryLinks =
                 {
                     Categories = categories,
                 },
-                CableFKs = new CableRelation
+                CableFKs =
                 {
                     CableTypeFks = cableTypeFks,
                 },
@@ -410,7 +410,7 @@
                 TypicalPowerConsumption = typicalPowerConsumption,
                 MaximumPowerConsumption = maximumPowerConsumption,
                 PowerSupply = SlcAsset_Management.Enums.PowerSupplyEnum.AC,
-                Lifecycle = new AssetClassLifecycle
+                Lifecycle =
                 {
                     EndOfLife = DateTime.UtcNow.AddYears(10),
                     EndOfService = DateTime.UtcNow.AddYears(7),
@@ -436,11 +436,11 @@
             {
                 Description = $"Device type for {name}",
                 Name = name,
-                HierarchyInfo = new HierarchyInfo
+                HierarchyInfo =
                 {
                     HierarchyRole = role,
                 },
-                TagsInfo = new TagsInfo
+                TagsInfo =
                 {
                     Tags = tagsList,
                 },
@@ -449,17 +449,15 @@
 
         private static Rack CreateRack(string rackId, string name, int heightu, bool top = false)
         {
-            return new Rack
+            var rack = new Rack
             {
                 Identifier = Guid.NewGuid().ToString(),
                 RackId = rackId,
                 Name = name,
-                Capacity = new RackCapacity
-                {
-                    MaximumRackCapacity = heightu,
-                },
                 Position = top == true ? SlcFacility_Management.Enums.RackpositionenumEnum.Top : SlcFacility_Management.Enums.RackpositionenumEnum.Bottom,
             };
+            rack.Capacity.MaximumRackCapacity = heightu;
+            return rack;
         }
 
         private static Asset CreateBaseAsset(
@@ -490,14 +488,14 @@
                 ModificationDate = DateTime.UtcNow,
                 ModificationUserId = Guid.NewGuid(),
                 EndOfLifeDate = DateTime.UtcNow.AddYears(-orderNo + 15),
-                Ownership = new AssetOwnership
+                Ownership =
                 {
                     Organization = Guid.NewGuid(),
                     ContactPerson = Guid.NewGuid(),
                     ContactPersonRole = Guid.NewGuid(),
                     Team = Guid.NewGuid(),
                 },
-                Custody = new AssetCustody
+                Custody =
                 {
                     From = DateTime.UtcNow.AddMonths(-6),
                     Till = DateTime.UtcNow.AddMonths(6),

@@ -1,5 +1,7 @@
 namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 {
+    using System;
+
     using Newtonsoft.Json;
 
     using SharedMappers.DomIds;
@@ -51,6 +53,14 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
         [SdmIgnore]
         public bool IsNew => _isNew;
 
+        #region Section Tracking
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal Guid? DeskInformationSectionId { get; set; }
+
+        #endregion
+
         public string Name
         {
             get => NameField.Value;
@@ -75,9 +85,13 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             set => DeskIdField.Value = value;
         }
 
-        public RoomRelation RoomFk { get; set; }
+        private RoomRelation _roomFk;
 
-        public ResourceLink Resource { get; set; }
+        public RoomRelation RoomFk => _roomFk ?? (_roomFk = new RoomRelation());
+
+        private ResourceLink _resource;
+
+        public ResourceLink Resource => _resource ?? (_resource = new ResourceLink());
 
         [SdmIgnore]
         public SlcFacility_Management.Behaviors.Desk_Behaviour.StatusesEnum State { get; internal set; }

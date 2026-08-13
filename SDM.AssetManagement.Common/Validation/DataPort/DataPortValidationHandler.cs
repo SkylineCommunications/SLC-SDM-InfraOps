@@ -41,14 +41,14 @@
                 return result.IsValid;
             }
 
-            if (string.IsNullOrWhiteSpace(dataPort.DataPortInfo?.Name))
+            if (string.IsNullOrWhiteSpace(dataPort.DataPortInfo.Name))
             {
                 result.AddFailReason(DataPortValidationField.Name,
                     "DataPort Name cannot be empty.");
                 return result.IsValid;
             }
 
-            if (dataPort.DataPortInfo?.PortNumber == null)
+            if (dataPort.DataPortInfo.PortNumber == null)
             {
                 result.AddFailReason(DataPortValidationField.PortNumber,
                     "DataPort Number must be provided.");
@@ -62,7 +62,7 @@
                 return result.IsValid;
             }
 
-            if (dataPort.DataPortInfo?.OutputType == null)
+            if (dataPort.DataPortInfo.OutputType == null)
             {
                 result.AddFailReason(DataPortValidationField.OutputType,
                     "DataPort Output Type must be provided.");

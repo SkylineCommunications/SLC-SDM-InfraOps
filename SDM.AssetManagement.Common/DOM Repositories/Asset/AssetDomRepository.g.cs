@@ -538,6 +538,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             var _assetpropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(AssetManagement.Models.AssetDomMapper.AssetProperties.SectionDefinitionId));
             if (_assetpropertiesSection != default)
             {
+                obj.AssetPropertiesSectionId = _assetpropertiesSection.ID.Id;
                 var _assetid = _assetpropertiesSection.GetValue<string>(AssetManagement.Models.AssetDomMapper.AssetProperties.AssetId);
                 if (_assetid != null)
                 {
@@ -584,6 +585,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             var _networkdetailsSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(AssetManagement.Models.AssetDomMapper.NetworkDetails.SectionDefinitionId));
             if (_networkdetailsSection != default)
             {
+                obj.NetworkDetailsSectionId = _networkdetailsSection.ID.Id;
                 var _networkdetailsmacaddress = _networkdetailsSection.GetValue<string>(AssetManagement.Models.AssetDomMapper.NetworkDetails.MACAddress);
                 if (_networkdetailsmacaddress != null)
                 {
@@ -594,7 +596,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             var _locationSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(AssetManagement.Models.AssetDomMapper.Location.SectionDefinitionId));
             if (_locationSection != default)
             {
-                obj.Location = new AssetManagement.Models.AssetLocation();
+                ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Location).SectionId = _locationSection.ID.Id;
                 var _locationholdernumber = _locationSection.GetValue<long>(AssetManagement.Models.AssetDomMapper.Location.HolderNumber);
                 if (_locationholdernumber != null)
                 {
@@ -647,7 +649,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             var _destinationlocationSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(AssetManagement.Models.AssetDomMapper.DestinationLocation.SectionDefinitionId));
             if (_destinationlocationSection != default)
             {
-                obj.DestinationLocation = new AssetManagement.Models.AssetLocation();
+                ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.DestinationLocation).SectionId = _destinationlocationSection.ID.Id;
                 var _locationholdernumber = _destinationlocationSection.GetValue<long>(AssetManagement.Models.AssetDomMapper.DestinationLocation.HolderNumber);
                 if (_locationholdernumber != null)
                 {
@@ -700,6 +702,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             var _lifecycleSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(AssetManagement.Models.AssetDomMapper.Lifecycle.SectionDefinitionId));
             if (_lifecycleSection != default)
             {
+                obj.LifecycleSectionId = _lifecycleSection.ID.Id;
                 var _lifecyclepurchasedate = _lifecycleSection.GetValue<DateTime>(AssetManagement.Models.AssetDomMapper.Lifecycle.PurchaseDate);
                 if (_lifecyclepurchasedate != null)
                 {
@@ -752,7 +755,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             var _ownershipSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(AssetManagement.Models.AssetDomMapper.Ownership.SectionDefinitionId));
             if (_ownershipSection != default)
             {
-                obj.Ownership = new AssetManagement.Models.AssetOwnership();
+                ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Ownership).SectionId = _ownershipSection.ID.Id;
 
                 var _organization = _ownershipSection.GetValue<System.Guid>(AssetManagement.Models.AssetDomMapper.Ownership.Organization);
                 if (_organization != null)
@@ -783,7 +786,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             var _custodySection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(AssetManagement.Models.AssetDomMapper.Custody.SectionDefinitionId));
             if (_custodySection != default)
             {
-                obj.Custody = new AssetManagement.Models.AssetCustody();
+                ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Custody).SectionId = _custodySection.ID.Id;
                 var _custodyfrom = _custodySection.GetValue<DateTime>(AssetManagement.Models.AssetDomMapper.Custody.From);
                 if (_custodyfrom != null)
                 {
@@ -826,6 +829,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             {
                 var holders = new AssetManagement.Models.AssetHolder();
 
+                ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)holders).SectionId = _holdersSection.ID.Id;
+
                 var _holdersslotnumber = _holdersSection.GetValue<long>(AssetManagement.Models.AssetDomMapper.Holders.SlotNumber);
                 if (_holdersslotnumber != null)
                 {
@@ -846,6 +851,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             foreach (var _elementlinksSection in instance.Sections.Where(s => s.SectionDefinitionID.Equals(AssetManagement.Models.AssetDomMapper.ElementLinks.SectionDefinitionId)))
             {
                 var elementlinks = new AssetManagement.Models.ElementLink();
+
+                ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)elementlinks).SectionId = _elementlinksSection.ID.Id;
 
                 var _elementlinkselementid = _elementlinksSection.GetValue<string>(AssetManagement.Models.AssetDomMapper.ElementLinks.ElementID);
                 if (_elementlinkselementid != null)
@@ -895,6 +902,11 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
 
             var _assetproperties = new Section(AssetManagement.Models.AssetDomMapper.AssetProperties.SectionDefinitionId);
+            if (obj.AssetPropertiesSectionId.HasValue)
+            {
+                _assetproperties.ID = new SectionID(obj.AssetPropertiesSectionId.Value);
+            }
+
             if (obj.AssetID != default)
             {
                 _assetproperties.AddOrUpdateValue<string>(AssetManagement.Models.AssetDomMapper.AssetProperties.AssetId, Convert.ToString(obj.AssetID));
@@ -933,6 +945,10 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             instance.Sections.Add(_assetproperties);
 
             var _networkdetails = new Section(AssetManagement.Models.AssetDomMapper.NetworkDetails.SectionDefinitionId);
+            if (obj.NetworkDetailsSectionId.HasValue)
+            {
+                _networkdetails.ID = new SectionID(obj.NetworkDetailsSectionId.Value);
+            }
 
             if (obj.MacAddress != default)
             {
@@ -942,9 +958,15 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             instance.Sections.Add(_networkdetails);
 
 
-            if (obj.Location != null)
+            if (!obj.Location.IsEmpty)
             {
                 var _location = new Section(AssetManagement.Models.AssetDomMapper.Location.SectionDefinitionId);
+                var _locationSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Location).SectionId;
+                if (_locationSectionId.HasValue)
+                {
+                    _location.ID = new SectionID(_locationSectionId.Value);
+                }
+
                 if (obj.Location.HolderNumber != default)
                 {
                     _location.AddOrUpdateValue<long>(AssetManagement.Models.AssetDomMapper.Location.HolderNumber, (long)(obj.Location.HolderNumber).Value);
@@ -988,9 +1010,15 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 instance.Sections.Add(_location);
             }
 
-            if (obj.DestinationLocation != null && obj.State == SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit)
+            if (!obj.DestinationLocation.IsEmpty && obj.State == SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit)
             {
                 var _destinationlocation = new Section(AssetManagement.Models.AssetDomMapper.DestinationLocation.SectionDefinitionId);
+                var _destinationlocationSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.DestinationLocation).SectionId;
+                if (_destinationlocationSectionId.HasValue)
+                {
+                    _destinationlocation.ID = new SectionID(_destinationlocationSectionId.Value);
+                }
+
                 if (obj.DestinationLocation.HolderNumber != default)
                 {
                     _destinationlocation.AddOrUpdateValue<long>(AssetManagement.Models.AssetDomMapper.DestinationLocation.HolderNumber, (long)(obj.DestinationLocation.HolderNumber).Value);
@@ -1036,6 +1064,11 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
 
             var _lifecycle = new Section(AssetManagement.Models.AssetDomMapper.Lifecycle.SectionDefinitionId);
+            if (obj.LifecycleSectionId.HasValue)
+            {
+                _lifecycle.ID = new SectionID(obj.LifecycleSectionId.Value);
+            }
+
             if (obj.PurchaseDate != default)
             {
                 _lifecycle.AddOrUpdateValue<DateTime>(AssetManagement.Models.AssetDomMapper.Lifecycle.PurchaseDate, (DateTime)obj.PurchaseDate);
@@ -1079,9 +1112,15 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             instance.Sections.Add(_lifecycle);
 
 
-            if (obj.Ownership != null)
+            if (!obj.Ownership.IsEmpty)
             {
                 var _ownership = new Section(AssetManagement.Models.AssetDomMapper.Ownership.SectionDefinitionId);
+                var _ownershipSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Ownership).SectionId;
+                if (_ownershipSectionId.HasValue)
+                {
+                    _ownership.ID = new SectionID(_ownershipSectionId.Value);
+                }
+
                 if (obj.Ownership.Organization != default)
                 {
                     _ownership.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetDomMapper.Ownership.Organization, obj.Ownership.Organization);
@@ -1105,9 +1144,15 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 instance.Sections.Add(_ownership);
             }
 
-            if (obj.Custody != null)
+            if (!obj.Custody.IsEmpty)
             {
                 var _custody = new Section(AssetManagement.Models.AssetDomMapper.Custody.SectionDefinitionId);
+                var _custodySectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Custody).SectionId;
+                if (_custodySectionId.HasValue)
+                {
+                    _custody.ID = new SectionID(_custodySectionId.Value);
+                }
+
                 if (obj.Custody.From != default)
                 {
                     _custody.AddOrUpdateValue<DateTime>(AssetManagement.Models.AssetDomMapper.Custody.From, (DateTime)obj.Custody.From);
@@ -1145,6 +1190,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             {
                 var _holdersSection = new Section(AssetManagement.Models.AssetDomMapper.Holders.SectionDefinitionId);
 
+                var _holdersSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)holders).SectionId;
+                if (_holdersSectionId.HasValue)
+                {
+                    _holdersSection.ID = new SectionID(_holdersSectionId.Value);
+                }
+
                 if (holders.SlotNumber != default)
                 {
                     _holdersSection.AddOrUpdateValue<long>(AssetManagement.Models.AssetDomMapper.Holders.SlotNumber, (long)holders.SlotNumber);
@@ -1161,6 +1212,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             foreach (var elementlinks in obj.ElementLinks)
             {
                 var _elementlinksSection = new Section(AssetManagement.Models.AssetDomMapper.ElementLinks.SectionDefinitionId);
+
+                var _elementlinksSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)elementlinks).SectionId;
+                if (_elementlinksSectionId.HasValue)
+                {
+                    _elementlinksSection.ID = new SectionID(_elementlinksSectionId.Value);
+                }
 
                 if (elementlinks.ElementID != default)
                 {

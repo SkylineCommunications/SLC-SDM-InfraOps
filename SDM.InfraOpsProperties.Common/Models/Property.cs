@@ -105,7 +105,20 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
 
         #region Layout
 
-        public PropertyLayout Layout { get; set; }
+        private PropertyLayout _layout;
+
+        public PropertyLayout Layout => _layout ?? (_layout = new PropertyLayout());
+
+        #endregion
+
+        #region Section Tracking
+
+        /// <summary>
+        /// Gets or sets the DOM Section ID of the PropertyProperties section, captured on read so it can be reused on update.
+        /// </summary>
+        [JsonIgnore]
+        [SdmIgnore]
+        internal System.Guid? PropertyPropertiesSectionId { get; set; }
 
         #endregion
 

@@ -127,15 +127,15 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
             }
 
             var roomsWithRows = _entityLoader.GetRowsByRoomIdentifiers(identifiers)
-                .Select(r => r.RoomFk == null ? null : r.RoomFk.Room.Identifier)
+                .Select(r => r.RoomFk.IsEmpty ? null : r.RoomFk.Room.Identifier)
                 .Where(id => !string.IsNullOrWhiteSpace(id))
                 .ToHashSet();
             var roomsWithZones = _entityLoader.GetZonesByRoomIdentifiers(identifiers)
-                .Select(z => z.RoomFk == null ? null : z.RoomFk.Room.Identifier)
+                .Select(z => z.RoomFk.IsEmpty ? null : z.RoomFk.Room.Identifier)
                 .Where(id => !string.IsNullOrWhiteSpace(id))
                 .ToHashSet();
             var roomsWithDesks = _entityLoader.GetDesksByRoomIdentifiers(identifiers)
-                .Select(d => d.RoomFk == null ? null : d.RoomFk.Room.Identifier)
+                .Select(d => d.RoomFk.IsEmpty ? null : d.RoomFk.Room.Identifier)
                 .Where(id => !string.IsNullOrWhiteSpace(id))
                 .ToHashSet();
 
@@ -208,7 +208,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                 {
                     Entity = entity,
                     Index = index,
-                    FloorIdentifier = entity.FloorFk == null ? null : ReferenceValidationHelper.GetId(entity.FloorFk.Floor),
+                    FloorIdentifier = entity.FloorFk.IsEmpty ? null : ReferenceValidationHelper.GetId(entity.FloorFk.Floor),
                 })
                 .Where(x => ReferenceValidationHelper.ShouldValidateReferences(x.Entity) &&
                     ReferenceValidationHelper.HasId(x.FloorIdentifier))

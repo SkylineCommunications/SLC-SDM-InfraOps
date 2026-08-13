@@ -127,7 +127,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
             }
 
             var facilitiesWithFloors = _entityLoader.GetFloorsByFacilityIdentifiers(identifiers)
-                .Select(f => f.FacilityFk == null ? null : f.FacilityFk.Facility.Identifier)
+                .Select(f => f.FacilityFk.IsEmpty ? null : f.FacilityFk.Facility.Identifier)
                 .Where(id => !string.IsNullOrWhiteSpace(id))
                 .ToHashSet();
 
@@ -191,7 +191,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                 {
                     Entity = entity,
                     Index = index,
-                    SiteIdentifier = entity.SiteFk == null ? null : ReferenceValidationHelper.GetId(entity.SiteFk.Site),
+                    SiteIdentifier = entity.SiteFk.IsEmpty ? null : ReferenceValidationHelper.GetId(entity.SiteFk.Site),
                 })
                 .Where(x => ReferenceValidationHelper.ShouldValidateReferences(x.Entity) &&
                     ReferenceValidationHelper.HasId(x.SiteIdentifier))

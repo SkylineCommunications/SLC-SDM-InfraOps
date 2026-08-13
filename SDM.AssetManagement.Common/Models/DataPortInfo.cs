@@ -4,12 +4,25 @@ using Newtonsoft.Json;
 
 using SharedMappers.DomIds;
 
+using Skyline.DataMiner.SDM.Extensions;
 using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
 namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
-    public sealed class DataPortInfo : ChangeTrackingBase, IEquatable<DataPortInfo>
+    public sealed class DataPortInfo : ChangeTrackingBase, IEquatable<DataPortInfo>, ISectionTrackable, ISectionEmptyState
     {
+        [JsonIgnore]
+        [SdmIgnore]
+        Guid? ISectionTrackable.SectionId { get; set; }
+        [JsonIgnore]
+        [SdmIgnore]
+        public bool IsEmpty => Name == default &&
+            PortNumber == default &&
+            OutputType == default &&
+            PortExposure == default &&
+            !Type.HasValue() &&
+            Label == default;
+
         public DataPortInfo() : base()
         {
         }

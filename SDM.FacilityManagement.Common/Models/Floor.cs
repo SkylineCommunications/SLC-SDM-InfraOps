@@ -1,5 +1,7 @@
 namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 {
+    using System;
+
     using Newtonsoft.Json;
 
     using SharedMappers.DomIds;
@@ -50,6 +52,14 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
         [SdmIgnore]
         public bool IsNew => _isNew;
 
+        #region Section Tracking
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal Guid? FloorPropertiesSectionId { get; set; }
+
+        #endregion
+
         public string Name
         {
             get => NameField.Value;
@@ -74,7 +84,9 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             set => FloorIdField.Value = value;
         }
 
-        public FacilityRelation FacilityFk { get; set; }
+        private FacilityRelation _facilityFk;
+
+        public FacilityRelation FacilityFk => _facilityFk ?? (_facilityFk = new FacilityRelation());
 
         [SdmIgnore]
         public SlcFacility_Management.Behaviors.Floor_Behaviour.StatusesEnum State { get; internal set; }

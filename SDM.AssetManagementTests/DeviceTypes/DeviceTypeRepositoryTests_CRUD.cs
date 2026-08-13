@@ -33,7 +33,7 @@
                 Identifier = Guid.NewGuid().ToString(),
                 Name = "Test DeviceType",
                 Description = "Test Description",
-                TagsInfo = new TagsInfo
+                TagsInfo =
                 {
                     Tags = new List<SlcAsset_Management.Enums.TagOption> 
                     { 
@@ -41,7 +41,7 @@
                         SlcAsset_Management.Enums.TagOption.RackUnitConsumer 
                     },
                 },
-                HierarchyInfo = new HierarchyInfo
+                HierarchyInfo =
                 {
                     HierarchyRole = SlcAsset_Management.Enums.HierarchyRoleEnum.SubCard,
                 },
@@ -86,14 +86,14 @@
                 Identifier = referenceDeviceType.Identifier,
                 Name = "Updated DeviceType Name",
                 Description = "Updated Description",
-                TagsInfo = new TagsInfo
+                TagsInfo =
                 {
                     Tags = new List<SlcAsset_Management.Enums.TagOption> 
                     { 
                         SlcAsset_Management.Enums.TagOption.RackUnitConsumer 
                     },
                 },
-                HierarchyInfo = new HierarchyInfo
+                HierarchyInfo =
                 {
                     HierarchyRole = SlcAsset_Management.Enums.HierarchyRoleEnum.Chassis,
                 },

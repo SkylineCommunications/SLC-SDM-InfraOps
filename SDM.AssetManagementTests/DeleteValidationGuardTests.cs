@@ -312,11 +312,11 @@ namespace SDM.AssetManagement.Tests
                 Identifier = Guid.NewGuid().ToString(),
                 Name = name,
                 Description = $"{name} description",
-                HierarchyInfo = new HierarchyInfo
+                HierarchyInfo =
                 {
                     HierarchyRole = SlcAsset_Management.Enums.HierarchyRoleEnum.None,
                 },
-                TagsInfo = new TagsInfo
+                TagsInfo =
                 {
                     Tags = tags ?? new List<SlcAsset_Management.Enums.TagOption>(),
                 },
@@ -345,11 +345,11 @@ namespace SDM.AssetManagement.Tests
             {
                 Identifier = Guid.NewGuid().ToString(),
                 Name = name,
-                CategoryLinks = new CategoryRelation
+                CategoryLinks =
                 {
                     Categories = new List<SlcAsset_Management.Enums.CategoriesEnum> { category },
                 },
-                CableFKs = new CableRelation
+                CableFKs =
                 {
                     CableTypeFks = cableRefs,
                 },
@@ -379,7 +379,7 @@ namespace SDM.AssetManagement.Tests
             {
                 Identifier = Guid.NewGuid().ToString(),
                 Asset = new SdmObjectReference<Asset>(asset.Identifier),
-                DataPortInfo = new DataPortInfo
+                DataPortInfo =
                 {
                     Name = $"Data {Guid.NewGuid()}",
                     PortNumber = 1,
@@ -398,7 +398,7 @@ namespace SDM.AssetManagement.Tests
             {
                 Identifier = Guid.NewGuid().ToString(),
                 Asset = new SdmObjectReference<Asset>(asset.Identifier),
-                PowerPortInfo = new PowerPortInfo
+                PowerPortInfo =
                 {
                     Name = $"Power {Guid.NewGuid()}",
                     PortNumber = 1,
@@ -417,12 +417,12 @@ namespace SDM.AssetManagement.Tests
             {
                 Identifier = Guid.NewGuid().ToString(),
                 CableType = cableType == null ? null : new SdmObjectReference<CableType>(cableType.Identifier),
-                Source = new SourceInfo
+                Source =
                 {
                     Port = Guid.Parse(sourcePortId),
                     PortType = sourcePortType,
                 },
-                Destination = new DestinationInfo
+                Destination =
                 {
                     Port = Guid.Empty,
                     PortType = null,

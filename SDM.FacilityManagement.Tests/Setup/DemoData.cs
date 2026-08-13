@@ -153,7 +153,8 @@
 		];
 		public static readonly List<Rack> Racks =
 		[
-			new Rack
+			CreateRack(
+				new Rack
 			{
 				Identifier = Guid.NewGuid().ToString(),
 				Name = "Alpha Server Rack",
@@ -168,9 +169,9 @@
 				Label = "A01",
 				Orientation = SlcFacility_Management.Enums.Placementorientationenum.Vertical,
 				RackId = "RCK-001",
-				Capacity = new RackCapacity { MaximumRackCapacity = 42 },
-			},
-			new Rack
+			}, 42),
+			CreateRack(
+				new Rack
 			{
 				Identifier = Guid.NewGuid().ToString(),
 				Name = "Beta Network Rack",
@@ -185,9 +186,9 @@
 				Label = "A02",
 				Orientation = SlcFacility_Management.Enums.Placementorientationenum.Vertical,
 				RackId = "RCK-002",
-				Capacity = new RackCapacity { MaximumRackCapacity = 24 },
-			},
-			new Rack
+			}, 24),
+			CreateRack(
+				new Rack
 			{
 				Identifier = Guid.NewGuid().ToString(),
 				Name = "Core Switch Enclosure",
@@ -202,9 +203,9 @@
 				Label = "B01",
 				Orientation = SlcFacility_Management.Enums.Placementorientationenum.Vertical,
 				RackId = "RCK-003",
-				Capacity = new RackCapacity { MaximumRackCapacity = 42 },
-			},
-			new Rack
+			}, 42),
+			CreateRack(
+				new Rack
 			{
 				Identifier = Guid.NewGuid().ToString(),
 				Name = "Edge Compute Rack",
@@ -219,9 +220,9 @@
 				Label = "B02",
 				Orientation = SlcFacility_Management.Enums.Placementorientationenum.Horizontal,
 				RackId = "RCK-004",
-				Capacity = new RackCapacity { MaximumRackCapacity = 36 },
-			},
-			new Rack
+			}, 36),
+			CreateRack(
+				new Rack
 			{
 				Identifier = Guid.NewGuid().ToString(),
 				Name = "Alpha Patch Panel",
@@ -236,9 +237,9 @@
 				Label = "C01",
 				Orientation = SlcFacility_Management.Enums.Placementorientationenum.Vertical,
 				RackId = "RCK-005",
-				Capacity = new RackCapacity { MaximumRackCapacity = 12 },
-			},
-			new Rack
+			}, 12),
+			CreateRack(
+				new Rack
 			{
 				Identifier = Guid.NewGuid().ToString(),
 				Name = "Storage Array Cabinet",
@@ -253,9 +254,14 @@
 				Label = "C02",
 				Orientation = SlcFacility_Management.Enums.Placementorientationenum.Vertical,
 				RackId = "RCK-006",
-				Capacity = new RackCapacity { MaximumRackCapacity = 48 },
-			},
+			}, 48),
 		];
+
+		private static Rack CreateRack(Rack rack, double maximumRackCapacity)
+		{
+			rack.Capacity.MaximumRackCapacity = maximumRackCapacity;
+			return rack;
+		}
 
 		public static readonly List<Desk> Desks =
 		[

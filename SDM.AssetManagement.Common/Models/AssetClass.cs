@@ -1,4 +1,4 @@
-namespace Skyline.DataMiner.SDM.AssetManagement.Models
+﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
     using System;
     using System.Collections.Generic;
@@ -133,11 +133,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             set => PowerSupplyField.Value = value;
         }
 
-        public AssetClassLifecycle Lifecycle
-        {
-            get => _lifecycle ?? (_lifecycle = new AssetClassLifecycle());
-            set => _lifecycle = value ?? new AssetClassLifecycle();
-        }
+        public AssetClassLifecycle Lifecycle => _lifecycle ?? (_lifecycle = new AssetClassLifecycle());
 
         public List<DataPortInfo> DataPorts
         {
@@ -320,5 +316,14 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 }
             }
         }
+
+        #region Section Tracking
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal Guid? AssetClassPropertiesSectionId { get; set; }
+
+        #endregion
+
     }
 }

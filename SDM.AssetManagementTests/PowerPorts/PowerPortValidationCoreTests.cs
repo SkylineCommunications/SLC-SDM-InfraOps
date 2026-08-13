@@ -48,7 +48,7 @@ namespace SDM.AssetManagement.Tests.PowerPorts
             powerPort.PowerPortInfo.PortType = new SdmObjectReference<PortType>(Guid.NewGuid().ToString());
             var dataPortType = new PortType
             {
-                CategoryLinks = new CategoryRelation
+                CategoryLinks =
                 {
                     Categories = [SharedMappers.DomIds.SlcAsset_Management.Enums.CategoriesEnum.Data],
                 },
@@ -82,7 +82,7 @@ namespace SDM.AssetManagement.Tests.PowerPorts
             {
                 Identifier = Guid.NewGuid().ToString(),
                 Asset = AssetReference,
-                PowerPortInfo = new PowerPortInfo
+                PowerPortInfo =
                 {
                     Name = "PSU",
                     PortNumber = portNumber,

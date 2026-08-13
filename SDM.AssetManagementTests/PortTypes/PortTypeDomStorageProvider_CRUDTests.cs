@@ -33,7 +33,7 @@
                 Identifier = Guid.NewGuid().ToString(),
                 Name = "Test PortType",
                 Description = "Test Description",
-                CategoryLinks = new CategoryRelation
+                CategoryLinks =
                 {
                     Categories = new List<SlcAsset_Management.Enums.CategoriesEnum>
                     {
@@ -41,7 +41,7 @@
                         SlcAsset_Management.Enums.CategoriesEnum.Data,
                     },
                 },
-                CableFKs = new CableRelation
+                CableFKs =
                 {
                     CableTypeFks = new List<SdmObjectReference<CableType>>(),
                 },
@@ -112,7 +112,7 @@
                 Identifier = referencePortType.Identifier,
                 Name = "Updated PortType Name",
                 Description = "Updated Description",
-                CategoryLinks = new CategoryRelation
+                CategoryLinks =
                 {
                     Categories = new List<SlcAsset_Management.Enums.CategoriesEnum>
                     {
@@ -120,7 +120,7 @@
                         SlcAsset_Management.Enums.CategoriesEnum.Video,
                     },
                 },
-                CableFKs = new CableRelation
+                CableFKs =
                 {
                     CableTypeFks = new List<SdmObjectReference<CableType>>(),
                 },
@@ -252,8 +252,10 @@
                     SlcAsset_Management.Enums.CategoriesEnum.Video,
                 });
 
-                // CableFKs changes
-                updated.CableFKs.CableTypeFks.Should().BeEmpty();
+                // CableFKs changes - updated with an empty CableTypeFks list, so the section is
+                // empty (ISectionEmptyState.IsEmpty) and omitted from the persisted DOM instance.
+                // The section property is never null (auto-vivified), so it reads back empty.
+                updated.CableFKs.IsEmpty.Should().BeTrue();
             }
         }
 
@@ -274,9 +276,18 @@
                 created.CategoryLinks.Should().NotBeNull();
                 created.CategoryLinks.Categories.Should().BeEquivalentTo(referencePortType.CategoryLinks.Categories);
 
-                // CableFKs
-                created.CableFKs.Should().NotBeNull();
-                created.CableFKs.CableTypeFks.Should().HaveCount(referencePortType.CableFKs.CableTypeFks.Count);
+                // CableFKs - an empty CableTypeFks list makes the section empty
+                // (ISectionEmptyState.IsEmpty), so it is omitted from the persisted DOM instance;
+                // a populated list is persisted as usual.
+                if (referencePortType.CableFKs.IsEmpty || referencePortType.CableFKs.CableTypeFks.Count == 0)
+                {
+                    created.CableFKs.IsEmpty.Should().BeTrue();
+                }
+                else
+                {
+                    created.CableFKs.Should().NotBeNull();
+                    created.CableFKs.CableTypeFks.Should().HaveCount(referencePortType.CableFKs.CableTypeFks.Count);
+                }
             }
         }
 
