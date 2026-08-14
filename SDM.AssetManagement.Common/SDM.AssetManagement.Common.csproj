@@ -6,8 +6,8 @@
     <Nullable>disable</Nullable>
     <AssemblyName>Skyline.DataMiner.SDM.AssetManagement.Common</AssemblyName>
     <RootNamespace>Skyline.DataMiner.SDM.AssetManagement.Common</RootNamespace>
-    <VersionSuffix Condition="'$(Configuration)' == 'Debug'">dev-038</VersionSuffix>
-    <AssemblyVersion>0.2.3.38</AssemblyVersion>
+    <VersionSuffix Condition="'$(Configuration)' == 'Debug'">dev-041</VersionSuffix>
+    <AssemblyVersion>0.2.3.41</AssemblyVersion>
     <VersionPrefix>1.0.1</VersionPrefix>
     <PackageTags>Skyline;DataMiner</PackageTags>
     <PackageProjectUrl>https://skyline.be</PackageProjectUrl>
@@ -42,6 +42,10 @@
 		<PackageReference Include="Skyline.DataMiner.Utils.DOM" />
 		<PackageReference Include="Skyline.DataMiner.Utils.PerformanceAnalyzer" />
 		<PackageReference Include="Skyline.DataMiner.Utils.SecureCoding" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Skyline.DataMiner.SDM.AssetManagement.GQI" />
   </ItemGroup>
   
   <ItemGroup>

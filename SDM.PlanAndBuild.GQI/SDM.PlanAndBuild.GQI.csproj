@@ -7,7 +7,7 @@
     <AssemblyName>Skyline.DataMiner.SDM.PlanAndBuild.GQI</AssemblyName>
     <RootNamespace>Skyline.DataMiner.SDM.PlanAndBuild.GQI</RootNamespace>
     <PackageVersion>1.0.1</PackageVersion>
-    <AssemblyVersion>0.2.3.38</AssemblyVersion>
+    <AssemblyVersion>0.2.3.41</AssemblyVersion>
     <VersionPrefix>1.0.1</VersionPrefix>
     <PackageTags>Skyline;DataMiner</PackageTags>
     <PackageProjectUrl>https://skyline.be</PackageProjectUrl>
