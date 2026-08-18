@@ -12,19 +12,16 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
     using Skyline.DataMiner.Net;
     using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-    using Skyline.DataMiner.Net.Apps.Sections.Sections;
     using Skyline.DataMiner.Net.Helper;
     using Skyline.DataMiner.Net.ManagerStore;
-    using Skyline.DataMiner.Net.Messages;
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.Net.Sections;
-    using Skyline.DataMiner.Net.SubscriptionFilters;
     using Skyline.DataMiner.SDM;
-
+    using Skyline.DataMiner.SDM.AssetManagement.Models.Interafaces;
     using SLDataGateway.API.Querying;
     using SLDataGateway.API.Types.Querying;
 
-    internal partial class DataPortDomRepository : IBulkRepository<DataPort>
+    internal partial class DataPortDomRepository : IBulkRepository<DataPort>, IDomInstanceReader<DataPort>
     {
         private readonly IConnection connection;
         private readonly DomHelper helper;
@@ -615,6 +612,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
             return obj;
         }
+
+        DataPort IDomInstanceReader<DataPort>.FromDomInstance(DomInstance instance) => FromInstance(instance);
 
         private DomInstance ToInstance(DataPort obj)
         {

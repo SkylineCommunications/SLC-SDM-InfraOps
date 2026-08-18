@@ -6,29 +6,24 @@
 //------------------------------------------------------------------------------
 namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Diagnostics;
-	using System.Linq;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
 
     using SharedMappers.DomIds;
 
     using Skyline.DataMiner.Net;
-	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-	using Skyline.DataMiner.Net.Apps.Sections.Sections;
-	using Skyline.DataMiner.Net.Helper;
-	using Skyline.DataMiner.Net.ManagerStore;
-	using Skyline.DataMiner.Net.Messages;
-	using Skyline.DataMiner.Net.Messages.SLDataGateway;
-	using Skyline.DataMiner.Net.Sections;
-	using Skyline.DataMiner.Net.SubscriptionFilters;
-	using Skyline.DataMiner.SDM;
-
+    using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+    using Skyline.DataMiner.Net.Helper;
+    using Skyline.DataMiner.Net.ManagerStore;
+    using Skyline.DataMiner.Net.Messages.SLDataGateway;
+    using Skyline.DataMiner.Net.Sections;
+    using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.AssetManagement.Models.Interafaces;
     using SLDataGateway.API.Querying;
-	using SLDataGateway.API.Types.Querying;
-	using static Skyline.DataMiner.SDM.AssetManagement.Models.AssetDomMapper;
+    using SLDataGateway.API.Types.Querying;
 
-	internal partial class PowerPortDomRepository : IBulkRepository<PowerPort>
+    internal partial class PowerPortDomRepository : IBulkRepository<PowerPort>, IDomInstanceReader<PowerPort>
 	{
 		private readonly IConnection connection;
 		private readonly DomHelper helper;
@@ -573,7 +568,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			return obj;
 		}
 
-		private DomInstance ToInstance(PowerPort obj)
+        PowerPort IDomInstanceReader<PowerPort>.FromDomInstance(DomInstance instance) => FromInstance(instance);
+
+        private DomInstance ToInstance(PowerPort obj)
 		{
 			Guid id = default(Guid);
 			if (!String.IsNullOrEmpty(obj.Identifier))
@@ -697,5 +694,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 					throw new NotImplementedException();
 			}
 		}
-	}
+
+    }
 }

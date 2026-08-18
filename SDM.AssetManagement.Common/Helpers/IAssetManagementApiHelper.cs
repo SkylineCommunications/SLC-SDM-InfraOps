@@ -18,6 +18,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Helpers
 
 		IBulkRepository<DataPort> DataPorts { get; }
 
+		IPortRepository Ports { get; }
+
 		IBulkRepository<DeviceType> DeviceTypes { get; }
 
         IBulkRepository<PortType> PortTypes { get; }

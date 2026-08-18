@@ -45,6 +45,7 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
         var deviceTypeRepository = new DeviceTypeDomRepository(connection);
         var dataPortRepository = new DataPortDomRepository(connection);
         var powerPortRepository = new PowerPortDomRepository(connection);
+        var portRepository = new PortDomRepository(connection, dataPortRepository, powerPortRepository);
         var portTypeRepository = new PortTypeDomRepository(connection);
         var cableTypeRepository = new CableTypeDomRepository(connection);   
         var connectionDomRepository = new ConnectionDomRepository(connection);
@@ -78,6 +79,7 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
         DataPorts = dataPortRepository
             .WithMiddleware(new DataPortValidationMiddleware(_dataPortValidator))
             .WithMiddleware(new IdentifierMiddleware<DataPort>());
+        Ports = portRepository;
         DeviceTypes = deviceTypeRepository
             .WithMiddleware(new DeviceTypeValidationMiddleware(_deviceTypeValidator))
             .WithMiddleware(new IdentifierMiddleware<DeviceType>());
@@ -102,6 +104,7 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
     public IBulkRepository<AssetClass> AssetClasses { get; }
     public IBulkRepository<PowerPort> PowerPorts { get; }
     public IBulkRepository<DataPort> DataPorts { get; }
+    public IPortRepository Ports { get; }
     public IBulkRepository<DeviceType> DeviceTypes { get; }
     public IBulkRepository<PortType> PortTypes { get; }
     public IBulkRepository<Connection> Connections { get; }
