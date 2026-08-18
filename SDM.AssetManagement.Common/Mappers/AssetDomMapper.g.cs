@@ -132,5 +132,15 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             internal static FieldDescriptorID ElementID = SharedMappers.DomIds.SlcAsset_Management.Sections.ElementLink.ElementID;
             internal static FieldDescriptorID IsPrimary = SharedMappers.DomIds.SlcAsset_Management.Sections.ElementLink.IsPrimary;
         }
+
+        internal static class Attachments
+        {
+            internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(SharedMappers.DomIds.SlcAsset_Management.Sections.Attachment.Id.Id)
+            { ModuleId = ModuleId };
+
+            internal static FieldDescriptorID FilePath = SharedMappers.DomIds.SlcAsset_Management.Sections.Attachment.Path;
+            internal static FieldDescriptorID AttachedAt = SharedMappers.DomIds.SlcAsset_Management.Sections.Attachment.AttachedAt;
+            internal static FieldDescriptorID AttachedBy = SharedMappers.DomIds.SlcAsset_Management.Sections.Attachment.AttachedBy;
+        }
     }
 }

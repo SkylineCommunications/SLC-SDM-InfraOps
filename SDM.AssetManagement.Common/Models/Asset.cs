@@ -61,6 +61,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             Custody?.Changed == true ||
             HoldersField?.Changed == true ||
             ElementsField?.Changed == true ||
+            AttachmentsField?.Changed == true ||
             StateField?.Changed == true;
 
         /// <summary>
@@ -235,6 +236,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             set => ElementsField.Value = value;
         }
 
+        public List<AssetAttachment> Attachments
+        {
+            get => AttachmentsField.Value ?? new List<AssetAttachment>();
+            set => AttachmentsField.Value = value;
+        }
+
         #endregion
 
         #region Info Tracking Fields
@@ -371,6 +378,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             nameof(ElementLinks),
             () => new ChangeTrackingArrayField<ElementLink>(new List<ElementLink>()));
 
+        [JsonIgnore]
+        [SdmIgnore]
+        internal ChangeTrackingArrayField<AssetAttachment> AttachmentsField => FieldHandler.GetOrCreateArrayField(
+            nameof(Attachments),
+            () => new ChangeTrackingArrayField<AssetAttachment>(new List<AssetAttachment>()));
+
         #endregion
 
         #region Section Tracking
@@ -417,6 +430,14 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 foreach (var link in ElementLinks.OfType<IChangeTracking>())
                 {
                     link?.ResetChangeTracking();
+                }
+            }
+
+            if (Attachments != null)
+            {
+                foreach (var attachment in Attachments.OfType<IChangeTracking>())
+                {
+                    attachment?.ResetChangeTracking();
                 }
             }
         }

@@ -82,5 +82,15 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             internal static FieldDescriptorID SlotNumber = SharedMappers.DomIds.SlcAsset_Management.Sections.Holders.SlotNumber;
             internal static FieldDescriptorID HierarchyRole = SharedMappers.DomIds.SlcAsset_Management.Sections.Holders.HierarchyRole;
         }
+
+        internal static class Attachments
+        {
+            internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(SharedMappers.DomIds.SlcAsset_Management.Sections.Attachment.Id.Id)
+            { ModuleId = ModuleId };
+
+            internal static FieldDescriptorID FilePath = SharedMappers.DomIds.SlcAsset_Management.Sections.Attachment.Path;
+            internal static FieldDescriptorID AttachedAt = SharedMappers.DomIds.SlcAsset_Management.Sections.Attachment.AttachedAt;
+            internal static FieldDescriptorID AttachedBy = SharedMappers.DomIds.SlcAsset_Management.Sections.Attachment.AttachedBy;
+        }
     }
 }

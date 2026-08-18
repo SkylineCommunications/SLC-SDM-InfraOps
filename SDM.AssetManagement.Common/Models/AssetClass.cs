@@ -153,6 +153,12 @@
             set => HoldersField.Value = value;
         }
 
+        public List<AssetAttachment> Attachments
+        {
+            get => AttachmentsField.Value ?? new List<AssetAttachment>();
+            set => AttachmentsField.Value = value;
+        }
+
         /// <summary>
         /// Gets or sets a value indicating whether the entity has not yet been persisted or saved.
         /// </summary>
@@ -286,6 +292,12 @@
             nameof(Holders),
             () => new ChangeTrackingArrayField<AssetHolder>(new List<AssetHolder>()));
 
+        [JsonIgnore]
+        [SdmIgnore]
+        internal ChangeTrackingArrayField<AssetAttachment> AttachmentsField => FieldHandler.GetOrCreateArrayField(
+            nameof(Attachments),
+            () => new ChangeTrackingArrayField<AssetAttachment>(new List<AssetAttachment>()));
+
         /// <summary>
         /// Gets the current status of the asset class.
         /// </summary>
@@ -300,6 +312,8 @@
         public bool Changed => FieldHandler.HasChanges ||
             _lifecycle?.Changed == true ||
             StateField?.Changed == true ||
+            HoldersField?.Changed == true ||
+            AttachmentsField?.Changed == true ||
             (DataPorts?.Any(p => p?.Changed == true) == true);
 
         public void ResetChangeTracking()
@@ -313,6 +327,14 @@
                 foreach (var port in DataPorts)
                 {
                     port?.ResetChangeTracking();
+                }
+            }
+
+            if (Attachments != null)
+            {
+                foreach (var attachment in Attachments.OfType<IChangeTracking>())
+                {
+                    attachment?.ResetChangeTracking();
                 }
             }
         }
