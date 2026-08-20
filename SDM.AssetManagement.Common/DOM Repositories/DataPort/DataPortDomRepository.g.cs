@@ -613,7 +613,10 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             return obj;
         }
 
-        DataPort IDomInstanceReader<DataPort>.FromDomInstance(DomInstance instance) => FromInstance(instance);
+        DataPort IDomInstanceReader<DataPort>.FromDomInstance(DomInstance instance)
+        {
+            return FromInstance(instance);
+        }
 
         private DomInstance ToInstance(DataPort obj)
         {
@@ -784,6 +787,11 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
         }
 
+        FilterElement<DomInstance> IDomInstanceReader<DataPort>.CreatePortFilter(string fieldName, Comparer comparer, object value)
+        {
+            return CreateFilter(fieldName, comparer, value);
+        }
+
         private IOrderByElement CreateOrderBy(string fieldName, SortOrder sortOrder, bool naturalSort = false)
         {
             switch (fieldName)
@@ -820,5 +828,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     throw new NotImplementedException();
             }
         }
+
     }
 }

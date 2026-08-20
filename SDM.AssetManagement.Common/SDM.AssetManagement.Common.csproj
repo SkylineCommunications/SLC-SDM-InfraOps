@@ -6,8 +6,8 @@
     <Nullable>disable</Nullable>
     <AssemblyName>Skyline.DataMiner.SDM.AssetManagement.Common</AssemblyName>
     <RootNamespace>Skyline.DataMiner.SDM.AssetManagement.Common</RootNamespace>
-    <VersionSuffix Condition="'$(Configuration)' == 'Debug'">dev-041</VersionSuffix>
-    <AssemblyVersion>0.2.3.41</AssemblyVersion>
+    <VersionSuffix Condition="'$(Configuration)' == 'Debug'">dev-043</VersionSuffix>
+    <AssemblyVersion>0.2.3.43</AssemblyVersion>
     <VersionPrefix>1.0.1</VersionPrefix>
     <PackageTags>Skyline;DataMiner</PackageTags>
     <PackageProjectUrl>https://skyline.be</PackageProjectUrl>

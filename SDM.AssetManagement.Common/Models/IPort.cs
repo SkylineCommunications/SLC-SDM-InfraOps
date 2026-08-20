@@ -4,7 +4,7 @@
     /// Marker for port models (<see cref="DataPort"/> and <see cref="PowerPort"/>).
     /// Used to build filters on fields shared by both DOM definitions via <see cref="PortExposers"/>.
     /// </summary>
-    public interface IPort
+    public interface IPort : ISdmObject
     {
     }
 }

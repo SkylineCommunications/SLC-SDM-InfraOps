@@ -9,6 +9,8 @@
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Models.Interafaces;
+    using SLDataGateway.API.Querying;
+    using SLDataGateway.API.Types.Querying;
 
     /// <summary>
     /// Repository whose purpose is to read ports from both the DataPort and PowerPort DOM definitions, and split the results per definition.
@@ -67,17 +69,41 @@
             if (hasConflictingExclusiveFields)
             {
                 // The filter combines DataPort-exclusive and PowerPort-exclusive fields; no instance can match.
-                return new PortReadResult(null, null);
+                return new PortReadResult(null);
             }
 
-            var dataPorts = new List<DataPort>();
-            var powerPorts = new List<PowerPort>();
+            var ports = new List<IPort>();
             foreach (var instance in helper.DomInstances.Read(domFilter))
             {
-                ProcessInstances(instance, dataPorts, powerPorts);
+                ProcessInstance(instance, ports);
             }
 
-            return new PortReadResult(dataPorts, powerPorts);
+            return new PortReadResult(ports);
+        }
+
+        public PortReadResult Read(IQuery<IPort> query)
+        {
+            if (query is null)
+            {
+                throw new ArgumentNullException(nameof(query));
+            }
+
+            var domFilter = TranslateFullFilter(query.Filter, out var hasConflictingExclusiveFields);
+            if (hasConflictingExclusiveFields)
+            {
+                // The filter combines DataPort-exclusive and PowerPort-exclusive fields; no instance can match.
+                return new PortReadResult(null);
+            }
+
+            var domOrder = TranslateFullOrderBy(query.Order);
+            var domQuery = query.WithFilter(domFilter).WithOrder(domOrder);
+            var ports = new List<IPort>();
+            foreach (var instance in helper.DomInstances.Read(domQuery))
+            {
+                ProcessInstance(instance, ports);
+            }
+
+            return new PortReadResult(ports);
         }
 
         public IEnumerable<PortReadResult> ReadPaged(int pageSize = DefaultPageSize)
@@ -107,31 +133,69 @@
             return ReadPagedInternal(domFilter, pageSize);
         }
 
+        public IEnumerable<PortReadResult> ReadPaged(IQuery<IPort> query, int pageSize = DefaultPageSize)
+        {
+            if (query is null)
+            {
+                throw new ArgumentNullException(nameof(query));
+            }
+
+            if (pageSize <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(pageSize), "The page size must be 1 or higher");
+            }
+
+            var domFilter = TranslateFullFilter(query.Filter, out var hasConflictingExclusiveFields);
+            if (hasConflictingExclusiveFields)
+            {
+                // The filter combines DataPort-exclusive and PowerPort-exclusive fields; no instance can match.
+                return Enumerable.Empty<PortReadResult>();
+            }
+
+            var domOrder = TranslateFullOrderBy(query.Order);
+            var domQuery = query.WithFilter(domFilter).WithOrder(domOrder);
+            return ReadPagedInternal(domQuery, pageSize);
+        }
+
         private IEnumerable<PortReadResult> ReadPagedInternal(FilterElement<DomInstance> domFilter, int pageSize)
         {
             var pagingHelper = helper.DomInstances.PreparePaging(domFilter, pageSize);
             while (pagingHelper.MoveToNextPage())
             {
-                var dataPorts = new List<DataPort>();
-                var powerPorts = new List<PowerPort>();
+                var ports = new List<IPort>();
                 foreach (var instance in pagingHelper.GetCurrentPage())
                 {
-                    ProcessInstances(instance, dataPorts, powerPorts);
+                    ProcessInstance(instance, ports);
                 }
 
-                yield return new PortReadResult(dataPorts, powerPorts);
+                yield return new PortReadResult(ports);
             }
         }
 
-        private void ProcessInstances(DomInstance instance, List<DataPort> dataPorts, List<PowerPort> powerPorts)
+        private IEnumerable<PortReadResult> ReadPagedInternal(IQuery<DomInstance> domQuery, int pageSize)
+        {
+            var pagingHelper = helper.DomInstances.PreparePaging(domQuery, pageSize);
+            while (pagingHelper.MoveToNextPage())
+            {
+                var ports = new List<IPort>();
+                foreach (var instance in pagingHelper.GetCurrentPage())
+                {
+                    ProcessInstance(instance, ports);
+                }
+
+                yield return new PortReadResult(ports);
+            }
+        }
+
+        private void ProcessInstance(DomInstance instance, List<IPort> ports)
         {
             if (instance.DomDefinitionId.Id == DataPortDomMapper.DomDefinitionId.Id)
             {
-                dataPorts.Add(dataPortRepository.FromDomInstance(instance));
+                ports.Add(dataPortRepository.FromDomInstance(instance));
             }
             else if (instance.DomDefinitionId.Id == PowerPortDomMapper.DomDefinitionId.Id)
             {
-                powerPorts.Add(powerPortRepository.FromDomInstance(instance));
+                ports.Add(powerPortRepository.FromDomInstance(instance));
             }
         }
 
@@ -143,7 +207,7 @@
         /// match and its branch is dropped. Returns <c>false</c> when the filter combines exclusive
         /// fields of both definitions, meaning no instance can ever match.
         /// </summary>
-        private static FilterElement<DomInstance> TranslateFullFilter(FilterElement<IPort> filter, out bool hasConflictingExclusiveFields)
+        private FilterElement<DomInstance> TranslateFullFilter(FilterElement<IPort> filter, out bool hasConflictingExclusiveFields)
         {
             var usesDataPortOnly = false;
             var usesPowerPortOnly = false;
@@ -169,14 +233,99 @@
             return new ORFilterElement<DomInstance>(DataPortBranch(filter), PowerPortBranch(filter));
         }
 
-        private static FilterElement<DomInstance> DataPortBranch(FilterElement<IPort> filter)
+        /// <summary>
+        /// Translates a shared port order-by into a DOM order-by. Each element on a field whose
+        /// descriptor differs between the definitions expands into two elements — the DataPort
+        /// field followed by the PowerPort field — so OrderBy(PortExposers.PortInfo.PortNumber)
+        /// behaves as OrderBy(DataPort.PortNumber).ThenBy(PowerPort.PortNumber). Fields sharing
+        /// the same descriptor (Identifier, Asset) and definition-exclusive fields expand to a
+        /// single element.
+        /// </summary>
+        private static IOrderBy TranslateFullOrderBy(IOrderBy order)
+        {
+            if (order is null)
+            {
+                throw new ArgumentNullException(nameof(order));
+            }
+
+            var translatedElements = new List<IOrderByElement>();
+            foreach (var orderByElement in order.Elements)
+            {
+                var fieldName = orderByElement.Exposer.fieldName;
+                var sortOrder = orderByElement.SortOrder;
+                var naturalSort = orderByElement.Options.NaturalSort;
+                translatedElements.AddRange(CreateOrderByElements(fieldName, sortOrder, naturalSort));
+            }
+
+            return new OrderBy(translatedElements);
+        }
+
+        private static IEnumerable<IOrderByElement> CreateOrderByElements(string fieldName, SortOrder sortOrder, bool naturalSort)
+        {
+            switch (fieldName)
+            {
+                case "Identifier":
+                    yield return OrderByElementFactory.Create(DomInstanceExposers.Id, sortOrder, naturalSort);
+                    break;
+                case "Asset":
+                    // Both definitions share the same field descriptor for the asset reference, so one element covers both.
+                    yield return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(DataPortDomMapper.AssetFk.Asset), sortOrder, naturalSort);
+                    break;
+                case "PortInfo.Name":
+                    yield return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(DataPortDomMapper.DataPortInfo.Name), sortOrder, naturalSort);
+                    yield return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(PowerPortDomMapper.PowerPortInfo.Name), sortOrder, naturalSort);
+                    break;
+                case "PortInfo.PortNumber":
+                    yield return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(DataPortDomMapper.DataPortInfo.PortNumber), sortOrder, naturalSort);
+                    yield return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(PowerPortDomMapper.PowerPortInfo.PortNumber), sortOrder, naturalSort);
+                    break;
+                case "PortInfo.OutputType":
+                    yield return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(DataPortDomMapper.DataPortInfo.OutputType), sortOrder, naturalSort);
+                    yield return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(PowerPortDomMapper.PowerPortInfo.OutputType), sortOrder, naturalSort);
+                    break;
+                case "PortInfo.PortExposure":
+                    yield return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(DataPortDomMapper.DataPortInfo.PortExposure), sortOrder, naturalSort);
+                    yield return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(PowerPortDomMapper.PowerPortInfo.PortExposure), sortOrder, naturalSort);
+                    break;
+                case "PortInfo.Type":
+                    yield return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(DataPortDomMapper.DataPortInfo.Type), sortOrder, naturalSort);
+                    yield return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(PowerPortDomMapper.PowerPortInfo.PortType), sortOrder, naturalSort);
+                    break;
+                case "PortInfo.Label":
+                    yield return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(DataPortDomMapper.DataPortInfo.Label), sortOrder, naturalSort);
+                    yield return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(PowerPortDomMapper.PowerPortInfo.Label), sortOrder, naturalSort);
+                    break;
+                case "AddressInfo.Ipv4Address":
+                    yield return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(DataPortDomMapper.AddressInfo.Ipv4Address), sortOrder, naturalSort);
+                    break;
+                case "AddressInfo.Ipv6Address":
+                    yield return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(DataPortDomMapper.AddressInfo.Ipv6Address), sortOrder, naturalSort);
+                    break;
+                case "AddressInfo.Hostname":
+                    yield return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(DataPortDomMapper.AddressInfo.Hostname), sortOrder, naturalSort);
+                    break;
+                case "AddressInfo.DNS":
+                    yield return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(DataPortDomMapper.AddressInfo.DNS), sortOrder, naturalSort);
+                    break;
+                case "PrimaryPortRelation.IsPrimaryIpv6":
+                    yield return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(DataPortDomMapper.PrimaryPortRelation.IsPrimaryIpv6), sortOrder, naturalSort);
+                    break;
+                case "PrimaryPortRelation.IsPrimaryIpv4":
+                    yield return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(DataPortDomMapper.PrimaryPortRelation.IsPrimaryIpv4), sortOrder, naturalSort);
+                    break;
+                default:
+                    throw new NotSupportedException($"The field '{fieldName}' cannot be used to order ports. Use the exposers from '{nameof(PortExposers)}'.");
+            }
+        }
+
+        private FilterElement<DomInstance> DataPortBranch(FilterElement<IPort> filter)
         {
             return new ANDFilterElement<DomInstance>(
                 DomInstanceExposers.DomDefinitionId.Equal(DataPortDomMapper.DomDefinitionId.Id),
                 Translate(filter, CreateDataPortFilter));
         }
 
-        private static FilterElement<DomInstance> PowerPortBranch(FilterElement<IPort> filter)
+        private FilterElement<DomInstance> PowerPortBranch(FilterElement<IPort> filter)
         {
             return new ANDFilterElement<DomInstance>(
                 DomInstanceExposers.DomDefinitionId.Equal(PowerPortDomMapper.DomDefinitionId.Id),
@@ -254,75 +403,24 @@
             return translated;
         }
 
-        private static FilterElement<DomInstance> CreateDataPortFilter(string fieldName, Comparer comparer, object value)
+        private FilterElement<DomInstance> CreateDataPortFilter(string fieldName, Comparer comparer, object value)
         {
-            switch (fieldName)
+            if(fieldName.StartsWith("PortInfo.", StringComparison.Ordinal))
             {
-                case "Identifier":
-                    return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.Id, comparer, Guid.Parse((string)value));
-                case "Asset":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(DataPortDomMapper.AssetFk.Asset), comparer, Guid.Parse(SdmObjectReference<Asset>.Convert(value).Identifier));
-                case "PortInfo.Name":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(DataPortDomMapper.DataPortInfo.Name), comparer, (string)value);
-                case "PortInfo.PortNumber" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
-                    return DomInstanceExposers.FieldValues.KeyExists(DataPortDomMapper.DataPortInfo.PortNumber.Id.ToString()).Equal(comparer == Comparer.NotEquals);
-                case "PortInfo.PortNumber":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(DataPortDomMapper.DataPortInfo.PortNumber), comparer, ((long?)value).Value);
-                case "PortInfo.OutputType" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
-                    return DomInstanceExposers.FieldValues.KeyExists(DataPortDomMapper.DataPortInfo.OutputType.Id.ToString()).Equal(comparer == Comparer.NotEquals);
-                case "PortInfo.OutputType":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(DataPortDomMapper.DataPortInfo.OutputType), comparer, (int)((SharedMappers.DomIds.SlcAsset_Management.Enums.Outputtype?)value).Value);
-                case "PortInfo.PortExposure":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(DataPortDomMapper.DataPortInfo.PortExposure), comparer, SharedMappers.DomIds.SlcAsset_Management.Enums.Portexposure.ToValue((SharedMappers.DomIds.SlcAsset_Management.Enums.PortExposureEnum)value));
-                case "PortInfo.Type":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(DataPortDomMapper.DataPortInfo.Type), comparer, Guid.Parse(SdmObjectReference<PortType>.Convert(value).Identifier));
-                case "PortInfo.Label":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(DataPortDomMapper.DataPortInfo.Label), comparer, (string)value);
-                case "AddressInfo.Ipv4Address":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(DataPortDomMapper.AddressInfo.Ipv4Address), comparer, (string)value);
-                case "AddressInfo.Ipv6Address":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(DataPortDomMapper.AddressInfo.Ipv6Address), comparer, (string)value);
-                case "AddressInfo.Hostname":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(DataPortDomMapper.AddressInfo.Hostname), comparer, (string)value);
-                case "AddressInfo.DNS":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(DataPortDomMapper.AddressInfo.DNS), comparer, (bool)value);
-                case "PrimaryPortRelation.IsPrimaryIpv6":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(DataPortDomMapper.PrimaryPortRelation.IsPrimaryIpv6), comparer, (bool)value);
-                case "PrimaryPortRelation.IsPrimaryIpv4":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(DataPortDomMapper.PrimaryPortRelation.IsPrimaryIpv4), comparer, (bool)value);
-                default:
-                    throw new NotSupportedException($"The field '{fieldName}' cannot be used to filter the DataPort definition. Use the exposers from '{nameof(PortExposers)}'.");
+                fieldName = $"Data{fieldName}";
             }
+
+            return dataPortRepository.CreatePortFilter(fieldName, comparer, value);
         }
 
-        private static FilterElement<DomInstance> CreatePowerPortFilter(string fieldName, Comparer comparer, object value)
+        private FilterElement<DomInstance> CreatePowerPortFilter(string fieldName, Comparer comparer, object value)
         {
-            switch (fieldName)
+            if (fieldName.StartsWith("PortInfo.", StringComparison.Ordinal))
             {
-                case "Identifier":
-                    return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.Id, comparer, Guid.Parse((string)value));
-                case "Asset":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PowerPortDomMapper.AssetRelationProperties.Asset), comparer, Guid.Parse(SdmObjectReference<Asset>.Convert(value).Identifier));
-                case "PortInfo.Name":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PowerPortDomMapper.PowerPortInfo.Name), comparer, (string)value);
-                case "PortInfo.PortNumber" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
-                    return DomInstanceExposers.FieldValues.KeyExists(PowerPortDomMapper.PowerPortInfo.PortNumber.Id.ToString()).Equal(comparer == Comparer.NotEquals);
-                case "PortInfo.PortNumber":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PowerPortDomMapper.PowerPortInfo.PortNumber), comparer, ((long?)value).Value);
-                case "PortInfo.OutputType" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
-                    return DomInstanceExposers.FieldValues.KeyExists(PowerPortDomMapper.PowerPortInfo.OutputType.Id.ToString()).Equal(comparer == Comparer.NotEquals);
-                case "PortInfo.OutputType":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PowerPortDomMapper.PowerPortInfo.OutputType), comparer, (int)((SharedMappers.DomIds.SlcAsset_Management.Enums.Outputtype?)value).Value);
-                case "PortInfo.PortExposure":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PowerPortDomMapper.PowerPortInfo.PortExposure), comparer, SharedMappers.DomIds.SlcAsset_Management.Enums.Portexposure.ToValue((SharedMappers.DomIds.SlcAsset_Management.Enums.PortExposureEnum)value));
-                case "PortInfo.Type":
-                    // The PowerPort definition stores the port type reference as a string, unlike the DataPort definition which stores it as a GUID.
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PowerPortDomMapper.PowerPortInfo.PortType), comparer, SdmObjectReference<PortType>.Convert(value).Identifier);
-                case "PortInfo.Label":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PowerPortDomMapper.PowerPortInfo.Label), comparer, (string)value);
-                default:
-                    throw new NotSupportedException($"The field '{fieldName}' cannot be used to filter the PowerPort definition. Use the exposers from '{nameof(PortExposers)}'.");
+                fieldName = $"Power{fieldName}";
             }
+
+            return powerPortRepository.CreatePortFilter(fieldName, comparer, value);
         }
     }
 }
