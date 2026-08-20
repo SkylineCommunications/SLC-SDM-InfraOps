@@ -16,6 +16,31 @@
 			(obj) => obj is DataPort dataPort ? dataPort.Identifier : (obj as PowerPort)?.Identifier,
 			"Identifier");
 
+		/// <summary>
+		/// Discriminates on the port definition itself: "Data" for DataPort, "Power" for PowerPort.
+		/// Filtering on this field restricts the query to the matching definition, the opposite
+		/// definition is useless to filter and is skipped. Combining "Data" and "Power" constraints
+		/// (or this field with the opposite definition's exclusive fields) yields an empty result.
+		/// Only Equals and NotEquals are supported.
+		/// </summary>
+		public static readonly Exposer<IPort, string> Type = new Exposer<IPort, string>(
+			(obj) =>
+            {
+                if (obj is DataPort)
+                {
+                    return "Data";
+                }
+                else if (obj is PowerPort)
+                {
+                    return "Power";
+                }
+                else
+                {
+                    return null;
+                }
+            },
+			"Type");
+
 		public static readonly Exposer<IPort, SdmObjectReference<AssetManagement.Models.Asset>> Asset = new Exposer<IPort, SdmObjectReference<AssetManagement.Models.Asset>>(
 			(obj) => obj is DataPort dataPort ? dataPort.Asset : (obj as PowerPort)?.Asset ?? default,
 			"Asset");

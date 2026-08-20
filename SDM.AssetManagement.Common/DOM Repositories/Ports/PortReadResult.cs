@@ -11,14 +11,19 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     /// </summary>
     public sealed class PortReadResult : IPagedResult<IPort>
     {
-        internal PortReadResult(IReadOnlyList<IPort> domOrderedPorts)
+        internal PortReadResult(IReadOnlyList<IPort> domOrderedPorts, int pageNumber = 0, bool hasNextPage = false)
         {
             DomOrderedPorts = domOrderedPorts ?? Array.Empty<IPort>();
             DataPorts = DomOrderedPorts.OfType<DataPort>().ToList();
             PowerPorts = DomOrderedPorts.OfType<PowerPort>().ToList();
+            PageNumber = pageNumber;
+            HasNextPage = hasNextPage;
         }
 
-        public IPort this[int index] => throw new NotImplementedException();
+        /// <summary>
+        /// Gets the port at the given position in DOM query order.
+        /// </summary>
+        public IPort this[int index] => DomOrderedPorts[index];
 
         /// <summary>
         /// Gets all ports in the order the DOM instances were returned by the query,
@@ -36,15 +41,27 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         /// </summary>
         public IReadOnlyList<PowerPort> PowerPorts { get; }
 
-        public int PageNumber => throw new NotImplementedException();
+        /// <summary>
+        /// Gets the current page number (0-based). Always 0 for non-paged reads.
+        /// </summary>
+        public int PageNumber { get; }
 
-        public bool HasNextPage => throw new NotImplementedException();
+        /// <summary>
+        /// Gets a value indicating whether there is a next page. Always <c>false</c> for non-paged reads.
+        /// </summary>
+        public bool HasNextPage { get; }
 
-        public int Count => throw new NotImplementedException();
+        /// <summary>
+        /// Gets the total number of ports across both definitions.
+        /// </summary>
+        public int Count => DomOrderedPorts.Count;
 
+        /// <summary>
+        /// Enumerates all ports in DOM query order.
+        /// </summary>
         public IEnumerator<IPort> GetEnumerator()
         {
-            throw new NotImplementedException();
+            return DomOrderedPorts.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
