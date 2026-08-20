@@ -418,6 +418,7 @@
                 },
                 DataPorts = GenerateRandomDataPortInfos(),
                 PowerPorts = GenerateRandomPowerPortInfos(),
+                Attachments = BuildImageAttachments(frontImage, backImage),
                 Holders = holders ?? new List<AssetHolder>
             {
                 new AssetHolder
@@ -427,6 +428,23 @@
                 },
             },
             };
+        }
+
+        private static List<AssetAttachment> BuildImageAttachments(string frontImage, string backImage)
+        {
+            var attachments = new List<AssetAttachment>();
+
+            if (!string.IsNullOrWhiteSpace(frontImage))
+            {
+                attachments.Add(new AssetAttachment { FilePath = frontImage });
+            }
+
+            if (!string.IsNullOrWhiteSpace(backImage) && backImage != frontImage)
+            {
+                attachments.Add(new AssetAttachment { FilePath = backImage });
+            }
+
+            return attachments;
         }
 
         private static DeviceType CreateDeviceType(string name, SlcAsset_Management.Enums.HierarchyRoleEnum role, params SlcAsset_Management.Enums.TagOption[] tags)
