@@ -11,8 +11,10 @@
 
 		public PowerPortInfo PowerPortInfo => _powerPortInfo ?? (_powerPortInfo = new PowerPortInfo());
 
-		// within AssetRelation section definition
-		public SdmObjectReference<Asset> Asset { get; set; }
+        string IPort.PortName => PowerPortInfo.Name;
+
+        // within AssetRelation section definition
+        public SdmObjectReference<Asset> Asset { get; set; }
 
         #region Section Tracking
 

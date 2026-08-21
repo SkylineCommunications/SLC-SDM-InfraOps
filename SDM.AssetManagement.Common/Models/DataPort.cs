@@ -29,6 +29,8 @@
 
         public DataPortInfo DataPortInfo => _dataPortInfo ?? (_dataPortInfo = new DataPortInfo());
 
+        string IPort.PortName => DataPortInfo.Name;
+
         public SdmObjectReference<Asset> Asset
         {
             get => (_assetFk ?? (_assetFk = new AssetRelation())).Asset;
