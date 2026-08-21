@@ -6,9 +6,9 @@
     <Nullable>disable</Nullable>
     <AssemblyName>Skyline.DataMiner.SDM.FacilityManagement.GQI</AssemblyName>
     <RootNamespace>Skyline.DataMiner.SDM.FacilityManagement.GQI</RootNamespace>
-    <PackageVersion>1.0.1</PackageVersion>
-    <AssemblyVersion>0.2.3.45</AssemblyVersion>
+    <VersionSuffix Condition="'$(Configuration)' == 'Debug'">dev-045</VersionSuffix>
     <VersionPrefix>1.0.1</VersionPrefix>
+    <AssemblyVersion>0.2.3.45</AssemblyVersion>
     <PackageTags>Skyline;DataMiner</PackageTags>
     <PackageProjectUrl>https://skyline.be</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -40,4 +40,9 @@
   <ItemGroup>
     <ProjectReference Include="..\SDM.FacilityManagement.Common\SDM.FacilityManagement.Common.csproj" />
   </ItemGroup>
+  <!-- Can be used to set the location of your local nuget store to copy to -->
+  <Import Project="../Directory.Build.props.user" Condition="Exists('../Directory.Build.props.user')" />
+  <Target Name="CopyNuGetPackage" AfterTargets="Pack" Condition="'$(NuGetStorePath)' != '' and '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <Copy SourceFiles="$(OutputPath)..\$(PackageId).$(PackageVersion).nupkg" DestinationFolder="$(NuGetStorePath)\$(PackageId)" />
+  </Target>
 </Project>
