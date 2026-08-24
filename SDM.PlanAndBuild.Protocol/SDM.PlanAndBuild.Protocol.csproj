@@ -7,7 +7,7 @@
     <AssemblyName>Skyline.DataMiner.SDM.PlanAndBuild.Protocol</AssemblyName>
     <RootNamespace>Skyline.DataMiner.SDM.PlanAndBuild.Protocol</RootNamespace>
     <PackageVersion>1.0.1</PackageVersion>
-    <AssemblyVersion>0.2.3.39</AssemblyVersion>
+    <AssemblyVersion>0.2.3.40</AssemblyVersion>
     <VersionPrefix>1.0.1</VersionPrefix>
     <PackageTags>Skyline;DataMiner</PackageTags>
     <PackageProjectUrl>https://skyline.be</PackageProjectUrl>
