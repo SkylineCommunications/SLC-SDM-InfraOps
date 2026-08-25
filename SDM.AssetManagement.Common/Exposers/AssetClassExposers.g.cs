@@ -47,6 +47,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             RuntimeHelpers.RunClassConstructor(typeof(PowerPorts).TypeHandle);
             RuntimeHelpers.RunClassConstructor(typeof(Holders).TypeHandle);
             RuntimeHelpers.RunClassConstructor(typeof(Holders).TypeHandle);
+            RuntimeHelpers.RunClassConstructor(typeof(Attachments).TypeHandle);
         }
 
         public static partial class Lifecycle
@@ -80,6 +81,13 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 		{
 			public static readonly CollectionExposer<AssetManagement.Models.AssetClass, long> SlotNumber = new CollectionExposer<AssetManagement.Models.AssetClass, long>((obj) => obj.Holders.Where(x => x != null).Select(x => x.SlotNumber), "Holders.SlotNumber");
 			public static readonly CollectionExposer<AssetManagement.Models.AssetClass, SlcAsset_Management.Enums.HierarchyRoleEnum> HierarchyRole = new CollectionExposer<AssetManagement.Models.AssetClass, SlcAsset_Management.Enums.HierarchyRoleEnum>((obj) => obj.Holders.Where(x => x != null).Select(x => x.HierarchyRole), "Holders.HierarchyRole");
+		}
+
+		public static partial class Attachments
+		{
+			public static readonly CollectionExposer<AssetManagement.Models.AssetClass, string> FilePath = new CollectionExposer<AssetManagement.Models.AssetClass, string>((obj) => obj.Attachments.Where(x => x != null).Select(x => x.FilePath).Where(x => x != null), "Attachments.FilePath");
+			public static readonly CollectionExposer<AssetManagement.Models.AssetClass, System.DateTime?> AttachedAt = new CollectionExposer<AssetManagement.Models.AssetClass, System.DateTime?>((obj) => obj.Attachments.Where(x => x != null).Select(x => x.AttachedAt).Where(x => x != null), "Attachments.AttachedAt");
+			public static readonly CollectionExposer<AssetManagement.Models.AssetClass, System.Guid?> AttachedBy = new CollectionExposer<AssetManagement.Models.AssetClass, System.Guid?>((obj) => obj.Attachments.Where(x => x != null).Select(x => x.AttachedBy).Where(x => x != null), "Attachments.AttachedBy");
 		}
 	}
 }

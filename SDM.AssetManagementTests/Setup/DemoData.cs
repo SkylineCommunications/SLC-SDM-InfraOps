@@ -1,4 +1,4 @@
-﻿namespace SDM.AssetManagement.Tests.Setup
+namespace SDM.AssetManagement.Tests.Setup
 {
     using System;
     using System.Collections.Generic;
@@ -418,6 +418,7 @@
                 },
                 DataPorts = GenerateRandomDataPortInfos(),
                 PowerPorts = GenerateRandomPowerPortInfos(),
+                Attachments = BuildImageAttachments(frontImage, backImage),
                 Holders = holders ?? new List<AssetHolder>
             {
                 new AssetHolder
@@ -427,6 +428,23 @@
                 },
             },
             };
+        }
+
+        private static List<Attachment> BuildImageAttachments(string frontImage, string backImage)
+        {
+            var attachments = new List<Attachment>();
+
+            if (!string.IsNullOrWhiteSpace(frontImage))
+            {
+                attachments.Add(new Attachment { FilePath = frontImage });
+            }
+
+            if (!string.IsNullOrWhiteSpace(backImage) && backImage != frontImage)
+            {
+                attachments.Add(new Attachment { FilePath = backImage });
+            }
+
+            return attachments;
         }
 
         private static DeviceType CreateDeviceType(string name, SlcAsset_Management.Enums.HierarchyRoleEnum role, params SlcAsset_Management.Enums.TagOption[] tags)

@@ -43,6 +43,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             RuntimeHelpers.RunClassConstructor(typeof(Custody).TypeHandle);
             RuntimeHelpers.RunClassConstructor(typeof(Holders).TypeHandle);
             RuntimeHelpers.RunClassConstructor(typeof(ElementLinks).TypeHandle);
+            RuntimeHelpers.RunClassConstructor(typeof(Attachments).TypeHandle);
         }
 
         public static partial class NetworkDetails
@@ -114,6 +115,13 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 		{
 			public static readonly CollectionExposer<AssetManagement.Models.Asset, string> ElementID = new CollectionExposer<AssetManagement.Models.Asset, string>((obj) => obj.ElementLinks.Where(x => x != null).Select(x => x.ElementID).Where(x => x != null), "ElementLinks.ElementID");
 			public static readonly CollectionExposer<AssetManagement.Models.Asset, bool> IsPrimary = new CollectionExposer<AssetManagement.Models.Asset, bool>((obj) => obj.ElementLinks.Where(x => x != null).Select(x => x.IsPrimary), "ElementLinks.IsPrimary");
+		}
+
+		public static partial class Attachments
+		{
+			public static readonly CollectionExposer<AssetManagement.Models.Asset, string> FilePath = new CollectionExposer<AssetManagement.Models.Asset, string>((obj) => obj.Attachments.Where(x => x != null).Select(x => x.FilePath).Where(x => x != null), "Attachments.FilePath");
+			public static readonly CollectionExposer<AssetManagement.Models.Asset, System.DateTime?> AttachedAt = new CollectionExposer<AssetManagement.Models.Asset, System.DateTime?>((obj) => obj.Attachments.Where(x => x != null).Select(x => x.AttachedAt).Where(x => x != null), "Attachments.AttachedAt");
+			public static readonly CollectionExposer<AssetManagement.Models.Asset, System.Guid?> AttachedBy = new CollectionExposer<AssetManagement.Models.Asset, System.Guid?>((obj) => obj.Attachments.Where(x => x != null).Select(x => x.AttachedBy).Where(x => x != null), "Attachments.AttachedBy");
 		}
 	}
 }

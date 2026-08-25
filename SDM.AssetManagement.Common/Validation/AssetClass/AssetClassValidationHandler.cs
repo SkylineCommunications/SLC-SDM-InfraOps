@@ -31,6 +31,9 @@
             TypicalPowerConsumption,
             MaxPowerConsumption,
 
+            FrontImage,
+            BackImage,
+
             DataPortNumber,
 
             PowerPortNumber,
@@ -183,6 +186,50 @@
                 assetClass.MaximumPowerConsumption.Value,
                 AssetClassValidationField.MaxPowerConsumption,
                 out result);
+        }
+
+        /// <summary>
+        /// Validates that the Front Image, when set, is present in the Asset Class Attachments.
+        /// </summary>
+        public static bool IsFrontImageInAttachments(AssetClass assetClass, out ValidationResult result)
+        {
+            return IsImageInAttachments(
+                assetClass,
+                assetClass.FrontImage,
+                AssetClassValidationField.FrontImage,
+                "Front Image",
+                out result);
+        }
+
+        /// <summary>
+        /// Validates that the Back Image, when set, is present in the Asset Class Attachments.
+        /// </summary>
+        public static bool IsBackImageInAttachments(AssetClass assetClass, out ValidationResult result)
+        {
+            return IsImageInAttachments(
+                assetClass,
+                assetClass.BackImage,
+                AssetClassValidationField.BackImage,
+                "Back Image",
+                out result);
+        }
+
+        private static bool IsImageInAttachments(AssetClass assetClass, string imagePath, AssetClassValidationField field, string imageName, out ValidationResult result)
+        {
+            result = new ValidationResult();
+
+            if (string.IsNullOrWhiteSpace(imagePath))
+            {
+                return true;
+            }
+
+            if (!assetClass.Attachments.Any(a => a?.FilePath == imagePath))
+            {
+                result.AddFailReason(field,
+                    $"Asset Class {imageName} must be part of the Attachments.");
+            }
+
+            return result.IsValid;
         }
         #endregion
 
