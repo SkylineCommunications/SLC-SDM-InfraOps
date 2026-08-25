@@ -1,4 +1,4 @@
-﻿namespace SDM.AssetManagement.Tests.AssetClasses
+namespace SDM.AssetManagement.Tests.AssetClasses
 {
     using System;
     using System.Collections.Generic;
@@ -19,7 +19,7 @@
     using Skyline.DataMiner.SDM.AssetManagement.Models;
 
     /// <summary>
-    /// Unit tests for the <see cref="AssetAttachment"/> convenience methods on <see cref="AssetClass"/>
+    /// Unit tests for the <see cref="Attachment"/> convenience methods on <see cref="AssetClass"/>
     /// (AddAttachment/RemoveItemFromAttachments/SetAttachments/ClearAttachments), plus a DOM
     /// round-trip test verifying attachments persist, mirroring the JobAttachment implementation.
     /// </summary>
@@ -30,7 +30,7 @@
         public void AddAttachment_NewAttachment_ShouldBeAdded()
         {
             var assetClass = new AssetClass();
-            var attachment = new AssetAttachment { FilePath = @"C:\file1.pdf" };
+            var attachment = new Attachment { FilePath = @"C:\file1.pdf" };
 
             assetClass.AddAttachment(attachment);
 
@@ -51,9 +51,9 @@
         public void AddAttachment_DuplicateFilePath_ShouldThrow()
         {
             var assetClass = new AssetClass();
-            assetClass.AddAttachment(new AssetAttachment { FilePath = @"C:\file1.pdf" });
+            assetClass.AddAttachment(new Attachment { FilePath = @"C:\file1.pdf" });
 
-            Action act = () => assetClass.AddAttachment(new AssetAttachment { FilePath = @"C:\file1.pdf" });
+            Action act = () => assetClass.AddAttachment(new Attachment { FilePath = @"C:\file1.pdf" });
 
             act.Should().Throw<InvalidOperationException>();
         }
@@ -62,7 +62,7 @@
         public void RemoveItemFromAttachments_ExistingAttachment_ShouldBeRemoved()
         {
             var assetClass = new AssetClass();
-            var attachment = new AssetAttachment { FilePath = @"C:\file1.pdf" };
+            var attachment = new Attachment { FilePath = @"C:\file1.pdf" };
             assetClass.AddAttachment(attachment);
 
             assetClass.RemoveItemFromAttachments(attachment);
@@ -84,7 +84,7 @@
         public void RemoveItemFromAttachments_NotFound_ShouldThrow()
         {
             var assetClass = new AssetClass();
-            var attachment = new AssetAttachment { FilePath = @"C:\file1.pdf" };
+            var attachment = new Attachment { FilePath = @"C:\file1.pdf" };
 
             Action act = () => assetClass.RemoveItemFromAttachments(attachment);
 
@@ -95,12 +95,12 @@
         public void SetAttachments_ShouldReplaceExistingList()
         {
             var assetClass = new AssetClass();
-            assetClass.AddAttachment(new AssetAttachment { FilePath = @"C:\file1.pdf" });
+            assetClass.AddAttachment(new Attachment { FilePath = @"C:\file1.pdf" });
 
-            var replacement = new List<AssetAttachment>
+            var replacement = new List<Attachment>
             {
-                new AssetAttachment { FilePath = @"C:\file2.pdf" },
-                new AssetAttachment { FilePath = @"C:\file3.pdf" },
+                new Attachment { FilePath = @"C:\file2.pdf" },
+                new Attachment { FilePath = @"C:\file3.pdf" },
             };
             assetClass.SetAttachments(replacement);
 
@@ -111,7 +111,7 @@
         public void ClearAttachments_ShouldEmptyList()
         {
             var assetClass = new AssetClass();
-            assetClass.AddAttachment(new AssetAttachment { FilePath = @"C:\file1.pdf" });
+            assetClass.AddAttachment(new Attachment { FilePath = @"C:\file1.pdf" });
 
             assetClass.ClearAttachments();
 
@@ -159,7 +159,7 @@
             var attachedBy = Guid.NewGuid();
 
             var assetClass = new AssetClass();
-            assetClass.AddAttachment(new AssetAttachment
+            assetClass.AddAttachment(new Attachment
             {
                 FilePath = @"C:\images\front.png",
                 AttachedAt = attachedAt,
@@ -243,7 +243,7 @@
         {
             var assetClass = new AssetClass();
             assetClass.AddFrontImageAndAttachment(@"C:\images\front.png");
-            assetClass.AddAttachment(new AssetAttachment { FilePath = @"C:\docs\manual.pdf" });
+            assetClass.AddAttachment(new Attachment { FilePath = @"C:\docs\manual.pdf" });
             var manual = assetClass.Attachments.Single(a => a.FilePath == @"C:\docs\manual.pdf");
 
             assetClass.RemoveAttachmentAndDependencies(manual);
@@ -330,10 +330,10 @@
                 Manufacturer = Guid.NewGuid(),
                 HeightU = 1.0,
                 PowerSupply = SlcAsset_Management.Enums.PowerSupplyEnum.AC,
-                Attachments = new List<AssetAttachment>
+                Attachments = new List<Attachment>
                 {
-                    new AssetAttachment { FilePath = @"C:\docs\manual.pdf", AttachedAt = attachedAt, AttachedBy = attachedBy },
-                    new AssetAttachment { FilePath = @"C:\docs\datasheet.pdf" },
+                    new Attachment { FilePath = @"C:\docs\manual.pdf", AttachedAt = attachedAt, AttachedBy = attachedBy },
+                    new Attachment { FilePath = @"C:\docs\datasheet.pdf" },
                 },
             };
 

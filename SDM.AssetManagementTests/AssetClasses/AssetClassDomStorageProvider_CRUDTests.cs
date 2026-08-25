@@ -1,4 +1,4 @@
-﻿namespace SDM.AssetManagement.Tests.AssetClasses
+namespace SDM.AssetManagement.Tests.AssetClasses
 {
     using System;
     using System.Linq;
@@ -46,10 +46,10 @@
                 Weight = 10.0,
                 FrontImage = "front.png",
                 BackImage = "back.png",
-                Attachments = new List<AssetAttachment>
+                Attachments = new List<Attachment>
                 {
-                    new AssetAttachment { FilePath = "front.png" },
-                    new AssetAttachment { FilePath = "back.png" },
+                    new Attachment { FilePath = "front.png" },
+                    new Attachment { FilePath = "back.png" },
                 },
                 MaximumPowerConsumption = 100.0,
                 TypicalPowerConsumption = 80.0,
@@ -243,10 +243,10 @@
                 Weight = 20.0,
                 FrontImage = "front2.png",
                 BackImage = "back2.png",
-                Attachments = new List<AssetAttachment>
+                Attachments = new List<Attachment>
                 {
-                    new AssetAttachment { FilePath = "front2.png" },
-                    new AssetAttachment { FilePath = "back2.png" },
+                    new Attachment { FilePath = "front2.png" },
+                    new Attachment { FilePath = "back2.png" },
                 },
                 MaximumPowerConsumption = 200.0,
                 TypicalPowerConsumption = 150.0,

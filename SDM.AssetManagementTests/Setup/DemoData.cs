@@ -1,4 +1,4 @@
-﻿namespace SDM.AssetManagement.Tests.Setup
+namespace SDM.AssetManagement.Tests.Setup
 {
     using System;
     using System.Collections.Generic;
@@ -430,18 +430,18 @@
             };
         }
 
-        private static List<AssetAttachment> BuildImageAttachments(string frontImage, string backImage)
+        private static List<Attachment> BuildImageAttachments(string frontImage, string backImage)
         {
-            var attachments = new List<AssetAttachment>();
+            var attachments = new List<Attachment>();
 
             if (!string.IsNullOrWhiteSpace(frontImage))
             {
-                attachments.Add(new AssetAttachment { FilePath = frontImage });
+                attachments.Add(new Attachment { FilePath = frontImage });
             }
 
             if (!string.IsNullOrWhiteSpace(backImage) && backImage != frontImage)
             {
-                attachments.Add(new AssetAttachment { FilePath = backImage });
+                attachments.Add(new Attachment { FilePath = backImage });
             }
 
             return attachments;

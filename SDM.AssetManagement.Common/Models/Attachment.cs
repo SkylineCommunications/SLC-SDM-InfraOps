@@ -7,7 +7,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
-    public sealed class AssetAttachment : IEquatable<AssetAttachment>, ISectionTrackable, ISectionEmptyState
+    public sealed class Attachment : IEquatable<Attachment>, ISectionTrackable, ISectionEmptyState
     {
         [JsonIgnore]
         [SdmIgnore]
@@ -26,7 +26,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
         public Guid? AttachedBy { get; set; }
 
-        public static bool operator ==(AssetAttachment left, AssetAttachment right)
+        public static bool operator ==(Attachment left, Attachment right)
         {
             if (ReferenceEquals(left, right))
             {
@@ -41,17 +41,17 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             return left.Equals(right);
         }
 
-        public static bool operator !=(AssetAttachment left, AssetAttachment right)
+        public static bool operator !=(Attachment left, Attachment right)
         {
             return !(left == right);
         }
 
         public override bool Equals(object obj)
         {
-            return Equals(obj as AssetAttachment);
+            return Equals(obj as Attachment);
         }
 
-        public bool Equals(AssetAttachment other)
+        public bool Equals(Attachment other)
         {
             if (other is null)
             {

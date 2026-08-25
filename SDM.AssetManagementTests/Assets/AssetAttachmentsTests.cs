@@ -1,4 +1,4 @@
-﻿namespace SDM.AssetManagement.Tests.Assets
+namespace SDM.AssetManagement.Tests.Assets
 {
     using System;
     using System.Collections.Generic;
@@ -17,7 +17,7 @@
     using Skyline.DataMiner.SDM.AssetManagement.Models;
 
     /// <summary>
-    /// Unit tests for the <see cref="AssetAttachment"/> convenience methods on <see cref="Asset"/>
+    /// Unit tests for the <see cref="Attachment"/> convenience methods on <see cref="Asset"/>
     /// (AddAttachment/RemoveItemFromAttachments/SetAttachments/ClearAttachments), plus a DOM
     /// round-trip test verifying attachments persist, mirroring the JobAttachment implementation.
     /// </summary>
@@ -28,7 +28,7 @@
         public void AddAttachment_NewAttachment_ShouldBeAdded()
         {
             var asset = new Asset();
-            var attachment = new AssetAttachment { FilePath = @"C:\file1.pdf" };
+            var attachment = new Attachment { FilePath = @"C:\file1.pdf" };
 
             asset.AddAttachment(attachment);
 
@@ -49,9 +49,9 @@
         public void AddAttachment_DuplicateFilePath_ShouldThrow()
         {
             var asset = new Asset();
-            asset.AddAttachment(new AssetAttachment { FilePath = @"C:\file1.pdf" });
+            asset.AddAttachment(new Attachment { FilePath = @"C:\file1.pdf" });
 
-            Action act = () => asset.AddAttachment(new AssetAttachment { FilePath = @"C:\file1.pdf" });
+            Action act = () => asset.AddAttachment(new Attachment { FilePath = @"C:\file1.pdf" });
 
             act.Should().Throw<InvalidOperationException>();
         }
@@ -60,7 +60,7 @@
         public void RemoveItemFromAttachments_ExistingAttachment_ShouldBeRemoved()
         {
             var asset = new Asset();
-            var attachment = new AssetAttachment { FilePath = @"C:\file1.pdf" };
+            var attachment = new Attachment { FilePath = @"C:\file1.pdf" };
             asset.AddAttachment(attachment);
 
             asset.RemoveItemFromAttachments(attachment);
@@ -82,7 +82,7 @@
         public void RemoveItemFromAttachments_NotFound_ShouldThrow()
         {
             var asset = new Asset();
-            var attachment = new AssetAttachment { FilePath = @"C:\file1.pdf" };
+            var attachment = new Attachment { FilePath = @"C:\file1.pdf" };
 
             Action act = () => asset.RemoveItemFromAttachments(attachment);
 
@@ -93,12 +93,12 @@
         public void SetAttachments_ShouldReplaceExistingList()
         {
             var asset = new Asset();
-            asset.AddAttachment(new AssetAttachment { FilePath = @"C:\file1.pdf" });
+            asset.AddAttachment(new Attachment { FilePath = @"C:\file1.pdf" });
 
-            var replacement = new List<AssetAttachment>
+            var replacement = new List<Attachment>
             {
-                new AssetAttachment { FilePath = @"C:\file2.pdf" },
-                new AssetAttachment { FilePath = @"C:\file3.pdf" },
+                new Attachment { FilePath = @"C:\file2.pdf" },
+                new Attachment { FilePath = @"C:\file3.pdf" },
             };
             asset.SetAttachments(replacement);
 
@@ -109,7 +109,7 @@
         public void ClearAttachments_ShouldEmptyList()
         {
             var asset = new Asset();
-            asset.AddAttachment(new AssetAttachment { FilePath = @"C:\file1.pdf" });
+            asset.AddAttachment(new Attachment { FilePath = @"C:\file1.pdf" });
 
             asset.ClearAttachments();
 
@@ -131,10 +131,10 @@
                 AssetID = Guid.NewGuid().ToString(),
                 Name = "Asset With Attachments",
                 AssetClassId = new SdmObjectReference<AssetClass>(assetClass.Identifier),
-                Attachments = new List<AssetAttachment>
+                Attachments = new List<Attachment>
                 {
-                    new AssetAttachment { FilePath = @"C:\docs\manual.pdf", AttachedAt = attachedAt, AttachedBy = attachedBy },
-                    new AssetAttachment { FilePath = @"C:\docs\datasheet.pdf" },
+                    new Attachment { FilePath = @"C:\docs\manual.pdf", AttachedAt = attachedAt, AttachedBy = attachedBy },
+                    new Attachment { FilePath = @"C:\docs\datasheet.pdf" },
                 },
             };
 

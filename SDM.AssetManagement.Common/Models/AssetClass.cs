@@ -1,4 +1,4 @@
-﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
+namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
     using System;
     using System.Collections.Generic;
@@ -153,9 +153,9 @@
             set => HoldersField.Value = value;
         }
 
-        public List<AssetAttachment> Attachments
+        public List<Attachment> Attachments
         {
-            get => AttachmentsField.Value ?? new List<AssetAttachment>();
+            get => AttachmentsField.Value ?? new List<Attachment>();
             set => AttachmentsField.Value = value;
         }
 
@@ -294,9 +294,9 @@
 
         [JsonIgnore]
         [SdmIgnore]
-        internal ChangeTrackingArrayField<AssetAttachment> AttachmentsField => FieldHandler.GetOrCreateArrayField(
+        internal ChangeTrackingArrayField<Attachment> AttachmentsField => FieldHandler.GetOrCreateArrayField(
             nameof(Attachments),
-            () => new ChangeTrackingArrayField<AssetAttachment>(new List<AssetAttachment>()));
+            () => new ChangeTrackingArrayField<Attachment>(new List<Attachment>()));
 
         /// <summary>
         /// Gets the current status of the asset class.

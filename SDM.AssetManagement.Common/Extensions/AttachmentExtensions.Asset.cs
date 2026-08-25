@@ -7,21 +7,21 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Extensions
     using Skyline.DataMiner.SDM.AssetManagement.Models;
 
     /// <summary>
-    /// Convenience methods for managing <see cref="AssetAttachment"/> collections on
+    /// Convenience methods for managing <see cref="Attachment"/> collections on
     /// <see cref="Asset"/> and <see cref="AssetClass"/>, mirroring the JobAttachment API.
     /// </summary>
     public static partial class AttachmentExtensions
     {
         /// <summary>
-        /// Adds an <see cref="AssetAttachment"/> to <see cref="Asset.Attachments"/>.
+        /// Adds an <see cref="Attachment"/> to <see cref="Asset.Attachments"/>.
         /// </summary>
         /// <exception cref="ArgumentNullException"><paramref name="attachment"/> is <c>null</c>.</exception>
-        /// <exception cref="InvalidOperationException">An attachment with the same <see cref="AssetAttachment.FilePath"/> already exists.</exception>
+        /// <exception cref="InvalidOperationException">An attachment with the same <see cref="Attachment.FilePath"/> already exists.</exception>
         /// <remarks>
         /// This only updates the in-memory <see cref="Asset"/> instance. It is not persisted
         /// to the DOM/database until the asset is saved.
         /// </remarks>
-        public static void AddAttachment(this Asset asset, AssetAttachment attachment)
+        public static void AddAttachment(this Asset asset, Attachment attachment)
         {
             if (asset == null)
             {
@@ -45,12 +45,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Extensions
         }
 
         /// <summary>
-        /// Removes the <see cref="AssetAttachment"/> matching <paramref name="attachment"/>'s
-        /// <see cref="AssetAttachment.FilePath"/> from <see cref="Asset.Attachments"/>.
+        /// Removes the <see cref="Attachment"/> matching <paramref name="attachment"/>'s
+        /// <see cref="Attachment.FilePath"/> from <see cref="Asset.Attachments"/>.
         /// </summary>
         /// <exception cref="ArgumentNullException"><paramref name="attachment"/> is <c>null</c>.</exception>
         /// <exception cref="ArgumentException">No matching attachment was found.</exception>
-        public static void RemoveItemFromAttachments(this Asset asset, AssetAttachment attachment)
+        public static void RemoveItemFromAttachments(this Asset asset, Attachment attachment)
         {
             if (asset == null)
             {
@@ -77,14 +77,14 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Extensions
         /// <summary>
         /// Replaces <see cref="Asset.Attachments"/> with <paramref name="attachments"/>.
         /// </summary>
-        public static void SetAttachments(this Asset asset, List<AssetAttachment> attachments)
+        public static void SetAttachments(this Asset asset, List<Attachment> attachments)
         {
             if (asset == null)
             {
                 throw new ArgumentNullException(nameof(asset));
             }
 
-            asset.Attachments = attachments ?? new List<AssetAttachment>();
+            asset.Attachments = attachments ?? new List<Attachment>();
         }
 
         /// <summary>
@@ -102,7 +102,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Extensions
                 return;
             }
 
-            asset.Attachments = new List<AssetAttachment>();
+            asset.Attachments = new List<Attachment>();
         }
     }
 }
