@@ -897,6 +897,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
 
             obj.Attachments = _attachmentsList;
+
             return obj;
         }
 
@@ -923,7 +924,11 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 }
             };
 
-            if (isNew)
+            if(isNew)
+            {
+                instance.StatusId = SlcAsset_Management.Behaviors.Asset_Behavior.Statuses.ToValue(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable);
+            }
+            else
             {
                 instance.StatusId = SlcAsset_Management.Behaviors.Asset_Behavior.Statuses.ToValue(obj.State);
             }
