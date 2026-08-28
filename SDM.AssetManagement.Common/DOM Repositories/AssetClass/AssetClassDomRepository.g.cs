@@ -852,10 +852,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				}
 			};
 
-			if (isNew)
-			{
-				instance.StatusId = SlcAsset_Management.Behaviors.Asset_Class_Behavior.Statuses.ToValue(obj.State);
-			}
+			instance.StatusId = SlcAsset_Management.Behaviors.Asset_Class_Behavior.Statuses.ToValue(obj.State);
 			var _assetclassproperties = new Section(AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.SectionDefinitionId);
 			if (obj.AssetClassPropertiesSectionId.HasValue)
 			{
