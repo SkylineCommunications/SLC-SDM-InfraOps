@@ -921,17 +921,11 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 ID = new DomInstanceId(id)
                 {
                     ModuleId = AssetManagement.Models.AssetDomMapper.ModuleId
-                }
+                },
+                StatusId = SlcAsset_Management.Behaviors.Asset_Behavior.Statuses.ToValue(obj.State),
+
             };
 
-            if(isNew)
-            {
-                instance.StatusId = SlcAsset_Management.Behaviors.Asset_Behavior.Statuses.ToValue(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable);
-            }
-            else
-            {
-                instance.StatusId = SlcAsset_Management.Behaviors.Asset_Behavior.Statuses.ToValue(obj.State);
-            }
 
             var _assetproperties = new Section(AssetManagement.Models.AssetDomMapper.AssetProperties.SectionDefinitionId);
             if (obj.AssetPropertiesSectionId.HasValue)
