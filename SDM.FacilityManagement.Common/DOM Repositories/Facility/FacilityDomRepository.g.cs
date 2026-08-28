@@ -613,10 +613,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 }
             };
 
-            if (obj.IsNew || String.IsNullOrWhiteSpace(obj.Identifier))
-            {
-                instance.StatusId = SharedMappers.DomIds.SlcFacility_Management.Behaviors.Facility_Behaviour.Statuses.ToValue(obj.State);
-            }
+            instance.StatusId = SharedMappers.DomIds.SlcFacility_Management.Behaviors.Facility_Behaviour.Statuses.ToValue(obj.State);
             var _facilityproperties = new Section(FacilityManagement.Models.FacilityDomMapper.FacilityProperties.SectionDefinitionId);
             if (obj.FacilityPropertiesSectionId.HasValue)
             {
