@@ -29,7 +29,7 @@
 
         public DataPortInfo DataPortInfo => _dataPortInfo ?? (_dataPortInfo = new DataPortInfo());
 
-        string IPort.PortName => DataPortInfo.Name;
+        IPortInfo IPort.PortInfo => DataPortInfo;
 
         public SdmObjectReference<Asset> Asset
         {

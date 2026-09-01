@@ -354,7 +354,7 @@
 
                 var dataPort = CloneDataPort(basePort);
                 dataPort.Asset = new SdmObjectReference<Asset>(persistedAssets[assetIndex].Identifier);
-                dataPort.DataPortInfo.Type = new SdmObjectReference<PortType>(dataPortType.Identifier);
+                dataPort.DataPortInfo.PortType = new SdmObjectReference<PortType>(dataPortType.Identifier);
 
                 dataPorts.Add(dataPort);
             }
@@ -688,7 +688,7 @@
             clone.DataPortInfo.PortNumber = source.DataPortInfo.PortNumber;
             clone.DataPortInfo.OutputType = source.DataPortInfo.OutputType;
             clone.DataPortInfo.PortExposure = source.DataPortInfo.PortExposure;
-            clone.DataPortInfo.Type = source.DataPortInfo.Type;
+            clone.DataPortInfo.PortType = source.DataPortInfo.PortType;
             clone.DataPortInfo.Label = source.DataPortInfo.Label;
 
             clone.AddressInfo.Ipv4Address = source.AddressInfo.Ipv4Address;

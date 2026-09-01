@@ -6,8 +6,8 @@
     /// </summary>
     public interface IPort : ISdmObject
     {
-        SdmObjectReference<Asset> Asset { get; set; }
+        IPortInfo PortInfo { get; }
 
-        string PortName { get; }
+        SdmObjectReference<Asset> Asset { get; }
     }
 }

@@ -339,7 +339,7 @@ namespace SDM.AssetManagement.Tests.Connections
                     PortNumber = 1,
                     OutputType = outputType,
                     PortExposure = SlcAsset_Management.Enums.PortExposureEnum.Front,
-                    Type = new SdmObjectReference<PortType>(portType.Identifier),
+                    PortType = new SdmObjectReference<PortType>(portType.Identifier),
                 },
             };
 

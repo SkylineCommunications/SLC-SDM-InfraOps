@@ -116,8 +116,8 @@
         private void ValidatePortTypesInBulk(List<DataPort> dataPorts, List<ValidationResult> results)
         {
             var distinctPortTypeIds = dataPorts
-                .Where(p => p.DataPortInfo.TypeField.Changed == true && p.DataPortInfo.Type != null && p.DataPortInfo.Type.HasValue())
-                .Select(p => p.DataPortInfo.Type.Identifier)
+                .Where(p => p.DataPortInfo.PortTypeField.Changed == true && p.DataPortInfo.PortType != null && p.DataPortInfo.PortType.HasValue())
+                .Select(p => p.DataPortInfo.PortType.Identifier)
                 .Distinct()
                 .ToList();
 
@@ -129,9 +129,9 @@
                 var port = dataPorts[i];
 
                 PortType loadedPortType = null;
-                if (port.DataPortInfo.Type != null && port.DataPortInfo.Type.HasValue())
+                if (port.DataPortInfo.PortType != null && port.DataPortInfo.PortType.HasValue())
                 {
-                    portTypeMap.TryGetValue(port.DataPortInfo.Type.Identifier, out loadedPortType);
+                    portTypeMap.TryGetValue(port.DataPortInfo.PortType.Identifier, out loadedPortType);
                 }
 
                 results[i].AddFailuresFrom(_validationCore.ValidatePortTypeAgainst(port, loadedPortType));

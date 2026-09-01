@@ -434,7 +434,7 @@
             dataPort.DataPortInfo.Name = $"Data Port {portNumber}";
             dataPort.DataPortInfo.PortNumber = portNumber;
             dataPort.DataPortInfo.OutputType = SlcAsset_Management.Enums.Outputtype.IO;
-            dataPort.DataPortInfo.Type = new SdmObjectReference<PortType>(portTypeId);
+            dataPort.DataPortInfo.PortType = new SdmObjectReference<PortType>(portTypeId);
             return dataPort;
         }
 

@@ -409,8 +409,8 @@
 
                 var portTypeIds = assetClasses
                     .SelectMany(ac => (ac.DataPorts ?? new List<DataPortInfo>())
-                        .Where(p => p?.Type != null && p.Type.HasValue())
-                        .Select(p => p.Type.Identifier)
+                        .Where(p => p?.PortType != null && p.PortType.HasValue())
+                        .Select(p => p.PortType.Identifier)
                         .Concat((ac.PowerPorts ?? new List<PowerPortInfo>())
                             .Where(p => p?.PortType != null && p.PortType.HasValue())
                             .Select(p => p.PortType.Identifier)))
@@ -444,9 +444,9 @@
             {
                 foreach (var port in assetClass.DataPorts ?? new List<DataPortInfo>())
                 {
-                    if (port?.Type != null && port.Type.HasValue() && !existingPortTypeIds.Contains(port.Type.Identifier))
+                    if (port?.PortType != null && port.PortType.HasValue() && !existingPortTypeIds.Contains(port.PortType.Identifier))
                     {
-                        result.AddFailReason("AssetClass.DataPorts.Type", "DataPorts", $"Referenced Port Type '{port.Type.Identifier}' does not exist.");
+                        result.AddFailReason("AssetClass.DataPorts.Type", "DataPorts", $"Referenced Port Type '{port.PortType.Identifier}' does not exist.");
                     }
                 }
 
@@ -463,12 +463,12 @@
             {
                 foreach (var port in ports ?? Enumerable.Empty<DataPortInfo>())
                 {
-                    if (port?.Type == null || !port.Type.HasValue())
+                    if (port?.PortType == null || !port.PortType.HasValue())
                     {
                         continue;
                     }
 
-                    var reference = port.Type;
+                    var reference = port.PortType;
                     if (!_entityLoader.GetPortTypesByDomIds(new List<string> { reference.Identifier }).Any())
                     {
                         result.AddFailReason(fieldId, fieldName, $"Referenced Port Type '{reference.Identifier}' does not exist.");

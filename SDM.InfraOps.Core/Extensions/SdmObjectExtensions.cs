@@ -4,7 +4,7 @@
 
     public static partial class SdmObjectExtensions
     {
-        public static Guid GetIdentifierAsGuid<T>(this SdmObject<T> sdmObject) where T : SdmObject<T>
+        public static Guid GetIdentifierAsGuid(this ISdmObject sdmObject)
         {
             if(!Guid.TryParse(sdmObject.Identifier, out var guid))
             {

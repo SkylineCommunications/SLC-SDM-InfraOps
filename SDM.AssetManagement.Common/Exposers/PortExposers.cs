@@ -63,9 +63,9 @@
 				(obj) => obj is DataPort dataPort ? dataPort.DataPortInfo.PortExposure : (obj as PowerPort)?.PowerPortInfo.PortExposure ?? default,
 				"PortInfo.PortExposure");
 
-			public static readonly Exposer<IPort, SdmObjectReference<AssetManagement.Models.PortType>> Type = new Exposer<IPort, SdmObjectReference<AssetManagement.Models.PortType>>(
-				(obj) => obj is DataPort dataPort ? dataPort.DataPortInfo.Type : (obj as PowerPort)?.PowerPortInfo.PortType ?? default,
-				"PortInfo.Type");
+			public static readonly Exposer<IPort, SdmObjectReference<AssetManagement.Models.PortType>> PortType = new Exposer<IPort, SdmObjectReference<AssetManagement.Models.PortType>>(
+				(obj) => obj is DataPort dataPort ? dataPort.DataPortInfo.PortType : (obj as PowerPort)?.PowerPortInfo.PortType ?? default,
+				"PortInfo.PortType");
 
 			public static readonly Exposer<IPort, string> Label = new Exposer<IPort, string>(
 				(obj) => obj is DataPort dataPort ? dataPort.DataPortInfo.Label : (obj as PowerPort)?.PowerPortInfo.Label,
@@ -116,7 +116,6 @@
 		/// Using any of these in a filter makes the DataPort definition useless to filter,
 		/// so the repository will only query the PowerPort definition.
 		/// Combining these with <see cref="DataPortOnly"/> exposers yields an empty result.
-		/// The PowerPort definition currently has no fields that the DataPort definition lacks.
 		/// </summary>
 		public static class PowerPortOnly
 		{

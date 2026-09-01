@@ -723,7 +723,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				var _dataportstype = _dataportsSection.GetValue<Guid>(AssetManagement.Models.AssetClassDomMapper.DataPorts.Type);
 				if (_dataportstype != null)
 				{
-                    dataports.Type = new SdmObjectReference<PortType>(Convert.ToString(_dataportstype.Value));
+                    dataports.PortType = new SdmObjectReference<PortType>(Convert.ToString(_dataportstype.Value));
 				}
 
 				var _dataportslabel = _dataportsSection.GetValue<string>(AssetManagement.Models.AssetClassDomMapper.DataPorts.Label);
@@ -969,7 +969,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
 				_dataportsSection.AddOrUpdateValue<int>(AssetManagement.Models.AssetClassDomMapper.DataPorts.OutputType, (int)dataports.OutputType);
 				_dataportsSection.AddOrUpdateValue<string>(AssetManagement.Models.AssetClassDomMapper.DataPorts.PortExposure, SharedMappers.DomIds.SlcAsset_Management.Enums.Portexposure.ToValue(dataports.PortExposure));
-				if (dataports.Type != default && System.Guid.TryParse(dataports.Type.Identifier, out var dataPortTypeGuid) && dataPortTypeGuid != System.Guid.Empty)
+				if (dataports.PortType != default && System.Guid.TryParse(dataports.PortType.Identifier, out var dataPortTypeGuid) && dataPortTypeGuid != System.Guid.Empty)
 				{
 					_dataportsSection.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetClassDomMapper.DataPorts.Type, dataPortTypeGuid);
 				}

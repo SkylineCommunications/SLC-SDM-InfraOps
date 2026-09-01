@@ -87,8 +87,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
                 .ToList();
 
             var portTypeIdsUsedByAssetPorts = _entityLoader.GetDataPortsByPortTypeIds(identifiers)
-                .Where(port => port.DataPortInfo.Type.HasValue())
-                .Select(port => port.DataPortInfo.Type.Identifier)
+                .Where(port => port.DataPortInfo.PortType.HasValue())
+                .Select(port => port.DataPortInfo.PortType.Identifier)
                 .Concat(_entityLoader.GetPowerPortsByPortTypeIds(identifiers)
                     .Where(port => port.PowerPortInfo.PortType.HasValue())
                     .Select(port => port.PowerPortInfo.PortType.Identifier))
@@ -96,8 +96,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
 
             var portTypeIdsUsedByAssetClassPorts = _entityLoader.GetAssetClassesByDataPortTypeIds(identifiers)
                 .SelectMany(assetClass => assetClass.DataPorts ?? new List<DataPortInfo>())
-                .Where(port => port != null && port.Type.HasValue())
-                .Select(port => port.Type.Identifier)
+                .Where(port => port != null && port.PortType.HasValue())
+                .Select(port => port.PortType.Identifier)
                 .Concat(_entityLoader.GetAssetClassesByPowerPortTypeIds(identifiers)
                     .SelectMany(assetClass => assetClass.PowerPorts ?? new List<PowerPortInfo>())
                     .Where(port => port != null && port.PortType.HasValue())

@@ -403,8 +403,8 @@
                 updated.DataPorts[0].PortNumber.Should().Be(2);
                 updated.DataPorts[0].Name.Should().Be("Port2");
                 updated.DataPorts[0].Label.Should().Be("Label2");
-                updated.DataPorts[0].Type.Should().NotBeNull();
-                updated.DataPorts[0].Type.HasValue().Should().BeFalse();
+                updated.DataPorts[0].PortType.Should().NotBeNull();
+                updated.DataPorts[0].PortType.HasValue().Should().BeFalse();
                 updated.DataPorts[0].PortExposure.Should().Be(SlcAsset_Management.Enums.PortExposureEnum.Back);
                 updated.DataPorts[0].OutputType.Should().Be(SlcAsset_Management.Enums.Outputtype.In);
 
@@ -455,8 +455,8 @@
                 created.DataPorts[0].PortNumber.Should().Be(1);
                 created.DataPorts[0].Name.Should().Be("Port1");
                 created.DataPorts[0].Label.Should().Be("Label1");
-                created.DataPorts[0].Type.Should().NotBeNull();
-                created.DataPorts[0].Type.HasValue().Should().BeFalse();
+                created.DataPorts[0].PortType.Should().NotBeNull();
+                created.DataPorts[0].PortType.HasValue().Should().BeFalse();
                 created.DataPorts[0].PortExposure.Should().Be(SlcAsset_Management.Enums.PortExposureEnum.Front);
                 created.DataPorts[0].OutputType.Should().Be(SlcAsset_Management.Enums.Outputtype.Out);
 

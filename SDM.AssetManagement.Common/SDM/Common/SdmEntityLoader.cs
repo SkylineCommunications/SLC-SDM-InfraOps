@@ -595,7 +595,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
 
             return Tools.RetrieveBigOrFilter(
                 portTypeIds,
-                id => DataPortExposers.DataPortInfo.Type.Equal(new SdmObjectReference<PortType>(id)),
+                id => DataPortExposers.DataPortInfo.PortType.Equal(new SdmObjectReference<PortType>(id)),
                 filter => assetManagerApiHelper.DataPorts.Read(filter).ToList());
         }
 
@@ -647,8 +647,8 @@ namespace Skyline.DataMiner.SDM.Common.Services
 
             var dataPortTypeExposer = new Exposers.CollectionExposer<AssetClass, Guid>(
                 obj => obj.DataPorts
-                    .Where(port => port?.Type != null && port.Type.HasValue())
-                    .Select(port => Guid.Parse(port.Type.Identifier)),
+                    .Where(port => port?.PortType != null && port.PortType.HasValue())
+                    .Select(port => Guid.Parse(port.PortType.Identifier)),
                 "DataPorts.Type");
 
             var matches = Tools.RetrieveBigOrFilter(
@@ -663,9 +663,9 @@ namespace Skyline.DataMiner.SDM.Common.Services
 
             var lookup = new HashSet<string>(portTypeIds);
             return assetManagerApiHelper.AssetClasses.Read(new TRUEFilterElement<AssetClass>())
-                .Where(assetClass => assetClass.DataPorts.Any(port => port?.Type != null
-                    && port.Type.HasValue()
-                    && lookup.Contains(port.Type.Identifier)))
+                .Where(assetClass => assetClass.DataPorts.Any(port => port?.PortType != null
+                    && port.PortType.HasValue()
+                    && lookup.Contains(port.PortType.Identifier)))
                 .ToList();
         }
 

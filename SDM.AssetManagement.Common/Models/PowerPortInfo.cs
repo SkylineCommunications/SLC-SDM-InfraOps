@@ -1,13 +1,12 @@
 namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
 	using System;
-
-    using SharedMappers.DomIds;
     using Newtonsoft.Json;
+    using SharedMappers.DomIds;
     using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
-    public sealed class PowerPortInfo : IEquatable<PowerPortInfo>, ISectionTrackable, ISectionEmptyState
+    public sealed class PowerPortInfo : ChangeTrackingBase, IEquatable<PowerPortInfo>, ISectionTrackable, ISectionEmptyState, IPortInfo
 	{
         [JsonIgnore]
         [SdmIgnore]
@@ -21,41 +20,105 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             !PortType.HasValue() &&
             Label == default;
 
-		public string Name { get; set; }
+        public PowerPortInfo() : base()
+        {
+        }
 
-		public long? PortNumber { get; set; }
+        public string Name
+        {
+            get => NameField.Value;
+            set => NameField.Value = value;
+        }
 
-		public SlcAsset_Management.Enums.Outputtype? OutputType { get; set; }
+        public long? PortNumber
+        {
+            get => PortNumberField.Value;
+            set => PortNumberField.Value = value;
+        }
 
-		public SlcAsset_Management.Enums.PortExposureEnum PortExposure { get; set; }
+        public SlcAsset_Management.Enums.Outputtype? OutputType
+        {
+            get => OutputTypeField.Value;
+            set => OutputTypeField.Value = value;
+        }
 
-        public SdmObjectReference<PortType> PortType { get; set; }
+        public SlcAsset_Management.Enums.PortExposureEnum PortExposure
+        {
+            get => PortExposureField.Value;
+            set => PortExposureField.Value = value;
+        }
 
-		public string Label { get; set; }
+        public SdmObjectReference<PortType> PortType
+        {
+            get => PortTypeField.Value;
+            set => PortTypeField.Value = value;
+        }
 
-		public override bool Equals(object obj)
+        public string Label
+        {
+            get => LabelField.Value;
+            set => LabelField.Value = value;
+        }
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal IChangeTrackingField<string> NameField => FieldHandler.GetOrCreateField(
+            nameof(Name),
+            () => new ChangeTrackingStringField(null));
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal IChangeTrackingField<long?> PortNumberField => FieldHandler.GetOrCreateField(
+            nameof(PortNumber),
+            () => new ChangeTrackingField<long?>(null));
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal IChangeTrackingField<SlcAsset_Management.Enums.Outputtype?> OutputTypeField => FieldHandler.GetOrCreateField(
+            nameof(OutputType),
+            () => new ChangeTrackingField<SlcAsset_Management.Enums.Outputtype?>(null));
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal IChangeTrackingField<SlcAsset_Management.Enums.PortExposureEnum> PortExposureField => FieldHandler.GetOrCreateField(
+            nameof(PortExposure),
+            () => new ChangeTrackingField<SlcAsset_Management.Enums.PortExposureEnum>(default));
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal IChangeTrackingField<SdmObjectReference<PortType>> PortTypeField => FieldHandler.GetOrCreateField(
+            nameof(Type),
+            () => new ChangeTrackingField<SdmObjectReference<PortType>>(default));
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal IChangeTrackingField<string> LabelField => FieldHandler.GetOrCreateField(
+            nameof(Label),
+            () => new ChangeTrackingStringField(null));
+
+        public bool Equals(PowerPortInfo other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return string.Equals(Name, other.Name, StringComparison.OrdinalIgnoreCase) &&
+                   PortNumber == other.PortNumber &&
+                   OutputType == other.OutputType &&
+                   PortExposure == other.PortExposure &&
+                   PortType == other.PortType &&
+                   string.Equals(Label, other.Label, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public override bool Equals(object obj)
 		{
 			return Equals(obj as PowerPortInfo);
-		}
-
-		public bool Equals(PowerPortInfo other)
-		{
-			if (other == null)
-			{
-				return false;
-			}
-
-			if (ReferenceEquals(this, other))
-			{
-				return true;
-			}
-
-			return string.Equals(Name, other.Name, StringComparison.OrdinalIgnoreCase) &&
-				   PortNumber == other.PortNumber &&
-				   OutputType == other.OutputType &&
-				   PortExposure == other.PortExposure &&
-				   PortType == other.PortType &&
-				   string.Equals(Label, other.Label, StringComparison.OrdinalIgnoreCase);
 		}
 
 		public override int GetHashCode()

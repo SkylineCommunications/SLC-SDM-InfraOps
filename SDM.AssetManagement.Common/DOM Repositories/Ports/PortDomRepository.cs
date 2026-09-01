@@ -295,7 +295,7 @@
                     yield return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(DataPortDomMapper.DataPortInfo.PortExposure), sortOrder, naturalSort);
                     yield return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(PowerPortDomMapper.PowerPortInfo.PortExposure), sortOrder, naturalSort);
                     break;
-                case "PortInfo.Type":
+                case "PortInfo.PortType":
                     yield return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(DataPortDomMapper.DataPortInfo.Type), sortOrder, naturalSort);
                     yield return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(PowerPortDomMapper.PowerPortInfo.PortType), sortOrder, naturalSort);
                     break;
