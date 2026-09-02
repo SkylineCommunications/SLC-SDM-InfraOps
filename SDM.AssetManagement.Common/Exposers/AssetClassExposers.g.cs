@@ -88,8 +88,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         {
             public static readonly Exposer<AssetManagement.Models.AssetClass, string> Protocol = new Exposer<AssetManagement.Models.AssetClass, string>((obj) => obj.ProtocolLink.Protocol, "ProtocolLink.Protocol");
         }
-    }
-		}
 
 		public static partial class Attachments
 		{
