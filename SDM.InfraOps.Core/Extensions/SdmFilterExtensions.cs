@@ -1,5 +1,6 @@
 ﻿namespace Skyline.DataMiner.SDM.Extensions
 {
+    using System;
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
 
     public static class SdmFilterExtensions
@@ -15,11 +16,12 @@
         /// <returns>
         /// A <see cref="ManagedFilter{TFilter, TField}"/> that matches when the field has a value equal to <paramref name="value"/>.
         /// </returns>
+        
         public static ManagedFilter<TFilter, TField?> Equal<TFilter, TField>(
             this Exposer<TFilter, TField?> exposer,
             TField value)
             where TFilter : class
-            where TField : struct
+            where TField : struct, Enum
         {
             return new ManagedFilter<TFilter, TField?>(exposer, Comparer.Equals, value, delegate (TFilter obj)
             {
@@ -43,7 +45,7 @@
             this Exposer<TFilter, TField?> exposer,
             TField value)
             where TFilter : class
-            where TField : struct
+            where TField : struct, Enum
         {
             return new ManagedFilter<TFilter, TField?>(exposer, Comparer.NotEquals, value, delegate (TFilter obj)
             {
