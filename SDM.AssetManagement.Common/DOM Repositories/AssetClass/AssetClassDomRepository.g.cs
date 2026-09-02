@@ -1107,8 +1107,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 					return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Weight.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "Weight":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Weight), comparer, (double)((double?)value).Value);
-				case "FrontImage":
+                case "FrontImage" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.FrontImage.Id.ToString()).Equal(comparer == Comparer.NotEquals);
+                case "FrontImage":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.FrontImage), comparer, (string)value);
+				case "BackImage" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.BackImage.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "BackImage":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.BackImage), comparer, (string)value);
 				case "TypicalPowerConsumption" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
