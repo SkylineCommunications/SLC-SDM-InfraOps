@@ -1,4 +1,4 @@
-﻿namespace SDM.AssetManagement.Tests
+namespace SDM.AssetManagement.Tests
 {
     using System;
     using System.Collections.Generic;
@@ -610,6 +610,7 @@
                 DataPorts = source.DataPorts != null ? new List<DataPortInfo>(source.DataPorts) : new List<DataPortInfo>(),
                 PowerPorts = source.PowerPorts != null ? new List<PowerPortInfo>(source.PowerPorts) : new List<PowerPortInfo>(),
                 Holders = source.Holders != null ? new List<AssetHolder>(source.Holders) : new List<AssetHolder>(),
+                Attachments = source.Attachments != null ? new List<Attachment>(source.Attachments) : new List<Attachment>(),
                 // DeviceTypeId will be set by caller
             };
 

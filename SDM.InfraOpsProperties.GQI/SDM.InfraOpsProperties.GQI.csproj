@@ -6,9 +6,9 @@
     <Nullable>disable</Nullable>
     <AssemblyName>Skyline.DataMiner.SDM.InfraOpsProperties.GQI</AssemblyName>
     <RootNamespace>Skyline.DataMiner.SDM.InfraOpsProperties.GQI</RootNamespace>
-    <VersionSuffix Condition="'$(Configuration)' == 'Debug'">dev-045</VersionSuffix>
+    <VersionSuffix Condition="'$(Configuration)' == 'Debug'">dev-046</VersionSuffix>
     <VersionPrefix>1.0.1</VersionPrefix>
-    <AssemblyVersion>0.2.3.45</AssemblyVersion>
+    <AssemblyVersion>0.2.3.46</AssemblyVersion>
     <PackageTags>Skyline;DataMiner</PackageTags>
     <PackageProjectUrl>https://skyline.be</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>

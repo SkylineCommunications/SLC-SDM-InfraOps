@@ -285,7 +285,8 @@
             var standardChecks = Validator<AssetClass>
                 .Create(ValidateDimensions)
                 .AndThen(ValidatePowerConsumption)
-                .AndThen(ValidateCollections);
+                .AndThen(ValidateCollections)
+                .AndThen(ValidateImages);
 
             return criticalCheck.AndThen(standardChecks).Validate(assetClass);
         }
@@ -552,6 +553,25 @@
             if (assetClass.ShouldValidate(assetClass.HoldersField))
             {
                 validations.Add(AssetClassValidationHandler.ValidateAssetClassHolders(assetClass));
+            }
+
+            return validations.MergeAll();
+        }
+
+        private ValidationResult ValidateImages(AssetClass assetClass)
+        {
+            var validations = new List<ValidationResult>();
+
+            if ((assetClass.ShouldValidate(assetClass.FrontImageField) || assetClass.ShouldValidate(assetClass.AttachmentsField))
+                && !AssetClassValidationHandler.IsFrontImageInAttachments(assetClass, out var frontResult))
+            {
+                validations.Add(frontResult);
+            }
+
+            if ((assetClass.ShouldValidate(assetClass.BackImageField) || assetClass.ShouldValidate(assetClass.AttachmentsField))
+                && !AssetClassValidationHandler.IsBackImageInAttachments(assetClass, out var backResult))
+            {
+                validations.Add(backResult);
             }
 
             return validations.MergeAll();

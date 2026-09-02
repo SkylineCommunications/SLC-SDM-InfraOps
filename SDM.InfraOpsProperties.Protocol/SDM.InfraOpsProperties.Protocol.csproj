@@ -7,7 +7,7 @@
     <AssemblyName>Skyline.DataMiner.SDM.InfraOpsProperties.Protocol</AssemblyName>
     <RootNamespace>Skyline.DataMiner.SDM.InfraOpsProperties.Protocol</RootNamespace>
     <PackageVersion>1.0.1</PackageVersion>
-    <AssemblyVersion>0.2.3.45</AssemblyVersion>
+    <AssemblyVersion>0.2.3.46</AssemblyVersion>
     <VersionPrefix>1.0.1</VersionPrefix>
     <PackageTags>Skyline;DataMiner</PackageTags>
     <PackageProjectUrl>https://skyline.be</PackageProjectUrl>

@@ -720,7 +720,36 @@ namespace SharedMappers.DomIds
                 = new FieldDescriptorID(new Guid("c6f632ad-33d9-41e3-a8de-74c99a001143"));
             }
 
-            public static class AssetLifecycle
+			public static class Attachment
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("cdfaec69-e775-47f2-bbc0-7ca98d5bbe34"))
+				{ ModuleId = "(slc)asset_management" };
+				public static FieldDescriptorID Path
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("7513ce2a-b668-4676-9f48-fb2ceff9612d"));
+				public static FieldDescriptorID AttachedAt
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("1c547989-5f7e-4775-afae-b2360968411d"));
+				public static FieldDescriptorID AttachedBy
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("694ae718-2867-4bde-896f-ed1cc344fea9"));
+			}
+
+			public static class AssetLifecycle
             {
                 public static SectionDefinitionID Id
                 {
