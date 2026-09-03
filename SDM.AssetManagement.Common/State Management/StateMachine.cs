@@ -1,8 +1,12 @@
 ﻿namespace SharedCommonLibrary.AssetManagement.State_Management
 {
+    using System;
     using System.Collections.Generic;
 
     using SharedMappers.DomIds;
+
+    using AssetStatuses = SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum;
+    using AssetTransitions = SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum;
 
     internal static class StateMachine
     {
@@ -251,6 +255,52 @@
             #endregion
         };
 
+        private static readonly IReadOnlyDictionary<AssetTransitions, AssetStatuses> TransitionDestinationStates =
+            new Dictionary<AssetTransitions, AssetStatuses>
+            {
+                [AssetTransitions.Notavailable_To_Available] = AssetStatuses.Available,
+                [AssetTransitions.Notavailable_To_Disposed] = AssetStatuses.Disposed,
+                [AssetTransitions.Available_To_Notavailable] = AssetStatuses.NotAvailable,
+                [AssetTransitions.Buildplanready_To_Installed] = AssetStatuses.Installed,
+                [AssetTransitions.Installed_To_Inservice] = AssetStatuses.InService,
+                [AssetTransitions.Inservice_To_Notavailable] = AssetStatuses.NotAvailable,
+                [AssetTransitions.Inservice_To_Buildplanready] = AssetStatuses.BuildPlanReady,
+                [AssetTransitions.Inservice_To_Available] = AssetStatuses.Available,
+                [AssetTransitions.Inservice_To_Installed] = AssetStatuses.Installed,
+                [AssetTransitions.Inplanning_To_Available] = AssetStatuses.Available,
+                [AssetTransitions.Inplanning_To_Buildplanready] = AssetStatuses.BuildPlanReady,
+                [AssetTransitions.Buildplanready_To_Inplanning] = AssetStatuses.InPlanning,
+                [AssetTransitions.Inservice_To_Inplanning] = AssetStatuses.InPlanning,
+                [AssetTransitions.Available_To_Inplanning] = AssetStatuses.InPlanning,
+                [AssetTransitions.Installed_To_Inplanning] = AssetStatuses.InPlanning,
+                [AssetTransitions.Notavailable_To_Intransit] = AssetStatuses.InTransit,
+                [AssetTransitions.Available_To_Intransit] = AssetStatuses.InTransit,
+                [AssetTransitions.Buildplanready_To_Intransit] = AssetStatuses.InTransit,
+                [AssetTransitions.Installed_To_Intransit] = AssetStatuses.InTransit,
+                [AssetTransitions.Inservice_To_Intransit] = AssetStatuses.InTransit,
+                [AssetTransitions.Inplanning_To_Intransit] = AssetStatuses.InTransit,
+                [AssetTransitions.Inrepair_To_Intransit] = AssetStatuses.InTransit,
+                [AssetTransitions.Notavailable_To_Inrepair] = AssetStatuses.InRepair,
+                [AssetTransitions.Available_To_Inrepair] = AssetStatuses.InRepair,
+                [AssetTransitions.Buildplanready_To_Inrepair] = AssetStatuses.InRepair,
+                [AssetTransitions.Installed_To_Inrepair] = AssetStatuses.InRepair,
+                [AssetTransitions.Inservice_To_Inrepair] = AssetStatuses.InRepair,
+                [AssetTransitions.Inplanning_To_Inrepair] = AssetStatuses.InRepair,
+                [AssetTransitions.Intransit_To_Inrepair] = AssetStatuses.InRepair,
+                [AssetTransitions.Intransit_To_Notavailable] = AssetStatuses.NotAvailable,
+                [AssetTransitions.Intransit_To_Available] = AssetStatuses.Available,
+                [AssetTransitions.Intransit_To_Buildplanready] = AssetStatuses.BuildPlanReady,
+                [AssetTransitions.Intransit_To_Installed] = AssetStatuses.Installed,
+                [AssetTransitions.Intransit_To_Disposed] = AssetStatuses.Disposed,
+                [AssetTransitions.Intransit_To_Inplanning] = AssetStatuses.InPlanning,
+                [AssetTransitions.Inrepair_To_Notavailable] = AssetStatuses.NotAvailable,
+                [AssetTransitions.Inrepair_To_Available] = AssetStatuses.Available,
+                [AssetTransitions.Inrepair_To_Buildplanready] = AssetStatuses.BuildPlanReady,
+                [AssetTransitions.Inrepair_To_Installed] = AssetStatuses.Installed,
+                [AssetTransitions.Inrepair_To_Disposed] = AssetStatuses.Disposed,
+                [AssetTransitions.Inrepair_To_Inplanning] = AssetStatuses.InPlanning,
+            };
+
         /// <summary>
         /// Checks if a state transition from the specified start status to end status is allowed.
         /// </summary>
@@ -276,6 +326,30 @@
             }
 
             return new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum>();
+        }
+
+        /// <summary>
+        /// Gets the destination state entered by each transition in the path.
+        /// </summary>
+        public static List<SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum> GetTransitionDestinationStates(
+            SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum fromStatus,
+            SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum toStatus)
+        {
+            var transitions = GetTransitionPath(fromStatus, toStatus);
+            var destinationStates = new List<SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum>();
+
+            foreach (var transition in transitions)
+            {
+                if (!TransitionDestinationStates.TryGetValue(transition, out var destinationState))
+                {
+                    throw new InvalidOperationException(
+                        $"Unable to resolve destination state for transition '{transition}' from '{fromStatus}' to '{toStatus}'.");
+                }
+
+                destinationStates.Add(destinationState);
+            }
+
+            return destinationStates;
         }
     }
 }

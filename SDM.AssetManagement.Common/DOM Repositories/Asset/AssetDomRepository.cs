@@ -1,12 +1,12 @@
-﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
+namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
     using System;
-    using System.Linq;
 
     using SharedCommonLibrary.AssetManagement.State_Management;
 
     using SharedMappers.DomIds;
 
+    using Skyline.DataMiner.SDM.AssetManagement.Common.Exceptions;
     using Skyline.DataMiner.SDM.AssetManagement.Common.Validation;
     using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 
@@ -62,7 +62,7 @@
                 throw new InvalidOperationException($"State transition from {asset.State} to {newState} is not allowed.");
             }
 
-            EnsureReadyForInstallIfRequired(asset, newState);
+            ValidateTransitionPath(asset, newState);
 
             return ExecuteStateTransition(asset, newState);
         }
@@ -76,9 +76,8 @@
                 throw new InvalidOperationException($"State transition from {asset.State} to {newState} is not allowed.");
             }
 
-            EnsureReadyForInstallIfRequired(asset, newState);
-
             var updated = Update(asset);
+            ValidateTransitionPath(updated, newState);
 
             return ExecuteStateTransition(updated, newState);
         }
@@ -99,7 +98,7 @@
                 throw new InvalidOperationException($"State transition from {asset.State} to {newState} is not allowed.");
             }
 
-            EnsureReadyForInstallIfRequired(asset, newState);
+            ValidateTransitionPath(asset, newState);
 
             var transitioned = ExecuteStateTransition(asset, newState);
 
@@ -149,19 +148,14 @@
             }
         }
 
-        private static void EnsureReadyForInstallIfRequired(
+        private static void ValidateTransitionPath(
             Asset asset,
             SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum toState)
         {
-            var transitions = StateMachine.GetTransitionPath(asset.State, toState);
-            if (!transitions.Contains(SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Buildplanready_To_Installed))
+            var validationResult = AssetTransitionValidator.ValidatePath(asset, toState);
+            if (!validationResult.IsValid)
             {
-                return;
-            }
-
-            if (!AssetValidationHandler.IsReadyForInstall(asset, out _))
-            {
-                throw new InvalidOperationException("Please assign an installation user and date to the asset before installing.");
+                throw new AssetTransitionValidationException(validationResult);
             }
         }
     }
