@@ -311,7 +311,7 @@ namespace SDM.AssetManagement.Tests.AssetClasses
 
             var initialCount = Helper.TestData.AssetClasses.Count;
             var assetClassToDelete = Helper.AssetManagement.AssetClasses
-                .Read(AssetClassExposers.DeviceName.Equal("Router"))
+                .Read(AssetClassExposers.Name.Equal("Router"))
                 .First();
             assetClassToDelete.State = SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Draft;
 
@@ -338,8 +338,8 @@ namespace SDM.AssetManagement.Tests.AssetClasses
             var initialCount = Helper.TestData.AssetClasses.Count;
 
             var filter = new ORFilterElement<AssetClass>(
-                AssetClassExposers.DeviceName.Equal("UPS"),
-                AssetClassExposers.DeviceName.Equal("Firewall"),
+                AssetClassExposers.Name.Equal("UPS"),
+                AssetClassExposers.Name.Equal("Firewall"),
                 AssetClassExposers.DeviceDescription.Contains("Ethernet", StringComparison.OrdinalIgnoreCase));
 
             var assetClassesToDelete = Helper.AssetManagement.AssetClasses.Read(filter).ToList();
@@ -355,10 +355,10 @@ namespace SDM.AssetManagement.Tests.AssetClasses
                 Helper.AssetManagement.AssetClasses.Count(new TRUEFilterElement<AssetClass>())
                     .Should().Be(initialCount - deleteCount, $"{deleteCount} asset classes should be deleted");
 
-                Helper.AssetManagement.AssetClasses.Count(AssetClassExposers.DeviceName.Equal("UPS"))
+                Helper.AssetManagement.AssetClasses.Count(AssetClassExposers.Name.Equal("UPS"))
                     .Should().Be(0, "UPS should be deleted");
 
-                Helper.AssetManagement.AssetClasses.Count(AssetClassExposers.DeviceName.Equal("Firewall"))
+                Helper.AssetManagement.AssetClasses.Count(AssetClassExposers.Name.Equal("Firewall"))
                     .Should().Be(0, "Firewall should be deleted");
             }
         }

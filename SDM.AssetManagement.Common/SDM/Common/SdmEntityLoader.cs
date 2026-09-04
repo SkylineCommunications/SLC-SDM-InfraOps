@@ -347,7 +347,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
                 return 0;
             }
 
-            FilterElement<AssetClass> filter = AssetClassExposers.DeviceName.Equal(name);
+            FilterElement<AssetClass> filter = AssetClassExposers.Name.Equal(name);
 
             if (!string.IsNullOrWhiteSpace(exceptIdentifier))
             {
@@ -371,7 +371,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
 
             return Tools.RetrieveBigOrFilter(
                 names,
-                name => AssetClassExposers.DeviceName.Equal(name),
+                name => AssetClassExposers.Name.Equal(name),
                 filter => assetManagerApiHelper.AssetClasses.Read(filter).ToList());
         }
 

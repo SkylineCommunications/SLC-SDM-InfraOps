@@ -11,11 +11,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     /// </summary>
     public sealed class PortReadResult : IPagedResult<IPort>
     {
+        IReadOnlyList<DataPort> _dataPorts;
+        IReadOnlyList<PowerPort> _powerPorts;
+
         internal PortReadResult(IReadOnlyList<IPort> domOrderedPorts, int pageNumber = 0, bool hasNextPage = false)
         {
             DomOrderedPorts = domOrderedPorts ?? Array.Empty<IPort>();
-            DataPorts = DomOrderedPorts.OfType<DataPort>().ToList();
-            PowerPorts = DomOrderedPorts.OfType<PowerPort>().ToList();
             PageNumber = pageNumber;
             HasNextPage = hasNextPage;
         }
@@ -34,12 +35,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         /// <summary>
         /// Gets the ports that were read from the DataPort DOM definition.
         /// </summary>
-        public IReadOnlyList<DataPort> DataPorts { get; }
+        public IReadOnlyList<DataPort> DataPorts => _dataPorts ?? (_dataPorts = DomOrderedPorts.OfType<DataPort>().ToList());
 
         /// <summary>
         /// Gets the ports that were read from the PowerPort DOM definition.
         /// </summary>
-        public IReadOnlyList<PowerPort> PowerPorts { get; }
+        public IReadOnlyList<PowerPort> PowerPorts => _powerPorts ?? (_powerPorts = DomOrderedPorts.OfType<PowerPort>().ToList());
 
         /// <summary>
         /// Gets the current page number (0-based). Always 0 for non-paged reads.

@@ -24,7 +24,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 	public static partial class AssetClassExposers
 	{
 		public static readonly Exposer<AssetManagement.Models.AssetClass, string> Identifier = new Exposer<AssetManagement.Models.AssetClass, string>((obj) => obj.Identifier, "Identifier");
-		public static readonly Exposer<AssetManagement.Models.AssetClass, string> DeviceName = new Exposer<AssetManagement.Models.AssetClass, string>((obj) => obj.Name, "Name");
+		public static readonly Exposer<AssetManagement.Models.AssetClass, string> Name = new Exposer<AssetManagement.Models.AssetClass, string>((obj) => obj.Name, "Name");
 		public static readonly Exposer<AssetManagement.Models.AssetClass, SdmObjectReference<AssetManagement.Models.DeviceType>> DeviceTypeId = new Exposer<AssetManagement.Models.AssetClass, SdmObjectReference<AssetManagement.Models.DeviceType>>((obj) => obj.DeviceTypeId, "DeviceTypeId");
 		public static readonly Exposer<AssetManagement.Models.AssetClass, string> DeviceDescription = new Exposer<AssetManagement.Models.AssetClass, string>((obj) => obj.Description, "Description");
 		public static readonly Exposer<AssetManagement.Models.AssetClass, System.Guid?> ManufacturerId = new Exposer<AssetManagement.Models.AssetClass, System.Guid?>((obj) => obj.Manufacturer, "Manufacturer");

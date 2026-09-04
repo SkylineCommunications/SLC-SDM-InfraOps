@@ -28,5 +28,25 @@
 
             return guid != Guid.Empty;
         }
+
+        public static Guid GetIdentifierAsGuid<T>(this SdmObjectReference<T> reference) where T : SdmObject<T>
+        {
+            if(string.IsNullOrWhiteSpace(reference.Identifier))
+            {
+                return Guid.Empty;
+            }
+
+            if (!Guid.TryParse(reference.Identifier, out var guid))
+            {
+                throw new InvalidOperationException("The Identifier of the SdmObjectReference is not a valid GUID.");
+            }
+
+            if (guid == Guid.Empty)
+            {
+                throw new InvalidOperationException("The Identifier of the SdmObjectReference is an empty GUID.");
+            }
+
+            return guid;
+        }
     }
 }
