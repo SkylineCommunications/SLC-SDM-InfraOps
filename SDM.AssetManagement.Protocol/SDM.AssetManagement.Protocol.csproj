@@ -6,9 +6,9 @@
     <Nullable>disable</Nullable>
     <AssemblyName>Skyline.DataMiner.SDM.AssetManagement.Protocol</AssemblyName>
     <RootNamespace>Skyline.DataMiner.SDM.AssetManagement.Protocol</RootNamespace>
-    <PackageVersion>1.0.1</PackageVersion>
-    <Version>1.0.1</Version>
-    <AssemblyVersion>0.2.3.46</AssemblyVersion>
+    <VersionSuffix Condition="'$(VersionSuffixValue)' != '' and '$(Configuration)' == 'Debug'">$(VersionSuffixValue)</VersionSuffix>
+    <AssemblyVersion Condition="'$(AssemblyVersionValue)' != ''">$(AssemblyVersionValue)</AssemblyVersion>
+    <VersionPrefix>1.0.1</VersionPrefix>
     <PackageTags>Skyline;DataMiner</PackageTags>
     <PackageProjectUrl>https://skyline.be</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
