@@ -7,6 +7,8 @@
 
     using AssetStatuses = SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum;
     using AssetTransitions = SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum;
+    using AssetClassStatuses = SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum;
+    using AssetClassTransitions = SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Class_Behavior.TransitionsEnum;
 
     internal static class StateMachine
     {
@@ -301,6 +303,24 @@
                 [AssetTransitions.Inrepair_To_Inplanning] = AssetStatuses.InPlanning,
             };
 
+        private static readonly IDictionary<(AssetClassStatuses startStatus, AssetClassStatuses endStatus), List<AssetClassTransitions>> AssetClassStatusToStatusTransitions =
+            new Dictionary<(AssetClassStatuses startStatus, AssetClassStatuses endStatus), List<AssetClassTransitions>>
+            {
+               [(AssetClassStatuses.Draft, AssetClassStatuses.Active)] = new List<AssetClassTransitions>
+               {
+                   AssetClassTransitions.Draft_Active,
+               },
+               [(AssetClassStatuses.Active, AssetClassStatuses.Deprecated)] = new List<AssetClassTransitions>
+               {
+                   AssetClassTransitions.Active_Deprecated,
+               },
+               [(AssetClassStatuses.Draft, AssetClassStatuses.Deprecated)] = new List<AssetClassTransitions>
+               {
+                   AssetClassTransitions.Draft_Active,
+                   AssetClassTransitions.Active_Deprecated,
+               },
+            };
+
         /// <summary>
         /// Checks if a state transition from the specified start status to end status is allowed.
         /// </summary>
@@ -326,6 +346,21 @@
             }
 
             return new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum>();
+        }
+
+        public static bool IsTransitionAllowed(AssetClassStatuses fromStatus, AssetClassStatuses toStatus)
+        {
+            return AssetClassStatusToStatusTransitions.ContainsKey((fromStatus, toStatus));
+        }
+
+        public static List<AssetClassTransitions> GetTransitionPath(AssetClassStatuses fromStatus, AssetClassStatuses toStatus)
+        {
+            if (AssetClassStatusToStatusTransitions.TryGetValue((fromStatus, toStatus), out var transitions))
+            {
+                return new List<AssetClassTransitions>(transitions);
+            }
+
+            return new List<AssetClassTransitions>();
         }
 
         /// <summary>

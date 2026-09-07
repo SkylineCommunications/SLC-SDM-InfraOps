@@ -8,8 +8,8 @@ namespace Skyline.DataMiner.SDM
 	public static class AssetClassDomRepository_Extensions
 	{
 
-		public static IBulkRepository<AssetManagement.Models.AssetClass> WithMiddleware(
-			this IBulkRepository<AssetManagement.Models.AssetClass> repository,
+		public static IAssetClassRepository WithMiddleware(
+			this IAssetClassRepository repository,
 			IMiddlewareMarker<AssetManagement.Models.AssetClass> middleware)
 		{
 			return new AssetClassDomRepository_Middleware(repository, middleware);
