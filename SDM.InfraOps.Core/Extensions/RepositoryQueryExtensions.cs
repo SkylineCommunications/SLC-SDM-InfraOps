@@ -31,14 +31,16 @@
         /// <typeparam name="T">The entity type.</typeparam>
         /// <typeparam name="TKey">The key type used to build a per-item filter (e.g. a name, id, or tuple).</typeparam>
         /// <param name="repository">The repository to read from.</param>
-        /// <param name="keys">The keys to look up. Duplicates and empty input are handled gracefully.</param>
+        /// <param name="keys">
+        /// The keys to look up. Duplicates are removed using <see cref="EqualityComparer{T}.Default"/>;
+        /// null and empty input are handled gracefully.
+        /// </param>
         /// <param name="filterProvider">Builds the <see cref="FilterElement{T}"/> for a single key.</param>
         public static List<T> ReadByBigOrFilter<T, TKey>(
             this IReadableRepository<T> repository,
             IEnumerable<TKey> keys,
-            Func<TKey, FilterElement<T>> filterProvider) 
+            Func<TKey, FilterElement<T>> filterProvider)
             where T : class
-            where TKey : IEquatable<TKey>
         {
             if (repository == null)
             {
@@ -50,7 +52,7 @@
                 throw new ArgumentNullException(nameof(filterProvider));
             }
 
-            var keyList = keys?.Distinct()?.ToList() ?? new List<TKey>();
+            var keyList = keys?.Distinct().ToList() ?? new List<TKey>();
 
             if (keyList.Count == 0)
             {
