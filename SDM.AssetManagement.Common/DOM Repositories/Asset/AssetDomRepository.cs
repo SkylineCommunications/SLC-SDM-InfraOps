@@ -1,14 +1,16 @@
 namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
     using System;
+    using System.Linq;
 
     using SharedCommonLibrary.AssetManagement.State_Management;
 
     using SharedMappers.DomIds;
 
+    using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+    using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM.AssetManagement.Common.Exceptions;
     using Skyline.DataMiner.SDM.AssetManagement.Common.Validation;
-    using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 
     /// <summary>
     /// Defines methods for updating asset fields and managing asset state transitions in a repository. Extends bulk
@@ -22,6 +24,13 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     [AllowSdmMiddleware]
     public interface IAssetRepository : IBulkRepository<Asset>
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        Asset ReadAssetById(string id);
+      
         /// <summary>
         /// Transitions asset to a new state.
         /// Use this AFTER updating fields if the new state has different validation rules.
@@ -53,6 +62,16 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
     internal partial class AssetDomRepository : IAssetRepository
     {
+        public Asset ReadAssetById(string id)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                return null;
+            }
+
+            return Read(AssetExposers.Identifier.Equal(id)).SingleOrDefault();
+        }
+
         public Asset TransitionTo(Asset asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum newState)
         {
             if(asset == null) throw new ArgumentNullException(nameof(asset));
