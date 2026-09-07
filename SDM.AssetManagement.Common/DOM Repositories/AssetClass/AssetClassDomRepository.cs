@@ -11,6 +11,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
 
+    [AllowSdmMiddleware]
     public interface IAssetClassRepository : IBulkRepository<AssetClass>
     {
         AssetClass ReadAssetClassById(string id);
