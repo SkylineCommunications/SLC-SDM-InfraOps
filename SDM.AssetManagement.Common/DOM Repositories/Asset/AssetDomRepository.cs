@@ -1,14 +1,10 @@
 ﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
     using System;
-    using System.Linq;
-
     using SharedCommonLibrary.AssetManagement.State_Management;
-
     using SharedMappers.DomIds;
-
-    using Skyline.DataMiner.SDM.AssetManagement.Common.Validation;
     using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+    using Skyline.DataMiner.SDM.AssetManagement.Common.Validation;
 
     /// <summary>
     /// Defines methods for updating asset fields and managing asset state transitions in a repository. Extends bulk

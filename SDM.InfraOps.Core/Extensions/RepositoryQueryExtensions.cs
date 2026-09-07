@@ -23,9 +23,10 @@
     public static class RepositoryQueryExtensions
     {
         /// <summary>
-        /// Reads all entities matching any of the given <paramref name="keys"/>, using a single big-OR filter
-        /// (internally batched by <see cref="Tools.RetrieveBigOrFilter{T, ID}"/> to avoid oversized queries)
-        /// instead of one query per key.
+        /// Reads all entities matching any of the given <paramref name="keys"/> by combining their typed filters
+        /// into big-OR queries. <see cref="Tools.RetrieveBigOrFilter{T, ID}"/> batches oversized queries, while the
+        /// repository remains responsible for translating the resulting <see cref="FilterElement{T}"/> and applying
+        /// any repository-specific constraints, such as a DOM definition filter.
         /// </summary>
         /// <typeparam name="T">The entity type.</typeparam>
         /// <typeparam name="TKey">The key type used to build a per-item filter (e.g. a name, id, or tuple).</typeparam>
@@ -35,8 +36,9 @@
         public static List<T> ReadByBigOrFilter<T, TKey>(
             this IReadableRepository<T> repository,
             IEnumerable<TKey> keys,
-            Func<TKey, FilterElement<T>> filterProvider)
+            Func<TKey, FilterElement<T>> filterProvider) 
             where T : class
+            where TKey : IEquatable<TKey>
         {
             if (repository == null)
             {
@@ -48,14 +50,14 @@
                 throw new ArgumentNullException(nameof(filterProvider));
             }
 
-            var keyList = keys?.ToList() ?? new List<TKey>();
+            var keyList = keys?.Distinct()?.ToList() ?? new List<TKey>();
 
             if (keyList.Count == 0)
             {
                 return new List<T>();
             }
 
-            return Tools.RetrieveBigOrFilter<T, TKey>(keyList, key => filterProvider(key), filter => repository.Read(filter).ToList());
+            return Tools.RetrieveBigOrFilter(keyList, key => filterProvider(key), filter => repository.Read(filter).ToList()).Distinct().ToList();
         }
     }
 }
