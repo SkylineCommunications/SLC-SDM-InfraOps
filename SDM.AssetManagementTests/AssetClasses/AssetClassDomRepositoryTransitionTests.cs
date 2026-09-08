@@ -29,7 +29,8 @@ namespace SDM.AssetManagement.Tests.AssetClasses
         private AssetClass CreateAssetClass(
             SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum state)
         {
-            var deviceType = _helper.TestData.DeviceTypes.First();
+            // Deterministic, rack-mountable, non-PowerProvider device type (see RackMountableDeviceType).
+            var deviceType = _helper.TestData.RackMountableDeviceType();
             // The in-memory DOM double honors an explicitly supplied State on Create, matching CreateJobAt.
             return _helper.AssetManagement.AssetClasses.Create(new AssetClass
             {

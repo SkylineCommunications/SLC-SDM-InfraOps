@@ -303,6 +303,20 @@ namespace SDM.AssetManagement.Tests.Setup
         public static Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType NonPowerProviderDeviceType(this ITestDataCache testData)
             => testData.DeviceTypes.First(d => !d.TagsInfo.Tags.Contains(SlcAsset_Management.Enums.TagOption.PowerProvider));
 
+        /// <summary>
+        /// Returns the first rack-mountable device type that is <b>not</b> a PowerProvider, i.e. one
+        /// tagged <see cref="SlcAsset_Management.Enums.TagOption.RackUnitConsumer"/> but not
+        /// <see cref="SlcAsset_Management.Enums.TagOption.PowerProvider"/>. Use this instead of
+        /// <c>DeviceTypes.First()</c> when creating an asset class with <c>HeightU &gt; 0</c>: the
+        /// RackUnitConsumer tag satisfies the rack-capacity rule, while excluding PowerProvider avoids
+        /// the "must have a Power Supply" rule. Also keeps the selection deterministic across runners,
+        /// since repo enumeration order is not guaranteed.
+        /// </summary>
+        public static Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType RackMountableDeviceType(this ITestDataCache testData)
+            => testData.DeviceTypes.First(d =>
+                d.TagsInfo.Tags.Contains(SlcAsset_Management.Enums.TagOption.RackUnitConsumer) &&
+                !d.TagsInfo.Tags.Contains(SlcAsset_Management.Enums.TagOption.PowerProvider));
+
         #endregion
     }
 }

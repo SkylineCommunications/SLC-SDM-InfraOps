@@ -26,10 +26,14 @@ namespace SDM.AssetManagement.Tests.Assets
         {
             _helper = RepositoryInitialize.InitializeWithAssetBehavior();
             _helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
+
+            // Deterministic, rack-mountable, non-PowerProvider device type (see RackMountableDeviceType).
+            var deviceType = _helper.TestData.RackMountableDeviceType();
+
             _assetClass = _helper.AssetManagement.AssetClasses.Create(new AssetClass
             {
                 Name = "Transition asset class " + Guid.NewGuid(),
-                DeviceTypeId = new SdmObjectReference<DeviceType>(_helper.TestData.DeviceTypes.First().Identifier),
+                DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier),
                 State = SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Active,
                 Height = 1,
                 Width = 1,
