@@ -492,9 +492,7 @@ namespace SDM.AssetManagement.Tests.AssetClasses
             // Arrange
             _helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
 
-            var rackUnitConsumerDeviceType = _helper.TestData.DeviceTypes
-                .First(dt => dt.TagsInfo.Tags.Contains(SlcAsset_Management.Enums.TagOption.RackUnitConsumer)
-                    && !dt.TagsInfo.Tags.Contains(SlcAsset_Management.Enums.TagOption.PowerProvider));
+            var rackUnitConsumerDeviceType = _helper.TestData.RackMountableDeviceType();
 
             var assetClass = new AssetClass
             {

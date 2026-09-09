@@ -111,7 +111,7 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
 
     public IAssetRepository Assets { get; }
     public IBulkRepository<AssetManagerAppSettings> AppSettings { get; }
-    public IBulkRepository<AssetClass> AssetClasses { get; }
+    public IAssetClassRepository AssetClasses { get; }
     public IBulkRepository<PowerPort> PowerPorts { get; }
     public IBulkRepository<DataPort> DataPorts { get; }
     public IPortRepository Ports { get; }
