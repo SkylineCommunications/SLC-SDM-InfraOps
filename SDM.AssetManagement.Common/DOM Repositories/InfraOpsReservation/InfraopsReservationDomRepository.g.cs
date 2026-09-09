@@ -556,6 +556,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
 
             obj.ReservedPositions = _reservedpositionsList;
+
+            obj.ResetChangeTracking();
+
             return obj;
         }
 

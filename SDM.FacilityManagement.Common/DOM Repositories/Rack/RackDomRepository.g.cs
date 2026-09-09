@@ -674,6 +674,9 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             }
 
             obj.ImageDetails = _imagedetailsList;
+
+            obj.ResetChangeTracking();
+
             return obj;
         }
 

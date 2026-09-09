@@ -589,6 +589,8 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 }
             }
 
+            obj.ResetChangeTracking();
+
             return obj;
         }
 
