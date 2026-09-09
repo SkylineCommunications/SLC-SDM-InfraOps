@@ -1324,6 +1324,10 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetDomMapper.AssetProperties.SerialNumber), comparer, (string)value);
 				case "HardwareVersion":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetDomMapper.AssetProperties.HardwareVersion), comparer, (string)value);
+				case "OperationalFlags" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+					return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.AssetDomMapper.AssetProperties.OperationalFlags.Id.ToString()).Equal(comparer == Comparer.NotEquals);
+				case "OperationalFlags":
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetDomMapper.AssetProperties.OperationalFlags), comparer, (long)(SlcAsset_Management.Enums.Operationalflagsenum)value);
 				case "NetworkDetails.MacAddress":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetDomMapper.NetworkDetails.MACAddress), comparer, (string)value);
 				case "Location.HolderNumber" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
@@ -1461,6 +1465,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetDomMapper.AssetProperties.SerialNumber), sortOrder, naturalSort);
                 case "HardwareVersion":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetDomMapper.AssetProperties.HardwareVersion), sortOrder, naturalSort);
+                case "OperationalFlags":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetDomMapper.AssetProperties.OperationalFlags), sortOrder, naturalSort);
                 case "NetworkDetails.MacAddress":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetDomMapper.NetworkDetails.MACAddress), sortOrder, naturalSort);
                 case "Location.HolderNumber":

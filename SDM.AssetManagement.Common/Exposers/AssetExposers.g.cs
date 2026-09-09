@@ -32,6 +32,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 		public static readonly Exposer<AssetManagement.Models.Asset, string> SerialNumber = new Exposer<AssetManagement.Models.Asset, string>((obj) => obj.SerialNumber, "SerialNumber");
 		public static readonly Exposer<AssetManagement.Models.Asset, string> HardwareVersion = new Exposer<AssetManagement.Models.Asset, string>((obj) => obj.HardwareVersion, "HardwareVersion");
 		public static readonly Exposer<AssetManagement.Models.Asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum> State = new Exposer<AssetManagement.Models.Asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum>((obj) => obj.State, "State");
+		public static readonly CollectionExposer<AssetManagement.Models.Asset, SlcAsset_Management.Enums.Operationalflagsenum> OperationalFlags = new CollectionExposer<AssetManagement.Models.Asset, SlcAsset_Management.Enums.Operationalflagsenum>((obj) => obj.OperationalFlags, "OperationalFlags");
 
         static AssetExposers()
         {
