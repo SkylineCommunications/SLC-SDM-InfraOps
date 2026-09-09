@@ -2,6 +2,7 @@
 {
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.SDM.FacilityManagement.Models;
+	using Skyline.DataMiner.SDM.FacilityManagement.Validation;
 
 	public interface IFacilityManagementApiHelper
 	{
@@ -24,5 +25,23 @@
         IBulkRepository<Row> Rows { get; }
 
         IBulkRepository<Site> Sites { get; }
+
+        SiteValidator SiteValidator { get; }
+
+        FacilityValidator FacilityValidator { get; }
+
+        FloorValidator FloorValidator { get; }
+
+        RoomValidator RoomValidator { get; }
+
+        RowValidator RowValidator { get; }
+
+        ZoneValidator ZoneValidator { get; }
+
+        DeskValidator DeskValidator { get; }
+
+        RackValidator RackValidator { get; }
+
+        FacilityManagerAppSettingsValidator AppSettingsValidator { get; }
     }
 }

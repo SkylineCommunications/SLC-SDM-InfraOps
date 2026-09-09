@@ -8,7 +8,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
-    public class AssetLocation : ChangeTrackingBase, ISectionTrackable, ISectionEmptyState
+    public sealed class AssetLocation : ChangeTrackingBase, IEquatable<AssetLocation>, ISectionTrackable, ISectionEmptyState
     {
         [JsonIgnore]
         [SdmIgnore]
@@ -119,5 +119,70 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         internal IChangeTrackingField<SdmObjectReference<FacilityManagement.Models.Room>> RoomIdField => FieldHandler.GetOrCreateField(
             nameof(RoomId),
             () => new ChangeTrackingField<SdmObjectReference<FacilityManagement.Models.Room>>(default));
+
+        public static bool operator ==(AssetLocation left, AssetLocation right)
+        {
+            if (ReferenceEquals(left, right))
+            {
+                return true;
+            }
+
+            if (left is null || right is null)
+            {
+                return false;
+            }
+
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(AssetLocation left, AssetLocation right)
+        {
+            return !(left == right);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as AssetLocation);
+        }
+
+        public bool Equals(AssetLocation other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return
+                ParentAsset == other.ParentAsset &&
+                HolderNumber == other.HolderNumber &&
+                RackId == other.RackId &&
+                RackPosition == other.RackPosition &&
+                Side == other.Side &&
+                DeskId.Equals(other.DeskId) &&
+                ContainerId == other.ContainerId &&
+                RoomId == other.RoomId;
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 17;
+                hash = (hash * 23) + (ParentAsset != null ? ParentAsset.GetHashCode() : 0);
+                hash = (hash * 23) + HolderNumber.GetHashCode();
+                hash = (hash * 23) + (RackId != null ? RackId.GetHashCode() : 0);
+                hash = (hash * 23) + RackPosition.GetHashCode();
+                hash = (hash * 23) + Side.GetHashCode();
+                hash = (hash * 23) + DeskId.GetHashCode();
+                hash = (hash * 23) + (ContainerId != null ? ContainerId.GetHashCode() : 0);
+                hash = (hash * 23) + (RoomId != null ? RoomId.GetHashCode() : 0);
+                return hash;
+            }
+        }
     }
 }

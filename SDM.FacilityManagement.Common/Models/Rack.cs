@@ -2,6 +2,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
 
     using Newtonsoft.Json;
 
@@ -12,7 +13,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
     // [GenerateExposers]
     //[SdmDomStorage("(slc)facility_management")]
-    public class Rack : SdmObject<Rack>, IEntityTracking
+    public sealed class Rack : SdmObject<Rack>, IEquatable<Rack>, IEntityTracking
     {
         [JsonIgnore]
         private ChangeTrackingFieldHandler _fieldHandler;
@@ -57,7 +58,11 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
          LabelField?.Changed == true ||
          OrientationField?.Changed == true ||
          RackIdField?.Changed == true ||
-         Capacity?.Changed == true;
+         Capacity?.Changed == true ||
+         RowFk?.Changed == true ||
+         ZoneFk?.Changed == true ||
+         Resource?.Changed == true ||
+         ImageDetailsField?.Changed == true;
 
         [JsonIgnore]
         [SdmIgnore]
@@ -180,7 +185,11 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
         public ResourceLink Resource => _resource ?? (_resource = new ResourceLink());
 
-        public List<ImageInfo> ImageDetails { get; set; } = new List<ImageInfo>();
+        public List<ImageInfo> ImageDetails
+        {
+            get => ImageDetailsField.Value ?? new List<ImageInfo>();
+            set => ImageDetailsField.Value = value;
+        }
 
         [SdmIgnore]
         public SlcFacility_Management.Behaviors.Rack_Behaviour.StatusesEnum State { get; internal set; }
@@ -261,10 +270,125 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             nameof(RackId),
             () => new ChangeTrackingStringField(null));
 
+        [JsonIgnore]
+        [SdmIgnore]
+        internal ChangeTrackingArrayField<ImageInfo> ImageDetailsField => FieldHandler.GetOrCreateArrayField(
+            nameof(ImageDetails),
+            () => new ChangeTrackingArrayField<ImageInfo>(new List<ImageInfo>()));
+
         // Reset change tracking after deserialization or save
         public void ResetChangeTracking()
         {
             FieldHandler.ApplyChanges();
+            Capacity?.ResetChangeTracking();
+            RowFk?.ResetChangeTracking();
+            ZoneFk?.ResetChangeTracking();
+            Resource?.ResetChangeTracking();
+
+            // Cascade to list items if they implement IChangeTracking
+            if (ImageDetails != null)
+            {
+                foreach (var image in ImageDetails.OfType<IChangeTracking>())
+                {
+                    image?.ResetChangeTracking();
+                }
+            }
         }
+
+        #region Equality
+
+        public static bool operator ==(Rack left, Rack right)
+        {
+            if (ReferenceEquals(left, right))
+            {
+                return true;
+            }
+
+            if (left is null || right is null)
+            {
+                return false;
+            }
+
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(Rack left, Rack right)
+        {
+            return !(left == right);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as Rack);
+        }
+
+        public bool Equals(Rack other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return
+                string.Equals(Name, other.Name, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(Model, other.Model, StringComparison.OrdinalIgnoreCase) &&
+                Position == other.Position &&
+                Width == other.Width &&
+                Height == other.Height &&
+                Depth == other.Depth &&
+                string.Equals(Description, other.Description, StringComparison.OrdinalIgnoreCase) &&
+                Bookable == other.Bookable &&
+                CoolingFlow == other.CoolingFlow &&
+                XPosition == other.XPosition &&
+                YPosition == other.YPosition &&
+                string.Equals(Label, other.Label, StringComparison.OrdinalIgnoreCase) &&
+                Orientation == other.Orientation &&
+                string.Equals(RackId, other.RackId, StringComparison.OrdinalIgnoreCase) &&
+                Equals(Capacity, other.Capacity) &&
+                Equals(RowFk, other.RowFk) &&
+                Equals(ZoneFk, other.ZoneFk) &&
+                Equals(Resource, other.Resource) &&
+                ListsEqual(ImageDetails, other.ImageDetails) &&
+                State == other.State;
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 17;
+                hash = (hash * 23) + (Name != null ? Name.GetHashCode() : 0);
+                hash = (hash * 23) + (Model != null ? Model.GetHashCode() : 0);
+                hash = (hash * 23) + (Description != null ? Description.GetHashCode() : 0);
+                hash = (hash * 23) + (RackId != null ? RackId.GetHashCode() : 0);
+                hash = (hash * 23) + (Capacity != null ? Capacity.GetHashCode() : 0);
+                hash = (hash * 23) + (RowFk != null ? RowFk.GetHashCode() : 0);
+                hash = (hash * 23) + (ZoneFk != null ? ZoneFk.GetHashCode() : 0);
+                hash = (hash * 23) + State.GetHashCode();
+                return hash;
+            }
+        }
+
+        private static bool ListsEqual<T>(List<T> left, List<T> right)
+        {
+            if (ReferenceEquals(left, right))
+            {
+                return true;
+            }
+
+            if (left is null || right is null)
+            {
+                return false;
+            }
+
+            return left.SequenceEqual(right);
+        }
+
+        #endregion
     }
 }

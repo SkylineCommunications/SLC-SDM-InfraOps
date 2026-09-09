@@ -10,7 +10,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)facility_management")]
-    public class Facility : SdmObject<Facility>, IEntityTracking
+    public sealed class Facility : SdmObject<Facility>, IEquatable<Facility>, IEntityTracking
     {
         [JsonIgnore]
         private ChangeTrackingFieldHandler _fieldHandler;
@@ -38,7 +38,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
         [JsonIgnore]
         [SdmIgnore]
-        public bool Changed => FieldHandler.HasChanges;
+        public bool Changed => FieldHandler.HasChanges || _siteFk?.Changed == true;
 
         [JsonIgnore]
         [SdmIgnore]
@@ -177,6 +177,79 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
         public void ResetChangeTracking()
         {
             FieldHandler.ApplyChanges();
+            _siteFk?.ResetChangeTracking();
         }
+
+        #region Equality
+
+        public static bool operator ==(Facility left, Facility right)
+        {
+            if (ReferenceEquals(left, right))
+            {
+                return true;
+            }
+
+            if (left is null || right is null)
+            {
+                return false;
+            }
+
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(Facility left, Facility right)
+        {
+            return !(left == right);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as Facility);
+        }
+
+        public bool Equals(Facility other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return
+                string.Equals(FacilityId, other.FacilityId, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(Name, other.Name, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(Description, other.Description, StringComparison.OrdinalIgnoreCase) &&
+                FacilityType == other.FacilityType &&
+                string.Equals(Address, other.Address, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(City, other.City, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(ZipCode, other.ZipCode, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(Country, other.Country, StringComparison.OrdinalIgnoreCase) &&
+                Latitude == other.Latitude &&
+                Longitude == other.Longitude &&
+                Equals(SiteFk, other.SiteFk) &&
+                State == other.State;
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 17;
+                hash = (hash * 23) + (FacilityId != null ? FacilityId.GetHashCode() : 0);
+                hash = (hash * 23) + (Name != null ? Name.GetHashCode() : 0);
+                hash = (hash * 23) + (Description != null ? Description.GetHashCode() : 0);
+                hash = (hash * 23) + (Address != null ? Address.GetHashCode() : 0);
+                hash = (hash * 23) + (City != null ? City.GetHashCode() : 0);
+                hash = (hash * 23) + (SiteFk != null ? SiteFk.GetHashCode() : 0);
+                hash = (hash * 23) + State.GetHashCode();
+                return hash;
+            }
+        }
+
+        #endregion
     }
 }

@@ -13,7 +13,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)asset_management")]
-    public class Asset : SdmObject<Asset>, IEntityTracking
+    public sealed class Asset : SdmObject<Asset>, IEquatable<Asset>, IEntityTracking
     {
         [JsonIgnore]
         private ChangeTrackingFieldHandler _fieldHandler;
@@ -441,5 +441,105 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 }
             }
         }
+
+        #region Equality
+
+        public static bool operator ==(Asset left, Asset right)
+        {
+            if (ReferenceEquals(left, right))
+            {
+                return true;
+            }
+
+            if (left is null || right is null)
+            {
+                return false;
+            }
+
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(Asset left, Asset right)
+        {
+            return !(left == right);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as Asset);
+        }
+
+        public bool Equals(Asset other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return
+                string.Equals(Name, other.Name, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(AssetID, other.AssetID, StringComparison.OrdinalIgnoreCase) &&
+                AssetClassId == other.AssetClassId &&
+                string.Equals(SerialNumber, other.SerialNumber, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(Description, other.Description, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(FW_OS, other.FW_OS, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(HardwareVersion, other.HardwareVersion, StringComparison.OrdinalIgnoreCase) &&
+                ListsEqual(OperationalFlags, other.OperationalFlags) &&
+                string.Equals(MacAddress, other.MacAddress, StringComparison.OrdinalIgnoreCase) &&
+                Equals(Location, other.Location) &&
+                Equals(DestinationLocation, other.DestinationLocation) &&
+                InstallationUserId.Equals(other.InstallationUserId) &&
+                InstallationDate == other.InstallationDate &&
+                FirstUseDate == other.FirstUseDate &&
+                PurchaseDate == other.PurchaseDate &&
+                ModificationUserId.Equals(other.ModificationUserId) &&
+                ModificationDate == other.ModificationDate &&
+                EndOfLifeDate == other.EndOfLifeDate &&
+                EndOfWarrantyDate == other.EndOfWarrantyDate &&
+                Equals(Ownership, other.Ownership) &&
+                Equals(Custody, other.Custody) &&
+                State == other.State &&
+                ListsEqual(Holders, other.Holders) &&
+                ListsEqual(ElementLinks, other.ElementLinks) &&
+                ListsEqual(Attachments, other.Attachments);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 17;
+                hash = (hash * 23) + (Name != null ? Name.GetHashCode() : 0);
+                hash = (hash * 23) + (AssetID != null ? AssetID.GetHashCode() : 0);
+                hash = (hash * 23) + (AssetClassId != null ? AssetClassId.GetHashCode() : 0);
+                hash = (hash * 23) + (SerialNumber != null ? SerialNumber.GetHashCode() : 0);
+                hash = (hash * 23) + (Description != null ? Description.GetHashCode() : 0);
+                hash = (hash * 23) + (MacAddress != null ? MacAddress.GetHashCode() : 0);
+                hash = (hash * 23) + State.GetHashCode();
+                return hash;
+            }
+        }
+
+        private static bool ListsEqual<T>(List<T> left, List<T> right)
+        {
+            if (ReferenceEquals(left, right))
+            {
+                return true;
+            }
+
+            if (left is null || right is null)
+            {
+                return false;
+            }
+
+            return left.SequenceEqual(right);
+        }
+
+        #endregion
     }
 }

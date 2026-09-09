@@ -6,7 +6,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
-    public class AssetCustody : ChangeTrackingBase, ISectionTrackable, ISectionEmptyState
+    public sealed class AssetCustody : ChangeTrackingBase, IEquatable<AssetCustody>, ISectionTrackable, ISectionEmptyState
     {
         [JsonIgnore]
         [SdmIgnore]
@@ -91,5 +91,66 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         internal IChangeTrackingField<Guid> ContactPersonRoleField => FieldHandler.GetOrCreateField(
             nameof(ContactPersonRole),
             () => new ChangeTrackingField<Guid>(Guid.Empty));
+
+        public static bool operator ==(AssetCustody left, AssetCustody right)
+        {
+            if (ReferenceEquals(left, right))
+            {
+                return true;
+            }
+
+            if (left is null || right is null)
+            {
+                return false;
+            }
+
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(AssetCustody left, AssetCustody right)
+        {
+            return !(left == right);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as AssetCustody);
+        }
+
+        public bool Equals(AssetCustody other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return
+                From.Equals(other.From) &&
+                Till.Equals(other.Till) &&
+                ContactPerson.Equals(other.ContactPerson) &&
+                Team.Equals(other.Team) &&
+                Organization.Equals(other.Organization) &&
+                ContactPersonRole.Equals(other.ContactPersonRole);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 17;
+                hash = (hash * 23) + From.GetHashCode();
+                hash = (hash * 23) + Till.GetHashCode();
+                hash = (hash * 23) + ContactPerson.GetHashCode();
+                hash = (hash * 23) + Team.GetHashCode();
+                hash = (hash * 23) + Organization.GetHashCode();
+                hash = (hash * 23) + ContactPersonRole.GetHashCode();
+                return hash;
+            }
+        }
     }
 }

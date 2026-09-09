@@ -13,7 +13,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)asset_management")]
-    public class AssetClass : SdmObject<AssetClass>, IEntityTracking
+    public sealed class AssetClass : SdmObject<AssetClass>, IEquatable<AssetClass>, IEntityTracking
     {
         [JsonIgnore]
         private ChangeTrackingFieldHandler _fieldHandler;
@@ -364,6 +364,103 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         [JsonIgnore]
         [SdmIgnore]
         internal Guid? AssetClassPropertiesSectionId { get; set; }
+
+        #endregion
+
+        #region Equality
+
+        public static bool operator ==(AssetClass left, AssetClass right)
+        {
+            if (ReferenceEquals(left, right))
+            {
+                return true;
+            }
+
+            if (left is null || right is null)
+            {
+                return false;
+            }
+
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(AssetClass left, AssetClass right)
+        {
+            return !(left == right);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as AssetClass);
+        }
+
+        public bool Equals(AssetClass other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return
+                string.Equals(Name, other.Name, StringComparison.OrdinalIgnoreCase) &&
+                DeviceTypeId == other.DeviceTypeId &&
+                string.Equals(Description, other.Description, StringComparison.OrdinalIgnoreCase) &&
+                Manufacturer.Equals(other.Manufacturer) &&
+                Depth == other.Depth &&
+                Height == other.Height &&
+                Width == other.Width &&
+                HeightU == other.HeightU &&
+                Weight == other.Weight &&
+                string.Equals(Plan, other.Plan, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(FrontImage, other.FrontImage, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(BackImage, other.BackImage, StringComparison.OrdinalIgnoreCase) &&
+                TypicalPowerConsumption == other.TypicalPowerConsumption &&
+                MaximumPowerConsumption == other.MaximumPowerConsumption &&
+                PowerSupply == other.PowerSupply &&
+                Equals(Lifecycle, other.Lifecycle) &&
+                ListsEqual(DataPorts, other.DataPorts) &&
+                ListsEqual(PowerPorts, other.PowerPorts) &&
+                ListsEqual(Holders, other.Holders) &&
+                IsBookable == other.IsBookable &&
+                Equals(ProtocolLink, other.ProtocolLink) &&
+                ListsEqual(Attachments, other.Attachments) &&
+                State == other.State;
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 17;
+                hash = (hash * 23) + (Name != null ? Name.GetHashCode() : 0);
+                hash = (hash * 23) + (DeviceTypeId != null ? DeviceTypeId.GetHashCode() : 0);
+                hash = (hash * 23) + (Description != null ? Description.GetHashCode() : 0);
+                hash = (hash * 23) + Manufacturer.GetHashCode();
+                hash = (hash * 23) + IsBookable.GetHashCode();
+                hash = (hash * 23) + State.GetHashCode();
+                return hash;
+            }
+        }
+
+        private static bool ListsEqual<T>(List<T> left, List<T> right)
+        {
+            if (ReferenceEquals(left, right))
+            {
+                return true;
+            }
+
+            if (left is null || right is null)
+            {
+                return false;
+            }
+
+            return left.SequenceEqual(right);
+        }
 
         #endregion
 

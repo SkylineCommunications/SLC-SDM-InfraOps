@@ -10,7 +10,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)facility_management")]
-    public class Row : SdmObject<Row>, IEntityTracking
+    public sealed class Row : SdmObject<Row>, IEquatable<Row>, IEntityTracking
     {
         [JsonIgnore]
         private ChangeTrackingFieldHandler _fieldHandler;
@@ -38,7 +38,10 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
         [JsonIgnore]
         [SdmIgnore]
-        public bool Changed => FieldHandler.HasChanges;
+        public bool Changed =>
+            FieldHandler.HasChanges ||
+            _roomFk?.Changed == true ||
+            _resource?.Changed == true;
 
         [JsonIgnore]
         [SdmIgnore]
@@ -139,6 +142,77 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
         public void ResetChangeTracking()
         {
             FieldHandler.ApplyChanges();
+            _roomFk?.ResetChangeTracking();
+            _resource?.ResetChangeTracking();
         }
+
+        #region Equality
+
+        public static bool operator ==(Row left, Row right)
+        {
+            if (ReferenceEquals(left, right))
+            {
+                return true;
+            }
+
+            if (left is null || right is null)
+            {
+                return false;
+            }
+
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(Row left, Row right)
+        {
+            return !(left == right);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as Row);
+        }
+
+        public bool Equals(Row other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return
+                string.Equals(Name, other.Name, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(Plan, other.Plan, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(Description, other.Description, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(Label, other.Label, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(RowId, other.RowId, StringComparison.OrdinalIgnoreCase) &&
+                YPosition == other.YPosition &&
+                Equals(RoomFk, other.RoomFk) &&
+                Equals(Resource, other.Resource) &&
+                State == other.State;
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 17;
+                hash = (hash * 23) + (Name != null ? Name.GetHashCode() : 0);
+                hash = (hash * 23) + (Plan != null ? Plan.GetHashCode() : 0);
+                hash = (hash * 23) + (Description != null ? Description.GetHashCode() : 0);
+                hash = (hash * 23) + (Label != null ? Label.GetHashCode() : 0);
+                hash = (hash * 23) + (RowId != null ? RowId.GetHashCode() : 0);
+                hash = (hash * 23) + (RoomFk != null ? RoomFk.GetHashCode() : 0);
+                hash = (hash * 23) + State.GetHashCode();
+                return hash;
+            }
+        }
+
+        #endregion
     }
 }
