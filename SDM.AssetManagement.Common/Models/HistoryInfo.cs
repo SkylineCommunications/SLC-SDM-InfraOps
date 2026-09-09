@@ -5,7 +5,7 @@
     using SharedMappers.DomIds;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
-    public class HistoryInfo : ChangeTrackingBase, ISectionTrackable, ISectionEmptyState
+    public sealed class HistoryInfo : ChangeTrackingBase, IEquatable<HistoryInfo>, ISectionTrackable, ISectionEmptyState
     {
         [JsonIgnore]
         [SdmIgnore]
@@ -91,5 +91,66 @@
         internal IChangeTrackingField<SlcAsset_Management.Enums.TypeOfHistoryEnum?> TypeOfHistoryField => FieldHandler.GetOrCreateField(
             nameof(TypeOfHistory),
             () => new ChangeTrackingField<SlcAsset_Management.Enums.TypeOfHistoryEnum?>(null));
+
+        public static bool operator ==(HistoryInfo left, HistoryInfo right)
+        {
+            if (ReferenceEquals(left, right))
+            {
+                return true;
+            }
+
+            if (left is null || right is null)
+            {
+                return false;
+            }
+
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(HistoryInfo left, HistoryInfo right)
+        {
+            return !(left == right);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as HistoryInfo);
+        }
+
+        public bool Equals(HistoryInfo other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return
+                string.Equals(Description, other.Description, StringComparison.OrdinalIgnoreCase) &&
+                Job.Equals(other.Job) &&
+                string.Equals(ModifiedInstanceID, other.ModifiedInstanceID, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(ModifiedInstanceDefinitionID, other.ModifiedInstanceDefinitionID, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(ExtraInfo, other.ExtraInfo, StringComparison.OrdinalIgnoreCase) &&
+                TypeOfHistory == other.TypeOfHistory;
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 17;
+                hash = (hash * 23) + (Description != null ? Description.GetHashCode() : 0);
+                hash = (hash * 23) + Job.GetHashCode();
+                hash = (hash * 23) + (ModifiedInstanceID != null ? ModifiedInstanceID.GetHashCode() : 0);
+                hash = (hash * 23) + (ModifiedInstanceDefinitionID != null ? ModifiedInstanceDefinitionID.GetHashCode() : 0);
+                hash = (hash * 23) + (ExtraInfo != null ? ExtraInfo.GetHashCode() : 0);
+                hash = (hash * 23) + TypeOfHistory.GetHashCode();
+                return hash;
+            }
+        }
     }
 }

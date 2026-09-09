@@ -9,7 +9,7 @@
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)plan_and_build")]
-    public class PlanAndBuildAppSettings : SdmObject<PlanAndBuildAppSettings>, IEntityTracking
+    public sealed class PlanAndBuildAppSettings : SdmObject<PlanAndBuildAppSettings>, IEquatable<PlanAndBuildAppSettings>, IEntityTracking
     {
         [JsonIgnore]
         private ChangeTrackingFieldHandler _fieldHandler;
@@ -128,6 +128,65 @@
         public void ResetChangeTracking()
         {
             FieldHandler?.ApplyChanges();
+        }
+
+        public static bool operator ==(PlanAndBuildAppSettings left, PlanAndBuildAppSettings right)
+        {
+            if (ReferenceEquals(left, right))
+            {
+                return true;
+            }
+
+            if (left is null || right is null)
+            {
+                return false;
+            }
+
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(PlanAndBuildAppSettings left, PlanAndBuildAppSettings right)
+        {
+            return !(left == right);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as PlanAndBuildAppSettings);
+        }
+
+        public bool Equals(PlanAndBuildAppSettings other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return
+                string.Equals(JobIDPrefix, other.JobIDPrefix, StringComparison.OrdinalIgnoreCase) &&
+                JobIDNextSequence == other.JobIDNextSequence &&
+                JobIDIncrement == other.JobIDIncrement &&
+                JobIDStartingSeed == other.JobIDStartingSeed &&
+                JobIDMinimumDigits == other.JobIDMinimumDigits;
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 17;
+                hash = (hash * 23) + (JobIDPrefix != null ? JobIDPrefix.GetHashCode() : 0);
+                hash = (hash * 23) + JobIDNextSequence.GetHashCode();
+                hash = (hash * 23) + JobIDIncrement.GetHashCode();
+                hash = (hash * 23) + JobIDStartingSeed.GetHashCode();
+                hash = (hash * 23) + JobIDMinimumDigits.GetHashCode();
+                return hash;
+            }
         }
     }
 }

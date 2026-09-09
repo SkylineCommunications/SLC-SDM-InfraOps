@@ -11,7 +11,7 @@
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)facility_management")]
-    public class Room : SdmObject<Room>, IEntityTracking
+    public sealed class Room : SdmObject<Room>, IEquatable<Room>, IEntityTracking
     {
         [JsonIgnore]
         private ChangeTrackingFieldHandler _fieldHandler;
@@ -39,7 +39,11 @@
 
         [JsonIgnore]
         [SdmIgnore]
-        public bool Changed => FieldHandler.HasChanges;
+        public bool Changed =>
+            FieldHandler.HasChanges ||
+            _ownership?.Changed == true ||
+            _resourceLink?.Changed == true ||
+            _floorFk?.Changed == true;
 
         [JsonIgnore]
         [SdmIgnore]
@@ -143,6 +147,79 @@
         public void ResetChangeTracking()
         {
             FieldHandler.ApplyChanges();
+            _ownership?.ResetChangeTracking();
+            _resourceLink?.ResetChangeTracking();
+            _floorFk?.ResetChangeTracking();
         }
+
+        #region Equality
+
+        public static bool operator ==(Room left, Room right)
+        {
+            if (ReferenceEquals(left, right))
+            {
+                return true;
+            }
+
+            if (left is null || right is null)
+            {
+                return false;
+            }
+
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(Room left, Room right)
+        {
+            return !(left == right);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as Room);
+        }
+
+        public bool Equals(Room other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return
+                string.Equals(Name, other.Name, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(Plan, other.Plan, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(Description, other.Description, StringComparison.OrdinalIgnoreCase) &&
+                Width == other.Width &&
+                Depth == other.Depth &&
+                string.Equals(RoomId, other.RoomId, StringComparison.OrdinalIgnoreCase) &&
+                Equals(Ownership, other.Ownership) &&
+                Equals(ResourceLink, other.ResourceLink) &&
+                Equals(FloorFk, other.FloorFk) &&
+                State == other.State;
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 17;
+                hash = (hash * 23) + (Name != null ? Name.GetHashCode() : 0);
+                hash = (hash * 23) + (Plan != null ? Plan.GetHashCode() : 0);
+                hash = (hash * 23) + (Description != null ? Description.GetHashCode() : 0);
+                hash = (hash * 23) + (RoomId != null ? RoomId.GetHashCode() : 0);
+                hash = (hash * 23) + (Ownership != null ? Ownership.GetHashCode() : 0);
+                hash = (hash * 23) + (FloorFk != null ? FloorFk.GetHashCode() : 0);
+                hash = (hash * 23) + State.GetHashCode();
+                return hash;
+            }
+        }
+
+        #endregion
     }
 }

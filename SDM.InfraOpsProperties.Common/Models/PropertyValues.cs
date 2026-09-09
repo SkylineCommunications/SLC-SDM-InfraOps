@@ -11,7 +11,7 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
 
     //[GenerateExposers]
     //[SdmDomStorage("(infraops)properties")]
-    public class PropertyValues : SdmObject<PropertyValues>, IEntityTracking
+    public sealed class PropertyValues : SdmObject<PropertyValues>, IEquatable<PropertyValues>, IEntityTracking
     {
         [JsonIgnore]
         private ChangeTrackingFieldHandler _fieldHandler;
@@ -149,5 +149,80 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
                 }
             }
         }
+
+        #region Equality
+
+        public static bool operator ==(PropertyValues left, PropertyValues right)
+        {
+            if (ReferenceEquals(left, right))
+            {
+                return true;
+            }
+
+            if (left is null || right is null)
+            {
+                return false;
+            }
+
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(PropertyValues left, PropertyValues right)
+        {
+            return !(left == right);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as PropertyValues);
+        }
+
+        public bool Equals(PropertyValues other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return
+                LinkedObjectID.Equals(other.LinkedObjectID) &&
+                string.Equals(Scope, other.Scope, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(SubID, other.SubID, StringComparison.OrdinalIgnoreCase) &&
+                ListsEqual(Values, other.Values);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 17;
+                hash = (hash * 23) + LinkedObjectID.GetHashCode();
+                hash = (hash * 23) + (Scope != null ? Scope.GetHashCode() : 0);
+                hash = (hash * 23) + (SubID != null ? SubID.GetHashCode() : 0);
+                return hash;
+            }
+        }
+
+        private static bool ListsEqual<T>(List<T> left, List<T> right)
+        {
+            if (ReferenceEquals(left, right))
+            {
+                return true;
+            }
+
+            if (left is null || right is null)
+            {
+                return false;
+            }
+
+            return left.SequenceEqual(right);
+        }
+
+        #endregion
     }
 }

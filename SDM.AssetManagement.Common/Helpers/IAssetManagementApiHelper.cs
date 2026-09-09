@@ -45,5 +45,13 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Helpers
         PortTypeValidator PortTypeValidator { get; }
 
         CableTypeValidator CableTypeValidator { get; }
+
+        ConnectionValidator ConnectionValidator { get; }
+
+        InfraopsReservationValidator InfraopsReservationValidator { get; }
+
+        AssetManagerAppSettingsValidator AppSettingsValidator { get; }
+
+        HistoryValidator HistoryValidator { get; }
     }
 }

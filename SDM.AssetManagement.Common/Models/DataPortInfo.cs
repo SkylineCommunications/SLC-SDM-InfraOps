@@ -119,6 +119,26 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                    string.Equals(Label, other.Label, StringComparison.OrdinalIgnoreCase);
         }
 
+        public static bool operator ==(DataPortInfo left, DataPortInfo right)
+        {
+            if (ReferenceEquals(left, right))
+            {
+                return true;
+            }
+
+            if (left is null || right is null)
+            {
+                return false;
+            }
+
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(DataPortInfo left, DataPortInfo right)
+        {
+            return !(left == right);
+        }
+
         public override bool Equals(object obj)
         {
             return Equals(obj as DataPortInfo);

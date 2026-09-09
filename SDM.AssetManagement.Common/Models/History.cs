@@ -6,7 +6,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
-    public class History : SdmObject<History>, IEntityTracking
+    public sealed class History : SdmObject<History>, IEquatable<History>, IEntityTracking
     {
         [JsonIgnore]
         private bool _isNew = true;
@@ -51,5 +51,54 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             _historyInfo?.ResetChangeTracking();
         }
 
+        public static bool operator ==(History left, History right)
+        {
+            if (ReferenceEquals(left, right))
+            {
+                return true;
+            }
+
+            if (left is null || right is null)
+            {
+                return false;
+            }
+
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(History left, History right)
+        {
+            return !(left == right);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as History);
+        }
+
+        public bool Equals(History other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return Equals(HistoryInfo, other.HistoryInfo);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 17;
+                hash = (hash * 23) + (HistoryInfo != null ? HistoryInfo.GetHashCode() : 0);
+                return hash;
+            }
+        }
     }
 }

@@ -7,7 +7,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
-    public sealed class Attachment : IEquatable<Attachment>, ISectionTrackable, ISectionEmptyState
+    public sealed class Attachment : ChangeTrackingBase, IEquatable<Attachment>, ISectionTrackable, ISectionEmptyState
     {
         [JsonIgnore]
         [SdmIgnore]
@@ -20,11 +20,41 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             AttachedAt == default &&
             AttachedBy == default;
 
-        public string FilePath { get; set; }
+        public string FilePath
+        {
+            get => FilePathField.Value;
+            set => FilePathField.Value = value;
+        }
 
-        public DateTime? AttachedAt { get; set; }
+        public DateTime? AttachedAt
+        {
+            get => AttachedAtField.Value;
+            set => AttachedAtField.Value = value;
+        }
 
-        public Guid? AttachedBy { get; set; }
+        public Guid? AttachedBy
+        {
+            get => AttachedByField.Value;
+            set => AttachedByField.Value = value;
+        }
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal IChangeTrackingField<string> FilePathField => FieldHandler.GetOrCreateField(
+            nameof(FilePath),
+            () => new ChangeTrackingStringField(null));
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal IChangeTrackingField<DateTime?> AttachedAtField => FieldHandler.GetOrCreateField(
+            nameof(AttachedAt),
+            () => new ChangeTrackingField<DateTime?>(null));
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal IChangeTrackingField<Guid?> AttachedByField => FieldHandler.GetOrCreateField(
+            nameof(AttachedBy),
+            () => new ChangeTrackingField<Guid?>(null));
 
         public static bool operator ==(Attachment left, Attachment right)
         {

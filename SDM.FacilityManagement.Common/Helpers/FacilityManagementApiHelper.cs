@@ -17,6 +17,7 @@
 		private readonly ZoneValidator _zoneValidator;
 		private readonly DeskValidator _deskValidator;
 		private readonly RackValidator _rackValidator;
+		private readonly FacilityManagerAppSettingsValidator _appSettingsValidator;
 
 		public FacilityManagementApiHelper(IConnection connection)
 		{
@@ -33,6 +34,7 @@
             _zoneValidator = new ZoneValidator(entityLoader);
             _deskValidator = new DeskValidator(entityLoader);
             _rackValidator = new RackValidator(entityLoader);
+            _appSettingsValidator = new FacilityManagerAppSettingsValidator();
 
             Racks = new RackDomRepository(connection)
                 .WithMiddleware(new RackValidationMiddleware(_rackValidator))
@@ -103,5 +105,7 @@
         public DeskValidator DeskValidator => _deskValidator;
 
         public RackValidator RackValidator => _rackValidator;
+
+        public FacilityManagerAppSettingsValidator AppSettingsValidator => _appSettingsValidator;
     }
 }

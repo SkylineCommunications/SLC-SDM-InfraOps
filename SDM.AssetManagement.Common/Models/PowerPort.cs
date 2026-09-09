@@ -75,6 +75,26 @@
                 Equals(Asset, other.Asset);
         }
 
+        public static bool operator ==(PowerPort left, PowerPort right)
+        {
+            if (ReferenceEquals(left, right))
+            {
+                return true;
+            }
+
+            if (left is null || right is null)
+            {
+                return false;
+            }
+
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(PowerPort left, PowerPort right)
+        {
+            return !(left == right);
+        }
+
         public override bool Equals(object obj)
         {
             return Equals(obj as PowerPort);

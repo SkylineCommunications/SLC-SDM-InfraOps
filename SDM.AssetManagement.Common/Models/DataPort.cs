@@ -89,6 +89,26 @@
                 Equals(PrimaryPortRelation, other.PrimaryPortRelation);
         }
 
+        public static bool operator ==(DataPort left, DataPort right)
+        {
+            if (ReferenceEquals(left, right))
+            {
+                return true;
+            }
+
+            if (left is null || right is null)
+            {
+                return false;
+            }
+
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(DataPort left, DataPort right)
+        {
+            return !(left == right);
+        }
+
         public override bool Equals(object obj)
         {
             return Equals(obj as DataPort);

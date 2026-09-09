@@ -13,7 +13,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)plan_and_build")]
-    public class PlanAndBuildJob : SdmObject<PlanAndBuildJob>, IEntityTracking
+    public sealed class PlanAndBuildJob : SdmObject<PlanAndBuildJob>, IEquatable<PlanAndBuildJob>, IEntityTracking
     {
         [JsonIgnore]
         private ChangeTrackingFieldHandler _fieldHandler;
@@ -342,5 +342,94 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
                 }
             }
         }
+
+        #region Equality
+
+        public static bool operator ==(PlanAndBuildJob left, PlanAndBuildJob right)
+        {
+            if (ReferenceEquals(left, right))
+            {
+                return true;
+            }
+
+            if (left is null || right is null)
+            {
+                return false;
+            }
+
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(PlanAndBuildJob left, PlanAndBuildJob right)
+        {
+            return !(left == right);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as PlanAndBuildJob);
+        }
+
+        public bool Equals(PlanAndBuildJob other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return
+                string.Equals(JobID, other.JobID, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(JobName, other.JobName, StringComparison.OrdinalIgnoreCase) &&
+                Start == other.Start &&
+                End == other.End &&
+                Type == other.Type &&
+                string.Equals(JobDescription, other.JobDescription, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(Remarks, other.Remarks, StringComparison.OrdinalIgnoreCase) &&
+                Priority == other.Priority &&
+                SubState == other.SubState &&
+                ListsEqual(Locations, other.Locations) &&
+                Equals(Ownership, other.Ownership) &&
+                ListsEqual(AssetsUsed, other.AssetsUsed) &&
+                ListsEqual(Attachments, other.Attachments) &&
+                ListsEqual(ConnectionsOnJob, other.ConnectionsOnJob) &&
+                State == other.State;
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 17;
+                hash = (hash * 23) + (JobID != null ? JobID.GetHashCode() : 0);
+                hash = (hash * 23) + (JobName != null ? JobName.GetHashCode() : 0);
+                hash = (hash * 23) + Start.GetHashCode();
+                hash = (hash * 23) + End.GetHashCode();
+                hash = (hash * 23) + Type.GetHashCode();
+                hash = (hash * 23) + State.GetHashCode();
+                return hash;
+            }
+        }
+
+        private static bool ListsEqual<T>(List<T> left, List<T> right)
+        {
+            if (ReferenceEquals(left, right))
+            {
+                return true;
+            }
+
+            if (left is null || right is null)
+            {
+                return false;
+            }
+
+            return left.SequenceEqual(right);
+        }
+
+        #endregion
     }
 }

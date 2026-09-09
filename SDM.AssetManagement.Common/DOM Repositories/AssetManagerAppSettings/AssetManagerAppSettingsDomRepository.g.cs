@@ -540,6 +540,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 }
             }
 
+            obj.ResetChangeTracking();
+
             return obj;
         }
 
