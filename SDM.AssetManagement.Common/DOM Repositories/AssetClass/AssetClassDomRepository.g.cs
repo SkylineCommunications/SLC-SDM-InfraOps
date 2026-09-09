@@ -830,7 +830,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			}
 
 			obj.Attachments = _attachmentsList;
-            obj.ResetChangeTracking();
 
             var _protocolLinkSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(AssetManagement.Models.AssetClassDomMapper.ProtocolLink.SectionDefinitionId));
             if (_protocolLinkSection != default)
@@ -842,6 +841,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     obj.ProtocolLink.Protocol = _protocolLinkProtocol.Value;
                 }
             }
+
+            obj.ResetChangeTracking();
 
             return obj;
 		}

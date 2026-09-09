@@ -580,6 +580,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 {
                     obj.HardwareVersion = _hardwareversion.Value;
                 }
+
+                var _operationalflags = _assetpropertiesSection.GetListValue<long>(AssetManagement.Models.AssetDomMapper.AssetProperties.OperationalFlags);
+                if (_operationalflags != null)
+                {
+                    obj.OperationalFlags = _operationalflags.Values.Select(flag => (SlcAsset_Management.Enums.Operationalflagsenum)flag).ToList();
+                }
             }
 
             var _networkdetailsSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(AssetManagement.Models.AssetDomMapper.NetworkDetails.SectionDefinitionId));
@@ -898,6 +904,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
             obj.Attachments = _attachmentsList;
 
+            obj.ResetChangeTracking();
+
             return obj;
         }
 
@@ -966,6 +974,11 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             if (obj.HardwareVersion != default)
             {
                 _assetproperties.AddOrUpdateValue<string>(AssetManagement.Models.AssetDomMapper.AssetProperties.HardwareVersion, Convert.ToString(obj.HardwareVersion));
+            }
+
+            if (obj.OperationalFlags != null && obj.OperationalFlags.Count > 0)
+            {
+                _assetproperties.AddOrUpdateValue<List<long>>(AssetManagement.Models.AssetDomMapper.AssetProperties.OperationalFlags, obj.OperationalFlags.Select(flag => (long)flag).ToList());
             }
 
             instance.Sections.Add(_assetproperties);

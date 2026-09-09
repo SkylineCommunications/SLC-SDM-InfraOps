@@ -191,6 +191,18 @@
         }
 
         [TestMethod]
+        public void HistoryInfo_DefaultState_IsEmpty()
+        {
+            new HistoryInfo().IsEmpty.Should().BeTrue();
+        }
+
+        [TestMethod]
+        public void HistoryInfo_DescriptionSet_IsNotEmpty()
+        {
+            new HistoryInfo().Also(x => x.Description = "History entry").IsEmpty.Should().BeFalse();
+        }
+
+        [TestMethod]
         public void InfraopsReservationBounderies_DefaultState_IsEmpty()
         {
             new InfraopsReservationBounderies().IsEmpty.Should().BeTrue();

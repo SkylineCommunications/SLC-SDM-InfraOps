@@ -30,6 +30,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Helpers
 
         IBulkRepository<InfraopsReservation> Reservations { get; }
 
+        IBulkRepository<History> Histories { get; }
+
         AssetClassValidator AssetClassValidator { get; }
 
         AssetValidator AssetValidator { get; }

@@ -136,7 +136,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             set => HardwareVersionField.Value = value;
         }
 
-        public long OperationalFlags
+        public List<SlcAsset_Management.Enums.Operationalflagsenum> OperationalFlags
         {
             get => OperationalFlagsField.Value;
             set => OperationalFlagsField.Value = value;
@@ -290,9 +290,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
         [JsonIgnore]
         [SdmIgnore]
-        internal IChangeTrackingField<long> OperationalFlagsField => FieldHandler.GetOrCreateField(
+        internal ChangeTrackingArrayField<SlcAsset_Management.Enums.Operationalflagsenum> OperationalFlagsField => FieldHandler.GetOrCreateArrayField(
             nameof(OperationalFlags),
-            () => new ChangeTrackingField<long>(0));
+            () => new ChangeTrackingArrayField<SlcAsset_Management.Enums.Operationalflagsenum>(new List<SlcAsset_Management.Enums.Operationalflagsenum>()));
 
         #endregion
 

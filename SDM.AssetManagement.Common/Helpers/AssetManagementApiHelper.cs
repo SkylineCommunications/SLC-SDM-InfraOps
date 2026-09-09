@@ -50,6 +50,7 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
         var cableTypeRepository = new CableTypeDomRepository(connection);   
         var connectionDomRepository = new ConnectionDomRepository(connection);
         var reservationRepository = new InfraopsReservationDomRepository(connection);
+        var historyRepository = new HistoryDomRepository(connection);
 
         var entityLoader = new SdmEntityLoader(this, facilityManagementHelper);
 
@@ -97,6 +98,7 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
         Reservations = reservationRepository
             .WithMiddleware(new InfraopsReservationValidationMiddleware(reservationValidator))
             .WithMiddleware(new IdentifierMiddleware<InfraopsReservation>());
+        Histories = historyRepository;
     }
 
     public IAssetRepository Assets { get; }
@@ -110,6 +112,7 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
     public IBulkRepository<Connection> Connections { get; }
     public IBulkRepository<CableType> CableTypes { get; }
     public IBulkRepository<InfraopsReservation> Reservations { get; }
+    public IBulkRepository<History> Histories { get; }
 
     public AssetValidator AssetValidator => _assetValidator;
 
