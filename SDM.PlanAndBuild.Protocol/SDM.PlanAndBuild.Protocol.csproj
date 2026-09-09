@@ -1,4 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../Directory.Build.props.user" Condition="Exists('../Directory.Build.props.user')" />
   <PropertyGroup>
     <TargetFramework>net48</TargetFramework>
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -7,7 +8,7 @@
     <AssemblyName>Skyline.DataMiner.SDM.PlanAndBuild.Protocol</AssemblyName>
     <RootNamespace>Skyline.DataMiner.SDM.PlanAndBuild.Protocol</RootNamespace>
     <PackageVersion>1.0.1</PackageVersion>
-    <AssemblyVersion>0.2.3.46</AssemblyVersion>
+    <AssemblyVersion Condition="'$(AssemblyVersionValue)' != ''">$(AssemblyVersionValue)</AssemblyVersion>
     <VersionPrefix>1.0.1</VersionPrefix>
     <PackageTags>Skyline;DataMiner</PackageTags>
     <PackageProjectUrl>https://skyline.be</PackageProjectUrl>
