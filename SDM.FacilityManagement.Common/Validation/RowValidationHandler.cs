@@ -12,6 +12,7 @@
         public enum RowValidationField
         {
             RowId,
+            Name,
         }
 
         /// <summary>
@@ -24,6 +25,18 @@
             if (entity == null || string.IsNullOrWhiteSpace(entity.RowId))
             {
                 result.AddFailReason(RowValidationField.RowId, "Row Id cannot be empty or whitespace.");
+            }
+
+            return result.IsValid;
+        }
+
+        public static bool IsRowNameValid(Row entity, out ValidationResult result)
+        {
+            result = new ValidationResult();
+
+            if (entity == null || string.IsNullOrWhiteSpace(entity.Name))
+            {
+                result.AddFailReason(RowValidationField.Name, "Row Name cannot be empty or whitespace.");
             }
 
             return result.IsValid;

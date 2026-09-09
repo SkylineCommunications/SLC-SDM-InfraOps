@@ -12,6 +12,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
         public enum SiteValidationField
         {
             SiteId,
+            Name,
         }
 
         /// <summary>
@@ -24,6 +25,18 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
             if (site == null || string.IsNullOrWhiteSpace(site.SiteId))
             {
                 result.AddFailReason(SiteValidationField.SiteId, "Site Id cannot be empty or whitespace.");
+            }
+
+            return result.IsValid;
+        }
+
+        public static bool IsSiteNameValid(Site entity, out ValidationResult result)
+        {
+            result = new ValidationResult();
+
+            if (entity == null || string.IsNullOrWhiteSpace(entity.Name))
+            {
+                result.AddFailReason(SiteValidationField.Name, "Site Name cannot be empty or whitespace.");
             }
 
             return result.IsValid;

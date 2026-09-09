@@ -14,7 +14,7 @@
         [TestMethod]
         public void Room_Create_WithEmptyId_ShouldThrow()
         {
-            var entity = new Room { Identifier = Guid.NewGuid().ToString(), RoomId = string.Empty };
+            var entity = new Room { Identifier = Guid.NewGuid().ToString(), Name = "Room", RoomId = string.Empty };
 
             var action = () => Helper.Rooms.Create(entity);
 
@@ -22,10 +22,20 @@
         }
 
         [TestMethod]
+        public void Room_Create_WithEmptyName_ShouldThrow()
+        {
+            var entity = new Room { Identifier = Guid.NewGuid().ToString(), Name = string.Empty, RoomId = "ROOM-1" };
+
+            var action = () => Helper.Rooms.Create(entity);
+
+            action.Should().Throw<Exception>().WithMessage("*Room Name cannot be empty*");
+        }
+
+        [TestMethod]
         public void Room_CreateOrUpdate_WithDuplicateIdInBatch_ShouldThrow()
         {
-            var first = new Room { Identifier = Guid.NewGuid().ToString(), RoomId = "DUP-1" };
-            var second = new Room { Identifier = Guid.NewGuid().ToString(), RoomId = "DUP-1" };
+            var first = new Room { Identifier = Guid.NewGuid().ToString(), Name = "Room 1", RoomId = "DUP-1" };
+            var second = new Room { Identifier = Guid.NewGuid().ToString(), Name = "Room 2", RoomId = "DUP-1" };
 
             var action = () => Helper.Rooms.CreateOrUpdate(new[] { first, second });
 
@@ -35,10 +45,10 @@
         [TestMethod]
         public void Room_Create_WithDuplicateIdInDatabase_ShouldThrow()
         {
-            var existing = new Room { Identifier = Guid.NewGuid().ToString(), RoomId = "EXIST-1" };
+            var existing = new Room { Identifier = Guid.NewGuid().ToString(), Name = "Existing Room", RoomId = "EXIST-1" };
             Helper.Rooms.Create(existing);
 
-            var duplicate = new Room { Identifier = Guid.NewGuid().ToString(), RoomId = "EXIST-1" };
+            var duplicate = new Room { Identifier = Guid.NewGuid().ToString(), Name = "Duplicate Room", RoomId = "EXIST-1" };
             var action = () => Helper.Rooms.Create(duplicate);
 
             action.Should().Throw<Exception>().WithMessage("*already in use*");

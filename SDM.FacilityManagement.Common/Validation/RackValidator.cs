@@ -49,6 +49,12 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                     return result;
                 }
 
+                if (!RackValidationHandler.IsRackNameValid(rack, out var nameResult))
+                {
+                    result.AddFailuresFrom(nameResult);
+                    return result;
+                }
+
                 if (IsRackIdInUse(rack.RackId, rack.Identifier))
                 {
                     result.AddFailReason(RackValidationHandler.RackValidationField.RackId,
@@ -121,6 +127,11 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                 if (!RackValidationHandler.IsRackIdValid(racks[i], out var idResult))
                 {
                     results[i].AddFailuresFrom(idResult);
+                }
+
+                if (!RackValidationHandler.IsRackNameValid(racks[i], out var nameResult))
+                {
+                    results[i].AddFailuresFrom(nameResult);
                 }
 
                 AddBusinessRuleFailures(racks[i], results[i]);

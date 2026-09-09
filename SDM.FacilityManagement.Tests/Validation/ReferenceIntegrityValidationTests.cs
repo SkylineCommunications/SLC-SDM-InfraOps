@@ -222,12 +222,12 @@ namespace SDM.FacilityManagement.Tests.Validation
 
 		private static Site NewSite(string id)
 		{
-			return new Site { Identifier = Guid.NewGuid().ToString(), SiteId = id };
+			return new Site { Identifier = Guid.NewGuid().ToString(), SiteId = id, Name = $"Site {id}" };
 		}
 
 		private static Facility NewFacility(string id)
 		{
-			return new Facility { Identifier = Guid.NewGuid().ToString(), FacilityId = id };
+			return new Facility { Identifier = Guid.NewGuid().ToString(), FacilityId = id, Name = $"Facility {id}" };
 		}
 
 		private static Floor NewFloor(string id)
@@ -237,22 +237,22 @@ namespace SDM.FacilityManagement.Tests.Validation
 
 		private static Room NewRoom(string id)
 		{
-			return new Room { Identifier = Guid.NewGuid().ToString(), RoomId = id };
+			return new Room { Identifier = Guid.NewGuid().ToString(), RoomId = id, Name = $"Room {id}" };
 		}
 
 		private static Row NewRow(string id)
 		{
-			return new Row { Identifier = Guid.NewGuid().ToString(), RowId = id };
+			return new Row { Identifier = Guid.NewGuid().ToString(), RowId = id, Name = $"Row {id}" };
 		}
 
 		private static Zone NewZone(string id)
 		{
-			return new Zone { Identifier = Guid.NewGuid().ToString(), ZoneId = id };
+			return new Zone { Identifier = Guid.NewGuid().ToString(), ZoneId = id, Name = $"Zone {id}" };
 		}
 
 		private static Desk NewDesk(string id)
 		{
-			return new Desk { Identifier = Guid.NewGuid().ToString(), DeskID = id };
+			return new Desk { Identifier = Guid.NewGuid().ToString(), DeskID = id, Name = $"Desk {id}" };
 		}
 
 		private static Rack NewRack(string id)
@@ -261,6 +261,7 @@ namespace SDM.FacilityManagement.Tests.Validation
 			{
 				Identifier = Guid.NewGuid().ToString(),
 				RackId = id,
+				Name = $"Rack {id}",
 			};
 
 			rack.Capacity.MaximumRackCapacity = 42;

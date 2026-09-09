@@ -39,6 +39,12 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                     return result;
                 }
 
+                if (!ZoneValidationHandler.IsZoneNameValid(entity, out var nameResult))
+                {
+                    result.AddFailuresFrom(nameResult);
+                    return result;
+                }
+
                 if (IsIdInUse(entity.ZoneId, entity.Identifier))
                 {
                     result.AddFailReason(ZoneValidationHandler.ZoneValidationField.ZoneId,
@@ -107,6 +113,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
             return FacilityBulkValidationHelper.RunBulkValidation(
                 entities,
                 ZoneValidationHandler.IsZoneIdValid,
+                ZoneValidationHandler.IsZoneNameValid,
                 ValidateIdDuplicatesInBatch,
                 ValidateBulkIdsAgainstDatabase,
                 ValidateReferencesAgainstDatabase);

@@ -41,6 +41,12 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                 return result;
             }
 
+            if (!SiteValidationHandler.IsSiteNameValid(site, out var nameResult))
+            {
+                result.AddFailuresFrom(nameResult);
+                return result;
+            }
+
             if (site.ShouldValidate(site.SiteIdField) && IsSiteIdInUse(site.SiteId, site.Identifier))
             {
                 result.AddFailReason(SiteValidationHandler.SiteValidationField.SiteId,
@@ -118,6 +124,11 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                 if (!SiteValidationHandler.IsSiteIdValid(sites[i], out var idResult))
                 {
                     results[i].AddFailuresFrom(idResult);
+                }
+
+                if (!SiteValidationHandler.IsSiteNameValid(sites[i], out var nameResult))
+                {
+                    results[i].AddFailuresFrom(nameResult);
                 }
             }
 

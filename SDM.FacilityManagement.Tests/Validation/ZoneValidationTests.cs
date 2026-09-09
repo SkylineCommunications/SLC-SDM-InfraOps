@@ -14,7 +14,7 @@
         [TestMethod]
         public void Zone_Create_WithEmptyId_ShouldThrow()
         {
-            var entity = new Zone { Identifier = Guid.NewGuid().ToString(), ZoneId = string.Empty };
+            var entity = new Zone { Identifier = Guid.NewGuid().ToString(), Name = "Zone", ZoneId = string.Empty };
 
             var action = () => Helper.Zones.Create(entity);
 
@@ -22,10 +22,20 @@
         }
 
         [TestMethod]
+        public void Zone_Create_WithEmptyName_ShouldThrow()
+        {
+            var entity = new Zone { Identifier = Guid.NewGuid().ToString(), Name = string.Empty, ZoneId = "ZONE-1" };
+
+            var action = () => Helper.Zones.Create(entity);
+
+            action.Should().Throw<Exception>().WithMessage("*Zone Name cannot be empty*");
+        }
+
+        [TestMethod]
         public void Zone_CreateOrUpdate_WithDuplicateIdInBatch_ShouldThrow()
         {
-            var first = new Zone { Identifier = Guid.NewGuid().ToString(), ZoneId = "DUP-1" };
-            var second = new Zone { Identifier = Guid.NewGuid().ToString(), ZoneId = "DUP-1" };
+            var first = new Zone { Identifier = Guid.NewGuid().ToString(), Name = "Zone 1", ZoneId = "DUP-1" };
+            var second = new Zone { Identifier = Guid.NewGuid().ToString(), Name = "Zone 2", ZoneId = "DUP-1" };
 
             var action = () => Helper.Zones.CreateOrUpdate(new[] { first, second });
 
@@ -35,10 +45,10 @@
         [TestMethod]
         public void Zone_Create_WithDuplicateIdInDatabase_ShouldThrow()
         {
-            var existing = new Zone { Identifier = Guid.NewGuid().ToString(), ZoneId = "EXIST-1" };
+            var existing = new Zone { Identifier = Guid.NewGuid().ToString(), Name = "Existing Zone", ZoneId = "EXIST-1" };
             Helper.Zones.Create(existing);
 
-            var duplicate = new Zone { Identifier = Guid.NewGuid().ToString(), ZoneId = "EXIST-1" };
+            var duplicate = new Zone { Identifier = Guid.NewGuid().ToString(), Name = "Duplicate Zone", ZoneId = "EXIST-1" };
             var action = () => Helper.Zones.Create(duplicate);
 
             action.Should().Throw<Exception>().WithMessage("*already in use*");
