@@ -95,9 +95,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 throw new InvalidOperationException($"State transition from {asset.State} to {newState} is not allowed.");
             }
 
+            ValidateTransitionPath(asset, newState);
             var updated = Update(asset);
-            ValidateTransitionPath(updated, newState);
-
+           
             return ExecuteStateTransition(updated, newState);
         }
 
