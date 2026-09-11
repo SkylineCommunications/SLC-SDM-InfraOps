@@ -32,6 +32,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             set => _isNew = value;
         }
 
+        /// <summary>
+        /// Gets the timestamp at which the underlying DOM instance was created.
+        /// Populated from the DOM instance metadata on read; not settable by consumers.
+        /// </summary>
+        public DateTime CreatedAt { get; internal set; }
+
         public HistoryInfo HistoryInfo => _historyInfo ?? (_historyInfo = new HistoryInfo());
 
         #region Section Tracking

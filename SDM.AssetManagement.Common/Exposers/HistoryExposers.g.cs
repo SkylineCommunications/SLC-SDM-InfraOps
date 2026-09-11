@@ -19,6 +19,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         public static readonly Exposer<History, string> Identifier =
             new Exposer<History, string>(obj => obj.Identifier, "Identifier");
 
+        public static readonly Exposer<History, DateTime> CreatedAt =
+            new Exposer<History, DateTime>(obj => obj.CreatedAt, "CreatedAt");
+
         static HistoryExposers()
         {
             RuntimeHelpers.RunClassConstructor(typeof(HistoryInfo).TypeHandle);
@@ -29,8 +32,11 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             public static readonly Exposer<History, string> Description =
                 new Exposer<History, string>(obj => obj.HistoryInfo.Description, "HistoryInfo.Description");
 
-            public static readonly Exposer<History, Guid> Job =
-                new Exposer<History, Guid>(obj => obj.HistoryInfo.Job, "HistoryInfo.Job");
+            public static readonly Exposer<History, Guid?> Job =
+                new Exposer<History, Guid?>(obj => obj.HistoryInfo.Job, "HistoryInfo.Job");
+
+            public static readonly Exposer<History, string> User =
+                new Exposer<History, string>(obj => obj.HistoryInfo.User, "HistoryInfo.User");
 
             public static readonly Exposer<History, Guid> UserID =
                 new Exposer<History, Guid>(obj => obj.HistoryInfo.UserID, "HistoryInfo.UserID");

@@ -61,5 +61,47 @@
 
             return Tools.RetrieveBigOrFilter(keyList, key => filterProvider(key), filter => repository.Read(filter).ToList()).Distinct().ToList();
         }
+
+        /// <summary>
+        /// Reads all entities matching any of the given <paramref name="keys"/> by combining their typed filters
+        /// into big-OR queries. <see cref="Tools.RetrieveBigOrFilter{T, ID}"/> batches oversized queries, while the
+        /// repository remains responsible for translating the resulting <see cref="FilterElement{T}"/> and applying
+        /// any repository-specific constraints, such as a DOM definition filter.
+        /// </summary>
+        /// <typeparam name="T">The entity type.</typeparam>
+        /// <typeparam name="TKey">The key type used to build a per-item filter (e.g. a name, id, or tuple).</typeparam>
+        /// <param name="repository">The repository to read from.</param>
+        /// <param name="keys">
+        /// The keys to look up. Duplicates are removed using <see cref="EqualityComparer{T}.Default"/>;
+        /// null and empty input are handled gracefully.
+        /// </param>
+        /// <param name="filterProvider">Builds the <see cref="FilterElement{T}"/> for a single key.</param>
+        /// <param name="batchFilterResolver">Resolves the batch filter for oversized queries.</param>
+        public static List<T> ReadByBigOrFilter<T, TKey>(
+            this IReadableRepository<T> repository,
+            IEnumerable<TKey> keys,
+            Func<TKey, FilterElement<T>> filterProvider,
+            Func<FilterElement<T>, FilterElement<T>> batchFilterResolver)
+            where T : class
+        {
+            if (repository == null)
+            {
+                throw new ArgumentNullException(nameof(repository));
+            }
+
+            if (filterProvider == null)
+            {
+                throw new ArgumentNullException(nameof(filterProvider));
+            }
+
+            var keyList = keys?.Distinct().ToList() ?? new List<TKey>();
+
+            if (keyList.Count == 0)
+            {
+                return new List<T>();
+            }
+
+            return Tools.RetrieveBigOrFilter(keyList, key => filterProvider(key), filter => repository.Read(batchFilterResolver(filter)).ToList()).Distinct().ToList();
+        }
     }
 }

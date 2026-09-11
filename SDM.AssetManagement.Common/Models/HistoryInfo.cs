@@ -14,8 +14,7 @@
         [JsonIgnore]
         [SdmIgnore]
         public bool IsEmpty => Description == default
-                               && Job == Guid.Empty
-                               && UserID == Guid.Empty
+                               && Job == default
                                && ModifiedInstanceID == default
                                && ModifiedInstanceDefinitionID == default
                                && ExtraInfo == default
@@ -27,17 +26,18 @@
             set => DescriptionField.Value = value;
         }
 
-        public Guid Job
+        public Guid? Job
         {
             get => JobField.Value;
             set => JobField.Value = value;
         }
 
-        public Guid UserID
-        {
-            get => UserIDField.Value;
-            set => UserIDField.Value = value;
-        }
+        /// <summary>
+        /// Gets the user that created this history entry.
+        /// Populated from the DOM instance's "created by" metadata on read; not a section field
+        /// and not settable by consumers.
+        /// </summary>
+        public string User { get; internal set; }
 
         public string ModifiedInstanceID
         {
@@ -71,9 +71,9 @@
 
         [JsonIgnore]
         [SdmIgnore]
-        internal IChangeTrackingField<Guid> JobField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<Guid?> JobField => FieldHandler.GetOrCreateField(
             nameof(Job),
-            () => new ChangeTrackingField<Guid>(Guid.Empty));
+            () => new ChangeTrackingField<Guid?>(null));
 
         [JsonIgnore]
         [SdmIgnore]

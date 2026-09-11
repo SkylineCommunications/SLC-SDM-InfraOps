@@ -10,6 +10,8 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
     using System.Collections.Generic;
     using System.Linq;
 
+    using SharedMappers.DomIds;
+
     using Skyline.DataMiner.Net;
     using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
     using Skyline.DataMiner.Net.Apps.Sections.Sections;
@@ -1028,6 +1030,8 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
                     return DomInstanceExposers.FieldValues.KeyExists(PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.CableLength.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "ConnectionsOnJob.CableLength":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.CableLength), comparer, (double)((System.Double?)value).Value);
+                case "State":
+                    return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.StatusId, comparer, SlcPlan_And_Build.Behaviors.Job_Behavior.Statuses.ToValue((SlcPlan_And_Build.Behaviors.Job_Behavior.StatusesEnum)value));
                 default:
                     throw new NotImplementedException();
             }
@@ -1093,6 +1097,8 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.CableType), sortOrder, naturalSort);
                 case "ConnectionsOnJob.CableLength":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.CableLength), sortOrder, naturalSort);
+                case "State":
+                    return OrderByElementFactory.Create(DomInstanceExposers.StatusId, sortOrder, naturalSort);
                 default:
                     throw new NotImplementedException();
             }
