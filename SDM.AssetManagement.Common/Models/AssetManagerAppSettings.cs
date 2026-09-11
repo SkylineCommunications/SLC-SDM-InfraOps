@@ -5,11 +5,12 @@
     using System.Linq;
     using Newtonsoft.Json;
     using SharedMappers.DomIds;
+    using Skyline.DataMiner.SDM.InfraOps.Core.Models;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)asset_management")]
-    public sealed class AssetManagerAppSettings : SdmObject<AssetManagerAppSettings>, IEquatable<AssetManagerAppSettings>, IEntityTracking
+    public sealed class AssetManagerAppSettings : SdmObjectBase<AssetManagerAppSettings>, IEquatable<AssetManagerAppSettings>, IEntityTracking
     {
         [JsonIgnore]
         private ChangeTrackingFieldHandler _fieldHandler;

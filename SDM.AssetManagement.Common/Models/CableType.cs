@@ -4,11 +4,12 @@
     using System.Collections.Generic;
     using System.Linq;
     using Newtonsoft.Json;
+    using Skyline.DataMiner.SDM.InfraOps.Core.Models;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)asset_management")]
-    public sealed class CableType : SdmObject<CableType>, IEquatable<CableType>, IEntityTracking
+    public sealed class CableType : SdmObjectBase<CableType>, IEquatable<CableType>, IEntityTracking
     {
         [JsonIgnore]
         private ChangeTrackingFieldHandler _fieldHandler;

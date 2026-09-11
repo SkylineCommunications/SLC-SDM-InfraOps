@@ -22,6 +22,10 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
     public static partial class DeskExposers
     {
         public static readonly Exposer<FacilityManagement.Models.Desk, string> Identifier = new Exposer<FacilityManagement.Models.Desk, string>((obj) => obj.Identifier, "Identifier");
+        public static readonly Exposer<FacilityManagement.Models.Desk, System.DateTime> CreatedAt = new Exposer<FacilityManagement.Models.Desk, System.DateTime>((obj) => obj.CreatedAt, "CreatedAt");
+        public static readonly Exposer<FacilityManagement.Models.Desk, string> CreatedBy = new Exposer<FacilityManagement.Models.Desk, string>((obj) => obj.CreatedBy, "CreatedBy");
+        public static readonly Exposer<FacilityManagement.Models.Desk, System.DateTime> LastModified = new Exposer<FacilityManagement.Models.Desk, System.DateTime>((obj) => obj.LastModified, "LastModified");
+        public static readonly Exposer<FacilityManagement.Models.Desk, string> LastModifiedBy = new Exposer<FacilityManagement.Models.Desk, string>((obj) => obj.LastModifiedBy, "LastModifiedBy");
         static DeskExposers()
         {
             RuntimeHelpers.RunClassConstructor(typeof(DeskInformation).TypeHandle);

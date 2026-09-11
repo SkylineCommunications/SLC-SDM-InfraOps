@@ -533,6 +533,10 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 Identifier = instance.ID.Id.ToString(),
                 State = SlcAsset_Management.Behaviors.Asset_Behavior.Statuses.ToEnum(instance.StatusId),
                 IsNewInternal = false,
+                CreatedAt = ((ITrackBase)instance).CreatedAt,
+                CreatedBy = ((ITrackBase)instance).CreatedBy,
+                LastModified = ((ITrackBase)instance).LastModified,
+                LastModifiedBy = ((ITrackBase)instance).LastModifiedBy,
             };
 
             var _assetpropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(AssetManagement.Models.AssetDomMapper.AssetProperties.SectionDefinitionId));
@@ -1321,6 +1325,14 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			{
 				case "Identifier":
 					return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.Id, comparer, Guid.Parse((string)value));
+				case "CreatedAt":
+					return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.CreatedAt, comparer, (DateTime)value);
+				case "CreatedBy":
+					return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.CreatedBy, comparer, (string)value);
+				case "LastModified":
+					return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModified, comparer, (DateTime)value);
+				case "LastModifiedBy":
+					return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModifiedBy, comparer, (string)value);
 				case "AssetID":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetDomMapper.AssetProperties.AssetId), comparer, (string)value);
 				case "Name":
@@ -1464,6 +1476,14 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             {
                 case "Identifier":
                     return OrderByElementFactory.Create(DomInstanceExposers.Id, sortOrder, naturalSort);
+                case "CreatedAt":
+                    return OrderByElementFactory.Create(DomInstanceExposers.CreatedAt, sortOrder, naturalSort);
+                case "CreatedBy":
+                    return OrderByElementFactory.Create(DomInstanceExposers.CreatedBy, sortOrder, naturalSort);
+                case "LastModified":
+                    return OrderByElementFactory.Create(DomInstanceExposers.LastModified, sortOrder, naturalSort);
+                case "LastModifiedBy":
+                    return OrderByElementFactory.Create(DomInstanceExposers.LastModifiedBy, sortOrder, naturalSort);
                 case "AssetID":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetDomMapper.AssetProperties.AssetId), sortOrder, naturalSort);
                 case "Name":

@@ -5,11 +5,12 @@
     using System.Linq;
     using Newtonsoft.Json;
     using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.InfraOps.Core.Models;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)asset_management")]
-    public sealed class DeviceType : SdmObject<DeviceType>, IEquatable<DeviceType>, IEntityTracking
+    public sealed class DeviceType : SdmObjectBase<DeviceType>, IEquatable<DeviceType>, IEntityTracking
     {
         [JsonIgnore]
         private ChangeTrackingFieldHandler _fieldHandler;

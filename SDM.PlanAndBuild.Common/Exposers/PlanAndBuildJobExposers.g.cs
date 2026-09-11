@@ -24,6 +24,10 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
     public static partial class PlanAndBuildJobExposers
     {
         public static readonly Exposer<PlanAndBuild.Models.PlanAndBuildJob, string> Identifier = new Exposer<PlanAndBuild.Models.PlanAndBuildJob, string>((obj) => obj.Identifier, "Identifier");
+        public static readonly Exposer<PlanAndBuild.Models.PlanAndBuildJob, System.DateTime> CreatedAt = new Exposer<PlanAndBuild.Models.PlanAndBuildJob, System.DateTime>((obj) => obj.CreatedAt, "CreatedAt");
+        public static readonly Exposer<PlanAndBuild.Models.PlanAndBuildJob, string> CreatedBy = new Exposer<PlanAndBuild.Models.PlanAndBuildJob, string>((obj) => obj.CreatedBy, "CreatedBy");
+        public static readonly Exposer<PlanAndBuild.Models.PlanAndBuildJob, System.DateTime> LastModified = new Exposer<PlanAndBuild.Models.PlanAndBuildJob, System.DateTime>((obj) => obj.LastModified, "LastModified");
+        public static readonly Exposer<PlanAndBuild.Models.PlanAndBuildJob, string> LastModifiedBy = new Exposer<PlanAndBuild.Models.PlanAndBuildJob, string>((obj) => obj.LastModifiedBy, "LastModifiedBy");
         public static readonly Exposer<PlanAndBuild.Models.PlanAndBuildJob, string> JobID = new Exposer<PlanAndBuild.Models.PlanAndBuildJob, string>((obj) => obj.JobID, "JobID");
         public static readonly Exposer<PlanAndBuild.Models.PlanAndBuildJob, string> JobName = new Exposer<PlanAndBuild.Models.PlanAndBuildJob, string>((obj) => obj.JobName, "JobName");
         public static readonly Exposer<PlanAndBuild.Models.PlanAndBuildJob, System.DateTime?> Start = new Exposer<PlanAndBuild.Models.PlanAndBuildJob, System.DateTime?>((obj) => obj.Start, "Start");

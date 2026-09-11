@@ -6,11 +6,12 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
     using Newtonsoft.Json;
 
     using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.InfraOps.Core.Models;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)plan_and_build")]
-    public sealed class JobType : SdmObject<JobType>, IEquatable<JobType>, IEntityTracking
+    public sealed class JobType : SdmObjectBase<JobType>, IEquatable<JobType>, IEntityTracking
     {
         [JsonIgnore]
         private ChangeTrackingFieldHandler _fieldHandler;

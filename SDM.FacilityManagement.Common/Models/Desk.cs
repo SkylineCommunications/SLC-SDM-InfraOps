@@ -8,11 +8,12 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
     using SharedMappers.DomIds;
 
     using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.InfraOps.Core.Models;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)facility_management")]
-    public sealed class Desk : SdmObject<Desk>, IEquatable<Desk>, IEntityTracking
+    public sealed class Desk : SdmObjectBase<Desk>, IEquatable<Desk>, IEntityTracking
     {
         [JsonIgnore]
         private ChangeTrackingFieldHandler _fieldHandler;

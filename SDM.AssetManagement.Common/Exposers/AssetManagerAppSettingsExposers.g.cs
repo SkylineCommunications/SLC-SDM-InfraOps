@@ -21,6 +21,10 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     public static partial class AssetManagerAppSettingsExposers
     {
         public static readonly Exposer<AssetManagement.Models.AssetManagerAppSettings, string> Identifier = new Exposer<AssetManagement.Models.AssetManagerAppSettings, string>((obj) => obj.Identifier, "Identifier");
+        public static readonly Exposer<AssetManagement.Models.AssetManagerAppSettings, System.DateTime> CreatedAt = new Exposer<AssetManagement.Models.AssetManagerAppSettings, System.DateTime>((obj) => obj.CreatedAt, "CreatedAt");
+        public static readonly Exposer<AssetManagement.Models.AssetManagerAppSettings, string> CreatedBy = new Exposer<AssetManagement.Models.AssetManagerAppSettings, string>((obj) => obj.CreatedBy, "CreatedBy");
+        public static readonly Exposer<AssetManagement.Models.AssetManagerAppSettings, System.DateTime> LastModified = new Exposer<AssetManagement.Models.AssetManagerAppSettings, System.DateTime>((obj) => obj.LastModified, "LastModified");
+        public static readonly Exposer<AssetManagement.Models.AssetManagerAppSettings, string> LastModifiedBy = new Exposer<AssetManagement.Models.AssetManagerAppSettings, string>((obj) => obj.LastModifiedBy, "LastModifiedBy");
         public static readonly Exposer<AssetManagement.Models.AssetManagerAppSettings, bool> EnableAssetHistory = new Exposer<AssetManagement.Models.AssetManagerAppSettings, bool>((obj) => obj.EnableAssetHistory, "EnableAssetHistory");
         public static readonly Exposer<AssetManagement.Models.AssetManagerAppSettings, SlcAsset_Management.Enums.Planandbuildjobpromptenum> PlanAndBuildJobPrompt = new Exposer<AssetManagement.Models.AssetManagerAppSettings, SlcAsset_Management.Enums.Planandbuildjobpromptenum>((obj) => obj.PlanAndBuildJobPrompt, "PlanAndBuildJobPrompt");
         public static readonly Exposer<AssetManagement.Models.AssetManagerAppSettings, bool> EnableConnectionHistory = new Exposer<AssetManagement.Models.AssetManagerAppSettings, bool>((obj) => obj.EnableConnectionHistory, "EnableConnectionHistory");

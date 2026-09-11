@@ -6,11 +6,12 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
     using Newtonsoft.Json;
 
     using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.InfraOps.Core.Models;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)facility_management")]
-    public sealed class FacilityManagerAppSettings : SdmObject<FacilityManagerAppSettings>, IEquatable<FacilityManagerAppSettings>, IEntityTracking
+    public sealed class FacilityManagerAppSettings : SdmObjectBase<FacilityManagerAppSettings>, IEquatable<FacilityManagerAppSettings>, IEntityTracking
     {
         [JsonIgnore]
         private ChangeTrackingFieldHandler _fieldHandler;

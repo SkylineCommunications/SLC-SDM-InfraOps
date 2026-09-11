@@ -4,12 +4,12 @@
     using System.Collections.Generic;
     using System.Linq;
     using Newtonsoft.Json;
-
+    using Skyline.DataMiner.SDM.InfraOps.Core.Models;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)asset_management")]
-    public sealed class DataPort : SdmObject<DataPort>, IEquatable<DataPort>, IEntityTracking, IPort
+    public sealed class DataPort : SdmObjectBase<DataPort>, IEquatable<DataPort>, IEntityTracking, IPort
     {
         [JsonIgnore]
         private DataPortInfo _dataPortInfo;
