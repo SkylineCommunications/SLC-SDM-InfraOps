@@ -110,6 +110,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 		{
 			public static readonly CollectionExposer<AssetManagement.Models.Asset, long> SlotNumber = new CollectionExposer<AssetManagement.Models.Asset, long>((obj) => obj.Holders.Where(x => x != null).Select(x => x.SlotNumber), "Holders.SlotNumber");
 			public static readonly CollectionExposer<AssetManagement.Models.Asset, SlcAsset_Management.Enums.HierarchyRoleEnum> HierarchyRole = new CollectionExposer<AssetManagement.Models.Asset, SlcAsset_Management.Enums.HierarchyRoleEnum>((obj) => obj.Holders.Where(x => x != null).Select(x => x.HierarchyRole), "Holders.HierarchyRole");
+			public static readonly CollectionExposer<AssetManagement.Models.Asset, string> Label = new CollectionExposer<AssetManagement.Models.Asset, string>((obj) => obj.Holders.Where(x => x != null).Select(x => x.Label).Where(x => x != null), "Holders.Label");
 		}
 
 		public static partial class ElementLinks

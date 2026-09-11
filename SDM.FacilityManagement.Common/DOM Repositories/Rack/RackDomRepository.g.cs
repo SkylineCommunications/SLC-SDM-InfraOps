@@ -590,6 +590,12 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     obj.Label = _rackpropertieslabel.Value;
                 }
 
+                var _rackpropertiescolor = _rackpropertiesSection.GetValue<string>(FacilityManagement.Models.RackDomMapper.RackProperties.Color);
+                if (_rackpropertiescolor != null)
+                {
+                    obj.Color = _rackpropertiescolor.Value;
+                }
+
                 var _rackpropertiesorientation = _rackpropertiesSection.GetValue<int>(FacilityManagement.Models.RackDomMapper.RackProperties.Orientation);
                 if (_rackpropertiesorientation != null)
                 {
@@ -766,6 +772,11 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 _rackproperties.AddOrUpdateValue<string>(FacilityManagement.Models.RackDomMapper.RackProperties.Label, Convert.ToString(obj.Label));
             }
 
+            if (obj.Color != default)
+            {
+                _rackproperties.AddOrUpdateValue<string>(FacilityManagement.Models.RackDomMapper.RackProperties.Color, Convert.ToString(obj.Color));
+            }
+
             if (obj.Orientation != default)
             {
                 _rackproperties.AddOrUpdateValue<int>(FacilityManagement.Models.RackDomMapper.RackProperties.Orientation, (int)(obj.Orientation).Value);
@@ -920,6 +931,8 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.RackProperties.YPosition), comparer, (double)((double?)value).Value);
                 case "Label":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.RackProperties.Label), comparer, (string)value);
+                case "Color":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.RackProperties.Color), comparer, (string)value);
                 case "Orientation" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
                     return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.RackDomMapper.RackProperties.Orientation.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Orientation":
@@ -975,6 +988,8 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.RackProperties.YPosition), sortOrder, naturalSort);
                 case "Label":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.RackProperties.Label), sortOrder, naturalSort);
+                case "Color":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.RackProperties.Color), sortOrder, naturalSort);
                 case "Orientation":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.RackProperties.Orientation), sortOrder, naturalSort);
                 case "RackId":

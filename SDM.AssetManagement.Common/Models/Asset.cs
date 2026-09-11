@@ -408,6 +408,21 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
         #endregion
 
+        public IEnumerable<TrackingFieldValueDifference> GetChanges()
+        {
+            return FieldHandler.GetChanges()
+                .Select(kvp => new TrackingFieldValueDifference
+                {
+                    FieldName = kvp.Key,
+                    OldValue = kvp.Value.prevVal,
+                    NewValue = kvp.Value.newVal,
+                })
+                .Concat(Location?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>())
+                .Concat(DestinationLocation?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>())
+                .Concat(Ownership?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>())
+                .Concat(Custody?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>());
+        }
+
         public void ResetChangeTracking()
         {
             FieldHandler?.ApplyChanges();

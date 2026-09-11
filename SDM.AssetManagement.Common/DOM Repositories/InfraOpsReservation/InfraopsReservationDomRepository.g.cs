@@ -535,6 +535,17 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 }
             }
 
+            var _jobfkSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(AssetManagement.Models.ReservationDomMapper.JobFk.SectionDefinitionId));
+            if (_jobfkSection != default)
+            {
+                ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.JobFk).SectionId = _jobfkSection.ID.Id;
+                var _jobfkjob = _jobfkSection.GetValue<System.Guid>(AssetManagement.Models.ReservationDomMapper.JobFk.Job);
+                if (_jobfkjob != null)
+                {
+                    obj.JobFk.Job = _jobfkjob.Value;
+                }
+            }
+
             var _reservedpositionsList = new System.Collections.Generic.List<AssetManagement.Models.InfraopsReservationBounderies>();
             foreach (var _reservedpositionsSection in instance.Sections.Where(s => s.SectionDefinitionID.Equals(AssetManagement.Models.ReservationDomMapper.ReservedPositions.SectionDefinitionId)))
             {
@@ -609,6 +620,22 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 instance.Sections.Add(_rackfk);
             }
 
+            if (!obj.JobFk.IsEmpty)
+            {
+                var _jobfk = new Section(AssetManagement.Models.ReservationDomMapper.JobFk.SectionDefinitionId);
+                var _jobfkSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.JobFk).SectionId;
+                if (_jobfkSectionId.HasValue)
+                {
+                    _jobfk.ID = new SectionID(_jobfkSectionId.Value);
+                }
+                if (obj.JobFk.Job != default && obj.JobFk.Job != System.Guid.Empty)
+                {
+                    _jobfk.AddOrUpdateValue<System.Guid>(AssetManagement.Models.ReservationDomMapper.JobFk.Job, obj.JobFk.Job.Value);
+                }
+
+                instance.Sections.Add(_jobfk);
+            }
+
             foreach (var reservedpositions in obj.ReservedPositions)
             {
                 var _reservedpositionsSection = new Section(AssetManagement.Models.ReservationDomMapper.ReservedPositions.SectionDefinitionId);
@@ -643,6 +670,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ReservationDomMapper.ReservationProperties.Description), comparer, (string)value);
                 case "RackFk.Rack":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ReservationDomMapper.RackFk.Rack), comparer, System.Guid.Parse(SdmObjectReference<FacilityManagement.Models.Rack>.Convert(value).Identifier));
+                case "JobFk.Job":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ReservationDomMapper.JobFk.Job), comparer, ((System.Guid?)value).Value);
                 case "ReservedPositions.LowerBound":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ReservationDomMapper.ReservedPositions.LowerBound), comparer, (long)value);
                 case "ReservedPositions.UpperBound":
@@ -662,6 +691,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ReservationDomMapper.ReservationProperties.Description), sortOrder, naturalSort);
                 case "RackFk.Rack":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ReservationDomMapper.RackFk.Rack), sortOrder, naturalSort);
+                case "JobFk.Job":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ReservationDomMapper.JobFk.Job), sortOrder, naturalSort);
                 case "ReservedPositions.LowerBound":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ReservationDomMapper.ReservedPositions.LowerBound), sortOrder, naturalSort);
                 case "ReservedPositions.UpperBound":

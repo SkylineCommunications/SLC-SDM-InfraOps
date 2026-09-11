@@ -1,7 +1,8 @@
 namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 {
     using System;
-
+    using System.Collections.Generic;
+    using System.Linq;
     using Newtonsoft.Json;
 
     using Skyline.DataMiner.SDM;
@@ -73,6 +74,17 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
         internal IChangeTrackingField<string> GoogleMapsAPIKeyField => FieldHandler.GetOrCreateField(
             nameof(GoogleMapsAPIKey),
             () => new ChangeTrackingStringField(null));
+
+        public IEnumerable<TrackingFieldValueDifference> GetChanges()
+        {
+            return FieldHandler.GetChanges()
+                .Select(kvp => new TrackingFieldValueDifference
+                {
+                    FieldName = kvp.Key,
+                    OldValue = kvp.Value.prevVal,
+                    NewValue = kvp.Value.newVal,
+                });
+        }
 
         public void ResetChangeTracking()
         {

@@ -46,6 +46,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             public static readonly Exposer<FacilityManagement.Models.Rack, double?> XPosition = new Exposer<FacilityManagement.Models.Rack, double?>((obj) => obj.XPosition, "XPosition");
             public static readonly Exposer<FacilityManagement.Models.Rack, double?> YPosition = new Exposer<FacilityManagement.Models.Rack, double?>((obj) => obj.YPosition, "YPosition");
             public static readonly Exposer<FacilityManagement.Models.Rack, string> Label = new Exposer<FacilityManagement.Models.Rack, string>((obj) => obj.Label, "Label");
+            public static readonly Exposer<FacilityManagement.Models.Rack, string> Color = new Exposer<FacilityManagement.Models.Rack, string>((obj) => obj.Color, "Color");
             public static readonly Exposer<FacilityManagement.Models.Rack, SharedMappers.DomIds.SlcFacility_Management.Enums.Placementorientationenum?> Orientation = new Exposer<FacilityManagement.Models.Rack, SharedMappers.DomIds.SlcFacility_Management.Enums.Placementorientationenum?>((obj) => obj.Orientation, "Orientation");
             public static readonly Exposer<FacilityManagement.Models.Rack, string> RackId = new Exposer<FacilityManagement.Models.Rack, string>((obj) => obj.RackId, "RackId");
         }

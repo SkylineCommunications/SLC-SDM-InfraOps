@@ -1,8 +1,10 @@
 ﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using Newtonsoft.Json;
-
+    using SharedMappers.DomIds;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     //[GenerateExposers]
@@ -58,7 +60,7 @@
             set => EnableAssetHistoryField.Value = value;
         }
 
-        public int PlanAndBuildJobPrompt
+        public SlcAsset_Management.Enums.Planandbuildjobpromptenum PlanAndBuildJobPrompt
         {
             get => PlanAndBuildJobPromptField.Value;
             set => PlanAndBuildJobPromptField.Value = value;
@@ -82,6 +84,12 @@
             set => HistoryLimitField.Value = value;
         }
 
+        public bool EnableResourceLink
+        {
+            get => EnableResourceLinkField.Value;
+            set => EnableResourceLinkField.Value = value;
+        }
+
         [JsonIgnore]
         [SdmIgnore]
         internal IChangeTrackingField<bool> EnableAssetHistoryField => FieldHandler.GetOrCreateField(
@@ -90,9 +98,9 @@
 
         [JsonIgnore]
         [SdmIgnore]
-        internal IChangeTrackingField<int> PlanAndBuildJobPromptField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<SlcAsset_Management.Enums.Planandbuildjobpromptenum> PlanAndBuildJobPromptField => FieldHandler.GetOrCreateField(
             nameof(PlanAndBuildJobPrompt),
-            () => new ChangeTrackingField<int>(default));
+            () => new ChangeTrackingField<SlcAsset_Management.Enums.Planandbuildjobpromptenum>(default));
 
         [JsonIgnore]
         [SdmIgnore]
@@ -111,6 +119,23 @@
         internal IChangeTrackingField<long?> HistoryLimitField => FieldHandler.GetOrCreateField(
             nameof(HistoryLimit),
             () => new ChangeTrackingField<long?>(null));
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal IChangeTrackingField<bool> EnableResourceLinkField => FieldHandler.GetOrCreateField(
+            nameof(EnableResourceLink),
+            () => new ChangeTrackingField<bool>(default));
+
+        public IEnumerable<TrackingFieldValueDifference> GetChanges()
+        {
+            return FieldHandler.GetChanges()
+                .Select(kvp => new TrackingFieldValueDifference
+                {
+                    FieldName = kvp.Key,
+                    OldValue = kvp.Value.prevVal,
+                    NewValue = kvp.Value.newVal,
+                });
+        }
 
         public void ResetChangeTracking()
         {
@@ -159,7 +184,8 @@
                 PlanAndBuildJobPrompt == other.PlanAndBuildJobPrompt &&
                 EnableConnectionHistory == other.EnableConnectionHistory &&
                 HistoryTTL == other.HistoryTTL &&
-                HistoryLimit == other.HistoryLimit;
+                HistoryLimit == other.HistoryLimit &&
+                EnableResourceLink == other.EnableResourceLink;
         }
 
         public override int GetHashCode()
@@ -172,6 +198,7 @@
                 hash = (hash * 23) + EnableConnectionHistory.GetHashCode();
                 hash = (hash * 23) + HistoryTTL.GetHashCode();
                 hash = (hash * 23) + HistoryLimit.GetHashCode();
+                hash = (hash * 23) + EnableResourceLink.GetHashCode();
                 return hash;
             }
         }

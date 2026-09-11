@@ -619,6 +619,24 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
                     assetsused.Action = SharedMappers.DomIds.SlcPlan_And_Build.Enums.Actionforassetenum.ToEnum(_assetsusedaction.Value);
                 }
 
+                var _assetsusedassetname = _assetsusedSection.GetValue<string>(PlanAndBuild.Models.PlanAndBuildJobDomMapper.AssetsUsed.AssetName);
+                if (_assetsusedassetname != null)
+                {
+                    assetsused.AssetName = _assetsusedassetname.Value;
+                }
+
+                var _assetsusedassetclassname = _assetsusedSection.GetValue<string>(PlanAndBuild.Models.PlanAndBuildJobDomMapper.AssetsUsed.AssetClassName);
+                if (_assetsusedassetclassname != null)
+                {
+                    assetsused.AssetClassName = _assetsusedassetclassname.Value;
+                }
+
+                var _assetsusedipaddress = _assetsusedSection.GetValue<string>(PlanAndBuild.Models.PlanAndBuildJobDomMapper.AssetsUsed.IPAddress);
+                if (_assetsusedipaddress != null)
+                {
+                    assetsused.IPAddress = _assetsusedipaddress.Value;
+                }
+
                 _assetsusedList.Add(assetsused);
             }
 
@@ -820,6 +838,21 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
                 }
 
                 _assetsusedSection.AddOrUpdateValue<string>(PlanAndBuild.Models.PlanAndBuildJobDomMapper.AssetsUsed.Action, SharedMappers.DomIds.SlcPlan_And_Build.Enums.Actionforassetenum.ToValue(assetsused.Action));
+                if (assetsused.AssetName != default)
+                {
+                    _assetsusedSection.AddOrUpdateValue<string>(PlanAndBuild.Models.PlanAndBuildJobDomMapper.AssetsUsed.AssetName, Convert.ToString(assetsused.AssetName));
+                }
+
+                if (assetsused.AssetClassName != default)
+                {
+                    _assetsusedSection.AddOrUpdateValue<string>(PlanAndBuild.Models.PlanAndBuildJobDomMapper.AssetsUsed.AssetClassName, Convert.ToString(assetsused.AssetClassName));
+                }
+
+                if (assetsused.IPAddress != default)
+                {
+                    _assetsusedSection.AddOrUpdateValue<string>(PlanAndBuild.Models.PlanAndBuildJobDomMapper.AssetsUsed.IPAddress, Convert.ToString(assetsused.IPAddress));
+                }
+
                 instance.Sections.Add(_assetsusedSection);
             }
 
@@ -951,6 +984,18 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.AssetsUsed.AssetId), comparer, SdmObjectReference<AssetManagement.Models.Asset>.Convert(value).Identifier);
                 case "AssetsUsed.Action":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.AssetsUsed.Action), comparer, SharedMappers.DomIds.SlcPlan_And_Build.Enums.Actionforassetenum.ToValue((SharedMappers.DomIds.SlcPlan_And_Build.Enums.ActionforassetenumEnum)value));
+                case "AssetsUsed.AssetName" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(PlanAndBuild.Models.PlanAndBuildJobDomMapper.AssetsUsed.AssetName.Id.ToString()).Equal(comparer == Comparer.NotEquals);
+                case "AssetsUsed.AssetName":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.AssetsUsed.AssetName), comparer, (string)value);
+                case "AssetsUsed.AssetClassName" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(PlanAndBuild.Models.PlanAndBuildJobDomMapper.AssetsUsed.AssetClassName.Id.ToString()).Equal(comparer == Comparer.NotEquals);
+                case "AssetsUsed.AssetClassName":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.AssetsUsed.AssetClassName), comparer, (string)value);
+                case "AssetsUsed.IPAddress" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(PlanAndBuild.Models.PlanAndBuildJobDomMapper.AssetsUsed.IPAddress.Id.ToString()).Equal(comparer == Comparer.NotEquals);
+                case "AssetsUsed.IPAddress":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.AssetsUsed.IPAddress), comparer, (string)value);
                 case "Attachments.FilePath" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
                     return DomInstanceExposers.FieldValues.KeyExists(PlanAndBuild.Models.PlanAndBuildJobDomMapper.Attachments.FilePath.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Attachments.FilePath":
@@ -1024,6 +1069,12 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.AssetsUsed.AssetId), sortOrder, naturalSort);
                 case "AssetsUsed.Action":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.AssetsUsed.Action), sortOrder, naturalSort);
+                case "AssetsUsed.AssetName":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.AssetsUsed.AssetName), sortOrder, naturalSort);
+                case "AssetsUsed.AssetClassName":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.AssetsUsed.AssetClassName), sortOrder, naturalSort);
+                case "AssetsUsed.IPAddress":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.AssetsUsed.IPAddress), sortOrder, naturalSort);
                 case "Attachments.FilePath":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.Attachments.FilePath), sortOrder, naturalSort);
                 case "Attachments.AttachedAt":

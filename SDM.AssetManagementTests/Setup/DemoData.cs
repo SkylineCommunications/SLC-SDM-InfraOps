@@ -217,7 +217,7 @@ namespace SDM.AssetManagement.Tests.Setup
             {
                 Identifier = Guid.NewGuid().ToString(),
                 EnableAssetHistory = true,
-                PlanAndBuildJobPrompt = 1,
+                PlanAndBuildJobPrompt = SharedMappers.DomIds.SlcAsset_Management.Enums.Planandbuildjobpromptenum.Enabled,
                 EnableConnectionHistory = true,
                 HistoryTTL = TimeSpan.FromDays(30),
                 HistoryLimit = 1000L,
@@ -226,7 +226,7 @@ namespace SDM.AssetManagement.Tests.Setup
             {
                 Identifier = Guid.NewGuid().ToString(),
                 EnableAssetHistory = false,
-                PlanAndBuildJobPrompt = 0,
+                PlanAndBuildJobPrompt = SharedMappers.DomIds.SlcAsset_Management.Enums.Planandbuildjobpromptenum.Disabled,
                 EnableConnectionHistory = true,
                 HistoryTTL = null,
                 HistoryLimit = 1000L,
@@ -235,7 +235,7 @@ namespace SDM.AssetManagement.Tests.Setup
             {
                 Identifier = Guid.NewGuid().ToString(),
                 EnableAssetHistory = true,
-                PlanAndBuildJobPrompt = 0,
+                PlanAndBuildJobPrompt = SharedMappers.DomIds.SlcAsset_Management.Enums.Planandbuildjobpromptenum.Disabled,
                 EnableConnectionHistory = false,
                 HistoryTTL = TimeSpan.FromDays(30),
                 HistoryLimit = null,
@@ -244,7 +244,7 @@ namespace SDM.AssetManagement.Tests.Setup
             {
                 Identifier = Guid.NewGuid().ToString(),
                 EnableAssetHistory = false,
-                PlanAndBuildJobPrompt = 1,
+                PlanAndBuildJobPrompt = SharedMappers.DomIds.SlcAsset_Management.Enums.Planandbuildjobpromptenum.Enabled,
                 EnableConnectionHistory = false,
                 HistoryTTL = null,
                 HistoryLimit = null,

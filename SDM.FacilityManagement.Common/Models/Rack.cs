@@ -56,6 +56,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
          XPositionField?.Changed == true ||
          YPositionField?.Changed == true ||
          LabelField?.Changed == true ||
+         ColorField?.Changed == true ||
          OrientationField?.Changed == true ||
          RackIdField?.Changed == true ||
          Capacity?.Changed == true ||
@@ -155,6 +156,12 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
         {
             get => LabelField.Value;
             set => LabelField.Value = value;
+        }
+
+        public string Color
+        {
+            get => ColorField.Value;
+            set => ColorField.Value = value;
         }
 
         public SlcFacility_Management.Enums.Placementorientationenum? Orientation
@@ -260,6 +267,12 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             () => new ChangeTrackingStringField(null));
 
         [JsonIgnore]
+        [SdmIgnore]
+        internal IChangeTrackingField<string> ColorField => FieldHandler.GetOrCreateField(
+            nameof(Color),
+            () => new ChangeTrackingStringField(null));
+
+        [JsonIgnore]
         internal IChangeTrackingField<SlcFacility_Management.Enums.Placementorientationenum?> OrientationField => FieldHandler.GetOrCreateField(
             nameof(Orientation),
             () => new ChangeTrackingField<SlcFacility_Management.Enums.Placementorientationenum?>(null));
@@ -275,6 +288,21 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
         internal ChangeTrackingArrayField<ImageInfo> ImageDetailsField => FieldHandler.GetOrCreateArrayField(
             nameof(ImageDetails),
             () => new ChangeTrackingArrayField<ImageInfo>(new List<ImageInfo>()));
+
+        public IEnumerable<TrackingFieldValueDifference> GetChanges()
+        {
+            return FieldHandler.GetChanges()
+                .Select(kvp => new TrackingFieldValueDifference
+                {
+                    FieldName = kvp.Key,
+                    OldValue = kvp.Value.prevVal,
+                    NewValue = kvp.Value.newVal,
+                })
+                .Concat(Capacity?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>())
+                .Concat(RowFk?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>())
+                .Concat(ZoneFk?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>())
+                .Concat(Resource?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>());
+        }
 
         // Reset change tracking after deserialization or save
         public void ResetChangeTracking()
@@ -347,6 +375,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 XPosition == other.XPosition &&
                 YPosition == other.YPosition &&
                 string.Equals(Label, other.Label, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(Color, other.Color, StringComparison.OrdinalIgnoreCase) &&
                 Orientation == other.Orientation &&
                 string.Equals(RackId, other.RackId, StringComparison.OrdinalIgnoreCase) &&
                 Equals(Capacity, other.Capacity) &&

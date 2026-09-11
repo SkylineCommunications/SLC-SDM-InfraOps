@@ -1,6 +1,8 @@
 namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using Newtonsoft.Json;
 
     using Skyline.DataMiner.SDM;
@@ -45,6 +47,11 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         internal Guid? HistoryInfoSectionId { get; set; }
 
         #endregion
+
+        public IEnumerable<TrackingFieldValueDifference> GetChanges()
+        {
+            return _historyInfo?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>();
+        }
 
         public void ResetChangeTracking()
         {

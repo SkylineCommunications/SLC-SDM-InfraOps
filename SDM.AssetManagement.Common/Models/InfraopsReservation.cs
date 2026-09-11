@@ -95,6 +95,19 @@
             nameof(ReservedPositions),
             () => new ChangeTrackingArrayField<InfraopsReservationBounderies>(new List<InfraopsReservationBounderies>()));
 
+        public IEnumerable<TrackingFieldValueDifference> GetChanges()
+        {
+            return FieldHandler.GetChanges()
+                .Select(kvp => new TrackingFieldValueDifference
+                {
+                    FieldName = kvp.Key,
+                    OldValue = kvp.Value.prevVal,
+                    NewValue = kvp.Value.newVal,
+                })
+                .Concat(_jobFk?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>())
+                .Concat(_rackFk?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>());
+        }
+
         public void ResetChangeTracking()
         {
             FieldHandler?.ApplyChanges();

@@ -1,7 +1,8 @@
 namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 {
     using System;
-
+    using System.Collections.Generic;
+    using System.Linq;
     using Newtonsoft.Json;
 
     using SharedMappers.DomIds;
@@ -118,6 +119,19 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
         [SdmIgnore]
         internal IChangeTrackingField<string> DeskIdField => FieldHandler.GetOrCreateField(
             nameof(DeskID), () => new ChangeTrackingStringField(null));
+
+        public IEnumerable<TrackingFieldValueDifference> GetChanges()
+        {
+            return FieldHandler.GetChanges()
+                .Select(kvp => new TrackingFieldValueDifference
+                {
+                    FieldName = kvp.Key,
+                    OldValue = kvp.Value.prevVal,
+                    NewValue = kvp.Value.newVal,
+                })
+                .Concat(_roomFk?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>())
+                .Concat(_resource?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>());
+        }
 
         public void ResetChangeTracking()
         {

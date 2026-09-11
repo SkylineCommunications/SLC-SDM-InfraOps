@@ -1,6 +1,8 @@
 ﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using Newtonsoft.Json;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
@@ -112,6 +114,12 @@
         }
 
         #endregion
+
+        public IEnumerable<TrackingFieldValueDifference> GetChanges()
+        {
+            return (_powerPortInfo?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>())
+                .Concat(_assetFk?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>());
+        }
 
         /// <summary>
         /// Resets the change tracking state for all related properties to indicate that no changes have been made since

@@ -10,7 +10,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
-
+    using SharedMappers.DomIds;
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.Exposers;
@@ -22,9 +22,10 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     {
         public static readonly Exposer<AssetManagement.Models.AssetManagerAppSettings, string> Identifier = new Exposer<AssetManagement.Models.AssetManagerAppSettings, string>((obj) => obj.Identifier, "Identifier");
         public static readonly Exposer<AssetManagement.Models.AssetManagerAppSettings, bool> EnableAssetHistory = new Exposer<AssetManagement.Models.AssetManagerAppSettings, bool>((obj) => obj.EnableAssetHistory, "EnableAssetHistory");
-        public static readonly Exposer<AssetManagement.Models.AssetManagerAppSettings, int> PlanAndBuildJobPrompt = new Exposer<AssetManagement.Models.AssetManagerAppSettings, int>((obj) => obj.PlanAndBuildJobPrompt, "PlanAndBuildJobPrompt");
+        public static readonly Exposer<AssetManagement.Models.AssetManagerAppSettings, SlcAsset_Management.Enums.Planandbuildjobpromptenum> PlanAndBuildJobPrompt = new Exposer<AssetManagement.Models.AssetManagerAppSettings, SlcAsset_Management.Enums.Planandbuildjobpromptenum>((obj) => obj.PlanAndBuildJobPrompt, "PlanAndBuildJobPrompt");
         public static readonly Exposer<AssetManagement.Models.AssetManagerAppSettings, bool> EnableConnectionHistory = new Exposer<AssetManagement.Models.AssetManagerAppSettings, bool>((obj) => obj.EnableConnectionHistory, "EnableConnectionHistory");
         public static readonly Exposer<AssetManagement.Models.AssetManagerAppSettings, TimeSpan?> HistoryTTL = new Exposer<AssetManagement.Models.AssetManagerAppSettings, TimeSpan?>((obj) => obj.HistoryTTL, "HistoryTTL");
         public static readonly Exposer<AssetManagement.Models.AssetManagerAppSettings, long?> HistoryLimit = new Exposer<AssetManagement.Models.AssetManagerAppSettings, long?>((obj) => obj.HistoryLimit, "HistoryLimit");
+        public static readonly Exposer<AssetManagement.Models.AssetManagerAppSettings, bool> EnableResourceLink = new Exposer<AssetManagement.Models.AssetManagerAppSettings, bool>((obj) => obj.EnableResourceLink, "EnableResourceLink");
     }
 }

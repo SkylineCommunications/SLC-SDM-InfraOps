@@ -27,6 +27,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             internal static readonly FieldDescriptorID Job =
                 SharedMappers.DomIds.SlcAsset_Management.Sections.HistoryInfo.Job;
 
+            internal static readonly FieldDescriptorID UserID =
+                SharedMappers.DomIds.SlcAsset_Management.Sections.HistoryInfo.UserID;
+
             internal static readonly FieldDescriptorID ModifiedInstanceId =
                 SharedMappers.DomIds.SlcAsset_Management.Sections.HistoryInfo.InstanceID;
 

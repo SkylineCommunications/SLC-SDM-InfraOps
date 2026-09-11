@@ -32,6 +32,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             public static readonly Exposer<History, Guid> Job =
                 new Exposer<History, Guid>(obj => obj.HistoryInfo.Job, "HistoryInfo.Job");
 
+            public static readonly Exposer<History, Guid> UserID =
+                new Exposer<History, Guid>(obj => obj.HistoryInfo.UserID, "HistoryInfo.UserID");
+
             public static readonly Exposer<History, string> ModifiedInstanceID =
                 new Exposer<History, string>(obj => obj.HistoryInfo.ModifiedInstanceID, "HistoryInfo.ModifiedInstanceID");
 

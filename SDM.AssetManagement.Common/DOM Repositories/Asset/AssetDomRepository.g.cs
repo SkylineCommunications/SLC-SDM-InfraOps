@@ -849,6 +849,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     holders.HierarchyRole = SlcAsset_Management.Enums.Hierarchyrole.ToEnum(_holdershierarchyrole.Value);
                 }
 
+                var _holderslabel = _holdersSection.GetValue<string>(AssetManagement.Models.AssetDomMapper.Holders.Label);
+                if (_holderslabel != null)
+                {
+                    holders.Label = _holderslabel.Value;
+                }
+
                 _holdersList.Add(holders);
             }
 
@@ -1245,6 +1251,11 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     _holdersSection.AddOrUpdateValue<string>(AssetManagement.Models.AssetDomMapper.Holders.HierarchyRole, SharedMappers.DomIds.SlcAsset_Management.Enums.Hierarchyrole.ToValue(holders.HierarchyRole));
                 }
 
+                if (holders.Label != default)
+                {
+                    _holdersSection.AddOrUpdateValue<string>(AssetManagement.Models.AssetDomMapper.Holders.Label, Convert.ToString(holders.Label));
+                }
+
                 instance.Sections.Add(_holdersSection);
             }
 
@@ -1420,6 +1431,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetDomMapper.Holders.SlotNumber), comparer, (long)value);
 				case "Holders.HierarchyRole":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetDomMapper.Holders.HierarchyRole), comparer, SlcAsset_Management.Enums.Hierarchyrole.ToValue((SlcAsset_Management.Enums.HierarchyRoleEnum)value));
+				case "Holders.Label":
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetDomMapper.Holders.Label), comparer, (string)value);
 				case "ElementLinks.Identifier":
 					return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.SectionIds, comparer, Guid.Parse((string)value));
 				case "ElementLinks.ElementID":
@@ -1543,6 +1556,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetDomMapper.Holders.SlotNumber), sortOrder, naturalSort);
                 case "Holders.HierarchyRole":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetDomMapper.Holders.HierarchyRole), sortOrder, naturalSort);
+                case "Holders.Label":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetDomMapper.Holders.Label), sortOrder, naturalSort);
                 case "ElementLinks.Identifier":
                     return OrderByElementFactory.Create(DomInstanceExposers.SectionIds, sortOrder, naturalSort);
                 case "ElementLinks.ElementID":

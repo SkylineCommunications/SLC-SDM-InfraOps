@@ -9,7 +9,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     using System;
     using System.Collections.Generic;
     using System.Linq;
-
+    using SharedMappers.DomIds;
     using Skyline.DataMiner.Net;
     using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
     using Skyline.DataMiner.Net.Apps.Sections.Sections;
@@ -518,7 +518,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 var _planandbuildjobprompt = _appsettingsSection.GetValue<int>(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.PlanAndBuildJobPrompt);
                 if (_planandbuildjobprompt != null)
                 {
-                    obj.PlanAndBuildJobPrompt = _planandbuildjobprompt.Value;
+                    obj.PlanAndBuildJobPrompt = (SlcAsset_Management.Enums.Planandbuildjobpromptenum)_planandbuildjobprompt.Value;
                 }
 
                 var _enableconnectionhistory = _appsettingsSection.GetValue<bool>(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.EnableConnectionHistory);
@@ -537,6 +537,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 if (_historylimit != null)
                 {
                     obj.HistoryLimit = _historylimit.Value;
+                }
+
+                var _enableresourcelink = _appsettingsSection.GetValue<bool>(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.EnableResourceLink);
+                if (_enableresourcelink != null)
+                {
+                    obj.EnableResourceLink = _enableresourcelink.Value;
                 }
             }
 
@@ -571,8 +577,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 _appsettings.ID = new SectionID(obj.AppSettingsSectionId.Value);
             }
             _appsettings.AddOrUpdateValue<bool>(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.EnableAssetHistory, obj.EnableAssetHistory);
-            _appsettings.AddOrUpdateValue<int>(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.PlanAndBuildJobPrompt, obj.PlanAndBuildJobPrompt);
+            _appsettings.AddOrUpdateValue<int>(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.PlanAndBuildJobPrompt, (int)obj.PlanAndBuildJobPrompt);
             _appsettings.AddOrUpdateValue<bool>(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.EnableConnectionHistory, obj.EnableConnectionHistory);
+            _appsettings.AddOrUpdateValue<bool>(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.EnableResourceLink, obj.EnableResourceLink);
             if (obj.HistoryTTL != default)
             {
                 _appsettings.AddOrUpdateValue<TimeSpan>(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.HistoryTTL, (TimeSpan)obj.HistoryTTL.Value);
@@ -607,6 +614,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.HistoryLimit.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "HistoryLimit":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.HistoryLimit), comparer, ((long?)value).Value);
+                case "EnableResourceLink":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.EnableResourceLink), comparer, (bool)value);
                 default:
                     throw new NotImplementedException();
             }
@@ -628,6 +637,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.HistoryTTL), sortOrder, naturalSort);
                 case "HistoryLimit":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.HistoryLimit), sortOrder, naturalSort);
+                case "EnableResourceLink":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.EnableResourceLink), sortOrder, naturalSort);
                 default:
                     throw new NotImplementedException();
             }

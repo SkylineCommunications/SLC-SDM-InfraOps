@@ -39,6 +39,10 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         /// <returns>The matching objects, or <see langword="null"/> when no values are supplied.</returns>
         IEnumerable<Asset> ReadByIdentifiers(IEnumerable<string> identifiers);
 
+        bool IsTransitionAllowed(Asset asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum newState);
+
+        List<SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum> GetTransitionPathStates(Asset asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum newState);
+
         /// <summary>
         /// Transitions asset to a new state.
         /// Use this AFTER updating fields if the new state has different validation rules.
@@ -88,6 +92,30 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
 
             return RepositoryQueryExtensions.ReadByBigOrFilter(this, identifiers, value => AssetExposers.Identifier.Equal(value));
+        }
+
+        public bool IsTransitionAllowed(Asset asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum newState)
+        {
+            if (asset == null)
+            {
+                throw new ArgumentNullException(nameof(asset));
+            }
+            return StateMachine.IsTransitionAllowed(asset.State, newState);
+        }
+
+        public List<SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum> GetTransitionPathStates(Asset asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum newState)
+        {
+            if (asset == null)
+            {
+                throw new ArgumentNullException(nameof(asset));
+            }
+
+            if (!StateMachine.IsTransitionAllowed(asset.State, newState))
+            {
+                throw new InvalidOperationException($"State transition from {asset.State} to {newState} is not allowed.");
+            }
+
+            return StateMachine.GetTransitionDestinationStates(asset.State, newState);
         }
 
         public Asset TransitionTo(Asset asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum newState)

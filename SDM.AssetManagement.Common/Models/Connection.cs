@@ -1,9 +1,10 @@
 ﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
-    using SharedMappers.DomIds;
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using Newtonsoft.Json;
-
+    using SharedMappers.DomIds;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     //[GenerateExposers]
@@ -126,6 +127,19 @@
         internal IChangeTrackingField<double?> CableLengthField => FieldHandler.GetOrCreateField(
             nameof(CableLength),
             () => new ChangeTrackingField<double?>(null));
+
+        public IEnumerable<TrackingFieldValueDifference> GetChanges()
+        {
+            return FieldHandler.GetChanges()
+                .Select(kvp => new TrackingFieldValueDifference
+                {
+                    FieldName = kvp.Key,
+                    OldValue = kvp.Value.prevVal,
+                    NewValue = kvp.Value.newVal,
+                })
+                .Concat(_source?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>())
+                .Concat(_destination?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>());
+        }
 
         public void ResetChangeTracking()
         {

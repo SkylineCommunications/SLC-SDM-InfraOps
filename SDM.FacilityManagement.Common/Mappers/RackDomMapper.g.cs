@@ -37,6 +37,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             internal static FieldDescriptorID XPosition = SlcFacility_Management.Sections.RackInformation.X;
             internal static FieldDescriptorID YPosition = SlcFacility_Management.Sections.RackInformation.Y;
             internal static FieldDescriptorID Label = SlcFacility_Management.Sections.RackInformation.Label;
+            internal static FieldDescriptorID Color = SlcFacility_Management.Sections.RackInformation.Color;
             internal static FieldDescriptorID Orientation = SlcFacility_Management.Sections.RackInformation.PlacementOrientation;
             internal static FieldDescriptorID RackId = SlcFacility_Management.Sections.RackInformation.RackID;
         }

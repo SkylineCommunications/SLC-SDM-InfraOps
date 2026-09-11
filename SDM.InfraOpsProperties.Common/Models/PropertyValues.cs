@@ -136,6 +136,17 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
 
         #endregion
 
+        public IEnumerable<TrackingFieldValueDifference> GetChanges()
+        {
+            return FieldHandler.GetChanges()
+                .Select(kvp => new TrackingFieldValueDifference
+                {
+                    FieldName = kvp.Key,
+                    OldValue = kvp.Value.prevVal,
+                    NewValue = kvp.Value.newVal,
+                });
+        }
+
         public void ResetChangeTracking()
         {
             FieldHandler?.ApplyChanges();

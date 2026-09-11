@@ -38,6 +38,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             RuntimeHelpers.RunClassConstructor(typeof(Ownership).TypeHandle);
             RuntimeHelpers.RunClassConstructor(typeof(AssetsUsed).TypeHandle);
             RuntimeHelpers.RunClassConstructor(typeof(Attachments).TypeHandle);
+            RuntimeHelpers.RunClassConstructor(typeof(ConnectionsOnJob).TypeHandle);
         }
 
         public static partial class Ownership
@@ -50,6 +51,9 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
         {
             public static readonly CollectionExposer<PlanAndBuild.Models.PlanAndBuildJob, SdmObjectReference<AssetManagement.Models.Asset>> AssetId = new CollectionExposer<PlanAndBuild.Models.PlanAndBuildJob, SdmObjectReference<AssetManagement.Models.Asset>>((obj) => obj.AssetsUsed.Where(x => x != null).Select(x => x.AssetId).Where(x => x != null), "AssetsUsed.AssetId");
             public static readonly CollectionExposer<PlanAndBuild.Models.PlanAndBuildJob, SharedMappers.DomIds.SlcPlan_And_Build.Enums.ActionforassetenumEnum> Action = new CollectionExposer<PlanAndBuild.Models.PlanAndBuildJob, SharedMappers.DomIds.SlcPlan_And_Build.Enums.ActionforassetenumEnum>((obj) => obj.AssetsUsed.Where(x => x != null).Select(x => x.Action).Where(x => x != null), "AssetsUsed.Action");
+            public static readonly CollectionExposer<PlanAndBuild.Models.PlanAndBuildJob, string> AssetName = new CollectionExposer<PlanAndBuild.Models.PlanAndBuildJob, string>((obj) => obj.AssetsUsed.Where(x => x != null).Select(x => x.AssetName).Where(x => x != null), "AssetsUsed.AssetName");
+            public static readonly CollectionExposer<PlanAndBuild.Models.PlanAndBuildJob, string> AssetClassName = new CollectionExposer<PlanAndBuild.Models.PlanAndBuildJob, string>((obj) => obj.AssetsUsed.Where(x => x != null).Select(x => x.AssetClassName).Where(x => x != null), "AssetsUsed.AssetClassName");
+            public static readonly CollectionExposer<PlanAndBuild.Models.PlanAndBuildJob, string> IPAddress = new CollectionExposer<PlanAndBuild.Models.PlanAndBuildJob, string>((obj) => obj.AssetsUsed.Where(x => x != null).Select(x => x.IPAddress).Where(x => x != null), "AssetsUsed.IPAddress");
         }
 
         public static partial class Attachments
@@ -57,6 +61,16 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             public static readonly CollectionExposer<PlanAndBuild.Models.PlanAndBuildJob, string> FilePath = new CollectionExposer<PlanAndBuild.Models.PlanAndBuildJob, string>((obj) => obj.Attachments.Where(x => x != null).Select(x => x.FilePath).Where(x => x != null), "Attachments.FilePath");
             public static readonly CollectionExposer<PlanAndBuild.Models.PlanAndBuildJob, System.DateTime?> AttachedAt = new CollectionExposer<PlanAndBuild.Models.PlanAndBuildJob, System.DateTime?>((obj) => obj.Attachments.Where(x => x != null).Select(x => x.AttachedAt).Where(x => x != null), "Attachments.AttachedAt");
             public static readonly CollectionExposer<PlanAndBuild.Models.PlanAndBuildJob, System.Guid?> AttachedBy = new CollectionExposer<PlanAndBuild.Models.PlanAndBuildJob, System.Guid?>((obj) => obj.Attachments.Where(x => x != null).Select(x => x.AttachedBy).Where(x => x != null), "Attachments.AttachedBy");
+        }
+
+        public static partial class ConnectionsOnJob
+        {
+            public static readonly CollectionExposer<PlanAndBuild.Models.PlanAndBuildJob, SdmObjectReference<AssetManagement.Models.Connection>> ConnectionId = new CollectionExposer<PlanAndBuild.Models.PlanAndBuildJob, SdmObjectReference<AssetManagement.Models.Connection>>((obj) => obj.ConnectionsOnJob.Where(x => x != null).Select(x => x.ConnectionId).Where(x => x != null), "ConnectionsOnJob.ConnectionId");
+            public static readonly CollectionExposer<PlanAndBuild.Models.PlanAndBuildJob, string> Source = new CollectionExposer<PlanAndBuild.Models.PlanAndBuildJob, string>((obj) => obj.ConnectionsOnJob.Where(x => x != null).Select(x => x.Source).Where(x => x != null), "ConnectionsOnJob.Source");
+            public static readonly CollectionExposer<PlanAndBuild.Models.PlanAndBuildJob, string> Destination = new CollectionExposer<PlanAndBuild.Models.PlanAndBuildJob, string>((obj) => obj.ConnectionsOnJob.Where(x => x != null).Select(x => x.Destination).Where(x => x != null), "ConnectionsOnJob.Destination");
+            public static readonly CollectionExposer<PlanAndBuild.Models.PlanAndBuildJob, string> Status = new CollectionExposer<PlanAndBuild.Models.PlanAndBuildJob, string>((obj) => obj.ConnectionsOnJob.Where(x => x != null).Select(x => x.Status).Where(x => x != null), "ConnectionsOnJob.Status");
+            public static readonly CollectionExposer<PlanAndBuild.Models.PlanAndBuildJob, SdmObjectReference<AssetManagement.Models.CableType>> CableType = new CollectionExposer<PlanAndBuild.Models.PlanAndBuildJob, SdmObjectReference<AssetManagement.Models.CableType>>((obj) => obj.ConnectionsOnJob.Where(x => x != null).Select(x => x.CableType).Where(x => x != null), "ConnectionsOnJob.CableType");
+            public static readonly CollectionExposer<PlanAndBuild.Models.PlanAndBuildJob, double?> CableLength = new CollectionExposer<PlanAndBuild.Models.PlanAndBuildJob, double?>((obj) => obj.ConnectionsOnJob.Where(x => x != null).Select(x => x.CableLength).Where(x => x != null), "ConnectionsOnJob.CableLength");
         }
     }
 }

@@ -26,12 +26,18 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         static InfraopsReservationExposers()
         {
             RuntimeHelpers.RunClassConstructor(typeof(RackFk).TypeHandle);
+            RuntimeHelpers.RunClassConstructor(typeof(JobFk).TypeHandle);
             RuntimeHelpers.RunClassConstructor(typeof(ReservedPositions).TypeHandle);
         }
 
         public static partial class RackFk
         {
             public static readonly Exposer<AssetManagement.Models.InfraopsReservation, SdmObjectReference<FacilityManagement.Models.Rack>> Rack = new Exposer<AssetManagement.Models.InfraopsReservation, SdmObjectReference<FacilityManagement.Models.Rack>>((obj) => obj.RackFk.Rack, "RackFk.Rack");
+        }
+
+        public static partial class JobFk
+        {
+            public static readonly Exposer<AssetManagement.Models.InfraopsReservation, Guid?> Job = new Exposer<AssetManagement.Models.InfraopsReservation, Guid?>((obj) => obj.JobFk.Job, "JobFk.Job");
         }
 
         public static partial class ReservedPositions

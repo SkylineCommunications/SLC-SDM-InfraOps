@@ -543,6 +543,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     obj.HistoryInfo.Job = _job.Value;
                 }
 
+                var _userId = _historyInfoSection.GetValue<Guid>(AssetManagement.Models.HistoryDomMapper.HistoryInfo.UserID);
+                if (_userId != null)
+                {
+                    obj.HistoryInfo.UserID = _userId.Value;
+                }
+
                 var _modifiedInstanceId = _historyInfoSection.GetValue<string>(AssetManagement.Models.HistoryDomMapper.HistoryInfo.ModifiedInstanceId);
                 if (_modifiedInstanceId != null)
                 {
@@ -605,6 +611,11 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     section.AddOrUpdateValue<Guid>(HistoryDomMapper.HistoryInfo.Job, info.Job);
                 }
 
+                if (info.UserID != Guid.Empty)
+                {
+                    section.AddOrUpdateValue<Guid>(HistoryDomMapper.HistoryInfo.UserID, info.UserID);
+                }
+
                 if (info.ModifiedInstanceID != default)
                 {
                     section.AddOrUpdateValue<string>(HistoryDomMapper.HistoryInfo.ModifiedInstanceId, Convert.ToString(info.ModifiedInstanceID));
@@ -641,6 +652,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     return FieldFilter(HistoryDomMapper.HistoryInfo.Description, comparer, value);
                 case "HistoryInfo.Job":
                     return FieldFilter(HistoryDomMapper.HistoryInfo.Job, comparer, value);
+                case "HistoryInfo.UserID":
+                    return FieldFilter(HistoryDomMapper.HistoryInfo.UserID, comparer, value);
                 case "HistoryInfo.ModifiedInstanceID":
                     return FieldFilter(HistoryDomMapper.HistoryInfo.ModifiedInstanceId, comparer, value);
                 case "HistoryInfo.ModifiedInstanceDefinitionID":
@@ -678,6 +691,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     return FieldOrder(HistoryDomMapper.HistoryInfo.Description, sortOrder, naturalSort);
                 case "HistoryInfo.Job":
                     return FieldOrder(HistoryDomMapper.HistoryInfo.Job, sortOrder, naturalSort);
+                case "HistoryInfo.UserID":
+                    return FieldOrder(HistoryDomMapper.HistoryInfo.UserID, sortOrder, naturalSort);
                 case "HistoryInfo.ModifiedInstanceID":
                     return FieldOrder(HistoryDomMapper.HistoryInfo.ModifiedInstanceId, sortOrder, naturalSort);
                 case "HistoryInfo.ModifiedInstanceDefinitionID":

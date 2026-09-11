@@ -135,6 +135,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             set => PowerSupplyField.Value = value;
         }
 
+        public string CIType
+        {
+            get => CITypeField.Value;
+            set => CITypeField.Value = value;
+        }
+
         public AssetClassLifecycle Lifecycle => _lifecycle ?? (_lifecycle = new AssetClassLifecycle());
 
         public List<DataPortInfo> DataPorts
@@ -284,6 +290,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
         [JsonIgnore]
         [SdmIgnore]
+        internal IChangeTrackingField<string> CITypeField => FieldHandler.GetOrCreateField(
+            nameof(CIType),
+            () => new ChangeTrackingStringField(null));
+
+        [JsonIgnore]
+        [SdmIgnore]
         internal ChangeTrackingArrayField<DataPortInfo> DataPortsField => FieldHandler.GetOrCreateArrayField(
             nameof(DataPorts),
             () => new ChangeTrackingArrayField<DataPortInfo>(new List<DataPortInfo>()));
@@ -335,6 +347,18 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             HoldersField?.Changed == true ||
             AttachmentsField?.Changed == true ||
             (DataPorts?.Any(p => p?.Changed == true) == true);
+
+        public IEnumerable<TrackingFieldValueDifference> GetChanges()
+        {
+            return FieldHandler.GetChanges()
+                .Select(kvp => new TrackingFieldValueDifference
+                {
+                    FieldName = kvp.Key,
+                    OldValue = kvp.Value.prevVal,
+                    NewValue = kvp.Value.newVal,
+                })
+                .Concat(_lifecycle?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>());
+        }
 
         public void ResetChangeTracking()
         {
@@ -422,6 +446,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 TypicalPowerConsumption == other.TypicalPowerConsumption &&
                 MaximumPowerConsumption == other.MaximumPowerConsumption &&
                 PowerSupply == other.PowerSupply &&
+                string.Equals(CIType, other.CIType, StringComparison.OrdinalIgnoreCase) &&
                 Equals(Lifecycle, other.Lifecycle) &&
                 ListsEqual(DataPorts, other.DataPorts) &&
                 ListsEqual(PowerPorts, other.PowerPorts) &&

@@ -94,6 +94,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
 			return
 				SlotNumber == other.SlotNumber &&
+				string.Equals(Label, other.Label, StringComparison.OrdinalIgnoreCase) &&
 				HierarchyRole == other.HierarchyRole;
 		}
 
@@ -103,6 +104,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			{
 				int hash = 17;
 				hash = (hash * 23) + SlotNumber.GetHashCode();
+				hash = (hash * 23) + (Label != null ? Label.GetHashCode() : 0);
 				hash = (hash * 23) + HierarchyRole.GetHashCode();
 				return hash;
 			}

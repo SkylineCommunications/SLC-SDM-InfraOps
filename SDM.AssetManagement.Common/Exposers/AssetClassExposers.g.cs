@@ -38,6 +38,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 		public static readonly Exposer<AssetManagement.Models.AssetClass, double?> TypicalPowerConsumption = new Exposer<AssetManagement.Models.AssetClass, double?>((obj) => obj.TypicalPowerConsumption, "TypicalPowerConsumption");
 		public static readonly Exposer<AssetManagement.Models.AssetClass, double?> MaximumPowerConsumption = new Exposer<AssetManagement.Models.AssetClass, double?>((obj) => obj.MaximumPowerConsumption, "MaximumPowerConsumption");
 		public static readonly Exposer<AssetManagement.Models.AssetClass, SlcAsset_Management.Enums.PowerSupplyEnum?> PowerSupply = new Exposer<AssetManagement.Models.AssetClass, SlcAsset_Management.Enums.PowerSupplyEnum?>((obj) => obj.PowerSupply, "PowerSupply");
+		public static readonly Exposer<AssetManagement.Models.AssetClass, string> CIType = new Exposer<AssetManagement.Models.AssetClass, string>((obj) => obj.CIType, "CIType");
 		public static readonly Exposer<AssetManagement.Models.AssetClass, SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum> State = new Exposer<AssetManagement.Models.AssetClass, SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum>((obj) => obj.State, "State");
         public static readonly Exposer<AssetManagement.Models.AssetClass, bool> IsBookable = new Exposer<AssetManagement.Models.AssetClass, bool>((obj) => obj.IsBookable, "IsBookable");
 
@@ -82,6 +83,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 		{
 			public static readonly CollectionExposer<AssetManagement.Models.AssetClass, long> SlotNumber = new CollectionExposer<AssetManagement.Models.AssetClass, long>((obj) => obj.Holders.Where(x => x != null).Select(x => x.SlotNumber), "Holders.SlotNumber");
 			public static readonly CollectionExposer<AssetManagement.Models.AssetClass, SlcAsset_Management.Enums.HierarchyRoleEnum> HierarchyRole = new CollectionExposer<AssetManagement.Models.AssetClass, SlcAsset_Management.Enums.HierarchyRoleEnum>((obj) => obj.Holders.Where(x => x != null).Select(x => x.HierarchyRole), "Holders.HierarchyRole");
+			public static readonly CollectionExposer<AssetManagement.Models.AssetClass, string> Label = new CollectionExposer<AssetManagement.Models.AssetClass, string>((obj) => obj.Holders.Where(x => x != null).Select(x => x.Label).Where(x => x != null), "Holders.Label");
         }
 
         public static partial class ProtocolLink
