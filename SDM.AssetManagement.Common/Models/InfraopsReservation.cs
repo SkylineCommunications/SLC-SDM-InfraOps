@@ -1,17 +1,16 @@
 ﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
-
-    using Skyline.DataMiner.SDM;
-    using System;
     using Newtonsoft.Json;
-
+    using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.InfraOps.Core.Models;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)asset_management")]
-    public sealed class InfraopsReservation : SdmObject<InfraopsReservation>, IEquatable<InfraopsReservation>, IEntityTracking
+    public sealed class InfraopsReservation : SdmObjectBase<InfraopsReservation>, IEquatable<InfraopsReservation>, IEntityTracking
     {
         [JsonIgnore]
         private ChangeTrackingFieldHandler _fieldHandler;
@@ -94,6 +93,19 @@
         internal ChangeTrackingArrayField<InfraopsReservationBounderies> ReservedPositionsField => FieldHandler.GetOrCreateArrayField(
             nameof(ReservedPositions),
             () => new ChangeTrackingArrayField<InfraopsReservationBounderies>(new List<InfraopsReservationBounderies>()));
+
+        public IEnumerable<TrackingFieldValueDifference> GetChanges()
+        {
+            return FieldHandler.GetChanges()
+                .Select(kvp => new TrackingFieldValueDifference
+                {
+                    FieldName = kvp.Key,
+                    OldValue = kvp.Value.prevVal,
+                    NewValue = kvp.Value.newVal,
+                })
+                .Concat(_jobFk?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>())
+                .Concat(_rackFk?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>());
+        }
 
         public void ResetChangeTracking()
         {

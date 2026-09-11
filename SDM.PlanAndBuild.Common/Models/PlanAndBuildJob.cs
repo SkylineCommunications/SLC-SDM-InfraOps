@@ -9,11 +9,12 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
     using SharedMappers.DomIds;
 
     using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.InfraOps.Core.Models;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)plan_and_build")]
-    public sealed class PlanAndBuildJob : SdmObject<PlanAndBuildJob>, IEquatable<PlanAndBuildJob>, IEntityTracking
+    public sealed class PlanAndBuildJob : SdmObjectBase<PlanAndBuildJob>, IEquatable<PlanAndBuildJob>, IEntityTracking
     {
         [JsonIgnore]
         private ChangeTrackingFieldHandler _fieldHandler;
@@ -311,6 +312,18 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             () => new ChangeTrackingArrayField<JobConnection>(new List<JobConnection>()));
 
         #endregion
+
+        public IEnumerable<TrackingFieldValueDifference> GetChanges()
+        {
+            return FieldHandler.GetChanges()
+                .Select(kvp => new TrackingFieldValueDifference
+                {
+                    FieldName = kvp.Key,
+                    OldValue = kvp.Value.prevVal,
+                    NewValue = kvp.Value.newVal,
+                })
+                .Concat(Ownership?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>());
+        }
 
         public void ResetChangeTracking()
         {

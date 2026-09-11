@@ -1,14 +1,16 @@
 ﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
-    using Newtonsoft.Json;
-
-    using Skyline.DataMiner.SDM;
-    using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using Newtonsoft.Json;
+    using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.InfraOps.Core.Models;
+    using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)asset_management")]
-    public sealed class DeviceType : SdmObject<DeviceType>, IEquatable<DeviceType>, IEntityTracking
+    public sealed class DeviceType : SdmObjectBase<DeviceType>, IEquatable<DeviceType>, IEntityTracking
     {
         [JsonIgnore]
         private ChangeTrackingFieldHandler _fieldHandler;
@@ -90,6 +92,19 @@
         internal IChangeTrackingField<string> DescriptionField => FieldHandler.GetOrCreateField(
             nameof(Description),
             () => new ChangeTrackingStringField(null));
+
+        public IEnumerable<TrackingFieldValueDifference> GetChanges()
+        {
+            return FieldHandler.GetChanges()
+                .Select(kvp => new TrackingFieldValueDifference
+                {
+                    FieldName = kvp.Key,
+                    OldValue = kvp.Value.prevVal,
+                    NewValue = kvp.Value.newVal,
+                })
+                .Concat(_tagsInfo?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>())
+                .Concat(_hierarchyInfo?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>());
+        }
 
         public void ResetChangeTracking()
         {

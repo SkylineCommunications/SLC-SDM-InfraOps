@@ -32,13 +32,6 @@
             set => JobField.Value = value;
         }
 
-        /// <summary>
-        /// Gets the user that created this history entry.
-        /// Populated from the DOM instance's "created by" metadata on read; not a section field
-        /// and not settable by consumers.
-        /// </summary>
-        public string User { get; internal set; }
-
         public string ModifiedInstanceID
         {
             get => ModifiedInstanceIDField.Value;

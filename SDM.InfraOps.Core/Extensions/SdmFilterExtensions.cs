@@ -29,7 +29,7 @@
                 return val.HasValue && val.GetValueOrDefault().Equals(value);
             });
         }
-        
+
         public static ManagedFilter<TFilter, TField?> Equal<TFilter, TField>(
             this Exposer<TFilter, TField?> exposer,
             TField? value)

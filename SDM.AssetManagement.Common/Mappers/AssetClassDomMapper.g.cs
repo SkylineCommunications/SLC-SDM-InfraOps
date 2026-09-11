@@ -38,6 +38,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             internal static FieldDescriptorID FrontImage = SharedMappers.DomIds.SlcAsset_Management.Sections.AssetClassInfo.FrontImage;
             internal static FieldDescriptorID BackImage = SharedMappers.DomIds.SlcAsset_Management.Sections.AssetClassInfo.BackImage;
             internal static FieldDescriptorID PowerSupply = SharedMappers.DomIds.SlcAsset_Management.Sections.AssetClassInfo.PowerSupply;
+            internal static FieldDescriptorID CIType = SharedMappers.DomIds.SlcAsset_Management.Sections.AssetClassInfo.Citype;
             internal static FieldDescriptorID IsBookable = SharedMappers.DomIds.SlcAsset_Management.Sections.AssetClassInfo.Isbookable;
         }
 
@@ -82,6 +83,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
             internal static FieldDescriptorID SlotNumber = SharedMappers.DomIds.SlcAsset_Management.Sections.Holders.SlotNumber;
             internal static FieldDescriptorID HierarchyRole = SharedMappers.DomIds.SlcAsset_Management.Sections.Holders.HierarchyRole;
+            internal static FieldDescriptorID Label = SharedMappers.DomIds.SlcAsset_Management.Sections.Holders.Label;
         }
 
         internal static class ProtocolLink

@@ -1,15 +1,17 @@
 namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 {
     using System;
-
+    using System.Collections.Generic;
+    using System.Linq;
     using Newtonsoft.Json;
 
     using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.InfraOps.Core.Models;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)facility_management")]
-    public sealed class FacilityManagerAppSettings : SdmObject<FacilityManagerAppSettings>, IEquatable<FacilityManagerAppSettings>, IEntityTracking
+    public sealed class FacilityManagerAppSettings : SdmObjectBase<FacilityManagerAppSettings>, IEquatable<FacilityManagerAppSettings>, IEntityTracking
     {
         [JsonIgnore]
         private ChangeTrackingFieldHandler _fieldHandler;
@@ -73,6 +75,17 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
         internal IChangeTrackingField<string> GoogleMapsAPIKeyField => FieldHandler.GetOrCreateField(
             nameof(GoogleMapsAPIKey),
             () => new ChangeTrackingStringField(null));
+
+        public IEnumerable<TrackingFieldValueDifference> GetChanges()
+        {
+            return FieldHandler.GetChanges()
+                .Select(kvp => new TrackingFieldValueDifference
+                {
+                    FieldName = kvp.Key,
+                    OldValue = kvp.Value.prevVal,
+                    NewValue = kvp.Value.newVal,
+                });
+        }
 
         public void ResetChangeTracking()
         {

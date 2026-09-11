@@ -523,10 +523,11 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             {
                 Identifier = instance.ID.Id.ToString(),
                 IsNewInternal = false,
-                CreatedAt = (instance as ITrackCreatedAt)?.CreatedAt ?? default,
+                CreatedAt = ((ITrackBase)instance).CreatedAt,
+                CreatedBy = ((ITrackBase)instance).CreatedBy,
+                LastModified = ((ITrackBase)instance).LastModified,
+                LastModifiedBy = ((ITrackBase)instance).LastModifiedBy,
             };
-
-            obj.HistoryInfo.User = (instance as ITrackCreatedBy)?.CreatedBy;
 
             var _historyInfoSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(AssetManagement.Models.HistoryDomMapper.HistoryInfo.SectionDefinitionId));
             if (_historyInfoSection != default)
@@ -642,14 +643,18 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.Id, comparer, Guid.Parse((string)value));
                 case "CreatedAt":
                     return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.CreatedAt, comparer, (DateTime)value);
+                case "CreatedBy":
+                    return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.CreatedBy, comparer, (string)value);
+                case "LastModified":
+                    return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModified, comparer, (DateTime)value);
+                case "LastModifiedBy":
+                    return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModifiedBy, comparer, (string)value);
                 case "HistoryInfo.Description":
                     return FieldFilter(HistoryDomMapper.HistoryInfo.Description, comparer, value);
                 case "HistoryInfo.Job" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
                     return DomInstanceExposers.FieldValues.KeyExists(HistoryDomMapper.HistoryInfo.Job.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "HistoryInfo.Job":
                     return FieldFilter(HistoryDomMapper.HistoryInfo.Job, comparer, value);
-                case "HistoryInfo.User":
-                    return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.CreatedBy, comparer, (string)value);
                 case "HistoryInfo.ModifiedInstanceID":
                     return FieldFilter(HistoryDomMapper.HistoryInfo.ModifiedInstanceId, comparer, value);
                 case "HistoryInfo.ModifiedInstanceDefinitionID":
@@ -685,12 +690,16 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     return OrderByElementFactory.Create(DomInstanceExposers.Id, sortOrder, naturalSort);
                 case "CreatedAt":
                     return OrderByElementFactory.Create(DomInstanceExposers.CreatedAt, sortOrder, naturalSort);
+                case "CreatedBy":
+                    return OrderByElementFactory.Create(DomInstanceExposers.CreatedBy, sortOrder, naturalSort);
+                case "LastModified":
+                    return OrderByElementFactory.Create(DomInstanceExposers.LastModified, sortOrder, naturalSort);
+                case "LastModifiedBy":
+                    return OrderByElementFactory.Create(DomInstanceExposers.LastModifiedBy, sortOrder, naturalSort);
                 case "HistoryInfo.Description":
                     return FieldOrder(HistoryDomMapper.HistoryInfo.Description, sortOrder, naturalSort);
                 case "HistoryInfo.Job":
                     return FieldOrder(HistoryDomMapper.HistoryInfo.Job, sortOrder, naturalSort);
-                case "HistoryInfo.User":
-                    return OrderByElementFactory.Create(DomInstanceExposers.CreatedBy, sortOrder, naturalSort);
                 case "HistoryInfo.ModifiedInstanceID":
                     return FieldOrder(HistoryDomMapper.HistoryInfo.ModifiedInstanceId, sortOrder, naturalSort);
                 case "HistoryInfo.ModifiedInstanceDefinitionID":

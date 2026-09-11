@@ -22,6 +22,10 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
     public static partial class PlanAndBuildAppSettingsExposers
     {
         public static readonly Exposer<PlanAndBuild.Models.PlanAndBuildAppSettings, string> Identifier = new Exposer<PlanAndBuild.Models.PlanAndBuildAppSettings, string>((obj) => obj.Identifier, "Identifier");
+        public static readonly Exposer<PlanAndBuild.Models.PlanAndBuildAppSettings, System.DateTime> CreatedAt = new Exposer<PlanAndBuild.Models.PlanAndBuildAppSettings, System.DateTime>((obj) => obj.CreatedAt, "CreatedAt");
+        public static readonly Exposer<PlanAndBuild.Models.PlanAndBuildAppSettings, string> CreatedBy = new Exposer<PlanAndBuild.Models.PlanAndBuildAppSettings, string>((obj) => obj.CreatedBy, "CreatedBy");
+        public static readonly Exposer<PlanAndBuild.Models.PlanAndBuildAppSettings, System.DateTime> LastModified = new Exposer<PlanAndBuild.Models.PlanAndBuildAppSettings, System.DateTime>((obj) => obj.LastModified, "LastModified");
+        public static readonly Exposer<PlanAndBuild.Models.PlanAndBuildAppSettings, string> LastModifiedBy = new Exposer<PlanAndBuild.Models.PlanAndBuildAppSettings, string>((obj) => obj.LastModifiedBy, "LastModifiedBy");
         public static readonly Exposer<PlanAndBuild.Models.PlanAndBuildAppSettings, string> JobIDPrefix = new Exposer<PlanAndBuild.Models.PlanAndBuildAppSettings, string>((obj) => obj.JobIDPrefix, "JobIDPrefix");
         public static readonly Exposer<PlanAndBuild.Models.PlanAndBuildAppSettings, long> JobIDNextSequence = new Exposer<PlanAndBuild.Models.PlanAndBuildAppSettings, long>((obj) => obj.JobIDNextSequence, "JobIDNextSequence");
         public static readonly Exposer<PlanAndBuild.Models.PlanAndBuildAppSettings, long> JobIDIncrement = new Exposer<PlanAndBuild.Models.PlanAndBuildAppSettings, long>((obj) => obj.JobIDIncrement, "JobIDIncrement");

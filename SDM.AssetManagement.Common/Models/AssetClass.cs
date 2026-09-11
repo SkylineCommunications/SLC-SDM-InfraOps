@@ -9,11 +9,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     using SharedMappers.DomIds;
 
     using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.InfraOps.Core.Models;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)asset_management")]
-    public sealed class AssetClass : SdmObject<AssetClass>, IEquatable<AssetClass>, IEntityTracking
+    public sealed class AssetClass : SdmObjectBase<AssetClass>, IEquatable<AssetClass>, IEntityTracking
     {
         [JsonIgnore]
         private ChangeTrackingFieldHandler _fieldHandler;
@@ -133,6 +134,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         {
             get => PowerSupplyField.Value;
             set => PowerSupplyField.Value = value;
+        }
+
+        public string CIType
+        {
+            get => CITypeField.Value;
+            set => CITypeField.Value = value;
         }
 
         public AssetClassLifecycle Lifecycle => _lifecycle ?? (_lifecycle = new AssetClassLifecycle());
@@ -284,6 +291,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
         [JsonIgnore]
         [SdmIgnore]
+        internal IChangeTrackingField<string> CITypeField => FieldHandler.GetOrCreateField(
+            nameof(CIType),
+            () => new ChangeTrackingStringField(null));
+
+        [JsonIgnore]
+        [SdmIgnore]
         internal ChangeTrackingArrayField<DataPortInfo> DataPortsField => FieldHandler.GetOrCreateArrayField(
             nameof(DataPorts),
             () => new ChangeTrackingArrayField<DataPortInfo>(new List<DataPortInfo>()));
@@ -335,6 +348,18 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             HoldersField?.Changed == true ||
             AttachmentsField?.Changed == true ||
             (DataPorts?.Any(p => p?.Changed == true) == true);
+
+        public IEnumerable<TrackingFieldValueDifference> GetChanges()
+        {
+            return FieldHandler.GetChanges()
+                .Select(kvp => new TrackingFieldValueDifference
+                {
+                    FieldName = kvp.Key,
+                    OldValue = kvp.Value.prevVal,
+                    NewValue = kvp.Value.newVal,
+                })
+                .Concat(_lifecycle?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>());
+        }
 
         public void ResetChangeTracking()
         {
@@ -422,6 +447,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 TypicalPowerConsumption == other.TypicalPowerConsumption &&
                 MaximumPowerConsumption == other.MaximumPowerConsumption &&
                 PowerSupply == other.PowerSupply &&
+                string.Equals(CIType, other.CIType, StringComparison.OrdinalIgnoreCase) &&
                 Equals(Lifecycle, other.Lifecycle) &&
                 ListsEqual(DataPorts, other.DataPorts) &&
                 ListsEqual(PowerPorts, other.PowerPorts) &&

@@ -1,10 +1,17 @@
-﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
+namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using SharedCommonLibrary.AssetManagement.State_Management;
     using SharedMappers.DomIds;
+
     using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+    using Skyline.DataMiner.Net.Helper;
+    using Skyline.DataMiner.Net.Messages.SLDataGateway;
+    using Skyline.DataMiner.SDM.AssetManagement.Common.Exceptions;
     using Skyline.DataMiner.SDM.AssetManagement.Common.Validation;
+    using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Extensions;
 
     /// <summary>
     /// Defines methods for updating asset fields and managing asset state transitions in a repository. Extends bulk
@@ -18,6 +25,24 @@
     [AllowSdmMiddleware]
     public interface IAssetRepository : IBulkRepository<Asset>
     {
+        /// <summary>
+        /// Reads the object matching the given identifier. Recommended to use <see cref="ReadByIdentifiers(IEnumerable{string})"/> when retrieving multiple values.
+        /// </summary>
+        /// <param name="id">The identifier to match.</param>
+        /// <returns>The matching object, or <see langword="null"/> if none exists.</returns>
+        Asset ReadByIdentifier(string id);
+
+        /// <summary>
+        /// Reads objects matching any supplied identifiers in one combined retrieval.
+        /// </summary>
+        /// <param name="identifiers">The identifiers to match.</param>
+        /// <returns>The matching objects, or <see langword="null"/> when no values are supplied.</returns>
+        IEnumerable<Asset> ReadByIdentifiers(IEnumerable<string> identifiers);
+
+        bool IsTransitionAllowed(Asset asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum newState);
+
+        List<SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum> GetTransitionPathStates(Asset asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum newState);
+
         /// <summary>
         /// Transitions asset to a new state.
         /// Use this AFTER updating fields if the new state has different validation rules.
@@ -49,16 +74,60 @@
 
     internal partial class AssetDomRepository : IAssetRepository
     {
-        public Asset TransitionTo(Asset asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum newState)
+        public Asset ReadByIdentifier(string id)
         {
-            if(asset == null) throw new ArgumentNullException(nameof(asset));
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                return null;
+            }
 
-            if(!StateMachine.IsTransitionAllowed(asset.State, newState))
+            return ReadByIdentifiers(new[] { id }).SingleOrDefault();
+        }
+
+        public IEnumerable<Asset> ReadByIdentifiers(IEnumerable<string> identifiers)
+        {
+            if (identifiers.IsNullOrEmpty())
+            {
+                return Array.Empty<Asset>();
+            }
+
+            return RepositoryQueryExtensions.ReadByBigOrFilter(this, identifiers, value => AssetExposers.Identifier.Equal(value));
+        }
+
+        public bool IsTransitionAllowed(Asset asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum newState)
+        {
+            if (asset == null)
+            {
+                throw new ArgumentNullException(nameof(asset));
+            }
+            return StateMachine.IsTransitionAllowed(asset.State, newState);
+        }
+
+        public List<SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum> GetTransitionPathStates(Asset asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum newState)
+        {
+            if (asset == null)
+            {
+                throw new ArgumentNullException(nameof(asset));
+            }
+
+            if (!StateMachine.IsTransitionAllowed(asset.State, newState))
             {
                 throw new InvalidOperationException($"State transition from {asset.State} to {newState} is not allowed.");
             }
 
-            EnsureReadyForInstallIfRequired(asset, newState);
+            return StateMachine.GetTransitionDestinationStates(asset.State, newState);
+        }
+
+        public Asset TransitionTo(Asset asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum newState)
+        {
+            if (asset == null) throw new ArgumentNullException(nameof(asset));
+
+            if (!StateMachine.IsTransitionAllowed(asset.State, newState))
+            {
+                throw new InvalidOperationException($"State transition from {asset.State} to {newState} is not allowed.");
+            }
+
+            ValidateTransitionPath(asset, newState);
 
             return ExecuteStateTransition(asset, newState);
         }
@@ -72,8 +141,7 @@
                 throw new InvalidOperationException($"State transition from {asset.State} to {newState} is not allowed.");
             }
 
-            EnsureReadyForInstallIfRequired(asset, newState);
-
+            ValidateTransitionPath(asset, newState);
             var updated = Update(asset);
 
             return ExecuteStateTransition(updated, newState);
@@ -95,7 +163,7 @@
                 throw new InvalidOperationException($"State transition from {asset.State} to {newState} is not allowed.");
             }
 
-            EnsureReadyForInstallIfRequired(asset, newState);
+            ValidateTransitionPath(asset, newState);
 
             var transitioned = ExecuteStateTransition(asset, newState);
 
@@ -128,7 +196,7 @@
                     currentInstance = helper.DomInstances.DoStatusTransition(instanceId, SlcAsset_Management.Behaviors.Asset_Behavior.Transitions.ToValue(transitionId));
                 }
 
-                if(currentInstance == null)
+                if (currentInstance == null)
                 {
                     throw new InvalidOperationException($"State transition failed for asset '{asset.Identifier}' to {toState}.");
                 }
@@ -145,19 +213,14 @@
             }
         }
 
-        private static void EnsureReadyForInstallIfRequired(
+        private static void ValidateTransitionPath(
             Asset asset,
             SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum toState)
         {
-            var transitions = StateMachine.GetTransitionPath(asset.State, toState);
-            if (!transitions.Contains(SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Buildplanready_To_Installed))
+            var validationResult = AssetTransitionValidator.ValidatePath(asset, toState);
+            if (!validationResult.IsValid)
             {
-                return;
-            }
-
-            if (!AssetValidationHandler.IsReadyForInstall(asset, out _))
-            {
-                throw new InvalidOperationException("Please assign an installation user and date to the asset before installing.");
+                throw new AssetTransitionValidationException(validationResult);
             }
         }
     }

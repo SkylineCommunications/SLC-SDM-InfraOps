@@ -1,15 +1,17 @@
 ﻿namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 {
     using System;
-
+    using System.Collections.Generic;
+    using System.Linq;
     using Newtonsoft.Json;
 
     using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.InfraOps.Core.Models;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)plan_and_build")]
-    public sealed class PlanAndBuildAppSettings : SdmObject<PlanAndBuildAppSettings>, IEquatable<PlanAndBuildAppSettings>, IEntityTracking
+    public sealed class PlanAndBuildAppSettings : SdmObjectBase<PlanAndBuildAppSettings>, IEquatable<PlanAndBuildAppSettings>, IEntityTracking
     {
         [JsonIgnore]
         private ChangeTrackingFieldHandler _fieldHandler;
@@ -124,6 +126,17 @@
         internal Guid? PlanAndBuildAppSettingsPropertiesSectionId { get; set; }
 
         #endregion
+
+        public IEnumerable<TrackingFieldValueDifference> GetChanges()
+        {
+            return FieldHandler.GetChanges()
+                .Select(kvp => new TrackingFieldValueDifference
+                {
+                    FieldName = kvp.Key,
+                    OldValue = kvp.Value.prevVal,
+                    NewValue = kvp.Value.newVal,
+                });
+        }
 
         public void ResetChangeTracking()
         {

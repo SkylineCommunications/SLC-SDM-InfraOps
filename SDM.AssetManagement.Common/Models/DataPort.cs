@@ -1,14 +1,15 @@
 ﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
     using System;
-
+    using System.Collections.Generic;
+    using System.Linq;
     using Newtonsoft.Json;
-
+    using Skyline.DataMiner.SDM.InfraOps.Core.Models;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)asset_management")]
-    public sealed class DataPort : SdmObject<DataPort>, IEquatable<DataPort>, IEntityTracking, IPort
+    public sealed class DataPort : SdmObjectBase<DataPort>, IEquatable<DataPort>, IEntityTracking, IPort
     {
         [JsonIgnore]
         private DataPortInfo _dataPortInfo;
@@ -128,6 +129,14 @@
         }
 
         #endregion
+
+        public IEnumerable<TrackingFieldValueDifference> GetChanges()
+        {
+            return (_dataPortInfo?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>())
+                .Concat(_assetFk?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>())
+                .Concat(_addressInfo?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>())
+                .Concat(_primaryPortRelation?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>());
+        }
 
         /// <summary>
         /// Resets the change tracking state for all related properties to indicate that no changes have been made since

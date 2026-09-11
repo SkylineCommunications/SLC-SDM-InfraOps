@@ -1,12 +1,15 @@
 namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using Newtonsoft.Json;
 
     using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.InfraOps.Core.Models;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
-    public sealed class History : SdmObject<History>, IEquatable<History>, IEntityTracking
+    public sealed class History : SdmObjectBase<History>, IEquatable<History>, IEntityTracking
     {
         [JsonIgnore]
         private bool _isNew = true;
@@ -30,12 +33,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             set => _isNew = value;
         }
 
-        /// <summary>
-        /// Gets the timestamp at which the underlying DOM instance was created.
-        /// Populated from the DOM instance metadata on read; not settable by consumers.
-        /// </summary>
-        public DateTime CreatedAt { get; internal set; }
-
         public HistoryInfo HistoryInfo => _historyInfo ?? (_historyInfo = new HistoryInfo());
 
         #region Section Tracking
@@ -51,6 +48,11 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         internal Guid? HistoryInfoSectionId { get; set; }
 
         #endregion
+
+        public IEnumerable<TrackingFieldValueDifference> GetChanges()
+        {
+            return _historyInfo?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>();
+        }
 
         public void ResetChangeTracking()
         {

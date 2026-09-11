@@ -21,11 +21,20 @@
         [SdmIgnore]
         public bool IsEmpty =>
             !AssetId.HasValue() &&
-            Action == default;
+            Action == default &&
+            AssetName == default &&
+            AssetClassName == default &&
+            IPAddress == default;
 
         public SdmObjectReference<Asset> AssetId { get; set; }
 
         public SlcPlan_And_Build.Enums.ActionforassetenumEnum Action { get; set; }
+
+        public string AssetName { get; set; }
+
+        public string AssetClassName { get; set; }
+
+        public string IPAddress { get; set; }
 
         public static bool operator ==(JobAsset left, JobAsset right)
         {
@@ -66,7 +75,10 @@
 
             return
                 AssetId == other.AssetId &&
-                Action == other.Action;
+                Action == other.Action &&
+                AssetName == other.AssetName &&
+                AssetClassName == other.AssetClassName &&
+                IPAddress == other.IPAddress;
         }
 
         public override int GetHashCode()
@@ -76,6 +88,9 @@
                 int hash = 17;
                 hash = (hash * 23) + AssetId.GetHashCode();
                 hash = (hash * 23) + Action.GetHashCode();
+                hash = (hash * 23) + (AssetName?.GetHashCode() ?? 0);
+                hash = (hash * 23) + (AssetClassName?.GetHashCode() ?? 0);
+                hash = (hash * 23) + (IPAddress?.GetHashCode() ?? 0);
                 return hash;
             }
         }
