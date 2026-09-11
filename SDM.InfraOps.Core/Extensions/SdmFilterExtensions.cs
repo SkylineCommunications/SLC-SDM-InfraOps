@@ -29,6 +29,19 @@
                 return val.HasValue && val.GetValueOrDefault().Equals(value);
             });
         }
+        
+        public static ManagedFilter<TFilter, TField?> Equal<TFilter, TField>(
+            this Exposer<TFilter, TField?> exposer,
+            TField? value)
+            where TFilter : class
+            where TField : struct
+        {
+            return new ManagedFilter<TFilter, TField?>(exposer, Comparer.Equals, value, delegate (TFilter obj)
+            {
+                TField? val = exposer.internalFunc(obj);
+                return val.HasValue && val.GetValueOrDefault().Equals(value);
+            });
+        }
 
         /// <summary>
         /// Creates a filter that checks if the exposed nullable field does not equal the specified value.

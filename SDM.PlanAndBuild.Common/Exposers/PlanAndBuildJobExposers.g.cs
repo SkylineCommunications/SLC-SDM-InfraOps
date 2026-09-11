@@ -12,6 +12,8 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
     using System.Linq;
     using System.Runtime.CompilerServices;
 
+    using SharedMappers.DomIds;
+
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.Exposers;
@@ -33,6 +35,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
         public static readonly Exposer<PlanAndBuild.Models.PlanAndBuildJob, SharedMappers.DomIds.SlcPlan_And_Build.Enums.PriorityEnum> Priority = new Exposer<PlanAndBuild.Models.PlanAndBuildJob, SharedMappers.DomIds.SlcPlan_And_Build.Enums.PriorityEnum>((obj) => obj.Priority, "Priority");
         public static readonly Exposer<PlanAndBuild.Models.PlanAndBuildJob, SharedMappers.DomIds.SlcPlan_And_Build.Enums.SubStateEnum?> SubState = new Exposer<PlanAndBuild.Models.PlanAndBuildJob, SharedMappers.DomIds.SlcPlan_And_Build.Enums.SubStateEnum?>((obj) => obj.SubState, "SubState");
         public static readonly CollectionExposer<PlanAndBuild.Models.PlanAndBuildJob, Guid> Locations = new CollectionExposer<PlanAndBuild.Models.PlanAndBuildJob, Guid>((obj) => obj.Locations, "Locations");
+        public static readonly Exposer<PlanAndBuild.Models.PlanAndBuildJob, SlcPlan_And_Build.Behaviors.Job_Behavior.StatusesEnum> State = new Exposer<PlanAndBuild.Models.PlanAndBuildJob, SlcPlan_And_Build.Behaviors.Job_Behavior.StatusesEnum>((obj) => obj.State, "State");
         static PlanAndBuildJobExposers()
         {
             RuntimeHelpers.RunClassConstructor(typeof(Ownership).TypeHandle);

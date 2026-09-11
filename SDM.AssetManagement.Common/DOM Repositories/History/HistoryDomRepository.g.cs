@@ -523,7 +523,10 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             {
                 Identifier = instance.ID.Id.ToString(),
                 IsNewInternal = false,
+                CreatedAt = (instance as ITrackCreatedAt)?.CreatedAt ?? default,
             };
+
+            obj.HistoryInfo.User = (instance as ITrackCreatedBy)?.CreatedBy;
 
             var _historyInfoSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(AssetManagement.Models.HistoryDomMapper.HistoryInfo.SectionDefinitionId));
             if (_historyInfoSection != default)
@@ -600,9 +603,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     section.AddOrUpdateValue<string>(HistoryDomMapper.HistoryInfo.Description, Convert.ToString(info.Description));
                 }
 
-                if (info.Job != Guid.Empty)
+                if (info.Job.HasValue)
                 {
-                    section.AddOrUpdateValue<Guid>(HistoryDomMapper.HistoryInfo.Job, info.Job);
+                    section.AddOrUpdateValue<Guid>(HistoryDomMapper.HistoryInfo.Job, info.Job.Value);
                 }
 
                 if (info.ModifiedInstanceID != default)
@@ -637,10 +640,16 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             {
                 case "Identifier":
                     return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.Id, comparer, Guid.Parse((string)value));
+                case "CreatedAt":
+                    return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.CreatedAt, comparer, (DateTime)value);
                 case "HistoryInfo.Description":
                     return FieldFilter(HistoryDomMapper.HistoryInfo.Description, comparer, value);
+                case "HistoryInfo.Job" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(HistoryDomMapper.HistoryInfo.Job.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "HistoryInfo.Job":
                     return FieldFilter(HistoryDomMapper.HistoryInfo.Job, comparer, value);
+                case "HistoryInfo.User":
+                    return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.CreatedBy, comparer, (string)value);
                 case "HistoryInfo.ModifiedInstanceID":
                     return FieldFilter(HistoryDomMapper.HistoryInfo.ModifiedInstanceId, comparer, value);
                 case "HistoryInfo.ModifiedInstanceDefinitionID":
@@ -674,10 +683,14 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             {
                 case "Identifier":
                     return OrderByElementFactory.Create(DomInstanceExposers.Id, sortOrder, naturalSort);
+                case "CreatedAt":
+                    return OrderByElementFactory.Create(DomInstanceExposers.CreatedAt, sortOrder, naturalSort);
                 case "HistoryInfo.Description":
                     return FieldOrder(HistoryDomMapper.HistoryInfo.Description, sortOrder, naturalSort);
                 case "HistoryInfo.Job":
                     return FieldOrder(HistoryDomMapper.HistoryInfo.Job, sortOrder, naturalSort);
+                case "HistoryInfo.User":
+                    return OrderByElementFactory.Create(DomInstanceExposers.CreatedBy, sortOrder, naturalSort);
                 case "HistoryInfo.ModifiedInstanceID":
                     return FieldOrder(HistoryDomMapper.HistoryInfo.ModifiedInstanceId, sortOrder, naturalSort);
                 case "HistoryInfo.ModifiedInstanceDefinitionID":
