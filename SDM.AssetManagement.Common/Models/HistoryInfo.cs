@@ -77,12 +77,6 @@
 
         [JsonIgnore]
         [SdmIgnore]
-        internal IChangeTrackingField<Guid> UserIDField => FieldHandler.GetOrCreateField(
-            nameof(UserID),
-            () => new ChangeTrackingField<Guid>(Guid.Empty));
-
-        [JsonIgnore]
-        [SdmIgnore]
         internal IChangeTrackingField<string> ModifiedInstanceIDField => FieldHandler.GetOrCreateField(
             nameof(ModifiedInstanceID),
             () => new ChangeTrackingField<string>(null));
@@ -145,7 +139,6 @@
             return
                 string.Equals(Description, other.Description, StringComparison.OrdinalIgnoreCase) &&
                 Job.Equals(other.Job) &&
-                UserID.Equals(other.UserID) &&
                 string.Equals(ModifiedInstanceID, other.ModifiedInstanceID, StringComparison.OrdinalIgnoreCase) &&
                 string.Equals(ModifiedInstanceDefinitionID, other.ModifiedInstanceDefinitionID, StringComparison.OrdinalIgnoreCase) &&
                 string.Equals(ExtraInfo, other.ExtraInfo, StringComparison.OrdinalIgnoreCase) &&
@@ -159,7 +152,6 @@
                 int hash = 17;
                 hash = (hash * 23) + (Description != null ? Description.GetHashCode() : 0);
                 hash = (hash * 23) + Job.GetHashCode();
-                hash = (hash * 23) + UserID.GetHashCode();
                 hash = (hash * 23) + (ModifiedInstanceID != null ? ModifiedInstanceID.GetHashCode() : 0);
                 hash = (hash * 23) + (ModifiedInstanceDefinitionID != null ? ModifiedInstanceDefinitionID.GetHashCode() : 0);
                 hash = (hash * 23) + (ExtraInfo != null ? ExtraInfo.GetHashCode() : 0);

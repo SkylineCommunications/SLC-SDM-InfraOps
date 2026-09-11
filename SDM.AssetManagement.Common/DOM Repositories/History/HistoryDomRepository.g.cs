@@ -546,12 +546,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     obj.HistoryInfo.Job = _job.Value;
                 }
 
-                var _userId = _historyInfoSection.GetValue<Guid>(AssetManagement.Models.HistoryDomMapper.HistoryInfo.UserID);
-                if (_userId != null)
-                {
-                    obj.HistoryInfo.UserID = _userId.Value;
-                }
-
                 var _modifiedInstanceId = _historyInfoSection.GetValue<string>(AssetManagement.Models.HistoryDomMapper.HistoryInfo.ModifiedInstanceId);
                 if (_modifiedInstanceId != null)
                 {
@@ -612,11 +606,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 if (info.Job.HasValue)
                 {
                     section.AddOrUpdateValue<Guid>(HistoryDomMapper.HistoryInfo.Job, info.Job.Value);
-                }
-
-                if (info.UserID != Guid.Empty)
-                {
-                    section.AddOrUpdateValue<Guid>(HistoryDomMapper.HistoryInfo.UserID, info.UserID);
                 }
 
                 if (info.ModifiedInstanceID != default)
