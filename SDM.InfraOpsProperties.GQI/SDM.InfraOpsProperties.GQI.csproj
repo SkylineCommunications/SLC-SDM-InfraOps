@@ -6,9 +6,9 @@
     <Nullable>disable</Nullable>
     <AssemblyName>Skyline.DataMiner.SDM.InfraOpsProperties.GQI</AssemblyName>
     <RootNamespace>Skyline.DataMiner.SDM.InfraOpsProperties.GQI</RootNamespace>
-    <VersionSuffix Condition="'$(Configuration)' == 'Debug'">dev-049</VersionSuffix>
+    <VersionSuffix Condition="'$(VersionSuffixValue)' != '' and '$(Configuration)' == 'Debug'">$(VersionSuffixValue)</VersionSuffix>
     <VersionPrefix>1.0.1</VersionPrefix>
-    <AssemblyVersion>0.2.3.49</AssemblyVersion>
+    <AssemblyVersion Condition="'$(AssemblyVersionValue)' != ''">$(AssemblyVersionValue)</AssemblyVersion>
     <PackageTags>Skyline;DataMiner</PackageTags>
     <PackageProjectUrl>https://skyline.be</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -39,6 +39,7 @@
   
   <ItemGroup>
     <ProjectReference Include="..\SDM.InfraOpsProperties.Common\SDM.InfraOpsProperties.Common.csproj" />
+    <ProjectReference Include="..\SDM.InfraOps.GQI.Common\SDM.InfraOps.GQI.Common.csproj" />
   </ItemGroup>
   <!-- Can be used to set the location of your local nuget store to copy to -->
   <Import Project="../Directory.Build.props.user" Condition="Exists('../Directory.Build.props.user')" />

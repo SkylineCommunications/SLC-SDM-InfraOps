@@ -17,7 +17,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.Net.Sections;
     using Skyline.DataMiner.SDM;
-    using Skyline.DataMiner.SDM.AssetManagement.Models.Interafaces;
+    using Skyline.DataMiner.SDM.AssetManagement.Models.Interfaces;
     using SLDataGateway.API.Querying;
     using SLDataGateway.API.Types.Querying;
 

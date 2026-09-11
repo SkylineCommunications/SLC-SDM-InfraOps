@@ -1,4 +1,4 @@
-﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models.Interafaces
+﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models.Interfaces
 {
     using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
