@@ -6,24 +6,24 @@
 //------------------------------------------------------------------------------
 namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
+	using System;
+	using System.Collections.Generic;
+	using System.Linq;
 
-    using SharedMappers.DomIds;
+	using SharedMappers.DomIds;
 
-    using Skyline.DataMiner.Net;
-    using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-    using Skyline.DataMiner.Net.Helper;
-    using Skyline.DataMiner.Net.ManagerStore;
-    using Skyline.DataMiner.Net.Messages.SLDataGateway;
-    using Skyline.DataMiner.Net.Sections;
-    using Skyline.DataMiner.SDM;
-    using Skyline.DataMiner.SDM.AssetManagement.Models.Interafaces;
-    using SLDataGateway.API.Querying;
-    using SLDataGateway.API.Types.Querying;
+	using Skyline.DataMiner.Net;
+	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+	using Skyline.DataMiner.Net.Helper;
+	using Skyline.DataMiner.Net.ManagerStore;
+	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+	using Skyline.DataMiner.Net.Sections;
+	using Skyline.DataMiner.SDM;
+	using Skyline.DataMiner.SDM.AssetManagement.Models.Interafaces;
+	using SLDataGateway.API.Querying;
+	using SLDataGateway.API.Types.Querying;
 
-    internal partial class PowerPortDomRepository : IBulkRepository<PowerPort>, IDomInstanceReader<PowerPort>
+	internal partial class PowerPortDomRepository : IBulkRepository<PowerPort>
 	{
 		private readonly IConnection connection;
 		private readonly DomHelper helper;
@@ -510,12 +510,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			var obj = new PowerPort
 			{
 				Identifier = instance.ID.Id.ToString(),
-                IsNewInternal = false,
-                CreatedAt = ((ITrackBase)instance).CreatedAt,
-                CreatedBy = ((ITrackBase)instance).CreatedBy,
-                LastModified = ((ITrackBase)instance).LastModified,
-                LastModifiedBy = ((ITrackBase)instance).LastModifiedBy,
-            };
+				IsNewInternal = false,
+				CreatedAt = ((ITrackBase)instance).CreatedAt,
+				CreatedBy = ((ITrackBase)instance).CreatedBy,
+				LastModified = ((ITrackBase)instance).LastModified,
+				LastModifiedBy = ((ITrackBase)instance).LastModifiedBy,
+			};
 
 			var _powerportinfoSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.SectionDefinitionId));
 			if (_powerportinfoSection != default)
@@ -576,12 +576,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			return obj;
 		}
 
-        PowerPort IDomInstanceReader<PowerPort>.FromDomInstance(DomInstance instance)
-        {
-            return FromInstance(instance);
-        }
-
-        private DomInstance ToInstance(PowerPort obj)
+		private DomInstance ToInstance(PowerPort obj)
 		{
 			Guid id = default(Guid);
 			if (!String.IsNullOrEmpty(obj.Identifier))
@@ -621,7 +616,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				_powerportinfo.AddOrUpdateValue<int>(AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.OutputType, (int)obj.PowerPortInfo.OutputType);
 				_powerportinfo.AddOrUpdateValue<string>(AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.PortExposure, SharedMappers.DomIds.SlcAsset_Management.Enums.Portexposure.ToValue(obj.PowerPortInfo.PortExposure));
 
-                if (obj.PowerPortInfo.PortType != default)
+				if (obj.PowerPortInfo.PortType != default)
 				{
 					_powerportinfo.AddOrUpdateValue<string>(AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.PortType, Convert.ToString(obj.PowerPortInfo.PortType));
 				}
@@ -687,12 +682,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			}
 		}
 
-        FilterElement<DomInstance> IDomInstanceReader<PowerPort>.CreatePortFilter(string fieldName, Comparer comparer, object value)
-        {
-            return CreateFilter(fieldName, comparer, value);
-        }
-
-        private IOrderByElement CreateOrderBy(string fieldName, SortOrder sortOrder, bool naturalSort = false)
+		private IOrderByElement CreateOrderBy(string fieldName, SortOrder sortOrder, bool naturalSort = false)
 		{
 			switch (fieldName)
 			{
@@ -727,5 +717,5 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			}
 		}
 
-    }
+	}
 }

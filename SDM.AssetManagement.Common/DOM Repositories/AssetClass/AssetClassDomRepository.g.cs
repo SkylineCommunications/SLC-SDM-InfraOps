@@ -1202,7 +1202,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetClassDomMapper.DataPorts.OutputType), comparer, (int)((SharedMappers.DomIds.SlcAsset_Management.Enums.Outputtype?)value).Value);
 				case "DataPorts.PortExposure":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetClassDomMapper.DataPorts.PortExposure), comparer, SharedMappers.DomIds.SlcAsset_Management.Enums.Portexposure.ToValue((SharedMappers.DomIds.SlcAsset_Management.Enums.PortExposureEnum)value));
-				case "DataPorts.Type":
+				case "DataPorts.PortType":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetClassDomMapper.DataPorts.Type), comparer, Convert.ToString((System.Guid)value));
 				case "DataPorts.Label":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetClassDomMapper.DataPorts.Label), comparer, (string)value);
@@ -1311,7 +1311,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetClassDomMapper.DataPorts.OutputType), sortOrder, naturalSort);
 				case "DataPorts.PortExposure":
 					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetClassDomMapper.DataPorts.PortExposure), sortOrder, naturalSort);
-				case "DataPorts.Type":
+				case "DataPorts.PortType":
 					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetClassDomMapper.DataPorts.Type), sortOrder, naturalSort);
 				case "DataPorts.Label":
 					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetClassDomMapper.DataPorts.Label), sortOrder, naturalSort);

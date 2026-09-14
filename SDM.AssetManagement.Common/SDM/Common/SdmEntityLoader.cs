@@ -649,7 +649,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
                 obj => obj.DataPorts
                     .Where(port => port?.PortType != null && port.PortType.HasValue())
                     .Select(port => Guid.Parse(port.PortType.Identifier)),
-                "DataPorts.Type");
+                "DataPorts.PortType");
 
             var matches = Tools.RetrieveBigOrFilter(
                 portTypeGuids,

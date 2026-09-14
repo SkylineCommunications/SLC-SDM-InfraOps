@@ -49,7 +49,7 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
         var deviceTypeRepository = new DeviceTypeDomRepository(connection);
         var dataPortRepository = new DataPortDomRepository(connection);
         var powerPortRepository = new PowerPortDomRepository(connection);
-        var portRepository = new PortDomRepository(connection, dataPortRepository, powerPortRepository);
+        var portRepository = new PortDomReader(connection, dataPortRepository, powerPortRepository);
         var portTypeRepository = new PortTypeDomRepository(connection);
         var cableTypeRepository = new CableTypeDomRepository(connection);   
         var connectionDomRepository = new ConnectionDomRepository(connection);
@@ -114,7 +114,7 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
     public IAssetClassRepository AssetClasses { get; }
     public IBulkRepository<PowerPort> PowerPorts { get; }
     public IBulkRepository<DataPort> DataPorts { get; }
-    public IPortRepository Ports { get; }
+    public IPortReader Ports { get; }
     public IBulkRepository<DeviceType> DeviceTypes { get; }
     public IBulkRepository<PortType> PortTypes { get; }
     public IBulkRepository<Connection> Connections { get; }

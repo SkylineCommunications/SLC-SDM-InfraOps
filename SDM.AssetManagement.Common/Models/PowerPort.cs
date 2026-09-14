@@ -141,10 +141,6 @@
         [SdmIgnore]
         internal Guid? AssetFkSectionId { get; set; }
 
-        #endregion
-
-        #region Section Tracking
-
         [JsonIgnore]
         [SdmIgnore]
         internal Guid? AssetRelationPropertiesSectionId { get; set; }

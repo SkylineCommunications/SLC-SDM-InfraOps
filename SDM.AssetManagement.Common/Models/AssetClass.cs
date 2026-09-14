@@ -347,7 +347,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             StateField?.Changed == true ||
             HoldersField?.Changed == true ||
             AttachmentsField?.Changed == true ||
-            (DataPorts?.Any(p => p?.Changed == true) == true);
+            (DataPorts?.Any(p => p?.Changed == true) == true) ||
+            _protocolLink?.Changed == true;
 
         public IEnumerable<TrackingFieldValueDifference> GetChanges()
         {
@@ -358,7 +359,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     OldValue = kvp.Value.prevVal,
                     NewValue = kvp.Value.newVal,
                 })
-                .Concat(_lifecycle?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>());
+                .Concat(_lifecycle?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>())
+                .Concat(_protocolLink?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>());
         }
 
         public void ResetChangeTracking()
@@ -382,6 +384,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     attachment?.ResetChangeTracking();
                 }
             }
+
+            _protocolLink?.ResetChangeTracking();
         }
 
         #region Section Tracking
