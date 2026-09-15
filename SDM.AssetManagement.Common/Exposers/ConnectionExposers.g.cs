@@ -6,18 +6,11 @@
 //------------------------------------------------------------------------------
 namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
-    using System;
-    using System.Collections;
-    using System.Collections.Generic;
-    using System.Linq;
     using System.Runtime.CompilerServices;
 
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
-    using Skyline.DataMiner.SDM.Exposers;
-
-    using SLDataGateway.API.Querying;
-    using SLDataGateway.API.Types.Querying;
+    using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
 
     public static partial class ConnectionExposers
     {
@@ -41,14 +34,14 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         public static partial class Source
         {
             public static readonly Exposer<AssetManagement.Models.Connection, string> CableTag = new Exposer<AssetManagement.Models.Connection, string>((obj) => obj.Source.CableTag, "Source.CableTag");
-            public static readonly Exposer<AssetManagement.Models.Connection, System.Guid> Port = new Exposer<AssetManagement.Models.Connection, System.Guid>((obj) => obj.Source.Port, "Source.Port");
+            public static readonly Exposer<AssetManagement.Models.Connection, ISdmObjectReference<IPort>> Port = new Exposer<AssetManagement.Models.Connection, ISdmObjectReference<IPort>>((obj) => obj.Source.Port, "Source.Port");
             public static readonly Exposer<AssetManagement.Models.Connection, SdmObjectReference<AssetManagement.Models.PortType>> PortType = new Exposer<AssetManagement.Models.Connection, SdmObjectReference<AssetManagement.Models.PortType>>((obj) => obj.Source.PortType, "Source.PortType");
         }
 
         public static partial class Destination
         {
             public static readonly Exposer<AssetManagement.Models.Connection, string> CableTag = new Exposer<AssetManagement.Models.Connection, string>((obj) => obj.Destination.CableTag, "Destination.CableTag");
-            public static readonly Exposer<AssetManagement.Models.Connection, System.Guid> Port = new Exposer<AssetManagement.Models.Connection, System.Guid>((obj) => obj.Destination.Port, "Destination.Port");
+            public static readonly Exposer<AssetManagement.Models.Connection, ISdmObjectReference<IPort>> Port = new Exposer<AssetManagement.Models.Connection, ISdmObjectReference<IPort>>((obj) => obj.Destination.Port, "Destination.Port");
             public static readonly Exposer<AssetManagement.Models.Connection, SdmObjectReference<AssetManagement.Models.PortType>> PortType = new Exposer<AssetManagement.Models.Connection, SdmObjectReference<AssetManagement.Models.PortType>>((obj) => obj.Destination.PortType, "Destination.PortType");
         }
     }

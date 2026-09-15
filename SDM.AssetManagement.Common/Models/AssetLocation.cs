@@ -20,7 +20,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             !RackId.HasValue() &&
             RackPosition == default &&
             Side == default &&
-            DeskId == Guid.Empty &&
+            !DeskId.HasValue() &&
             !ContainerId.HasValue() &&
             !RoomId.HasValue();
 
@@ -54,19 +54,19 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             set => SideField.Value = value;
         }
 
-        public Guid DeskId
+        public SdmObjectReference<Desk> DeskId
         {
             get => DeskIdField.Value;
             set => DeskIdField.Value = value;
         }
 
-        public SdmObjectReference<FacilityManagement.Models.Facility> ContainerId
+        public SdmObjectReference<Facility> ContainerId
         {
             get => ContainerIdField.Value;
             set => ContainerIdField.Value = value;
         }
 
-        public SdmObjectReference<FacilityManagement.Models.Room> RoomId
+        public SdmObjectReference<Room> RoomId
         {
             get => RoomIdField.Value;
             set => RoomIdField.Value = value;
@@ -104,9 +104,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
         [JsonIgnore]
         [SdmIgnore]
-        internal IChangeTrackingField<Guid> DeskIdField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<SdmObjectReference<Desk>> DeskIdField => FieldHandler.GetOrCreateField(
             nameof(DeskId),
-            () => new ChangeTrackingField<Guid>(Guid.Empty));
+            () => new ChangeTrackingField<SdmObjectReference<Desk>>(default));
 
         [JsonIgnore]
         [SdmIgnore]
@@ -163,7 +163,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 RackId == other.RackId &&
                 RackPosition == other.RackPosition &&
                 Side == other.Side &&
-                DeskId.Equals(other.DeskId) &&
+                DeskId == other.DeskId &&
                 ContainerId == other.ContainerId &&
                 RoomId == other.RoomId;
         }

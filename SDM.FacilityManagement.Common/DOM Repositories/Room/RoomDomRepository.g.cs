@@ -12,796 +12,795 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
     using Skyline.DataMiner.Net;
     using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-    using Skyline.DataMiner.Net.Apps.Sections.Sections;
     using Skyline.DataMiner.Net.Helper;
     using Skyline.DataMiner.Net.ManagerStore;
-    using Skyline.DataMiner.Net.Messages;
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.Net.Sections;
-    using Skyline.DataMiner.Net.SubscriptionFilters;
     using Skyline.DataMiner.SDM;
-
+    using Skyline.DataMiner.SDM.Extensions;
+    using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
+    using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
     using SLDataGateway.API.Querying;
     using SLDataGateway.API.Types.Querying;
 
     internal partial class RoomDomRepository : IBulkRepository<Room>
-    {
-        private readonly IConnection connection;
-        private readonly DomHelper helper;
-        public RoomDomRepository(IConnection connection)
-        {
-            this.connection = connection;
-            this.helper = new DomHelper(connection.HandleMessages, FacilityManagement.Models.RoomDomMapper.ModuleId);
-        }
-
-        public Room Create(Room createObject)
-        {
-            if (createObject is null)
-            {
-                throw new ArgumentNullException(nameof(createObject));
-            }
-
-            var instance = ToInstance(createObject);
-            instance = helper.DomInstances.Create(instance);
-            return FromInstance(instance);
-        }
-
-        public IReadOnlyCollection<Room> Create(IEnumerable<Room> createObjects)
-        {
-            if (createObjects is null || !createObjects.Any())
-            {
-                return Array.Empty<Room>();
-            }
-
-            // Check if some of the objects already exist
-            var existing = new HashSet<string>();
-            foreach (var batch in createObjects.Batch(500))
-            {
-                existing.UnionWith(Read(new ORFilterElement<Room>(batch.Select(obj => RoomExposers.Identifier.Equal(obj.Identifier)).ToArray())).Select(obj => obj.Identifier));
-            }
-
-            // Create the remainder
-            var SuccessfulItems = new List<Room>();
-            var failures = new Dictionary<string, Exception>();
-            var objects = createObjects.Where(obj => !existing.Contains(obj.Identifier)).ToDictionary(obj => obj.Identifier);
-            foreach (var batch in createObjects.Select(ToInstance).Batch(helper.DomInstances.MaxAmountBulkOperation))
-            {
-                helper.DomInstances.TryCreateOrUpdate(batch.ToList(), out var result);
-                foreach (var failure in result.UnsuccessfulIds)
-                {
-                    failures.Add(failure.Id.ToString(), new CrudFailedException(result.TraceDataPerItem[failure]));
-                }
-
-                foreach (var success in result.SuccessfulItems)
-                {
-                    SuccessfulItems.Add(FromInstance(success));
-                }
-            }
-
-            // If everything went fine, return the successful creations
-            if (!existing.Any() && !failures.Any())
-            {
-                return SuccessfulItems;
-            }
-
-            // Otherwise, build and throw an exception
-            var exceptionBuilder = new SdmBulkCrudException<Room>.Builder();
-            foreach (var obj in createObjects)
-            {
-                if (existing.Contains(obj.Identifier))
-                {
-                    exceptionBuilder.AddFailed(obj, new SdmCrudException<Room>(obj, $"Could not create Room with guid: '{obj.Identifier}', it already exists."));
-                    continue;
-                }
-
-                if (failures.ContainsKey(obj.Identifier))
-                {
-                    exceptionBuilder.AddFailed(obj, failures[obj.Identifier]);
-                    continue;
-                }
-
-                exceptionBuilder.AddSuccessful(obj);
-            }
-
-            throw exceptionBuilder.Build();
-        }
-
-        public IReadOnlyCollection<Room> CreateOrUpdate(IEnumerable<Room> items)
-        {
-            if (items is null || !items.Any())
-            {
-                return Array.Empty<Room>();
-            }
-
-            var successful = new List<Room>();
-            var exceptionBuilder = new SdmBulkCrudException<Room>.Builder();
-            var objects = items.ToDictionary(obj => obj.Identifier);
-            foreach (var batch in items.Select(ToInstance).Batch(helper.DomInstances.MaxAmountBulkOperation))
-            {
-                helper.DomInstances.TryCreateOrUpdate(batch.ToList(), out var result);
-                foreach (var failure in result.UnsuccessfulIds)
-                {
-                    exceptionBuilder.AddFailed(objects[failure.Id.ToString()], new CrudFailedException(result.TraceDataPerItem[failure]));
-                }
-
-                foreach (var success in result.SuccessfulItems)
-                {
-                    var item = FromInstance(success);
-                    exceptionBuilder.AddSuccessful(item);
-                    successful.Add(item);
-                }
-            }
-
-            if (exceptionBuilder.HasFailure)
-            {
-                throw exceptionBuilder.Build();
-            }
-
-            return successful;
-        }
-
-        public long Count(FilterElement<Room> filter)
-        {
-            if (filter is null)
-            {
-                throw new ArgumentNullException(nameof(filter));
-            }
-
-            var domFilter = TranslateFullFilter(filter);
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(FacilityManagement.Models.RoomDomMapper.DomDefinitionId.Id));
-            return helper.DomInstances.Count(domFilter);
-        }
-
-        public long Count(IQuery<Room> query)
-        {
-            if (query is null)
-            {
-                throw new ArgumentNullException(nameof(query));
-            }
-
-            var domFilter = TranslateFullFilter(query.Filter);
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(FacilityManagement.Models.RoomDomMapper.DomDefinitionId.Id));
-            var domOrder = TranslateFullOrderBy(query.Order);
-            var domQuery = query.WithFilter(domFilter).WithOrder(domOrder);
-            return helper.DomInstances.Count(domQuery);
-        }
-
-        public IEnumerable<Room> Read(FilterElement<Room> filter)
-        {
-            if (filter is null)
-            {
-                throw new ArgumentNullException(nameof(filter));
-            }
-
-            var domFilter = TranslateFullFilter(filter);
-            return Read(domFilter);
-        }
-
-        public IEnumerable<Room> Read(IQuery<Room> query)
-        {
-            if (query is null)
-            {
-                throw new ArgumentNullException(nameof(query));
-            }
-
-            var domFilter = TranslateFullFilter(query.Filter);
-            var domOrder = TranslateFullOrderBy(query.Order);
-            var domQuery = query.WithFilter(domFilter).WithOrder(domOrder);
-            return Read(domQuery);
-        }
-
-        public IEnumerable<IPagedResult<Room>> ReadPaged(FilterElement<Room> filter)
-        {
-            return ReadPaged(filter, 500);
-        }
-
-        public IEnumerable<IPagedResult<Room>> ReadPaged(FilterElement<Room> filter, int pageSize)
-        {
-            if (filter is null)
-            {
-                throw new ArgumentNullException(nameof(filter));
-            }
-
-            if (pageSize <= 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(pageSize), "The page size must be 1 or higher");
-            }
-
-            var domFilter = TranslateFullFilter(filter);
-            var paging = ReadPaged(domFilter, pageSize).GetEnumerator();
-            var moveNext = paging.MoveNext();
-            var i = 0;
-            while (moveNext)
-            {
-                var page = paging.Current.ToList();
-                moveNext = paging.MoveNext();
-                var result = new PagedResult<Room>(page, i, pageSize, moveNext);
-                yield return result;
-                i++;
-            }
-        }
-
-        public IEnumerable<IPagedResult<Room>> ReadPaged(IQuery<Room> query)
-        {
-            return ReadPaged(query, 500);
-        }
-
-        public IEnumerable<IPagedResult<Room>> ReadPaged(IQuery<Room> query, int pageSize)
-        {
-            if (query is null)
-            {
-                throw new ArgumentNullException(nameof(query));
-            }
-
-            if (pageSize <= 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(pageSize), "The page size must be 1 or higher");
-            }
-
-            var domFilter = TranslateFullFilter(query.Filter);
-            var domOrder = TranslateFullOrderBy(query.Order);
-            var domQuery = query.WithFilter(domFilter).WithOrder(domOrder);
-            var paging = ReadPaged(domQuery, pageSize).GetEnumerator();
-            var moveNext = paging.MoveNext();
-            var i = 0;
-            while (moveNext)
-            {
-                var page = paging.Current.ToList();
-                moveNext = paging.MoveNext();
-                var result = new PagedResult<Room>(page, i, pageSize, moveNext);
-                yield return result;
-                i++;
-            }
-        }
-
-        public Room Update(Room updateObject)
-        {
-            if (updateObject is null)
-            {
-                throw new ArgumentNullException(nameof(updateObject));
-            }
-
-            var instance = ToInstance(updateObject);
-            instance = helper.DomInstances.Update(instance);
-            return FromInstance(instance);
-        }
-
-        public IReadOnlyCollection<Room> Update(IEnumerable<Room> updateObjects)
-        {
-            if (updateObjects is null || !updateObjects.Any())
-            {
-                return Array.Empty<Room>();
-            }
-
-            // Check if which objects already exist
-            var existing = new HashSet<string>();
-            foreach (var batch in updateObjects.Batch(500))
-            {
-                existing.UnionWith(Read(new ORFilterElement<Room>(batch.Select(obj => RoomExposers.Identifier.Equal(obj.Identifier)).ToArray())).Select(obj => obj.Identifier));
-            }
-
-            // Update the existing objects
-            var successfulItems = new List<Room>();
-            var failures = new Dictionary<string, Exception>();
-            var objects = updateObjects.Where(obj => existing.Contains(obj.Identifier)).ToDictionary(obj => obj.Identifier);
-            foreach (var batch in updateObjects.Select(ToInstance).Batch(helper.DomInstances.MaxAmountBulkOperation))
-            {
-                helper.DomInstances.TryCreateOrUpdate(batch.ToList(), out var result);
-                foreach (var failure in result.UnsuccessfulIds)
-                {
-                    failures.Add(failure.Id.ToString(), new CrudFailedException(result.TraceDataPerItem[failure]));
-                }
-
-                foreach (var success in result.SuccessfulItems)
-                {
-                    successfulItems.Add(FromInstance(success));
-                }
-            }
-
-            // Check for failures and build exception if needed
-            var exceptionBuilder = new SdmBulkCrudException<Room>.Builder();
-            foreach (var obj in updateObjects)
-            {
-                if (!existing.Contains(obj.Identifier))
-                {
-                    exceptionBuilder.AddFailed(obj, new SdmCrudException<Room>(obj, "Could not update a non existing Room"));
-                    continue;
-                }
-
-                if (failures.ContainsKey(obj.Identifier))
-                {
-                    exceptionBuilder.AddFailed(obj, failures[obj.Identifier]);
-                    continue;
-                }
-
-                exceptionBuilder.AddSuccessful(obj);
-            }
-
-            if (exceptionBuilder.HasFailure)
-            {
-                throw exceptionBuilder.Build();
-            }
-
-            return successfulItems;
-        }
-
-        public void Delete(Room deleteObject)
-        {
-            if (deleteObject is null)
-            {
-                throw new ArgumentNullException(nameof(deleteObject));
-            }
-
-            var instance = ToInstance(deleteObject);
-            helper.DomInstances.Delete(instance);
-        }
-
-        public void Delete(IEnumerable<Room> deleteObjects)
-        {
-            if (deleteObjects is null || !deleteObjects.Any())
-            {
-                return;
-            }
-
-            var exceptionBuilder = new SdmBulkCrudException<Room>.Builder();
-            var objects = deleteObjects.ToDictionary(obj => obj.Identifier);
-            foreach (var batch in deleteObjects.Select(ToInstance).Batch(helper.DomInstances.MaxAmountBulkOperation))
-            {
-                helper.DomInstances.TryDelete(batch.ToList(), out var result);
-                foreach (var failure in result.UnsuccessfulIds)
-                {
-                    exceptionBuilder.AddFailed(objects[failure.Id.ToString()], new CrudFailedException(result.TraceDataPerItem[failure]));
-                }
-
-                foreach (var success in result.SuccessfulIds)
-                {
-                    exceptionBuilder.AddSuccessful(objects[success.Id.ToString()]);
-                }
-            }
-
-            if (exceptionBuilder.HasFailure)
-            {
-                throw exceptionBuilder.Build();
-            }
-        }
-
-        private IEnumerable<Room> Read(FilterElement<DomInstance> domFilter)
-        {
-            if (domFilter is null)
-            {
-                throw new ArgumentNullException(nameof(domFilter));
-            }
-
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(FacilityManagement.Models.RoomDomMapper.DomDefinitionId.Id));
-            var domInstances = helper.DomInstances.Read(domFilter);
-            return domInstances.Select(FromInstance);
-        }
-
-        private IEnumerable<Room> Read(IQuery<DomInstance> domQuery)
-        {
-            if (domQuery is null)
-            {
-                throw new ArgumentNullException(nameof(domQuery));
-            }
-
-            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(FacilityManagement.Models.RoomDomMapper.DomDefinitionId.Id));
-            domQuery = domQuery.WithFilter(domFilter);
-            var domInstances = helper.DomInstances.Read(domQuery);
-            return domInstances.Select(FromInstance);
-        }
-
-        private IEnumerable<IEnumerable<Room>> ReadPaged(FilterElement<DomInstance> domFilter, int pageSize)
-        {
-            if (domFilter is null)
-            {
-                throw new ArgumentNullException(nameof(domFilter));
-            }
-
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(FacilityManagement.Models.RoomDomMapper.DomDefinitionId.Id));
-            var pagingHelper = helper.DomInstances.PreparePaging(domFilter, pageSize);
-            while (pagingHelper.MoveToNextPage())
-            {
-                yield return pagingHelper.GetCurrentPage().Select(FromInstance);
-            }
-        }
-
-        private IEnumerable<IEnumerable<Room>> ReadPaged(IQuery<DomInstance> domQuery, int pageSize)
-        {
-            if (domQuery is null)
-            {
-                throw new ArgumentNullException(nameof(domQuery));
-            }
-
-            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(FacilityManagement.Models.RoomDomMapper.DomDefinitionId.Id));
-            domQuery = domQuery.WithFilter(domFilter);
-            var pagingHelper = helper.DomInstances.PreparePaging(domQuery, pageSize);
-            while (pagingHelper.MoveToNextPage())
-            {
-                yield return pagingHelper.GetCurrentPage().Select(FromInstance);
-            }
-        }
-
-        private FilterElement<DomInstance> TranslateFullFilter(FilterElement<Room> filter)
-        {
-            if (filter is null)
-            {
-                throw new ArgumentNullException(nameof(filter));
-            }
-
-            FilterElement<DomInstance> translated;
-            if (filter is ANDFilterElement<Room> and)
-            {
-                translated = new ANDFilterElement<DomInstance>(and.subFilters.Select(TranslateFullFilter).ToArray());
-            }
-            else if (filter is ORFilterElement<Room> or)
-            {
-                translated = new ORFilterElement<DomInstance>(or.subFilters.Select(TranslateFullFilter).ToArray());
-            }
-            else if (filter is NOTFilterElement<Room> not)
-            {
-                translated = new NOTFilterElement<DomInstance>(TranslateFullFilter(not));
-            }
-            else if (filter is TRUEFilterElement<Room>)
-            {
-                translated = new TRUEFilterElement<DomInstance>();
-            }
-            else if (filter is FALSEFilterElement<Room>)
-            {
-                translated = new FALSEFilterElement<DomInstance>();
-            }
-            else if (filter is ManagedFilterIdentifier managedFilter)
-            {
-                translated = TranslateFilter(managedFilter);
-            }
-            else
-            {
-                throw new NotSupportedException($"Unsupported filter: {filter}");
-            }
-
-            return translated;
-        }
-
-        private IOrderBy TranslateFullOrderBy(IOrderBy order)
-        {
-            if (order is null)
-            {
-                throw new ArgumentNullException(nameof(order));
-            }
-
-            var translatedElements = new List<IOrderByElement>();
-            foreach (var orderByElement in order.Elements)
-            {
-                var translated = TranslateOrderBy(orderByElement);
-                translatedElements.Add(translated);
-            }
-
-            return new OrderBy(translatedElements);
-        }
-
-        private FilterElement<DomInstance> TranslateFilter(ManagedFilterIdentifier managedFilter)
-        {
-            if (managedFilter is null)
-            {
-                throw new ArgumentNullException(nameof(managedFilter));
-            }
-
-            var fieldName = managedFilter.getFieldName().fieldName;
-            var comparer = managedFilter.getComparer();
-            var value = managedFilter.getValue();
-            var translated = CreateFilter(fieldName, comparer, value);
-            return translated;
-        }
-
-        private IOrderByElement TranslateOrderBy(IOrderByElement orderByElement)
-        {
-            if (orderByElement is null)
-            {
-                throw new ArgumentNullException(nameof(orderByElement));
-            }
-
-            var fieldName = orderByElement.Exposer.fieldName;
-            var sortOrder = orderByElement.SortOrder;
-            var naturalSort = orderByElement.Options.NaturalSort;
-            var translated = CreateOrderBy(fieldName, sortOrder, naturalSort);
-            return translated;
-        }
-
-        private Room FromInstance(DomInstance instance)
-        {
-            var obj = new Room
-            {
-                Identifier = instance.ID.Id.ToString(),
-                IsNewInternal = false,
-                CreatedAt = ((ITrackBase)instance).CreatedAt,
-                CreatedBy = ((ITrackBase)instance).CreatedBy,
-                LastModified = ((ITrackBase)instance).LastModified,
-                LastModifiedBy = ((ITrackBase)instance).LastModifiedBy,
-            };
-
-            obj.State = SharedMappers.DomIds.SlcFacility_Management.Behaviors.Room_Behaviour.Statuses.ToEnum(instance.StatusId);
-            var _roompropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(FacilityManagement.Models.RoomDomMapper.RoomProperties.SectionDefinitionId));
-            if (_roompropertiesSection != default)
-            {
-                obj.RoomPropertiesSectionId = _roompropertiesSection.ID.Id;
-                var _roompropertiesname = _roompropertiesSection.GetValue<string>(FacilityManagement.Models.RoomDomMapper.RoomProperties.Name);
-                if (_roompropertiesname != null)
-                {
-                    obj.Name = _roompropertiesname.Value;
-                }
-
-                var _roompropertiesplan = _roompropertiesSection.GetValue<string>(FacilityManagement.Models.RoomDomMapper.RoomProperties.Plan);
-                if (_roompropertiesplan != null)
-                {
-                    obj.Plan = _roompropertiesplan.Value;
-                }
-
-                var _roompropertiesdescription = _roompropertiesSection.GetValue<string>(FacilityManagement.Models.RoomDomMapper.RoomProperties.Description);
-                if (_roompropertiesdescription != null)
-                {
-                    obj.Description = _roompropertiesdescription.Value;
-                }
-
-                var _roompropertieswidth = _roompropertiesSection.GetValue<long>(FacilityManagement.Models.RoomDomMapper.RoomProperties.Width);
-                if (_roompropertieswidth != null)
-                {
-                    obj.Width = _roompropertieswidth.Value;
-                }
-
-                var _roompropertiesdepth = _roompropertiesSection.GetValue<long>(FacilityManagement.Models.RoomDomMapper.RoomProperties.Depth);
-                if (_roompropertiesdepth != null)
-                {
-                    obj.Depth = _roompropertiesdepth.Value;
-                }
-
-                var _roompropertiesroomid = _roompropertiesSection.GetValue<string>(FacilityManagement.Models.RoomDomMapper.RoomProperties.RoomId);
-                if (_roompropertiesroomid != null)
-                {
-                    obj.RoomId = _roompropertiesroomid.Value;
-                }
-            }
-
-            var _OwnershipSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(FacilityManagement.Models.RoomDomMapper.Ownership.SectionDefinitionId));
-            if (_OwnershipSection != default)
-            {
-                ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Ownership).SectionId = _OwnershipSection.ID.Id;
-                var _Ownershipteam = _OwnershipSection.GetValue<string>(FacilityManagement.Models.RoomDomMapper.Ownership.Team);
-                if (_Ownershipteam != null)
-                {
-                    obj.Ownership.Team = System.Guid.Parse(Convert.ToString(_Ownershipteam.Value));
-                }
-
-                var _Ownershipowner = _OwnershipSection.GetValue<string>(FacilityManagement.Models.RoomDomMapper.Ownership.Owner);
-                if (_Ownershipowner != null)
-                {
-                    obj.Ownership.Owner = System.Guid.Parse(Convert.ToString(_Ownershipowner.Value));
-                }
-            }
-
-            var _resourcelinkSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(FacilityManagement.Models.RoomDomMapper.ResourceLink.SectionDefinitionId));
-            if (_resourcelinkSection != default)
-            {
-                ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.ResourceLink).SectionId = _resourcelinkSection.ID.Id;
-                var _resourcelinkresourceid = _resourcelinkSection.GetValue<string>(FacilityManagement.Models.RoomDomMapper.ResourceLink.ResourceId);
-                if (_resourcelinkresourceid != null)
-                {
-                    obj.ResourceLink.ResourceId = System.Guid.Parse(Convert.ToString(_resourcelinkresourceid.Value));
-                }
-            }
-
-            var _floorfkSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(FacilityManagement.Models.RoomDomMapper.FloorFk.SectionDefinitionId));
-            if (_floorfkSection != default)
-            {
-                ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.FloorFk).SectionId = _floorfkSection.ID.Id;
-                var _floorfkfloor = _floorfkSection.GetValue<System.Guid>(FacilityManagement.Models.RoomDomMapper.FloorFk.Floor);
-                if (_floorfkfloor != null)
-                {
-                    obj.FloorFk.Floor = new SdmObjectReference<FacilityManagement.Models.Floor>(Convert.ToString(_floorfkfloor.Value));
-                }
-            }
-
-            obj.ResetChangeTracking();
-
-            return obj;
-        }
-
-        private DomInstance ToInstance(Room obj)
-        {
-            Guid id = default(Guid);
-            if (!String.IsNullOrEmpty(obj.Identifier))
-            {
-                id = Guid.Parse(obj.Identifier);
-            }
-            else
-            {
-                id = Guid.NewGuid();
-            }
-
-            var instance = new DomInstance
-            {
-                DomDefinitionId = FacilityManagement.Models.RoomDomMapper.DomDefinitionId,
-                ID = new DomInstanceId(id)
-                {
-                    ModuleId = FacilityManagement.Models.RoomDomMapper.ModuleId
-                }
-            };
-
-            instance.StatusId = SharedMappers.DomIds.SlcFacility_Management.Behaviors.Room_Behaviour.Statuses.ToValue(obj.State);
-            var _roomproperties = new Section(FacilityManagement.Models.RoomDomMapper.RoomProperties.SectionDefinitionId);
-            if (obj.RoomPropertiesSectionId.HasValue)
-            {
-                _roomproperties.ID = new SectionID(obj.RoomPropertiesSectionId.Value);
-            }
-
-            if (obj.Name != default)
-            {
-                _roomproperties.AddOrUpdateValue<string>(FacilityManagement.Models.RoomDomMapper.RoomProperties.Name, Convert.ToString(obj.Name));
-            }
-
-            if (obj.Plan != default)
-            {
-                _roomproperties.AddOrUpdateValue<string>(FacilityManagement.Models.RoomDomMapper.RoomProperties.Plan, Convert.ToString(obj.Plan));
-            }
-
-            if (obj.Description != default)
-            {
-                _roomproperties.AddOrUpdateValue<string>(FacilityManagement.Models.RoomDomMapper.RoomProperties.Description, Convert.ToString(obj.Description));
-            }
-
-            if (obj.Width != default)
-            {
-                _roomproperties.AddOrUpdateValue<long>(FacilityManagement.Models.RoomDomMapper.RoomProperties.Width, (long)(obj.Width).Value);
-            }
-
-            if (obj.Depth != default)
-            {
-                _roomproperties.AddOrUpdateValue<long>(FacilityManagement.Models.RoomDomMapper.RoomProperties.Depth, (long)(obj.Depth).Value);
-            }
-
-            if (obj.RoomId != default)
-            {
-                _roomproperties.AddOrUpdateValue<string>(FacilityManagement.Models.RoomDomMapper.RoomProperties.RoomId, Convert.ToString(obj.RoomId));
-            }
-
-            instance.Sections.Add(_roomproperties);
-            if (!obj.Ownership.IsEmpty)
-            {
-                var _Ownership = new Section(FacilityManagement.Models.RoomDomMapper.Ownership.SectionDefinitionId);
-                var _OwnershipSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Ownership).SectionId;
-                if (_OwnershipSectionId.HasValue)
-                {
-                    _Ownership.ID = new SectionID(_OwnershipSectionId.Value);
-                }
-
-                if (obj.Ownership.Team != default)
-                {
-                    _Ownership.AddOrUpdateValue<string>(FacilityManagement.Models.RoomDomMapper.Ownership.Team, Convert.ToString(obj.Ownership.Team));
-                }
-
-                if (obj.Ownership.Owner != default)
-                {
-                    _Ownership.AddOrUpdateValue<string>(FacilityManagement.Models.RoomDomMapper.Ownership.Owner, Convert.ToString(obj.Ownership.Owner));
-                }
-
-                instance.Sections.Add(_Ownership);
-            }
-
-            if (!obj.ResourceLink.IsEmpty)
-            {
-                var _resourcelink = new Section(FacilityManagement.Models.RoomDomMapper.ResourceLink.SectionDefinitionId);
-                var _resourcelinkSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.ResourceLink).SectionId;
-                if (_resourcelinkSectionId.HasValue)
-                {
-                    _resourcelink.ID = new SectionID(_resourcelinkSectionId.Value);
-                }
-
-                if (obj.ResourceLink.ResourceId != default)
-                {
-                    _resourcelink.AddOrUpdateValue<string>(FacilityManagement.Models.RoomDomMapper.ResourceLink.ResourceId, Convert.ToString(obj.ResourceLink.ResourceId));
-                }
-
-                instance.Sections.Add(_resourcelink);
-            }
-
-            if (!obj.FloorFk.IsEmpty)
-            {
-                var _floorfk = new Section(FacilityManagement.Models.RoomDomMapper.FloorFk.SectionDefinitionId);
-                var _floorfkSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.FloorFk).SectionId;
-                if (_floorfkSectionId.HasValue)
-                {
-                    _floorfk.ID = new SectionID(_floorfkSectionId.Value);
-                }
-
-                if (obj.FloorFk.Floor != default && System.Guid.TryParse(obj.FloorFk.Floor.Identifier, out var floorGuid) && floorGuid != System.Guid.Empty)
-                {
-                    _floorfk.AddOrUpdateValue<System.Guid>(FacilityManagement.Models.RoomDomMapper.FloorFk.Floor, floorGuid);
-                }
-
-                instance.Sections.Add(_floorfk);
-            }
-
-            return instance;
-        }
-
-        private FilterElement<DomInstance> CreateFilter(string fieldName, Comparer comparer, object value)
-        {
-            switch (fieldName)
-            {
-                case "Identifier":
-                    return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.Id, comparer, Guid.Parse((string)value));
-                case "CreatedAt":
-                    return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.CreatedAt, comparer, (DateTime)value);
-                case "CreatedBy":
-                    return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.CreatedBy, comparer, (string)value);
-                case "LastModified":
-                    return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModified, comparer, (DateTime)value);
-                case "LastModifiedBy":
-                    return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModifiedBy, comparer, (string)value);
-                case "Name":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.RoomProperties.Name), comparer, (string)value);
-                case "Plan":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.RoomProperties.Plan), comparer, (string)value);
-                case "Description":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.RoomProperties.Description), comparer, (string)value);
-                case "Width" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
-                    return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.RoomDomMapper.RoomProperties.Width.Id.ToString()).Equal(comparer == Comparer.NotEquals);
-                case "Width":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.RoomProperties.Width), comparer, (long)((long?)value).Value);
-                case "Depth" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
-                    return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.RoomDomMapper.RoomProperties.Depth.Id.ToString()).Equal(comparer == Comparer.NotEquals);
-                case "Depth":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.RoomProperties.Depth), comparer, (long)((long?)value).Value);
-                case "RoomId":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.RoomProperties.RoomId), comparer, (string)value);
-                case "Ownership.Team":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.Ownership.Team), comparer, Convert.ToString((System.Guid)value));
-                case "Ownership.Owner":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.Ownership.Owner), comparer, Convert.ToString((System.Guid)value));
-                case "ResourceLink.ResourceId":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.ResourceLink.ResourceId), comparer, Convert.ToString((System.Guid)value));
-                case "FloorFk.Floor":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.FloorFk.Floor), comparer, System.Guid.Parse(SdmObjectReference<FacilityManagement.Models.Floor>.Convert(value).Identifier));
-                default:
-                    throw new NotImplementedException();
-            }
-        }
-
-        private IOrderByElement CreateOrderBy(string fieldName, SortOrder sortOrder, bool naturalSort = false)
-        {
-            switch (fieldName)
-            {
-                case "Identifier":
-                    return OrderByElementFactory.Create(DomInstanceExposers.Id, sortOrder, naturalSort);
-                case "CreatedAt":
-                    return OrderByElementFactory.Create(DomInstanceExposers.CreatedAt, sortOrder, naturalSort);
-                case "CreatedBy":
-                    return OrderByElementFactory.Create(DomInstanceExposers.CreatedBy, sortOrder, naturalSort);
-                case "LastModified":
-                    return OrderByElementFactory.Create(DomInstanceExposers.LastModified, sortOrder, naturalSort);
-                case "LastModifiedBy":
-                    return OrderByElementFactory.Create(DomInstanceExposers.LastModifiedBy, sortOrder, naturalSort);
-                case "Name":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.RoomProperties.Name), sortOrder, naturalSort);
-                case "Plan":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.RoomProperties.Plan), sortOrder, naturalSort);
-                case "Description":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.RoomProperties.Description), sortOrder, naturalSort);
-                case "Width":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.RoomProperties.Width), sortOrder, naturalSort);
-                case "Depth":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.RoomProperties.Depth), sortOrder, naturalSort);
-                case "RoomId":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.RoomProperties.RoomId), sortOrder, naturalSort);
-                case "Ownership.Team":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.Ownership.Team), sortOrder, naturalSort);
-                case "Ownership.Owner":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.Ownership.Owner), sortOrder, naturalSort);
-                case "ResourceLink.ResourceId":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.ResourceLink.ResourceId), sortOrder, naturalSort);
-                case "FloorFk.Floor":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.FloorFk.Floor), sortOrder, naturalSort);
-                default:
-                    throw new NotImplementedException();
-            }
-        }
-    }
+	{
+		private readonly IConnection connection;
+		private readonly DomHelper helper;
+		public RoomDomRepository(IConnection connection)
+		{
+			this.connection = connection;
+			this.helper = new DomHelper(connection.HandleMessages, FacilityManagement.Models.RoomDomMapper.ModuleId);
+		}
+
+		public Room Create(Room createObject)
+		{
+			if (createObject is null)
+			{
+				throw new ArgumentNullException(nameof(createObject));
+			}
+
+			var instance = ToInstance(createObject);
+			instance = helper.DomInstances.Create(instance);
+			return FromInstance(instance);
+		}
+
+		public IReadOnlyCollection<Room> Create(IEnumerable<Room> createObjects)
+		{
+			if (createObjects is null || !createObjects.Any())
+			{
+				return Array.Empty<Room>();
+			}
+
+			// Check if some of the objects already exist
+			var existing = new HashSet<string>();
+			foreach (var batch in createObjects.Batch(500))
+			{
+				existing.UnionWith(Read(new ORFilterElement<Room>(batch.Select(obj => RoomExposers.Identifier.Equal(obj.Identifier)).ToArray())).Select(obj => obj.Identifier));
+			}
+
+			// Create the remainder
+			var SuccessfulItems = new List<Room>();
+			var failures = new Dictionary<string, Exception>();
+			var objects = createObjects.Where(obj => !existing.Contains(obj.Identifier)).ToDictionary(obj => obj.Identifier);
+			foreach (var batch in createObjects.Select(ToInstance).Batch(helper.DomInstances.MaxAmountBulkOperation))
+			{
+				helper.DomInstances.TryCreateOrUpdate(batch.ToList(), out var result);
+				foreach (var failure in result.UnsuccessfulIds)
+				{
+					failures.Add(failure.Id.ToString(), new CrudFailedException(result.TraceDataPerItem[failure]));
+				}
+
+				foreach (var success in result.SuccessfulItems)
+				{
+					SuccessfulItems.Add(FromInstance(success));
+				}
+			}
+
+			// If everything went fine, return the successful creations
+			if (!existing.Any() && !failures.Any())
+			{
+				return SuccessfulItems;
+			}
+
+			// Otherwise, build and throw an exception
+			var exceptionBuilder = new SdmBulkCrudException<Room>.Builder();
+			foreach (var obj in createObjects)
+			{
+				if (existing.Contains(obj.Identifier))
+				{
+					exceptionBuilder.AddFailed(obj, new SdmCrudException<Room>(obj, $"Could not create Room with guid: '{obj.Identifier}', it already exists."));
+					continue;
+				}
+
+				if (failures.ContainsKey(obj.Identifier))
+				{
+					exceptionBuilder.AddFailed(obj, failures[obj.Identifier]);
+					continue;
+				}
+
+				exceptionBuilder.AddSuccessful(obj);
+			}
+
+			throw exceptionBuilder.Build();
+		}
+
+		public IReadOnlyCollection<Room> CreateOrUpdate(IEnumerable<Room> items)
+		{
+			if (items is null || !items.Any())
+			{
+				return Array.Empty<Room>();
+			}
+
+			var successful = new List<Room>();
+			var exceptionBuilder = new SdmBulkCrudException<Room>.Builder();
+			var objects = items.ToDictionary(obj => obj.Identifier);
+			foreach (var batch in items.Select(ToInstance).Batch(helper.DomInstances.MaxAmountBulkOperation))
+			{
+				helper.DomInstances.TryCreateOrUpdate(batch.ToList(), out var result);
+				foreach (var failure in result.UnsuccessfulIds)
+				{
+					exceptionBuilder.AddFailed(objects[failure.Id.ToString()], new CrudFailedException(result.TraceDataPerItem[failure]));
+				}
+
+				foreach (var success in result.SuccessfulItems)
+				{
+					var item = FromInstance(success);
+					exceptionBuilder.AddSuccessful(item);
+					successful.Add(item);
+				}
+			}
+
+			if (exceptionBuilder.HasFailure)
+			{
+				throw exceptionBuilder.Build();
+			}
+
+			return successful;
+		}
+
+		public long Count(FilterElement<Room> filter)
+		{
+			if (filter is null)
+			{
+				throw new ArgumentNullException(nameof(filter));
+			}
+
+			var domFilter = TranslateFullFilter(filter);
+			domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(FacilityManagement.Models.RoomDomMapper.DomDefinitionId.Id));
+			return helper.DomInstances.Count(domFilter);
+		}
+
+		public long Count(IQuery<Room> query)
+		{
+			if (query is null)
+			{
+				throw new ArgumentNullException(nameof(query));
+			}
+
+			var domFilter = TranslateFullFilter(query.Filter);
+			domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(FacilityManagement.Models.RoomDomMapper.DomDefinitionId.Id));
+			var domOrder = TranslateFullOrderBy(query.Order);
+			var domQuery = query.WithFilter(domFilter).WithOrder(domOrder);
+			return helper.DomInstances.Count(domQuery);
+		}
+
+		public IEnumerable<Room> Read(FilterElement<Room> filter)
+		{
+			if (filter is null)
+			{
+				throw new ArgumentNullException(nameof(filter));
+			}
+
+			var domFilter = TranslateFullFilter(filter);
+			return Read(domFilter);
+		}
+
+		public IEnumerable<Room> Read(IQuery<Room> query)
+		{
+			if (query is null)
+			{
+				throw new ArgumentNullException(nameof(query));
+			}
+
+			var domFilter = TranslateFullFilter(query.Filter);
+			var domOrder = TranslateFullOrderBy(query.Order);
+			var domQuery = query.WithFilter(domFilter).WithOrder(domOrder);
+			return Read(domQuery);
+		}
+
+		public IEnumerable<IPagedResult<Room>> ReadPaged(FilterElement<Room> filter)
+		{
+			return ReadPaged(filter, 500);
+		}
+
+		public IEnumerable<IPagedResult<Room>> ReadPaged(FilterElement<Room> filter, int pageSize)
+		{
+			if (filter is null)
+			{
+				throw new ArgumentNullException(nameof(filter));
+			}
+
+			if (pageSize <= 0)
+			{
+				throw new ArgumentOutOfRangeException(nameof(pageSize), "The page size must be 1 or higher");
+			}
+
+			var domFilter = TranslateFullFilter(filter);
+			var paging = ReadPaged(domFilter, pageSize).GetEnumerator();
+			var moveNext = paging.MoveNext();
+			var i = 0;
+			while (moveNext)
+			{
+				var page = paging.Current.ToList();
+				moveNext = paging.MoveNext();
+				var result = new PagedResult<Room>(page, i, pageSize, moveNext);
+				yield return result;
+				i++;
+			}
+		}
+
+		public IEnumerable<IPagedResult<Room>> ReadPaged(IQuery<Room> query)
+		{
+			return ReadPaged(query, 500);
+		}
+
+		public IEnumerable<IPagedResult<Room>> ReadPaged(IQuery<Room> query, int pageSize)
+		{
+			if (query is null)
+			{
+				throw new ArgumentNullException(nameof(query));
+			}
+
+			if (pageSize <= 0)
+			{
+				throw new ArgumentOutOfRangeException(nameof(pageSize), "The page size must be 1 or higher");
+			}
+
+			var domFilter = TranslateFullFilter(query.Filter);
+			var domOrder = TranslateFullOrderBy(query.Order);
+			var domQuery = query.WithFilter(domFilter).WithOrder(domOrder);
+			var paging = ReadPaged(domQuery, pageSize).GetEnumerator();
+			var moveNext = paging.MoveNext();
+			var i = 0;
+			while (moveNext)
+			{
+				var page = paging.Current.ToList();
+				moveNext = paging.MoveNext();
+				var result = new PagedResult<Room>(page, i, pageSize, moveNext);
+				yield return result;
+				i++;
+			}
+		}
+
+		public Room Update(Room updateObject)
+		{
+			if (updateObject is null)
+			{
+				throw new ArgumentNullException(nameof(updateObject));
+			}
+
+			var instance = ToInstance(updateObject);
+			instance = helper.DomInstances.Update(instance);
+			return FromInstance(instance);
+		}
+
+		public IReadOnlyCollection<Room> Update(IEnumerable<Room> updateObjects)
+		{
+			if (updateObjects is null || !updateObjects.Any())
+			{
+				return Array.Empty<Room>();
+			}
+
+			// Check if which objects already exist
+			var existing = new HashSet<string>();
+			foreach (var batch in updateObjects.Batch(500))
+			{
+				existing.UnionWith(Read(new ORFilterElement<Room>(batch.Select(obj => RoomExposers.Identifier.Equal(obj.Identifier)).ToArray())).Select(obj => obj.Identifier));
+			}
+
+			// Update the existing objects
+			var successfulItems = new List<Room>();
+			var failures = new Dictionary<string, Exception>();
+			var objects = updateObjects.Where(obj => existing.Contains(obj.Identifier)).ToDictionary(obj => obj.Identifier);
+			foreach (var batch in updateObjects.Select(ToInstance).Batch(helper.DomInstances.MaxAmountBulkOperation))
+			{
+				helper.DomInstances.TryCreateOrUpdate(batch.ToList(), out var result);
+				foreach (var failure in result.UnsuccessfulIds)
+				{
+					failures.Add(failure.Id.ToString(), new CrudFailedException(result.TraceDataPerItem[failure]));
+				}
+
+				foreach (var success in result.SuccessfulItems)
+				{
+					successfulItems.Add(FromInstance(success));
+				}
+			}
+
+			// Check for failures and build exception if needed
+			var exceptionBuilder = new SdmBulkCrudException<Room>.Builder();
+			foreach (var obj in updateObjects)
+			{
+				if (!existing.Contains(obj.Identifier))
+				{
+					exceptionBuilder.AddFailed(obj, new SdmCrudException<Room>(obj, "Could not update a non existing Room"));
+					continue;
+				}
+
+				if (failures.ContainsKey(obj.Identifier))
+				{
+					exceptionBuilder.AddFailed(obj, failures[obj.Identifier]);
+					continue;
+				}
+
+				exceptionBuilder.AddSuccessful(obj);
+			}
+
+			if (exceptionBuilder.HasFailure)
+			{
+				throw exceptionBuilder.Build();
+			}
+
+			return successfulItems;
+		}
+
+		public void Delete(Room deleteObject)
+		{
+			if (deleteObject is null)
+			{
+				throw new ArgumentNullException(nameof(deleteObject));
+			}
+
+			var instance = ToInstance(deleteObject);
+			helper.DomInstances.Delete(instance);
+		}
+
+		public void Delete(IEnumerable<Room> deleteObjects)
+		{
+			if (deleteObjects is null || !deleteObjects.Any())
+			{
+				return;
+			}
+
+			var exceptionBuilder = new SdmBulkCrudException<Room>.Builder();
+			var objects = deleteObjects.ToDictionary(obj => obj.Identifier);
+			foreach (var batch in deleteObjects.Select(ToInstance).Batch(helper.DomInstances.MaxAmountBulkOperation))
+			{
+				helper.DomInstances.TryDelete(batch.ToList(), out var result);
+				foreach (var failure in result.UnsuccessfulIds)
+				{
+					exceptionBuilder.AddFailed(objects[failure.Id.ToString()], new CrudFailedException(result.TraceDataPerItem[failure]));
+				}
+
+				foreach (var success in result.SuccessfulIds)
+				{
+					exceptionBuilder.AddSuccessful(objects[success.Id.ToString()]);
+				}
+			}
+
+			if (exceptionBuilder.HasFailure)
+			{
+				throw exceptionBuilder.Build();
+			}
+		}
+
+		private IEnumerable<Room> Read(FilterElement<DomInstance> domFilter)
+		{
+			if (domFilter is null)
+			{
+				throw new ArgumentNullException(nameof(domFilter));
+			}
+
+			domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(FacilityManagement.Models.RoomDomMapper.DomDefinitionId.Id));
+			var domInstances = helper.DomInstances.Read(domFilter);
+			return domInstances.Select(FromInstance);
+		}
+
+		private IEnumerable<Room> Read(IQuery<DomInstance> domQuery)
+		{
+			if (domQuery is null)
+			{
+				throw new ArgumentNullException(nameof(domQuery));
+			}
+
+			var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(FacilityManagement.Models.RoomDomMapper.DomDefinitionId.Id));
+			domQuery = domQuery.WithFilter(domFilter);
+			var domInstances = helper.DomInstances.Read(domQuery);
+			return domInstances.Select(FromInstance);
+		}
+
+		private IEnumerable<IEnumerable<Room>> ReadPaged(FilterElement<DomInstance> domFilter, int pageSize)
+		{
+			if (domFilter is null)
+			{
+				throw new ArgumentNullException(nameof(domFilter));
+			}
+
+			domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(FacilityManagement.Models.RoomDomMapper.DomDefinitionId.Id));
+			var pagingHelper = helper.DomInstances.PreparePaging(domFilter, pageSize);
+			while (pagingHelper.MoveToNextPage())
+			{
+				yield return pagingHelper.GetCurrentPage().Select(FromInstance);
+			}
+		}
+
+		private IEnumerable<IEnumerable<Room>> ReadPaged(IQuery<DomInstance> domQuery, int pageSize)
+		{
+			if (domQuery is null)
+			{
+				throw new ArgumentNullException(nameof(domQuery));
+			}
+
+			var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(FacilityManagement.Models.RoomDomMapper.DomDefinitionId.Id));
+			domQuery = domQuery.WithFilter(domFilter);
+			var pagingHelper = helper.DomInstances.PreparePaging(domQuery, pageSize);
+			while (pagingHelper.MoveToNextPage())
+			{
+				yield return pagingHelper.GetCurrentPage().Select(FromInstance);
+			}
+		}
+
+		private FilterElement<DomInstance> TranslateFullFilter(FilterElement<Room> filter)
+		{
+			if (filter is null)
+			{
+				throw new ArgumentNullException(nameof(filter));
+			}
+
+			FilterElement<DomInstance> translated;
+			if (filter is ANDFilterElement<Room> and)
+			{
+				translated = new ANDFilterElement<DomInstance>(and.subFilters.Select(TranslateFullFilter).ToArray());
+			}
+			else if (filter is ORFilterElement<Room> or)
+			{
+				translated = new ORFilterElement<DomInstance>(or.subFilters.Select(TranslateFullFilter).ToArray());
+			}
+			else if (filter is NOTFilterElement<Room> not)
+			{
+				translated = new NOTFilterElement<DomInstance>(TranslateFullFilter(not));
+			}
+			else if (filter is TRUEFilterElement<Room>)
+			{
+				translated = new TRUEFilterElement<DomInstance>();
+			}
+			else if (filter is FALSEFilterElement<Room>)
+			{
+				translated = new FALSEFilterElement<DomInstance>();
+			}
+			else if (filter is ManagedFilterIdentifier managedFilter)
+			{
+				translated = TranslateFilter(managedFilter);
+			}
+			else
+			{
+				throw new NotSupportedException($"Unsupported filter: {filter}");
+			}
+
+			return translated;
+		}
+
+		private IOrderBy TranslateFullOrderBy(IOrderBy order)
+		{
+			if (order is null)
+			{
+				throw new ArgumentNullException(nameof(order));
+			}
+
+			var translatedElements = new List<IOrderByElement>();
+			foreach (var orderByElement in order.Elements)
+			{
+				var translated = TranslateOrderBy(orderByElement);
+				translatedElements.Add(translated);
+			}
+
+			return new OrderBy(translatedElements);
+		}
+
+		private FilterElement<DomInstance> TranslateFilter(ManagedFilterIdentifier managedFilter)
+		{
+			if (managedFilter is null)
+			{
+				throw new ArgumentNullException(nameof(managedFilter));
+			}
+
+			var fieldName = managedFilter.getFieldName().fieldName;
+			var comparer = managedFilter.getComparer();
+			var value = managedFilter.getValue();
+			var translated = CreateFilter(fieldName, comparer, value);
+			return translated;
+		}
+
+		private IOrderByElement TranslateOrderBy(IOrderByElement orderByElement)
+		{
+			if (orderByElement is null)
+			{
+				throw new ArgumentNullException(nameof(orderByElement));
+			}
+
+			var fieldName = orderByElement.Exposer.fieldName;
+			var sortOrder = orderByElement.SortOrder;
+			var naturalSort = orderByElement.Options.NaturalSort;
+			var translated = CreateOrderBy(fieldName, sortOrder, naturalSort);
+			return translated;
+		}
+
+		private Room FromInstance(DomInstance instance)
+		{
+			var obj = new Room
+			{
+				Identifier = instance.ID.Id.ToString(),
+				IsNewInternal = false,
+				CreatedAt = ((ITrackBase)instance).CreatedAt,
+				CreatedBy = ((ITrackBase)instance).CreatedBy,
+				LastModified = ((ITrackBase)instance).LastModified,
+				LastModifiedBy = ((ITrackBase)instance).LastModifiedBy,
+			};
+
+			obj.State = SharedMappers.DomIds.SlcFacility_Management.Behaviors.Room_Behaviour.Statuses.ToEnum(instance.StatusId);
+			var _roompropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(FacilityManagement.Models.RoomDomMapper.RoomProperties.SectionDefinitionId));
+			if (_roompropertiesSection != default)
+			{
+				obj.RoomPropertiesSectionId = _roompropertiesSection.ID.Id;
+				var _roompropertiesname = _roompropertiesSection.GetValue<string>(FacilityManagement.Models.RoomDomMapper.RoomProperties.Name);
+				if (_roompropertiesname != null)
+				{
+					obj.Name = _roompropertiesname.Value;
+				}
+
+				var _roompropertiesplan = _roompropertiesSection.GetValue<string>(FacilityManagement.Models.RoomDomMapper.RoomProperties.Plan);
+				if (_roompropertiesplan != null)
+				{
+					obj.Plan = _roompropertiesplan.Value;
+				}
+
+				var _roompropertiesdescription = _roompropertiesSection.GetValue<string>(FacilityManagement.Models.RoomDomMapper.RoomProperties.Description);
+				if (_roompropertiesdescription != null)
+				{
+					obj.Description = _roompropertiesdescription.Value;
+				}
+
+				var _roompropertieswidth = _roompropertiesSection.GetValue<long>(FacilityManagement.Models.RoomDomMapper.RoomProperties.Width);
+				if (_roompropertieswidth != null)
+				{
+					obj.Width = _roompropertieswidth.Value;
+				}
+
+				var _roompropertiesdepth = _roompropertiesSection.GetValue<long>(FacilityManagement.Models.RoomDomMapper.RoomProperties.Depth);
+				if (_roompropertiesdepth != null)
+				{
+					obj.Depth = _roompropertiesdepth.Value;
+				}
+
+				var _roompropertiesroomid = _roompropertiesSection.GetValue<string>(FacilityManagement.Models.RoomDomMapper.RoomProperties.RoomId);
+				if (_roompropertiesroomid != null)
+				{
+					obj.RoomId = _roompropertiesroomid.Value;
+				}
+			}
+
+			var _OwnershipSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(FacilityManagement.Models.RoomDomMapper.Ownership.SectionDefinitionId));
+			if (_OwnershipSection != default)
+			{
+				((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Ownership).SectionId = _OwnershipSection.ID.Id;
+				var _Ownershipteam = _OwnershipSection.GetValue<Guid>(FacilityManagement.Models.RoomDomMapper.Ownership.Team);
+				if (_Ownershipteam != null)
+				{
+					obj.Ownership.Team = new PnoObjectReference<Team>(_Ownershipteam.Value);
+				}
+
+				var _Ownershipowner = _OwnershipSection.GetValue<Guid>(FacilityManagement.Models.RoomDomMapper.Ownership.Owner);
+				if (_Ownershipowner != null)
+				{
+					obj.Ownership.Owner = new PnoObjectReference<Person>(_Ownershipowner.Value);
+				}
+			}
+
+			var _resourcelinkSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(FacilityManagement.Models.RoomDomMapper.ResourceLink.SectionDefinitionId));
+			if (_resourcelinkSection != default)
+			{
+				((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.ResourceLink).SectionId = _resourcelinkSection.ID.Id;
+				var _resourcelinkresourceid = _resourcelinkSection.GetValue<string>(FacilityManagement.Models.RoomDomMapper.ResourceLink.ResourceId);
+				if (_resourcelinkresourceid != null)
+				{
+					obj.ResourceLink.ResourceId = System.Guid.Parse(Convert.ToString(_resourcelinkresourceid.Value));
+				}
+			}
+
+			var _floorfkSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(FacilityManagement.Models.RoomDomMapper.FloorFk.SectionDefinitionId));
+			if (_floorfkSection != default)
+			{
+				((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.FloorFk).SectionId = _floorfkSection.ID.Id;
+				var _floorfkfloor = _floorfkSection.GetValue<System.Guid>(FacilityManagement.Models.RoomDomMapper.FloorFk.Floor);
+				if (_floorfkfloor != null)
+				{
+					obj.FloorFk.Floor = new SdmObjectReference<FacilityManagement.Models.Floor>(Convert.ToString(_floorfkfloor.Value));
+				}
+			}
+
+			obj.ResetChangeTracking();
+
+			return obj;
+		}
+
+		private DomInstance ToInstance(Room obj)
+		{
+			Guid id = default(Guid);
+			if (!String.IsNullOrEmpty(obj.Identifier))
+			{
+				id = Guid.Parse(obj.Identifier);
+			}
+			else
+			{
+				id = Guid.NewGuid();
+			}
+
+			var instance = new DomInstance
+			{
+				DomDefinitionId = FacilityManagement.Models.RoomDomMapper.DomDefinitionId,
+				ID = new DomInstanceId(id)
+				{
+					ModuleId = FacilityManagement.Models.RoomDomMapper.ModuleId
+				}
+			};
+
+			instance.StatusId = SharedMappers.DomIds.SlcFacility_Management.Behaviors.Room_Behaviour.Statuses.ToValue(obj.State);
+			var _roomproperties = new Section(FacilityManagement.Models.RoomDomMapper.RoomProperties.SectionDefinitionId);
+			if (obj.RoomPropertiesSectionId.HasValue)
+			{
+				_roomproperties.ID = new SectionID(obj.RoomPropertiesSectionId.Value);
+			}
+
+			if (obj.Name != default)
+			{
+				_roomproperties.AddOrUpdateValue<string>(FacilityManagement.Models.RoomDomMapper.RoomProperties.Name, Convert.ToString(obj.Name));
+			}
+
+			if (obj.Plan != default)
+			{
+				_roomproperties.AddOrUpdateValue<string>(FacilityManagement.Models.RoomDomMapper.RoomProperties.Plan, Convert.ToString(obj.Plan));
+			}
+
+			if (obj.Description != default)
+			{
+				_roomproperties.AddOrUpdateValue<string>(FacilityManagement.Models.RoomDomMapper.RoomProperties.Description, Convert.ToString(obj.Description));
+			}
+
+			if (obj.Width != default)
+			{
+				_roomproperties.AddOrUpdateValue<long>(FacilityManagement.Models.RoomDomMapper.RoomProperties.Width, (long)(obj.Width).Value);
+			}
+
+			if (obj.Depth != default)
+			{
+				_roomproperties.AddOrUpdateValue<long>(FacilityManagement.Models.RoomDomMapper.RoomProperties.Depth, (long)(obj.Depth).Value);
+			}
+
+			if (obj.RoomId != default)
+			{
+				_roomproperties.AddOrUpdateValue<string>(FacilityManagement.Models.RoomDomMapper.RoomProperties.RoomId, Convert.ToString(obj.RoomId));
+			}
+
+			instance.Sections.Add(_roomproperties);
+			if (!obj.Ownership.IsEmpty)
+			{
+				var _Ownership = new Section(FacilityManagement.Models.RoomDomMapper.Ownership.SectionDefinitionId);
+				var _OwnershipSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Ownership).SectionId;
+				if (_OwnershipSectionId.HasValue)
+				{
+					_Ownership.ID = new SectionID(_OwnershipSectionId.Value);
+				}
+
+				if (obj.Ownership.Team != default && obj.Ownership.Team.HasValue())
+				{
+					_Ownership.AddOrUpdateValue<Guid>(FacilityManagement.Models.RoomDomMapper.Ownership.Team, obj.Ownership.Team.Identifier);
+				}
+
+				if (obj.Ownership.Owner != default && obj.Ownership.Owner.HasValue())
+				{
+					_Ownership.AddOrUpdateValue<Guid>(FacilityManagement.Models.RoomDomMapper.Ownership.Owner, obj.Ownership.Owner.Identifier);
+				}
+
+				instance.Sections.Add(_Ownership);
+			}
+
+			if (!obj.ResourceLink.IsEmpty)
+			{
+				var _resourcelink = new Section(FacilityManagement.Models.RoomDomMapper.ResourceLink.SectionDefinitionId);
+				var _resourcelinkSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.ResourceLink).SectionId;
+				if (_resourcelinkSectionId.HasValue)
+				{
+					_resourcelink.ID = new SectionID(_resourcelinkSectionId.Value);
+				}
+
+				if (obj.ResourceLink.ResourceId != default)
+				{
+					_resourcelink.AddOrUpdateValue<string>(FacilityManagement.Models.RoomDomMapper.ResourceLink.ResourceId, Convert.ToString(obj.ResourceLink.ResourceId));
+				}
+
+				instance.Sections.Add(_resourcelink);
+			}
+
+			if (!obj.FloorFk.IsEmpty)
+			{
+				var _floorfk = new Section(FacilityManagement.Models.RoomDomMapper.FloorFk.SectionDefinitionId);
+				var _floorfkSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.FloorFk).SectionId;
+				if (_floorfkSectionId.HasValue)
+				{
+					_floorfk.ID = new SectionID(_floorfkSectionId.Value);
+				}
+
+				if (obj.FloorFk.Floor != default && System.Guid.TryParse(obj.FloorFk.Floor.Identifier, out var floorGuid) && floorGuid != System.Guid.Empty)
+				{
+					_floorfk.AddOrUpdateValue<System.Guid>(FacilityManagement.Models.RoomDomMapper.FloorFk.Floor, floorGuid);
+				}
+
+				instance.Sections.Add(_floorfk);
+			}
+
+			return instance;
+		}
+
+		private FilterElement<DomInstance> CreateFilter(string fieldName, Comparer comparer, object value)
+		{
+			switch (fieldName)
+			{
+				case "Identifier":
+					return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.Id, comparer, Guid.Parse((string)value));
+				case "CreatedAt":
+					return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.CreatedAt, comparer, (DateTime)value);
+				case "CreatedBy":
+					return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.CreatedBy, comparer, (string)value);
+				case "LastModified":
+					return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModified, comparer, (DateTime)value);
+				case "LastModifiedBy":
+					return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModifiedBy, comparer, (string)value);
+				case "Name":
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.RoomProperties.Name), comparer, (string)value);
+				case "Plan":
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.RoomProperties.Plan), comparer, (string)value);
+				case "Description":
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.RoomProperties.Description), comparer, (string)value);
+				case "Width" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+					return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.RoomDomMapper.RoomProperties.Width.Id.ToString()).Equal(comparer == Comparer.NotEquals);
+				case "Width":
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.RoomProperties.Width), comparer, (long)((long?)value).Value);
+				case "Depth" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+					return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.RoomDomMapper.RoomProperties.Depth.Id.ToString()).Equal(comparer == Comparer.NotEquals);
+				case "Depth":
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.RoomProperties.Depth), comparer, (long)((long?)value).Value);
+				case "RoomId":
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.RoomProperties.RoomId), comparer, (string)value);
+				case "Ownership.Team":
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.Ownership.Team), comparer, Convert.ToString((System.Guid)value));
+				case "Ownership.Owner":
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.Ownership.Owner), comparer, Convert.ToString((System.Guid)value));
+				case "ResourceLink.ResourceId":
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.ResourceLink.ResourceId), comparer, Convert.ToString((System.Guid)value));
+				case "FloorFk.Floor":
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.FloorFk.Floor), comparer, System.Guid.Parse(SdmObjectReference<FacilityManagement.Models.Floor>.Convert(value).Identifier));
+				default:
+					throw new NotImplementedException();
+			}
+		}
+
+		private IOrderByElement CreateOrderBy(string fieldName, SortOrder sortOrder, bool naturalSort = false)
+		{
+			switch (fieldName)
+			{
+				case "Identifier":
+					return OrderByElementFactory.Create(DomInstanceExposers.Id, sortOrder, naturalSort);
+				case "CreatedAt":
+					return OrderByElementFactory.Create(DomInstanceExposers.CreatedAt, sortOrder, naturalSort);
+				case "CreatedBy":
+					return OrderByElementFactory.Create(DomInstanceExposers.CreatedBy, sortOrder, naturalSort);
+				case "LastModified":
+					return OrderByElementFactory.Create(DomInstanceExposers.LastModified, sortOrder, naturalSort);
+				case "LastModifiedBy":
+					return OrderByElementFactory.Create(DomInstanceExposers.LastModifiedBy, sortOrder, naturalSort);
+				case "Name":
+					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.RoomProperties.Name), sortOrder, naturalSort);
+				case "Plan":
+					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.RoomProperties.Plan), sortOrder, naturalSort);
+				case "Description":
+					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.RoomProperties.Description), sortOrder, naturalSort);
+				case "Width":
+					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.RoomProperties.Width), sortOrder, naturalSort);
+				case "Depth":
+					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.RoomProperties.Depth), sortOrder, naturalSort);
+				case "RoomId":
+					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.RoomProperties.RoomId), sortOrder, naturalSort);
+				case "Ownership.Team":
+					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.Ownership.Team), sortOrder, naturalSort);
+				case "Ownership.Owner":
+					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.Ownership.Owner), sortOrder, naturalSort);
+				case "ResourceLink.ResourceId":
+					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.ResourceLink.ResourceId), sortOrder, naturalSort);
+				case "FloorFk.Floor":
+					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.FloorFk.Floor), sortOrder, naturalSort);
+				default:
+					throw new NotImplementedException();
+			}
+		}
+	}
 }

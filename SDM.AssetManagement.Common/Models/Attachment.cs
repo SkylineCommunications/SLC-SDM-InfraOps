@@ -1,9 +1,7 @@
 namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
     using System;
-
     using Newtonsoft.Json;
-
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
@@ -32,7 +30,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             set => AttachedAtField.Value = value;
         }
 
-        public Guid? AttachedBy
+        public string AttachedBy
         {
             get => AttachedByField.Value;
             set => AttachedByField.Value = value;
@@ -52,9 +50,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
         [JsonIgnore]
         [SdmIgnore]
-        internal IChangeTrackingField<Guid?> AttachedByField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<string> AttachedByField => FieldHandler.GetOrCreateField(
             nameof(AttachedBy),
-            () => new ChangeTrackingField<Guid?>(null));
+            () => new ChangeTrackingField<string>(null));
 
         public static bool operator ==(Attachment left, Attachment right)
         {

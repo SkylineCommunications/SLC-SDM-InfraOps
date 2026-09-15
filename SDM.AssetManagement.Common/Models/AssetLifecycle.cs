@@ -3,7 +3,9 @@
     using System;
 
     using Newtonsoft.Json;
-
+    using Skyline.DataMiner.SDM.Extensions;
+    using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
+    using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     public sealed class AssetLifecycle : ChangeTrackingBase, IEquatable<AssetLifecycle>, ISectionTrackable, ISectionEmptyState
@@ -17,9 +19,9 @@
 			FirstUseDate == default &&
 			EndOfWarrantyDate == default &&
 			InstallationDate == default &&
-			InstallationUserId == Guid.Empty &&
+			!InstallationUserId.HasValue() &&
 			ModificationDate == default &&
-			ModificationUserId == Guid.Empty &&
+			!ModificationUserId.HasValue() &&
 			EndOfLife == default;
 
 		public DateTime PurchaseDate
@@ -46,7 +48,7 @@
 			set => InstallationDateField.Value = value;
 		}
 
-		public Guid InstallationUserId
+		public PnoObjectReference<Person> InstallationUserId
 		{
 			get => InstallationUserIdField.Value;
 			set => InstallationUserIdField.Value = value;
@@ -58,7 +60,7 @@
 			set => ModificationDateField.Value = value;
 		}
 
-		public Guid ModificationUserId
+		public PnoObjectReference<Person> ModificationUserId
 		{
 			get => ModificationUserIdField.Value;
 			set => ModificationUserIdField.Value = value;
@@ -96,9 +98,9 @@
 
 		[JsonIgnore]
 		[SdmIgnore]
-		internal IChangeTrackingField<Guid> InstallationUserIdField => FieldHandler.GetOrCreateField(
+		internal IChangeTrackingField<PnoObjectReference<Person>> InstallationUserIdField => FieldHandler.GetOrCreateField(
 			nameof(InstallationUserId),
-			() => new ChangeTrackingField<Guid>(Guid.Empty));
+			() => new ChangeTrackingField<PnoObjectReference<Person>>(default));
 
 		[JsonIgnore]
 		[SdmIgnore]
@@ -108,9 +110,9 @@
 
 		[JsonIgnore]
 		[SdmIgnore]
-		internal IChangeTrackingField<Guid> ModificationUserIdField => FieldHandler.GetOrCreateField(
+		internal IChangeTrackingField<PnoObjectReference<Person>> ModificationUserIdField => FieldHandler.GetOrCreateField(
 			nameof(ModificationUserId),
-			() => new ChangeTrackingField<Guid>(Guid.Empty));
+			() => new ChangeTrackingField<PnoObjectReference<Person>>(default));
 
 		[JsonIgnore]
 		[SdmIgnore]
@@ -160,9 +162,9 @@
 				FirstUseDate.Equals(other.FirstUseDate) &&
 				EndOfWarrantyDate.Equals(other.EndOfWarrantyDate) &&
 				InstallationDate.Equals(other.InstallationDate) &&
-				InstallationUserId.Equals(other.InstallationUserId) &&
+				InstallationUserId == other.InstallationUserId &&
 				ModificationDate.Equals(other.ModificationDate) &&
-				ModificationUserId.Equals(other.ModificationUserId) &&
+				ModificationUserId == other.ModificationUserId &&
 				EndOfLife.Equals(other.EndOfLife);
 		}
 

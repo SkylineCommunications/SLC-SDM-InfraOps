@@ -3,7 +3,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     using System;
 
     using Newtonsoft.Json;
-
+    using Skyline.DataMiner.SDM.Extensions;
+    using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
+    using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     public sealed class AssetOwnership : ChangeTrackingBase, IEquatable<AssetOwnership>, ISectionTrackable, ISectionEmptyState
@@ -13,30 +15,30 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         Guid? ISectionTrackable.SectionId { get; set; }
         [JsonIgnore]
         [SdmIgnore]
-        public bool IsEmpty => Organization == Guid.Empty &&
-            ContactPerson == Guid.Empty &&
-            ContactPersonRole == Guid.Empty &&
-            Team == Guid.Empty;
+        public bool IsEmpty => !Organization.HasValue() &&
+            !ContactPerson.HasValue() &&
+            !ContactPersonRole.HasValue() &&
+            !Team.HasValue();
 
-        public Guid Organization
+        public PnoObjectReference<Organization> Organization
         {
             get => OrganizationField.Value;
             set => OrganizationField.Value = value;
         }
 
-        public Guid ContactPerson
+        public PnoObjectReference<Person> ContactPerson
         {
             get => ContactPersonField.Value;
             set => ContactPersonField.Value = value;
         }
 
-        public Guid ContactPersonRole
+        public PnoObjectReference<Role> ContactPersonRole
         {
             get => ContactPersonRoleField.Value;
             set => ContactPersonRoleField.Value = value;
         }
 
-        public Guid Team
+        public PnoObjectReference<Team> Team
         {
             get => TeamField.Value;
             set => TeamField.Value = value;
@@ -44,27 +46,27 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
         [JsonIgnore]
         [SdmIgnore]
-        internal IChangeTrackingField<Guid> OrganizationField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<PnoObjectReference<Organization>> OrganizationField => FieldHandler.GetOrCreateField(
             nameof(Organization),
-            () => new ChangeTrackingField<Guid>(Guid.Empty));
+            () => new ChangeTrackingField<PnoObjectReference<Organization>>(default));
 
         [JsonIgnore]
         [SdmIgnore]
-        internal IChangeTrackingField<Guid> ContactPersonField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<PnoObjectReference<Person>> ContactPersonField => FieldHandler.GetOrCreateField(
             nameof(ContactPerson),
-            () => new ChangeTrackingField<Guid>(Guid.Empty));
+            () => new ChangeTrackingField<PnoObjectReference<Person>>(default));
 
         [JsonIgnore]
         [SdmIgnore]
-        internal IChangeTrackingField<Guid> ContactPersonRoleField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<PnoObjectReference<Role>> ContactPersonRoleField => FieldHandler.GetOrCreateField(
             nameof(ContactPersonRole),
-            () => new ChangeTrackingField<Guid>(Guid.Empty));
+            () => new ChangeTrackingField<PnoObjectReference<Role>>(default));
 
         [JsonIgnore]
         [SdmIgnore]
-        internal IChangeTrackingField<Guid> TeamField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<PnoObjectReference<Team>> TeamField => FieldHandler.GetOrCreateField(
             nameof(Team),
-            () => new ChangeTrackingField<Guid>(Guid.Empty));
+            () => new ChangeTrackingField<PnoObjectReference<Team>>(default));
 
         public static bool operator ==(AssetOwnership left, AssetOwnership right)
         {
@@ -104,10 +106,10 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
 
             return
-                Organization.Equals(other.Organization) &&
-                ContactPerson.Equals(other.ContactPerson) &&
-                ContactPersonRole.Equals(other.ContactPersonRole) &&
-                Team.Equals(other.Team);
+                Organization == other.Organization &&
+                ContactPerson == other.ContactPerson &&
+                ContactPersonRole == other.ContactPersonRole &&
+                Team == other.Team;
         }
 
         public override int GetHashCode()

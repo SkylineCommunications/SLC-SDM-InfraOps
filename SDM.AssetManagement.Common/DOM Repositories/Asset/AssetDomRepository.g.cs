@@ -10,8 +10,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     using System.Collections.Generic;
     using System.Linq;
 
-    using SharedCommonLibrary.AssetManagement.State_Management;
-
     using SharedMappers.DomIds;
 
     using Skyline.DataMiner.Net;
@@ -19,12 +17,11 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     using Skyline.DataMiner.Net.Apps.Sections.Sections;
     using Skyline.DataMiner.Net.Helper;
     using Skyline.DataMiner.Net.ManagerStore;
-    using Skyline.DataMiner.Net.Messages;
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.Net.Sections;
-    using Skyline.DataMiner.Net.SubscriptionFilters;
     using Skyline.DataMiner.SDM;
-
+    using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
+    using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
     using SLDataGateway.API.Querying;
     using SLDataGateway.API.Types.Querying;
 
@@ -640,7 +637,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 var _locationdesk = _locationSection.GetValue<System.Guid>(AssetManagement.Models.AssetDomMapper.Location.Desk);
                 if (_locationdesk != null)
                 {
-                    obj.Location.DeskId = System.Guid.Parse(Convert.ToString(_locationdesk.Value));
+                    obj.Location.DeskId = new SdmObjectReference<FacilityManagement.Models.Desk>(Convert.ToString(_locationdesk.Value));
                 }
 
                 var _locationcontainer = _locationSection.GetValue<System.Guid>(AssetManagement.Models.AssetDomMapper.Location.Container);
@@ -693,7 +690,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 var _locationdesk = _destinationlocationSection.GetValue<System.Guid>(AssetManagement.Models.AssetDomMapper.DestinationLocation.Desk);
                 if (_locationdesk != null)
                 {
-                    obj.DestinationLocation.DeskId = System.Guid.Parse(Convert.ToString(_locationdesk.Value));
+                    obj.DestinationLocation.DeskId = new SdmObjectReference<FacilityManagement.Models.Desk>(Convert.ToString(_locationdesk.Value));
                 }
 
                 var _locationcontainer = _destinationlocationSection.GetValue<System.Guid>(AssetManagement.Models.AssetDomMapper.DestinationLocation.Container);
@@ -734,7 +731,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 var _lifecycleinstallationuser = _lifecycleSection.GetValue<System.Guid>(AssetManagement.Models.AssetDomMapper.Lifecycle.InstallationUser);
                 if (_lifecycleinstallationuser != null)
                 {
-                    obj.InstallationUserId = (Guid)_lifecycleinstallationuser.Value;
+                    obj.InstallationUserId = new PnoObjectReference<Person>(_lifecycleinstallationuser.Value);
                 }
 
                 var _lifecycleinstallationdate = _lifecycleSection.GetValue<DateTime>(AssetManagement.Models.AssetDomMapper.Lifecycle.InstallationDate);
@@ -746,7 +743,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 var _lifecyclemodificationuser = _lifecycleSection.GetValue<System.Guid>(AssetManagement.Models.AssetDomMapper.Lifecycle.ModificationUser);
                 if (_lifecyclemodificationuser != null)
                 {
-                    obj.ModificationUserId = (Guid)_lifecyclemodificationuser.Value;
+                    obj.ModificationUserId = new PnoObjectReference<Person>(_lifecyclemodificationuser.Value);
                 }
 
                 var _lifecyclemodificationdate = _lifecycleSection.GetValue<DateTime>(AssetManagement.Models.AssetDomMapper.Lifecycle.ModificationDate);
@@ -770,25 +767,25 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 var _organization = _ownershipSection.GetValue<System.Guid>(AssetManagement.Models.AssetDomMapper.Ownership.Organization);
                 if (_organization != null)
                 {
-                    obj.Ownership.Organization = _organization.Value;
+                    obj.Ownership.Organization = new PnoObjectReference<Organization>(_organization.Value);
                 }
 
                 var _ownershipcontactperson = _ownershipSection.GetValue<System.Guid>(AssetManagement.Models.AssetDomMapper.Ownership.ContactPerson);
                 if (_ownershipcontactperson != null)
                 {
-                    obj.Ownership.ContactPerson = System.Guid.Parse(Convert.ToString(_ownershipcontactperson.Value));
+                    obj.Ownership.ContactPerson = new PnoObjectReference<Person>(_ownershipcontactperson.Value);
                 }
 
                 var _ownershipcontactpersonrole = _ownershipSection.GetValue<System.Guid>(AssetManagement.Models.AssetDomMapper.Ownership.ContactPersonRole);
                 if (_ownershipcontactpersonrole != null)
                 {
-                    obj.Ownership.ContactPersonRole = System.Guid.Parse(Convert.ToString(_ownershipcontactpersonrole.Value));
+                    obj.Ownership.ContactPersonRole = new PnoObjectReference<Role>(_ownershipcontactpersonrole.Value);
                 }
 
                 var _ownershipteam = _ownershipSection.GetValue<System.Guid>(AssetManagement.Models.AssetDomMapper.Ownership.Team);
                 if (_ownershipteam != null)
                 {
-                    obj.Ownership.Team = System.Guid.Parse(Convert.ToString(_ownershipteam.Value));
+                    obj.Ownership.Team = new PnoObjectReference<Team>(_ownershipteam.Value);
                 }
 
             }
@@ -812,25 +809,25 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 var _custodyOrganization = _custodySection.GetValue<System.Guid>(AssetManagement.Models.AssetDomMapper.Custody.Organization);
                 if (_custodyOrganization != null)
                 {
-                    obj.Custody.Organization = System.Guid.Parse(Convert.ToString(_custodyOrganization.Value));
+                    obj.Custody.Organization = new PnoObjectReference<Organization>(_custodyOrganization.Value);
                 }
 
                 var _custodycontactperson = _custodySection.GetValue<System.Guid>(AssetManagement.Models.AssetDomMapper.Custody.ContactPerson);
                 if (_custodycontactperson != null)
                 {
-                    obj.Custody.ContactPerson = System.Guid.Parse(Convert.ToString(_custodycontactperson.Value));
+                    obj.Custody.ContactPerson = new PnoObjectReference<Person>(_custodycontactperson.Value);
                 }
 
                 var _custodycontactpersonrole = _custodySection.GetValue<System.Guid>(AssetManagement.Models.AssetDomMapper.Custody.ContactPersonRole);
                 if (_custodycontactpersonrole != null)
                 {
-                    obj.Custody.ContactPersonRole = System.Guid.Parse(Convert.ToString(_custodycontactpersonrole.Value));
+                    obj.Custody.ContactPersonRole = new PnoObjectReference<Role>(_custodycontactpersonrole.Value);
                 }
 
                 var _custodyteam = _custodySection.GetValue<System.Guid>(AssetManagement.Models.AssetDomMapper.Custody.Team);
                 if (_custodyteam != null)
                 {
-                    obj.Custody.Team = System.Guid.Parse(Convert.ToString(_custodyteam.Value));
+                    obj.Custody.Team = new PnoObjectReference<Team>(_custodyteam.Value);
                 }
             }
 
@@ -906,7 +903,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 var _attachmentsattachedby = _attachmentsSection.GetValue<string>(AssetManagement.Models.AssetDomMapper.Attachments.AttachedBy);
                 if (_attachmentsattachedby != null)
                 {
-                    attachments.AttachedBy = System.Guid.Parse(Convert.ToString(_attachmentsattachedby.Value));
+                    attachments.AttachedBy = _attachmentsattachedby.Value;
                 }
 
                 _attachmentsList.Add(attachments);
@@ -1036,9 +1033,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     _location.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetDomMapper.Location.Rack, locationRackGuid);
                 }
 
-                if (obj.Location.DeskId != default)
+                if (obj.Location.DeskId != default && System.Guid.TryParse(obj.Location.DeskId.Identifier, out var locationDeskGuid) && locationDeskGuid != System.Guid.Empty)
                 {
-                    _location.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetDomMapper.Location.Desk, obj.Location.DeskId);
+                    _location.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetDomMapper.Location.Desk, locationDeskGuid);
                 }
 
                 if (obj.Location.ContainerId != default && System.Guid.TryParse(obj.Location.ContainerId.Identifier, out var locationContainerGuid) && locationContainerGuid != System.Guid.Empty)
@@ -1088,9 +1085,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     _destinationlocation.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetDomMapper.DestinationLocation.Rack, destinationRackGuid);
                 }
 
-                if (obj.DestinationLocation.DeskId != default)
+                if (obj.DestinationLocation.DeskId != default && System.Guid.TryParse(obj.DestinationLocation.DeskId.Identifier, out var destinationDeskGuid) && destinationDeskGuid != System.Guid.Empty)
                 {
-                    _destinationlocation.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetDomMapper.DestinationLocation.Desk, obj.DestinationLocation.DeskId);
+                    _destinationlocation.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetDomMapper.DestinationLocation.Desk, destinationDeskGuid);
                 }
 
                 if (obj.DestinationLocation.ContainerId != default && System.Guid.TryParse(obj.DestinationLocation.ContainerId.Identifier, out var destinationContainerGuid) && destinationContainerGuid != System.Guid.Empty)
@@ -1308,7 +1305,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
                 if (attachments.AttachedBy != default)
                 {
-                    _attachmentsSection.AddOrUpdateValue<string>(AssetManagement.Models.AssetDomMapper.Attachments.AttachedBy, Convert.ToString((attachments.AttachedBy).Value));
+                    _attachmentsSection.AddOrUpdateValue<string>(AssetManagement.Models.AssetDomMapper.Attachments.AttachedBy, Convert.ToString(attachments.AttachedBy));
                 }
 
                 instance.Sections.Add(_attachmentsSection);

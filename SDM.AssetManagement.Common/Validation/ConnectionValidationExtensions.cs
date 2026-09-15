@@ -1,9 +1,9 @@
 namespace Skyline.DataMiner.SDM.AssetManagement.Validation
 {
-    using System;
     using System.Collections.Generic;
 
     using Skyline.DataMiner.SDM.AssetManagement.Models;
+    using Skyline.DataMiner.SDM.Extensions;
 
     /// <summary>
     /// Shared helpers for extracting information from <see cref="Connection"/> instances during validation.
@@ -15,12 +15,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
         /// </summary>
         public static IEnumerable<string> GetPortIds(this Connection connection)
         {
-            if (connection != null && connection.Source.Port != Guid.Empty)
+            if (connection != null && connection.Source.Port.HasValue())
             {
                 yield return connection.Source.Port.ToString();
             }
 
-            if (connection != null && connection.Destination.Port != Guid.Empty)
+            if (connection != null && connection.Destination.Port.HasValue())
             {
                 yield return connection.Destination.Port.ToString();
             }

@@ -13,6 +13,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.Net.Sections;
     using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.Extensions;
+    using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     using SLDataGateway.API.Querying;
@@ -544,13 +546,13 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 var _job = _historyInfoSection.GetValue<Guid>(AssetManagement.Models.HistoryDomMapper.HistoryInfo.Job);
                 if (_job != null)
                 {
-                    obj.HistoryInfo.Job = _job.Value;
+                    obj.HistoryInfo.Job = new ISdmObjectReference<ISdmObject>(Convert.ToString(_job.Value));
                 }
 
                 var _modifiedInstanceId = _historyInfoSection.GetValue<string>(AssetManagement.Models.HistoryDomMapper.HistoryInfo.ModifiedInstanceId);
                 if (_modifiedInstanceId != null)
                 {
-                    obj.HistoryInfo.ModifiedInstanceID = _modifiedInstanceId.Value;
+                    obj.HistoryInfo.ModifiedInstanceID = new ISdmObjectReference<ISdmObject>(Convert.ToString(_modifiedInstanceId.Value));
                 }
 
                 var _modifiedInstanceDefinitionId = _historyInfoSection.GetValue<string>(AssetManagement.Models.HistoryDomMapper.HistoryInfo.ModifiedInstanceDefinitionId);
@@ -604,14 +606,14 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     section.AddOrUpdateValue<string>(HistoryDomMapper.HistoryInfo.Description, Convert.ToString(info.Description));
                 }
 
-                if (info.Job.HasValue)
+                if (info.Job != default && System.Guid.TryParse(info.Job.Identifier, out var jobGuid) && jobGuid != System.Guid.Empty)
                 {
-                    section.AddOrUpdateValue<Guid>(HistoryDomMapper.HistoryInfo.Job, info.Job.Value);
+                    section.AddOrUpdateValue<Guid>(HistoryDomMapper.HistoryInfo.Job, jobGuid);
                 }
 
-                if (info.ModifiedInstanceID != default)
+                if (info.ModifiedInstanceID != default && info.ModifiedInstanceID.HasValue())
                 {
-                    section.AddOrUpdateValue<string>(HistoryDomMapper.HistoryInfo.ModifiedInstanceId, Convert.ToString(info.ModifiedInstanceID));
+                    section.AddOrUpdateValue<string>(HistoryDomMapper.HistoryInfo.ModifiedInstanceId, info.ModifiedInstanceID.Identifier);
                 }
 
                 if (info.ModifiedInstanceDefinitionID != default)

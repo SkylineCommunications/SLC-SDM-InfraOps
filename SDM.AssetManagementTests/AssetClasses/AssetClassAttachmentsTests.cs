@@ -17,6 +17,8 @@ namespace SDM.AssetManagement.Tests.AssetClasses
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Extensions;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
+    using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
+    using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
 
     /// <summary>
     /// Unit tests for the <see cref="Attachment"/> convenience methods on <see cref="AssetClass"/>
@@ -156,7 +158,7 @@ namespace SDM.AssetManagement.Tests.AssetClasses
         public void AddFrontImageAndAttachment_WhenAlreadyInAttachments_ShouldNotDuplicate()
         {
             var attachedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-            var attachedBy = Guid.NewGuid();
+            var attachedBy = Convert.ToString(Guid.NewGuid());
 
             var assetClass = new AssetClass();
             assetClass.AddAttachment(new Attachment
@@ -265,7 +267,7 @@ namespace SDM.AssetManagement.Tests.AssetClasses
                 Identifier = Guid.NewGuid().ToString(),
                 Name = "Class With Orphan Image",
                 DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier),
-                Manufacturer = Guid.NewGuid(),
+                Manufacturer = new PnoObjectReference<Organization>(Guid.NewGuid()),
                 HeightU = 1.0,
                 PowerSupply = SlcAsset_Management.Enums.PowerSupplyEnum.AC,
                 FrontImage = @"C:\images\front.png",
@@ -291,7 +293,7 @@ namespace SDM.AssetManagement.Tests.AssetClasses
                 Identifier = Guid.NewGuid().ToString(),
                 Name = "Class With Image",
                 DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier),
-                Manufacturer = Guid.NewGuid(),
+                Manufacturer = new PnoObjectReference<Organization>(Guid.NewGuid()),
                 HeightU = 1.0,
                 PowerSupply = SlcAsset_Management.Enums.PowerSupplyEnum.AC,
             };
@@ -320,14 +322,14 @@ namespace SDM.AssetManagement.Tests.AssetClasses
             var deviceType = Helper.TestData.DeviceTypes.First();
 
             var attachedAt = new DateTime(2024, 1, 15, 8, 30, 0, DateTimeKind.Utc);
-            var attachedBy = Guid.NewGuid();
+            var attachedBy = Convert.ToString(Guid.NewGuid());
 
             var assetClass = new AssetClass
             {
                 Identifier = Guid.NewGuid().ToString(),
                 Name = "Class With Attachments",
                 DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier),
-                Manufacturer = Guid.NewGuid(),
+                Manufacturer = new PnoObjectReference<Organization>(Guid.NewGuid()),
                 HeightU = 1.0,
                 PowerSupply = SlcAsset_Management.Enums.PowerSupplyEnum.AC,
                 Attachments = new List<Attachment>

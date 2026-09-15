@@ -12,15 +12,13 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
     using Skyline.DataMiner.Net;
     using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-    using Skyline.DataMiner.Net.Apps.Sections.Sections;
     using Skyline.DataMiner.Net.Helper;
     using Skyline.DataMiner.Net.ManagerStore;
-    using Skyline.DataMiner.Net.Messages;
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.Net.Sections;
-    using Skyline.DataMiner.Net.SubscriptionFilters;
     using Skyline.DataMiner.SDM;
-
+    using Skyline.DataMiner.SDM.Extensions;
+    using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
     using SLDataGateway.API.Querying;
     using SLDataGateway.API.Types.Querying;
 
@@ -571,7 +569,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 var _sourceport = _sourceSection.GetValue<string>(AssetManagement.Models.ConnectionDomMapper.Source.Port);
                 if (_sourceport != null)
                 {
-                    obj.Source.Port = System.Guid.Parse(Convert.ToString(_sourceport.Value));
+                    obj.Source.Port = new ISdmObjectReference<IPort>(_sourceport.Value);
                 }
 
                 var _sourceporttype = _sourceSection.GetValue<string>(AssetManagement.Models.ConnectionDomMapper.Source.PortType);
@@ -594,7 +592,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 var _destinationport = _destinationSection.GetValue<string>(AssetManagement.Models.ConnectionDomMapper.Destination.Port);
                 if (_destinationport != null)
                 {
-                    obj.Destination.Port = System.Guid.Parse(Convert.ToString(_destinationport.Value));
+                    obj.Destination.Port = new ISdmObjectReference<IPort>(_destinationport.Value);
                 }
 
                 var _destinationporttype = _destinationSection.GetValue<string>(AssetManagement.Models.ConnectionDomMapper.Destination.PortType);
@@ -680,9 +678,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     _source.AddOrUpdateValue<string>(AssetManagement.Models.ConnectionDomMapper.Source.CableTag, Convert.ToString(obj.Source.CableTag));
                 }
 
-                if (obj.Source.Port != default)
+                if (obj.Source.Port != default && obj.Source.Port.HasValue())
                 {
-                    _source.AddOrUpdateValue<string>(AssetManagement.Models.ConnectionDomMapper.Source.Port, Convert.ToString(obj.Source.Port));
+                    _source.AddOrUpdateValue<string>(AssetManagement.Models.ConnectionDomMapper.Source.Port, obj.Source.Port.Identifier);
                 }
 
                 if (obj.Source.PortType != default)
@@ -706,9 +704,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     _destination.AddOrUpdateValue<string>(AssetManagement.Models.ConnectionDomMapper.Destination.CableTag, Convert.ToString(obj.Destination.CableTag));
                 }
 
-                if (obj.Destination.Port != default)
+                if (obj.Destination.Port != default && obj.Destination.Port.HasValue())
                 {
-                    _destination.AddOrUpdateValue<string>(AssetManagement.Models.ConnectionDomMapper.Destination.Port, Convert.ToString(obj.Destination.Port));
+                    _destination.AddOrUpdateValue<string>(AssetManagement.Models.ConnectionDomMapper.Destination.Port, obj.Destination.Port.Identifier);
                 }
 
                 if (obj.Destination.PortType != default)

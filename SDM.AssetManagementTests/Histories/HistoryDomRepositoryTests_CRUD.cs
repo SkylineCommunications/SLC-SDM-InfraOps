@@ -11,7 +11,9 @@ namespace SDM.AssetManagement.Tests.Histories
     using SharedMappers.DomIds;
 
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
+    using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
+    using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
 
     [TestClass]
     public class HistoryDomRepositoryTests_CRUD : BaseRepositoryTest
@@ -41,8 +43,8 @@ namespace SDM.AssetManagement.Tests.Histories
         {
             var created = Helper.AssetManagement.Histories.Create(_referenceHistory);
             created.HistoryInfo.Description = "Asset modified";
-            created.HistoryInfo.Job = Guid.NewGuid();
-            created.HistoryInfo.ModifiedInstanceID = Guid.NewGuid().ToString();
+            created.HistoryInfo.Job = new ISdmObjectReference<ISdmObject>(Convert.ToString(Guid.NewGuid()));
+            created.HistoryInfo.ModifiedInstanceID = new ISdmObjectReference<ISdmObject>(Convert.ToString(Guid.NewGuid()));
             created.HistoryInfo.ModifiedInstanceDefinitionID = Guid.NewGuid().ToString();
             created.HistoryInfo.ExtraInfo = "{\"field\":\"Name\"}";
             created.HistoryInfo.TypeOfHistory = SlcAsset_Management.Enums.TypeOfHistoryEnum.Modification;
@@ -117,9 +119,9 @@ namespace SDM.AssetManagement.Tests.Histories
                 HistoryInfo =
                 {
                     Description = description,
-                    Job = Guid.NewGuid(),
-                    ModifiedInstanceID = Guid.NewGuid().ToString(),
-                    ModifiedInstanceDefinitionID = Guid.NewGuid().ToString(),
+                    Job = new ISdmObjectReference<ISdmObject>(Convert.ToString(Guid.NewGuid())),
+                    ModifiedInstanceID = new ISdmObjectReference<ISdmObject>(Convert.ToString(Guid.NewGuid())),
+                    ModifiedInstanceDefinitionID = Convert.ToString(Guid.NewGuid()),
                     ExtraInfo = "{\"source\":\"unit-test\"}",
                     TypeOfHistory = type,
                 },

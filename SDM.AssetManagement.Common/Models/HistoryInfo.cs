@@ -3,6 +3,7 @@
     using System;
     using Newtonsoft.Json;
     using SharedMappers.DomIds;
+    using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     public sealed class HistoryInfo : ChangeTrackingBase, IEquatable<HistoryInfo>, ISectionTrackable, ISectionEmptyState
@@ -26,13 +27,16 @@
             set => DescriptionField.Value = value;
         }
 
-        public Guid? Job
+        public ISdmObjectReference<ISdmObject> Job
         {
             get => JobField.Value;
             set => JobField.Value = value;
         }
 
-        public string ModifiedInstanceID
+        /// <summary>
+        /// Gets or sets the modified instance ID. Type of SDM Object is referenced in <see cref="ModifiedInstanceDefinitionID"/>.
+        /// </summary>
+        public ISdmObjectReference<ISdmObject> ModifiedInstanceID
         {
             get => ModifiedInstanceIDField.Value;
             set => ModifiedInstanceIDField.Value = value;
@@ -64,15 +68,15 @@
 
         [JsonIgnore]
         [SdmIgnore]
-        internal IChangeTrackingField<Guid?> JobField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<ISdmObjectReference<ISdmObject>> JobField => FieldHandler.GetOrCreateField(
             nameof(Job),
-            () => new ChangeTrackingField<Guid?>(null));
+            () => new ChangeTrackingField<ISdmObjectReference<ISdmObject>>(default));
 
         [JsonIgnore]
         [SdmIgnore]
-        internal IChangeTrackingField<string> ModifiedInstanceIDField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<ISdmObjectReference<ISdmObject>> ModifiedInstanceIDField => FieldHandler.GetOrCreateField(
             nameof(ModifiedInstanceID),
-            () => new ChangeTrackingField<string>(null));
+            () => new ChangeTrackingField<ISdmObjectReference<ISdmObject>>(default));
 
         [JsonIgnore]
         [SdmIgnore]
@@ -131,8 +135,8 @@
 
             return
                 string.Equals(Description, other.Description, StringComparison.OrdinalIgnoreCase) &&
-                Job.Equals(other.Job) &&
-                string.Equals(ModifiedInstanceID, other.ModifiedInstanceID, StringComparison.OrdinalIgnoreCase) &&
+                Job == other.Job &&
+                ModifiedInstanceID == other.ModifiedInstanceID &&
                 string.Equals(ModifiedInstanceDefinitionID, other.ModifiedInstanceDefinitionID, StringComparison.OrdinalIgnoreCase) &&
                 string.Equals(ExtraInfo, other.ExtraInfo, StringComparison.OrdinalIgnoreCase) &&
                 TypeOfHistory == other.TypeOfHistory;

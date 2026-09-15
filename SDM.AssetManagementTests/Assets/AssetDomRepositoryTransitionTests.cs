@@ -14,6 +14,8 @@ namespace SDM.AssetManagement.Tests.Assets
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
+    using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
+    using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
 
     [TestClass]
     public class AssetDomRepositoryTransitionTests
@@ -63,7 +65,7 @@ namespace SDM.AssetManagement.Tests.Assets
 
             if (installation)
             {
-                asset.InstallationUserId = Guid.NewGuid();
+                asset.InstallationUserId = new PnoObjectReference<Person>(Guid.NewGuid());
                 asset.InstallationDate = DateTime.UtcNow;
             }
 

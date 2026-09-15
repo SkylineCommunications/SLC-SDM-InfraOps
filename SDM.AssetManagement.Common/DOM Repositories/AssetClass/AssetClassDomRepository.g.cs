@@ -6,28 +6,24 @@
 //------------------------------------------------------------------------------
 namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Diagnostics;
-	using System.Linq;
-
-	using Skyline.DataMiner.Net;
-	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-	using Skyline.DataMiner.Net.Apps.Sections.Sections;
-	using Skyline.DataMiner.Net.Helper;
-	using Skyline.DataMiner.Net.ManagerStore;
-	using Skyline.DataMiner.Net.Messages;
-	using Skyline.DataMiner.Net.Messages.SLDataGateway;
-	using Skyline.DataMiner.Net.Sections;
-	using Skyline.DataMiner.Net.SubscriptionFilters;
-	using Skyline.DataMiner.SDM;
-	using Skyline.DataMiner.SDM.AssetManagement.Validation;
-
-    using SLDataGateway.API.Querying;
-	using SLDataGateway.API.Types.Querying;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using SharedMappers.DomIds;
+    using Skyline.DataMiner.Net;
+    using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+    using Skyline.DataMiner.Net.Helper;
+    using Skyline.DataMiner.Net.ManagerStore;
+    using Skyline.DataMiner.Net.Messages.SLDataGateway;
+    using Skyline.DataMiner.Net.Sections;
+    using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.Extensions;
+    using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
+    using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
+    using SLDataGateway.API.Querying;
+    using SLDataGateway.API.Types.Querying;
 
-	internal partial class AssetClassDomRepository : IBulkRepository<AssetClass>
+    internal partial class AssetClassDomRepository : IBulkRepository<AssetClass>
     {
 		private readonly IConnection connection;
 		private readonly DomHelper helper;
@@ -595,7 +591,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				var _manufacturer = _assetclasspropertiesSection.GetValue<System.Guid>(AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Manufacturer);
 				if (_manufacturer != null)
 				{
-					obj.Manufacturer = _manufacturer.Value;
+					obj.Manufacturer = new PnoObjectReference<Organization>(_manufacturer.Value);
 				}
 
 				var _devicedescription = _assetclasspropertiesSection.GetValue<string>(AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.DeviceDescription);
@@ -839,7 +835,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				var _attachmentsattachedby = _attachmentsSection.GetValue<string>(AssetManagement.Models.AssetClassDomMapper.Attachments.AttachedBy);
 				if (_attachmentsattachedby != null)
 				{
-					attachments.AttachedBy = System.Guid.Parse(Convert.ToString(_attachmentsattachedby.Value));
+					attachments.AttachedBy = _attachmentsattachedby.Value;
 				}
 
 				_attachmentsList.Add(attachments);
@@ -902,7 +898,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				_assetclassproperties.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.DeviceType, deviceTypeGuid);
 			}
 
-			if (obj.Manufacturer != default)
+			if (obj.Manufacturer != default && obj.Manufacturer.HasValue())
 			{
 				_assetclassproperties.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Manufacturer, obj.Manufacturer);
 			}
@@ -1107,7 +1103,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
 				if (attachments.AttachedBy != default)
 				{
-					_attachmentsSection.AddOrUpdateValue<string>(AssetManagement.Models.AssetClassDomMapper.Attachments.AttachedBy, Convert.ToString((attachments.AttachedBy).Value));
+					_attachmentsSection.AddOrUpdateValue<string>(AssetManagement.Models.AssetClassDomMapper.Attachments.AttachedBy, attachments.AttachedBy);
 				}
 
 				instance.Sections.Add(_attachmentsSection);

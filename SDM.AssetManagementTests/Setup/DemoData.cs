@@ -8,6 +8,8 @@ namespace SDM.AssetManagement.Tests.Setup
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
+    using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
+    using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
 
     internal static class DemoData
     {
@@ -399,7 +401,7 @@ namespace SDM.AssetManagement.Tests.Setup
                 State = SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Active,
                 // DeviceTypeId will be set at runtime
                 Description = deviceDescription,
-                Manufacturer = Guid.NewGuid(),
+                Manufacturer = new PnoObjectReference<Organization>(Guid.NewGuid()),
                 Depth = depth,
                 Height = height,
                 Width = width,
@@ -502,25 +504,25 @@ namespace SDM.AssetManagement.Tests.Setup
                 FirstUseDate = DateTime.UtcNow.AddYears(-orderNo).AddMonths(2),
                 EndOfWarrantyDate = DateTime.UtcNow.AddYears(-orderNo + 10),
                 InstallationDate = DateTime.UtcNow.AddYears(-orderNo).AddMonths(1),
-                InstallationUserId = Guid.NewGuid(),
+                InstallationUserId = new PnoObjectReference<Person>(Guid.NewGuid()),
                 ModificationDate = DateTime.UtcNow,
-                ModificationUserId = Guid.NewGuid(),
+                ModificationUserId = new PnoObjectReference<Person>(Guid.NewGuid()),
                 EndOfLifeDate = DateTime.UtcNow.AddYears(-orderNo + 15),
                 Ownership =
                 {
-                    Organization = Guid.NewGuid(),
-                    ContactPerson = Guid.NewGuid(),
-                    ContactPersonRole = Guid.NewGuid(),
-                    Team = Guid.NewGuid(),
+                    Organization = new PnoObjectReference<Organization>(Guid.NewGuid()),
+                    ContactPerson = new PnoObjectReference<Person>(Guid.NewGuid()),
+                    ContactPersonRole = new PnoObjectReference<Role>(Guid.NewGuid()),
+                    Team = new PnoObjectReference<Team>(Guid.NewGuid()),
                 },
                 Custody =
                 {
                     From = DateTime.UtcNow.AddMonths(-6),
                     Till = DateTime.UtcNow.AddMonths(6),
-                    ContactPerson = Guid.NewGuid(),
-                    Team = Guid.NewGuid(),
-                    Organization = Guid.NewGuid(),
-                    ContactPersonRole = Guid.NewGuid(),
+                    ContactPerson = new PnoObjectReference<Person>(Guid.NewGuid()),
+                    Team = new PnoObjectReference<Team>(Guid.NewGuid()),
+                    Organization = new PnoObjectReference<Organization>(Guid.NewGuid()),
+                    ContactPersonRole = new PnoObjectReference<Role>(Guid.NewGuid()),
                 },
                 ElementLinks = new List<ElementLink>
                 {

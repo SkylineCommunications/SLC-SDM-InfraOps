@@ -9,9 +9,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     using System;
     using System.Linq;
     using System.Runtime.CompilerServices;
-
     using SharedMappers.DomIds;
-
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.Exposers;
@@ -94,7 +92,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 		{
 			public static readonly CollectionExposer<AssetManagement.Models.AssetClass, string> FilePath = new CollectionExposer<AssetManagement.Models.AssetClass, string>((obj) => obj.Attachments.Where(x => x != null).Select(x => x.FilePath).Where(x => x != null), "Attachments.FilePath");
 			public static readonly CollectionExposer<AssetManagement.Models.AssetClass, System.DateTime?> AttachedAt = new CollectionExposer<AssetManagement.Models.AssetClass, System.DateTime?>((obj) => obj.Attachments.Where(x => x != null).Select(x => x.AttachedAt).Where(x => x != null), "Attachments.AttachedAt");
-			public static readonly CollectionExposer<AssetManagement.Models.AssetClass, System.Guid?> AttachedBy = new CollectionExposer<AssetManagement.Models.AssetClass, System.Guid?>((obj) => obj.Attachments.Where(x => x != null).Select(x => x.AttachedBy).Where(x => x != null), "Attachments.AttachedBy");
+			public static readonly CollectionExposer<AssetManagement.Models.AssetClass, string> AttachedBy = new CollectionExposer<AssetManagement.Models.AssetClass, string>((obj) => obj.Attachments.Where(x => x != null).Select(x => x.AttachedBy).Where(x => x != null), "Attachments.AttachedBy");
 		}
 	}
 }
