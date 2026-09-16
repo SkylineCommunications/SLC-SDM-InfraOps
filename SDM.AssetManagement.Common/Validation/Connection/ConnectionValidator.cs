@@ -357,7 +357,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
 
         private static void AddPortUsage(Dictionary<string, List<string>> usage, ISdmObjectReference<IPort> port, string connectionId)
         {
-            if (port == default)
+            if (port == default(ISdmObjectReference<IPort>))
             {
                 return;
             }
