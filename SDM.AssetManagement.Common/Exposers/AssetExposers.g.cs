@@ -6,22 +6,18 @@
 //------------------------------------------------------------------------------
 namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
-	using System;
-	using System.Collections;
-	using System.Collections.Generic;
-	using System.Linq;
+    using System;
+    using System.Linq;
     using System.Runtime.CompilerServices;
 
     using SharedMappers.DomIds;
 
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
-	using Skyline.DataMiner.SDM;
-	using Skyline.DataMiner.SDM.Exposers;
+    using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.Exposers;
+    using Skyline.DataMiner.SDM.FacilityManagement.Models;
 
-	using SLDataGateway.API.Querying;
-	using SLDataGateway.API.Types.Querying;
-
-	public static partial class AssetExposers
+    public static partial class AssetExposers
 	{
 		public static readonly Exposer<AssetManagement.Models.Asset, string> Identifier = new Exposer<AssetManagement.Models.Asset, string>((obj) => obj.Identifier, "Identifier");
 		public static readonly Exposer<AssetManagement.Models.Asset, System.DateTime> CreatedAt = new Exposer<AssetManagement.Models.Asset, System.DateTime>((obj) => obj.CreatedAt, "CreatedAt");
@@ -38,20 +34,20 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 		public static readonly Exposer<AssetManagement.Models.Asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum> State = new Exposer<AssetManagement.Models.Asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum>((obj) => obj.State, "State");
 		public static readonly CollectionExposer<AssetManagement.Models.Asset, SlcAsset_Management.Enums.Operationalflagsenum> OperationalFlags = new CollectionExposer<AssetManagement.Models.Asset, SlcAsset_Management.Enums.Operationalflagsenum>((obj) => obj.OperationalFlags, "OperationalFlags");
 
-        static AssetExposers()
-        {
-            RuntimeHelpers.RunClassConstructor(typeof(NetworkDetails).TypeHandle);
-            RuntimeHelpers.RunClassConstructor(typeof(Location).TypeHandle);
-            RuntimeHelpers.RunClassConstructor(typeof(DestinationLocation).TypeHandle);
-            RuntimeHelpers.RunClassConstructor(typeof(Lifecycle).TypeHandle);
-            RuntimeHelpers.RunClassConstructor(typeof(Ownership).TypeHandle);
-            RuntimeHelpers.RunClassConstructor(typeof(Custody).TypeHandle);
-            RuntimeHelpers.RunClassConstructor(typeof(Holders).TypeHandle);
-            RuntimeHelpers.RunClassConstructor(typeof(ElementLinks).TypeHandle);
-            RuntimeHelpers.RunClassConstructor(typeof(Attachments).TypeHandle);
-        }
+		static AssetExposers()
+		{
+			RuntimeHelpers.RunClassConstructor(typeof(NetworkDetails).TypeHandle);
+			RuntimeHelpers.RunClassConstructor(typeof(Location).TypeHandle);
+			RuntimeHelpers.RunClassConstructor(typeof(DestinationLocation).TypeHandle);
+			RuntimeHelpers.RunClassConstructor(typeof(Lifecycle).TypeHandle);
+			RuntimeHelpers.RunClassConstructor(typeof(Ownership).TypeHandle);
+			RuntimeHelpers.RunClassConstructor(typeof(Custody).TypeHandle);
+			RuntimeHelpers.RunClassConstructor(typeof(Holders).TypeHandle);
+			RuntimeHelpers.RunClassConstructor(typeof(ElementLinks).TypeHandle);
+			RuntimeHelpers.RunClassConstructor(typeof(Attachments).TypeHandle);
+		}
 
-        public static partial class NetworkDetails
+		public static partial class NetworkDetails
 		{
 			public static readonly Exposer<AssetManagement.Models.Asset, string> MACAddress = new Exposer<AssetManagement.Models.Asset, string>((obj) => obj.MacAddress, "NetworkDetails.MacAddress");
 		}
@@ -80,7 +76,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             public static readonly Exposer<AssetManagement.Models.Asset, SdmObjectReference<FacilityManagement.Models.Room>> RoomId = new Exposer<AssetManagement.Models.Asset, SdmObjectReference<FacilityManagement.Models.Room>>((obj) => obj.Location.RoomId, "DestinationLocation.RoomId");
         }
 
-        public static partial class Lifecycle
+		public static partial class Lifecycle
 		{
 			public static readonly Exposer<AssetManagement.Models.Asset, DateTime?> PurchaseDate = new Exposer<AssetManagement.Models.Asset, DateTime?>((obj) => obj.PurchaseDate, "Lifecycle.PurchaseDate");
 			public static readonly Exposer<AssetManagement.Models.Asset, DateTime?> FirstUseDate = new Exposer<AssetManagement.Models.Asset, DateTime?>((obj) => obj.FirstUseDate, "Lifecycle.FirstUseDate");
@@ -127,7 +123,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 		{
 			public static readonly CollectionExposer<AssetManagement.Models.Asset, string> FilePath = new CollectionExposer<AssetManagement.Models.Asset, string>((obj) => obj.Attachments.Where(x => x != null).Select(x => x.FilePath).Where(x => x != null), "Attachments.FilePath");
 			public static readonly CollectionExposer<AssetManagement.Models.Asset, System.DateTime?> AttachedAt = new CollectionExposer<AssetManagement.Models.Asset, System.DateTime?>((obj) => obj.Attachments.Where(x => x != null).Select(x => x.AttachedAt).Where(x => x != null), "Attachments.AttachedAt");
-			public static readonly CollectionExposer<AssetManagement.Models.Asset, System.Guid?> AttachedBy = new CollectionExposer<AssetManagement.Models.Asset, System.Guid?>((obj) => obj.Attachments.Where(x => x != null).Select(x => x.AttachedBy).Where(x => x != null), "Attachments.AttachedBy");
-		}
-	}
+			public static readonly CollectionExposer<AssetManagement.Models.Asset, string> AttachedBy = new CollectionExposer<AssetManagement.Models.Asset, string>((obj) => obj.Attachments.Where(x => x != null).Select(x => x.AttachedBy).Where(x => x != null), "Attachments.AttachedBy");
+        }
+    }
 }

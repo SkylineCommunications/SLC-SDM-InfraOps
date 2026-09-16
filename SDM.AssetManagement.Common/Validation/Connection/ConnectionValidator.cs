@@ -11,6 +11,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.Common.Services;
     using Skyline.DataMiner.SDM.Extensions;
+    using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
     public class ConnectionValidator : ValidatorBase<Connection>
@@ -71,7 +72,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
 
         private static void ValidateWithoutDatabaseAccess(Connection connection, ValidationResult result)
         {
-            if (ConnectionValidationHandler.IsCableLengthValid(connection.CableLength, out var cableLengthResult) == false)
+            if (!ConnectionValidationHandler.IsCableLengthValid(connection.CableLength, out var cableLengthResult))
             {
                 result.AddFailuresFrom(cableLengthResult);
             }
@@ -79,7 +80,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             var sourcePort = connection.Source.Port;
             var destinationPort = connection.Destination.Port;
 
-            if (ConnectionValidationHandler.IsNotSelfConnection(sourcePort, destinationPort, out var selfResult) == false)
+            if (!ConnectionValidationHandler.IsNotSelfConnection(sourcePort, destinationPort, out var selfResult))
             {
                 result.AddFailuresFrom(selfResult);
                 return;
@@ -139,7 +140,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             // track per-field changes (unlike the legacy application, which gated the "port must be selected"
             // check on the port field being changed), an unset endpoint is treated as "not being connected"
             // and skipped rather than rejected. Endpoints that are set are still fully validated.
-            if (endpointPort == Guid.Empty)
+            if (!endpointPort.HasValue())
             {
                 return;
             }
@@ -176,9 +177,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             }
         }
 
-        private bool IsPortAlreadyInUse(Connection connection, Guid endpointPort, Lookups lookups)
+        private bool IsPortAlreadyInUse(Connection connection, ISdmObjectReference<IPort> endpointPort, Lookups lookups)
         {
-            if (!lookups.PortUsage.TryGetValue(endpointPort.ToString(), out var connectionIds))
+            if (!lookups.PortUsage.TryGetValue(endpointPort.Identifier, out var connectionIds))
             {
                 return false;
             }
@@ -195,14 +196,14 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             }
 
             var sourcePort = connection.Source.Port;
-            if (sourcePort != Guid.Empty)
+            if (sourcePort.HasValue())
             {
-                if (lookups.DataPorts.ContainsKey(sourcePort.ToString()))
+                if (lookups.DataPorts.ContainsKey(sourcePort.Identifier))
                 {
                     return SlcAsset_Management.Enums.ConnectionType.Data;
                 }
 
-                if (lookups.PowerPorts.ContainsKey(sourcePort.ToString()))
+                if (lookups.PowerPorts.ContainsKey(sourcePort.Identifier))
                 {
                     return SlcAsset_Management.Enums.ConnectionType.Power;
                 }
@@ -211,9 +212,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             return null;
         }
 
-        private static ResolvedPort ResolvePort(Guid portGuid, Lookups lookups)
+        private static ResolvedPort ResolvePort(ISdmObjectReference<IPort> portGuid, Lookups lookups)
         {
-            var key = portGuid.ToString();
+            var key = portGuid.Identifier;
 
             if (lookups.DataPorts.TryGetValue(key, out var dataPort))
             {
@@ -283,8 +284,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
 
             var portIds = connections
                 .SelectMany(c => new[] { c.Source.Port, c.Destination.Port })
-                .Where(id => id != Guid.Empty)
-                .Select(id => id.ToString())
+                .Where(reference => reference.HasValue())
+                .Select(reference => reference.Identifier)
                 .Distinct()
                 .ToList();
 
@@ -354,14 +355,14 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             }
         }
 
-        private static void AddPortUsage(Dictionary<string, List<string>> usage, Guid port, string connectionId)
+        private static void AddPortUsage(Dictionary<string, List<string>> usage, ISdmObjectReference<IPort> port, string connectionId)
         {
-            if (port == Guid.Empty)
+            if (port == default)
             {
                 return;
             }
 
-            var key = port.ToString();
+            var key = port.Identifier;
             if (!usage.TryGetValue(key, out var ids))
             {
                 ids = new List<string>();

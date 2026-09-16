@@ -10,9 +10,11 @@ namespace SDM.PlanAndBuild.Tests
 
 	using Skyline.DataMiner.SDM;
 	using Skyline.DataMiner.SDM.AssetManagement.Models;
-	using Skyline.DataMiner.SDM.PlanAndBuild.Models;
+    using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
+    using Skyline.DataMiner.SDM.PlanAndBuild.Models;
+    using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
 
-	[TestClass]
+    [TestClass]
 	public class SectionEmptyStateTests
 	{
 		[TestMethod]
@@ -24,8 +26,8 @@ namespace SDM.PlanAndBuild.Tests
 		[TestMethod]
 		public void JobOwnership_AnyFieldSet_IsNotEmpty()
 		{
-			new JobOwnership().Also(ownership => ownership.AssignedTo = Guid.NewGuid()).IsEmpty.Should().BeFalse();
-			new JobOwnership().Also(ownership => ownership.AssignmentGroup = Guid.NewGuid()).IsEmpty.Should().BeFalse();
+			new JobOwnership().Also(ownership => ownership.AssignedTo = new PnoObjectReference<Person>(Guid.NewGuid())).IsEmpty.Should().BeFalse();
+			new JobOwnership().Also(ownership => ownership.AssignmentGroup = new PnoObjectReference<Team>(Guid.NewGuid())).IsEmpty.Should().BeFalse();
 		}
 
 		[TestMethod]
@@ -52,7 +54,7 @@ namespace SDM.PlanAndBuild.Tests
 		{
 			new JobAttachment().Also(attachment => attachment.FilePath = @"C:\attachments\plan.pdf").IsEmpty.Should().BeFalse();
 			new JobAttachment().Also(attachment => attachment.AttachedAt = DateTime.UtcNow).IsEmpty.Should().BeFalse();
-			new JobAttachment().Also(attachment => attachment.AttachedBy = Guid.NewGuid()).IsEmpty.Should().BeFalse();
+			new JobAttachment().Also(attachment => attachment.AttachedBy = Convert.ToString(Guid.NewGuid())).IsEmpty.Should().BeFalse();
 		}
 
 		[TestMethod]

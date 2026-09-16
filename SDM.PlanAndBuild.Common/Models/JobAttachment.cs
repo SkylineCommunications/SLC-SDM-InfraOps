@@ -1,9 +1,7 @@
 ﻿namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 {
     using System;
-
     using Newtonsoft.Json;
-
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
@@ -24,7 +22,7 @@
 
         public DateTime? AttachedAt { get; set; }
 
-        public Guid? AttachedBy { get; set; }
+        public string AttachedBy { get; set; }
 
         public static bool operator ==(JobAttachment left, JobAttachment right)
         {

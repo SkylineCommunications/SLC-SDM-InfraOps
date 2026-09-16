@@ -12,6 +12,6 @@
         /// <returns>The mapped instance.</returns>
         T FromDomInstance(DomInstance instance);
 
-        FilterElement<DomInstance> CreatePortFilter(string fieldName, Comparer comparer, object value);
+        FilterElement<DomInstance> CreateDomFilter(string fieldName, Comparer comparer, object value);
     }
 }

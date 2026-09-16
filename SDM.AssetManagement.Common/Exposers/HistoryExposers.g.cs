@@ -12,7 +12,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     using SharedMappers.DomIds;
 
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
-    using Skyline.DataMiner.SDM.Exposers;
+    using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
 
     public static partial class HistoryExposers
     {
@@ -41,8 +41,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             public static readonly Exposer<History, string> Description =
                 new Exposer<History, string>(obj => obj.HistoryInfo.Description, "HistoryInfo.Description");
 
-            public static readonly Exposer<History, Guid?> Job =
-                new Exposer<History, Guid?>(obj => obj.HistoryInfo.Job, "HistoryInfo.Job");
+            public static readonly Exposer<History, ISdmObjectReference<ISdmObject>> Job =
+                new Exposer<History, ISdmObjectReference<ISdmObject>>(obj => obj.HistoryInfo.Job, "HistoryInfo.Job");
 
             public static readonly Exposer<History, string> ModifiedInstanceID =
                 new Exposer<History, string>(obj => obj.HistoryInfo.ModifiedInstanceID, "HistoryInfo.ModifiedInstanceID");

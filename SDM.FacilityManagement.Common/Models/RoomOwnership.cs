@@ -3,7 +3,9 @@
     using System;
 
     using Newtonsoft.Json;
-
+    using Skyline.DataMiner.SDM.Extensions;
+    using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
+    using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     public sealed class RoomOwnership : ChangeTrackingBase, IEquatable<RoomOwnership>, ISectionTrackable, ISectionEmptyState
@@ -15,16 +17,16 @@
         [JsonIgnore]
         [SdmIgnore]
         public bool IsEmpty =>
-            Team == Guid.Empty &&
-            Owner == Guid.Empty;
+            !Team.HasValue() &&
+            !Owner.HasValue();
 
-        public Guid Team
+        public PnoObjectReference<Team> Team
         {
             get => TeamField.Value;
             set => TeamField.Value = value;
         }
 
-        public Guid Owner
+        public PnoObjectReference<Person> Owner
         {
             get => OwnerField.Value;
             set => OwnerField.Value = value;
@@ -32,15 +34,15 @@
 
         [JsonIgnore]
         [SdmIgnore]
-        internal IChangeTrackingField<Guid> TeamField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<PnoObjectReference<Team>> TeamField => FieldHandler.GetOrCreateField(
             nameof(Team),
-            () => new ChangeTrackingField<Guid>(Guid.Empty));
+            () => new ChangeTrackingField<PnoObjectReference<Team>>(default));
 
         [JsonIgnore]
         [SdmIgnore]
-        internal IChangeTrackingField<Guid> OwnerField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<PnoObjectReference<Person>> OwnerField => FieldHandler.GetOrCreateField(
             nameof(Owner),
-            () => new ChangeTrackingField<Guid>(Guid.Empty));
+            () => new ChangeTrackingField<PnoObjectReference<Person>>(default));
 
         public static bool operator ==(RoomOwnership left, RoomOwnership right)
         {
@@ -80,8 +82,8 @@
             }
 
             return
-                Team.Equals(other.Team) &&
-                Owner.Equals(other.Owner);
+                Team == other.Team &&
+                Owner == other.Owner;
         }
 
         public override int GetHashCode()

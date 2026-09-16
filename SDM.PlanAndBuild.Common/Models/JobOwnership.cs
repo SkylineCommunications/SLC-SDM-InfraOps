@@ -3,7 +3,9 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
     using System;
 
     using Newtonsoft.Json;
-
+    using Skyline.DataMiner.SDM.Extensions;
+    using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
+    using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     public sealed class JobOwnership : ChangeTrackingBase, IEquatable<JobOwnership>, ISectionTrackable, ISectionEmptyState
@@ -15,16 +17,16 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
         [JsonIgnore]
         [SdmIgnore]
         public bool IsEmpty =>
-            AssignedTo == default &&
-            AssignmentGroup == default;
+            !AssignedTo.HasValue() &&
+            !AssignmentGroup.HasValue();
 
-        public Guid? AssignedTo
+        public PnoObjectReference<Person> AssignedTo
         {
             get => AssignedToField.Value;
             set => AssignedToField.Value = value;
         }
 
-        public Guid? AssignmentGroup
+        public PnoObjectReference<Team> AssignmentGroup
         {
             get => AssignmentGroupField.Value;
             set => AssignmentGroupField.Value = value;
@@ -32,15 +34,15 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 
         [JsonIgnore]
         [SdmIgnore]
-        internal IChangeTrackingField<Guid?> AssignedToField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<PnoObjectReference<Person>> AssignedToField => FieldHandler.GetOrCreateField(
             nameof(AssignedTo),
-            () => new ChangeTrackingField<Guid?>(null));
+            () => new ChangeTrackingField<PnoObjectReference<Person>>(default));
 
         [JsonIgnore]
         [SdmIgnore]
-        internal IChangeTrackingField<Guid?> AssignmentGroupField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<PnoObjectReference<Team>> AssignmentGroupField => FieldHandler.GetOrCreateField(
             nameof(AssignmentGroup),
-            () => new ChangeTrackingField<Guid?>(null));
+            () => new ChangeTrackingField<PnoObjectReference<Team>>(default));
 
         public static bool operator ==(JobOwnership left, JobOwnership right)
         {

@@ -9,7 +9,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     using SharedMappers.DomIds;
 
     using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
     using Skyline.DataMiner.SDM.InfraOps.Core.Models;
+    using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     //[GenerateExposers]
@@ -165,7 +167,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
         #region Lifecycle Properties
 
-        public Guid InstallationUserId
+        public PnoObjectReference<Person> InstallationUserId
         {
             get => InstallationUserIdField.Value;
             set => InstallationUserIdField.Value = value;
@@ -189,7 +191,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             set => PurchaseDateField.Value = value;
         }
 
-        public Guid ModificationUserId
+        public PnoObjectReference<Person> ModificationUserId
         {
             get => ModificationUserIdField.Value;
             set => ModificationUserIdField.Value = value;
@@ -311,9 +313,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
         [JsonIgnore]
         [SdmIgnore]
-        internal IChangeTrackingField<Guid> InstallationUserIdField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<PnoObjectReference<Person>> InstallationUserIdField => FieldHandler.GetOrCreateField(
             nameof(InstallationUserId),
-            () => new ChangeTrackingField<Guid>(Guid.Empty));
+            () => new ChangeTrackingField<PnoObjectReference<Person>>(default));
 
         [JsonIgnore]
         [SdmIgnore]
@@ -335,9 +337,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
         [JsonIgnore]
         [SdmIgnore]
-        internal IChangeTrackingField<Guid> ModificationUserIdField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<PnoObjectReference<Person>> ModificationUserIdField => FieldHandler.GetOrCreateField(
             nameof(ModificationUserId),
-            () => new ChangeTrackingField<Guid>(Guid.Empty));
+            () => new ChangeTrackingField<PnoObjectReference<Person>>(default));
 
         [JsonIgnore]
         [SdmIgnore]
@@ -509,11 +511,11 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 string.Equals(MacAddress, other.MacAddress, StringComparison.OrdinalIgnoreCase) &&
                 Equals(Location, other.Location) &&
                 Equals(DestinationLocation, other.DestinationLocation) &&
-                InstallationUserId.Equals(other.InstallationUserId) &&
+                InstallationUserId == other.InstallationUserId &&
                 InstallationDate == other.InstallationDate &&
                 FirstUseDate == other.FirstUseDate &&
                 PurchaseDate == other.PurchaseDate &&
-                ModificationUserId.Equals(other.ModificationUserId) &&
+                ModificationUserId == other.ModificationUserId &&
                 ModificationDate == other.ModificationDate &&
                 EndOfLifeDate == other.EndOfLifeDate &&
                 EndOfWarrantyDate == other.EndOfWarrantyDate &&

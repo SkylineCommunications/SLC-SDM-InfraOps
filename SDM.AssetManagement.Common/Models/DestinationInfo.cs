@@ -3,6 +3,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     using System;
     using Newtonsoft.Json;
     using Skyline.DataMiner.SDM.Extensions;
+    using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     public sealed class DestinationInfo : ChangeTrackingBase, IEquatable<DestinationInfo>, ISectionTrackable, ISectionEmptyState
@@ -13,7 +14,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         [JsonIgnore]
         [SdmIgnore]
         public bool IsEmpty => CableTag == default &&
-            Port == Guid.Empty &&
+            !Port.HasValue() &&
             !PortType.HasValue();
 
         public string CableTag
@@ -22,7 +23,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             set => CableTagField.Value = value;
         }
 
-        public Guid Port
+        public ISdmObjectReference<IPort> Port
         {
             get => PortField.Value;
             set => PortField.Value = value;
@@ -42,9 +43,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
         [JsonIgnore]
         [SdmIgnore]
-        internal IChangeTrackingField<Guid> PortField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<ISdmObjectReference<IPort>> PortField => FieldHandler.GetOrCreateField(
             nameof(Port),
-            () => new ChangeTrackingField<Guid>(Guid.Empty));
+            () => new ChangeTrackingField<ISdmObjectReference<IPort>>(default));
 
         [JsonIgnore]
         [SdmIgnore]
@@ -91,7 +92,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
             return
                 string.Equals(CableTag, other.CableTag, StringComparison.OrdinalIgnoreCase) &&
-                Port.Equals(other.Port) &&
+                Port == other.Port &&
                 PortType == other.PortType;
         }
 

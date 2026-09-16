@@ -3,7 +3,8 @@
     using System;
 
     using Newtonsoft.Json;
-
+    using Skyline.DataMiner.SDM.Extensions;
+    using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     public sealed class JobRelation : ChangeTrackingBase, IEquatable<JobRelation>, ISectionTrackable, ISectionEmptyState
@@ -13,9 +14,9 @@
         Guid? ISectionTrackable.SectionId { get; set; }
         [JsonIgnore]
         [SdmIgnore]
-        public bool IsEmpty => Job == default;
+        public bool IsEmpty => !Job.HasValue();
 
-        public Guid? Job
+        public ISdmObjectReference<ISdmObject> Job
         {
             get => JobField.Value;
             set => JobField.Value = value;
@@ -23,9 +24,9 @@
 
         [JsonIgnore]
         [SdmIgnore]
-        internal IChangeTrackingField<Guid?> JobField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<ISdmObjectReference<ISdmObject>> JobField => FieldHandler.GetOrCreateField(
             nameof(Job),
-            () => new ChangeTrackingField<Guid?>(null));
+            () => new ChangeTrackingField<ISdmObjectReference<ISdmObject>>(default));
 
         public static bool operator ==(JobRelation left, JobRelation right)
         {

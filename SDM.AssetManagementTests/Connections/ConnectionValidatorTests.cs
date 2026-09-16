@@ -13,6 +13,7 @@ namespace SDM.AssetManagement.Tests.Connections
 
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
+    using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Exceptions;
 
     [TestClass]
@@ -76,10 +77,10 @@ namespace SDM.AssetManagement.Tests.Connections
                 ConnectionType = SlcAsset_Management.Enums.ConnectionType.Data,
                 Source =
                 {
-                    Port = Guid.Parse(sourcePort.PortId),
+                    Port = new ISdmObjectReference<IPort>(sourcePort.PortId),
                     PortType = new SdmObjectReference<PortType>(sourcePort.PortType.Identifier),
                 },
-                Destination = { Port = Guid.Empty },
+                Destination = { Port = default },
             };
 
             Action act = () => Helper.AssetManagement.Connections.Create(connection);
@@ -96,8 +97,8 @@ namespace SDM.AssetManagement.Tests.Connections
             {
                 Identifier = Guid.NewGuid().ToString(),
                 ConnectionType = SlcAsset_Management.Enums.ConnectionType.Data,
-                Source = { Port = Guid.Parse(sourcePort.PortId) },
-                Destination = { Port = Guid.Parse(sourcePort.PortId) },
+                Source = { Port = new ISdmObjectReference<IPort>(sourcePort.PortId) },
+                Destination = { Port = new ISdmObjectReference<IPort>(sourcePort.PortId) },
             };
 
             Action act = () => Helper.AssetManagement.Connections.Create(connection);
@@ -217,12 +218,12 @@ namespace SDM.AssetManagement.Tests.Connections
                 CableLength = cableLength,
                 Source =
                 {
-                    Port = Guid.Parse(source.PortId),
+                    Port = new ISdmObjectReference<IPort>(source.PortId),
                     PortType = new SdmObjectReference<PortType>(source.PortType.Identifier),
                 },
                 Destination =
                 {
-                    Port = Guid.Parse(destination.PortId),
+                    Port = new ISdmObjectReference<IPort>(destination.PortId),
                     PortType = new SdmObjectReference<PortType>(destination.PortType.Identifier),
                 },
             };
@@ -239,12 +240,12 @@ namespace SDM.AssetManagement.Tests.Connections
                 CableLength = cableLength,
                 Source =
                 {
-                    Port = Guid.Parse(source.PortId),
+                    Port = new ISdmObjectReference<IPort>(source.PortId),
                     PortType = new SdmObjectReference<PortType>(source.PortType.Identifier),
                 },
                 Destination =
                 {
-                    Port = Guid.Parse(destination.PortId),
+                    Port = new ISdmObjectReference<IPort>(destination.PortId),
                     PortType = new SdmObjectReference<PortType>(destination.PortType.Identifier),
                 },
             };

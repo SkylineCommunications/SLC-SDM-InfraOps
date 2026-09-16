@@ -1,18 +1,17 @@
-﻿namespace SDM.AssetManagement.Tests.Assets
+namespace SDM.AssetManagement.Tests.Assets
 {
     using System;
     using System.Linq;
-
     using FluentAssertions;
     using FluentAssertions.Execution;
-
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-
     using SDM.AssetManagement.Tests.Setup;
-
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
+    using Skyline.DataMiner.SDM.Extensions;
+    using Skyline.DataMiner.SDM.FacilityManagement.Models;
+    using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
 
     /// <summary>
     /// Filter and query tests for Asset repository operations.
@@ -301,6 +300,84 @@
             }
         }
 
+        [TestMethod]
+        public void ReadFilter_AssetClass_NonExistent_ShouldReturnNoAssets()
+        {
+            AssertEmpty(Helper.AssetManagement.Assets.Read(AssetExposers.AssetClass.Equal(new SdmObjectReference<AssetClass>(Guid.NewGuid().ToString()))));
+        }
+
+        [TestMethod]
+        public void ReadFilter_LocationParentAsset_NonExistent_ShouldReturnNoAssets()
+        {
+            AssertEmpty(Helper.AssetManagement.Assets.Read(AssetExposers.Location.ParentAsset.Equal(new SdmObjectReference<Asset>(Guid.NewGuid().ToString()))));
+        }
+
+        [TestMethod]
+        public void ReadFilter_LocationRackId_NonExistent_ShouldReturnNoAssets()
+        {
+            AssertEmpty(Helper.AssetManagement.Assets.Read(AssetExposers.Location.RackId.Equal(new SdmObjectReference<Rack>(Guid.NewGuid().ToString()))));
+        }
+
+        [TestMethod]
+        public void ReadFilter_LocationContainerId_NonExistent_ShouldReturnNoAssets()
+        {
+            AssertEmpty(Helper.AssetManagement.Assets.Read(AssetExposers.Location.ContainerId.Equal(new SdmObjectReference<Facility>(Guid.NewGuid().ToString()))));
+        }
+
+        [TestMethod]
+        public void ReadFilter_LocationRoomId_NonExistent_ShouldReturnNoAssets()
+        {
+            AssertEmpty(Helper.AssetManagement.Assets.Read(AssetExposers.Location.RoomId.Equal(new SdmObjectReference<Room>(Guid.NewGuid().ToString()))));
+        }
+
+        [TestMethod]
+        public void ReadFilter_LocationDeskId_NonExistent_ShouldReturnNoAssets()
+        {
+            AssertEmpty(Helper.AssetManagement.Assets.Read(AssetExposers.Location.DeskId.Equal(new SdmObjectReference<Desk>(Guid.NewGuid().ToString()))));
+        }
+
+        [TestMethod]
+        public void ReadFilter_DestinationLocationParentAsset_NonExistent_ShouldReturnNoAssets()
+        {
+            AssertEmpty(Helper.AssetManagement.Assets.Read(AssetExposers.DestinationLocation.ParentAsset.Equal(new SdmObjectReference<Asset>(Guid.NewGuid().ToString()))));
+        }
+
+        [TestMethod]
+        public void ReadFilter_DestinationLocationRackId_NonExistent_ShouldReturnNoAssets()
+        {
+            AssertEmpty(Helper.AssetManagement.Assets.Read(AssetExposers.DestinationLocation.RackId.Equal(new SdmObjectReference<Rack>(Guid.NewGuid().ToString()))));
+        }
+
+        [TestMethod]
+        public void ReadFilter_DestinationLocationContainerId_NonExistent_ShouldReturnNoAssets()
+        {
+            AssertEmpty(Helper.AssetManagement.Assets.Read(AssetExposers.DestinationLocation.ContainerId.Equal(new SdmObjectReference<Facility>(Guid.NewGuid().ToString()))));
+        }
+
+        [TestMethod]
+        public void ReadFilter_DestinationLocationRoomId_NonExistent_ShouldReturnNoAssets()
+        {
+            AssertEmpty(Helper.AssetManagement.Assets.Read(AssetExposers.DestinationLocation.RoomId.Equal(new SdmObjectReference<Room>(Guid.NewGuid().ToString()))));
+        }
+
+        [TestMethod]
+        public void ReadFilter_DestinationLocationDeskId_NonExistent_ShouldReturnNoAssets()
+        {
+            AssertEmpty(Helper.AssetManagement.Assets.Read(AssetExposers.DestinationLocation.DeskId.Equal(new SdmObjectReference<Desk>(Guid.NewGuid().ToString()))));
+        }
+
         #endregion
+
+        private static void AssertEmpty(System.Collections.Generic.IEnumerable<Asset> results)
+        {
+            var assets = results.ToList();
+
+            using (new AssertionScope())
+            {
+                assets.Should().NotBeNull();
+                assets.Should().BeEmpty();
+                assets.Should().HaveCount(0);
+            }
+        }
     }
 }

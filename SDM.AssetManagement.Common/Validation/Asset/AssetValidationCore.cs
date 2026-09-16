@@ -3,18 +3,14 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
     using System;
     using System.Collections.Generic;
     using System.Linq;
-
-    using Skyline.DataMiner.SDM.AssetManagement.Models;
-
     using SharedMappers.DomIds;
-
     using Skyline.DataMiner.SDM.AssetManagement.Common.Validation;
+    using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.Common.Services;
     using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
     using Skyline.DataMiner.SDM.InfraOps.Common.Validation;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
-
     using static Skyline.DataMiner.SDM.AssetManagement.Common.Validation.AssetValidationHandler;
     using static Skyline.DataMiner.SDM.FacilityManagement.Validation.RackValidationHandler;
 
@@ -392,7 +388,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
 
             var deskIds = assets
                 .SelectMany(a => GetDeskIds(a, includeDestination: true))
-                .Select(id => id.ToString())
+                .Select(id => id.Identifier)
                 .Distinct()
                 .ToList();
             var existingDeskIds = _entityLoader.GetDesksByDomIds(deskIds).Select(d => d.Identifier).ToHashSet();
@@ -651,7 +647,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
         {
             return GetLocations(asset, includeDestination)
                 .Select(selector)
-                .Where(reference => reference != null && reference.HasValue())
+                .Where(reference => reference.HasValue())
                 .Select(reference => reference.Identifier);
         }
 
@@ -659,7 +655,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
         {
             return GetLocations(asset, includeDestination)
                 .Select(selector)
-                .Where(reference => reference != null && reference.HasValue())
+                .Where(reference => reference.HasValue())
                 .Select(reference => reference.Identifier);
         }
 
@@ -667,7 +663,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
         {
             return GetLocations(asset, includeDestination)
                 .Select(selector)
-                .Where(reference => reference != null && reference.HasValue())
+                .Where(reference => reference.HasValue())
                 .Select(reference => reference.Identifier);
         }
 
@@ -675,16 +671,15 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
         {
             return GetLocations(asset, includeDestination)
                 .Select(selector)
-                .Where(reference => reference != null && reference.HasValue())
+                .Where(reference => reference.HasValue())
                 .Select(reference => reference.Identifier);
         }
 
-        private static IEnumerable<Guid> GetDeskIds(Asset asset, bool includeDestination)
+        private static IEnumerable<SdmObjectReference<Desk>> GetDeskIds(Asset asset, bool includeDestination)
         {
             return GetLocations(asset, includeDestination)
                 .Select(location => location.DeskId)
-                .Where(reference => reference != null && reference.HasValue())
-                .Select(reference => reference.GetIdentifierAsGuid());
+                .Where(reference => reference.HasValue());
         }
 
         private static IEnumerable<AssetLocation> GetLocations(Asset asset, bool includeDestination)
@@ -770,7 +765,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             ValidationResult result)
             where T : SdmObject<T>
         {
-            if (reference != null && reference.HasValue() && !existingIds.Contains(reference.Identifier))
+            if (reference.HasValue() && !existingIds.Contains(reference.Identifier))
             {
                 result.AddFailReason(field, $"Referenced {targetName} '{reference.Identifier}' does not exist.");
             }
@@ -1128,7 +1123,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
         {
             var result = new ValidationResult();
 
-            if (asset.Location.RackId == default || asset.Location.RackPosition == null)
+            if (!asset.Location.RackId.HasValue() || asset.Location.RackPosition == null)
             {
                 return result;
             }

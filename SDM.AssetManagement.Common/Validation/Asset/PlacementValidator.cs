@@ -3,15 +3,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
     using System;
     using System.Collections.Generic;
     using System.Linq;
-
-    using Skyline.DataMiner.SDM.AssetManagement.Models;
-
     using Skyline.DataMiner.SDM.AssetManagement.Common.Validation;
+    using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.Common.Services;
     using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
-
     using static Skyline.DataMiner.SDM.AssetManagement.Common.Validation.AssetValidationHandler;
 
     /// <summary>
@@ -230,7 +227,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
         {
             var result = new ValidationResult();
 
-            if (asset.Location.IsEmpty || asset.Location.RackId == default)
+            if (asset.Location.IsEmpty || !asset.Location.RackId.HasValue())
             {
                 return result;
             }

@@ -17,6 +17,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.Net.Sections;
     using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.Extensions;
     using SLDataGateway.API.Querying;
     using SLDataGateway.API.Types.Querying;
 
@@ -819,9 +820,9 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     _rowfk.ID = new SectionID(_rowfkSectionId.Value);
                 }
 
-                if (obj.RowFk.Row != default && System.Guid.TryParse(obj.RowFk.Row.Identifier, out var rowGuid) && rowGuid != System.Guid.Empty)
+                if (obj.RowFk.Row.HasValue())
                 {
-                    _rowfk.AddOrUpdateValue<System.Guid>(FacilityManagement.Models.RackDomMapper.RowFk.Row, rowGuid);
+                    _rowfk.AddOrUpdateValue<System.Guid>(FacilityManagement.Models.RackDomMapper.RowFk.Row, obj.RowFk.Row.GetIdentifierAsGuid());
                 }
 
                 instance.Sections.Add(_rowfk);
@@ -836,9 +837,9 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     _zonefk.ID = new SectionID(_zonefkSectionId.Value);
                 }
 
-                if (obj.ZoneFk.Zone != default && System.Guid.TryParse(obj.ZoneFk.Zone.Identifier, out var zoneGuid) && zoneGuid != System.Guid.Empty)
+                if (obj.ZoneFk.Zone.HasValue())
                 {
-                    _zonefk.AddOrUpdateValue<System.Guid>(FacilityManagement.Models.RackDomMapper.ZoneFk.Zone, zoneGuid);
+                    _zonefk.AddOrUpdateValue<System.Guid>(FacilityManagement.Models.RackDomMapper.ZoneFk.Zone, obj.ZoneFk.Zone.GetIdentifierAsGuid());
                 }
 
                 instance.Sections.Add(_zonefk);
@@ -952,11 +953,11 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.Capacity.MaximumRackCapacity), comparer, (double)value);
                 case "Capacity.MaximumPowerCapacity":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.Capacity.MaximumPowerCapacity), comparer, (double)value);
-                case "RowFk.Row" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && (value is null || SdmObjectReference<FacilityManagement.Models.Row>.Convert(value).Identifier is null):
+                case "RowFk.Row" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && !SdmObjectReference<FacilityManagement.Models.Row>.Convert(value).HasValue():
                     return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.RackDomMapper.RowFk.Row.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "RowFk.Row":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.RowFk.Row), comparer, System.Guid.Parse(SdmObjectReference<FacilityManagement.Models.Row>.Convert(value).Identifier));
-                case "ZoneFk.Zone" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && (value is null || SdmObjectReference<Zone>.Convert(value).Identifier is null):
+                case "ZoneFk.Zone" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && !SdmObjectReference<Zone>.Convert(value).HasValue():
                     return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.RackDomMapper.ZoneFk.Zone.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "ZoneFk.Zone":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.ZoneFk.Zone), comparer, System.Guid.Parse(SdmObjectReference<Zone>.Convert(value).Identifier));

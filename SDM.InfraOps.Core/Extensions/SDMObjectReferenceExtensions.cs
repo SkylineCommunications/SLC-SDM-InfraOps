@@ -11,6 +11,22 @@
         /// </summary>
         public static bool HasValue<T>(this SdmObjectReference<T> reference) where T : SdmObject<T>
         {
+            if(!TryGetIdentifierAsGuid(reference, out var guid))
+            {
+                return false;
+            }
+
+            if (guid == Guid.Empty)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public static bool TryGetIdentifierAsGuid<T>(this SdmObjectReference<T> reference, out Guid guid) where T : SdmObject<T>
+        {
+            guid = Guid.Empty;
             if (reference == null)
             {
                 return false;
@@ -21,22 +37,17 @@
                 return false;
             }
 
-            if(!Guid.TryParse(reference.Identifier, out var guid))
+            if (!Guid.TryParse(reference.Identifier, out guid))
             {
                 return false;
             }
 
-            return guid != Guid.Empty;
+            return true;
         }
 
         public static Guid GetIdentifierAsGuid<T>(this SdmObjectReference<T> reference) where T : SdmObject<T>
         {
-            if(string.IsNullOrWhiteSpace(reference.Identifier))
-            {
-                return Guid.Empty;
-            }
-
-            if (!Guid.TryParse(reference.Identifier, out var guid))
+            if (!TryGetIdentifierAsGuid(reference, out var guid))
             {
                 throw new InvalidOperationException("The Identifier of the SdmObjectReference is not a valid GUID.");
             }

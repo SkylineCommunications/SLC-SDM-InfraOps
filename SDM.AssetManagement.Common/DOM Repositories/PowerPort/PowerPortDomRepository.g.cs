@@ -19,11 +19,11 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.Net.Sections;
     using Skyline.DataMiner.SDM;
-    using Skyline.DataMiner.SDM.AssetManagement.Models.Interafaces;
+    using Skyline.DataMiner.SDM.Extensions;
     using SLDataGateway.API.Querying;
     using SLDataGateway.API.Types.Querying;
 
-    internal partial class PowerPortDomRepository : IBulkRepository<PowerPort>, IDomInstanceReader<PowerPort>
+    internal partial class PowerPortDomRepository : IBulkRepository<PowerPort>
 	{
 		private readonly IConnection connection;
 		private readonly DomHelper helper;
@@ -510,12 +510,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			var obj = new PowerPort
 			{
 				Identifier = instance.ID.Id.ToString(),
-                IsNewInternal = false,
-                CreatedAt = ((ITrackBase)instance).CreatedAt,
-                CreatedBy = ((ITrackBase)instance).CreatedBy,
-                LastModified = ((ITrackBase)instance).LastModified,
-                LastModifiedBy = ((ITrackBase)instance).LastModifiedBy,
-            };
+				IsNewInternal = false,
+				CreatedAt = ((ITrackBase)instance).CreatedAt,
+				CreatedBy = ((ITrackBase)instance).CreatedBy,
+				LastModified = ((ITrackBase)instance).LastModified,
+				LastModifiedBy = ((ITrackBase)instance).LastModifiedBy,
+			};
 
 			var _powerportinfoSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.SectionDefinitionId));
 			if (_powerportinfoSection != default)
@@ -576,12 +576,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			return obj;
 		}
 
-        PowerPort IDomInstanceReader<PowerPort>.FromDomInstance(DomInstance instance)
-        {
-            return FromInstance(instance);
-        }
-
-        private DomInstance ToInstance(PowerPort obj)
+		private DomInstance ToInstance(PowerPort obj)
 		{
 			Guid id = default(Guid);
 			if (!String.IsNullOrEmpty(obj.Identifier))
@@ -621,9 +616,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				_powerportinfo.AddOrUpdateValue<int>(AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.OutputType, (int)obj.PowerPortInfo.OutputType);
 				_powerportinfo.AddOrUpdateValue<string>(AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.PortExposure, SharedMappers.DomIds.SlcAsset_Management.Enums.Portexposure.ToValue(obj.PowerPortInfo.PortExposure));
 
-                if (obj.PowerPortInfo.PortType != default)
+				if (obj.PowerPortInfo.PortType.HasValue())
 				{
-					_powerportinfo.AddOrUpdateValue<string>(AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.PortType, Convert.ToString(obj.PowerPortInfo.PortType));
+					_powerportinfo.AddOrUpdateValue<string>(AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.PortType, obj.PowerPortInfo.PortType.Identifier);
 				}
 
 				if (obj.PowerPortInfo.Label != default)
@@ -641,9 +636,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				{
 					_assetrelation.ID = new SectionID(obj.AssetRelationPropertiesSectionId.Value);
 				}
-				if (obj.Asset != default && System.Guid.TryParse(obj.Asset.Identifier, out var assetGuid) && assetGuid != System.Guid.Empty)
+				if (obj.Asset.HasValue())
 				{
-					_assetrelation.AddOrUpdateValue<System.Guid>(AssetManagement.Models.PowerPortDomMapper.AssetRelationProperties.Asset, assetGuid);
+					_assetrelation.AddOrUpdateValue<System.Guid>(AssetManagement.Models.PowerPortDomMapper.AssetRelationProperties.Asset, obj.Asset.GetIdentifierAsGuid());
 				}
 
 				instance.Sections.Add(_assetrelation);
@@ -666,7 +661,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 					return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModified, comparer, (DateTime)value);
 				case "LastModifiedBy":
 					return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModifiedBy, comparer, (string)value);
-				case "Asset" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && (value is null || SdmObjectReference<AssetManagement.Models.Asset>.Convert(value).Identifier is null):
+				case "Asset" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && !SdmObjectReference<AssetManagement.Models.Asset>.Convert(value).HasValue():
 					return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.PowerPortDomMapper.AssetRelationProperties.Asset.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "Asset":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.PowerPortDomMapper.AssetRelationProperties.Asset), comparer, System.Guid.Parse(SdmObjectReference<AssetManagement.Models.Asset>.Convert(value).Identifier));
@@ -689,12 +684,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			}
 		}
 
-        FilterElement<DomInstance> IDomInstanceReader<PowerPort>.CreatePortFilter(string fieldName, Comparer comparer, object value)
-        {
-            return CreateFilter(fieldName, comparer, value);
-        }
-
-        private IOrderByElement CreateOrderBy(string fieldName, SortOrder sortOrder, bool naturalSort = false)
+		private IOrderByElement CreateOrderBy(string fieldName, SortOrder sortOrder, bool naturalSort = false)
 		{
 			switch (fieldName)
 			{
@@ -729,5 +719,5 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			}
 		}
 
-    }
+	}
 }

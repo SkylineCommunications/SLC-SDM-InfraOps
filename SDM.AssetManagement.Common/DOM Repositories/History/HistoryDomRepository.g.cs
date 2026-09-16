@@ -13,6 +13,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.Net.Sections;
     using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.Extensions;
+    using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     using SLDataGateway.API.Querying;
@@ -544,13 +546,13 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 var _job = _historyInfoSection.GetValue<Guid>(AssetManagement.Models.HistoryDomMapper.HistoryInfo.Job);
                 if (_job != null)
                 {
-                    obj.HistoryInfo.Job = _job.Value;
+                    obj.HistoryInfo.Job = new ISdmObjectReference<ISdmObject>(Convert.ToString(_job.Value));
                 }
 
                 var _modifiedInstanceId = _historyInfoSection.GetValue<string>(AssetManagement.Models.HistoryDomMapper.HistoryInfo.ModifiedInstanceId);
                 if (_modifiedInstanceId != null)
                 {
-                    obj.HistoryInfo.ModifiedInstanceID = _modifiedInstanceId.Value;
+                    obj.HistoryInfo.ModifiedInstanceID = new ISdmObjectReference<ISdmObject>(Convert.ToString(_modifiedInstanceId.Value));
                 }
 
                 var _modifiedInstanceDefinitionId = _historyInfoSection.GetValue<string>(AssetManagement.Models.HistoryDomMapper.HistoryInfo.ModifiedInstanceDefinitionId);
@@ -604,14 +606,14 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     section.AddOrUpdateValue<string>(HistoryDomMapper.HistoryInfo.Description, Convert.ToString(info.Description));
                 }
 
-                if (info.Job.HasValue)
+                if (info.Job.HasValue())
                 {
-                    section.AddOrUpdateValue<Guid>(HistoryDomMapper.HistoryInfo.Job, info.Job.Value);
+                    section.AddOrUpdateValue<Guid>(HistoryDomMapper.HistoryInfo.Job, info.Job.GetIdentifierAsGuid());
                 }
 
-                if (info.ModifiedInstanceID != default)
+                if (info.ModifiedInstanceID.HasValue())
                 {
-                    section.AddOrUpdateValue<string>(HistoryDomMapper.HistoryInfo.ModifiedInstanceId, Convert.ToString(info.ModifiedInstanceID));
+                    section.AddOrUpdateValue<string>(HistoryDomMapper.HistoryInfo.ModifiedInstanceId, info.ModifiedInstanceID.Identifier);
                 }
 
                 if (info.ModifiedInstanceDefinitionID != default)
@@ -651,10 +653,10 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModifiedBy, comparer, (string)value);
                 case "HistoryInfo.Description":
                     return FieldFilter(HistoryDomMapper.HistoryInfo.Description, comparer, value);
-                case "HistoryInfo.Job" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                case "HistoryInfo.Job" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && !ISdmObjectReference<ISdmObject>.Convert<ISdmObject>(value).HasValue():
                     return DomInstanceExposers.FieldValues.KeyExists(HistoryDomMapper.HistoryInfo.Job.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "HistoryInfo.Job":
-                    return FieldFilter(HistoryDomMapper.HistoryInfo.Job, comparer, value);
+                    return FieldFilter(HistoryDomMapper.HistoryInfo.Job, comparer, System.Guid.Parse(ISdmObjectReference<ISdmObject>.Convert<ISdmObject>(value).Identifier));
                 case "HistoryInfo.ModifiedInstanceID":
                     return FieldFilter(HistoryDomMapper.HistoryInfo.ModifiedInstanceId, comparer, value);
                 case "HistoryInfo.ModifiedInstanceDefinitionID":

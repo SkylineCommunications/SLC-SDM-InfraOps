@@ -6,6 +6,7 @@
 
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
+    [Obsolete("This class is deprecated and will be removed in future versions.")]
     public sealed class ResourceLink : ChangeTrackingBase, IEquatable<ResourceLink>, ISectionTrackable, ISectionEmptyState
     {
         [JsonIgnore]
@@ -17,6 +18,7 @@
         public bool IsEmpty =>
             ResourceId == Guid.Empty;
 
+        //TODO: Verify if it is a reference
         public Guid ResourceId
         {
             get => ResourceIdField.Value;

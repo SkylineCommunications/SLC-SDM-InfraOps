@@ -3,17 +3,14 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
-
     using FluentAssertions;
     using FluentAssertions.Execution;
-
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-
     using SharedMappers.DomIds;
-
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
+    using Skyline.DataMiner.SDM.Extensions;
 
     /// <summary>
     /// Filter and query tests for PortType repository operations.
@@ -132,9 +129,6 @@
         [TestMethod]
         public void PortTypeDomStorageProvider_NestedReadFilter_CableTypeFks_Contains()
         {
-            // Arrange
-            Helper.PopulateWithDemoData(upTo: DemoDataLayer.PortTypes);
-
             var cableType = Helper.AssetManagement.CableTypes.Create(new CableType
             {
                 Identifier = Guid.NewGuid().ToString(),
@@ -168,6 +162,142 @@
             {
                 results.Should().NotBeEmpty("should find port types with the specified cable type FK");
                 results.Should().OnlyContain(pt => pt.CableFKs.CableTypeFks.Contains(targetCableTypeFk));
+            }
+        }
+
+        [TestMethod]
+        public void PortTypeDomStorageProvider_NestedReadFilter_CableTypeFks_NotContains()
+        {
+            var targetCableType = Helper.AssetManagement.CableTypes.Create(new CableType
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                Name = "Target Cable Type",
+                CategoryLinks = new CategoryRelation
+                {
+                    Categories = new List<SlcAsset_Management.Enums.CategoriesEnum> { SlcAsset_Management.Enums.CategoriesEnum.Data },
+                },
+            });
+            var otherCableType = Helper.AssetManagement.CableTypes.Create(new CableType
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                Name = "Other Cable Type",
+                CategoryLinks = new CategoryRelation
+                {
+                    Categories = new List<SlcAsset_Management.Enums.CategoriesEnum> { SlcAsset_Management.Enums.CategoriesEnum.Power },
+                },
+            });
+
+            var targetCableTypeFk = new SdmObjectReference<CableType>(targetCableType.Identifier);
+            var otherCableTypeFk = new SdmObjectReference<CableType>(otherCableType.Identifier);
+            var portTypes = new[]
+            {
+                new PortType
+                {
+                    Identifier = Guid.NewGuid().ToString(),
+                    Name = "Port Type Without Cable FK",
+                    CategoryLinks = { Categories = new List<SlcAsset_Management.Enums.CategoriesEnum> { SlcAsset_Management.Enums.CategoriesEnum.Data } },
+                    CableFKs = { CableTypeFks = new List<SdmObjectReference<CableType>>() },
+                },
+                new PortType
+                {
+                    Identifier = Guid.NewGuid().ToString(),
+                    Name = "Port Type With Target Cable FK",
+                    CategoryLinks = { Categories = new List<SlcAsset_Management.Enums.CategoriesEnum> { SlcAsset_Management.Enums.CategoriesEnum.Data } },
+                    CableFKs = { CableTypeFks = new List<SdmObjectReference<CableType>> { targetCableTypeFk } },
+                },
+                new PortType
+                {
+                    Identifier = Guid.NewGuid().ToString(),
+                    Name = "Port Type With Other Cable FK",
+                    CategoryLinks = { Categories = new List<SlcAsset_Management.Enums.CategoriesEnum> { SlcAsset_Management.Enums.CategoriesEnum.Power } },
+                    CableFKs = { CableTypeFks = new List<SdmObjectReference<CableType>> { otherCableTypeFk } },
+                },
+            };
+
+            Helper.AssetManagement.PortTypes.Create(portTypes);
+
+            var filter = PortTypeExposers.CableFKs.CableTypeFks.NotContains(targetCableTypeFk);
+            var expected = portTypes.Where(pt => pt.CableFKs.CableTypeFks.Any() && !pt.CableFKs.CableTypeFks.Any(fk => fk != null && fk.HasValue() && fk.Identifier == targetCableTypeFk.Identifier)).ToArray();
+
+            var results = Helper.AssetManagement.PortTypes.Read(filter).ToList();
+
+            using (new AssertionScope())
+            {
+                results.Should().NotBeNull();
+                results.Should().HaveCount(expected.Length);
+                results.Should().BeEquivalentTo(expected);
+            }
+        }
+
+        [TestMethod]
+        public void PortTypeDomStorageProvider_NestedReadFilter_CableTypeFks_NonExistent()
+        {
+            Helper.AssetManagement.PortTypes.Create(new PortType
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                Name = "Port Type Without Matching Cable Type",
+                CategoryLinks =
+                {
+                    Categories = new List<SlcAsset_Management.Enums.CategoriesEnum> { SlcAsset_Management.Enums.CategoriesEnum.Data },
+                },
+            });
+
+            var filter = PortTypeExposers.CableFKs.CableTypeFks.Contains(new SdmObjectReference<CableType>(Guid.NewGuid().ToString()));
+
+            var results = Helper.AssetManagement.PortTypes.Read(filter).ToList();
+
+            using (new AssertionScope())
+            {
+                results.Should().NotBeNull();
+                results.Should().BeEmpty();
+                results.Should().HaveCount(0);
+            }
+        }
+
+        [TestMethod]
+        public void PortTypeDomStorageProvider_NestedReadFilter_CableTypeFks_WithValue()
+        {
+            var targetCableType = Helper.AssetManagement.CableTypes.Create(new CableType
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                Name = "Present Cable Type",
+                CategoryLinks = new CategoryRelation
+                {
+                    Categories = new List<SlcAsset_Management.Enums.CategoriesEnum> { SlcAsset_Management.Enums.CategoriesEnum.Data },
+                },
+            });
+
+            var targetCableTypeFk = new SdmObjectReference<CableType>(targetCableType.Identifier);
+            var portTypes = new[]
+            {
+                new PortType
+                {
+                    Identifier = Guid.NewGuid().ToString(),
+                    Name = "Port Type Empty Cable FKs",
+                    CategoryLinks = { Categories = new List<SlcAsset_Management.Enums.CategoriesEnum> { SlcAsset_Management.Enums.CategoriesEnum.Data } },
+                    CableFKs = { CableTypeFks = new List<SdmObjectReference<CableType>>() },
+                },
+                new PortType
+                {
+                    Identifier = Guid.NewGuid().ToString(),
+                    Name = "Port Type Matching Cable FK",
+                    CategoryLinks = { Categories = new List<SlcAsset_Management.Enums.CategoriesEnum> { SlcAsset_Management.Enums.CategoriesEnum.Data } },
+                    CableFKs = { CableTypeFks = new List<SdmObjectReference<CableType>> { targetCableTypeFk } },
+                },
+            };
+
+            Helper.AssetManagement.PortTypes.Create(portTypes);
+
+            var filter = PortTypeExposers.CableFKs.CableTypeFks.Contains(targetCableTypeFk);
+            var expected = portTypes.Where(pt => pt.CableFKs.CableTypeFks.Any(fk => fk != null && fk.HasValue() && fk.Identifier == targetCableTypeFk.Identifier)).ToArray();
+
+            var results = Helper.AssetManagement.PortTypes.Read(filter).ToList();
+
+            using (new AssertionScope())
+            {
+                results.Should().NotBeNull();
+                results.Should().HaveCount(expected.Length);
+                results.Should().BeEquivalentTo(expected);
             }
         }
 

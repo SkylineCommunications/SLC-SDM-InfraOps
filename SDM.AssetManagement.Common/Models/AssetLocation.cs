@@ -60,13 +60,13 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             set => DeskIdField.Value = value;
         }
 
-        public SdmObjectReference<FacilityManagement.Models.Facility> ContainerId
+        public SdmObjectReference<Facility> ContainerId
         {
             get => ContainerIdField.Value;
             set => ContainerIdField.Value = value;
         }
 
-        public SdmObjectReference<FacilityManagement.Models.Room> RoomId
+        public SdmObjectReference<Room> RoomId
         {
             get => RoomIdField.Value;
             set => RoomIdField.Value = value;

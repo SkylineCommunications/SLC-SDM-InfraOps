@@ -9,7 +9,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     using SharedMappers.DomIds;
 
     using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
     using Skyline.DataMiner.SDM.InfraOps.Core.Models;
+    using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     //[GenerateExposers]
@@ -64,7 +66,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             set => DescriptionField.Value = value;
         }
 
-        public Guid Manufacturer
+        public PnoObjectReference<Organization> Manufacturer
         {
             get => ManufacturerField.Value;
             set => ManufacturerField.Value = value;
@@ -219,9 +221,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
         [JsonIgnore]
         [SdmIgnore]
-        internal IChangeTrackingField<Guid> ManufacturerField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<PnoObjectReference<Organization>> ManufacturerField => FieldHandler.GetOrCreateField(
             nameof(Manufacturer),
-            () => new ChangeTrackingField<Guid>(Guid.Empty));
+            () => new ChangeTrackingField<PnoObjectReference<Organization>>(default));
 
         [JsonIgnore]
         [SdmIgnore]
@@ -347,7 +349,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             StateField?.Changed == true ||
             HoldersField?.Changed == true ||
             AttachmentsField?.Changed == true ||
-            (DataPorts?.Any(p => p?.Changed == true) == true);
+            (DataPorts?.Any(p => p?.Changed == true) == true) ||
+            _protocolLink?.Changed == true;
 
         public IEnumerable<TrackingFieldValueDifference> GetChanges()
         {
@@ -358,7 +361,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     OldValue = kvp.Value.prevVal,
                     NewValue = kvp.Value.newVal,
                 })
-                .Concat(_lifecycle?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>());
+                .Concat(_lifecycle?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>())
+                .Concat(_protocolLink?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>());
         }
 
         public void ResetChangeTracking()
@@ -382,6 +386,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     attachment?.ResetChangeTracking();
                 }
             }
+
+            _protocolLink?.ResetChangeTracking();
         }
 
         #region Section Tracking
@@ -435,7 +441,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 string.Equals(Name, other.Name, StringComparison.OrdinalIgnoreCase) &&
                 DeviceTypeId == other.DeviceTypeId &&
                 string.Equals(Description, other.Description, StringComparison.OrdinalIgnoreCase) &&
-                Manufacturer.Equals(other.Manufacturer) &&
+                Manufacturer == other.Manufacturer &&
                 Depth == other.Depth &&
                 Height == other.Height &&
                 Width == other.Width &&

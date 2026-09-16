@@ -3,21 +3,18 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
-
     using FluentAssertions;
     using FluentAssertions.Execution;
-
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-
     using SDM.AssetManagement.Tests.Setup;
-
     using SharedMappers.DomIds;
-
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
+    using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
+    using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
 
     /// <summary>
     /// CRUD tests for Asset repository operations.
@@ -44,25 +41,25 @@
                 FirstUseDate = DateTime.UtcNow.AddMonths(-11),
                 EndOfWarrantyDate = DateTime.UtcNow.AddYears(1),
                 InstallationDate = DateTime.UtcNow.AddMonths(-10),
-                InstallationUserId = Guid.NewGuid(),
+                InstallationUserId = new PnoObjectReference<Person>(Guid.NewGuid()),
                 ModificationDate = DateTime.UtcNow,
-                ModificationUserId = Guid.NewGuid(),
+                ModificationUserId = new PnoObjectReference<Person>(Guid.NewGuid()),
                 EndOfLifeDate = DateTime.UtcNow.AddYears(5),
                 Ownership =
                 {
-                    Organization = Guid.NewGuid(),
-                    ContactPerson = Guid.NewGuid(),
-                    ContactPersonRole = Guid.NewGuid(),
-                    Team = Guid.NewGuid(),
+                    Organization = new PnoObjectReference<Organization>(Guid.NewGuid()),
+                    ContactPerson = new PnoObjectReference<Person>(Guid.NewGuid()),
+                    ContactPersonRole = new PnoObjectReference<Role>(Guid.NewGuid()),
+                    Team = new PnoObjectReference<Team>(Guid.NewGuid()),
                 },
                 Custody =
                 {
                     From = DateTime.UtcNow.AddMonths(-6),
                     Till = DateTime.UtcNow.AddMonths(6),
-                    ContactPerson = Guid.NewGuid(),
-                    Team = Guid.NewGuid(),
-                    Organization = Guid.NewGuid(),
-                    ContactPersonRole = Guid.NewGuid(),
+                    ContactPerson = new PnoObjectReference<Person>(Guid.NewGuid()),
+                    Team = new PnoObjectReference<Team>(Guid.NewGuid()),
+                    Organization = new PnoObjectReference<Organization>(Guid.NewGuid()),
+                    ContactPersonRole = new PnoObjectReference<Role>(Guid.NewGuid()),
                 },
                 Holders = new List<AssetHolder>
                 {
@@ -155,22 +152,22 @@
                 FirstUseDate = DateTime.UtcNow.AddMonths(-11),
                 EndOfWarrantyDate = DateTime.UtcNow.AddYears(1),
                 InstallationDate = DateTime.UtcNow.AddMonths(-10),
-                InstallationUserId = Guid.NewGuid(),
+                InstallationUserId = new PnoObjectReference<Person>(Guid.NewGuid()),
                 ModificationDate = DateTime.UtcNow,
-                ModificationUserId = Guid.NewGuid(),
+                ModificationUserId = new PnoObjectReference<Person>(Guid.NewGuid()),
                 EndOfLifeDate = DateTime.UtcNow.AddYears(5),
                 Ownership =
                 {
-                    Organization = Guid.NewGuid(),
+                    Organization = new PnoObjectReference<Organization>(Guid.NewGuid()),
                 },
                 Custody =
                 {
                     From = DateTime.UtcNow.AddMonths(-6),
                     Till = DateTime.UtcNow.AddMonths(6),
-                    ContactPerson = Guid.NewGuid(),
-                    Team = Guid.NewGuid(),
-                    Organization = Guid.NewGuid(),
-                    ContactPersonRole = Guid.NewGuid(),
+                    ContactPerson = new PnoObjectReference<Person>(Guid.NewGuid()),
+                    Team = new PnoObjectReference<Team>(Guid.NewGuid()),
+                    Organization = new PnoObjectReference<Organization>(Guid.NewGuid()),
+                    ContactPersonRole = new PnoObjectReference<Role>(Guid.NewGuid()),
                 },
                 Holders = new List<AssetHolder>(),
                 ElementLinks = new List<ElementLink>
@@ -341,9 +338,9 @@
                 // Ownership changes
                 updated.Ownership.Should().NotBeNull();
                 updated.Ownership.Organization.Should().NotBe(original.Ownership.Organization);
-                updated.Ownership.ContactPerson.Should().Be(Guid.Empty);
-                updated.Ownership.ContactPersonRole.Should().Be(Guid.Empty);
-                updated.Ownership.Team.Should().Be(Guid.Empty);
+                updated.Ownership.ContactPerson.Should().Be(new PnoObjectReference<Person>(Guid.Empty));
+                updated.Ownership.ContactPersonRole.Should().Be(new PnoObjectReference<Role>(Guid.Empty));
+                updated.Ownership.Team.Should().Be(new PnoObjectReference<Team>(Guid.Empty));
 
                 // Custody changes
                 updated.Custody.Should().NotBeNull();

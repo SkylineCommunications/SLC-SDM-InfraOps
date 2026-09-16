@@ -129,11 +129,11 @@
 
             bool[] locationExists = new bool[]
             {
-                asset.Location.ParentAsset != null && asset.Location.ParentAsset.HasValue(),
-                asset.Location.RackId != default && asset.Location.RackId.HasValue(),
-                 asset.Location.DeskId != null && asset.Location.DeskId.HasValue(),
-                asset.Location.ContainerId != null && asset.Location.ContainerId.HasValue(),
-                asset.Location.RoomId != default && asset.Location.RoomId.HasValue(),
+                asset.Location.ParentAsset.HasValue(),
+                asset.Location.RackId.HasValue(),
+                asset.Location.DeskId.HasValue(),
+                asset.Location.ContainerId.HasValue(),
+                asset.Location.RoomId.HasValue(),
             };
 
             if (locationExists.Count(entry => entry) > 1)
@@ -303,11 +303,11 @@
 
             bool[] locationExists = new bool[]
             {
-                asset.DestinationLocation.ParentAsset != null && asset.DestinationLocation.ParentAsset.HasValue(),
-                asset.DestinationLocation.RackId != default && asset.DestinationLocation.RackId.HasValue(),
-                asset.DestinationLocation.DeskId != null && asset.DestinationLocation.DeskId.HasValue(),
-                asset.DestinationLocation.ContainerId != default && asset.DestinationLocation.ContainerId.HasValue(),
-                asset.DestinationLocation.RoomId != default && asset.DestinationLocation.RoomId.HasValue(),
+                asset.DestinationLocation.ParentAsset.HasValue(),
+                asset.DestinationLocation.RackId.HasValue(),
+                asset.DestinationLocation.DeskId.HasValue(),
+                asset.DestinationLocation.ContainerId.HasValue(),
+                asset.DestinationLocation.RoomId.HasValue(),
             };
 
             if (locationExists.Count(entry => entry) > 1)

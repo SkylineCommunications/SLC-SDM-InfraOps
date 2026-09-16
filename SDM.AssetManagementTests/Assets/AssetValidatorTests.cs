@@ -3,21 +3,18 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
-
     using FluentAssertions;
-
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-
     using SDM.AssetManagement.Tests.Setup;
-
     using SharedCommonLibrary.AssetManagement.State_Management;
     using SharedMappers.DomIds;
-
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Common.Exceptions;
     using Skyline.DataMiner.SDM.AssetManagement.Common.Validation;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
+    using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
+    using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
     /// <summary>
@@ -307,7 +304,7 @@
                     RackId = new SdmObjectReference<Rack>(rack.Identifier),
                     RackPosition = 10,
                     Side = SlcAsset_Management.Enums.SideEnum.Front,
-                    DeskId = new SdmObjectReference<Desk>(Guid.NewGuid().ToString()), // Multiple location types
+                    DeskId = new SdmObjectReference<Desk>(Convert.ToString(Guid.NewGuid())), // Multiple location types
                 },
             };
 
@@ -603,7 +600,7 @@
                     RackId = new SdmObjectReference<Rack>(rack.Identifier),
                     RackPosition = 10,
                     Side = SlcAsset_Management.Enums.SideEnum.Front,
-                    DeskId = new SdmObjectReference<Desk>(Guid.NewGuid().ToString()), // Multiple destination types
+                    DeskId = new SdmObjectReference<Desk>(Convert.ToString(Guid.NewGuid())), // Multiple destination types
                 },
             };
 
@@ -798,7 +795,7 @@
                 AssetID = "TEST-LIFECYCLE-001",
                 Name = "Asset With Installation User But No Date",
                 AssetClassId = new SdmObjectReference<AssetClass>(testAssetClass.Identifier),
-                InstallationUserId = Guid.NewGuid(),
+                InstallationUserId = new PnoObjectReference<Person>(Guid.NewGuid()),
                 // InstallationDate not set
             };
 
@@ -840,7 +837,7 @@
                 AssetID = "TEST-LIFECYCLE-003",
                 Name = "Asset With Modification User But No Date",
                 AssetClassId = new SdmObjectReference<AssetClass>(testAssetClass.Identifier),
-                ModificationUserId = Guid.NewGuid(),
+                ModificationUserId = new PnoObjectReference<Person>(Guid.NewGuid()),
                 // ModificationDate not set
             };
 
@@ -883,7 +880,7 @@
                 Name = "Installed Asset",
                 AssetClassId = new SdmObjectReference<AssetClass>(testAssetClass.Identifier),
                 State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Installed,
-                InstallationUserId = Guid.NewGuid(),
+                InstallationUserId = new PnoObjectReference<Person>(Guid.NewGuid()),
                 InstallationDate = DateTime.UtcNow.AddDays(-1),
             };
             asset.IsNewInternal = false;
@@ -908,7 +905,7 @@
                 Name = "Available Asset",
                 AssetClassId = new SdmObjectReference<AssetClass>(testAssetClass.Identifier),
                 State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available,
-                InstallationUserId = Guid.NewGuid(),
+                InstallationUserId = new PnoObjectReference<Person>(Guid.NewGuid()),
                 InstallationDate = DateTime.UtcNow.AddDays(-1),
             };
             asset.IsNewInternal = false;
@@ -951,7 +948,7 @@
             // Arrange
             var asset = new Asset
             {
-                InstallationUserId = Guid.NewGuid(),
+                InstallationUserId = new PnoObjectReference<Person>(Guid.NewGuid()),
                 InstallationDate = DateTime.UtcNow,
             };
 
@@ -1073,7 +1070,7 @@
                 AssetClassId = new SdmObjectReference<AssetClass>(testAssetClass.Identifier),
                 Ownership =
                 {
-                    ContactPerson = Guid.NewGuid(),
+                    ContactPerson = new PnoObjectReference<Person>(Guid.NewGuid()),
                     // ContactPersonRole not set
                 },
             };
@@ -1097,7 +1094,7 @@
                 AssetClassId = new SdmObjectReference<AssetClass>(testAssetClass.Identifier),
                 Ownership =
                 {
-                    ContactPersonRole = Guid.NewGuid(),
+                    ContactPersonRole = new PnoObjectReference<Role>(Guid.NewGuid()),
                     // ContactPerson not set
                 },
             };
@@ -1125,7 +1122,7 @@
                 AssetClassId = new SdmObjectReference<AssetClass>(testAssetClass.Identifier),
                 Custody =
                 {
-                    ContactPerson = Guid.NewGuid(),
+                    ContactPerson = new PnoObjectReference<Person>(Guid.NewGuid()),
                     // ContactPersonRole not set
                 },
             };
@@ -1149,7 +1146,7 @@
                 AssetClassId = new SdmObjectReference<AssetClass>(testAssetClass.Identifier),
                 Custody =
                 {
-                    ContactPersonRole = Guid.NewGuid(),
+                    ContactPersonRole = new PnoObjectReference<Role>(Guid.NewGuid()),
                     // ContactPerson not set
                 },
             };
