@@ -3,6 +3,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Common.Validation
     using SharedMappers.DomIds;
 
     using Skyline.DataMiner.SDM.AssetManagement.Models;
+    using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
@@ -72,7 +73,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Common.Validation
         {
             result = new ValidationResult();
 
-            if (sourcePort != default && sourcePort == destinationPort)
+            if (sourcePort.HasValue() && sourcePort == destinationPort)
             {
                 result.AddFailReason(ConnectionValidationField.SourcePort, "Source Port is the same as destination.");
                 result.AddFailReason(ConnectionValidationField.DestinationPort, "Destination Port is the same as source.");

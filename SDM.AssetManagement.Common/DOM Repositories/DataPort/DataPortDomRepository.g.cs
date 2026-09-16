@@ -665,9 +665,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
 				_dataportinfo.AddOrUpdateValue<string>(AssetManagement.Models.DataPortDomMapper.DataPortInfo.PortExposure, SharedMappers.DomIds.SlcAsset_Management.Enums.Portexposure.ToValue(obj.DataPortInfo.PortExposure));
 
-				if (obj.DataPortInfo.PortType != default && System.Guid.TryParse(obj.DataPortInfo.PortType.Identifier, out var dataPortInfoTypeGuid) && dataPortInfoTypeGuid != System.Guid.Empty)
+				if (obj.DataPortInfo.PortType.HasValue())
 				{
-					_dataportinfo.AddOrUpdateValue<System.Guid>(AssetManagement.Models.DataPortDomMapper.DataPortInfo.Type, dataPortInfoTypeGuid);
+					_dataportinfo.AddOrUpdateValue<System.Guid>(AssetManagement.Models.DataPortDomMapper.DataPortInfo.Type, obj.DataPortInfo.PortType.GetIdentifierAsGuid());
 				}
 
 				if (obj.DataPortInfo.Label != default)
@@ -685,9 +685,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				{
 					_assetrelation.ID = new SectionID(obj.AssetFkSectionId.Value);
 				}
-				if (obj.Asset != default && System.Guid.TryParse(obj.Asset.Identifier, out var assetGuid) && assetGuid != System.Guid.Empty)
+				if (obj.Asset.HasValue())
 				{
-					_assetrelation.AddOrUpdateValue<System.Guid>(AssetManagement.Models.DataPortDomMapper.AssetFk.Asset, assetGuid);
+					_assetrelation.AddOrUpdateValue<System.Guid>(AssetManagement.Models.DataPortDomMapper.AssetFk.Asset, obj.Asset.GetIdentifierAsGuid());
 				}
 
 				instance.Sections.Add(_assetrelation);

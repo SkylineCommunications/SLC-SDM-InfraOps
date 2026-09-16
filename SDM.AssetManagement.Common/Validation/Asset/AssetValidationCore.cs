@@ -388,7 +388,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
 
             var deskIds = assets
                 .SelectMany(a => GetDeskIds(a, includeDestination: true))
-                .Select(id => id.ToString())
+                .Select(id => id.Identifier)
                 .Distinct()
                 .ToList();
             var existingDeskIds = _entityLoader.GetDesksByDomIds(deskIds).Select(d => d.Identifier).ToHashSet();

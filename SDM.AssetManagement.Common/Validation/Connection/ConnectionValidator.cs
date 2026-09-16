@@ -196,7 +196,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             }
 
             var sourcePort = connection.Source.Port;
-            if (sourcePort != default)
+            if (sourcePort.HasValue())
             {
                 if (lookups.DataPorts.ContainsKey(sourcePort.Identifier))
                 {

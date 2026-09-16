@@ -671,12 +671,12 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 					_Ownership.ID = new SectionID(_OwnershipSectionId.Value);
 				}
 
-				if (obj.Ownership.Team != default && obj.Ownership.Team.HasValue())
+				if (obj.Ownership.Team.HasValue())
 				{
 					_Ownership.AddOrUpdateValue<Guid>(FacilityManagement.Models.RoomDomMapper.Ownership.Team, obj.Ownership.Team.Identifier);
 				}
 
-				if (obj.Ownership.Owner != default && obj.Ownership.Owner.HasValue())
+				if (obj.Ownership.Owner.HasValue())
 				{
 					_Ownership.AddOrUpdateValue<Guid>(FacilityManagement.Models.RoomDomMapper.Ownership.Owner, obj.Ownership.Owner.Identifier);
 				}
@@ -710,9 +710,9 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 					_floorfk.ID = new SectionID(_floorfkSectionId.Value);
 				}
 
-				if (obj.FloorFk.Floor != default && System.Guid.TryParse(obj.FloorFk.Floor.Identifier, out var floorGuid) && floorGuid != System.Guid.Empty)
+				if (obj.FloorFk.Floor.HasValue())
 				{
-					_floorfk.AddOrUpdateValue<System.Guid>(FacilityManagement.Models.RoomDomMapper.FloorFk.Floor, floorGuid);
+					_floorfk.AddOrUpdateValue<System.Guid>(FacilityManagement.Models.RoomDomMapper.FloorFk.Floor, obj.FloorFk.Floor.GetIdentifierAsGuid());
 				}
 
 				instance.Sections.Add(_floorfk);

@@ -959,9 +959,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 _assetproperties.AddOrUpdateValue<string>(AssetManagement.Models.AssetDomMapper.AssetProperties.AssetName, Convert.ToString(obj.Name));
             }
 
-            if (obj.AssetClassId != default && System.Guid.TryParse(obj.AssetClassId.Identifier, out var assetClassGuid) && assetClassGuid != System.Guid.Empty)
+            if (obj.AssetClassId.HasValue())
             {
-                _assetproperties.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetDomMapper.AssetProperties.AssetClass, assetClassGuid);
+                _assetproperties.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetDomMapper.AssetProperties.AssetClass, obj.AssetClassId.GetIdentifierAsGuid());
             }
 
             if (obj.Description != default)
@@ -1019,9 +1019,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     _location.AddOrUpdateValue<long>(AssetManagement.Models.AssetDomMapper.Location.HolderNumber, (long)(obj.Location.HolderNumber).Value);
                 }
 
-                if (obj.Location.ParentAsset != default && System.Guid.TryParse(obj.Location.ParentAsset.Identifier, out var locationParentAssetGuid) && locationParentAssetGuid != System.Guid.Empty)
+                if (obj.Location.ParentAsset.HasValue())
                 {
-                    _location.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetDomMapper.Location.ParentAsset, locationParentAssetGuid);
+                    _location.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetDomMapper.Location.ParentAsset, obj.Location.ParentAsset.GetIdentifierAsGuid());
                 }
 
                 if (obj.Location.RackPosition != default)
@@ -1029,24 +1029,24 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     _location.AddOrUpdateValue<long>(AssetManagement.Models.AssetDomMapper.Location.RackPosition, (long)(obj.Location.RackPosition).Value);
                 }
 
-                if (obj.Location.RackId != default && System.Guid.TryParse(obj.Location.RackId.Identifier, out var locationRackGuid) && locationRackGuid != System.Guid.Empty)
+                if (obj.Location.RackId.HasValue())
                 {
-                    _location.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetDomMapper.Location.Rack, locationRackGuid);
+                    _location.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetDomMapper.Location.Rack, obj.Location.RackId.GetIdentifierAsGuid());
                 }
 
-                if (obj.Location.DeskId != default && System.Guid.TryParse(obj.Location.DeskId.Identifier, out var locationDeskGuid) && locationDeskGuid != System.Guid.Empty)
+                if (obj.Location.DeskId.HasValue())
                 {
-                    _location.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetDomMapper.Location.Desk, locationDeskGuid);
+                    _location.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetDomMapper.Location.Desk, obj.Location.DeskId.GetIdentifierAsGuid());
                 }
 
-                if (obj.Location.ContainerId != default && System.Guid.TryParse(obj.Location.ContainerId.Identifier, out var locationContainerGuid) && locationContainerGuid != System.Guid.Empty)
+                if (obj.Location.ContainerId.HasValue())
                 {
-                    _location.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetDomMapper.Location.Container, locationContainerGuid);
+                    _location.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetDomMapper.Location.Container, obj.Location.ContainerId.GetIdentifierAsGuid());
                 }
 
-                if (obj.Location.RoomId != default && System.Guid.TryParse(obj.Location.RoomId.Identifier, out var locationRoomGuid) && locationRoomGuid != System.Guid.Empty)
+                if (obj.Location.RoomId.HasValue())
                 {
-                    _location.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetDomMapper.Location.Room, locationRoomGuid);
+                    _location.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetDomMapper.Location.Room, obj.Location.RoomId.GetIdentifierAsGuid());
                 }
 
                 if (obj.Location.Side != default)
@@ -1071,9 +1071,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     _destinationlocation.AddOrUpdateValue<long>(AssetManagement.Models.AssetDomMapper.DestinationLocation.HolderNumber, (long)(obj.DestinationLocation.HolderNumber).Value);
                 }
 
-                if (obj.DestinationLocation.ParentAsset != default && System.Guid.TryParse(obj.DestinationLocation.ParentAsset.Identifier, out var destinationParentAssetGuid) && destinationParentAssetGuid != System.Guid.Empty)
+                if (obj.DestinationLocation.ParentAsset.HasValue())
                 {
-                    _destinationlocation.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetDomMapper.DestinationLocation.ParentAsset, destinationParentAssetGuid);
+                    _destinationlocation.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetDomMapper.DestinationLocation.ParentAsset, obj.DestinationLocation.ParentAsset.GetIdentifierAsGuid());
                 }
 
                 if (obj.DestinationLocation.RackPosition != default)
@@ -1081,24 +1081,24 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     _destinationlocation.AddOrUpdateValue<long>(AssetManagement.Models.AssetDomMapper.DestinationLocation.RackPosition, (long)(obj.DestinationLocation.RackPosition).Value);
                 }
 
-                if (obj.DestinationLocation.RackId != default && System.Guid.TryParse(obj.DestinationLocation.RackId.Identifier, out var destinationRackGuid) && destinationRackGuid != System.Guid.Empty)
+                if (obj.DestinationLocation.RackId.HasValue())
                 {
-                    _destinationlocation.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetDomMapper.DestinationLocation.Rack, destinationRackGuid);
+                    _destinationlocation.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetDomMapper.DestinationLocation.Rack, obj.DestinationLocation.RackId.GetIdentifierAsGuid());
                 }
 
-                if (obj.DestinationLocation.DeskId != default && System.Guid.TryParse(obj.DestinationLocation.DeskId.Identifier, out var destinationDeskGuid) && destinationDeskGuid != System.Guid.Empty)
+                if (obj.DestinationLocation.DeskId.HasValue())
                 {
-                    _destinationlocation.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetDomMapper.DestinationLocation.Desk, destinationDeskGuid);
+                    _destinationlocation.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetDomMapper.DestinationLocation.Desk, obj.DestinationLocation.DeskId.GetIdentifierAsGuid());
                 }
 
-                if (obj.DestinationLocation.ContainerId != default && System.Guid.TryParse(obj.DestinationLocation.ContainerId.Identifier, out var destinationContainerGuid) && destinationContainerGuid != System.Guid.Empty)
+                if (obj.DestinationLocation.ContainerId.HasValue())
                 {
-                    _destinationlocation.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetDomMapper.DestinationLocation.Container, destinationContainerGuid);
+                    _destinationlocation.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetDomMapper.DestinationLocation.Container, obj.DestinationLocation.ContainerId.GetIdentifierAsGuid());
                 }
 
-                if (obj.DestinationLocation.RoomId != default && System.Guid.TryParse(obj.DestinationLocation.RoomId.Identifier, out var destinationRoomGuid) && destinationRoomGuid != System.Guid.Empty)
+                if (obj.DestinationLocation.RoomId.HasValue())
                 {
-                    _destinationlocation.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetDomMapper.DestinationLocation.Room, destinationRoomGuid);
+                    _destinationlocation.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetDomMapper.DestinationLocation.Room, obj.DestinationLocation.RoomId.GetIdentifierAsGuid());
                 }
 
                 if (obj.DestinationLocation.Side != default)
@@ -1131,7 +1131,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 _lifecycle.AddOrUpdateValue<DateTime>(AssetManagement.Models.AssetDomMapper.Lifecycle.EndOfWarrantyDate, (DateTime)obj.EndOfWarrantyDate);
             }
 
-            if (obj.InstallationUserId != default)
+            if (obj.InstallationUserId.HasValue())
             {
                 _lifecycle.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetDomMapper.Lifecycle.InstallationUser, obj.InstallationUserId);
             }
@@ -1141,7 +1141,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 _lifecycle.AddOrUpdateValue<DateTime>(AssetManagement.Models.AssetDomMapper.Lifecycle.InstallationDate, (DateTime)obj.InstallationDate);
             }
 
-            if (obj.ModificationUserId != default)
+            if (obj.ModificationUserId.HasValue())
             {
                 _lifecycle.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetDomMapper.Lifecycle.ModificationUser, obj.ModificationUserId);
             }
@@ -1168,22 +1168,22 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     _ownership.ID = new SectionID(_ownershipSectionId.Value);
                 }
 
-                if (obj.Ownership.Organization != default)
+                if (obj.Ownership.Organization.HasValue())
                 {
                     _ownership.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetDomMapper.Ownership.Organization, obj.Ownership.Organization);
                 }
 
-                if (obj.Ownership.ContactPerson != default)
+                if (obj.Ownership.ContactPerson.HasValue())
                 {
                     _ownership.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetDomMapper.Ownership.ContactPerson, (System.Guid)obj.Ownership.ContactPerson);
                 }
 
-                if (obj.Ownership.ContactPersonRole != default)
+                if (obj.Ownership.ContactPersonRole.HasValue())
                 {
                     _ownership.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetDomMapper.Ownership.ContactPersonRole, (System.Guid)obj.Ownership.ContactPersonRole);
                 }
 
-                if (obj.Ownership.Team != default)
+                if (obj.Ownership.Team.HasValue())
                 {
                     _ownership.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetDomMapper.Ownership.Team, (System.Guid)obj.Ownership.Team);
                 }
@@ -1210,22 +1210,22 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     _custody.AddOrUpdateValue<DateTime>(AssetManagement.Models.AssetDomMapper.Custody.Till, (DateTime)obj.Custody.Till);
                 }
 
-                if (obj.Custody.Organization != default)
+                if (obj.Custody.Organization.HasValue())
                 {
                     _custody.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetDomMapper.Custody.Organization, (System.Guid)obj.Custody.Organization);
                 }
 
-                if (obj.Custody.ContactPerson != default)
+                if (obj.Custody.ContactPerson.HasValue())
                 {
                     _custody.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetDomMapper.Custody.ContactPerson, (System.Guid)obj.Custody.ContactPerson);
                 }
 
-                if (obj.Custody.ContactPersonRole != default)
+                if (obj.Custody.ContactPersonRole.HasValue())
                 {
                     _custody.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetDomMapper.Custody.ContactPersonRole, (System.Guid)obj.Custody.ContactPersonRole);
                 }
 
-                if (obj.Custody.Team != default)
+                if (obj.Custody.Team.HasValue())
                 {
                     _custody.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetDomMapper.Custody.Team, (System.Guid)obj.Custody.Team);
                 }

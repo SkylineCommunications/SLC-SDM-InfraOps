@@ -615,9 +615,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				{
 					_rackfk.ID = new SectionID(_rackfkSectionId.Value);
 				}
-				if (obj.RackFk.Rack != default && System.Guid.TryParse(obj.RackFk.Rack.Identifier, out var rackGuid) && rackGuid != System.Guid.Empty)
+				if (obj.RackFk.Rack.HasValue())
 				{
-					_rackfk.AddOrUpdateValue<System.Guid>(AssetManagement.Models.ReservationDomMapper.RackFk.Rack, rackGuid);
+					_rackfk.AddOrUpdateValue<System.Guid>(AssetManagement.Models.ReservationDomMapper.RackFk.Rack, obj.RackFk.Rack.GetIdentifierAsGuid());
 				}
 
 				instance.Sections.Add(_rackfk);
@@ -631,9 +631,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				{
 					_jobfk.ID = new SectionID(_jobfkSectionId.Value);
 				}
-                if (obj.JobFk.Job != default && System.Guid.TryParse(obj.JobFk.Job.Identifier, out var jobGuid) && jobGuid != System.Guid.Empty)
+                if (obj.JobFk.Job.HasValue())
 				{
-					_jobfk.AddOrUpdateValue<System.Guid>(AssetManagement.Models.ReservationDomMapper.JobFk.Job, jobGuid);
+					_jobfk.AddOrUpdateValue<System.Guid>(AssetManagement.Models.ReservationDomMapper.JobFk.Job, obj.JobFk.Job.GetIdentifierAsGuid());
 				}
 
 				instance.Sections.Add(_jobfk);

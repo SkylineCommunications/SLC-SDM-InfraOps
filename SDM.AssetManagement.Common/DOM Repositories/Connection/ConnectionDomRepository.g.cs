@@ -654,7 +654,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             {
                 _cableinformation.ID = new SectionID(obj.CableInformationSectionId.Value);
             }
-            if (obj.CableType != default)
+            if (obj.CableType.HasValue())
             {
                 _cableinformation.AddOrUpdateValue<string>(AssetManagement.Models.ConnectionDomMapper.CableInformation.CableType, obj.CableType.Identifier);
             }
@@ -678,12 +678,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     _source.AddOrUpdateValue<string>(AssetManagement.Models.ConnectionDomMapper.Source.CableTag, Convert.ToString(obj.Source.CableTag));
                 }
 
-                if (obj.Source.Port != default && System.Guid.TryParse(obj.Source.Port.Identifier, out var sourcePortGuid) && sourcePortGuid != System.Guid.Empty)
+                if (obj.Source.Port.HasValue())
                 {
-                    _source.AddOrUpdateValue<Guid>(AssetManagement.Models.ConnectionDomMapper.Source.Port, sourcePortGuid);
+                    _source.AddOrUpdateValue<Guid>(AssetManagement.Models.ConnectionDomMapper.Source.Port, obj.Source.Port.GetIdentifierAsGuid());
                 }
 
-                if (obj.Source.PortType != default)
+                if (obj.Source.PortType.HasValue())
                 {
                     _source.AddOrUpdateValue<string>(AssetManagement.Models.ConnectionDomMapper.Source.PortType, obj.Source.PortType.Identifier);
                 }
@@ -704,12 +704,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     _destination.AddOrUpdateValue<string>(AssetManagement.Models.ConnectionDomMapper.Destination.CableTag, Convert.ToString(obj.Destination.CableTag));
                 }
 
-                if (obj.Destination.Port != default && System.Guid.TryParse(obj.Destination.Port.Identifier, out var destinationPortGuid) && destinationPortGuid != System.Guid.Empty)
+                if (obj.Destination.Port.HasValue())
                 {
-                    _destination.AddOrUpdateValue<Guid>(AssetManagement.Models.ConnectionDomMapper.Destination.Port, destinationPortGuid);
+                    _destination.AddOrUpdateValue<Guid>(AssetManagement.Models.ConnectionDomMapper.Destination.Port, obj.Destination.Port.GetIdentifierAsGuid());
                 }
 
-                if (obj.Destination.PortType != default)
+                if (obj.Destination.PortType.HasValue())
                 {
                     _destination.AddOrUpdateValue<string>(AssetManagement.Models.ConnectionDomMapper.Destination.PortType, obj.Destination.PortType.Identifier);
                 }

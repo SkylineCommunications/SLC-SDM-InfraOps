@@ -820,9 +820,9 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     _rowfk.ID = new SectionID(_rowfkSectionId.Value);
                 }
 
-                if (obj.RowFk.Row != default && System.Guid.TryParse(obj.RowFk.Row.Identifier, out var rowGuid) && rowGuid != System.Guid.Empty)
+                if (obj.RowFk.Row.HasValue())
                 {
-                    _rowfk.AddOrUpdateValue<System.Guid>(FacilityManagement.Models.RackDomMapper.RowFk.Row, rowGuid);
+                    _rowfk.AddOrUpdateValue<System.Guid>(FacilityManagement.Models.RackDomMapper.RowFk.Row, obj.RowFk.Row.GetIdentifierAsGuid());
                 }
 
                 instance.Sections.Add(_rowfk);
@@ -837,9 +837,9 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     _zonefk.ID = new SectionID(_zonefkSectionId.Value);
                 }
 
-                if (obj.ZoneFk.Zone != default && System.Guid.TryParse(obj.ZoneFk.Zone.Identifier, out var zoneGuid) && zoneGuid != System.Guid.Empty)
+                if (obj.ZoneFk.Zone.HasValue())
                 {
-                    _zonefk.AddOrUpdateValue<System.Guid>(FacilityManagement.Models.RackDomMapper.ZoneFk.Zone, zoneGuid);
+                    _zonefk.AddOrUpdateValue<System.Guid>(FacilityManagement.Models.RackDomMapper.ZoneFk.Zone, obj.ZoneFk.Zone.GetIdentifierAsGuid());
                 }
 
                 instance.Sections.Add(_zonefk);

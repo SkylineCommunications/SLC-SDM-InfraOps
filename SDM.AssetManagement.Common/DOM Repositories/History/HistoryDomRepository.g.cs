@@ -606,12 +606,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     section.AddOrUpdateValue<string>(HistoryDomMapper.HistoryInfo.Description, Convert.ToString(info.Description));
                 }
 
-                if (info.Job != default && System.Guid.TryParse(info.Job.Identifier, out var jobGuid) && jobGuid != System.Guid.Empty)
+                if (info.Job.HasValue())
                 {
-                    section.AddOrUpdateValue<Guid>(HistoryDomMapper.HistoryInfo.Job, jobGuid);
+                    section.AddOrUpdateValue<Guid>(HistoryDomMapper.HistoryInfo.Job, info.Job.GetIdentifierAsGuid());
                 }
 
-                if (info.ModifiedInstanceID != default && info.ModifiedInstanceID.HasValue())
+                if (info.ModifiedInstanceID.HasValue())
                 {
                     section.AddOrUpdateValue<string>(HistoryDomMapper.HistoryInfo.ModifiedInstanceId, info.ModifiedInstanceID.Identifier);
                 }

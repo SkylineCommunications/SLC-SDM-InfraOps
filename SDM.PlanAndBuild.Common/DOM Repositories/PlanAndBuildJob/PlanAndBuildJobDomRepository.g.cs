@@ -20,6 +20,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.Net.Sections;
     using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
     using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
     using SLDataGateway.API.Querying;
@@ -781,7 +782,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 
 			// JobType (soft deleted, replaced by Type) is intentionally never written back, matching legacy's
 			// ApplyChanges(), which excludes the obsolete field from persistence entirely.
-			if (obj.Type != default)
+			if (obj.Type.HasValue())
 			{
 				_planandbuildjobproperties.AddOrUpdateValue<string>(PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.Type, obj.Type.Identifier);
 			}
@@ -816,12 +817,12 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 					_ownership.ID = new SectionID(_ownershipSectionId.Value);
 				}
 
-				if (obj.Ownership.AssignedTo != default)
+				if (obj.Ownership.AssignedTo.HasValue())
 				{
 					_ownership.AddOrUpdateValue<Guid>(PlanAndBuild.Models.PlanAndBuildJobDomMapper.Ownership.AssignedTo, obj.Ownership.AssignedTo);
 				}
 
-				if (obj.Ownership.AssignmentGroup != default)
+				if (obj.Ownership.AssignmentGroup.HasValue())
 				{
 					_ownership.AddOrUpdateValue<Guid>(PlanAndBuild.Models.PlanAndBuildJobDomMapper.Ownership.AssignmentGroup, obj.Ownership.AssignmentGroup);
 				}
@@ -838,7 +839,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 					_assetsusedSection.ID = new SectionID(_assetsusedSectionId.Value);
 				}
 
-				if (assetsused.AssetId != default)
+				if (assetsused.AssetId.HasValue())
 				{
 					_assetsusedSection.AddOrUpdateValue<string>(PlanAndBuild.Models.PlanAndBuildJobDomMapper.AssetsUsed.AssetId, assetsused.AssetId.Identifier);
 				}
@@ -898,7 +899,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 					_connectionsonjobSection.ID = new SectionID(_connectionsonjobSectionId.Value);
 				}
 
-				if (connectionsonjob.ConnectionId != default)
+				if (connectionsonjob.ConnectionId.HasValue())
 				{
 					_connectionsonjobSection.AddOrUpdateValue<string>(PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.ConnectionId, connectionsonjob.ConnectionId.Identifier);
 				}
@@ -918,7 +919,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 					_connectionsonjobSection.AddOrUpdateValue<string>(PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.Status, Convert.ToString(connectionsonjob.Status));
 				}
 
-				if (connectionsonjob.CableType != default)
+				if (connectionsonjob.CableType.HasValue())
 				{
 					_connectionsonjobSection.AddOrUpdateValue<string>(PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.CableType, connectionsonjob.CableType.Identifier);
 				}

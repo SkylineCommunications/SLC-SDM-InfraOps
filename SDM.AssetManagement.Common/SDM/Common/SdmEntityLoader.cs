@@ -616,7 +616,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
             }
 
             var powerPortTypeExposer = new Exposer<PowerPort, Guid>(
-                obj => Guid.Parse(obj.PowerPortInfo.PortType.Identifier),
+                obj => obj.PowerPortInfo.PortType.HasValue() ? obj.PowerPortInfo.PortType.GetIdentifierAsGuid() : Guid.Empty,
                 "PowerPortInfo.PortType");
 
             return Tools.RetrieveBigOrFilter(

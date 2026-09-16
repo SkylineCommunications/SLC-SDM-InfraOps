@@ -616,9 +616,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				_powerportinfo.AddOrUpdateValue<int>(AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.OutputType, (int)obj.PowerPortInfo.OutputType);
 				_powerportinfo.AddOrUpdateValue<string>(AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.PortExposure, SharedMappers.DomIds.SlcAsset_Management.Enums.Portexposure.ToValue(obj.PowerPortInfo.PortExposure));
 
-				if (obj.PowerPortInfo.PortType != default)
+				if (obj.PowerPortInfo.PortType.HasValue())
 				{
-					_powerportinfo.AddOrUpdateValue<string>(AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.PortType, Convert.ToString(obj.PowerPortInfo.PortType));
+					_powerportinfo.AddOrUpdateValue<string>(AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.PortType, obj.PowerPortInfo.PortType.Identifier);
 				}
 
 				if (obj.PowerPortInfo.Label != default)
@@ -636,9 +636,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				{
 					_assetrelation.ID = new SectionID(obj.AssetRelationPropertiesSectionId.Value);
 				}
-				if (obj.Asset != default && System.Guid.TryParse(obj.Asset.Identifier, out var assetGuid) && assetGuid != System.Guid.Empty)
+				if (obj.Asset.HasValue())
 				{
-					_assetrelation.AddOrUpdateValue<System.Guid>(AssetManagement.Models.PowerPortDomMapper.AssetRelationProperties.Asset, assetGuid);
+					_assetrelation.AddOrUpdateValue<System.Guid>(AssetManagement.Models.PowerPortDomMapper.AssetRelationProperties.Asset, obj.Asset.GetIdentifierAsGuid());
 				}
 
 				instance.Sections.Add(_assetrelation);

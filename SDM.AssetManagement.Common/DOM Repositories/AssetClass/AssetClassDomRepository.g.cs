@@ -893,12 +893,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				_assetclassproperties.AddOrUpdateValue<string>(AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.DeviceName, Convert.ToString(obj.Name));
 			}
 
-			if (obj.DeviceTypeId != default && System.Guid.TryParse(obj.DeviceTypeId.Identifier, out var deviceTypeGuid) && deviceTypeGuid != System.Guid.Empty)
+			if (obj.DeviceTypeId.HasValue())
 			{
-				_assetclassproperties.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.DeviceType, deviceTypeGuid);
+				_assetclassproperties.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.DeviceType, obj.DeviceTypeId.GetIdentifierAsGuid());
 			}
 
-			if (obj.Manufacturer != default && obj.Manufacturer.HasValue())
+			if (obj.Manufacturer.HasValue())
 			{
 				_assetclassproperties.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Manufacturer, obj.Manufacturer);
 			}
@@ -1011,9 +1011,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
 				_dataportsSection.AddOrUpdateValue<int>(AssetManagement.Models.AssetClassDomMapper.DataPorts.OutputType, (int)dataports.OutputType);
 				_dataportsSection.AddOrUpdateValue<string>(AssetManagement.Models.AssetClassDomMapper.DataPorts.PortExposure, SharedMappers.DomIds.SlcAsset_Management.Enums.Portexposure.ToValue(dataports.PortExposure));
-				if (dataports.PortType != default && System.Guid.TryParse(dataports.PortType.Identifier, out var dataPortTypeGuid) && dataPortTypeGuid != System.Guid.Empty)
+				if (dataports.PortType.HasValue())
 				{
-					_dataportsSection.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetClassDomMapper.DataPorts.Type, dataPortTypeGuid);
+					_dataportsSection.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetClassDomMapper.DataPorts.Type, dataports.PortType.GetIdentifierAsGuid());
 				}
 
 				if (dataports.Label != default)
@@ -1045,9 +1045,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
 				_powerportsSection.AddOrUpdateValue<int>(AssetManagement.Models.AssetClassDomMapper.PowerPorts.OutputType, (int)powerports.OutputType);
 				_powerportsSection.AddOrUpdateValue<string>(AssetManagement.Models.AssetClassDomMapper.PowerPorts.PortExposure, SharedMappers.DomIds.SlcAsset_Management.Enums.Portexposure.ToValue(powerports.PortExposure));
-				if (powerports.PortType != default && System.Guid.TryParse(powerports.PortType.Identifier, out var powerPortTypeGuid) && powerPortTypeGuid != System.Guid.Empty)
+				if (powerports.PortType.HasValue())
 				{
-					_powerportsSection.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetClassDomMapper.PowerPorts.PortType, powerPortTypeGuid);
+					_powerportsSection.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetClassDomMapper.PowerPorts.PortType, powerports.PortType.GetIdentifierAsGuid());
 				}
 
 				if (powerports.Label != default)
