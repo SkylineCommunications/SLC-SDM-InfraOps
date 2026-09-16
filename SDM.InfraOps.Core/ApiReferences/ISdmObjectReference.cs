@@ -66,6 +66,28 @@
 
         //
         // Summary:
+        //     Implicitly converts an ISdmObject to an Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences.ISdmObjectReference`1.
+        //
+        //
+        // Parameters:
+        //   sdmObject:
+        //     The SDM object to convert.
+        //
+        // Returns:
+        //     A new Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences.ISdmObjectReference`1 if the object and its identifier
+        //     are not null; otherwise, the default value.
+        public static implicit operator ISdmObjectReference<T>(T sdmObject)
+        {
+            if (sdmObject?.Identifier == null)
+            {
+                return default(ISdmObjectReference<T>);
+            }
+
+            return new ISdmObjectReference<T>(sdmObject.Identifier);
+        }
+
+        //
+        // Summary:
         //     Determines whether two Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences.ISdmObjectReference`1 instances are
         //     equal.
         //
