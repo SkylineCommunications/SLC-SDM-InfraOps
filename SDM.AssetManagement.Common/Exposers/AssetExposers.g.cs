@@ -15,7 +15,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.Exposers;
-    using Skyline.DataMiner.SDM.FacilityManagement.Models;
 
     public static partial class AssetExposers
 	{
@@ -59,22 +58,22 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			public static readonly Exposer<AssetManagement.Models.Asset, SdmObjectReference<FacilityManagement.Models.Rack>> RackId = new Exposer<AssetManagement.Models.Asset, SdmObjectReference<FacilityManagement.Models.Rack>>((obj) => obj.Location.RackId, "Location.RackId");
 			public static readonly Exposer<AssetManagement.Models.Asset, long?> RackPosition = new Exposer<AssetManagement.Models.Asset, long?>((obj) => obj.Location.RackPosition, "Location.RackPosition");
 			public static readonly Exposer<AssetManagement.Models.Asset, SlcAsset_Management.Enums.SideEnum?> Side = new Exposer<AssetManagement.Models.Asset, SlcAsset_Management.Enums.SideEnum?>((obj) => obj.Location.Side, "Location.Side");
-			public static readonly Exposer<AssetManagement.Models.Asset, SdmObjectReference<Desk>> DeskId = new Exposer<AssetManagement.Models.Asset, SdmObjectReference<Desk>>((obj) => obj.Location.DeskId, "Location.DeskId");
+			public static readonly Exposer<AssetManagement.Models.Asset, SdmObjectReference<FacilityManagement.Models.Desk>> DeskId = new Exposer<AssetManagement.Models.Asset, SdmObjectReference<FacilityManagement.Models.Desk>>((obj) => obj.Location.DeskId, "Location.DeskId");
 			public static readonly Exposer<AssetManagement.Models.Asset, SdmObjectReference<FacilityManagement.Models.Facility>> ContainerId = new Exposer<AssetManagement.Models.Asset, SdmObjectReference<FacilityManagement.Models.Facility>>((obj) => obj.Location.ContainerId, "Location.ContainerId");
 			public static readonly Exposer<AssetManagement.Models.Asset, SdmObjectReference<FacilityManagement.Models.Room>> RoomId = new Exposer<AssetManagement.Models.Asset, SdmObjectReference<FacilityManagement.Models.Room>>((obj) => obj.Location.RoomId, "Location.RoomId");
 		}
 
-		public static partial class DestinationLocation
-		{
-			public static readonly Exposer<AssetManagement.Models.Asset, long?> HolderNumber = new Exposer<AssetManagement.Models.Asset, long?>((obj) => obj.Location.HolderNumber, "DestinationLocation.HolderNumber");
-			public static readonly Exposer<AssetManagement.Models.Asset, SdmObjectReference<AssetManagement.Models.Asset>> ParentAsset = new Exposer<AssetManagement.Models.Asset, SdmObjectReference<AssetManagement.Models.Asset>>((obj) => obj.Location.ParentAsset, "DestinationLocation.ParentAsset");
-			public static readonly Exposer<AssetManagement.Models.Asset, SdmObjectReference<FacilityManagement.Models.Rack>> RackId = new Exposer<AssetManagement.Models.Asset, SdmObjectReference<FacilityManagement.Models.Rack>>((obj) => obj.Location.RackId, "DestinationLocation.RackId");
-			public static readonly Exposer<AssetManagement.Models.Asset, long?> RackPosition = new Exposer<AssetManagement.Models.Asset, long?>((obj) => obj.Location.RackPosition, "DestinationLocation.RackPosition");
-			public static readonly Exposer<AssetManagement.Models.Asset, SlcAsset_Management.Enums.SideEnum?> Side = new Exposer<AssetManagement.Models.Asset, SlcAsset_Management.Enums.SideEnum?>((obj) => obj.Location.Side, "DestinationLocation.Side");
-			public static readonly Exposer<AssetManagement.Models.Asset, SdmObjectReference<Desk>> DeskId = new Exposer<AssetManagement.Models.Asset, SdmObjectReference<Desk>>((obj) => obj.Location.DeskId, "DestinationLocation.DeskId");
-			public static readonly Exposer<AssetManagement.Models.Asset, SdmObjectReference<FacilityManagement.Models.Facility>> ContainerId = new Exposer<AssetManagement.Models.Asset, SdmObjectReference<FacilityManagement.Models.Facility>>((obj) => obj.Location.ContainerId, "DestinationLocation.ContainerId");
-			public static readonly Exposer<AssetManagement.Models.Asset, SdmObjectReference<FacilityManagement.Models.Room>> RoomId = new Exposer<AssetManagement.Models.Asset, SdmObjectReference<FacilityManagement.Models.Room>>((obj) => obj.Location.RoomId, "DestinationLocation.RoomId");
-		}
+        public static partial class DestinationLocation
+        {
+            public static readonly Exposer<AssetManagement.Models.Asset, long?> HolderNumber = new Exposer<AssetManagement.Models.Asset, long?>((obj) => obj.Location.HolderNumber, "DestinationLocation.HolderNumber");
+            public static readonly Exposer<AssetManagement.Models.Asset, SdmObjectReference<AssetManagement.Models.Asset>> ParentAsset = new Exposer<AssetManagement.Models.Asset, SdmObjectReference<AssetManagement.Models.Asset>>((obj) => obj.Location.ParentAsset, "DestinationLocation.ParentAsset");
+            public static readonly Exposer<AssetManagement.Models.Asset, SdmObjectReference<FacilityManagement.Models.Rack>> RackId = new Exposer<AssetManagement.Models.Asset, SdmObjectReference<FacilityManagement.Models.Rack>>((obj) => obj.Location.RackId, "DestinationLocation.RackId");
+            public static readonly Exposer<AssetManagement.Models.Asset, long?> RackPosition = new Exposer<AssetManagement.Models.Asset, long?>((obj) => obj.Location.RackPosition, "DestinationLocation.RackPosition");
+            public static readonly Exposer<AssetManagement.Models.Asset, SlcAsset_Management.Enums.SideEnum?> Side = new Exposer<AssetManagement.Models.Asset, SlcAsset_Management.Enums.SideEnum?>((obj) => obj.Location.Side, "DestinationLocation.Side");
+            public static readonly Exposer<AssetManagement.Models.Asset, SdmObjectReference<FacilityManagement.Models.Desk>> DeskId = new Exposer<AssetManagement.Models.Asset, SdmObjectReference<FacilityManagement.Models.Desk>>((obj) => obj.Location.DeskId, "DestinationLocation.DeskId");
+            public static readonly Exposer<AssetManagement.Models.Asset, SdmObjectReference<FacilityManagement.Models.Facility>> ContainerId = new Exposer<AssetManagement.Models.Asset, SdmObjectReference<FacilityManagement.Models.Facility>>((obj) => obj.Location.ContainerId, "DestinationLocation.ContainerId");
+            public static readonly Exposer<AssetManagement.Models.Asset, SdmObjectReference<FacilityManagement.Models.Room>> RoomId = new Exposer<AssetManagement.Models.Asset, SdmObjectReference<FacilityManagement.Models.Room>>((obj) => obj.Location.RoomId, "DestinationLocation.RoomId");
+        }
 
 		public static partial class Lifecycle
 		{

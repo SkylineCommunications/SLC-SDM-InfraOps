@@ -92,7 +92,7 @@
             new AssetLocation().Also(x => x.RackId = Ref<Rack>()).IsEmpty.Should().BeFalse();
             new AssetLocation().Also(x => x.RackPosition = 1).IsEmpty.Should().BeFalse();
             new AssetLocation().Also(x => x.Side = SlcAsset_Management.Enums.SideEnum.Back).IsEmpty.Should().BeFalse();
-            new AssetLocation().Also(x => x.DeskId = new SdmObjectReference<Desk>(Convert.ToString(Guid.NewGuid()))).IsEmpty.Should().BeFalse();
+            new AssetLocation().Also(x => x.DeskId = Ref<Desk>()).IsEmpty.Should().BeFalse();
             new AssetLocation().Also(x => x.ContainerId = Ref<Facility>()).IsEmpty.Should().BeFalse();
             new AssetLocation().Also(x => x.RoomId = Ref<Room>()).IsEmpty.Should().BeFalse();
         }

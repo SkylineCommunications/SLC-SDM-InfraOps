@@ -178,7 +178,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 hash = (hash * 23) + (RackId != null ? RackId.GetHashCode() : 0);
                 hash = (hash * 23) + RackPosition.GetHashCode();
                 hash = (hash * 23) + Side.GetHashCode();
-                hash = (hash * 23) + DeskId.GetHashCode();
+                hash = (hash * 23) + (DeskId != null ? DeskId.GetHashCode() : 0);
                 hash = (hash * 23) + (ContainerId != null ? ContainerId.GetHashCode() : 0);
                 hash = (hash * 23) + (RoomId != null ? RoomId.GetHashCode() : 0);
                 return hash;
