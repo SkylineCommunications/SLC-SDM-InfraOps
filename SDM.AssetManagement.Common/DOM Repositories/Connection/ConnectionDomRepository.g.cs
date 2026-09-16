@@ -742,6 +742,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ConnectionDomMapper.ConnectionProperties.Description), comparer, (string)value);
                 case "ConnectionType":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ConnectionDomMapper.ConnectionProperties.ConnectionType), comparer, (int)(SharedMappers.DomIds.SlcAsset_Management.Enums.ConnectionType)value);
+                case "CableType" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && (value is null || SdmObjectReference<AssetManagement.Models.CableType>.Convert(value).Identifier is null):
+                    return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.ConnectionDomMapper.CableInformation.CableType.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "CableType":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ConnectionDomMapper.CableInformation.CableType), comparer, SdmObjectReference<AssetManagement.Models.CableType>.Convert(value).Identifier);
                 case "CableLength":
@@ -750,12 +752,16 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ConnectionDomMapper.Source.CableTag), comparer, (string)value);
                 case "Source.Port":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ConnectionDomMapper.Source.Port), comparer, Convert.ToString((System.Guid)value));
+                case "Source.PortType" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && (value is null || SdmObjectReference<AssetManagement.Models.PortType>.Convert(value).Identifier is null):
+                    return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.ConnectionDomMapper.Source.PortType.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Source.PortType":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ConnectionDomMapper.Source.PortType), comparer, SdmObjectReference<AssetManagement.Models.PortType>.Convert(value).Identifier);
                 case "Destination.CableTag":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ConnectionDomMapper.Destination.CableTag), comparer, (string)value);
                 case "Destination.Port":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ConnectionDomMapper.Destination.Port), comparer, Convert.ToString((System.Guid)value));
+                case "Destination.PortType" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && (value is null || SdmObjectReference<AssetManagement.Models.PortType>.Convert(value).Identifier is null):
+                    return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.ConnectionDomMapper.Destination.PortType.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Destination.PortType":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ConnectionDomMapper.Destination.PortType), comparer, SdmObjectReference<AssetManagement.Models.PortType>.Convert(value).Identifier);
                 default:

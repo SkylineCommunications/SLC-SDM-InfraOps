@@ -683,7 +683,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
         {
             return GetLocations(asset, includeDestination)
                 .Select(location => location.DeskId)
-                .Where(id => id != Guid.Empty);
+                .Where(reference => reference != null && reference.HasValue())
+                .Select(reference => reference.GetIdentifierAsGuid());
         }
 
         private static IEnumerable<AssetLocation> GetLocations(Asset asset, bool includeDestination)
@@ -731,12 +732,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             AddLocationReferenceFailure(location.RackId, lookups.RackIds, isDestination ? AssetValidationField.DestinationRackId : AssetValidationField.RackId, "Rack", result);
             AddLocationReferenceFailure(location.ContainerId, lookups.FacilityIds, isDestination ? AssetValidationField.DestinationContainerId : AssetValidationField.ContainerId, "Facility", result);
             AddLocationReferenceFailure(location.RoomId, lookups.RoomIds, isDestination ? AssetValidationField.DestinationRoomId : AssetValidationField.RoomId, "Room", result);
-
-            if (location.DeskId != Guid.Empty && !lookups.DeskIds.Contains(location.DeskId.ToString()))
-            {
-                result.AddFailReason(isDestination ? AssetValidationField.DestinationDeskId : AssetValidationField.DeskId,
-                    $"Referenced Desk '{location.DeskId}' does not exist.");
-            }
+            AddLocationReferenceFailure(location.DeskId, lookups.DeskIds, isDestination ? AssetValidationField.DestinationDeskId : AssetValidationField.DeskId, "Desk", result);
         }
 
         private sealed class LocationReferenceLookups

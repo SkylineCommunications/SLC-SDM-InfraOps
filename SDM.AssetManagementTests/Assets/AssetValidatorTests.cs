@@ -307,7 +307,7 @@
                     RackId = new SdmObjectReference<Rack>(rack.Identifier),
                     RackPosition = 10,
                     Side = SlcAsset_Management.Enums.SideEnum.Front,
-                    DeskId = Guid.NewGuid(), // Multiple location types
+                    DeskId = new SdmObjectReference<Desk>(Guid.NewGuid().ToString()), // Multiple location types
                 },
             };
 
@@ -603,7 +603,7 @@
                     RackId = new SdmObjectReference<Rack>(rack.Identifier),
                     RackPosition = 10,
                     Side = SlcAsset_Management.Enums.SideEnum.Front,
-                    DeskId = Guid.NewGuid(), // Multiple destination types
+                    DeskId = new SdmObjectReference<Desk>(Guid.NewGuid().ToString()), // Multiple destination types
                 },
             };
 

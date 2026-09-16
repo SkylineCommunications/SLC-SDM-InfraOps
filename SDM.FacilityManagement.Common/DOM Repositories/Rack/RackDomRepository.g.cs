@@ -952,8 +952,12 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.Capacity.MaximumRackCapacity), comparer, (double)value);
                 case "Capacity.MaximumPowerCapacity":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.Capacity.MaximumPowerCapacity), comparer, (double)value);
+                case "RowFk.Row" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && (value is null || SdmObjectReference<FacilityManagement.Models.Row>.Convert(value).Identifier is null):
+                    return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.RackDomMapper.RowFk.Row.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "RowFk.Row":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.RowFk.Row), comparer, System.Guid.Parse(SdmObjectReference<FacilityManagement.Models.Row>.Convert(value).Identifier));
+                case "ZoneFk.Zone" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && (value is null || SdmObjectReference<Zone>.Convert(value).Identifier is null):
+                    return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.RackDomMapper.ZoneFk.Zone.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "ZoneFk.Zone":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.ZoneFk.Zone), comparer, System.Guid.Parse(SdmObjectReference<Zone>.Convert(value).Identifier));
                 case "Resource.ResourceId":

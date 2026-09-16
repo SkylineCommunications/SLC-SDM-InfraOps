@@ -676,6 +676,8 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
                     return DomInstanceExposers.FieldValues.KeyExists(InfraOpsProperties.Models.PropertyValuesDomMapper.Values.Value.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Values.Value":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(InfraOpsProperties.Models.PropertyValuesDomMapper.Values.Value), comparer, (string)value);
+                case "Values.PropertyId" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && (value is null || SdmObjectReference<InfraOpsProperties.Models.Property>.Convert(value).Identifier is null):
+                    return DomInstanceExposers.FieldValues.KeyExists(InfraOpsProperties.Models.PropertyValuesDomMapper.Values.PropertyId.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Values.PropertyId":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(InfraOpsProperties.Models.PropertyValuesDomMapper.Values.PropertyId), comparer, System.Guid.Parse(SdmObjectReference<InfraOpsProperties.Models.Property>.Convert(value).Identifier));
                 default:

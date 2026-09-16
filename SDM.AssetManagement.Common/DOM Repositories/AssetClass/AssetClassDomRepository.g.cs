@@ -1132,6 +1132,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 					return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModifiedBy, comparer, (string)value);
 				case "Name":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.DeviceName), comparer, (string)value);
+				case "DeviceTypeId" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && (value is null || SdmObjectReference<AssetManagement.Models.DeviceType>.Convert(value).Identifier is null):
+					return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.DeviceType.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "DeviceTypeId":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.DeviceType), comparer, System.Guid.Parse(SdmObjectReference<AssetManagement.Models.DeviceType>.Convert(value).Identifier));
 				case "Manufacturer" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:

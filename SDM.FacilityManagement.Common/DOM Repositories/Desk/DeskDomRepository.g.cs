@@ -676,6 +676,8 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.DeskDomMapper.DeskInformation.Description), comparer, (string)value);
                 case "DeskInformation.DeskID":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.DeskDomMapper.DeskInformation.DeskID), comparer, (string)value);
+                case "RoomFk.Room" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && (value is null || SdmObjectReference<FacilityManagement.Models.Room>.Convert(value).Identifier is null):
+                    return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.DeskDomMapper.RoomFk.Room.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "RoomFk.Room":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.DeskDomMapper.RoomFk.Room), comparer, System.Guid.Parse(SdmObjectReference<FacilityManagement.Models.Room>.Convert(value).Identifier));
                 case "Resource.ResourceId":

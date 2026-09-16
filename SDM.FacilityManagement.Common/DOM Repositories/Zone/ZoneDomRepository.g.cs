@@ -785,6 +785,8 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.ZoneDomMapper.ZoneCapacity.CoolingCapacity.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "ZoneCapacity.CoolingCapacity":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.ZoneCapacity.CoolingCapacity), comparer, (double)((double?)value).Value);
+                case "RoomFk.Room" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && (value is null || SdmObjectReference<FacilityManagement.Models.Room>.Convert(value).Identifier is null):
+                    return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.ZoneDomMapper.RoomFk.Room.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "RoomFk.Room":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.RoomFk.Room), comparer, System.Guid.Parse(SdmObjectReference<FacilityManagement.Models.Room>.Convert(value).Identifier));
                 case "Resource.ResourceId":

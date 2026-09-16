@@ -758,6 +758,8 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.Ownership.Owner), comparer, Convert.ToString((System.Guid)value));
                 case "ResourceLink.ResourceId":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.ResourceLink.ResourceId), comparer, Convert.ToString((System.Guid)value));
+                case "FloorFk.Floor" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && (value is null || SdmObjectReference<FacilityManagement.Models.Floor>.Convert(value).Identifier is null):
+                    return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.RoomDomMapper.FloorFk.Floor.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "FloorFk.Floor":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.FloorFk.Floor), comparer, System.Guid.Parse(SdmObjectReference<FacilityManagement.Models.Floor>.Convert(value).Identifier));
                 default:

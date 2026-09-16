@@ -20,7 +20,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             !RackId.HasValue() &&
             RackPosition == default &&
             Side == default &&
-            DeskId == Guid.Empty &&
+            !DeskId.HasValue() &&
             !ContainerId.HasValue() &&
             !RoomId.HasValue();
 
@@ -54,7 +54,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             set => SideField.Value = value;
         }
 
-        public Guid DeskId
+        public SdmObjectReference<Desk> DeskId
         {
             get => DeskIdField.Value;
             set => DeskIdField.Value = value;
@@ -104,9 +104,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
         [JsonIgnore]
         [SdmIgnore]
-        internal IChangeTrackingField<Guid> DeskIdField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<SdmObjectReference<Desk>> DeskIdField => FieldHandler.GetOrCreateField(
             nameof(DeskId),
-            () => new ChangeTrackingField<Guid>(Guid.Empty));
+            () => new ChangeTrackingField<SdmObjectReference<Desk>>(default));
 
         [JsonIgnore]
         [SdmIgnore]
@@ -163,7 +163,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 RackId == other.RackId &&
                 RackPosition == other.RackPosition &&
                 Side == other.Side &&
-                DeskId.Equals(other.DeskId) &&
+                DeskId == other.DeskId &&
                 ContainerId == other.ContainerId &&
                 RoomId == other.RoomId;
         }
@@ -178,7 +178,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 hash = (hash * 23) + (RackId != null ? RackId.GetHashCode() : 0);
                 hash = (hash * 23) + RackPosition.GetHashCode();
                 hash = (hash * 23) + Side.GetHashCode();
-                hash = (hash * 23) + DeskId.GetHashCode();
+                hash = (hash * 23) + (DeskId != null ? DeskId.GetHashCode() : 0);
                 hash = (hash * 23) + (ContainerId != null ? ContainerId.GetHashCode() : 0);
                 hash = (hash * 23) + (RoomId != null ? RoomId.GetHashCode() : 0);
                 return hash;

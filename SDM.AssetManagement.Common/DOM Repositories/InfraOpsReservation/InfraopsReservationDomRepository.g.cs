@@ -682,6 +682,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModifiedBy, comparer, (string)value);
                 case "Description":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ReservationDomMapper.ReservationProperties.Description), comparer, (string)value);
+                case "RackFk.Rack" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && (value is null || SdmObjectReference<FacilityManagement.Models.Rack>.Convert(value).Identifier is null):
+                    return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.ReservationDomMapper.RackFk.Rack.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "RackFk.Rack":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ReservationDomMapper.RackFk.Rack), comparer, System.Guid.Parse(SdmObjectReference<FacilityManagement.Models.Rack>.Convert(value).Identifier));
                 case "JobFk.Job":

@@ -975,6 +975,8 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.End), comparer, (DateTime)((System.DateTime?)value).Value);
                 case "JobType":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.JobType), comparer, SharedMappers.DomIds.SlcPlan_And_Build.Enums.Jobtype.ToValue((SharedMappers.DomIds.SlcPlan_And_Build.Enums.JobtypeEnum)value));
+                case "Type" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && (value is null || SdmObjectReference<PlanAndBuild.Models.JobType>.Convert(value).Identifier is null):
+                    return DomInstanceExposers.FieldValues.KeyExists(PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.Type.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Type":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.Type), comparer, SdmObjectReference<PlanAndBuild.Models.JobType>.Convert(value).Identifier);
                 case "JobDescription" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
@@ -995,6 +997,8 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
                     return DomInstanceExposers.FieldValues.KeyExists(PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.Locations.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Locations":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.Locations), comparer, ((Guid)value).ToString());
+                case "AssetsUsed.AssetId" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && (value is null || SdmObjectReference<AssetManagement.Models.Asset>.Convert(value).Identifier is null):
+                    return DomInstanceExposers.FieldValues.KeyExists(PlanAndBuild.Models.PlanAndBuildJobDomMapper.AssetsUsed.AssetId.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "AssetsUsed.AssetId":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.AssetsUsed.AssetId), comparer, SdmObjectReference<AssetManagement.Models.Asset>.Convert(value).Identifier);
                 case "AssetsUsed.Action":
@@ -1023,6 +1027,8 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
                     return DomInstanceExposers.FieldValues.KeyExists(PlanAndBuild.Models.PlanAndBuildJobDomMapper.Attachments.AttachedBy.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Attachments.AttachedBy":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.Attachments.AttachedBy), comparer, Convert.ToString(((System.Guid?)value).Value));
+                case "ConnectionsOnJob.ConnectionId" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && (value is null || SdmObjectReference<AssetManagement.Models.Connection>.Convert(value).Identifier is null):
+                    return DomInstanceExposers.FieldValues.KeyExists(PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.ConnectionId.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "ConnectionsOnJob.ConnectionId":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.ConnectionId), comparer, SdmObjectReference<AssetManagement.Models.Connection>.Convert(value).Identifier);
                 case "ConnectionsOnJob.Source" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
@@ -1037,6 +1043,8 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
                     return DomInstanceExposers.FieldValues.KeyExists(PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.Status.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "ConnectionsOnJob.Status":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.Status), comparer, (string)value);
+                case "ConnectionsOnJob.CableType" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && (value is null || SdmObjectReference<AssetManagement.Models.CableType>.Convert(value).Identifier is null):
+                    return DomInstanceExposers.FieldValues.KeyExists(PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.CableType.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "ConnectionsOnJob.CableType":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.CableType), comparer, SdmObjectReference<AssetManagement.Models.CableType>.Convert(value).Identifier);
                 case "ConnectionsOnJob.CableLength" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
