@@ -117,14 +117,14 @@
         // Exceptions:
         //   T:System.InvalidOperationException:
         //     Thrown when the object cannot be converted to an Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences.ISdmObjectReference`1.
-        public static ISdmObjectReference<R> Convert<R>(object obj) where R : SdmObject<R>
+        public static ISdmObjectReference<R> Convert<R>(object obj) where R : ISdmObject
         {
             if (obj is ISdmObjectReference<R>)
             {
                 return (ISdmObjectReference<R>)obj;
             }
 
-            if (!(obj is ISdmObject<R> sdmObject))
+            if (!(obj is ISdmObject sdmObject))
             {
                 if (obj is string id)
                 {

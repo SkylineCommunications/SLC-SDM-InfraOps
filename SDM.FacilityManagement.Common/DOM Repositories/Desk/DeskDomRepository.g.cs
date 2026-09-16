@@ -12,14 +12,12 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
     using Skyline.DataMiner.Net;
     using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-    using Skyline.DataMiner.Net.Apps.Sections.Sections;
     using Skyline.DataMiner.Net.Helper;
     using Skyline.DataMiner.Net.ManagerStore;
-    using Skyline.DataMiner.Net.Messages;
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.Net.Sections;
-    using Skyline.DataMiner.Net.SubscriptionFilters;
     using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.Extensions;
 
     using SLDataGateway.API.Querying;
     using SLDataGateway.API.Types.Querying;
@@ -676,6 +674,8 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.DeskDomMapper.DeskInformation.Description), comparer, (string)value);
                 case "DeskInformation.DeskID":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.DeskDomMapper.DeskInformation.DeskID), comparer, (string)value);
+                case "RoomFk.Room" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && !SdmObjectReference<FacilityManagement.Models.Room>.Convert(value).HasValue():
+                    return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.DeskDomMapper.RoomFk.Room.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "RoomFk.Room":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.DeskDomMapper.RoomFk.Room), comparer, System.Guid.Parse(SdmObjectReference<FacilityManagement.Models.Room>.Convert(value).Identifier));
                 case "Resource.ResourceId":

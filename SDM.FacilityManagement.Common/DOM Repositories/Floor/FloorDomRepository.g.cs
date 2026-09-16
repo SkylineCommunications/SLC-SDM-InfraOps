@@ -12,14 +12,12 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
     using Skyline.DataMiner.Net;
     using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-    using Skyline.DataMiner.Net.Apps.Sections.Sections;
     using Skyline.DataMiner.Net.Helper;
     using Skyline.DataMiner.Net.ManagerStore;
-    using Skyline.DataMiner.Net.Messages;
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.Net.Sections;
-    using Skyline.DataMiner.Net.SubscriptionFilters;
     using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.Extensions;
 
     using SLDataGateway.API.Querying;
     using SLDataGateway.API.Types.Querying;
@@ -657,6 +655,8 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.FloorDomMapper.FloorProperties.Description), comparer, (string)value);
                 case "FloorProperties.FloorId":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.FloorDomMapper.FloorProperties.FloorId), comparer, (string)value);
+                case "FacilityFk.Facility" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && !SdmObjectReference<FacilityManagement.Models.Facility>.Convert(value).HasValue():
+                    return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.FloorDomMapper.FacilityFk.Facility.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "FacilityFk.Facility":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.FloorDomMapper.FacilityFk.Facility), comparer, System.Guid.Parse(SdmObjectReference<FacilityManagement.Models.Facility>.Convert(value).Identifier));
                 default:

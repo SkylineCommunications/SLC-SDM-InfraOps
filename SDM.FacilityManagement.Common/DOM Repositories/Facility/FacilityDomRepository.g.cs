@@ -735,6 +735,8 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 					return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.FacilityDomMapper.FacilityProperties.Longitude.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "Longitude":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.FacilityDomMapper.FacilityProperties.Longitude), comparer, (double)((double?)value).Value);
+                case "SiteFk.Site" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && !SdmObjectReference<FacilityManagement.Models.Site>.Convert(value).HasValue():
+                    return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.FacilityDomMapper.SiteFk.Site.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "SiteFk.Site":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.FacilityDomMapper.SiteFk.Site), comparer, System.Guid.Parse(SdmObjectReference<FacilityManagement.Models.Site>.Convert(value).Identifier));
 				default:

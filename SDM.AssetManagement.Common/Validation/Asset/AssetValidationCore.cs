@@ -1123,7 +1123,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
         {
             var result = new ValidationResult();
 
-            if (asset.Location.RackId == default || asset.Location.RackPosition == null)
+            if (!asset.Location.RackId.HasValue() || asset.Location.RackPosition == null)
             {
                 return result;
             }

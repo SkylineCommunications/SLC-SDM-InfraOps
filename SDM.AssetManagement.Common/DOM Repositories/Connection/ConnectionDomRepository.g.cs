@@ -566,10 +566,10 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     obj.Source.CableTag = _sourcecabletag.Value;
                 }
 
-                var _sourceport = _sourceSection.GetValue<string>(AssetManagement.Models.ConnectionDomMapper.Source.Port);
+                var _sourceport = _sourceSection.GetValue<Guid>(AssetManagement.Models.ConnectionDomMapper.Source.Port);
                 if (_sourceport != null)
                 {
-                    obj.Source.Port = new ISdmObjectReference<IPort>(_sourceport.Value);
+                    obj.Source.Port = new ISdmObjectReference<IPort>(Convert.ToString(_sourceport.Value));
                 }
 
                 var _sourceporttype = _sourceSection.GetValue<string>(AssetManagement.Models.ConnectionDomMapper.Source.PortType);
@@ -589,10 +589,10 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     obj.Destination.CableTag = _destinationcabletag.Value;
                 }
 
-                var _destinationport = _destinationSection.GetValue<string>(AssetManagement.Models.ConnectionDomMapper.Destination.Port);
+                var _destinationport = _destinationSection.GetValue<Guid>(AssetManagement.Models.ConnectionDomMapper.Destination.Port);
                 if (_destinationport != null)
                 {
-                    obj.Destination.Port = new ISdmObjectReference<IPort>(_destinationport.Value);
+                    obj.Destination.Port = new ISdmObjectReference<IPort>(Convert.ToString(_destinationport.Value));
                 }
 
                 var _destinationporttype = _destinationSection.GetValue<string>(AssetManagement.Models.ConnectionDomMapper.Destination.PortType);
@@ -678,9 +678,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     _source.AddOrUpdateValue<string>(AssetManagement.Models.ConnectionDomMapper.Source.CableTag, Convert.ToString(obj.Source.CableTag));
                 }
 
-                if (obj.Source.Port != default && obj.Source.Port.HasValue())
+                if (obj.Source.Port != default && System.Guid.TryParse(obj.Source.Port.Identifier, out var sourcePortGuid) && sourcePortGuid != System.Guid.Empty)
                 {
-                    _source.AddOrUpdateValue<string>(AssetManagement.Models.ConnectionDomMapper.Source.Port, obj.Source.Port.Identifier);
+                    _source.AddOrUpdateValue<Guid>(AssetManagement.Models.ConnectionDomMapper.Source.Port, sourcePortGuid);
                 }
 
                 if (obj.Source.PortType != default)
@@ -704,9 +704,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     _destination.AddOrUpdateValue<string>(AssetManagement.Models.ConnectionDomMapper.Destination.CableTag, Convert.ToString(obj.Destination.CableTag));
                 }
 
-                if (obj.Destination.Port != default && obj.Destination.Port.HasValue())
+                if (obj.Destination.Port != default && System.Guid.TryParse(obj.Destination.Port.Identifier, out var destinationPortGuid) && destinationPortGuid != System.Guid.Empty)
                 {
-                    _destination.AddOrUpdateValue<string>(AssetManagement.Models.ConnectionDomMapper.Destination.Port, obj.Destination.Port.Identifier);
+                    _destination.AddOrUpdateValue<Guid>(AssetManagement.Models.ConnectionDomMapper.Destination.Port, destinationPortGuid);
                 }
 
                 if (obj.Destination.PortType != default)
@@ -746,14 +746,18 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ConnectionDomMapper.CableInformation.CableLength), comparer, (double)value);
                 case "Source.CableTag":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ConnectionDomMapper.Source.CableTag), comparer, (string)value);
+                case "Source.Port" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && !ISdmObjectReference<IPort>.Convert<IPort>(value).HasValue():
+                    return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.ConnectionDomMapper.Source.Port.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Source.Port":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ConnectionDomMapper.Source.Port), comparer, Convert.ToString((System.Guid)value));
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ConnectionDomMapper.Source.Port), comparer, System.Guid.Parse(ISdmObjectReference<IPort>.Convert<IPort>(value).Identifier));
                 case "Source.PortType":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ConnectionDomMapper.Source.PortType), comparer, SdmObjectReference<AssetManagement.Models.PortType>.Convert(value).Identifier);
                 case "Destination.CableTag":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ConnectionDomMapper.Destination.CableTag), comparer, (string)value);
+                case "Destination.Port" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && !ISdmObjectReference<IPort>.Convert<IPort>(value).HasValue():
+                    return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.ConnectionDomMapper.Destination.Port.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Destination.Port":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ConnectionDomMapper.Destination.Port), comparer, Convert.ToString((System.Guid)value));
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ConnectionDomMapper.Destination.Port), comparer, System.Guid.Parse(ISdmObjectReference<IPort>.Convert<IPort>(value).Identifier));
                 case "Destination.PortType":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ConnectionDomMapper.Destination.PortType), comparer, SdmObjectReference<AssetManagement.Models.PortType>.Convert(value).Identifier);
                 default:

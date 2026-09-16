@@ -14,6 +14,7 @@ namespace SDM.FacilityManagement.Tests.Facilities
 
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
 
     public partial class FacilityDomRepositoryTests
@@ -48,7 +49,70 @@ namespace SDM.FacilityManagement.Tests.Facilities
 			}
 		}
 
-		[TestMethod]
+        [TestMethod]
+
+        public void FacilityDomRepository_ReadFilter_FacilitiesWithoutSite()
+        {
+            Helper.PopulateFacilities();
+
+            var noSiteFilter = FacilityExposers.SiteFk.Site.HasNoValue();
+            var expected = DemoData.Facilities.Where(f => (!f.SiteFk?.Site.HasValue()) ?? false);
+
+            var facilitiesRetrieved = Helper.Facilities.Read(noSiteFilter);
+
+            using (new AssertionScope())
+            {
+                facilitiesRetrieved.Should().NotBeNull();
+                facilitiesRetrieved.Should().NotBeEmpty();
+                facilitiesRetrieved.Should().HaveCount(expected.Count());
+                facilitiesRetrieved.Should().BeEquivalentTo(expected);
+            }
+        }
+
+        [TestMethod]
+
+        public void FacilityDomRepository_ReadFilter_NonExistentSite()
+        {
+            Helper.PopulateFacilities();
+
+            var site = new Site
+            {
+                Identifier = Guid.NewGuid().ToString(),
+            };
+
+            var noSiteFilter = FacilityExposers.SiteFk.Site.Equal(site);
+
+            var facilitiesRetrieved = Helper.Facilities.Read(noSiteFilter);
+
+            using (new AssertionScope())
+            {
+                facilitiesRetrieved.Should().NotBeNull();
+                facilitiesRetrieved.Should().BeEmpty();
+                facilitiesRetrieved.Should().HaveCount(0);
+            }
+        }
+
+        [TestMethod]
+
+        public void FacilityDomRepository_ReadFilter_FacilitiesWithSite()
+        {
+            Helper.PopulateFacilities();
+
+            var noSiteFilter = FacilityExposers.SiteFk.Site.HasValue();
+            var expected = DemoData.Facilities.Where(f => (f.SiteFk?.Site.HasValue()) ?? false);
+
+            var facilitiesRetrieved = Helper.Facilities.Read(noSiteFilter);
+
+            using (new AssertionScope())
+            {
+                facilitiesRetrieved.Should().NotBeNull();
+                facilitiesRetrieved.Should().BeEmpty();
+                facilitiesRetrieved.Should().HaveCount(expected.Count());
+                facilitiesRetrieved.Should().BeEquivalentTo(expected);
+            }
+        }
+
+        [TestMethod]
 		public void FacilityDomRepository_ReadFilter_Description_Contains()
 		{
 			Helper.PopulateFacilities();

@@ -20,6 +20,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.Net.Sections;
     using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
     using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
     using SLDataGateway.API.Querying;
@@ -1334,6 +1335,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetDomMapper.AssetProperties.AssetId), comparer, (string)value);
 				case "Name":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetDomMapper.AssetProperties.AssetName), comparer, (string)value);
+				case "AssetClassId" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && !SdmObjectReference<AssetManagement.Models.AssetClass>.Convert(value).HasValue():
+					return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.AssetDomMapper.AssetProperties.AssetClass.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "AssetClassId":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetDomMapper.AssetProperties.AssetClass), comparer, System.Guid.Parse(SdmObjectReference<AssetManagement.Models.AssetClass>.Convert(value).Identifier));
 				case "Description":
@@ -1354,6 +1357,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 					return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.AssetDomMapper.Location.HolderNumber.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "Location.HolderNumber":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetDomMapper.Location.HolderNumber), comparer, (long)((long?)value).Value);
+				case "Location.ParentAsset" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && !SdmObjectReference<AssetManagement.Models.Asset>.Convert(value).HasValue():
+					return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.AssetDomMapper.Location.ParentAsset.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "Location.ParentAsset":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetDomMapper.Location.ParentAsset), comparer, System.Guid.Parse(SdmObjectReference<AssetManagement.Models.Asset>.Convert(value).Identifier));
 				case "Location.RackPosition" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
@@ -1364,20 +1369,28 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 					return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.AssetDomMapper.Location.Side.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "Location.Side":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetDomMapper.Location.Side), comparer, SharedMappers.DomIds.SlcAsset_Management.Enums.Side.ToValue(((SlcAsset_Management.Enums.SideEnum?)value).Value));
+				case "Location.RackId" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && !SdmObjectReference<FacilityManagement.Models.Rack>.Convert(value).HasValue():
+						return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.AssetDomMapper.Location.Rack.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "Location.RackId":
 						return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetDomMapper.Location.Rack), comparer, System.Guid.Parse(SdmObjectReference<FacilityManagement.Models.Rack>.Convert(value).Identifier));
-				case "Location.DeskId" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+				case "Location.DeskId" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && !SdmObjectReference<FacilityManagement.Models.Desk>.Convert(value).HasValue():
 					return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.AssetDomMapper.Location.Desk.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "Location.DeskId":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetDomMapper.Location.Desk), comparer, ((System.Guid?)value).Value);
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetDomMapper.Location.Desk), comparer, System.Guid.Parse(SdmObjectReference<FacilityManagement.Models.Desk>.Convert(value).Identifier));
+				case "Location.ContainerId" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && !SdmObjectReference<FacilityManagement.Models.Facility>.Convert(value).HasValue():
+					return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.AssetDomMapper.Location.Container.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "Location.ContainerId":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetDomMapper.Location.Container), comparer, System.Guid.Parse(SdmObjectReference<FacilityManagement.Models.Facility>.Convert(value).Identifier));
+				case "Location.RoomId" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && !SdmObjectReference<FacilityManagement.Models.Room>.Convert(value).HasValue():
+					return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.AssetDomMapper.Location.Room.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "Location.RoomId":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetDomMapper.Location.Room), comparer, System.Guid.Parse(SdmObjectReference<FacilityManagement.Models.Room>.Convert(value).Identifier));
 				case "DestinationLocation.HolderNumber" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
 					return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.AssetDomMapper.DestinationLocation.HolderNumber.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "DestinationLocation.HolderNumber":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetDomMapper.DestinationLocation.HolderNumber), comparer, (long)((long?)value).Value);
+				case "DestinationLocation.ParentAsset" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && !SdmObjectReference<AssetManagement.Models.Asset>.Convert(value).HasValue():
+					return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.AssetDomMapper.DestinationLocation.ParentAsset.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "DestinationLocation.ParentAsset":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetDomMapper.DestinationLocation.ParentAsset), comparer, System.Guid.Parse(SdmObjectReference<AssetManagement.Models.Asset>.Convert(value).Identifier));
 				case "DestinationLocation.RackPosition" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
@@ -1388,14 +1401,20 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 					return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.AssetDomMapper.DestinationLocation.Side.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "DestinationLocation.Side":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetDomMapper.DestinationLocation.Side), comparer, SharedMappers.DomIds.SlcAsset_Management.Enums.Side.ToValue(((SharedMappers.DomIds.SlcAsset_Management.Enums.SideEnum?)value).Value));
+				case "DestinationLocation.RackId" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && !SdmObjectReference<FacilityManagement.Models.Rack>.Convert(value).HasValue():
+					return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.AssetDomMapper.DestinationLocation.Rack.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "DestinationLocation.RackId":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetDomMapper.DestinationLocation.Rack), comparer, System.Guid.Parse(SdmObjectReference<FacilityManagement.Models.Rack>.Convert(value).Identifier));
-				case "DestinationLocation.DeskId" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+				case "DestinationLocation.DeskId" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && !SdmObjectReference<FacilityManagement.Models.Desk>.Convert(value).HasValue():
 					return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.AssetDomMapper.DestinationLocation.Desk.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "DestinationLocation.DeskId":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetDomMapper.DestinationLocation.Desk), comparer, ((System.Guid?)value).Value);
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetDomMapper.DestinationLocation.Desk), comparer, System.Guid.Parse(SdmObjectReference<FacilityManagement.Models.Desk>.Convert(value).Identifier));
+				case "DestinationLocation.ContainerId" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && !SdmObjectReference<FacilityManagement.Models.Facility>.Convert(value).HasValue():
+					return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.AssetDomMapper.DestinationLocation.Container.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "DestinationLocation.ContainerId":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetDomMapper.DestinationLocation.Container), comparer, System.Guid.Parse(SdmObjectReference<FacilityManagement.Models.Facility>.Convert(value).Identifier));
+				case "DestinationLocation.RoomId" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && !SdmObjectReference<FacilityManagement.Models.Room>.Convert(value).HasValue():
+					return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.AssetDomMapper.DestinationLocation.Room.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "DestinationLocation.RoomId":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetDomMapper.DestinationLocation.Room), comparer, System.Guid.Parse(SdmObjectReference<FacilityManagement.Models.Room>.Convert(value).Identifier));
 				case "Lifecycle.PurchaseDate":

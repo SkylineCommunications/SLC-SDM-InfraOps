@@ -124,7 +124,7 @@
         //     are not null; otherwise, the default value.
         public static implicit operator PnoObjectReference<T>(ApiObject pnoObject)
         {
-            if (pnoObject?.Id == Guid.Empty)
+            if (pnoObject?.Id == null || pnoObject?.Id == Guid.Empty)
             {
                 return default(PnoObjectReference<T>);
             }

@@ -6,22 +6,22 @@
 //------------------------------------------------------------------------------
 namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
 
-	using Skyline.DataMiner.Net;
-	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-	using Skyline.DataMiner.Net.Helper;
-	using Skyline.DataMiner.Net.ManagerStore;
-	using Skyline.DataMiner.Net.Messages.SLDataGateway;
-	using Skyline.DataMiner.Net.Sections;
-	using Skyline.DataMiner.SDM;
-	using Skyline.DataMiner.SDM.AssetManagement.Models.Interafaces;
-	using SLDataGateway.API.Querying;
-	using SLDataGateway.API.Types.Querying;
+    using Skyline.DataMiner.Net;
+    using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+    using Skyline.DataMiner.Net.Helper;
+    using Skyline.DataMiner.Net.ManagerStore;
+    using Skyline.DataMiner.Net.Messages.SLDataGateway;
+    using Skyline.DataMiner.Net.Sections;
+    using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.Extensions;
+    using SLDataGateway.API.Querying;
+    using SLDataGateway.API.Types.Querying;
 
-	internal partial class DataPortDomRepository : IBulkRepository<DataPort>
+    internal partial class DataPortDomRepository : IBulkRepository<DataPort>
 	{
 		private readonly IConnection connection;
 		private readonly DomHelper helper;
@@ -774,10 +774,14 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DataPortDomMapper.DataPortInfo.OutputType), comparer, (int)((SharedMappers.DomIds.SlcAsset_Management.Enums.Outputtype?)value).Value);
 				case "DataPortInfo.PortExposure":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DataPortDomMapper.DataPortInfo.PortExposure), comparer, SharedMappers.DomIds.SlcAsset_Management.Enums.Portexposure.ToValue((SharedMappers.DomIds.SlcAsset_Management.Enums.PortExposureEnum)value));
+				case "DataPortInfo.PortType" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && !SdmObjectReference<AssetManagement.Models.PortType>.Convert(value).HasValue():
+					return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.DataPortDomMapper.DataPortInfo.Type.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "DataPortInfo.PortType":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DataPortDomMapper.DataPortInfo.Type), comparer, System.Guid.Parse(SdmObjectReference<AssetManagement.Models.PortType>.Convert(value).Identifier));
 				case "DataPortInfo.Label":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DataPortDomMapper.DataPortInfo.Label), comparer, (string)value);
+				case "Asset" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && !SdmObjectReference<AssetManagement.Models.Asset>.Convert(value).HasValue():
+					return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.PowerPortDomMapper.AssetRelationProperties.Asset.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "Asset":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.PowerPortDomMapper.AssetRelationProperties.Asset), comparer, System.Guid.Parse(SdmObjectReference<AssetManagement.Models.Asset>.Convert(value).Identifier));
 				case "AddressInfo.Ipv4Address":

@@ -2,17 +2,15 @@
 {
     using System;
     using System.Linq;
-
     using FluentAssertions;
     using FluentAssertions.Execution;
-
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-
     using SDM.AssetManagement.Tests.Setup;
-
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
+    using Skyline.DataMiner.SDM.Extensions;
+    using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
 
 
 
@@ -253,6 +251,85 @@
             }
         }
 
+        [TestMethod]
+        public void ReadFilter_DeviceTypeId_NonExistent_ShouldReturnNoAssetClasses()
+        {
+            SeedAssetClassesForDeviceTypeFilters();
+
+            var filter = AssetClassExposers.DeviceTypeId.Equal(new SdmObjectReference<DeviceType>(Guid.NewGuid().ToString()));
+
+            var results = Helper.AssetManagement.AssetClasses.Read(filter).ToList();
+
+            using (new AssertionScope())
+            {
+                results.Should().NotBeNull();
+                results.Should().BeEmpty();
+                results.Should().HaveCount(0);
+            }
+        }
+
+        [TestMethod]
+        public void ReadFilter_DeviceTypeId_HasValue_ShouldReturnAssetClassesWithDeviceType()
+        {
+            var (assetClasses, _) = SeedAssetClassesForDeviceTypeFilters();
+
+            var filter = AssetClassExposers.DeviceTypeId.HasValue();
+            var expected = assetClasses.Where(ac => ac.DeviceTypeId.HasValue()).ToArray();
+
+            var results = Helper.AssetManagement.AssetClasses.Read(filter).ToList();
+
+            using (new AssertionScope())
+            {
+                results.Should().NotBeNull();
+                results.Should().HaveCount(expected.Length);
+                results.Should().BeEquivalentTo(expected);
+            }
+        }
+
         #endregion
+
+        private (AssetClass[] AssetClasses, DeviceType TargetDeviceType) SeedAssetClassesForDeviceTypeFilters()
+        {
+            var targetDeviceType = Helper.AssetManagement.DeviceTypes.Create(new DeviceType
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                Name = "Filter Device Type A",
+            });
+            var otherDeviceType = Helper.AssetManagement.DeviceTypes.Create(new DeviceType
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                Name = "Filter Device Type B",
+            });
+
+            var assetClasses = new[]
+            {
+                CreateFilterAssetClass("Asset Class With Device Type A", new SdmObjectReference<DeviceType>(targetDeviceType.Identifier)),
+                CreateFilterAssetClass("Asset Class With Device Type B", new SdmObjectReference<DeviceType>(otherDeviceType.Identifier)),
+            };
+
+            Helper.AssetManagement.AssetClasses.Create(assetClasses);
+            return (assetClasses, targetDeviceType);
+        }
+
+        private static AssetClass CreateFilterAssetClass(string name, SdmObjectReference<DeviceType> deviceTypeId = default)
+        {
+            var assetClass = new AssetClass
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                Name = name,
+                Description = $"{name} description",
+                Height = 1.0,
+                Depth = 1.0,
+                Width = 1.0,
+                HeightU = 1.0,
+                Weight = 1.0,
+                MaximumPowerConsumption = 10.0,
+                TypicalPowerConsumption = 5.0,
+            };
+
+            assetClass.DeviceTypeId = deviceTypeId;
+
+            return assetClass;
+        }
     }
 }

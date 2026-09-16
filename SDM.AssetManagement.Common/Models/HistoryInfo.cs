@@ -3,6 +3,7 @@
     using System;
     using Newtonsoft.Json;
     using SharedMappers.DomIds;
+    using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
@@ -15,8 +16,8 @@
         [JsonIgnore]
         [SdmIgnore]
         public bool IsEmpty => Description == default
-                               && Job == default
-                               && ModifiedInstanceID == default
+                               && !Job.HasValue()
+                               && !ModifiedInstanceID.HasValue()
                                && ModifiedInstanceDefinitionID == default
                                && ExtraInfo == default
                                && TypeOfHistory == default;

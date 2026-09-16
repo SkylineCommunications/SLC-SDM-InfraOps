@@ -3,6 +3,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
     using System;
 
     using Newtonsoft.Json;
+    using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
     using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
@@ -16,8 +17,8 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
         [JsonIgnore]
         [SdmIgnore]
         public bool IsEmpty =>
-            AssignedTo == default &&
-            AssignmentGroup == default;
+            !AssignedTo.HasValue() &&
+            !AssignmentGroup.HasValue();
 
         public PnoObjectReference<Person> AssignedTo
         {

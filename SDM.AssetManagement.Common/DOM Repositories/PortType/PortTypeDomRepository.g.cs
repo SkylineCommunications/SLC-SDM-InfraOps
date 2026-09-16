@@ -17,11 +17,10 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     using Skyline.DataMiner.Net.Apps.Sections.Sections;
     using Skyline.DataMiner.Net.Helper;
     using Skyline.DataMiner.Net.ManagerStore;
-    using Skyline.DataMiner.Net.Messages;
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.Net.Sections;
-    using Skyline.DataMiner.Net.SubscriptionFilters;
     using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.Extensions;
 
     using SLDataGateway.API.Querying;
     using SLDataGateway.API.Types.Querying;
@@ -653,6 +652,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.PortTypeDomMapper.PortTypeProperties.Name), comparer, (string)value);
                 case "Description":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.PortTypeDomMapper.PortTypeProperties.Description), comparer, (string)value);
+                case "CableFKs.CableTypeFks" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && !SdmObjectReference<AssetManagement.Models.CableType>.Convert(value).HasValue():
+                    return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.PortTypeDomMapper.CableFKs.CableTypeFks.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "CableFKs.CableTypeFks":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.PortTypeDomMapper.CableFKs.CableTypeFks), comparer, System.Guid.Parse(SdmObjectReference<AssetManagement.Models.CableType>.Convert(value).Identifier));
                 case "CategoryLinks.Categories":

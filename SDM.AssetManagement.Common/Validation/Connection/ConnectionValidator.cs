@@ -140,7 +140,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             // track per-field changes (unlike the legacy application, which gated the "port must be selected"
             // check on the port field being changed), an unset endpoint is treated as "not being connected"
             // and skipped rather than rejected. Endpoints that are set are still fully validated.
-            if (endpointPort == default)
+            if (!endpointPort.HasValue())
             {
                 return;
             }

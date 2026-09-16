@@ -17,12 +17,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
         {
             if (connection != null && connection.Source.Port.HasValue())
             {
-                yield return connection.Source.Port.ToString();
+                yield return connection.Source.Port.Identifier;
             }
 
             if (connection != null && connection.Destination.Port.HasValue())
             {
-                yield return connection.Destination.Port.ToString();
+                yield return connection.Destination.Port.Identifier;
             }
         }
     }

@@ -1,19 +1,16 @@
 ﻿namespace SDM.AssetManagement.Tests.DataPorts
 {
+    using System;
     using System.Linq;
-
     using FluentAssertions;
     using FluentAssertions.Execution;
-
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-
     using SDM.AssetManagement.Tests.Setup;
-
     using SharedMappers.DomIds;
-
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
+    using Skyline.DataMiner.SDM.Extensions;
 
     /// <summary>
     /// Filter and query tests for DataPort repository operations.
@@ -203,6 +200,32 @@
             {
                 results.Should().NotBeEmpty($"should find data ports linked to asset '{targetAsset.Name}'");
                 results.Should().OnlyContain(dp => dp.Asset.Identifier == targetAsset.Identifier);
+            }
+        }
+
+        [TestMethod]
+        public void ReadFilter_PortType_NonExistent_ShouldReturnNoDataPorts()
+        {
+            var results = Helper.AssetManagement.DataPorts.Read(DataPortExposers.DataPortInfo.PortType.Equal(new SdmObjectReference<PortType>(Guid.NewGuid().ToString()))).ToList();
+
+            using (new AssertionScope())
+            {
+                results.Should().NotBeNull();
+                results.Should().BeEmpty();
+                results.Should().HaveCount(0);
+            }
+        }
+
+        [TestMethod]
+        public void ReadFilter_Asset_NonExistent_ShouldReturnNoDataPorts()
+        {
+            var results = Helper.AssetManagement.DataPorts.Read(DataPortExposers.Asset.Equal(new SdmObjectReference<Asset>(Guid.NewGuid().ToString()))).ToList();
+
+            using (new AssertionScope())
+            {
+                results.Should().NotBeNull();
+                results.Should().BeEmpty();
+                results.Should().HaveCount(0);
             }
         }
 

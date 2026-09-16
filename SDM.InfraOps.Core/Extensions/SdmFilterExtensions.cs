@@ -88,7 +88,7 @@
         //     the field is not null.
         public static ManagedFilter<TFilter, SdmObjectReference<TField>> HasValue<TFilter, TField>(this Exposer<TFilter, SdmObjectReference<TField>> exposer) where TFilter : class where TField : SdmObject<TField>
         {
-            return new ManagedFilter<TFilter, SdmObjectReference<TField>>(exposer, Comparer.NotEquals, default, (TFilter obj) => exposer.internalFunc(obj).HasValue());
+            return new ManagedFilter<TFilter, SdmObjectReference<TField>>(exposer, Comparer.NotEquals, null, (TFilter obj) => exposer.internalFunc(obj).HasValue());
         }
 
         //
@@ -111,7 +111,7 @@
         //     the field is not null.
         public static ManagedFilter<TFilter, IObjectReference<TField>> HasValue<TFilter, TField>(this Exposer<TFilter, IObjectReference<TField>> exposer) where TFilter : class
         {
-            return new ManagedFilter<TFilter, IObjectReference<TField>>(exposer, Comparer.NotEquals, default, (TFilter obj) => exposer.internalFunc(obj).HasValue());
+            return new ManagedFilter<TFilter, IObjectReference<TField>>(exposer, Comparer.NotEquals, null, (TFilter obj) => exposer.internalFunc(obj).HasValue());
         }
 
         //
@@ -134,7 +134,7 @@
         //     the field is null.
         public static ManagedFilter<TFilter, SdmObjectReference<TField>> HasNoValue<TFilter, TField>(this Exposer<TFilter, SdmObjectReference<TField>> exposer) where TFilter : class where TField : SdmObject<TField>
         {
-            return new ManagedFilter<TFilter, SdmObjectReference<TField>>(exposer, Comparer.Equals, default, (TFilter obj) => !exposer.internalFunc(obj).HasValue());
+            return new ManagedFilter<TFilter, SdmObjectReference<TField>>(exposer, Comparer.Equals, null, (TFilter obj) => !exposer.internalFunc(obj).HasValue());
         }
 
         //
@@ -157,7 +157,7 @@
         //     the field is null.
         public static ManagedFilter<TFilter, IObjectReference<TField>> HasNoValue<TFilter, TField>(this Exposer<TFilter, IObjectReference<TField>> exposer) where TFilter : class
         {
-            return new ManagedFilter<TFilter, IObjectReference<TField>>(exposer, Comparer.Equals, default, (TFilter obj) => !exposer.internalFunc(obj).HasValue());
+            return new ManagedFilter<TFilter, IObjectReference<TField>>(exposer, Comparer.Equals, null, (TFilter obj) => !exposer.internalFunc(obj).HasValue());
         }
     }
 }

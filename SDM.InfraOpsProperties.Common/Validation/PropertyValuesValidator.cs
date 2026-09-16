@@ -5,6 +5,7 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Validation
     using System.Linq;
 
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
+    using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.SDM.InfraOps.Common.Validation;
     using Skyline.DataMiner.SDM.InfraOpsProperties.Helpers;
     using Skyline.DataMiner.SDM.InfraOpsProperties.Models;
@@ -366,7 +367,7 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Validation
 
         private static bool IsReferenceSet(SdmObjectReference<Property> reference)
         {
-            return reference != null && !string.IsNullOrWhiteSpace(reference.Identifier);
+            return reference.HasValue();
         }
 
         #endregion

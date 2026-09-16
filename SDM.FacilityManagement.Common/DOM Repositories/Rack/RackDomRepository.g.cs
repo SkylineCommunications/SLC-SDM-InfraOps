@@ -17,6 +17,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.Net.Sections;
     using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.Extensions;
     using SLDataGateway.API.Querying;
     using SLDataGateway.API.Types.Querying;
 
@@ -952,8 +953,12 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.Capacity.MaximumRackCapacity), comparer, (double)value);
                 case "Capacity.MaximumPowerCapacity":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.Capacity.MaximumPowerCapacity), comparer, (double)value);
+                case "RowFk.Row" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && !SdmObjectReference<FacilityManagement.Models.Row>.Convert(value).HasValue():
+                    return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.RackDomMapper.RowFk.Row.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "RowFk.Row":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.RowFk.Row), comparer, System.Guid.Parse(SdmObjectReference<FacilityManagement.Models.Row>.Convert(value).Identifier));
+                case "ZoneFk.Zone" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && !SdmObjectReference<Zone>.Convert(value).HasValue():
+                    return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.RackDomMapper.ZoneFk.Zone.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "ZoneFk.Zone":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.ZoneFk.Zone), comparer, System.Guid.Parse(SdmObjectReference<Zone>.Convert(value).Identifier));
                 case "Resource.ResourceId":

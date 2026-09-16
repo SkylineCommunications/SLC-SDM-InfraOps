@@ -472,7 +472,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
             {
                 foreach (var attachment in job.Attachments)
                 {
-                    if (!string.IsNullOrEmpty(attachment?.AttachedBy))
+                    if (string.IsNullOrEmpty(attachment?.AttachedBy))
                     {
                         result.AddFailReason(PlanAndBuildJobValidationField.Attachments, $"AttachedBy '{attachment.AttachedBy}' cannot be empty.");
                     }
@@ -511,7 +511,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
             {
                 foreach (var attachment in job.Attachments)
                 {
-                    if (!string.IsNullOrEmpty(attachment?.AttachedBy))
+                    if (string.IsNullOrEmpty(attachment?.AttachedBy))
                     {
                         result.AddFailReason(PlanAndBuildJobValidationField.Attachments, $"AttachedBy '{attachment.AttachedBy}' cannot be empty.");
                     }
@@ -660,7 +660,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
         private static bool IsReferenceSet<T>(SdmObjectReference<T> reference)
             where T : SdmObject<T>
         {
-            return reference != null && !string.IsNullOrWhiteSpace(reference.Identifier);
+            return reference.HasValue();
         }
 
         #endregion

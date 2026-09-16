@@ -338,9 +338,9 @@
                 // Ownership changes
                 updated.Ownership.Should().NotBeNull();
                 updated.Ownership.Organization.Should().NotBe(original.Ownership.Organization);
-                updated.Ownership.ContactPerson.Should().Be(Guid.Empty);
-                updated.Ownership.ContactPersonRole.Should().Be(Guid.Empty);
-                updated.Ownership.Team.Should().Be(Guid.Empty);
+                updated.Ownership.ContactPerson.Should().Be(new PnoObjectReference<Person>(Guid.Empty));
+                updated.Ownership.ContactPersonRole.Should().Be(new PnoObjectReference<Role>(Guid.Empty));
+                updated.Ownership.Team.Should().Be(new PnoObjectReference<Team>(Guid.Empty));
 
                 // Custody changes
                 updated.Custody.Should().NotBeNull();

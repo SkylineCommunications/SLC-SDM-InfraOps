@@ -12,14 +12,12 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
 
     using Skyline.DataMiner.Net;
     using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-    using Skyline.DataMiner.Net.Apps.Sections.Sections;
     using Skyline.DataMiner.Net.Helper;
     using Skyline.DataMiner.Net.ManagerStore;
-    using Skyline.DataMiner.Net.Messages;
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.Net.Sections;
-    using Skyline.DataMiner.Net.SubscriptionFilters;
     using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.Extensions;
 
     using SLDataGateway.API.Querying;
     using SLDataGateway.API.Types.Querying;
@@ -676,6 +674,8 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
                     return DomInstanceExposers.FieldValues.KeyExists(InfraOpsProperties.Models.PropertyValuesDomMapper.Values.Value.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Values.Value":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(InfraOpsProperties.Models.PropertyValuesDomMapper.Values.Value), comparer, (string)value);
+                case "Values.PropertyId" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && !SdmObjectReference<InfraOpsProperties.Models.Property>.Convert(value).HasValue():
+                    return DomInstanceExposers.FieldValues.KeyExists(InfraOpsProperties.Models.PropertyValuesDomMapper.Values.PropertyId.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Values.PropertyId":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(InfraOpsProperties.Models.PropertyValuesDomMapper.Values.PropertyId), comparer, System.Guid.Parse(SdmObjectReference<InfraOpsProperties.Models.Property>.Convert(value).Identifier));
                 default:

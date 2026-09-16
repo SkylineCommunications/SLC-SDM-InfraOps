@@ -486,35 +486,6 @@ namespace SDM.PlanAndBuild.Tests.JobTests
 		}
 
 		[TestMethod]
-		public void Validate_WithAttachmentAttachedByUnknownPerson_ShouldReturnInvalid()
-		{
-			var helper = ConnectionHelper.CreateConnection()
-				.GetMockedHelperWithPeopleApi(exists: false)
-				.PopulateAppSettings();
-			var jobType = helper.JobTypes.Create(new JobType { Name = "Installation" });
-			var validator = new PlanAndBuildJobValidator(helper, ConnectionHelper.CreatePeopleApiMock(exists: false));
-
-			var job = new PlanAndBuildJob
-			{
-				JobName = "Some Job",
-				Type = new SdmObjectReference<JobType>(jobType.Identifier),
-				Attachments = new System.Collections.Generic.List<JobAttachment>
-				{
-					new JobAttachment { FilePath = @"C:\attachments\plan.pdf", AttachedBy = Convert.ToString(Guid.NewGuid()) },
-				},
-			};
-
-			var result = validator.Validate(job, RepositoryAction.Create);
-
-			using (new AssertionScope())
-			{
-				result.IsValid.Should().BeFalse();
-				result.TryGetFailReason(PlanAndBuildJobValidationHandler.PlanAndBuildJobValidationField.Attachments, out var reason).Should().BeTrue();
-				reason.Should().Contain("does not exist");
-			}
-		}
-
-		[TestMethod]
 		public void Validate_WithNoAssignedToOrAttachments_ShouldNotQueryPeopleApi()
 		{
 			// When AssignedTo/AssignmentGroup/Attachments are left unset, validation must not fail

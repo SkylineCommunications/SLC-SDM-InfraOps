@@ -1,10 +1,57 @@
 ﻿namespace Skyline.DataMiner.SDM.Extensions
 {
     using System;
+    using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
 
     public static class IObjectReferenceExtensions
     {
+        //
+        // Summary:
+        //     Creates a filter that checks if the exposed Reference field has a value.
+        //
+        // Parameters:
+        //   exposer:
+        //     The exposer that identifies the field to filter on.
+        //
+        // Type parameters:
+        //   TFilter:
+        //     The type of the filter.
+        //
+        //   TField:
+        //     The non-nullable value type being compared.
+        //
+        // Returns:
+        //     A Skyline.DataMiner.Net.Messages.SLDataGateway.ManagedFilter`2 that matches when
+        //     the field is not null.
+        public static ManagedFilter<TFilter, ISdmObjectReference<TField>> HasValue<TFilter, TField>(this Exposer<TFilter, ISdmObjectReference<TField>> exposer) where TFilter : class where TField : ISdmObject
+        {
+            return new ManagedFilter<TFilter, ISdmObjectReference<TField>>(exposer, Comparer.NotEquals, default, (TFilter obj) => exposer.internalFunc(obj).HasValue());
+        }
+
+        //
+        // Summary:
+        //     Creates a filter that checks if the exposed Reference field has no value.
+        //
+        // Parameters:
+        //   exposer:
+        //     The exposer that identifies the field to filter on.
+        //
+        // Type parameters:
+        //   TFilter:
+        //     The type of the filter.
+        //
+        //   TField:
+        //     The non-nullable value type being compared.
+        //
+        // Returns:
+        //     A Skyline.DataMiner.Net.Messages.SLDataGateway.ManagedFilter`2 that matches when
+        //     the field is null.
+        public static ManagedFilter<TFilter, ISdmObjectReference<TField>> HasNoValue<TFilter, TField>(this Exposer<TFilter, ISdmObjectReference<TField>> exposer) where TFilter : class where TField : ISdmObject
+        {
+            return new ManagedFilter<TFilter, ISdmObjectReference<TField>>(exposer, Comparer.Equals, default, (TFilter obj) => !exposer.internalFunc(obj).HasValue());
+        }
+
         /// <summary>
         /// Checks if the SdmObjectReference has a valid value (not null and identifier is not empty).
         /// </summary>

@@ -6,24 +6,24 @@
 //------------------------------------------------------------------------------
 namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
 
-	using SharedMappers.DomIds;
+    using SharedMappers.DomIds;
 
-	using Skyline.DataMiner.Net;
-	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-	using Skyline.DataMiner.Net.Helper;
-	using Skyline.DataMiner.Net.ManagerStore;
-	using Skyline.DataMiner.Net.Messages.SLDataGateway;
-	using Skyline.DataMiner.Net.Sections;
-	using Skyline.DataMiner.SDM;
-	using Skyline.DataMiner.SDM.AssetManagement.Models.Interafaces;
-	using SLDataGateway.API.Querying;
-	using SLDataGateway.API.Types.Querying;
+    using Skyline.DataMiner.Net;
+    using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+    using Skyline.DataMiner.Net.Helper;
+    using Skyline.DataMiner.Net.ManagerStore;
+    using Skyline.DataMiner.Net.Messages.SLDataGateway;
+    using Skyline.DataMiner.Net.Sections;
+    using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.Extensions;
+    using SLDataGateway.API.Querying;
+    using SLDataGateway.API.Types.Querying;
 
-	internal partial class PowerPortDomRepository : IBulkRepository<PowerPort>
+    internal partial class PowerPortDomRepository : IBulkRepository<PowerPort>
 	{
 		private readonly IConnection connection;
 		private readonly DomHelper helper;
@@ -661,6 +661,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 					return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModified, comparer, (DateTime)value);
 				case "LastModifiedBy":
 					return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModifiedBy, comparer, (string)value);
+				case "Asset" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && !SdmObjectReference<AssetManagement.Models.Asset>.Convert(value).HasValue():
+					return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.PowerPortDomMapper.AssetRelationProperties.Asset.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "Asset":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.PowerPortDomMapper.AssetRelationProperties.Asset), comparer, System.Guid.Parse(SdmObjectReference<AssetManagement.Models.Asset>.Convert(value).Identifier));
 				case "PowerPortInfo.Identifier":				

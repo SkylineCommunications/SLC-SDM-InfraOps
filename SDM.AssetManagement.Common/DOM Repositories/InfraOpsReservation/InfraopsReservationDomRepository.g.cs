@@ -17,6 +17,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.Net.Sections;
     using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
     using SLDataGateway.API.Querying;
     using SLDataGateway.API.Types.Querying;
@@ -678,10 +679,14 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 					return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModifiedBy, comparer, (string)value);
 				case "Description":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ReservationDomMapper.ReservationProperties.Description), comparer, (string)value);
+				case "RackFk.Rack" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && !SdmObjectReference<FacilityManagement.Models.Rack>.Convert(value).HasValue():
+					return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.ReservationDomMapper.RackFk.Rack.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "RackFk.Rack":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ReservationDomMapper.RackFk.Rack), comparer, System.Guid.Parse(SdmObjectReference<FacilityManagement.Models.Rack>.Convert(value).Identifier));
+				case "JobFk.Job" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && !ISdmObjectReference<ISdmObject>.Convert<ISdmObject>(value).HasValue():
+					return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.ReservationDomMapper.JobFk.Job.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "JobFk.Job":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ReservationDomMapper.JobFk.Job), comparer, ((System.Guid?)value).Value);
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ReservationDomMapper.JobFk.Job), comparer, System.Guid.Parse(ISdmObjectReference<ISdmObject>.Convert<ISdmObject>(value).Identifier));
 				case "ReservedPositions.LowerBound":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ReservationDomMapper.ReservedPositions.LowerBound), comparer, (long)value);
 				case "ReservedPositions.UpperBound":
