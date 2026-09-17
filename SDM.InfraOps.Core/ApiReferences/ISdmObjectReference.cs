@@ -263,7 +263,7 @@
             return "Ref " + typeof(T).Name + " [" + Identifier + "]";
         }
 
-        public static ISdmObjectReference<T> To(T sdmObject)
+        internal static ISdmObjectReference<T> To(T sdmObject)
         {
             if (sdmObject?.Identifier == null)
             {
