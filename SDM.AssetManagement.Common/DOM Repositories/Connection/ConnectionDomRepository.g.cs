@@ -539,7 +539,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             if (_cableInformationSection != default)
             {
                 obj.CableInformationSectionId = _cableInformationSection.ID.Id;
-                var _cabletype = _cableInformationSection.GetValue<string>(AssetManagement.Models.ConnectionDomMapper.CableInformation.CableType);
+                var _cabletype = _cableInformationSection.GetValue<Guid>(AssetManagement.Models.ConnectionDomMapper.CableInformation.CableType);
                 if (_cabletype != null)
                 {
                     obj.CableType = new SdmObjectReference<AssetManagement.Models.CableType>(Convert.ToString(_cabletype.Value));
@@ -562,16 +562,16 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     obj.Source.CableTag = _sourcecabletag.Value;
                 }
 
-                var _sourceport = _sourceSection.GetValue<string>(AssetManagement.Models.ConnectionDomMapper.Source.Port);
+                var _sourceport = _sourceSection.GetValue<Guid>(AssetManagement.Models.ConnectionDomMapper.Source.Port);
                 if (_sourceport != null)
                 {
-                    obj.Source.Port = System.Guid.Parse(Convert.ToString(_sourceport.Value));
+                    obj.Source.Port = _sourceport.Value;
                 }
 
-                var _sourceporttype = _sourceSection.GetValue<string>(AssetManagement.Models.ConnectionDomMapper.Source.PortType);
+                var _sourceporttype = _sourceSection.GetValue<Guid>(AssetManagement.Models.ConnectionDomMapper.Source.PortType);
                 if (_sourceporttype != null)
                 {
-                    obj.Source.PortType = new SdmObjectReference<AssetManagement.Models.PortType>(Convert.ToString(_sourceporttype.Value));
+                    obj.Source.PortType = new SdmObjectReference<AssetManagement.Models.PortType>(_sourceporttype.Value.ToString());
                 }
             }
 
@@ -585,16 +585,16 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     obj.Destination.CableTag = _destinationcabletag.Value;
                 }
 
-                var _destinationport = _destinationSection.GetValue<string>(AssetManagement.Models.ConnectionDomMapper.Destination.Port);
+                var _destinationport = _destinationSection.GetValue<Guid>(AssetManagement.Models.ConnectionDomMapper.Destination.Port);
                 if (_destinationport != null)
                 {
-                    obj.Destination.Port = System.Guid.Parse(Convert.ToString(_destinationport.Value));
+                    obj.Destination.Port = _destinationport.Value;
                 }
 
-                var _destinationporttype = _destinationSection.GetValue<string>(AssetManagement.Models.ConnectionDomMapper.Destination.PortType);
+                var _destinationporttype = _destinationSection.GetValue<Guid>(AssetManagement.Models.ConnectionDomMapper.Destination.PortType);
                 if (_destinationporttype != null)
                 {
-                    obj.Destination.PortType = new SdmObjectReference<AssetManagement.Models.PortType>(Convert.ToString(_destinationporttype.Value));
+                    obj.Destination.PortType = new SdmObjectReference<AssetManagement.Models.PortType>(_destinationporttype.Value.ToString());
                 }
             }
 
@@ -648,9 +648,10 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             {
                 _cableinformation.ID = new SectionID(obj.CableInformationSectionId.Value);
             }
-            if (obj.CableType != default)
+
+            if(obj.CableType != default && System.Guid.TryParse(obj.CableType.Identifier, out var cableTypeGuid) && cableTypeGuid != System.Guid.Empty)
             {
-                _cableinformation.AddOrUpdateValue<string>(AssetManagement.Models.ConnectionDomMapper.CableInformation.CableType, obj.CableType.Identifier);
+                _cableinformation.AddOrUpdateValue<Guid>(AssetManagement.Models.ConnectionDomMapper.CableInformation.CableType, cableTypeGuid);
             }
 
             if (obj.CableLength != default)
@@ -674,12 +675,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
                 if (obj.Source.Port != default)
                 {
-                    _source.AddOrUpdateValue<string>(AssetManagement.Models.ConnectionDomMapper.Source.Port, Convert.ToString(obj.Source.Port));
+                    _source.AddOrUpdateValue<Guid>(AssetManagement.Models.ConnectionDomMapper.Source.Port, obj.Source.Port);
                 }
 
-                if (obj.Source.PortType != default)
+                if (obj.Source.PortType != default && System.Guid.TryParse(obj.Source.PortType.Identifier, out var portTypeGuid) && portTypeGuid != System.Guid.Empty)
                 {
-                    _source.AddOrUpdateValue<string>(AssetManagement.Models.ConnectionDomMapper.Source.PortType, obj.Source.PortType.Identifier);
+                    _source.AddOrUpdateValue<Guid>(AssetManagement.Models.ConnectionDomMapper.Source.PortType, portTypeGuid);
                 }
 
                 instance.Sections.Add(_source);
@@ -700,12 +701,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
                 if (obj.Destination.Port != default)
                 {
-                    _destination.AddOrUpdateValue<string>(AssetManagement.Models.ConnectionDomMapper.Destination.Port, Convert.ToString(obj.Destination.Port));
+                    _destination.AddOrUpdateValue<Guid>(AssetManagement.Models.ConnectionDomMapper.Destination.Port, obj.Destination.Port);
                 }
 
-                if (obj.Destination.PortType != default)
+                if (obj.Destination.PortType != default && System.Guid.TryParse(obj.Destination.PortType.Identifier, out var portTypeGuid) && portTypeGuid != System.Guid.Empty)
                 {
-                    _destination.AddOrUpdateValue<string>(AssetManagement.Models.ConnectionDomMapper.Destination.PortType, obj.Destination.PortType.Identifier);
+                    _destination.AddOrUpdateValue<Guid>(AssetManagement.Models.ConnectionDomMapper.Destination.PortType, portTypeGuid);
                 }
 
                 instance.Sections.Add(_destination);
@@ -727,21 +728,21 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 case "ConnectionType":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ConnectionDomMapper.ConnectionProperties.ConnectionType), comparer, (int)(SharedMappers.DomIds.SlcAsset_Management.Enums.ConnectionType)value);
                 case "CableType":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ConnectionDomMapper.CableInformation.CableType), comparer, SdmObjectReference<AssetManagement.Models.CableType>.Convert(value).Identifier);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ConnectionDomMapper.CableInformation.CableType), comparer, Guid.Parse(SdmObjectReference<AssetManagement.Models.CableType>.Convert(value).Identifier));
                 case "CableLength":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ConnectionDomMapper.CableInformation.CableLength), comparer, (double)value);
                 case "Source.CableTag":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ConnectionDomMapper.Source.CableTag), comparer, (string)value);
                 case "Source.Port":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ConnectionDomMapper.Source.Port), comparer, Convert.ToString((System.Guid)value));
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ConnectionDomMapper.Source.Port), comparer, (System.Guid)value);
                 case "Source.PortType":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ConnectionDomMapper.Source.PortType), comparer, SdmObjectReference<AssetManagement.Models.PortType>.Convert(value).Identifier);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ConnectionDomMapper.Source.PortType), comparer, Guid.Parse(SdmObjectReference<AssetManagement.Models.PortType>.Convert(value).Identifier));
                 case "Destination.CableTag":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ConnectionDomMapper.Destination.CableTag), comparer, (string)value);
                 case "Destination.Port":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ConnectionDomMapper.Destination.Port), comparer, Convert.ToString((System.Guid)value));
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ConnectionDomMapper.Destination.Port), comparer, (System.Guid)value);
                 case "Destination.PortType":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ConnectionDomMapper.Destination.PortType), comparer, SdmObjectReference<AssetManagement.Models.PortType>.Convert(value).Identifier);
+                   return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ConnectionDomMapper.Destination.PortType), comparer, Guid.Parse(SdmObjectReference<AssetManagement.Models.PortType>.Convert(value).Identifier));
                 default:
                     throw new NotImplementedException();
             }
