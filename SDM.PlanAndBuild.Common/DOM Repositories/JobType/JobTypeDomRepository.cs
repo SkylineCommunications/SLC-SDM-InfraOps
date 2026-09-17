@@ -16,7 +16,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
     {
         /// <summary>
         /// Reads all JobTypes matching any of the given Names, using a single batched big-OR query (see
-        /// <see cref="BulkRepositoryQueryExtensions.ReadByBigOrFilter{T, TKey}"/>) instead of one query per
+        /// <see cref="RepositoryQueryExtensions.ReadByBigOrFilter{T, TKey}"/>) instead of one query per
         /// Name. Use this for bulk Name uniqueness checks instead of looping
         /// <see cref="ICountableRepository{JobType}.Count(FilterElement{JobType})"/> once per candidate JobType.
         /// </summary>

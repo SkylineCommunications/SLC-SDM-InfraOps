@@ -44,6 +44,10 @@
 		<PackageReference Include="Skyline.DataMiner.Utils.PerformanceAnalyzer" />
 		<PackageReference Include="Skyline.DataMiner.Utils.SecureCoding" />
   </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Skyline.DataMiner.SDM.AssetManagement.GQI" />
+  </ItemGroup>
   
   <ItemGroup>
     <ProjectReference Include="..\SDM.InfraOps.Core\SDM.InfraOps.Core.csproj" />

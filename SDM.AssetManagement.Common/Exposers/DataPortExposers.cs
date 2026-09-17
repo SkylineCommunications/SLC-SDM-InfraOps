@@ -39,7 +39,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			public static readonly Exposer<AssetManagement.Models.DataPort, long?> PortNumber = new Exposer<AssetManagement.Models.DataPort, long?>((obj) => obj.DataPortInfo.PortNumber, "DataPortInfo.PortNumber");
 			public static readonly Exposer<AssetManagement.Models.DataPort, SlcAsset_Management.Enums.Outputtype?> OutputType = new Exposer<AssetManagement.Models.DataPort, SlcAsset_Management.Enums.Outputtype?>((obj) => obj.DataPortInfo.OutputType, "DataPortInfo.OutputType");
 			public static readonly Exposer<AssetManagement.Models.DataPort, SlcAsset_Management.Enums.PortExposureEnum> PortExposure = new Exposer<AssetManagement.Models.DataPort, SlcAsset_Management.Enums.PortExposureEnum>((obj) => obj.DataPortInfo.PortExposure, "DataPortInfo.PortExposure");
-			public static readonly Exposer<AssetManagement.Models.DataPort, SdmObjectReference<AssetManagement.Models.PortType>> Type = new Exposer<AssetManagement.Models.DataPort, SdmObjectReference<AssetManagement.Models.PortType>>((obj) => obj.DataPortInfo.Type, "DataPortInfo.Type");
+			public static readonly Exposer<AssetManagement.Models.DataPort, SdmObjectReference<AssetManagement.Models.PortType>> PortType = new Exposer<AssetManagement.Models.DataPort, SdmObjectReference<AssetManagement.Models.PortType>>((obj) => obj.DataPortInfo.PortType, "DataPortInfo.PortType");
 			public static readonly Exposer<AssetManagement.Models.DataPort, string> Label = new Exposer<AssetManagement.Models.DataPort, string>((obj) => obj.DataPortInfo.Label, "DataPortInfo.Label");
 		}
 

@@ -8,7 +8,7 @@
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)asset_management")]
-    public sealed class DataPort : SdmObject<DataPort>, IEquatable<DataPort>, IEntityTracking
+    public sealed class DataPort : SdmObject<DataPort>, IEquatable<DataPort>, IEntityTracking, IPort
     {
         [JsonIgnore]
         private DataPortInfo _dataPortInfo;
@@ -28,6 +28,8 @@
         #region Properties
 
         public DataPortInfo DataPortInfo => _dataPortInfo ?? (_dataPortInfo = new DataPortInfo());
+
+        IPortInfo IPort.PortInfo => DataPortInfo;
 
         public SdmObjectReference<Asset> Asset
         {

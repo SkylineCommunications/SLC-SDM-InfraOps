@@ -31,7 +31,7 @@
             Helper.PopulateWithDemoData(upTo: DemoDataLayer.AssetClasses);
 
             const string deviceName = "KVM Switch";
-            var filter = AssetClassExposers.DeviceName.Equal(deviceName);
+            var filter = AssetClassExposers.Name.Equal(deviceName);
 
             // Act
             var results = Helper.AssetManagement.AssetClasses.Read(filter).ToList();

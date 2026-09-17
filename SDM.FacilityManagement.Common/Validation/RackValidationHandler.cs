@@ -45,6 +45,18 @@
             return result.IsValid;
         }
 
+        public static bool IsRackNameValid(Rack rack, out ValidationResult result)
+        {
+            result = new ValidationResult();
+
+            if (rack == null || string.IsNullOrWhiteSpace(rack.Name))
+            {
+                result.AddFailReason(RackValidationField.Name, "Rack Name cannot be empty or whitespace.");
+            }
+
+            return result.IsValid;
+        }
+
         #endregion
 
         #region Dimensions Validation

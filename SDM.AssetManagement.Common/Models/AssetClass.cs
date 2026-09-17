@@ -20,6 +20,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         [JsonIgnore]
         private AssetClassLifecycle _lifecycle;
         [JsonIgnore]
+        private ProtocolLink _protocolLink;
+        [JsonIgnore]
         private bool _isNew = true;
 
         public AssetClass()
@@ -151,6 +153,18 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         {
             get => HoldersField.Value ?? new List<AssetHolder>();
             set => HoldersField.Value = value;
+        }
+
+        public bool IsBookable
+        {
+            get => IsBookableField.Value;
+            set => IsBookableField.Value = value;
+        }
+
+        public ProtocolLink ProtocolLink
+        {
+            get => _protocolLink ?? (_protocolLink = new ProtocolLink());
+            set => _protocolLink = value ?? new ProtocolLink();
         }
 
         public List<Attachment> Attachments
@@ -291,6 +305,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         internal ChangeTrackingArrayField<AssetHolder> HoldersField => FieldHandler.GetOrCreateArrayField(
             nameof(Holders),
             () => new ChangeTrackingArrayField<AssetHolder>(new List<AssetHolder>()));
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal IChangeTrackingField<bool> IsBookableField => FieldHandler.GetOrCreateField(
+            nameof(IsBookable),
+            () => new ChangeTrackingField<bool>(false));
 
         [JsonIgnore]
         [SdmIgnore]

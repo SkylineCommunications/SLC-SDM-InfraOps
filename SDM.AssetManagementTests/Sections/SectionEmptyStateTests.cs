@@ -147,7 +147,7 @@
             new DataPortInfo().Also(x => x.PortNumber = 1).IsEmpty.Should().BeFalse();
             new DataPortInfo().Also(x => x.OutputType = SlcAsset_Management.Enums.Outputtype.In).IsEmpty.Should().BeFalse();
             new DataPortInfo().Also(x => x.PortExposure = SlcAsset_Management.Enums.PortExposureEnum.Front).IsEmpty.Should().BeFalse();
-            new DataPortInfo().Also(x => x.Type = Ref<PortType>()).IsEmpty.Should().BeFalse();
+            new DataPortInfo().Also(x => x.PortType = Ref<PortType>()).IsEmpty.Should().BeFalse();
             new DataPortInfo().Also(x => x.Label = "label").IsEmpty.Should().BeFalse();
         }
 

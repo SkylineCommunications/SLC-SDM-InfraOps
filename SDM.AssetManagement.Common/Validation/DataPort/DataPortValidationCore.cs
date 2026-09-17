@@ -86,14 +86,14 @@
         /// </summary>
         private ValidationResult ValidatePortType(DataPort dataPort)
         {
-            if (dataPort.DataPortInfo.Type == null || !dataPort.DataPortInfo.Type.HasValue())
+            if (dataPort.DataPortInfo.PortType == null || !dataPort.DataPortInfo.PortType.HasValue())
             {
                 return PortTypeRequiredFailure();
             }
 
             try
             {
-                var portType = _entityLoader.LoadPortType(dataPort.DataPortInfo.Type);
+                var portType = _entityLoader.LoadPortType(dataPort.DataPortInfo.PortType);
                 return ValidatePortTypeAgainst(dataPort, portType);
             }
             catch (Exception ex)
@@ -126,7 +126,7 @@
         {
             var result = new ValidationResult();
 
-            if (dataPort.DataPortInfo.Type == null || !dataPort.DataPortInfo.Type.HasValue())
+            if (dataPort.DataPortInfo.PortType == null || !dataPort.DataPortInfo.PortType.HasValue())
             {
                 return PortTypeRequiredFailure();
             }
@@ -134,7 +134,7 @@
             if (loadedPortType == null)
             {
                 result.AddFailReason(DataPortValidationField.PortType,
-                    $"Port Type not found. Referenced Port Type '{dataPort.DataPortInfo.Type.Identifier}' does not exist.");
+                    $"Port Type not found. Referenced Port Type '{dataPort.DataPortInfo.PortType.Identifier}' does not exist.");
                 return result;
             }
 

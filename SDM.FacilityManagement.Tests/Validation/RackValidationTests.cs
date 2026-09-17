@@ -15,7 +15,7 @@
         [TestMethod]
         public void Rack_Create_WithEmptyId_ShouldThrow()
         {
-            var entity = new Rack { Identifier = Guid.NewGuid().ToString(), RackId = string.Empty };
+            var entity = new Rack { Identifier = Guid.NewGuid().ToString(), Name = "Rack", RackId = string.Empty };
             entity.Capacity.MaximumRackCapacity = 42;
 
             var action = () => Helper.Racks.Create(entity);
@@ -24,11 +24,21 @@
         }
 
         [TestMethod]
+        public void Rack_Create_WithEmptyName_ShouldThrow()
+        {
+            var entity = new Rack { Identifier = Guid.NewGuid().ToString(), Name = string.Empty, RackId = "RACK-1" };
+
+            var action = () => Helper.Racks.Create(entity);
+
+            action.Should().Throw<Exception>().WithMessage("*Rack Name cannot be empty*");
+        }
+
+        [TestMethod]
         public void Rack_CreateOrUpdate_WithDuplicateIdInBatch_ShouldThrow()
         {
-            var first = new Rack { Identifier = Guid.NewGuid().ToString(), RackId = "DUP-1" };
+            var first = new Rack { Identifier = Guid.NewGuid().ToString(), Name = "Rack 1", RackId = "DUP-1" };
             first.Capacity.MaximumRackCapacity = 42;
-            var second = new Rack { Identifier = Guid.NewGuid().ToString(), RackId = "DUP-1" };
+            var second = new Rack { Identifier = Guid.NewGuid().ToString(), Name = "Rack 2", RackId = "DUP-1" };
             second.Capacity.MaximumRackCapacity = 42;
 
             var action = () => Helper.Racks.CreateOrUpdate(new[] { first, second });
@@ -39,11 +49,11 @@
         [TestMethod]
         public void Rack_Create_WithDuplicateIdInDatabase_ShouldThrow()
         {
-            var existing = new Rack { Identifier = Guid.NewGuid().ToString(), RackId = "EXIST-1" };
+            var existing = new Rack { Identifier = Guid.NewGuid().ToString(), Name = "Existing Rack", RackId = "EXIST-1" };
             existing.Capacity.MaximumRackCapacity = 42;
             Helper.Racks.Create(existing);
 
-            var duplicate = new Rack { Identifier = Guid.NewGuid().ToString(), RackId = "EXIST-1" };
+            var duplicate = new Rack { Identifier = Guid.NewGuid().ToString(), Name = "Duplicate Rack", RackId = "EXIST-1" };
             duplicate.Capacity.MaximumRackCapacity = 42;
             var action = () => Helper.Racks.Create(duplicate);
 

@@ -39,6 +39,12 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                     return result;
                 }
 
+                if (!DeskValidationHandler.IsDeskNameValid(entity, out var nameResult))
+                {
+                    result.AddFailuresFrom(nameResult);
+                    return result;
+                }
+
                 if (IsIdInUse(entity.DeskID, entity.Identifier))
                 {
                     result.AddFailReason(DeskValidationHandler.DeskValidationField.DeskId,
@@ -97,6 +103,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
             return FacilityBulkValidationHelper.RunBulkValidation(
                 entities,
                 DeskValidationHandler.IsDeskIdValid,
+                DeskValidationHandler.IsDeskNameValid,
                 ValidateIdDuplicatesInBatch,
                 ValidateBulkIdsAgainstDatabase,
                 ValidateReferencesAgainstDatabase);
