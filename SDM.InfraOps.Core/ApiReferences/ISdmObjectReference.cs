@@ -63,7 +63,7 @@
 
             return new ISdmObjectReference<T>(id);
         }
-
+        
         //
         // Summary:
         //     Implicitly converts an ISdmObject to an Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences.ISdmObjectReference`1.
@@ -84,6 +84,39 @@
             }
 
             return new ISdmObjectReference<T>(sdmObject.Identifier);
+        }
+
+        //
+        // Summary:
+        //     Widens an Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences.ISdmObjectReference`1 of type T to a reference
+        //     of type ISdmObject, e.g. for generic storage across different referenced types.
+        //
+        // Parameters:
+        //   reference:
+        //     The reference to widen.
+        public static implicit operator ISdmObjectReference<ISdmObject>(ISdmObjectReference<T> reference)
+        {
+            return new ISdmObjectReference<ISdmObject>(reference.Identifier);
+        }
+
+        public static bool operator ==(ISdmObjectReference<T> left, T right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(ISdmObjectReference<T> left, T right)
+        {
+            return !(left == right);
+        }
+
+        public static bool operator ==(T left, ISdmObjectReference<T> right)
+        {
+            return right == left;
+        }
+
+        public static bool operator !=(T left, ISdmObjectReference<T> right)
+        {
+            return !(left == right);
         }
 
         //
@@ -228,6 +261,15 @@
         public override string ToString()
         {
             return "Ref " + typeof(T).Name + " [" + Identifier + "]";
+        }
+
+        public static ISdmObjectReference<T> To(T sdmObject)
+        {
+            if (sdmObject?.Identifier == null)
+            {
+                return default(ISdmObjectReference<T>);
+            }
+            return new ISdmObjectReference<T>(sdmObject.Identifier);
         }
     }
 }

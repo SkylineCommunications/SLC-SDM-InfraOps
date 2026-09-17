@@ -15,7 +15,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.Exposers;
-    using Skyline.DataMiner.SDM.FacilityManagement.Models;
 
     public static partial class AssetExposers
 	{
