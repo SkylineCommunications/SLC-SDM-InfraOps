@@ -72,7 +72,7 @@ namespace SDM.AssetManagement.Tests
             var asset = CreateAsset(assetClass, "ASSET-CONNECTION-BLOCK");
             asset.State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable;
             var dataPort = CreateDataPort(asset, CreateDataPortType("Asset Connection Port Type"));
-            CreateConnection(dataPort.Identifier, dataPort.DataPortInfo.Type);
+            CreateConnection(dataPort.Identifier, dataPort.DataPortInfo.PortType);
 
             Action act = () => Helper.AssetManagement.Assets.Delete(asset);
 
@@ -97,7 +97,7 @@ namespace SDM.AssetManagement.Tests
         {
             var asset = CreateAsset(CreateAssetClass("Data Port Class", SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Active, deviceTags: new List<SlcAsset_Management.Enums.TagOption> { SlcAsset_Management.Enums.TagOption.AcceptsDataConnection }), "DATA-PORT-ASSET");
             var dataPort = CreateDataPort(asset, CreateDataPortType("Data Port Connected Type"));
-            CreateConnection(dataPort.Identifier, dataPort.DataPortInfo.Type);
+            CreateConnection(dataPort.Identifier, dataPort.DataPortInfo.PortType);
 
             Action act = () => Helper.AssetManagement.DataPorts.Delete(dataPort);
 
@@ -203,7 +203,7 @@ namespace SDM.AssetManagement.Tests
                         PortNumber = 1,
                         OutputType = SlcAsset_Management.Enums.Outputtype.IO,
                         PortExposure = SlcAsset_Management.Enums.PortExposureEnum.Front,
-                        Type = new SdmObjectReference<PortType>(portType.Identifier),
+                        PortType = new SdmObjectReference<PortType>(portType.Identifier),
                     },
                 });
 
@@ -385,7 +385,7 @@ namespace SDM.AssetManagement.Tests
                     PortNumber = 1,
                     OutputType = SlcAsset_Management.Enums.Outputtype.IO,
                     PortExposure = SlcAsset_Management.Enums.PortExposureEnum.Front,
-                    Type = new SdmObjectReference<PortType>(portType.Identifier),
+                    PortType = new SdmObjectReference<PortType>(portType.Identifier),
                 },
             };
 

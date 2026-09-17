@@ -6,10 +6,9 @@
 //------------------------------------------------------------------------------
 namespace SharedMappers.DomIds
 {
-	using System;
-
-	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-	using Skyline.DataMiner.Net.Sections;
+    using System;
+    using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+    using Skyline.DataMiner.Net.Sections;
 
     public static class SlcAsset_Management
     {
@@ -704,35 +703,6 @@ namespace SharedMappers.DomIds
                 = new FieldDescriptorID(new Guid("9109438c-72dc-4822-8891-4199d2dc0ed7"));
             }
 
-            public static class Attachment
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("cdfaec69-e775-47f2-bbc0-7ca98d5bbe34"))
-                { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID Path
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("7513ce2a-b668-4676-9f48-fb2ceff9612d"));
-                public static FieldDescriptorID AttachedAt
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("1c547989-5f7e-4775-afae-b2360968411d"));
-                public static FieldDescriptorID AttachedBy
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("694ae718-2867-4bde-896f-ed1cc344fea9"));
-            }
-
             public static class LinkedJob
             {
                 public static SectionDefinitionID Id
@@ -748,6 +718,94 @@ namespace SharedMappers.DomIds
                 }
 
                 = new FieldDescriptorID(new Guid("c6f632ad-33d9-41e3-a8de-74c99a001143"));
+            }
+
+			public static class Attachment
+			{
+				public static SectionDefinitionID Id
+				{
+					get;
+				}
+
+				= new SectionDefinitionID(new Guid("cdfaec69-e775-47f2-bbc0-7ca98d5bbe34"))
+				{ ModuleId = "(slc)asset_management" };
+				public static FieldDescriptorID Path
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("7513ce2a-b668-4676-9f48-fb2ceff9612d"));
+				public static FieldDescriptorID AttachedAt
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("1c547989-5f7e-4775-afae-b2360968411d"));
+				public static FieldDescriptorID AttachedBy
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("694ae718-2867-4bde-896f-ed1cc344fea9"));
+			}
+
+			public static class AssetLifecycle
+            {
+                public static SectionDefinitionID Id
+                {
+                    get;
+                }
+
+                = new SectionDefinitionID(new Guid("8f8353b9-5189-468f-881a-5841595548e8"))
+                { ModuleId = "(slc)asset_management" };
+                public static FieldDescriptorID PurchaseDate
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("944d7abf-31b7-4ef9-aabd-defe7cd7982f"));
+                public static FieldDescriptorID FirstUseDate
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("f6dfe8c6-a97f-4a78-b5c3-1d1872c912f5"));
+                public static FieldDescriptorID EndOfWarrantyDate
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("a35b0aeb-976e-4656-9915-4548f79bc2ca"));
+                public static FieldDescriptorID InstallationDate
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("71a78231-a686-4459-9c1a-b7dd0ac7178b"));
+                public static FieldDescriptorID InstallationUser
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("cad2081d-6c5c-4a0a-9cea-d6adcdd60b2a"));
+                public static FieldDescriptorID ModificationDate
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("7c36827c-efa2-475c-aef0-b27167c9071f"));
+                public static FieldDescriptorID ModificationUser
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("bd1fdb19-4913-4cf7-b74b-d037c5febbd7"));
+                public static FieldDescriptorID EndOfLife
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("9b70f622-1146-4239-807d-f81f63d4f46a"));
             }
 
             public static class AssetClassInfo
@@ -855,65 +913,6 @@ namespace SharedMappers.DomIds
                 }
 
                 = new FieldDescriptorID(new Guid("dc0b787e-338d-428e-8d56-8c02bceaf51e"));
-            }
-
-            public static class AssetLifecycle
-            {
-                public static SectionDefinitionID Id
-                {
-                    get;
-                }
-
-                = new SectionDefinitionID(new Guid("8f8353b9-5189-468f-881a-5841595548e8"))
-                { ModuleId = "(slc)asset_management" };
-                public static FieldDescriptorID PurchaseDate
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("944d7abf-31b7-4ef9-aabd-defe7cd7982f"));
-                public static FieldDescriptorID FirstUseDate
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("f6dfe8c6-a97f-4a78-b5c3-1d1872c912f5"));
-                public static FieldDescriptorID EndOfWarrantyDate
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("a35b0aeb-976e-4656-9915-4548f79bc2ca"));
-                public static FieldDescriptorID InstallationDate
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("71a78231-a686-4459-9c1a-b7dd0ac7178b"));
-                public static FieldDescriptorID InstallationUser
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("cad2081d-6c5c-4a0a-9cea-d6adcdd60b2a"));
-                public static FieldDescriptorID ModificationDate
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("7c36827c-efa2-475c-aef0-b27167c9071f"));
-                public static FieldDescriptorID ModificationUser
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("bd1fdb19-4913-4cf7-b74b-d037c5febbd7"));
-                public static FieldDescriptorID EndOfLife
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("9b70f622-1146-4239-807d-f81f63d4f46a"));
             }
 
             public static class AssetOwnership

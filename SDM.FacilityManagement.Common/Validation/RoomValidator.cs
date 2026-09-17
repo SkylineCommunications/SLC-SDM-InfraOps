@@ -39,6 +39,12 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                     return result;
                 }
 
+                if (!RoomValidationHandler.IsRoomNameValid(entity, out var nameResult))
+                {
+                    result.AddFailuresFrom(nameResult);
+                    return result;
+                }
+
                 if (IsIdInUse(entity.RoomId, entity.Identifier))
                 {
                     result.AddFailReason(RoomValidationHandler.RoomValidationField.RoomId,
@@ -107,6 +113,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
             return FacilityBulkValidationHelper.RunBulkValidation(
                 entities,
                 RoomValidationHandler.IsRoomIdValid,
+                RoomValidationHandler.IsRoomNameValid,
                 ValidateIdDuplicatesInBatch,
                 ValidateBulkIdsAgainstDatabase,
                 ValidateReferencesAgainstDatabase);

@@ -12,6 +12,7 @@
         public enum DeskValidationField
         {
             DeskId,
+            Name,
         }
 
         /// <summary>
@@ -24,6 +25,18 @@
             if (entity == null || string.IsNullOrWhiteSpace(entity.DeskID))
             {
                 result.AddFailReason(DeskValidationField.DeskId, "Desk Id cannot be empty or whitespace.");
+            }
+
+            return result.IsValid;
+        }
+
+        public static bool IsDeskNameValid(Desk entity, out ValidationResult result)
+        {
+            result = new ValidationResult();
+
+            if (entity == null || string.IsNullOrWhiteSpace(entity.Name))
+            {
+                result.AddFailReason(DeskValidationField.Name, "Desk Name cannot be empty or whitespace.");
             }
 
             return result.IsValid;

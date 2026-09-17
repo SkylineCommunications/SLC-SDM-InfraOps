@@ -185,7 +185,7 @@ namespace SDM.FacilityManagement.Tests.Validation
 
 		private static Site NewSite(string id)
 		{
-			return new Site { Identifier = Guid.NewGuid().ToString(), SiteId = id };
+			return new Site { Identifier = Guid.NewGuid().ToString(), SiteId = id, Name = $"Site {id}" };
 		}
 
 		private static Facility NewFacility(string id, Site? site = null)
@@ -194,6 +194,7 @@ namespace SDM.FacilityManagement.Tests.Validation
 			{
 				Identifier = Guid.NewGuid().ToString(),
 				FacilityId = id,
+				Name = $"Facility {id}",
 			};
 
 			if (site != null)
@@ -226,6 +227,7 @@ namespace SDM.FacilityManagement.Tests.Validation
 			{
 				Identifier = Guid.NewGuid().ToString(),
 				RoomId = id,
+				Name = $"Room {id}",
 			};
 
 			if (floor != null)
@@ -242,6 +244,7 @@ namespace SDM.FacilityManagement.Tests.Validation
 			{
 				Identifier = Guid.NewGuid().ToString(),
 				RowId = id,
+				Name = $"Row {id}",
 			};
 
 			if (room != null)
@@ -258,6 +261,7 @@ namespace SDM.FacilityManagement.Tests.Validation
 			{
 				Identifier = Guid.NewGuid().ToString(),
 				ZoneId = id,
+				Name = $"Zone {id}",
 			};
 
 			if (room != null)
@@ -274,6 +278,7 @@ namespace SDM.FacilityManagement.Tests.Validation
 			{
 				Identifier = Guid.NewGuid().ToString(),
 				DeskID = id,
+				Name = $"Desk {id}",
 			};
 
 			if (room != null)
@@ -290,6 +295,7 @@ namespace SDM.FacilityManagement.Tests.Validation
 			{
 				Identifier = Guid.NewGuid().ToString(),
 				RackId = id,
+				Name = $"Rack {id}",
 			};
 
 			rack.Capacity.MaximumRackCapacity = 42;

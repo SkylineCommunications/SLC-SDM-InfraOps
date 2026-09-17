@@ -311,7 +311,7 @@ namespace SDM.AssetManagement.Tests.AssetClasses
 
             var initialCount = Helper.TestData.AssetClasses.Count;
             var assetClassToDelete = Helper.AssetManagement.AssetClasses
-                .Read(AssetClassExposers.DeviceName.Equal("Router"))
+                .Read(AssetClassExposers.Name.Equal("Router"))
                 .First();
             assetClassToDelete.State = SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Draft;
 
@@ -338,8 +338,8 @@ namespace SDM.AssetManagement.Tests.AssetClasses
             var initialCount = Helper.TestData.AssetClasses.Count;
 
             var filter = new ORFilterElement<AssetClass>(
-                AssetClassExposers.DeviceName.Equal("UPS"),
-                AssetClassExposers.DeviceName.Equal("Firewall"),
+                AssetClassExposers.Name.Equal("UPS"),
+                AssetClassExposers.Name.Equal("Firewall"),
                 AssetClassExposers.DeviceDescription.Contains("Ethernet", StringComparison.OrdinalIgnoreCase));
 
             var assetClassesToDelete = Helper.AssetManagement.AssetClasses.Read(filter).ToList();
@@ -355,10 +355,10 @@ namespace SDM.AssetManagement.Tests.AssetClasses
                 Helper.AssetManagement.AssetClasses.Count(new TRUEFilterElement<AssetClass>())
                     .Should().Be(initialCount - deleteCount, $"{deleteCount} asset classes should be deleted");
 
-                Helper.AssetManagement.AssetClasses.Count(AssetClassExposers.DeviceName.Equal("UPS"))
+                Helper.AssetManagement.AssetClasses.Count(AssetClassExposers.Name.Equal("UPS"))
                     .Should().Be(0, "UPS should be deleted");
 
-                Helper.AssetManagement.AssetClasses.Count(AssetClassExposers.DeviceName.Equal("Firewall"))
+                Helper.AssetManagement.AssetClasses.Count(AssetClassExposers.Name.Equal("Firewall"))
                     .Should().Be(0, "Firewall should be deleted");
             }
         }
@@ -413,8 +413,8 @@ namespace SDM.AssetManagement.Tests.AssetClasses
                 updated.DataPorts[0].PortNumber.Should().Be(2);
                 updated.DataPorts[0].Name.Should().Be("Port2");
                 updated.DataPorts[0].Label.Should().Be("Label2");
-                updated.DataPorts[0].Type.Should().NotBeNull();
-                updated.DataPorts[0].Type.HasValue().Should().BeFalse();
+                updated.DataPorts[0].PortType.Should().NotBeNull();
+                updated.DataPorts[0].PortType.HasValue().Should().BeFalse();
                 updated.DataPorts[0].PortExposure.Should().Be(SlcAsset_Management.Enums.PortExposureEnum.Back);
                 updated.DataPorts[0].OutputType.Should().Be(SlcAsset_Management.Enums.Outputtype.In);
 
@@ -465,8 +465,8 @@ namespace SDM.AssetManagement.Tests.AssetClasses
                 created.DataPorts[0].PortNumber.Should().Be(1);
                 created.DataPorts[0].Name.Should().Be("Port1");
                 created.DataPorts[0].Label.Should().Be("Label1");
-                created.DataPorts[0].Type.Should().NotBeNull();
-                created.DataPorts[0].Type.HasValue().Should().BeFalse();
+                created.DataPorts[0].PortType.Should().NotBeNull();
+                created.DataPorts[0].PortType.HasValue().Should().BeFalse();
                 created.DataPorts[0].PortExposure.Should().Be(SlcAsset_Management.Enums.PortExposureEnum.Front);
                 created.DataPorts[0].OutputType.Should().Be(SlcAsset_Management.Enums.Outputtype.Out);
 

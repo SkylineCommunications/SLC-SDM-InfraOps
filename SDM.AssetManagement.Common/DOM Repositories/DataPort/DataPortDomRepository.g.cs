@@ -12,19 +12,16 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
     using Skyline.DataMiner.Net;
     using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-    using Skyline.DataMiner.Net.Apps.Sections.Sections;
     using Skyline.DataMiner.Net.Helper;
     using Skyline.DataMiner.Net.ManagerStore;
-    using Skyline.DataMiner.Net.Messages;
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.Net.Sections;
-    using Skyline.DataMiner.Net.SubscriptionFilters;
     using Skyline.DataMiner.SDM;
-
+    using Skyline.DataMiner.SDM.AssetManagement.Models.Interfaces;
     using SLDataGateway.API.Querying;
     using SLDataGateway.API.Types.Querying;
 
-    internal partial class DataPortDomRepository : IBulkRepository<DataPort>
+    internal partial class DataPortDomRepository : IBulkRepository<DataPort>, IDomInstanceReader<DataPort>
     {
         private readonly IConnection connection;
         private readonly DomHelper helper;
@@ -545,7 +542,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 var _dataportinfotype = _dataportinfoSection.GetValue<System.Guid>(AssetManagement.Models.DataPortDomMapper.DataPortInfo.Type);
                 if (_dataportinfotype != null)
                 {
-                    obj.DataPortInfo.Type = new SdmObjectReference<AssetManagement.Models.PortType>(Convert.ToString(_dataportinfotype.Value));
+                    obj.DataPortInfo.PortType = new SdmObjectReference<AssetManagement.Models.PortType>(Convert.ToString(_dataportinfotype.Value));
                 }
 
                 var _dataportinfolabel = _dataportinfoSection.GetValue<string>(AssetManagement.Models.DataPortDomMapper.DataPortInfo.Label);
@@ -616,6 +613,11 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             return obj;
         }
 
+        DataPort IDomInstanceReader<DataPort>.FromDomInstance(DomInstance instance)
+        {
+            return FromInstance(instance);
+        }
+
         private DomInstance ToInstance(DataPort obj)
         {
             Guid id = default(Guid);
@@ -661,7 +663,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
                 _dataportinfo.AddOrUpdateValue<string>(AssetManagement.Models.DataPortDomMapper.DataPortInfo.PortExposure, SharedMappers.DomIds.SlcAsset_Management.Enums.Portexposure.ToValue(obj.DataPortInfo.PortExposure));
 
-                if (obj.DataPortInfo.Type != default && System.Guid.TryParse(obj.DataPortInfo.Type.Identifier, out var dataPortInfoTypeGuid) && dataPortInfoTypeGuid != System.Guid.Empty)
+                if (obj.DataPortInfo.PortType != default && System.Guid.TryParse(obj.DataPortInfo.PortType.Identifier, out var dataPortInfoTypeGuid) && dataPortInfoTypeGuid != System.Guid.Empty)
                 {
                     _dataportinfo.AddOrUpdateValue<System.Guid>(AssetManagement.Models.DataPortDomMapper.DataPortInfo.Type, dataPortInfoTypeGuid);
                 }
@@ -762,7 +764,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DataPortDomMapper.DataPortInfo.OutputType), comparer, (int)((SharedMappers.DomIds.SlcAsset_Management.Enums.Outputtype?)value).Value);
                 case "DataPortInfo.PortExposure":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DataPortDomMapper.DataPortInfo.PortExposure), comparer, SharedMappers.DomIds.SlcAsset_Management.Enums.Portexposure.ToValue((SharedMappers.DomIds.SlcAsset_Management.Enums.PortExposureEnum)value));
-                case "DataPortInfo.Type":
+                case "DataPortInfo.PortType":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DataPortDomMapper.DataPortInfo.Type), comparer, System.Guid.Parse(SdmObjectReference<AssetManagement.Models.PortType>.Convert(value).Identifier));
                 case "DataPortInfo.Label":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DataPortDomMapper.DataPortInfo.Label), comparer, (string)value);
@@ -785,6 +787,11 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
         }
 
+        FilterElement<DomInstance> IDomInstanceReader<DataPort>.CreatePortFilter(string fieldName, Comparer comparer, object value)
+        {
+            return CreateFilter(fieldName, comparer, value);
+        }
+
         private IOrderByElement CreateOrderBy(string fieldName, SortOrder sortOrder, bool naturalSort = false)
         {
             switch (fieldName)
@@ -799,7 +806,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DataPortDomMapper.DataPortInfo.OutputType), sortOrder, naturalSort);
                 case "DataPortInfo.PortExposure":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DataPortDomMapper.DataPortInfo.PortExposure), sortOrder, naturalSort);
-                case "DataPortInfo.Type":
+                case "DataPortInfo.PortType":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DataPortDomMapper.DataPortInfo.Type), sortOrder, naturalSort);
                 case "DataPortInfo.Label":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DataPortDomMapper.DataPortInfo.Label), sortOrder, naturalSort);
@@ -821,5 +828,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     throw new NotImplementedException();
             }
         }
+
     }
 }

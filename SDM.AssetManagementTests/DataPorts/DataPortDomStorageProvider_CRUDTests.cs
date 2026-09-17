@@ -67,7 +67,7 @@
                     PortNumber = 1,
                     OutputType = SlcAsset_Management.Enums.Outputtype.IO,
                     PortExposure = SlcAsset_Management.Enums.PortExposureEnum.Front,
-                    Type = new SdmObjectReference<PortType>(dataPortType.Identifier),
+                    PortType = new SdmObjectReference<PortType>(dataPortType.Identifier),
                     Label = "Ethernet Port 1",
                 },
                 Asset = new SdmObjectReference<Asset>(asset.Identifier),
@@ -135,7 +135,7 @@
         {
             // Arrange - the bulk path now validates Port Type (existence + category),
             // so a batch referencing a non-existent Port Type must be rejected.
-            referenceDataPort.DataPortInfo.Type = new SdmObjectReference<PortType>(Guid.NewGuid().ToString());
+            referenceDataPort.DataPortInfo.PortType = new SdmObjectReference<PortType>(Guid.NewGuid().ToString());
 
             // Act - bulk Create routes through the middleware's bulk validation.
             var act = () => Helper.AssetManagement.DataPorts.Create(new[] { referenceDataPort });
@@ -155,7 +155,7 @@
         {
             // Arrange - CreateOrUpdate now routes through the middleware's bulk validation
             // (previously it bypassed validation entirely), so a non-existent Port Type must be rejected.
-            referenceDataPort.DataPortInfo.Type = new SdmObjectReference<PortType>(Guid.NewGuid().ToString());
+            referenceDataPort.DataPortInfo.PortType = new SdmObjectReference<PortType>(Guid.NewGuid().ToString());
 
             // Act
             var act = () => Helper.AssetManagement.DataPorts.CreateOrUpdate(new[] { referenceDataPort });
@@ -186,7 +186,7 @@
                     PortNumber = 2,
                     OutputType = SlcAsset_Management.Enums.Outputtype.Out,
                     PortExposure = SlcAsset_Management.Enums.PortExposureEnum.Back,
-                    Type = updateDataPortTypeRef,
+                    PortType = updateDataPortTypeRef,
                     Label = "Fiber Port 2",
                 },
                 Asset = created.Asset ,
@@ -316,7 +316,7 @@
                 updated.DataPortInfo.OutputType.Should().Be(SlcAsset_Management.Enums.Outputtype.Out);
                 updated.DataPortInfo.PortExposure.Should().Be(SlcAsset_Management.Enums.PortExposureEnum.Back);
                 updated.DataPortInfo.Label.Should().Be("Fiber Port 2");
-                updated.DataPortInfo.Type.Should().NotBe(original.DataPortInfo.Type);
+                updated.DataPortInfo.PortType.Should().NotBe(original.DataPortInfo.PortType);
 
                 // Asset reference remains the same
                 updated.Asset.Should().Be(original.Asset);

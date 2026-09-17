@@ -1,15 +1,15 @@
-using System;
-
-using Newtonsoft.Json;
-
-using SharedMappers.DomIds;
-
-using Skyline.DataMiner.SDM.Extensions;
-using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
-
 namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
-    public sealed class DataPortInfo : ChangeTrackingBase, IEquatable<DataPortInfo>, ISectionTrackable, ISectionEmptyState
+    using System;
+
+    using Newtonsoft.Json;
+
+    using SharedMappers.DomIds;
+
+    using Skyline.DataMiner.SDM.Extensions;
+    using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
+
+    public sealed class DataPortInfo : ChangeTrackingBase, IEquatable<DataPortInfo>, ISectionTrackable, ISectionEmptyState, IPortInfo
     {
         [JsonIgnore]
         [SdmIgnore]
@@ -20,7 +20,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             PortNumber == default &&
             OutputType == default &&
             PortExposure == default &&
-            !Type.HasValue() &&
+            !PortType.HasValue() &&
             Label == default;
 
         public DataPortInfo() : base()
@@ -51,10 +51,10 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             set => PortExposureField.Value = value;
         }
 
-        public SdmObjectReference<PortType> Type
+        public SdmObjectReference<PortType> PortType
         {
-            get => TypeField.Value;
-            set => TypeField.Value = value;
+            get => PortTypeField.Value;
+            set => PortTypeField.Value = value;
         }
 
         public string Label
@@ -89,8 +89,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
         [JsonIgnore]
         [SdmIgnore]
-        internal IChangeTrackingField<SdmObjectReference<PortType>> TypeField => FieldHandler.GetOrCreateField(
-            nameof(Type),
+        internal IChangeTrackingField<SdmObjectReference<PortType>> PortTypeField => FieldHandler.GetOrCreateField(
+            nameof(PortType),
             () => new ChangeTrackingField<SdmObjectReference<PortType>>(default));
 
         [JsonIgnore]
@@ -111,13 +111,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 return true;
             }
 
-            return
-                string.Equals(Name, other.Name, StringComparison.OrdinalIgnoreCase) &&
-                PortNumber == other.PortNumber &&
-                OutputType == other.OutputType &&
-                PortExposure == other.PortExposure &&
-                Type == other.Type &&
-                string.Equals(Label, other.Label, StringComparison.OrdinalIgnoreCase);
+            return string.Equals(Name, other.Name, StringComparison.OrdinalIgnoreCase) &&
+                   PortNumber == other.PortNumber &&
+                   OutputType == other.OutputType &&
+                   PortExposure == other.PortExposure &&
+                   PortType == other.PortType &&
+                   string.Equals(Label, other.Label, StringComparison.OrdinalIgnoreCase);
         }
 
         public override bool Equals(object obj)
@@ -134,7 +133,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 hash = (hash * 23) + PortNumber.GetHashCode();
                 hash = (hash * 23) + OutputType.GetHashCode();
                 hash = (hash * 23) + PortExposure.GetHashCode();
-                hash = (hash * 23) + Type.GetHashCode();
+                hash = (hash * 23) + PortType.GetHashCode();
                 hash = (hash * 23) + (Label != null ? Label.GetHashCode() : 0);
                 return hash;
             }

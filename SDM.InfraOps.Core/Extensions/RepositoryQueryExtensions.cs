@@ -20,7 +20,7 @@
     /// <c>IPropertyRepository.GetByScopeAndNames</c>) so callers don't need to build the <c>FilterElement</c>
     /// themselves.
     /// </remarks>
-    public static class BulkRepositoryQueryExtensions
+    public static class RepositoryQueryExtensions
     {
         /// <summary>
         /// Reads all entities matching any of the given <paramref name="keys"/>, using a single big-OR filter
@@ -33,7 +33,7 @@
         /// <param name="keys">The keys to look up. Duplicates and empty input are handled gracefully.</param>
         /// <param name="filterProvider">Builds the <see cref="FilterElement{T}"/> for a single key.</param>
         public static List<T> ReadByBigOrFilter<T, TKey>(
-            this IBulkRepository<T> repository,
+            this IReadableRepository<T> repository,
             IEnumerable<TKey> keys,
             Func<TKey, FilterElement<T>> filterProvider)
             where T : class

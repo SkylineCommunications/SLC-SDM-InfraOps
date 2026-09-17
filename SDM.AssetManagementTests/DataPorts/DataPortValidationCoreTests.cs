@@ -32,7 +32,7 @@ namespace SDM.AssetManagement.Tests.DataPorts
         public void PortTypeAgainst_WithMissingPortType_ShouldFail()
         {
             var dataPort = CreateDataPort(1);
-            dataPort.DataPortInfo.Type = new SdmObjectReference<PortType>(Guid.NewGuid().ToString());
+            dataPort.DataPortInfo.PortType = new SdmObjectReference<PortType>(Guid.NewGuid().ToString());
             var core = new DataPortValidationCore(null);
 
             var result = core.ValidatePortTypeAgainst(dataPort, null);
@@ -45,7 +45,7 @@ namespace SDM.AssetManagement.Tests.DataPorts
         public void PortTypeAgainst_WithPowerPortType_ShouldFail()
         {
             var dataPort = CreateDataPort(1);
-            dataPort.DataPortInfo.Type = new SdmObjectReference<PortType>(Guid.NewGuid().ToString());
+            dataPort.DataPortInfo.PortType = new SdmObjectReference<PortType>(Guid.NewGuid().ToString());
             var powerPortType = new PortType
             {
                 CategoryLinks =

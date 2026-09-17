@@ -14,7 +14,7 @@
         [TestMethod]
         public void Facility_Create_WithEmptyId_ShouldThrow()
         {
-            var entity = new Facility { Identifier = Guid.NewGuid().ToString(), FacilityId = string.Empty };
+            var entity = new Facility { Identifier = Guid.NewGuid().ToString(), Name = "Facility", FacilityId = string.Empty };
 
             var action = () => Helper.Facilities.Create(entity);
 
@@ -22,10 +22,20 @@
         }
 
         [TestMethod]
+        public void Facility_Create_WithEmptyName_ShouldThrow()
+        {
+            var entity = new Facility { Identifier = Guid.NewGuid().ToString(), Name = string.Empty, FacilityId = "FAC-1" };
+
+            var action = () => Helper.Facilities.Create(entity);
+
+            action.Should().Throw<Exception>().WithMessage("*Facility Name cannot be empty*");
+        }
+
+        [TestMethod]
         public void Facility_CreateOrUpdate_WithDuplicateIdInBatch_ShouldThrow()
         {
-            var first = new Facility { Identifier = Guid.NewGuid().ToString(), FacilityId = "DUP-1" };
-            var second = new Facility { Identifier = Guid.NewGuid().ToString(), FacilityId = "DUP-1" };
+            var first = new Facility { Identifier = Guid.NewGuid().ToString(), Name = "Facility 1", FacilityId = "DUP-1" };
+            var second = new Facility { Identifier = Guid.NewGuid().ToString(), Name = "Facility 2", FacilityId = "DUP-1" };
 
             var action = () => Helper.Facilities.CreateOrUpdate(new[] { first, second });
 
@@ -35,10 +45,10 @@
         [TestMethod]
         public void Facility_Create_WithDuplicateIdInDatabase_ShouldThrow()
         {
-            var existing = new Facility { Identifier = Guid.NewGuid().ToString(), FacilityId = "EXIST-1" };
+            var existing = new Facility { Identifier = Guid.NewGuid().ToString(), Name = "Existing Facility", FacilityId = "EXIST-1" };
             Helper.Facilities.Create(existing);
 
-            var duplicate = new Facility { Identifier = Guid.NewGuid().ToString(), FacilityId = "EXIST-1" };
+            var duplicate = new Facility { Identifier = Guid.NewGuid().ToString(), Name = "Duplicate Facility", FacilityId = "EXIST-1" };
             var action = () => Helper.Facilities.Create(duplicate);
 
             action.Should().Throw<Exception>().WithMessage("*already in use*");

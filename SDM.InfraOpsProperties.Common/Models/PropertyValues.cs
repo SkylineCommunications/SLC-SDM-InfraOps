@@ -87,7 +87,7 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
 
         public List<PropertyValue> Values
         {
-            get => ValuesField.Value ?? new List<PropertyValue>();
+            get => ValuesField.Value ?? (ValuesField.Value = new List<PropertyValue>());
             set => ValuesField.Value = value;
         }
 

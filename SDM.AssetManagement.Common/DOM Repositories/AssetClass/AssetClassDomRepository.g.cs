@@ -640,9 +640,15 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				if (_backimage != null)
 				{
 					obj.BackImage = _backimage.Value;
-				}
+                }
 
-				var _typicalpowerconsumption = _assetclasspropertiesSection.GetValue<double>(AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.TypicalPowerConsumption);
+                var _isBookable = _assetclasspropertiesSection.GetValue<bool>(AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.IsBookable);
+                if (_isBookable != null)
+                {
+                    obj.IsBookable = _isBookable.Value;
+                }
+
+                var _typicalpowerconsumption = _assetclasspropertiesSection.GetValue<double>(AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.TypicalPowerConsumption);
 				if (_typicalpowerconsumption != null)
 				{
 					obj.TypicalPowerConsumption = _typicalpowerconsumption.Value;
@@ -717,7 +723,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				var _dataportstype = _dataportsSection.GetValue<Guid>(AssetManagement.Models.AssetClassDomMapper.DataPorts.Type);
 				if (_dataportstype != null)
 				{
-                    dataports.Type = new SdmObjectReference<PortType>(Convert.ToString(_dataportstype.Value));
+                    dataports.PortType = new SdmObjectReference<PortType>(Convert.ToString(_dataportstype.Value));
 				}
 
 				var _dataportslabel = _dataportsSection.GetValue<string>(AssetManagement.Models.AssetClassDomMapper.DataPorts.Label);
@@ -826,7 +832,18 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			obj.Attachments = _attachmentsList;
             obj.ResetChangeTracking();
 
-			return obj;
+            var _protocolLinkSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(AssetManagement.Models.AssetClassDomMapper.ProtocolLink.SectionDefinitionId));
+            if (_protocolLinkSection != default)
+            {
+                obj.ProtocolLink = new AssetManagement.Models.ProtocolLink();
+                var _protocolLinkProtocol = _protocolLinkSection.GetValue<string>(AssetManagement.Models.AssetClassDomMapper.ProtocolLink.Protocol);
+                if (_protocolLinkProtocol != null)
+                {
+                    obj.ProtocolLink.Protocol = _protocolLinkProtocol.Value;
+                }
+            }
+
+            return obj;
 		}
 
 		private DomInstance ToInstance(AssetClass obj)
@@ -976,7 +993,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
 				_dataportsSection.AddOrUpdateValue<int>(AssetManagement.Models.AssetClassDomMapper.DataPorts.OutputType, (int)dataports.OutputType);
 				_dataportsSection.AddOrUpdateValue<string>(AssetManagement.Models.AssetClassDomMapper.DataPorts.PortExposure, SharedMappers.DomIds.SlcAsset_Management.Enums.Portexposure.ToValue(dataports.PortExposure));
-				if (dataports.Type != default && System.Guid.TryParse(dataports.Type.Identifier, out var dataPortTypeGuid) && dataPortTypeGuid != System.Guid.Empty)
+				if (dataports.PortType != default && System.Guid.TryParse(dataports.PortType.Identifier, out var dataPortTypeGuid) && dataPortTypeGuid != System.Guid.Empty)
 				{
 					_dataportsSection.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetClassDomMapper.DataPorts.Type, dataPortTypeGuid);
 				}

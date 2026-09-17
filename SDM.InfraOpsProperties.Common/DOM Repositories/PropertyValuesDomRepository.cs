@@ -17,7 +17,7 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
     {
         /// <summary>
         /// Reads all PropertyValues matching any of the given (LinkedObjectID, Scope) pairs, using a single
-        /// batched big-OR query (see <see cref="BulkRepositoryQueryExtensions.ReadByBigOrFilter{T, TKey}"/>)
+        /// batched big-OR query (see <see cref="RepositoryQueryExtensions.ReadByBigOrFilter{T, TKey}"/>)
         /// instead of one query per pair. Use this for bulk (LinkedObjectID, Scope, SubID) uniqueness checks
         /// instead of looping <see cref="IReadableRepository{PropertyValues}.Read(FilterElement{PropertyValues})"/> once per candidate entry.
         /// </summary>

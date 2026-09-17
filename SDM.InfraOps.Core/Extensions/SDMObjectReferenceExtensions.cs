@@ -28,5 +28,15 @@
 
             return guid != Guid.Empty;
         }
+
+        public static Guid GetIdentifierAsGuid<T>(this SdmObjectReference<T> reference) where T : SdmObject<T>
+        {
+            if(!reference.HasValue())
+            {
+                throw new InvalidOperationException("The SdmObjectReference does not have a valid identifier.");
+            }
+
+            return Guid.Parse(reference.Identifier);
+        }
     }
 }
