@@ -64,6 +64,18 @@ namespace SDM.AssetManagement.Tests
             return new TestApiHelper(connection);
         }
 
+        public static ITestApiHelper InitializeWithAssetBehavior()
+        {
+            var connection = ConnectionHelper.CreateConnectionWithAssetBehavior();
+            return new TestApiHelper(connection);
+        }
+
+        public static ITestApiHelper InitializeWithAssetClassBehavior()
+        {
+            var connection = ConnectionHelper.CreateConnectionWithAssetClassBehavior();
+            return new TestApiHelper(connection);
+        }
+
         /// <summary>
         /// Populates demo data up to and including the specified data layer.
         /// Automatically populates all required dependencies.

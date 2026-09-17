@@ -1,5 +1,6 @@
 ﻿namespace SDM.AssetManagement.Tests
 {
+    using SDM.AssetManagement.Tests.Setup;
     using Moq;
 
     using Skyline.DataMiner.Net;
@@ -15,6 +16,22 @@
 			var messageHandler = new DomSLNetMessageHandler();
 			return CreateConnection(messageHandler);
 		}
+
+        internal static IConnection CreateConnectionWithAssetBehavior()
+        {
+            var messageHandler = new DomSLNetMessageHandler();
+            messageHandler.SetDefinitions(AssetBehaviorFixture.ModuleId, new[] { AssetBehaviorFixture.BuildAssetDefinition() });
+            messageHandler.SetBehaviorDefinitions(AssetBehaviorFixture.ModuleId, new[] { AssetBehaviorFixture.BuildAssetBehaviorDefinition() });
+            return CreateConnection(messageHandler);
+        }
+
+        internal static IConnection CreateConnectionWithAssetClassBehavior()
+        {
+            var messageHandler = new DomSLNetMessageHandler();
+            messageHandler.SetDefinitions(AssetClassBehaviorFixture.ModuleId, new[] { AssetClassBehaviorFixture.BuildAssetClassDefinition() });
+            messageHandler.SetBehaviorDefinitions(AssetClassBehaviorFixture.ModuleId, new[] { AssetClassBehaviorFixture.BuildAssetClassBehaviorDefinition() });
+            return CreateConnection(messageHandler);
+        }
 
 		internal static IConnection CreateConnection(DomSLNetMessageHandler messageHandler)
 		{

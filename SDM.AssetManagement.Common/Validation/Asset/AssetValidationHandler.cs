@@ -536,13 +536,19 @@
         /// </summary>
         public static bool IsReadyForInstall(Asset asset, out ValidationResult result)
         {
-            result = new ValidationResult();
-
             if (asset == null)
             {
+                result = new ValidationResult();
                 result.AddFailReason(AssetValidationField.Asset, "Asset cannot be null.");
                 return result.IsValid;
             }
+
+            return ValidateInstallReadiness(asset, out result);
+        }
+
+        private static bool ValidateInstallReadiness(Asset asset, out ValidationResult result)
+        {
+            result = new ValidationResult();
 
             if (asset.InstallationUserId == Guid.Empty || !asset.InstallationDate.HasValue || asset.InstallationDate == DateTime.MinValue)
             {
@@ -833,6 +839,23 @@
         /// </summary>
         public static ValidationResult ValidateDestinationLocation(Asset asset)
         {
+            if (asset == null)
+            {
+                var nullResult = new ValidationResult();
+                nullResult.AddFailReason(AssetValidationField.Asset, "Asset cannot be null.");
+                return nullResult;
+            }
+
+            return ValidateDestinationLocation(asset, asset.State);
+        }
+
+        /// <summary>
+        /// Validates Destination Location against an explicitly supplied state.
+        /// </summary>
+        public static ValidationResult ValidateDestinationLocation(
+            Asset asset,
+            SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum stateToEvaluate)
+        {
             var result = new ValidationResult();
 
             if (asset == null)
@@ -841,11 +864,10 @@
                 return result;
             }
 
-            var state = asset.State;
             var hasDestinationLocation = HasDestinationLocation(asset);
 
             // Check if in "In Transit" state
-            bool isInTransit = state == SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit;
+            bool isInTransit = stateToEvaluate == SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit;
 
             if (isInTransit)
             {
@@ -862,7 +884,7 @@
                 if (hasDestinationLocation)
                 {
                     result.AddWarning(AssetValidationField.DestinationLocation,
-                        $"Destination Location is only applicable when Asset is in 'In Transit' state. Current state: '{state}'. The Destination Location will be ignored.");
+                        $"Destination Location is only applicable when Asset is in 'In Transit' state. Current state: '{stateToEvaluate}'. The Destination Location will be ignored.");
                 }
             }
 

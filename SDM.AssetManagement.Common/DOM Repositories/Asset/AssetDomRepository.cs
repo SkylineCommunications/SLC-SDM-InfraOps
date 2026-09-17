@@ -1,4 +1,4 @@
-﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
+namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
     using System;
     using System.Linq;
@@ -7,8 +7,10 @@
 
     using SharedMappers.DomIds;
 
-    using Skyline.DataMiner.SDM.AssetManagement.Common.Validation;
     using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+    using Skyline.DataMiner.Net.Messages.SLDataGateway;
+    using Skyline.DataMiner.SDM.AssetManagement.Common.Exceptions;
+    using Skyline.DataMiner.SDM.AssetManagement.Common.Validation;
 
     /// <summary>
     /// Defines methods for updating asset fields and managing asset state transitions in a repository. Extends bulk
@@ -22,6 +24,13 @@
     [AllowSdmMiddleware]
     public interface IAssetRepository : IBulkRepository<Asset>
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        Asset ReadAssetById(string id);
+      
         /// <summary>
         /// Transitions asset to a new state.
         /// Use this AFTER updating fields if the new state has different validation rules.
@@ -53,6 +62,16 @@
 
     internal partial class AssetDomRepository : IAssetRepository
     {
+        public Asset ReadAssetById(string id)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                return null;
+            }
+
+            return Read(AssetExposers.Identifier.Equal(id)).SingleOrDefault();
+        }
+
         public Asset TransitionTo(Asset asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum newState)
         {
             if(asset == null) throw new ArgumentNullException(nameof(asset));
@@ -62,7 +81,7 @@
                 throw new InvalidOperationException($"State transition from {asset.State} to {newState} is not allowed.");
             }
 
-            EnsureReadyForInstallIfRequired(asset, newState);
+            ValidateTransitionPath(asset, newState);
 
             return ExecuteStateTransition(asset, newState);
         }
@@ -76,10 +95,9 @@
                 throw new InvalidOperationException($"State transition from {asset.State} to {newState} is not allowed.");
             }
 
-            EnsureReadyForInstallIfRequired(asset, newState);
-
+            ValidateTransitionPath(asset, newState);
             var updated = Update(asset);
-
+           
             return ExecuteStateTransition(updated, newState);
         }
 
@@ -99,7 +117,7 @@
                 throw new InvalidOperationException($"State transition from {asset.State} to {newState} is not allowed.");
             }
 
-            EnsureReadyForInstallIfRequired(asset, newState);
+            ValidateTransitionPath(asset, newState);
 
             var transitioned = ExecuteStateTransition(asset, newState);
 
@@ -149,19 +167,14 @@
             }
         }
 
-        private static void EnsureReadyForInstallIfRequired(
+        private static void ValidateTransitionPath(
             Asset asset,
             SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum toState)
         {
-            var transitions = StateMachine.GetTransitionPath(asset.State, toState);
-            if (!transitions.Contains(SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Buildplanready_To_Installed))
+            var validationResult = AssetTransitionValidator.ValidatePath(asset, toState);
+            if (!validationResult.IsValid)
             {
-                return;
-            }
-
-            if (!AssetValidationHandler.IsReadyForInstall(asset, out _))
-            {
-                throw new InvalidOperationException("Please assign an installation user and date to the asset before installing.");
+                throw new AssetTransitionValidationException(validationResult);
             }
         }
     }

@@ -12,7 +12,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Helpers
 
         IBulkRepository<AssetManagerAppSettings> AppSettings { get; }
 
-		IBulkRepository<AssetClass> AssetClasses { get; }
+		IAssetClassRepository AssetClasses { get; }
 
 		IBulkRepository<PowerPort> PowerPorts { get; }
 

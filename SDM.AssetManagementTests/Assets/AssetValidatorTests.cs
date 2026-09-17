@@ -10,9 +10,11 @@
 
     using SDM.AssetManagement.Tests.Setup;
 
+    using SharedCommonLibrary.AssetManagement.State_Management;
     using SharedMappers.DomIds;
 
     using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.AssetManagement.Common.Exceptions;
     using Skyline.DataMiner.SDM.AssetManagement.Common.Validation;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
@@ -938,8 +940,9 @@
             // Assert
             isValid.Should().BeFalse();
             result.IsValid.Should().BeFalse();
-            transition.Should().Throw<InvalidOperationException>()
-                .WithMessage("Please assign an installation user and date to the asset before installing.");
+            transition.Should().Throw<AssetTransitionValidationException>()
+                .Which.ValidationResult.FailureReasons.Values.Should()
+                .Contain("Please assign an installation user and date to the asset before installing.");
         }
 
         [TestMethod]
@@ -974,6 +977,85 @@
 
             act.Should().Throw<InvalidOperationException>()
                 .WithMessage("*State transition from Available to Available is not allowed*");
+        }
+
+        [TestMethod]
+        public void ValidatePath_WithValidSingleHop_ShouldPass()
+        {
+            var asset = new Asset
+            {
+                State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available,
+            };
+            asset.DestinationLocation.RoomId = new SdmObjectReference<Room>(Guid.NewGuid().ToString());
+
+            var result = AssetTransitionValidator.ValidatePath(
+                asset,
+                SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit);
+
+            result.IsValid.Should().BeTrue();
+        }
+
+        [TestMethod]
+        public void ValidatePath_WithValidMultiHop_ShouldPass()
+        {
+            var asset = new Asset
+            {
+                State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available,
+            };
+
+            var result = AssetTransitionValidator.ValidatePath(
+                asset,
+                SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.BuildPlanReady);
+
+            result.IsValid.Should().BeTrue();
+        }
+
+        [TestMethod]
+        public void GetTransitionDestinationStates_NotAvailableToInService_ShouldReturnOrderedEnteredStates()
+        {
+            var enteredStates = StateMachine.GetTransitionDestinationStates(
+                SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable,
+                SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InService);
+
+            enteredStates.Should().Equal(
+                SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available,
+                SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InPlanning,
+                SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.BuildPlanReady,
+                SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Installed,
+                SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InService);
+        }
+
+        [TestMethod]
+        public void TransitionTo_WithInvalidIntermediateStateRequirement_ShouldNotTransition()
+        {
+            var asset = new Asset
+            {
+                State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available,
+            };
+
+            Action transition = () => Helper.AssetManagement.Assets.TransitionTo(
+                asset,
+                SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InService);
+
+            transition.Should().Throw<AssetTransitionValidationException>();
+            asset.State.Should().Be(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available);
+        }
+
+        [TestMethod]
+        public void TransitionTo_EnteringInTransitWithoutDestinationLocation_ShouldFailValidation()
+        {
+            var asset = new Asset
+            {
+                State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available,
+            };
+
+            Action transition = () => Helper.AssetManagement.Assets.TransitionTo(
+                asset,
+                SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit);
+
+            transition.Should().Throw<AssetTransitionValidationException>()
+                .Which.ValidationResult.FailureReasons.Values.Should()
+                .Contain("Destination Location is mandatory when Asset is in 'In Transit' state.");
         }
 
         #endregion
