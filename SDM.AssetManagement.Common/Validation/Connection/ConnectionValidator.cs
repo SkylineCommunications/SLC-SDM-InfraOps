@@ -91,10 +91,10 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             ValidateCableType(connection, lookups, result);
             ValidatePortTypeReferences(connection, lookups, result);
 
-            var connectionType = ResolveConnectionType(connection, lookups);
+            ResolveConnectionType(connection, lookups);
 
-            ValidateEndpoint(connection, isSource: true, connectionType, lookups, result);
-            ValidateEndpoint(connection, isSource: false, connectionType, lookups, result);
+            ValidateEndpoint(connection, isSource: true, lookups, result);
+            ValidateEndpoint(connection, isSource: false, lookups, result);
         }
 
         private void ValidateCableType(Connection connection, Lookups lookups, ValidationResult result)
@@ -130,7 +130,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             }
         }
 
-        private void ValidateEndpoint(Connection connection, bool isSource, SlcAsset_Management.Enums.ConnectionType? connectionType, Lookups lookups, ValidationResult result)
+        private void ValidateEndpoint(Connection connection, bool isSource, Lookups lookups, ValidationResult result)
         {
             var endpointPort = isSource ? connection.Source.Port : connection.Destination.Port;
             var field = isSource ? ConnectionValidationHandler.ConnectionValidationField.SourcePort : ConnectionValidationHandler.ConnectionValidationField.DestinationPort;
@@ -164,13 +164,13 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
                 return;
             }
 
-            if (!connectionType.HasValue)
+            if (!connection.ConnectionType.HasValue)
             {
                 return;
             }
 
             var chain = ResolveAssetChain(resolved.Asset, lookups);
-            if (ConnectionValidationHandler.IsEndpointAssetValid(chain.Asset, chain.AssetClass, chain.DeviceType, connectionType.Value, isSource, out var assetResult) == false)
+            if (ConnectionValidationHandler.IsEndpointAssetValid(chain.Asset, chain.AssetClass, chain.DeviceType, connection.ConnectionType.Value, isSource, out var assetResult) == false)
             {
                 result.AddFailuresFrom(assetResult);
             }
@@ -187,11 +187,11 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             return usageCount >= MaxConnectionsPerPort;
         }
 
-        private static SlcAsset_Management.Enums.ConnectionType? ResolveConnectionType(Connection connection, Lookups lookups)
+        private static void ResolveConnectionType(Connection connection, Lookups lookups)
         {
             if (connection.ConnectionType.HasValue)
             {
-                return connection.ConnectionType;
+                return;
             }
 
             var sourcePort = connection.Source.Port;
@@ -199,16 +199,18 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             {
                 if (lookups.DataPorts.ContainsKey(sourcePort.ToString()))
                 {
-                    return SlcAsset_Management.Enums.ConnectionType.Data;
+                    connection.ConnectionType = SlcAsset_Management.Enums.ConnectionType.Data;
                 }
 
                 if (lookups.PowerPorts.ContainsKey(sourcePort.ToString()))
                 {
-                    return SlcAsset_Management.Enums.ConnectionType.Power;
+                    connection.ConnectionType = SlcAsset_Management.Enums.ConnectionType.Power;
                 }
             }
-
-            return null;
+            else
+            {
+                throw new InvalidOperationException($"ResolveConnectionType|Source port id is empty.");
+            }
         }
 
         private static ResolvedPort ResolvePort(Guid portGuid, Lookups lookups)
