@@ -78,8 +78,8 @@
 
         public List<InfraopsReservationBounderies> ReservedPositions
         {
-            get => ReservedPositionsField.Value ?? new List<InfraopsReservationBounderies>();
-            set => ReservedPositionsField.Value = value;
+            get => ReservedPositionsField.Value ?? (ReservedPositionsField.Value = new List<InfraopsReservationBounderies>());
+            set => ReservedPositionsField.Value = value ?? new List<InfraopsReservationBounderies>();
         }
 
         [JsonIgnore]

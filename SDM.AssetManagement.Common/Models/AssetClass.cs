@@ -148,20 +148,20 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
         public List<DataPortInfo> DataPorts
         {
-            get => DataPortsField.Value ?? new List<DataPortInfo>();
-            set => DataPortsField.Value = value;
+            get => DataPortsField.Value ?? (DataPortsField.Value = new List<DataPortInfo>());
+            set => DataPortsField.Value = value ?? new List<DataPortInfo>();
         }
 
         public List<PowerPortInfo> PowerPorts
         {
-            get => PowerPortsField.Value ?? new List<PowerPortInfo>();
-            set => PowerPortsField.Value = value;
+            get => PowerPortsField.Value ?? (PowerPortsField.Value = new List<PowerPortInfo>());
+            set => PowerPortsField.Value = value ?? new List<PowerPortInfo>();
         }
 
         public List<AssetHolder> Holders
         {
-            get => HoldersField.Value ?? new List<AssetHolder>();
-            set => HoldersField.Value = value;
+            get => HoldersField.Value ?? (HoldersField.Value = new List<AssetHolder>());
+            set => HoldersField.Value = value ?? new List<AssetHolder>();
         }
 
         public bool IsBookable
@@ -178,8 +178,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
         public List<Attachment> Attachments
         {
-            get => AttachmentsField.Value ?? new List<Attachment>();
-            set => AttachmentsField.Value = value;
+            get => AttachmentsField.Value ?? (AttachmentsField.Value = new List<Attachment>());
+            set => AttachmentsField.Value = value ?? new List<Attachment>();
         }
 
         /// <summary>

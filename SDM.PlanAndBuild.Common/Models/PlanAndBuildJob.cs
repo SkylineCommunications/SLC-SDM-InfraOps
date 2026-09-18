@@ -174,8 +174,8 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
         /// </summary>
         public List<Guid> Locations
         {
-            get => LocationsField.Value ?? new List<Guid>();
-            set => LocationsField.Value = value;
+            get => LocationsField.Value ?? (LocationsField.Value = new List<Guid>());
+            set => LocationsField.Value = value ?? new List<Guid>();
         }
 
         #endregion
@@ -184,20 +184,20 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 
         public List<JobAsset> AssetsUsed
         {
-            get => AssetsUsedField.Value ?? new List<JobAsset>();
-            set => AssetsUsedField.Value = value;
+            get => AssetsUsedField.Value ?? (AssetsUsedField.Value = new List<JobAsset>());
+            set => AssetsUsedField.Value = value ?? new List<JobAsset>();
         }
 
         public List<JobAttachment> Attachments
         {
-            get => AttachmentsField.Value ?? new List<JobAttachment>();
-            set => AttachmentsField.Value = value;
+            get => AttachmentsField.Value ?? (AttachmentsField.Value = new List<JobAttachment>());
+            set => AttachmentsField.Value = value ?? new List<JobAttachment>();
         }
 
         public List<JobConnection> ConnectionsOnJob
         {
-            get => ConnectionsOnJobField.Value ?? new List<JobConnection>();
-            set => ConnectionsOnJobField.Value = value;
+            get => ConnectionsOnJobField.Value ?? (ConnectionsOnJobField.Value = new List<JobConnection>());
+            set => ConnectionsOnJobField.Value = value ?? new List<JobConnection>();
         }
 
         #endregion
