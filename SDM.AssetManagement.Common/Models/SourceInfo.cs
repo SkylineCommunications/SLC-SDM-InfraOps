@@ -102,8 +102,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             {
                 int hash = 17;
                 hash = (hash * 23) + (CableTag != null ? CableTag.GetHashCode() : 0);
-                hash = (hash * 23) + Port.GetHashCode();
-                hash = (hash * 23) + (PortType != null ? PortType.GetHashCode() : 0);
+                hash = (hash * 23) + (Port.Identifier?.GetHashCode() ?? 0);
+                hash = (hash * 23) + (PortType.Identifier?.GetHashCode() ?? 0);
                 return hash;
             }
         }

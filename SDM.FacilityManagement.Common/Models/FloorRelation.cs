@@ -76,7 +76,7 @@
             unchecked
             {
                 int hash = 17;
-                hash = (hash * 23) + (Floor != null ? Floor.GetHashCode() : 0);
+                hash = (hash * 23) + (Floor.Identifier?.GetHashCode() ?? 0);
                 return hash;
             }
         }

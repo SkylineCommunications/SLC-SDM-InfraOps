@@ -72,7 +72,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             unchecked
             {
                 int hash = 17;
-                hash = (hash * 23) + (Rack != null ? Rack.GetHashCode() : 0);
+                hash = (hash * 23) + (Rack.Identifier?.GetHashCode() ?? 0);
                 return hash;
             }
         }

@@ -121,7 +121,7 @@
             {
                 int hash = (2 << 12) - 1;
                 hash = (hash * 23) + (DataPortInfo != null ? DataPortInfo.GetHashCode() : 0);
-                hash = (hash * 23) + (Asset != null ? Asset.GetHashCode() : 0);
+                hash = (hash * 23) + (Asset.Identifier?.GetHashCode() ?? 0);
                 hash = (hash * 23) + (AddressInfo != null ? AddressInfo.GetHashCode() : 0);
                 hash = (hash * 23) + (PrimaryPortRelation != null ? PrimaryPortRelation.GetHashCode() : 0);
                 return hash;

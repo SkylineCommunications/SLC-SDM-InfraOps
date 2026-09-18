@@ -150,7 +150,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				hash = (hash * 23) + PortNumber.GetHashCode();
 				hash = (hash * 23) + OutputType.GetHashCode();
 				hash = (hash * 23) + PortExposure.GetHashCode();
-				hash = (hash * 23) + PortType.GetHashCode();
+				hash = (hash * 23) + (PortType.Identifier?.GetHashCode() ?? 0);
 				hash = (hash * 23) + (Label != null ? Label.GetHashCode() : 0);
 				return hash;
 			}

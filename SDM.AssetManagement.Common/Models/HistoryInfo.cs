@@ -149,7 +149,7 @@
             {
                 int hash = 17;
                 hash = (hash * 23) + (Description != null ? Description.GetHashCode() : 0);
-                hash = (hash * 23) + Job.GetHashCode();
+                hash = (hash * 23) + (Job.Identifier?.GetHashCode() ?? 0);
                 hash = (hash * 23) + (ModifiedInstanceID != default(ISdmObjectReference<ISdmObject>) ? ModifiedInstanceID.GetHashCode() : 0);
                 hash = (hash * 23) + (ModifiedInstanceDefinitionID != null ? ModifiedInstanceDefinitionID.GetHashCode() : 0);
                 hash = (hash * 23) + (ExtraInfo != null ? ExtraInfo.GetHashCode() : 0);

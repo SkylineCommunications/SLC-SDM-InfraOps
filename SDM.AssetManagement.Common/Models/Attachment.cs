@@ -104,7 +104,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 int hash = 17;
                 hash = (hash * 23) + (FilePath?.GetHashCode() ?? 0);
                 hash = (hash * 23) + AttachedAt.GetHashCode();
-                hash = (hash * 23) + AttachedBy.GetHashCode();
+                hash = (hash * 23) + (AttachedBy?.GetHashCode() ?? 0);
                 return hash;
             }
         }

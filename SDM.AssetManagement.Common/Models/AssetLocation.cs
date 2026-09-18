@@ -173,14 +173,14 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             unchecked
             {
                 int hash = 17;
-                hash = (hash * 23) + (ParentAsset != null ? ParentAsset.GetHashCode() : 0);
+                hash = (hash * 23) + (ParentAsset.Identifier?.GetHashCode() ?? 0);
                 hash = (hash * 23) + HolderNumber.GetHashCode();
-                hash = (hash * 23) + (RackId != null ? RackId.GetHashCode() : 0);
+                hash = (hash * 23) + (RackId.Identifier?.GetHashCode() ?? 0);
                 hash = (hash * 23) + RackPosition.GetHashCode();
                 hash = (hash * 23) + Side.GetHashCode();
-                hash = (hash * 23) + (DeskId != null ? DeskId.GetHashCode() : 0);
-                hash = (hash * 23) + (ContainerId != null ? ContainerId.GetHashCode() : 0);
-                hash = (hash * 23) + (RoomId != null ? RoomId.GetHashCode() : 0);
+                hash = (hash * 23) + (DeskId.Identifier?.GetHashCode() ?? 0);
+                hash = (hash * 23) + (ContainerId.Identifier?.GetHashCode() ?? 0);
+                hash = (hash * 23) + (RoomId.Identifier?.GetHashCode() ?? 0);
                 return hash;
             }
         }

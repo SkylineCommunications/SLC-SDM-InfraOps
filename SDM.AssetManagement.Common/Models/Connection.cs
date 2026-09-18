@@ -204,7 +204,7 @@
                 hash = (hash * 23) + (Notes != null ? Notes.GetHashCode() : 0);
                 hash = (hash * 23) + (Description != null ? Description.GetHashCode() : 0);
                 hash = (hash * 23) + ConnectionType.GetHashCode();
-                hash = (hash * 23) + (CableType != null ? CableType.GetHashCode() : 0);
+                hash = (hash * 23) + (CableType.Identifier?.GetHashCode() ?? 0);
                 hash = (hash * 23) + CableLength.GetHashCode();
                 hash = (hash * 23) + (Source != null ? Source.GetHashCode() : 0);
                 hash = (hash * 23) + (Destination != null ? Destination.GetHashCode() : 0);
