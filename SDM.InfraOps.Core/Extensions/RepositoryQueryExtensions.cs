@@ -7,6 +7,7 @@
     using Skyline.DataMiner.Net;
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.Extensions;
 
     /// <summary>
     /// Generic batched-read helper built on <see cref="Tools.RetrieveBigOrFilter{T, ID}"/>. Fetches every entity
@@ -102,6 +103,35 @@
             }
 
             return Tools.RetrieveBigOrFilter(keyList, key => filterProvider(key), filter => repository.Read(batchFilterResolver(filter)).ToList()).Distinct().ToList();
+        }
+
+        /// <summary>
+        /// Bulk-resolves every <paramref name="references"/> entry that has a value in one (internally batched)
+        /// big-OR query, keyed on <see cref="SdmObjectReference{T}.Identifier"/>. Deduplication and the
+        /// null/empty-key check happen once here and in the <c>string</c>-keyed overload this delegates to;
+        /// callers should not re-<c>Distinct()</c> the references themselves.
+        /// </summary>
+        /// <remarks>
+        /// References without a value (see <see cref="SdmObjectReferenceExtensions.HasValue{T}"/>) are filtered out
+        /// before deduplication, because <see cref="SdmObjectReference{T}"/> throws when hashing an unset reference
+        /// (its <c>Identifier</c> is <see langword="null"/>).
+        /// </remarks>
+        /// <typeparam name="T">The entity type referenced by <paramref name="references"/>, and read from <paramref name="repository"/>.</typeparam>
+        /// <param name="repository">The repository to read from.</param>
+        /// <param name="references">
+        /// The references to resolve. References without a value are skipped; null and empty input are handled gracefully.
+        /// </param>
+        /// <param name="filterProvider">Builds the <see cref="FilterElement{T}"/> for a single identifier.</param>
+        public static List<T> ReadByBigOrFilter<T>(
+            this IReadableRepository<T> repository,
+            IEnumerable<SdmObjectReference<T>> references,
+            Func<string, FilterElement<T>> filterProvider)
+            where T : SdmObject<T>
+        {
+            var identifiers = references?.Where(reference => reference.HasValue()).Select(reference => reference.Identifier)
+                ?? Enumerable.Empty<string>();
+
+            return repository.ReadByBigOrFilter(identifiers, filterProvider);
         }
     }
 }
