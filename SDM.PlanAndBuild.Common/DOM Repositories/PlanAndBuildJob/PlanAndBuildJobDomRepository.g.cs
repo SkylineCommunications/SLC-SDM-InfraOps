@@ -555,7 +555,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 					obj.JobType = SharedMappers.DomIds.SlcPlan_And_Build.Enums.Jobtype.ToEnum(_jobtype.Value);
 				}
 
-				var _type = _planandbuildjobpropertiesSection.GetValue<string>(PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.Type);
+				var _type = _planandbuildjobpropertiesSection.GetValue<Guid>(PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.Type);
 				if (_type != null)
 				{
 					obj.Type = new SdmObjectReference<PlanAndBuild.Models.JobType>(Convert.ToString(_type.Value));
@@ -585,10 +585,10 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 					obj.SubState = SharedMappers.DomIds.SlcPlan_And_Build.Enums.Substate.ToEnum(_substate.Value);
 				}
 
-				var _locations = _planandbuildjobpropertiesSection.GetListValue<string>(PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.Locations);
+				var _locations = _planandbuildjobpropertiesSection.GetListValue<Guid>(PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.Locations);
 				if (_locations != null)
 				{
-					obj.Locations = _locations.Values.Select(Guid.Parse).ToList();
+					obj.Locations = _locations.Values.ToList();
 				}
 			}
 
@@ -614,7 +614,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 			{
 				var assetsused = new PlanAndBuild.Models.JobAsset();
 				((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)assetsused).SectionId = _assetsusedSection.ID.Id;
-				var _assetsusedassetid = _assetsusedSection.GetValue<string>(PlanAndBuild.Models.PlanAndBuildJobDomMapper.AssetsUsed.AssetId);
+				var _assetsusedassetid = _assetsusedSection.GetValue<Guid>(PlanAndBuild.Models.PlanAndBuildJobDomMapper.AssetsUsed.AssetId);
 				if (_assetsusedassetid != null)
 				{
 					assetsused.AssetId = new SdmObjectReference<AssetManagement.Models.Asset>(Convert.ToString(_assetsusedassetid.Value));
@@ -680,7 +680,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 			{
 				var connectionsonjob = new PlanAndBuild.Models.JobConnection();
 				((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)connectionsonjob).SectionId = _connectionsonjobSection.ID.Id;
-				var _connectionsonjobconnectionid = _connectionsonjobSection.GetValue<string>(PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.ConnectionId);
+				var _connectionsonjobconnectionid = _connectionsonjobSection.GetValue<Guid>(PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.ConnectionId);
 				if (_connectionsonjobconnectionid != null)
 				{
 					connectionsonjob.ConnectionId = new SdmObjectReference<AssetManagement.Models.Connection>(Convert.ToString(_connectionsonjobconnectionid.Value));
@@ -704,7 +704,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 					connectionsonjob.Status = _connectionsonjobstatus.Value;
 				}
 
-				var _connectionsonjobcabletype = _connectionsonjobSection.GetValue<string>(PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.CableType);
+				var _connectionsonjobcabletype = _connectionsonjobSection.GetValue<Guid>(PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.CableType);
 				if (_connectionsonjobcabletype != null)
 				{
 					connectionsonjob.CableType = new SdmObjectReference<AssetManagement.Models.CableType>(Convert.ToString(_connectionsonjobcabletype.Value));
@@ -784,7 +784,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 			// ApplyChanges(), which excludes the obsolete field from persistence entirely.
 			if (obj.Type.HasValue())
 			{
-				_planandbuildjobproperties.AddOrUpdateValue<string>(PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.Type, obj.Type.Identifier);
+				_planandbuildjobproperties.AddOrUpdateValue<Guid>(PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.Type, obj.Type.GetIdentifierAsGuid());
 			}
 			if (obj.JobDescription != default)
 			{
@@ -802,9 +802,9 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 				_planandbuildjobproperties.AddOrUpdateValue<string>(PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.SubState, SharedMappers.DomIds.SlcPlan_And_Build.Enums.Substate.ToValue((obj.SubState).Value));
 			}
 
-			if (obj.Locations != default)
+			if (obj.Locations.IsNotNullOrEmpty())
 			{
-				_planandbuildjobproperties.AddOrUpdateListValue<string>(PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.Locations, obj.Locations.Select(v => v.ToString()).ToList());
+				_planandbuildjobproperties.AddOrUpdateListValue<Guid>(PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.Locations, obj.Locations);
 			}
 
 			instance.Sections.Add(_planandbuildjobproperties);
@@ -841,7 +841,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 
 				if (assetsused.AssetId.HasValue())
 				{
-					_assetsusedSection.AddOrUpdateValue<string>(PlanAndBuild.Models.PlanAndBuildJobDomMapper.AssetsUsed.AssetId, assetsused.AssetId.Identifier);
+					_assetsusedSection.AddOrUpdateValue<Guid>(PlanAndBuild.Models.PlanAndBuildJobDomMapper.AssetsUsed.AssetId, assetsused.AssetId.GetIdentifierAsGuid());
 				}
 
 				_assetsusedSection.AddOrUpdateValue<string>(PlanAndBuild.Models.PlanAndBuildJobDomMapper.AssetsUsed.Action, SharedMappers.DomIds.SlcPlan_And_Build.Enums.Actionforassetenum.ToValue(assetsused.Action));
@@ -901,7 +901,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 
 				if (connectionsonjob.ConnectionId.HasValue())
 				{
-					_connectionsonjobSection.AddOrUpdateValue<string>(PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.ConnectionId, connectionsonjob.ConnectionId.Identifier);
+					_connectionsonjobSection.AddOrUpdateValue<Guid>(PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.ConnectionId, connectionsonjob.ConnectionId.GetIdentifierAsGuid());
 				}
 
 				if (connectionsonjob.Source != default)
@@ -921,7 +921,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 
 				if (connectionsonjob.CableType.HasValue())
 				{
-					_connectionsonjobSection.AddOrUpdateValue<string>(PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.CableType, connectionsonjob.CableType.Identifier);
+					_connectionsonjobSection.AddOrUpdateValue<Guid>(PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.CableType, connectionsonjob.CableType.GetIdentifierAsGuid());
 				}
 
 				if (connectionsonjob.CableLength != default)
@@ -976,7 +976,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 				case "JobType":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.JobType), comparer, SharedMappers.DomIds.SlcPlan_And_Build.Enums.Jobtype.ToValue((SharedMappers.DomIds.SlcPlan_And_Build.Enums.JobtypeEnum)value));
 				case "Type":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.Type), comparer, SdmObjectReference<PlanAndBuild.Models.JobType>.Convert(value).Identifier);
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.Type), comparer, SdmObjectReference<PlanAndBuild.Models.JobType>.Convert(value).GetIdentifierAsGuid());
 				case "JobDescription" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
 					return DomInstanceExposers.FieldValues.KeyExists(PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.JobDescription.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "JobDescription":
@@ -994,9 +994,9 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 				case "Locations" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
 					return DomInstanceExposers.FieldValues.KeyExists(PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.Locations.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "Locations":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.Locations), comparer, ((Guid)value).ToString());
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.Locations), comparer, (Guid)value);
 				case "AssetsUsed.AssetId":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.AssetsUsed.AssetId), comparer, SdmObjectReference<AssetManagement.Models.Asset>.Convert(value).Identifier);
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.AssetsUsed.AssetId), comparer, SdmObjectReference<AssetManagement.Models.Asset>.Convert(value).GetIdentifierAsGuid());
 				case "AssetsUsed.Action":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.AssetsUsed.Action), comparer, SharedMappers.DomIds.SlcPlan_And_Build.Enums.Actionforassetenum.ToValue((SharedMappers.DomIds.SlcPlan_And_Build.Enums.ActionforassetenumEnum)value));
 				case "AssetsUsed.AssetName" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
@@ -1024,7 +1024,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 				case "Attachments.AttachedBy":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.Attachments.AttachedBy), comparer, Convert.ToString(((System.Guid?)value).Value));
 				case "ConnectionsOnJob.ConnectionId":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.ConnectionId), comparer, SdmObjectReference<AssetManagement.Models.Connection>.Convert(value).Identifier);
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.ConnectionId), comparer, SdmObjectReference<AssetManagement.Models.Connection>.Convert(value).GetIdentifierAsGuid());
 				case "ConnectionsOnJob.Source" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
 					return DomInstanceExposers.FieldValues.KeyExists(PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.Source.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "ConnectionsOnJob.Source":
@@ -1038,7 +1038,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 				case "ConnectionsOnJob.Status":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.Status), comparer, (string)value);
 				case "ConnectionsOnJob.CableType":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.CableType), comparer, SdmObjectReference<AssetManagement.Models.CableType>.Convert(value).Identifier);
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.CableType), comparer, SdmObjectReference<AssetManagement.Models.CableType>.Convert(value).GetIdentifierAsGuid());
 				case "ConnectionsOnJob.CableLength" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
 					return DomInstanceExposers.FieldValues.KeyExists(PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.CableLength.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "ConnectionsOnJob.CableLength":

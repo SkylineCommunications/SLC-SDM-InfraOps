@@ -75,7 +75,7 @@
             unchecked
             {
                 int hash = 17;
-                hash = (hash * 23) + (Facility != null ? Facility.GetHashCode() : 0);
+                hash = (hash * 23) + (Facility.Identifier?.GetHashCode() ?? 0);
                 return hash;
             }
         }

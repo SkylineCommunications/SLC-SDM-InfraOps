@@ -543,7 +543,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             if (_cableInformationSection != default)
             {
                 obj.CableInformationSectionId = _cableInformationSection.ID.Id;
-                var _cabletype = _cableInformationSection.GetValue<string>(AssetManagement.Models.ConnectionDomMapper.CableInformation.CableType);
+                var _cabletype = _cableInformationSection.GetValue<Guid>(AssetManagement.Models.ConnectionDomMapper.CableInformation.CableType);
                 if (_cabletype != null)
                 {
                     obj.CableType = new SdmObjectReference<AssetManagement.Models.CableType>(Convert.ToString(_cabletype.Value));
@@ -656,7 +656,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
             if (obj.CableType.HasValue())
             {
-                _cableinformation.AddOrUpdateValue<string>(AssetManagement.Models.ConnectionDomMapper.CableInformation.CableType, obj.CableType.Identifier);
+                _cableinformation.AddOrUpdateValue<Guid>(AssetManagement.Models.ConnectionDomMapper.CableInformation.CableType, obj.CableType.GetIdentifierAsGuid());
             }
 
             if (obj.CableLength != default)
@@ -743,7 +743,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 case "CableType" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && (value is null || SdmObjectReference<AssetManagement.Models.CableType>.Convert(value).Identifier is null):
                     return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.ConnectionDomMapper.CableInformation.CableType.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "CableType":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ConnectionDomMapper.CableInformation.CableType), comparer, SdmObjectReference<AssetManagement.Models.CableType>.Convert(value).Identifier);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ConnectionDomMapper.CableInformation.CableType), comparer, SdmObjectReference<AssetManagement.Models.CableType>.Convert(value).GetIdentifierAsGuid());
                 case "CableLength":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ConnectionDomMapper.CableInformation.CableLength), comparer, (double)value);
                 case "Source.CableTag":

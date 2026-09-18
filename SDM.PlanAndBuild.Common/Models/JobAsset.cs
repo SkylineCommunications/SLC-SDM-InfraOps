@@ -86,7 +86,7 @@
             unchecked
             {
                 int hash = 17;
-                hash = (hash * 23) + AssetId.GetHashCode();
+                hash = (hash * 23) + (AssetId.Identifier?.GetHashCode() ?? 0);
                 hash = (hash * 23) + Action.GetHashCode();
                 hash = (hash * 23) + (AssetName?.GetHashCode() ?? 0);
                 hash = (hash * 23) + (AssetClassName?.GetHashCode() ?? 0);

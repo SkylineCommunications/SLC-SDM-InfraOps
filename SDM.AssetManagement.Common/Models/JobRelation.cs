@@ -73,7 +73,7 @@
             unchecked
             {
                 int hash = 17;
-                hash = (hash * 23) + Job.GetHashCode();
+                hash = (hash * 23) + (Job.Identifier?.GetHashCode() ?? 0);
                 return hash;
             }
         }

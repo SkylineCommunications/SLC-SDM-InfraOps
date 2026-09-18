@@ -76,7 +76,7 @@
             unchecked
             {
                 int hash = 17;
-                hash = (hash * 23) + (Zone != null ? Zone.GetHashCode() : 0);
+                hash = (hash * 23) + (Zone.Identifier?.GetHashCode() ?? 0);
                 return hash;
             }
         }

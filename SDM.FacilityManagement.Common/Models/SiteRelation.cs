@@ -75,7 +75,7 @@
             unchecked
             {
                 int hash = 17;
-                hash = (hash * 23) + (Site != null ? Site.GetHashCode() : 0);
+                hash = (hash * 23) + (Site.Identifier?.GetHashCode() ?? 0);
                 return hash;
             }
         }

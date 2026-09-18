@@ -76,7 +76,7 @@
             unchecked
             {
                 int hash = 17;
-                hash = (hash * 23) + (Row != null ? Row.GetHashCode() : 0);
+                hash = (hash * 23) + (Row.Identifier?.GetHashCode() ?? 0);
                 return hash;
             }
         }

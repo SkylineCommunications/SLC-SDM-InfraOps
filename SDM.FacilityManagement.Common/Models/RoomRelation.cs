@@ -76,7 +76,7 @@
             unchecked
             {
                 int hash = 17;
-                hash = (hash * 23) + (Room != null ? Room.GetHashCode() : 0);
+                hash = (hash * 23) + (Room.Identifier?.GetHashCode() ?? 0);
                 return hash;
             }
         }

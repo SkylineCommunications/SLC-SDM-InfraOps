@@ -549,7 +549,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     obj.HistoryInfo.Job = new ISdmObjectReference<ISdmObject>(Convert.ToString(_job.Value));
                 }
 
-                var _modifiedInstanceId = _historyInfoSection.GetValue<string>(AssetManagement.Models.HistoryDomMapper.HistoryInfo.ModifiedInstanceId);
+                var _modifiedInstanceId = _historyInfoSection.GetValue<Guid>(AssetManagement.Models.HistoryDomMapper.HistoryInfo.ModifiedInstanceId);
                 if (_modifiedInstanceId != null)
                 {
                     obj.HistoryInfo.ModifiedInstanceID = new ISdmObjectReference<ISdmObject>(Convert.ToString(_modifiedInstanceId.Value));
@@ -613,7 +613,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
                 if (info.ModifiedInstanceID.HasValue())
                 {
-                    section.AddOrUpdateValue<string>(HistoryDomMapper.HistoryInfo.ModifiedInstanceId, info.ModifiedInstanceID.Identifier);
+                    section.AddOrUpdateValue<Guid>(HistoryDomMapper.HistoryInfo.ModifiedInstanceId, info.ModifiedInstanceID.GetIdentifierAsGuid());
                 }
 
                 if (info.ModifiedInstanceDefinitionID != default)
@@ -657,8 +657,10 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     return DomInstanceExposers.FieldValues.KeyExists(HistoryDomMapper.HistoryInfo.Job.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "HistoryInfo.Job":
                     return FieldFilter(HistoryDomMapper.HistoryInfo.Job, comparer, System.Guid.Parse(ISdmObjectReference<ISdmObject>.Convert<ISdmObject>(value).Identifier));
+                case "HistoryInfo.ModifiedInstanceID" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && !ISdmObjectReference<ISdmObject>.Convert<ISdmObject>(value).HasValue():
+                    return DomInstanceExposers.FieldValues.KeyExists(HistoryDomMapper.HistoryInfo.ModifiedInstanceId.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "HistoryInfo.ModifiedInstanceID":
-                    return FieldFilter(HistoryDomMapper.HistoryInfo.ModifiedInstanceId, comparer, value);
+                    return FieldFilter(HistoryDomMapper.HistoryInfo.ModifiedInstanceId, comparer, System.Guid.Parse(ISdmObjectReference<ISdmObject>.Convert<ISdmObject>(value).Identifier));
                 case "HistoryInfo.ModifiedInstanceDefinitionID":
                     return FieldFilter(HistoryDomMapper.HistoryInfo.ModifiedInstanceDefinitionId, comparer, value);
                 case "HistoryInfo.ExtraInfo":

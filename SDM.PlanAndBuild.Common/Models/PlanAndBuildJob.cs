@@ -418,11 +418,11 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             unchecked
             {
                 int hash = 17;
-                hash = (hash * 23) + (JobID != null ? JobID.GetHashCode() : 0);
-                hash = (hash * 23) + (JobName != null ? JobName.GetHashCode() : 0);
-                hash = (hash * 23) + Start.GetHashCode();
-                hash = (hash * 23) + End.GetHashCode();
-                hash = (hash * 23) + Type.GetHashCode();
+                hash = (hash * 23) + (JobID?.GetHashCode() ?? 0);
+                hash = (hash * 23) + (JobName?.GetHashCode() ?? 0);
+                hash = (hash * 23) + (Start?.GetHashCode() ?? 0);
+                hash = (hash * 23) + (End?.GetHashCode() ?? 0);
+                hash = (hash * 23) + (Type.Identifier?.GetHashCode() ?? 0);
                 hash = (hash * 23) + State.GetHashCode();
                 return hash;
             }
