@@ -141,8 +141,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
         public List<SlcAsset_Management.Enums.Operationalflagsenum> OperationalFlags
         {
-            get => OperationalFlagsField.Value;
-            set => OperationalFlagsField.Value = value;
+            get => OperationalFlagsField.Value ?? (OperationalFlagsField.Value = new List<SlcAsset_Management.Enums.Operationalflagsenum>());
+            set => OperationalFlagsField.Value = value ?? new List<SlcAsset_Management.Enums.Operationalflagsenum>();
         }
 
         #endregion
@@ -229,20 +229,20 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
         public List<AssetHolder> Holders
         {
-            get => HoldersField.Value ?? new List<AssetHolder>();
-            set => HoldersField.Value = value;
+            get => HoldersField.Value ?? (HoldersField.Value = new List<AssetHolder>());
+            set => HoldersField.Value = value ?? new List<AssetHolder>();
         }
 
         public List<ElementLink> ElementLinks
         {
-            get => ElementsField.Value ?? new List<ElementLink>();
-            set => ElementsField.Value = value;
+            get => ElementsField.Value ?? (ElementsField.Value = new List<ElementLink>());
+            set => ElementsField.Value = value ?? new List<ElementLink>();
         }
 
         public List<Attachment> Attachments
         {
-            get => AttachmentsField.Value ?? new List<Attachment>();
-            set => AttachmentsField.Value = value;
+            get => AttachmentsField.Value ?? (AttachmentsField.Value = new List<Attachment>());
+            set => AttachmentsField.Value = value ?? new List<Attachment>();
         }
 
         #endregion
@@ -532,12 +532,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             unchecked
             {
                 int hash = 17;
-                hash = (hash * 23) + (Name != null ? Name.GetHashCode() : 0);
-                hash = (hash * 23) + (AssetID != null ? AssetID.GetHashCode() : 0);
+                hash = (hash * 23) + (Name?.GetHashCode() ?? 0);
+                hash = (hash * 23) + (AssetID?.GetHashCode() ?? 0);
                 hash = (hash * 23) + (AssetClassId.Identifier?.GetHashCode() ?? 0);
-                hash = (hash * 23) + (SerialNumber != null ? SerialNumber.GetHashCode() : 0);
-                hash = (hash * 23) + (Description != null ? Description.GetHashCode() : 0);
-                hash = (hash * 23) + (MacAddress != null ? MacAddress.GetHashCode() : 0);
+                hash = (hash * 23) + (SerialNumber?.GetHashCode() ?? 0);
+                hash = (hash * 23) + (Description?.GetHashCode() ?? 0);
+                hash = (hash * 23) + (MacAddress?.GetHashCode() ?? 0);
                 hash = (hash * 23) + State.GetHashCode();
                 return hash;
             }

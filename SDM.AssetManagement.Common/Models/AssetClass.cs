@@ -148,20 +148,20 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
         public List<DataPortInfo> DataPorts
         {
-            get => DataPortsField.Value ?? new List<DataPortInfo>();
-            set => DataPortsField.Value = value;
+            get => DataPortsField.Value ?? (DataPortsField.Value = new List<DataPortInfo>());
+            set => DataPortsField.Value = value ?? new List<DataPortInfo>();
         }
 
         public List<PowerPortInfo> PowerPorts
         {
-            get => PowerPortsField.Value ?? new List<PowerPortInfo>();
-            set => PowerPortsField.Value = value;
+            get => PowerPortsField.Value ?? (PowerPortsField.Value = new List<PowerPortInfo>());
+            set => PowerPortsField.Value = value ?? new List<PowerPortInfo>();
         }
 
         public List<AssetHolder> Holders
         {
-            get => HoldersField.Value ?? new List<AssetHolder>();
-            set => HoldersField.Value = value;
+            get => HoldersField.Value ?? (HoldersField.Value = new List<AssetHolder>());
+            set => HoldersField.Value = value ?? new List<AssetHolder>();
         }
 
         public bool IsBookable
@@ -178,8 +178,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
         public List<Attachment> Attachments
         {
-            get => AttachmentsField.Value ?? new List<Attachment>();
-            set => AttachmentsField.Value = value;
+            get => AttachmentsField.Value ?? (AttachmentsField.Value = new List<Attachment>());
+            set => AttachmentsField.Value = value ?? new List<Attachment>();
         }
 
         /// <summary>
@@ -469,9 +469,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             unchecked
             {
                 int hash = 17;
-                hash = (hash * 23) + (Name != null ? Name.GetHashCode() : 0);
+                hash = (hash * 23) + (Name?.GetHashCode() ?? 0);
                 hash = (hash * 23) + (DeviceTypeId.Identifier?.GetHashCode() ?? 0);
-                hash = (hash * 23) + (Description != null ? Description.GetHashCode() : 0);
+                hash = (hash * 23) + (Description?.GetHashCode() ?? 0);
                 hash = (hash * 23) + Manufacturer.GetHashCode();
                 hash = (hash * 23) + IsBookable.GetHashCode();
                 hash = (hash * 23) + State.GetHashCode();

@@ -984,7 +984,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 _assetproperties.AddOrUpdateValue<string>(AssetManagement.Models.AssetDomMapper.AssetProperties.HardwareVersion, Convert.ToString(obj.HardwareVersion));
             }
 
-            if (obj.OperationalFlags != null && obj.OperationalFlags.Count > 0)
+            if (obj.OperationalFlags.IsNotNullOrEmpty())
             {
                 _assetproperties.AddOrUpdateValue<List<long>>(AssetManagement.Models.AssetDomMapper.AssetProperties.OperationalFlags, obj.OperationalFlags.Select(flag => (long)flag).ToList());
             }

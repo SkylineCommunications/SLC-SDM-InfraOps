@@ -128,8 +128,8 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
 
         public List<PropertyOption> Discreets
         {
-            get => DiscreetsField.Value ?? new List<PropertyOption>();
-            set => DiscreetsField.Value = value;
+            get => DiscreetsField.Value ?? (DiscreetsField.Value = new List<PropertyOption>());
+            set => DiscreetsField.Value = value ?? new List<PropertyOption>();
         }
 
         #endregion

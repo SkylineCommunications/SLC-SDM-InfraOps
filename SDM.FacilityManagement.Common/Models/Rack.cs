@@ -195,8 +195,8 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
         public List<ImageInfo> ImageDetails
         {
-            get => ImageDetailsField.Value ?? new List<ImageInfo>();
-            set => ImageDetailsField.Value = value;
+            get => ImageDetailsField.Value ?? (ImageDetailsField.Value = new List<ImageInfo>());
+            set => ImageDetailsField.Value = value ?? new List<ImageInfo>();
         }
 
         [SdmIgnore]
