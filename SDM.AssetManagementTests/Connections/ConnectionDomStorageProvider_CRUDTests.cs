@@ -199,13 +199,13 @@ namespace SDM.AssetManagement.Tests.Connections
                 Source =
                 {
                     Port = Guid.Parse(sourcePort.Identifier),
-                    PortType = sourcePort.DataPortInfo.Type,
+                    PortType = sourcePort.DataPortInfo.PortType,
                     CableTag = "Source cable",
                 },
                 Destination =
                 {
                     Port = Guid.Parse(destinationPort.Identifier),
-                    PortType = destinationPort.DataPortInfo.Type,
+                    PortType = destinationPort.DataPortInfo.PortType,
                     CableTag = "Destination cable",
                 },
             };
@@ -277,7 +277,7 @@ namespace SDM.AssetManagement.Tests.Connections
                     PortNumber = 1,
                     OutputType = outputType,
                     PortExposure = SlcAsset_Management.Enums.PortExposureEnum.Front,
-                    Type = new SdmObjectReference<PortType>(portType.Identifier),
+                    PortType = new SdmObjectReference<PortType>(portType.Identifier),
                 },
             });
         }
