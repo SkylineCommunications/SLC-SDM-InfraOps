@@ -11,7 +11,7 @@
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)facility_management")]
-    public class Room : SdmObject<Room>, IEntityTracking
+    public class Room : SdmObject<Room>, IEntityTracking, IReadOnlyModuleIdReferencer
     {
         [JsonIgnore]
         private ChangeTrackingFieldHandler _fieldHandler;
@@ -58,6 +58,12 @@
         [JsonIgnore]
         [SdmIgnore]
         internal Guid? RoomPropertiesSectionId { get; set; }
+
+        #endregion
+
+        #region Module Tracking
+
+        public string ModuleId => SlcFacility_Management.ModuleId;
 
         #endregion
 

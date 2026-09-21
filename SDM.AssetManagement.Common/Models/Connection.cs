@@ -4,9 +4,11 @@
     using System;
     using Newtonsoft.Json;
 
+    using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
+
     //[GenerateExposers]
     //[SdmDomStorage("(slc)asset_management")]
-    public class Connection : SdmObject<Connection>
+    public class Connection : SdmObject<Connection>, IReadOnlyModuleIdReferencer
     {
         [JsonIgnore]
         private SourceInfo _source;
@@ -39,6 +41,12 @@
         [JsonIgnore]
         [SdmIgnore]
         internal Guid? CableInformationSectionId { get; set; }
+
+        #endregion
+
+        #region Module Tracking
+
+        public string ModuleId => SlcAsset_Management.ModuleId;
 
         #endregion
 

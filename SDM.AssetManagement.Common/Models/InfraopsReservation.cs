@@ -6,9 +6,13 @@
     using System;
     using Newtonsoft.Json;
 
+    using SharedMappers.DomIds;
+
+    using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
+
     //[GenerateExposers]
     //[SdmDomStorage("(slc)asset_management")]
-    public class InfraopsReservation : SdmObject<InfraopsReservation>
+    public class InfraopsReservation : SdmObject<InfraopsReservation>, IReadOnlyModuleIdReferencer
     {
         [JsonIgnore]
         private RackRelation _rackFk;
@@ -26,6 +30,12 @@
         [JsonIgnore]
         [SdmIgnore]
         internal Guid? ReservationPropertiesSectionId { get; set; }
+
+        #endregion
+
+        #region Module Tracking
+
+        public string ModuleId => SlcAsset_Management.ModuleId;
 
         #endregion
 

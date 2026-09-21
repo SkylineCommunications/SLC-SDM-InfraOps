@@ -4,12 +4,14 @@
 
     using Newtonsoft.Json;
 
+    using SharedMappers.DomIds;
+
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)plan_and_build")]
-    public class PlanAndBuildAppSettings : SdmObject<PlanAndBuildAppSettings>, IEntityTracking
+    public class PlanAndBuildAppSettings : SdmObject<PlanAndBuildAppSettings>, IEntityTracking, IReadOnlyModuleIdReferencer
     {
         [JsonIgnore]
         private ChangeTrackingFieldHandler _fieldHandler;
@@ -122,6 +124,12 @@
         [JsonIgnore]
         [SdmIgnore]
         internal Guid? PlanAndBuildAppSettingsPropertiesSectionId { get; set; }
+
+        #endregion
+
+        #region Module Tracking
+
+        public string ModuleId => SlcPlan_And_Build.ModuleId;
 
         #endregion
 
