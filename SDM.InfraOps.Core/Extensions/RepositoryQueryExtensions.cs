@@ -8,6 +8,8 @@
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.Extensions;
+    using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
+    using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
 
     /// <summary>
     /// Generic batched-read helper built on <see cref="Tools.RetrieveBigOrFilter{T, ID}"/>. Fetches every entity
@@ -130,6 +132,58 @@
         {
             var identifiers = references?.Where(reference => reference.HasValue()).Select(reference => reference.Identifier)
                 ?? Enumerable.Empty<string>();
+
+            return repository.ReadByBigOrFilter(identifiers, filterProvider);
+        }
+
+        /// <summary>
+        /// Bulk-resolves every <paramref name="references"/> entry with a non-empty identifier in one (internally
+        /// batched) big-OR query. Deduplication happens once, in the <c>Guid</c>-keyed <c>ReadByBigOrFilter</c>
+        /// overload this delegates to; callers should not re-<c>Distinct()</c> the references themselves.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type read from <paramref name="repository"/>.</typeparam>
+        /// <typeparam name="TISdmObject">The referenced API object type.</typeparam>
+        /// <param name="repository">The repository to read from.</param>
+        /// <param name="references">
+        /// The references to resolve. References with an empty identifier are skipped; null and empty input are
+        /// handled gracefully.
+        /// </param>
+        /// <param name="filterProvider">Builds the <see cref="FilterElement{T}"/> for a single identifier.</param>
+        public static List<TEntity> ReadByBigOrFilter<TEntity, TISdmObject>(
+            this IReadableRepository<TEntity> repository,
+            IEnumerable<ISdmObjectReference<TISdmObject>> references,
+            Func<string, FilterElement<TEntity>> filterProvider)
+            where TEntity : class
+            where TISdmObject : ISdmObject
+        {
+            var identifiers = references?.Where(reference => reference.HasValue()).Select(reference => reference.Identifier)
+                ?? Enumerable.Empty<string>();
+
+            return repository.ReadByBigOrFilter(identifiers, filterProvider);
+        }
+
+        /// <summary>
+		/// Bulk-resolves every <paramref name="references"/> entry with a non-empty identifier in one (internally
+		/// batched) big-OR query. Deduplication happens once, in the <c>Guid</c>-keyed <c>ReadByBigOrFilter</c>
+		/// overload this delegates to; callers should not re-<c>Distinct()</c> the references themselves.
+		/// </summary>
+		/// <typeparam name="TEntity">The entity type read from <paramref name="repository"/>.</typeparam>
+		/// <typeparam name="TApi">The referenced API object type.</typeparam>
+		/// <param name="repository">The repository to read from.</param>
+		/// <param name="references">
+		/// The references to resolve. References with an empty identifier are skipped; null and empty input are
+		/// handled gracefully.
+		/// </param>
+		/// <param name="filterProvider">Builds the <see cref="FilterElement{T}"/> for a single identifier.</param>
+		public static List<TEntity> ReadByBigOrFilter<TEntity, TApi>(
+            this IReadableRepository<TEntity> repository,
+            IEnumerable<PnoObjectReference<TApi>> references,
+            Func<Guid, FilterElement<TEntity>> filterProvider)
+            where TEntity : class
+            where TApi : ApiObject
+        {
+            var identifiers = references?.Where(reference => reference.HasValue()).Select(reference => reference.Identifier)
+                ?? Enumerable.Empty<Guid>();
 
             return repository.ReadByBigOrFilter(identifiers, filterProvider);
         }
