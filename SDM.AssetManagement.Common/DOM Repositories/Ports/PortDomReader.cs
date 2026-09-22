@@ -8,7 +8,7 @@
     using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
-    using Skyline.DataMiner.SDM.AssetManagement.Models.Interafaces;
+    using Skyline.DataMiner.SDM.AssetManagement.Models.Interfaces;
     using SLDataGateway.API.Querying;
     using SLDataGateway.API.Types.Querying;
 

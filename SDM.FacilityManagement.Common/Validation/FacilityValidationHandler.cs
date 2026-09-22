@@ -12,6 +12,7 @@
         public enum FacilityValidationField
         {
             FacilityId,
+            Name,
         }
 
         /// <summary>
@@ -24,6 +25,18 @@
             if (entity == null || string.IsNullOrWhiteSpace(entity.FacilityId))
             {
                 result.AddFailReason(FacilityValidationField.FacilityId, "Facility Id cannot be empty or whitespace.");
+            }
+
+            return result.IsValid;
+        }
+
+        public static bool IsFacilityNameValid(Facility entity, out ValidationResult result)
+        {
+            result = new ValidationResult();
+
+            if (entity == null || string.IsNullOrWhiteSpace(entity.Name))
+            {
+                result.AddFailReason(FacilityValidationField.Name, "Facility Name cannot be empty or whitespace.");
             }
 
             return result.IsValid;

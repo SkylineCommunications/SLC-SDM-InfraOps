@@ -14,8 +14,8 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)plan_and_build")]
-    public sealed class PlanAndBuildJob : SdmObjectBase<PlanAndBuildJob>, IEquatable<PlanAndBuildJob>, IEntityTracking
-    {
+    public sealed class PlanAndBuildJob : SdmObjectBase<PlanAndBuildJob>, IEquatable<PlanAndBuildJob>, IEntityTracking, IReadOnlyModuleIdReferencer
+	{
         [JsonIgnore]
         private ChangeTrackingFieldHandler _fieldHandler;
         [JsonIgnore]
@@ -25,6 +25,12 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
         {
             _fieldHandler = new ChangeTrackingFieldHandler();
         }
+
+        #region Module Tracking
+
+        public string ModuleId => SlcPlan_And_Build.ModuleId;
+
+        #endregion
 
         [JsonIgnore]
         [SdmIgnore]

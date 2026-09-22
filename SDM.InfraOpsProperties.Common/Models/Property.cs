@@ -14,8 +14,8 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
 
     //[GenerateExposers]
     //[SdmDomStorage("(infraops)properties")]
-    public sealed class Property : SdmObjectBase<Property>, IEquatable<Property>, IEntityTracking
-    {
+    public sealed class Property : SdmObjectBase<Property>, IEquatable<Property>, IEntityTracking, IReadOnlyModuleIdReferencer
+	{
         [JsonIgnore]
         private ChangeTrackingFieldHandler _fieldHandler;
         [JsonIgnore]
@@ -25,6 +25,12 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
         {
             _fieldHandler = new ChangeTrackingFieldHandler();
         }
+
+        #region Module Tracking
+
+        public string ModuleId => InfraopsProperties.ModuleId;
+
+        #endregion
 
         [JsonIgnore]
         [SdmIgnore]

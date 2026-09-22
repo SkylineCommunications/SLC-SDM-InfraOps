@@ -6,14 +6,16 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
 
     using Newtonsoft.Json;
 
+    using SharedMappers.DomIds;
+
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.InfraOps.Core.Models;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     //[GenerateExposers]
     //[SdmDomStorage("(infraops)properties")]
-    public sealed class PropertyValues : SdmObjectBase<PropertyValues>, IEquatable<PropertyValues>, IEntityTracking
-    {
+    public sealed class PropertyValues : SdmObjectBase<PropertyValues>, IEquatable<PropertyValues>, IEntityTracking, IReadOnlyModuleIdReferencer
+	{
         [JsonIgnore]
         private ChangeTrackingFieldHandler _fieldHandler;
         [JsonIgnore]
@@ -23,6 +25,12 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
         {
             _fieldHandler = new ChangeTrackingFieldHandler();
         }
+
+        #region Module Tracking
+
+        public string ModuleId => InfraopsProperties.ModuleId;
+
+        #endregion
 
         [JsonIgnore]
         [SdmIgnore]

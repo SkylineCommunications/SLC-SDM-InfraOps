@@ -2,7 +2,7 @@
 {
     using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
-    using Skyline.DataMiner.SDM.AssetManagement.Models.Interafaces;
+    using Skyline.DataMiner.SDM.AssetManagement.Models.Interfaces;
 
     internal partial class PowerPortDomRepository : IBulkRepository<PowerPort>, IDomInstanceReader<PowerPort>
     {

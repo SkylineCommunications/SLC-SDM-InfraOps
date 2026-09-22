@@ -16,8 +16,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)asset_management")]
-    public sealed class Asset : SdmObjectBase<Asset>, IEquatable<Asset>, IEntityTracking
-    {
+    public sealed class Asset : SdmObjectBase<Asset>, IEquatable<Asset>, IEntityTracking, IReadOnlyModuleIdReferencer
+	{
         [JsonIgnore]
         private ChangeTrackingFieldHandler _fieldHandler;
         [JsonIgnore]
@@ -35,6 +35,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         {
             _fieldHandler = new ChangeTrackingFieldHandler();
         }
+
+        #region Module Tracking
+
+        public string ModuleId => SlcAsset_Management.ModuleId;
+
+        #endregion
 
         [JsonIgnore]
         [SdmIgnore]

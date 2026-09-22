@@ -11,8 +11,8 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)facility_management")]
-    public sealed class Facility : SdmObjectBase<Facility>, IEquatable<Facility>, IEntityTracking
-    {
+    public sealed class Facility : SdmObjectBase<Facility>, IEquatable<Facility>, IEntityTracking, IReadOnlyModuleIdReferencer
+	{
         [JsonIgnore]
         private ChangeTrackingFieldHandler _fieldHandler;
         [JsonIgnore]
@@ -22,6 +22,12 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
         {
             _fieldHandler = new ChangeTrackingFieldHandler();
         }
+
+        #region Module Tracking
+
+        public string ModuleId => SlcFacility_Management.ModuleId;
+
+        #endregion
 
         [JsonIgnore]
         [SdmIgnore]

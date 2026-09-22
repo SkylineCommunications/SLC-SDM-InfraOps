@@ -4,13 +4,14 @@
     using System.Collections.Generic;
     using System.Linq;
     using Newtonsoft.Json;
+    using SharedMappers.DomIds;
     using Skyline.DataMiner.SDM.InfraOps.Core.Models;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)asset_management")]
-    public sealed class CableType : SdmObjectBase<CableType>, IEquatable<CableType>, IEntityTracking
-    {
+    public sealed class CableType : SdmObjectBase<CableType>, IEquatable<CableType>, IEntityTracking, IReadOnlyModuleIdReferencer
+	{
         [JsonIgnore]
         private ChangeTrackingFieldHandler _fieldHandler;
         [JsonIgnore]
@@ -22,6 +23,12 @@
         {
             _fieldHandler = new ChangeTrackingFieldHandler();
         }
+
+        #region Module Tracking
+
+        public string ModuleId => SlcAsset_Management.ModuleId;
+
+        #endregion
 
         [JsonIgnore]
         [SdmIgnore]
@@ -168,6 +175,5 @@
         internal Guid? CableTypePropertiesSectionId { get; set; }
 
         #endregion
-
     }
 }

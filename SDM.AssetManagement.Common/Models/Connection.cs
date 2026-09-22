@@ -10,8 +10,8 @@
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)asset_management")]
-    public sealed class Connection : SdmObjectBase<Connection>, IEquatable<Connection>, IEntityTracking
-    {
+    public sealed class Connection : SdmObjectBase<Connection>, IEquatable<Connection>, IEntityTracking, IReadOnlyModuleIdReferencer
+	{
         [JsonIgnore]
         private ChangeTrackingFieldHandler _fieldHandler;
         [JsonIgnore]
@@ -25,6 +25,12 @@
         {
             _fieldHandler = new ChangeTrackingFieldHandler();
         }
+
+        #region Module Tracking
+
+        public string ModuleId => SlcAsset_Management.ModuleId;
+
+        #endregion
 
         [JsonIgnore]
         [SdmIgnore]
@@ -223,6 +229,5 @@
         internal Guid? CableInformationSectionId { get; set; }
 
         #endregion
-
     }
 }
