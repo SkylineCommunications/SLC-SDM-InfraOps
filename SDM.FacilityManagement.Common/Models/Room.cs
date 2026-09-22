@@ -13,8 +13,8 @@
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)facility_management")]
-    public sealed class Room : SdmObjectBase<Room>, IEquatable<Room>, IEntityTracking
-    {
+    public sealed class Room : SdmObjectBase<Room>, IEquatable<Room>, IEntityTracking, IReadOnlyModuleIdReferencer
+	{
         [JsonIgnore]
         private ChangeTrackingFieldHandler _fieldHandler;
         [JsonIgnore]
@@ -24,6 +24,12 @@
         {
             _fieldHandler = new ChangeTrackingFieldHandler();
         }
+
+        #region Module Tracking
+
+        public string ModuleId => SlcFacility_Management.ModuleId;
+
+        #endregion
 
         [JsonIgnore]
         [SdmIgnore]

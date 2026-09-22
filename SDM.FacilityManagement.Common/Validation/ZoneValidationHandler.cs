@@ -12,6 +12,7 @@
         public enum ZoneValidationField
         {
             ZoneId,
+            Name,
         }
 
         /// <summary>
@@ -24,6 +25,18 @@
             if (entity == null || string.IsNullOrWhiteSpace(entity.ZoneId))
             {
                 result.AddFailReason(ZoneValidationField.ZoneId, "Zone Id cannot be empty or whitespace.");
+            }
+
+            return result.IsValid;
+        }
+
+        public static bool IsZoneNameValid(Zone entity, out ValidationResult result)
+        {
+            result = new ValidationResult();
+
+            if (entity == null || string.IsNullOrWhiteSpace(entity.Name))
+            {
+                result.AddFailReason(ZoneValidationField.Name, "Zone Name cannot be empty or whitespace.");
             }
 
             return result.IsValid;

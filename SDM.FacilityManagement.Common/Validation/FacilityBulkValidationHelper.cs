@@ -23,15 +23,32 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
         /// <returns><c>true</c> when the id is valid; otherwise <c>false</c>.</returns>
         internal delegate bool TryValidateId<in TEntity>(TEntity entity, out ValidationResult result);
 
+        internal static List<ValidationResult> RunBulkValidation<TEntity>(
+            List<TEntity> entities,
+            TryValidateId<TEntity> validateId,
+            Func<List<TEntity>, List<ValidationResult>> validateBatchDuplicates,
+            Func<List<TEntity>, List<ValidationResult>> validateDatabaseIds,
+            Func<List<TEntity>, List<ValidationResult>> validateReferences)
+        {
+            return RunBulkValidation(
+                entities,
+                validateId,
+                null,
+                validateBatchDuplicates,
+                validateDatabaseIds,
+                validateReferences);
+        }
+
         /// <summary>
         /// Runs the standard four-phase bulk validation flow shared by all Facility Management
-        /// validators: per-item id checks, in-batch duplicate detection, database id-uniqueness
+        /// validators: per-item identity checks, in-batch duplicate detection, database id-uniqueness
         /// checks and reference-integrity checks. Short-circuits after phase 1 or 2 when failures
         /// are already present. Results are returned in the same order as <paramref name="entities"/>.
         /// </summary>
         /// <typeparam name="TEntity">The entity type being validated.</typeparam>
         /// <param name="entities">The batch of entities to validate.</param>
         /// <param name="validateId">Per-item id validity check.</param>
+        /// <param name="validateName">Per-item name validity check.</param>
         /// <param name="validateBatchDuplicates">In-memory duplicate-id detection within the batch.</param>
         /// <param name="validateDatabaseIds">Database id-uniqueness check.</param>
         /// <param name="validateReferences">Reference-integrity check.</param>
@@ -39,6 +56,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
         internal static List<ValidationResult> RunBulkValidation<TEntity>(
             List<TEntity> entities,
             TryValidateId<TEntity> validateId,
+            TryValidateId<TEntity> validateName,
             Func<List<TEntity>, List<ValidationResult>> validateBatchDuplicates,
             Func<List<TEntity>, List<ValidationResult>> validateDatabaseIds,
             Func<List<TEntity>, List<ValidationResult>> validateReferences)
@@ -55,6 +73,11 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                 if (!validateId(entities[i], out var idResult))
                 {
                     results[i].AddFailuresFrom(idResult);
+                }
+
+                if (validateName != null && !validateName(entities[i], out var nameResult))
+                {
+                    results[i].AddFailuresFrom(nameResult);
                 }
             }
 

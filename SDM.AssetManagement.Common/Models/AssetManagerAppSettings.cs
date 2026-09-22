@@ -10,8 +10,8 @@
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)asset_management")]
-    public sealed class AssetManagerAppSettings : SdmObjectBase<AssetManagerAppSettings>, IEquatable<AssetManagerAppSettings>, IEntityTracking
-    {
+    public sealed class AssetManagerAppSettings : SdmObjectBase<AssetManagerAppSettings>, IEquatable<AssetManagerAppSettings>, IEntityTracking, IReadOnlyModuleIdReferencer
+	{
         [JsonIgnore]
         private ChangeTrackingFieldHandler _fieldHandler;
         [JsonIgnore]
@@ -21,6 +21,12 @@
         {
             _fieldHandler = new ChangeTrackingFieldHandler();
         }
+
+        #region Module Tracking
+
+        public string ModuleId => SlcAsset_Management.ModuleId;
+
+        #endregion
 
         [JsonIgnore]
         [SdmIgnore]
@@ -211,6 +217,5 @@
         internal Guid? AppSettingsSectionId { get; set; }
 
         #endregion
-
     }
 }

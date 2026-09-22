@@ -4,13 +4,14 @@
     using System.Collections.Generic;
     using System.Linq;
     using Newtonsoft.Json;
+    using SharedMappers.DomIds;
     using Skyline.DataMiner.SDM.InfraOps.Core.Models;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)asset_management")]
-    public sealed class PortType : SdmObjectBase<PortType>, IEquatable<PortType>, IEntityTracking
-    {
+    public sealed class PortType : SdmObjectBase<PortType>, IEquatable<PortType>, IEntityTracking, IReadOnlyModuleIdReferencer
+	{
         [JsonIgnore]
         private ChangeTrackingFieldHandler _fieldHandler;
         [JsonIgnore]
@@ -24,6 +25,12 @@
         {
             _fieldHandler = new ChangeTrackingFieldHandler();
         }
+
+        #region Module Tracking
+
+        public string ModuleId => SlcAsset_Management.ModuleId;
+
+        #endregion
 
         [JsonIgnore]
         [SdmIgnore]
@@ -173,6 +180,5 @@
         internal Guid? PortTypePropertiesSectionId { get; set; }
 
         #endregion
-
     }
 }
