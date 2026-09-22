@@ -2,11 +2,14 @@
 {
     using System;
     using Newtonsoft.Json;
+
+    using SharedMappers.DomIds;
+
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     // [GenerateExposers]
     // [SdmDomStorage("(slc)asset_management")]
-    public sealed class PowerPort : SdmObject<PowerPort>, IEquatable<PowerPort>, IEntityTracking, IPort
+    public sealed class PowerPort : SdmObject<PowerPort>, IEquatable<PowerPort>, IEntityTracking, IPort, IReadOnlyModuleIdReferencer
 	{
         [JsonIgnore]
         private PowerPortInfo _powerPortInfo;
@@ -119,6 +122,12 @@
         [JsonIgnore]
         [SdmIgnore]
         internal Guid? AssetRelationPropertiesSectionId { get; set; }
+
+        #endregion
+
+        #region Module Tracking
+
+        public string ModuleId => SlcAsset_Management.ModuleId;
 
         #endregion
 	}

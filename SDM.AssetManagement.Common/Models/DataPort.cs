@@ -4,11 +4,13 @@
 
     using Newtonsoft.Json;
 
+    using SharedMappers.DomIds;
+
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)asset_management")]
-    public sealed class DataPort : SdmObject<DataPort>, IEquatable<DataPort>, IEntityTracking, IPort
+    public sealed class DataPort : SdmObject<DataPort>, IEquatable<DataPort>, IEntityTracking, IPort, IReadOnlyModuleIdReferencer
     {
         [JsonIgnore]
         private DataPortInfo _dataPortInfo;
@@ -132,5 +134,10 @@
 
         #endregion
 
+        #region Module Tracking
+
+        public string ModuleId => SlcAsset_Management.ModuleId;
+
+        #endregion
     }
 }

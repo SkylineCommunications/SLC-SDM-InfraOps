@@ -4,12 +4,14 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 
     using Newtonsoft.Json;
 
+    using SharedMappers.DomIds;
+
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)plan_and_build")]
-    public class JobType : SdmObject<JobType>, IEntityTracking
+    public class JobType : SdmObject<JobType>, IEntityTracking, IReadOnlyModuleIdReferencer
     {
         [JsonIgnore]
         private ChangeTrackingFieldHandler _fieldHandler;
@@ -98,6 +100,12 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
         [JsonIgnore]
         [SdmIgnore]
         internal Guid? JobTypePropertiesSectionId { get; set; }
+
+        #endregion
+
+        #region Module Tracking
+
+        public string ModuleId => SlcPlan_And_Build.ModuleId;
 
         #endregion
 
