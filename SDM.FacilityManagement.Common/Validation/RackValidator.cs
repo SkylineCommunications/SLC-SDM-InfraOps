@@ -272,7 +272,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                 : new HashSet<string>();
 
             ValidateStringReferences(rowCandidates, existingRowIds, "Row", results);
-            ValidateStringReferences(zoneCandidates, existingZoneIds, "Zone", results);
 
             return results;
         }
@@ -289,7 +288,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                 {
                     ReferenceValidationHelper.AddMissingReference(
                         results[index],
-                        RackValidationHandler.RackValidationField.RackId,
+                        RackValidationHandler.RackValidationField.RowId,
                         referenceType,
                         identifier);
                 }
