@@ -26,6 +26,7 @@
             PowerCapacity,
             RackSpacePosition,
             RackSpaceOccupied,
+            RowId,
         }
 
         #region Identity Validation

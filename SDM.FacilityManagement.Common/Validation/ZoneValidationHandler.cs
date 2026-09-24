@@ -13,6 +13,8 @@
         {
             ZoneId,
             Name,
+            CoolingCapacity,
+            RoomId,
         }
 
         /// <summary>
@@ -39,6 +41,16 @@
                 result.AddFailReason(ZoneValidationField.Name, "Zone Name cannot be empty or whitespace.");
             }
 
+            return result.IsValid;
+        }
+
+        public static bool IsCoolingCapacityValid(Zone entity, out ValidationResult result)
+        {
+            result = new ValidationResult();
+            if (entity == null || entity.ZoneCapacity?.CoolingCapacity == null || entity.ZoneCapacity.CoolingCapacity < 0)
+            {
+                result.AddFailReason(ZoneValidationField.CoolingCapacity, "Cooling Capacity must have a value greater than or equal to 0.");
+            }
             return result.IsValid;
         }
     }
