@@ -384,12 +384,16 @@ namespace SDM.FacilityManagement.Tests.Racks
         [TestMethod]
         public void RackDomRepository_ReadFilter_RacksWithoutZone()
         {
-            var zone = Helper.Zones.Create(new Zone
+            var zone = new Zone
             {
                 Identifier = Guid.NewGuid().ToString(),
                 ZoneId = $"ZONE-{Guid.NewGuid():N}",
                 Name = "Zone A",
-            });
+            };
+
+            zone.ZoneCapacity.CoolingCapacity = 1;
+
+            zone = Helper.Zones.Create(zone);
 
             var racks = new[]
             {
@@ -450,18 +454,26 @@ namespace SDM.FacilityManagement.Tests.Racks
         [TestMethod]
         public void RackDomRepository_ReadFilter_RacksWithZone()
         {
-            var firstZone = Helper.Zones.Create(new Zone
+            var firstZone = new Zone
             {
                 Identifier = Guid.NewGuid().ToString(),
                 ZoneId = $"ZONE-{Guid.NewGuid():N}",
                 Name = "Zone B1",
-            });
-            var secondZone = Helper.Zones.Create(new Zone
+            };
+
+            firstZone.ZoneCapacity.CoolingCapacity = 1;
+
+            firstZone = Helper.Zones.Create(firstZone);
+
+            var secondZone = new Zone
             {
                 Identifier = Guid.NewGuid().ToString(),
                 ZoneId = $"ZONE-{Guid.NewGuid():N}",
                 Name = "Zone B2",
-            });
+            };
+            secondZone.ZoneCapacity.CoolingCapacity = 1;
+
+            secondZone = Helper.Zones.Create(secondZone);
 
             var racks = new[]
             {
