@@ -231,7 +231,7 @@ namespace SDM.FacilityManagement.Tests.Validation
 
 		private static Floor NewFloor(string id)
 		{
-			return new Floor { Identifier = Guid.NewGuid().ToString(), FloorId = id };
+			return new Floor { Identifier = Guid.NewGuid().ToString(), FloorId = id, Name = $"Floor {id}" };
 		}
 
 		private static Room NewRoom(string id)
@@ -246,7 +246,9 @@ namespace SDM.FacilityManagement.Tests.Validation
 
 		private static Zone NewZone(string id)
 		{
-			return new Zone { Identifier = Guid.NewGuid().ToString(), ZoneId = id, Name = $"Zone {id}" };
+            var zone = new Zone { Identifier = Guid.NewGuid().ToString(), ZoneId = id, Name = $"Zone {id}" };
+            zone.ZoneCapacity.CoolingCapacity = 1;
+            return zone;
 		}
 
 		private static Desk NewDesk(string id)
