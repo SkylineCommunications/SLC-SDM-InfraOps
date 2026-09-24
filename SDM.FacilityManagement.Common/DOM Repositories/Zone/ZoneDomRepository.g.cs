@@ -730,27 +730,27 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             {
                 case "Identifier":
                     return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.Id, comparer, Guid.Parse((string)value));
-                case "ZoneProperties.Name":
+                case "Name":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Name), comparer, (string)value);
-                case "ZoneProperties.Plan":
+                case "Plan":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Plan), comparer, (string)value);
-                case "ZoneProperties.Description":
+                case "Description":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Description), comparer, (string)value);
-                case "ZoneProperties.ThermalType" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                case "ThermalType" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
                     return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.ThermalType.Id.ToString()).Equal(comparer == Comparer.NotEquals);
-                case "ZoneProperties.ThermalType":
+                case "ThermalType":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.ThermalType), comparer, (int)((SharedMappers.DomIds.SlcFacility_Management.Enums.ThermalType?)value).Value);
-                case "ZoneProperties.XPosition" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                case "XPosition" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
                     return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.XPosition.Id.ToString()).Equal(comparer == Comparer.NotEquals);
-                case "ZoneProperties.XPosition":
+                case "XPosition":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.XPosition), comparer, (double)((double?)value).Value);
-                case "ZoneProperties.YPosition" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                case "YPosition" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
                     return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.YPosition.Id.ToString()).Equal(comparer == Comparer.NotEquals);
-                case "ZoneProperties.YPosition":
+                case "YPosition":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.YPosition), comparer, (double)((double?)value).Value);
-                case "ZoneProperties.Width" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                case "Width" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
                     return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Width.Id.ToString()).Equal(comparer == Comparer.NotEquals);
-                case "ZoneProperties.Width":
+                case "Width":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Width), comparer, (double)((double?)value).Value);
                 case "ZoneProperties.ZoneId":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.ZoneId), comparer, (string)value);
@@ -773,19 +773,19 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             {
                 case "Identifier":
                     return OrderByElementFactory.Create(DomInstanceExposers.Id, sortOrder, naturalSort);
-                case "ZoneProperties.Name":
+                case "Name":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Name), sortOrder, naturalSort);
-                case "ZoneProperties.Plan":
+                case "Plan":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Plan), sortOrder, naturalSort);
-                case "ZoneProperties.Description":
+                case "Description":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Description), sortOrder, naturalSort);
-                case "ZoneProperties.ThermalType":
+                case "ThermalType":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.ThermalType), sortOrder, naturalSort);
-                case "ZoneProperties.XPosition":
+                case "XPosition":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.XPosition), sortOrder, naturalSort);
-                case "ZoneProperties.YPosition":
+                case "YPosition":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.YPosition), sortOrder, naturalSort);
-                case "ZoneProperties.Width":
+                case "Width":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Width), sortOrder, naturalSort);
                 case "ZoneProperties.ZoneId":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.ZoneId), sortOrder, naturalSort);
