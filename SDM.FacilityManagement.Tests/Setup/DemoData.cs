@@ -397,5 +397,45 @@
 				RoomId = "RM-006",
 			},
 		];
+
+		public static readonly List<Floor> Floors =
+		[
+			new Floor { Identifier = Guid.NewGuid().ToString(), Name = "Ground Floor",  Plan = "GF-Plan", Description = "Main lobby with reception",     FloorId = "FL-001" },
+			new Floor { Identifier = Guid.NewGuid().ToString(), Name = "First Floor",   Plan = "L1-Plan", Description = "Open plan offices",             FloorId = "FL-002" },
+			new Floor { Identifier = Guid.NewGuid().ToString(), Name = "Second Floor",  Plan = "L2-Plan", Description = "Executive suites",              FloorId = "FL-003" },
+			new Floor { Identifier = Guid.NewGuid().ToString(), Name = "Basement Level", Plan = "B1-Plan", Description = "Parking and storage",          FloorId = "FL-004" },
+			new Floor { Identifier = Guid.NewGuid().ToString(), Name = "Rooftop Level", Plan = "RF-Plan", Description = "HVAC and antenna equipment",    FloorId = "FL-005" },
+			new Floor { Identifier = Guid.NewGuid().ToString(), Name = "Technical Floor", Plan = "TF-Plan", Description = "Server and network equipment", FloorId = "FL-006" },
+		];
+
+		public static readonly List<Zone> Zones =
+		[
+			new Zone { Identifier = Guid.NewGuid().ToString(), Name = "Cold Aisle A",    Plan = "Z-A", Description = "Cold aisle containment zone",   ThermalType = SlcFacility_Management.Enums.ThermalType.Cold, XPosition = 0.0,  YPosition = 0.0,  Width = 5.0,  Depth = 10.0, ZoneId = "ZN-001", ZoneCapacity = { CoolingCapacity = 5.0 } },
+			new Zone { Identifier = Guid.NewGuid().ToString(), Name = "Hot Aisle A",     Plan = "Z-A", Description = "Hot aisle exhaust zone",        ThermalType = SlcFacility_Management.Enums.ThermalType.Warm, XPosition = 5.0,  YPosition = 0.0,  Width = 5.0,  Depth = 10.0, ZoneId = "ZN-002", ZoneCapacity = { CoolingCapacity = 0.0 } },
+			new Zone { Identifier = Guid.NewGuid().ToString(), Name = "Cold Aisle B",    Plan = "Z-B", Description = "Secondary cold aisle",          ThermalType = SlcFacility_Management.Enums.ThermalType.Cold, XPosition = 0.0,  YPosition = 10.0, Width = 6.0,  Depth = 12.0, ZoneId = "ZN-003", ZoneCapacity = { CoolingCapacity = 6.0 } },
+			new Zone { Identifier = Guid.NewGuid().ToString(), Name = "Neutral Staging", Plan = "Z-C", Description = "Staging and unboxing area",     ThermalType = SlcFacility_Management.Enums.ThermalType.None, XPosition = 10.0, YPosition = 0.0,  Width = 8.0,  Depth = 8.0,  ZoneId = "ZN-004", ZoneCapacity = { CoolingCapacity = 0.0 } },
+			new Zone { Identifier = Guid.NewGuid().ToString(), Name = "Hot Aisle B",     Plan = "Z-B", Description = "Secondary hot aisle exhaust",   ThermalType = SlcFacility_Management.Enums.ThermalType.Warm, XPosition = 5.0,  YPosition = 10.0, Width = 6.0,  Depth = 12.0, ZoneId = "ZN-005", ZoneCapacity = { CoolingCapacity = 0.0 } },
+			new Zone { Identifier = Guid.NewGuid().ToString(), Name = "Cooling Plant",   Plan = "Z-D", Description = "Chiller and cooling plant zone", ThermalType = SlcFacility_Management.Enums.ThermalType.Cold, XPosition = 20.0, YPosition = 0.0,  Width = 10.0, Depth = 15.0, ZoneId = "ZN-006", ZoneCapacity = { CoolingCapacity = 15.0 } },
+		];
+
+		public static readonly List<Row> Rows =
+		[
+			new Row { Identifier = Guid.NewGuid().ToString(), Name = "Row A", Plan = "R-1", Description = "First equipment row",       Label = "A", RowId = "RW-001", YPosition = 0.0 },
+			new Row { Identifier = Guid.NewGuid().ToString(), Name = "Row B", Plan = "R-1", Description = "Second equipment row",      Label = "B", RowId = "RW-002", YPosition = 2.0 },
+			new Row { Identifier = Guid.NewGuid().ToString(), Name = "Row C", Plan = "R-2", Description = "Third equipment row",       Label = "C", RowId = "RW-003", YPosition = 4.0 },
+			new Row { Identifier = Guid.NewGuid().ToString(), Name = "Row D", Plan = "R-2", Description = "Storage row",               Label = "D", RowId = "RW-004", YPosition = 6.0 },
+			new Row { Identifier = Guid.NewGuid().ToString(), Name = "Row E", Plan = "R-3", Description = "Network distribution row",  Label = "E", RowId = "RW-005", YPosition = 8.0 },
+			new Row { Identifier = Guid.NewGuid().ToString(), Name = "Row F", Plan = "R-3", Description = "Spare capacity row",        Label = "F", RowId = "RW-006", YPosition = 10.0 },
+		];
+
+		public static readonly List<Site> Sites =
+		[
+			new Site { Identifier = Guid.NewGuid().ToString(), Name = "New York Campus", Description = "East coast HQ",   Address = "123 Broadway",         City = "New York", ZipCode = "10001",   Country = "USA",            Latitude = 40.7128,  Longitude = -74.0060, SiteId = "ST-001" },
+			new Site { Identifier = Guid.NewGuid().ToString(), Name = "London Campus",   Description = "European HQ",    Address = "456 Oxford Street",    City = "London",   ZipCode = "W1D 1BS", Country = "United Kingdom", Latitude = 51.5074,  Longitude = -0.1278,  SiteId = "ST-002" },
+			new Site { Identifier = Guid.NewGuid().ToString(), Name = "Tokyo Campus",    Description = "APAC HQ",        Address = "789 Shibuya",          City = "Tokyo",    ZipCode = "150-0002", Country = "Japan",         Latitude = 35.6762,  Longitude = 139.6503, SiteId = "ST-003" },
+			new Site { Identifier = Guid.NewGuid().ToString(), Name = "Berlin Lab",      Description = "R&D site",       Address = "555 Unter den Linden", City = "Berlin",   ZipCode = "10117",   Country = "Germany",        Latitude = 52.5200,  Longitude = 13.4050,  SiteId = "ST-004" },
+			new Site { Identifier = Guid.NewGuid().ToString(), Name = "Austin Office",   Description = "US south office", Address = "321 Congress Ave",    City = "Austin",   ZipCode = "73301",   Country = "USA",            Latitude = 30.2672,  Longitude = -97.7431, SiteId = "ST-005" },
+			new Site { Identifier = Guid.NewGuid().ToString(), Name = "Sydney Office",   Description = "APAC office",    Address = "888 George St",        City = "Sydney",   ZipCode = "2000",    Country = "Australia",      Latitude = -33.8688, Longitude = 151.2093, SiteId = "ST-006" },
+		];
 	}
 }
