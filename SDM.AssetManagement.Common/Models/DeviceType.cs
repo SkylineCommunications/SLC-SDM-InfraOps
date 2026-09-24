@@ -2,13 +2,15 @@
 {
     using Newtonsoft.Json;
 
+    using SharedMappers.DomIds;
+
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
     using System;
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)asset_management")]
-    public class DeviceType : SdmObject<DeviceType>, IEntityTracking
+    public class DeviceType : SdmObject<DeviceType>, IEntityTracking, IReadOnlyModuleIdReferencer
     {
         [JsonIgnore]
         private ChangeTrackingFieldHandler _fieldHandler;
@@ -103,6 +105,12 @@
         [JsonIgnore]
         [SdmIgnore]
         internal Guid? DeviceTypePropertiesSectionId { get; set; }
+
+        #endregion
+
+        #region Module Tracking
+
+        public string ModuleId => SlcAsset_Management.ModuleId;
 
         #endregion
 

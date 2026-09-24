@@ -11,7 +11,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)facility_management")]
-    public class Desk : SdmObject<Desk>, IEntityTracking
+    public class Desk : SdmObject<Desk>, IEntityTracking, IReadOnlyModuleIdReferencer
     {
         [JsonIgnore]
         private ChangeTrackingFieldHandler _fieldHandler;
@@ -58,6 +58,12 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
         [JsonIgnore]
         [SdmIgnore]
         internal Guid? DeskInformationSectionId { get; set; }
+
+        #endregion
+
+        #region Module Tracking
+
+        public string ModuleId => SlcFacility_Management.ModuleId;
 
         #endregion
 

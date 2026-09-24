@@ -2,9 +2,14 @@
 {
     using System;
     using Newtonsoft.Json;
+
+    using SharedMappers.DomIds;
+
+    using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
+
     //[GenerateExposers]
     //[SdmDomStorage("(slc)asset_management")]
-    public class PortType : SdmObject<PortType>
+    public class PortType : SdmObject<PortType>, IReadOnlyModuleIdReferencer
     {
         [JsonIgnore]
         private CategoryRelation _categoryLinks;
@@ -24,6 +29,12 @@
         [JsonIgnore]
         [SdmIgnore]
         internal Guid? PortTypePropertiesSectionId { get; set; }
+
+        #endregion
+
+        #region Module Tracking
+
+        public string ModuleId => SlcAsset_Management.ModuleId;
 
         #endregion
 
