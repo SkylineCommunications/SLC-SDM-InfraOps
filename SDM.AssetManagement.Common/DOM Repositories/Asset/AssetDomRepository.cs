@@ -166,8 +166,11 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             ValidateTransitionPath(asset, newState);
 
             var transitioned = ExecuteStateTransition(asset, newState);
+            asset.State = transitioned.State;
 
-            return Update(transitioned);
+            //TODO: apply changes to transision Asset and proceed. This is done to preserve external changes.
+            //transitioned.ApplyChanges(asset.GetChanges());
+            return Update(asset);
         }
 
         private Asset ExecuteStateTransition(
@@ -201,9 +204,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     throw new InvalidOperationException($"State transition failed for asset '{asset.Identifier}' to {toState}.");
                 }
 
-                // return back Asset with updated state
-                asset.State = SlcAsset_Management.Behaviors.Asset_Behavior.Statuses.ToEnum(currentInstance.StatusId);
-                return asset;
+                return FromInstance(currentInstance);
             }
             catch (Exception ex)
             {
