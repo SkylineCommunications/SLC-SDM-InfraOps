@@ -5,6 +5,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Extensions
     using System.Linq;
 
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
+    using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.SDM.FacilityManagement.Helpers;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
     using Skyline.DataMiner.SDM.PlanAndBuild.Models;
@@ -34,7 +35,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Extensions
         /// </summary>
         public static bool IsAssignedToPerson(this JobOwnership ownership)
         {
-            return ownership?.AssignedTo.HasValue == true && ownership.AssignedTo != Guid.Empty;
+            return ownership?.AssignedTo.HasValue() ?? false;
         }
 
         /// <summary>
@@ -42,7 +43,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Extensions
         /// </summary>
         public static bool HasAssignmentGroup(this JobOwnership ownership)
         {
-            return ownership?.AssignmentGroup.HasValue == true && ownership.AssignmentGroup != Guid.Empty;
+            return ownership?.AssignmentGroup.HasValue() ?? false;
         }
 
         #endregion

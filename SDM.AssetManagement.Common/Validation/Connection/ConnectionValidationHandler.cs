@@ -1,10 +1,10 @@
 namespace Skyline.DataMiner.SDM.AssetManagement.Common.Validation
 {
-    using System;
-
     using SharedMappers.DomIds;
 
     using Skyline.DataMiner.SDM.AssetManagement.Models;
+    using Skyline.DataMiner.SDM.Extensions;
+    using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
     /// <summary>
@@ -69,11 +69,11 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Common.Validation
         /// <summary>
         /// Validates that a connection does not link a port to itself.
         /// </summary>
-        public static bool IsNotSelfConnection(Guid sourcePort, Guid destinationPort, out ValidationResult result)
+        public static bool IsNotSelfConnection(ISdmObjectReference<IPort> sourcePort, ISdmObjectReference<IPort> destinationPort, out ValidationResult result)
         {
             result = new ValidationResult();
 
-            if (sourcePort != Guid.Empty && sourcePort == destinationPort)
+            if (sourcePort.HasValue() && sourcePort == destinationPort)
             {
                 result.AddFailReason(ConnectionValidationField.SourcePort, "Source Port is the same as destination.");
                 result.AddFailReason(ConnectionValidationField.DestinationPort, "Destination Port is the same as source.");

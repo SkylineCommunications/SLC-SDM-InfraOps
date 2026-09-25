@@ -198,13 +198,13 @@ namespace SDM.AssetManagement.Tests.Connections
                 Description = "Connection description",
                 Source =
                 {
-                    Port = Guid.Parse(sourcePort.Identifier),
+                    Port = sourcePort,
                     PortType = sourcePort.DataPortInfo.PortType,
                     CableTag = "Source cable",
                 },
                 Destination =
                 {
-                    Port = Guid.Parse(destinationPort.Identifier),
+                    Port = destinationPort,
                     PortType = destinationPort.DataPortInfo.PortType,
                     CableTag = "Destination cable",
                 },

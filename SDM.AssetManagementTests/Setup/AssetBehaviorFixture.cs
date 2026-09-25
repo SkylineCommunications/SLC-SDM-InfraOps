@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using SharedMappers.DomIds;
 using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 using Skyline.DataMiner.Net.Apps.DataMinerObjectModel.Status;

@@ -8,8 +8,8 @@
     <AssemblyName>Skyline.DataMiner.SDM.FacilityManagement.Automation</AssemblyName>
     <RootNamespace>Skyline.DataMiner.SDM.FacilityManagement.Automation</RootNamespace>
     <VersionSuffix Condition="'$(VersionSuffixValue)' != '' and '$(Configuration)' == 'Debug'">$(VersionSuffixValue)</VersionSuffix>
-    <VersionPrefix>1.0.1</VersionPrefix>
     <AssemblyVersion Condition="'$(AssemblyVersionValue)' != ''">$(AssemblyVersionValue)</AssemblyVersion>
+    <VersionPrefix>1.0.1</VersionPrefix>
     <PackageTags>Skyline;DataMiner</PackageTags>
     <PackageProjectUrl>https://skyline.be</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>

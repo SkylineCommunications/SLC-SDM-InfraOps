@@ -6,7 +6,9 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
 
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.SDM.InfraOps.Common.Validation;
+    using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
     using Skyline.DataMiner.SDM.PlanAndBuild.Helpers;
     using Skyline.DataMiner.SDM.PlanAndBuild.Models;
     using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
@@ -236,16 +238,10 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
         private static List<Guid> CollectReferencedPersonIds(List<PlanAndBuildJob> jobs)
         {
             var assignedTo = jobs
-                .Where(j => j.ShouldValidate(j.Ownership.AssignedToField) && j.Ownership.AssignedTo.HasValue)
-                .Select(j => j.Ownership.AssignedTo.Value);
+                .Where(j => j.ShouldValidate(j.Ownership.AssignedToField) && j.Ownership.AssignedTo.HasValue())
+                .Select(j => j.Ownership.AssignedTo.Identifier);
 
-            var attachedBy = jobs
-                .Where(j => j.ShouldValidateAny(j.AttachmentsField) && j.Attachments != null)
-                .SelectMany(j => j.Attachments)
-                .Where(a => a?.AttachedBy.HasValue == true)
-                .Select(a => a.AttachedBy.Value);
-
-            return assignedTo.Concat(attachedBy).ToList();
+            return assignedTo.ToList();
         }
 
         /// <summary>
@@ -254,8 +250,8 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
         private static List<Guid> CollectReferencedTeamIds(List<PlanAndBuildJob> jobs)
         {
             return jobs
-                .Where(j => j.ShouldValidate(j.Ownership.AssignmentGroupField) && j.Ownership.AssignmentGroup.HasValue)
-                .Select(j => j.Ownership.AssignmentGroup.Value)
+                .Where(j => j.ShouldValidate(j.Ownership.AssignmentGroupField) && j.Ownership.AssignmentGroup.HasValue())
+                .Select(j => j.Ownership.AssignmentGroup.Identifier)
                 .ToList();
         }
 
@@ -459,15 +455,15 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
             var result = new ValidationResult();
 
             if (job.ShouldValidate(job.Ownership.AssignedToField) &&
-                job.Ownership.AssignedTo.HasValue &&
-                !IsPersonValid(job.Ownership.AssignedTo.Value))
+                job.Ownership.AssignedTo.HasValue() &&
+                !IsPersonValid(job.Ownership.AssignedTo))
             {
                 result.AddFailReason(PlanAndBuildJobValidationField.AssignedTo, $"AssignedTo Person '{job.Ownership.AssignedTo}' does not exist.");
             }
 
             if (job.ShouldValidate(job.Ownership.AssignmentGroupField) &&
-                job.Ownership.AssignmentGroup.HasValue &&
-                !IsTeamValid(job.Ownership.AssignmentGroup.Value))
+                job.Ownership.AssignmentGroup.HasValue() &&
+                !IsTeamValid(job.Ownership.AssignmentGroup))
             {
                 result.AddFailReason(PlanAndBuildJobValidationField.AssignmentGroup, $"AssignmentGroup Team '{job.Ownership.AssignmentGroup}' does not exist.");
             }
@@ -476,9 +472,9 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
             {
                 foreach (var attachment in job.Attachments)
                 {
-                    if (attachment?.AttachedBy.HasValue == true && !IsPersonValid(attachment.AttachedBy.Value))
+                    if (string.IsNullOrEmpty(attachment?.AttachedBy))
                     {
-                        result.AddFailReason(PlanAndBuildJobValidationField.Attachments, $"AttachedBy Person '{attachment.AttachedBy}' does not exist.");
+                        result.AddFailReason(PlanAndBuildJobValidationField.Attachments, $"AttachedBy '{attachment.AttachedBy}' cannot be empty.");
                     }
                 }
             }
@@ -498,15 +494,15 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
             var result = new ValidationResult();
 
             if (job.ShouldValidate(job.Ownership.AssignedToField) &&
-                job.Ownership.AssignedTo.HasValue &&
-                existingPersonIds?.Contains(job.Ownership.AssignedTo.Value) != true)
+                job.Ownership.AssignedTo.HasValue() &&
+                existingPersonIds?.Contains(job.Ownership.AssignedTo) != true)
             {
                 result.AddFailReason(PlanAndBuildJobValidationField.AssignedTo, $"AssignedTo Person '{job.Ownership.AssignedTo}' does not exist.");
             }
 
             if (job.ShouldValidate(job.Ownership.AssignmentGroupField) &&
-                job.Ownership.AssignmentGroup.HasValue &&
-                existingTeamIds?.Contains(job.Ownership.AssignmentGroup.Value) != true)
+                job.Ownership.AssignmentGroup.HasValue() &&
+                existingTeamIds?.Contains(job.Ownership.AssignmentGroup) != true)
             {
                 result.AddFailReason(PlanAndBuildJobValidationField.AssignmentGroup, $"AssignmentGroup Team '{job.Ownership.AssignmentGroup}' does not exist.");
             }
@@ -515,9 +511,9 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
             {
                 foreach (var attachment in job.Attachments)
                 {
-                    if (attachment?.AttachedBy.HasValue == true && existingPersonIds?.Contains(attachment.AttachedBy.Value) != true)
+                    if (string.IsNullOrEmpty(attachment?.AttachedBy))
                     {
-                        result.AddFailReason(PlanAndBuildJobValidationField.Attachments, $"AttachedBy Person '{attachment.AttachedBy}' does not exist.");
+                        result.AddFailReason(PlanAndBuildJobValidationField.Attachments, $"AttachedBy '{attachment.AttachedBy}' cannot be empty.");
                     }
                 }
             }
@@ -623,14 +619,14 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
             }
         }
 
-        private bool IsPersonValid(Guid personId)
+        private bool IsPersonValid(PnoObjectReference<Person> personId)
         {
-            return _peopleApi.People.Count(PersonExposers.Id.Equal(personId)) > 0;
+            return _peopleApi.People.Count(PersonExposers.Id.Equal(personId.Identifier)) > 0;
         }
 
-        private bool IsTeamValid(Guid teamId)
+        private bool IsTeamValid(PnoObjectReference<Team> teamId)
         {
-            return _peopleApi.Teams.Count(TeamExposers.Id.Equal(teamId)) > 0;
+            return _peopleApi.Teams.Count(TeamExposers.Id.Equal(teamId.Identifier)) > 0;
         }
 
         /// <summary>
@@ -664,7 +660,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
         private static bool IsReferenceSet<T>(SdmObjectReference<T> reference)
             where T : SdmObject<T>
         {
-            return reference != null && !string.IsNullOrWhiteSpace(reference.Identifier);
+            return reference.HasValue();
         }
 
         #endregion

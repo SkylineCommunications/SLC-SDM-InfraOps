@@ -2,9 +2,30 @@
 {
 	using System;
 
-	public sealed class AssetNetworkDetails : IEquatable<AssetNetworkDetails>
+	using Newtonsoft.Json;
+
+	using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
+
+	public sealed class AssetNetworkDetails : ChangeTrackingBase, IEquatable<AssetNetworkDetails>, ISectionTrackable, ISectionEmptyState
 	{
-		public string MACAddress { get; set; }
+		[JsonIgnore]
+		[SdmIgnore]
+		Guid? ISectionTrackable.SectionId { get; set; }
+		[JsonIgnore]
+		[SdmIgnore]
+		public bool IsEmpty => MACAddress == default;
+
+		public string MACAddress
+		{
+			get => MACAddressField.Value;
+			set => MACAddressField.Value = value;
+		}
+
+		[JsonIgnore]
+		[SdmIgnore]
+		internal IChangeTrackingField<string> MACAddressField => FieldHandler.GetOrCreateField(
+			nameof(MACAddress),
+			() => new ChangeTrackingStringField(null));
 
 		public static bool operator ==(AssetNetworkDetails left, AssetNetworkDetails right)
 		{

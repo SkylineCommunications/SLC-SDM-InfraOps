@@ -12,6 +12,8 @@
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
+    using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
+    using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
 
     [TestClass]
     public class SectionEmptyStateTests
@@ -56,10 +58,10 @@
         {
             new AssetCustody().Also(x => x.From = DateTime.UtcNow).IsEmpty.Should().BeFalse();
             new AssetCustody().Also(x => x.Till = DateTime.UtcNow).IsEmpty.Should().BeFalse();
-            new AssetCustody().Also(x => x.ContactPerson = Guid.NewGuid()).IsEmpty.Should().BeFalse();
-            new AssetCustody().Also(x => x.Team = Guid.NewGuid()).IsEmpty.Should().BeFalse();
-            new AssetCustody().Also(x => x.Organization = Guid.NewGuid()).IsEmpty.Should().BeFalse();
-            new AssetCustody().Also(x => x.ContactPersonRole = Guid.NewGuid()).IsEmpty.Should().BeFalse();
+            new AssetCustody().Also(x => x.ContactPerson = new PnoObjectReference<Person>(Guid.NewGuid())).IsEmpty.Should().BeFalse();
+            new AssetCustody().Also(x => x.Team = new PnoObjectReference<Team>(Guid.NewGuid())).IsEmpty.Should().BeFalse();
+            new AssetCustody().Also(x => x.Organization = new PnoObjectReference<Organization>(Guid.NewGuid())).IsEmpty.Should().BeFalse();
+            new AssetCustody().Also(x => x.ContactPersonRole = new PnoObjectReference<Role>(Guid.NewGuid())).IsEmpty.Should().BeFalse();
         }
 
         [TestMethod]
@@ -90,7 +92,7 @@
             new AssetLocation().Also(x => x.RackId = Ref<Rack>()).IsEmpty.Should().BeFalse();
             new AssetLocation().Also(x => x.RackPosition = 1).IsEmpty.Should().BeFalse();
             new AssetLocation().Also(x => x.Side = SlcAsset_Management.Enums.SideEnum.Back).IsEmpty.Should().BeFalse();
-            new AssetLocation().Also(x => x.DeskId = Guid.NewGuid()).IsEmpty.Should().BeFalse();
+            new AssetLocation().Also(x => x.DeskId = Ref<Desk>()).IsEmpty.Should().BeFalse();
             new AssetLocation().Also(x => x.ContainerId = Ref<Facility>()).IsEmpty.Should().BeFalse();
             new AssetLocation().Also(x => x.RoomId = Ref<Room>()).IsEmpty.Should().BeFalse();
         }
@@ -104,10 +106,10 @@
         [TestMethod]
         public void AssetOwnership_AnyFieldSet_IsNotEmpty()
         {
-            new AssetOwnership().Also(x => x.Organization = Guid.NewGuid()).IsEmpty.Should().BeFalse();
-            new AssetOwnership().Also(x => x.ContactPerson = Guid.NewGuid()).IsEmpty.Should().BeFalse();
-            new AssetOwnership().Also(x => x.ContactPersonRole = Guid.NewGuid()).IsEmpty.Should().BeFalse();
-            new AssetOwnership().Also(x => x.Team = Guid.NewGuid()).IsEmpty.Should().BeFalse();
+            new AssetOwnership().Also(x => x.Organization = new PnoObjectReference<Organization>(Guid.NewGuid())).IsEmpty.Should().BeFalse();
+            new AssetOwnership().Also(x => x.ContactPerson = new PnoObjectReference<Person>(Guid.NewGuid())).IsEmpty.Should().BeFalse();
+            new AssetOwnership().Also(x => x.ContactPersonRole = new PnoObjectReference<Role>(Guid.NewGuid())).IsEmpty.Should().BeFalse();
+            new AssetOwnership().Also(x => x.Team = new PnoObjectReference<Team>(Guid.NewGuid())).IsEmpty.Should().BeFalse();
         }
 
         [TestMethod]
@@ -161,7 +163,7 @@
         public void DestinationInfo_AnyFieldSet_IsNotEmpty()
         {
             new DestinationInfo().Also(x => x.CableTag = "cable").IsEmpty.Should().BeFalse();
-            new DestinationInfo().Also(x => x.Port = Guid.NewGuid()).IsEmpty.Should().BeFalse();
+            new DestinationInfo().Also(x => x.Port = new ISdmObjectReference<IPort>(Convert.ToString(Guid.NewGuid()))).IsEmpty.Should().BeFalse();
             new DestinationInfo().Also(x => x.PortType = Ref<PortType>()).IsEmpty.Should().BeFalse();
         }
 
@@ -188,6 +190,18 @@
         public void HierarchyInfo_HierarchyRoleSet_IsNotEmpty()
         {
             new HierarchyInfo().Also(x => x.HierarchyRole = SlcAsset_Management.Enums.HierarchyRoleEnum.Card).IsEmpty.Should().BeFalse();
+        }
+
+        [TestMethod]
+        public void HistoryInfo_DefaultState_IsEmpty()
+        {
+            new HistoryInfo().IsEmpty.Should().BeTrue();
+        }
+
+        [TestMethod]
+        public void HistoryInfo_DescriptionSet_IsNotEmpty()
+        {
+            new HistoryInfo().Also(x => x.Description = "History entry").IsEmpty.Should().BeFalse();
         }
 
         [TestMethod]
@@ -255,7 +269,7 @@
         public void SourceInfo_AnyFieldSet_IsNotEmpty()
         {
             new SourceInfo().Also(x => x.CableTag = "cable").IsEmpty.Should().BeFalse();
-            new SourceInfo().Also(x => x.Port = Guid.NewGuid()).IsEmpty.Should().BeFalse();
+            new SourceInfo().Also(x => x.Port = new ISdmObjectReference<IPort>(Convert.ToString(Guid.NewGuid()))).IsEmpty.Should().BeFalse();
             new SourceInfo().Also(x => x.PortType = Ref<PortType>()).IsEmpty.Should().BeFalse();
         }
 

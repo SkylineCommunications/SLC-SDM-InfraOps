@@ -6,8 +6,6 @@ namespace SDM.AssetManagement.Tests.StateManagement
 
     using SharedCommonLibrary.AssetManagement.State_Management;
 
-    using SharedMappers.DomIds;
-
     using Statuses = SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum;
     using Transitions = SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Class_Behavior.TransitionsEnum;
 

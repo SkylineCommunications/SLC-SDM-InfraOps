@@ -120,6 +120,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
             internal static FieldDescriptorID SlotNumber = SharedMappers.DomIds.SlcAsset_Management.Sections.Holders.SlotNumber;
             internal static FieldDescriptorID HierarchyRole = SharedMappers.DomIds.SlcAsset_Management.Sections.Holders.HierarchyRole;
+            internal static FieldDescriptorID Label = SharedMappers.DomIds.SlcAsset_Management.Sections.Holders.Label;
 
 
         }

@@ -13,6 +13,7 @@
         {
             FacilityId,
             Name,
+            SiteId,
         }
 
         /// <summary>

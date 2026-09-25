@@ -20,7 +20,7 @@
     /// the opposite definition is useless to filter and is skipped. When exclusive fields of both definitions
     /// are combined, no instance can match and an empty result is returned without querying.
     /// </summary>
-    internal sealed class PortDomRepository : IPortRepository
+    internal sealed class PortDomReader : IPortReader
     {
         private const int DefaultPageSize = 500;
 
@@ -41,7 +41,7 @@
         private readonly IDomInstanceReader<DataPort> dataPortRepository;
         private readonly IDomInstanceReader<PowerPort> powerPortRepository;
 
-        public PortDomRepository(IConnection connection, IDomInstanceReader<DataPort> dataPorts, IDomInstanceReader<PowerPort> powerPorts)
+        public PortDomReader(IConnection connection, IDomInstanceReader<DataPort> dataPorts, IDomInstanceReader<PowerPort> powerPorts)
         {
             if (connection is null)
             {
@@ -53,12 +53,7 @@
             this.powerPortRepository = powerPorts ?? throw new ArgumentNullException(nameof(powerPorts));
         }
 
-        public PortReadResult Read()
-        {
-            return Read(new TRUEFilterElement<IPort>());
-        }
-
-        public PortReadResult Read(FilterElement<IPort> filter)
+        public long Count(FilterElement<IPort> filter)
         {
             if (filter is null)
             {
@@ -69,19 +64,14 @@
             if (hasConflictingExclusiveFields)
             {
                 // The filter combines DataPort-exclusive and PowerPort-exclusive fields; no instance can match.
-                return new PortReadResult(null);
+                return 0;
             }
 
-            var ports = new List<IPort>();
-            foreach (var instance in helper.DomInstances.Read(domFilter))
-            {
-                ProcessInstance(instance, ports);
-            }
-
-            return new PortReadResult(ports);
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(AssetManagement.Models.AssetClassDomMapper.DomDefinitionId.Id));
+            return helper.DomInstances.Count(domFilter);
         }
 
-        public PortReadResult Read(IQuery<IPort> query)
+        public long Count(IQuery<IPort> query)
         {
             if (query is null)
             {
@@ -92,7 +82,55 @@
             if (hasConflictingExclusiveFields)
             {
                 // The filter combines DataPort-exclusive and PowerPort-exclusive fields; no instance can match.
-                return new PortReadResult(null);
+                return 0;
+            }
+
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(AssetManagement.Models.AssetClassDomMapper.DomDefinitionId.Id));
+            var domOrder = TranslateFullOrderBy(query.Order);
+            var domQuery = query.WithFilter(domFilter).WithOrder(domOrder);
+            return helper.DomInstances.Count(domQuery);
+        }
+
+        public IEnumerable<IPort> Read()
+        {
+            return Read(new TRUEFilterElement<IPort>());
+        }
+
+        public IEnumerable<IPort> Read(FilterElement<IPort> filter)
+        {
+            if (filter is null)
+            {
+                throw new ArgumentNullException(nameof(filter));
+            }
+
+            var domFilter = TranslateFullFilter(filter, out var hasConflictingExclusiveFields);
+            if (hasConflictingExclusiveFields)
+            {
+                // The filter combines DataPort-exclusive and PowerPort-exclusive fields; no instance can match.
+                return Array.Empty<IPort>();
+            }
+
+            var ports = new List<IPort>();
+            foreach (var instance in helper.DomInstances.Read(domFilter))
+            {
+                ProcessInstance(instance, ports);
+            }
+
+            return ports;
+        }
+
+        public IEnumerable<IPort> Read(IQuery<IPort> query)
+        {
+            if (query is null)
+            {
+                throw new ArgumentNullException(nameof(query));
+            }
+
+            var domFilter = TranslateFullFilter(query.Filter, out var hasConflictingExclusiveFields);
+            if (hasConflictingExclusiveFields)
+            {
+                // The filter combines DataPort-exclusive and PowerPort-exclusive fields; no instance can match.
+                return Array.Empty<IPort>();
             }
 
             var domOrder = TranslateFullOrderBy(query.Order);
@@ -103,15 +141,15 @@
                 ProcessInstance(instance, ports);
             }
 
-            return new PortReadResult(ports);
+            return ports;
         }
 
-        public IEnumerable<PortReadResult> ReadPaged(int pageSize = DefaultPageSize)
+        public IEnumerable<IPagedResult<IPort>> ReadPaged(int pageSize = DefaultPageSize)
         {
             return ReadPaged(new TRUEFilterElement<IPort>(), pageSize);
         }
 
-        public IEnumerable<PortReadResult> ReadPaged(FilterElement<IPort> filter, int pageSize = DefaultPageSize)
+        public IEnumerable<IPagedResult<IPort>> ReadPaged(FilterElement<IPort> filter, int pageSize = DefaultPageSize)
         {
             if (filter is null)
             {
@@ -127,13 +165,13 @@
             if (hasConflictingExclusiveFields)
             {
                 // The filter combines DataPort-exclusive and PowerPort-exclusive fields; no instance can match.
-                return Enumerable.Empty<PortReadResult>();
+                return Enumerable.Empty<IPagedResult<IPort>>();
             }
 
             return ReadPagedInternal(domFilter, pageSize);
         }
 
-        public IEnumerable<PortReadResult> ReadPaged(IQuery<IPort> query, int pageSize = DefaultPageSize)
+        public IEnumerable<IPagedResult<IPort>> ReadPaged(IQuery<IPort> query, int pageSize = DefaultPageSize)
         {
             if (query is null)
             {
@@ -149,7 +187,7 @@
             if (hasConflictingExclusiveFields)
             {
                 // The filter combines DataPort-exclusive and PowerPort-exclusive fields; no instance can match.
-                return Enumerable.Empty<PortReadResult>();
+                return Enumerable.Empty<IPagedResult<IPort>>();
             }
 
             var domOrder = TranslateFullOrderBy(query.Order);
@@ -157,7 +195,7 @@
             return ReadPagedInternal(domQuery, pageSize);
         }
 
-        private IEnumerable<PortReadResult> ReadPagedInternal(FilterElement<DomInstance> domFilter, int pageSize)
+        private IEnumerable<IPagedResult<IPort>> ReadPagedInternal(FilterElement<DomInstance> domFilter, int pageSize)
         {
             var pagingHelper = helper.DomInstances.PreparePaging(domFilter, pageSize);
             var hasPage = pagingHelper.MoveToNextPage();
@@ -171,12 +209,12 @@
                 }
 
                 hasPage = pagingHelper.MoveToNextPage();
-                yield return new PortReadResult(ports, pageNumber, hasPage);
+                yield return new PagedResult<IPort>(ports, pageNumber, pageSize, hasPage);
                 pageNumber++;
             }
         }
 
-        private IEnumerable<PortReadResult> ReadPagedInternal(IQuery<DomInstance> domQuery, int pageSize)
+        private IEnumerable<IPagedResult<IPort>> ReadPagedInternal(IQuery<DomInstance> domQuery, int pageSize)
         {
             var pagingHelper = helper.DomInstances.PreparePaging(domQuery, pageSize);
             var hasPage = pagingHelper.MoveToNextPage();
@@ -190,7 +228,7 @@
                 }
 
                 hasPage = pagingHelper.MoveToNextPage();
-                yield return new PortReadResult(ports, pageNumber, hasPage);
+                yield return new PagedResult<IPort>(ports, pageNumber, pageSize, hasPage);
                 pageNumber++;
             }
         }
@@ -458,7 +496,7 @@
                 fieldName = $"Data{fieldName}";
             }
 
-            return dataPortRepository.CreatePortFilter(fieldName, comparer, value);
+            return dataPortRepository.CreateDomFilter(fieldName, comparer, value);
         }
 
         private FilterElement<DomInstance> CreatePowerPortFilter(string fieldName, Comparer comparer, object value)
@@ -476,7 +514,7 @@
                 fieldName = $"Power{fieldName}";
             }
 
-            return powerPortRepository.CreatePortFilter(fieldName, comparer, value);
+            return powerPortRepository.CreateDomFilter(fieldName, comparer, value);
         }
     }
 }

@@ -110,15 +110,5 @@
 					"PrimaryPortRelation.IsPrimaryIpv4");
 			}
 		}
-
-		/// <summary>
-		/// Exposers for fields that only exist on the PowerPort definition.
-		/// Using any of these in a filter makes the DataPort definition useless to filter,
-		/// so the repository will only query the PowerPort definition.
-		/// Combining these with <see cref="DataPortOnly"/> exposers yields an empty result.
-		/// </summary>
-		public static class PowerPortOnly
-		{
-		}
 	}
 }

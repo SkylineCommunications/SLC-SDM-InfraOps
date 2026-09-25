@@ -13,6 +13,7 @@
         {
             RowId,
             Name,
+            RoomId,
         }
 
         /// <summary>

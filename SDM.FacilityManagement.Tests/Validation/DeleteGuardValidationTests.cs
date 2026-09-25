@@ -211,7 +211,8 @@ namespace SDM.FacilityManagement.Tests.Validation
 			{
 				Identifier = Guid.NewGuid().ToString(),
 				FloorId = id,
-			};
+                Name = $"Floor {id}",
+            };
 
 			if (facility != null)
 			{
@@ -264,6 +265,8 @@ namespace SDM.FacilityManagement.Tests.Validation
 				Name = $"Zone {id}",
 				ZoneCapacity = { CoolingCapacity = 5.0 },
 			};
+
+            zone.ZoneCapacity.CoolingCapacity = 1;
 
 			if (room != null)
 			{

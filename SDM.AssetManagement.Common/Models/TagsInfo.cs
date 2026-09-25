@@ -1,6 +1,7 @@
 namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
     using System.Collections.Generic;
+    using System.Linq;
 
     using Newtonsoft.Json;
 
@@ -9,7 +10,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
     using System;
 
-    public class TagsInfo : IChangeTracking, ISectionTrackable, ISectionEmptyState
+    public sealed class TagsInfo : ChangeTrackingBase, IEquatable<TagsInfo>, ISectionTrackable, ISectionEmptyState
     {
         [JsonIgnore]
         [SdmIgnore]
@@ -17,32 +18,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         [JsonIgnore]
         [SdmIgnore]
         public bool IsEmpty => (Tags == null || Tags.Count == 0);
-
-        [JsonIgnore]
-        private ChangeTrackingFieldHandler _fieldHandler;
-
-        public TagsInfo()
-        {
-            _fieldHandler = new ChangeTrackingFieldHandler();
-        }
-
-        [JsonIgnore]
-        [SdmIgnore]
-        private ChangeTrackingFieldHandler FieldHandler
-        {
-            get
-            {
-                if (_fieldHandler == null)
-                {
-                    _fieldHandler = new ChangeTrackingFieldHandler();
-                }
-                return _fieldHandler;
-            }
-        }
-
-        [JsonIgnore]
-        [SdmIgnore]
-        public bool Changed => FieldHandler.HasChanges;
 
         public List<SlcAsset_Management.Enums.TagOption> Tags
         {
@@ -56,9 +31,58 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             nameof(Tags),
             () => new ChangeTrackingArrayField<SlcAsset_Management.Enums.TagOption>(new List<SlcAsset_Management.Enums.TagOption>()));
 
-        public void ResetChangeTracking()
+        public static bool operator ==(TagsInfo left, TagsInfo right)
         {
-            FieldHandler?.ApplyChanges();
+            if (ReferenceEquals(left, right))
+            {
+                return true;
+            }
+
+            if (left is null || right is null)
+            {
+                return false;
+            }
+
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(TagsInfo left, TagsInfo right)
+        {
+            return !(left == right);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as TagsInfo);
+        }
+
+        public bool Equals(TagsInfo other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return Tags.SequenceEqual(other.Tags);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 17;
+                foreach (var tag in Tags)
+                {
+                    hash = (hash * 23) + tag.GetHashCode();
+                }
+
+                return hash;
+            }
         }
     }
 }

@@ -1,5 +1,6 @@
 namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
 
@@ -8,12 +9,13 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
     using SharedMappers.DomIds;
 
     using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.InfraOps.Core.Models;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     //[GenerateExposers]
     //[SdmDomStorage("(infraops)properties")]
-    public class Property : SdmObject<Property>, IEntityTracking, IReadOnlyModuleIdReferencer
-    {
+    public sealed class Property : SdmObjectBase<Property>, IEquatable<Property>, IEntityTracking, IReadOnlyModuleIdReferencer
+	{
         [JsonIgnore]
         private ChangeTrackingFieldHandler _fieldHandler;
         [JsonIgnore]
@@ -23,6 +25,12 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
         {
             _fieldHandler = new ChangeTrackingFieldHandler();
         }
+
+        #region Module Tracking
+
+        public string ModuleId => InfraopsProperties.ModuleId;
+
+        #endregion
 
         [JsonIgnore]
         [SdmIgnore]
@@ -122,18 +130,12 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
 
         #endregion
 
-        #region Module Tracking
-
-        public string ModuleId => InfraopsProperties.ModuleId;
-
-        #endregion
-
         #region Discrete
 
         public List<PropertyOption> Discreets
         {
-            get => DiscreetsField.Value ?? new List<PropertyOption>();
-            set => DiscreetsField.Value = value;
+            get => DiscreetsField.Value ?? (DiscreetsField.Value = new List<PropertyOption>());
+            set => DiscreetsField.Value = value ?? new List<PropertyOption>();
         }
 
         #endregion
@@ -188,6 +190,18 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
 
         #endregion
 
+        public IEnumerable<TrackingFieldValueDifference> GetChanges()
+        {
+            return FieldHandler.GetChanges()
+                .Select(kvp => new TrackingFieldValueDifference
+                {
+                    FieldName = kvp.Key,
+                    OldValue = kvp.Value.prevVal,
+                    NewValue = kvp.Value.newVal,
+                })
+                .Concat(Layout?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>());
+        }
+
         public void ResetChangeTracking()
         {
             FieldHandler?.ApplyChanges();
@@ -202,5 +216,86 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
                 }
             }
         }
+
+        #region Equality
+
+        public static bool operator ==(Property left, Property right)
+        {
+            if (ReferenceEquals(left, right))
+            {
+                return true;
+            }
+
+            if (left is null || right is null)
+            {
+                return false;
+            }
+
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(Property left, Property right)
+        {
+            return !(left == right);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as Property);
+        }
+
+        public bool Equals(Property other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return
+                string.Equals(Name, other.Name, StringComparison.OrdinalIgnoreCase) &&
+                PropertyType == other.PropertyType &&
+                string.Equals(Scope, other.Scope, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(Default, other.Default, StringComparison.OrdinalIgnoreCase) &&
+                StringSizeLimit == other.StringSizeLimit &&
+                IsMultiLineString == other.IsMultiLineString &&
+                Equals(Layout, other.Layout) &&
+                ListsEqual(Discreets, other.Discreets);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 17;
+                hash = (hash * 23) + (Name != null ? Name.GetHashCode() : 0);
+                hash = (hash * 23) + PropertyType.GetHashCode();
+                hash = (hash * 23) + (Scope != null ? Scope.GetHashCode() : 0);
+                hash = (hash * 23) + (Default != null ? Default.GetHashCode() : 0);
+                hash = (hash * 23) + IsMultiLineString.GetHashCode();
+                return hash;
+            }
+        }
+
+        private static bool ListsEqual<T>(List<T> left, List<T> right)
+        {
+            if (ReferenceEquals(left, right))
+            {
+                return true;
+            }
+
+            if (left is null || right is null)
+            {
+                return false;
+            }
+
+            return left.SequenceEqual(right);
+        }
+
+        #endregion
     }
 }

@@ -31,6 +31,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             internal static FieldDescriptorID XPosition = SlcFacility_Management.Sections.ZoneInformation.X;
             internal static FieldDescriptorID YPosition = SlcFacility_Management.Sections.ZoneInformation.Y;
             internal static FieldDescriptorID Width = SlcFacility_Management.Sections.ZoneInformation.Width;
+            internal static FieldDescriptorID Depth = SlcFacility_Management.Sections.ZoneInformation.Depth;
             internal static FieldDescriptorID ZoneId = SlcFacility_Management.Sections.ZoneInformation.ZoneID;
         }
 

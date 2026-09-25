@@ -6,38 +6,43 @@
 //------------------------------------------------------------------------------
 namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
-    using System;
-    using System.Collections;
-    using System.Collections.Generic;
     using System.Linq;
     using System.Runtime.CompilerServices;
 
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.Exposers;
-
-    using SLDataGateway.API.Querying;
-    using SLDataGateway.API.Types.Querying;
+    using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
 
     public static partial class InfraopsReservationExposers
-    {
-        public static readonly Exposer<AssetManagement.Models.InfraopsReservation, string> Identifier = new Exposer<AssetManagement.Models.InfraopsReservation, string>((obj) => obj.Identifier, "Identifier");
-        public static readonly Exposer<AssetManagement.Models.InfraopsReservation, string> Description = new Exposer<AssetManagement.Models.InfraopsReservation, string>((obj) => obj.Description, "Description");
-        static InfraopsReservationExposers()
-        {
-            RuntimeHelpers.RunClassConstructor(typeof(RackFk).TypeHandle);
-            RuntimeHelpers.RunClassConstructor(typeof(ReservedPositions).TypeHandle);
-        }
+	{
+		public static readonly Exposer<AssetManagement.Models.InfraopsReservation, string> Identifier = new Exposer<AssetManagement.Models.InfraopsReservation, string>((obj) => obj.Identifier, "Identifier");
+		public static readonly Exposer<AssetManagement.Models.InfraopsReservation, System.DateTime> CreatedAt = new Exposer<AssetManagement.Models.InfraopsReservation, System.DateTime>((obj) => obj.CreatedAt, "CreatedAt");
+		public static readonly Exposer<AssetManagement.Models.InfraopsReservation, string> CreatedBy = new Exposer<AssetManagement.Models.InfraopsReservation, string>((obj) => obj.CreatedBy, "CreatedBy");
+		public static readonly Exposer<AssetManagement.Models.InfraopsReservation, System.DateTime> LastModified = new Exposer<AssetManagement.Models.InfraopsReservation, System.DateTime>((obj) => obj.LastModified, "LastModified");
+		public static readonly Exposer<AssetManagement.Models.InfraopsReservation, string> LastModifiedBy = new Exposer<AssetManagement.Models.InfraopsReservation, string>((obj) => obj.LastModifiedBy, "LastModifiedBy");
+		public static readonly Exposer<AssetManagement.Models.InfraopsReservation, string> Description = new Exposer<AssetManagement.Models.InfraopsReservation, string>((obj) => obj.Description, "Description");
+		static InfraopsReservationExposers()
+		{
+			RuntimeHelpers.RunClassConstructor(typeof(RackFk).TypeHandle);
+			RuntimeHelpers.RunClassConstructor(typeof(JobFk).TypeHandle);
+			RuntimeHelpers.RunClassConstructor(typeof(ReservedPositions).TypeHandle);
+		}
 
-        public static partial class RackFk
-        {
-            public static readonly Exposer<AssetManagement.Models.InfraopsReservation, SdmObjectReference<FacilityManagement.Models.Rack>> Rack = new Exposer<AssetManagement.Models.InfraopsReservation, SdmObjectReference<FacilityManagement.Models.Rack>>((obj) => obj.RackFk.Rack, "RackFk.Rack");
-        }
+		public static partial class RackFk
+		{
+			public static readonly Exposer<AssetManagement.Models.InfraopsReservation, SdmObjectReference<FacilityManagement.Models.Rack>> Rack = new Exposer<AssetManagement.Models.InfraopsReservation, SdmObjectReference<FacilityManagement.Models.Rack>>((obj) => obj.RackFk.Rack, "RackFk.Rack");
+		}
 
-        public static partial class ReservedPositions
-        {
-            public static readonly CollectionExposer<AssetManagement.Models.InfraopsReservation, long?> LowerBound = new CollectionExposer<AssetManagement.Models.InfraopsReservation, long?>((obj) => obj.ReservedPositions.Where(x => x != null).Select(x => x.LowerBound), "ReservedPositions.LowerBound");
-            public static readonly CollectionExposer<AssetManagement.Models.InfraopsReservation, long?> UpperBound = new CollectionExposer<AssetManagement.Models.InfraopsReservation, long?>((obj) => obj.ReservedPositions.Where(x => x != null).Select(x => x.UpperBound), "ReservedPositions.UpperBound");
-        }
-    }
+		public static partial class JobFk
+		{
+			public static readonly Exposer<AssetManagement.Models.InfraopsReservation, ISdmObjectReference<ISdmObject>> Job = new Exposer<AssetManagement.Models.InfraopsReservation, ISdmObjectReference<ISdmObject>>((obj) => obj.JobFk.Job, "JobFk.Job");
+		}
+
+		public static partial class ReservedPositions
+		{
+			public static readonly CollectionExposer<AssetManagement.Models.InfraopsReservation, long?> LowerBound = new CollectionExposer<AssetManagement.Models.InfraopsReservation, long?>((obj) => obj.ReservedPositions.Where(x => x != null).Select(x => x.LowerBound), "ReservedPositions.LowerBound");
+			public static readonly CollectionExposer<AssetManagement.Models.InfraopsReservation, long?> UpperBound = new CollectionExposer<AssetManagement.Models.InfraopsReservation, long?>((obj) => obj.ReservedPositions.Where(x => x != null).Select(x => x.UpperBound), "ReservedPositions.UpperBound");
+		}
+	}
 }

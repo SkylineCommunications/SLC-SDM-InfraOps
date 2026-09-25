@@ -21,6 +21,10 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
     private readonly DeviceTypeValidator _deviceTypeValidator;
     private readonly PortTypeValidator _portTypeValidator;
     private readonly CableTypeValidator _cableTypeValidator;
+    private readonly ConnectionValidator _connectionValidator;
+    private readonly InfraopsReservationValidator _infraopsReservationValidator;
+    private readonly AssetManagerAppSettingsValidator _appSettingsValidator;
+    private readonly HistoryValidator _historyValidator;
 
     // Public constructor for production use - creates its own FacilityManagementHelper
     public AssetManagementApiHelper(IConnection connection)
@@ -45,11 +49,12 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
         var deviceTypeRepository = new DeviceTypeDomRepository(connection);
         var dataPortRepository = new DataPortDomRepository(connection);
         var powerPortRepository = new PowerPortDomRepository(connection);
-        var portRepository = new PortDomRepository(connection, dataPortRepository, powerPortRepository);
+        var portRepository = new PortDomReader(connection, dataPortRepository, powerPortRepository);
         var portTypeRepository = new PortTypeDomRepository(connection);
         var cableTypeRepository = new CableTypeDomRepository(connection);   
         var connectionDomRepository = new ConnectionDomRepository(connection);
         var reservationRepository = new InfraopsReservationDomRepository(connection);
+        var historyRepository = new HistoryDomRepository(connection);
 
         var entityLoader = new SdmEntityLoader(this, facilityManagementHelper);
 
@@ -62,6 +67,10 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
         _deviceTypeValidator = new DeviceTypeValidator(entityLoader);
         _portTypeValidator = new PortTypeValidator(entityLoader);
         _cableTypeValidator = new CableTypeValidator(entityLoader);
+        _connectionValidator = new ConnectionValidator(entityLoader);
+        _infraopsReservationValidator = new InfraopsReservationValidator(entityLoader);
+        _appSettingsValidator = new AssetManagerAppSettingsValidator();
+        _historyValidator = new HistoryValidator();
         // Wrap with middleware
         Assets = assetRepository
             .WithMiddleware(new AssetValidationMiddleware(_assetValidator))
@@ -86,17 +95,18 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
         PortTypes = portTypeRepository
             .WithMiddleware(new PortTypeValidationMiddleware(_portTypeValidator))
             .WithMiddleware(new IdentifierMiddleware<PortType>());
-        var connectionValidator = new ConnectionValidator(entityLoader);
         Connections = connectionDomRepository
-            .WithMiddleware(new ConnectionValidationMiddleware(connectionValidator))
+            .WithMiddleware(new ConnectionValidationMiddleware(_connectionValidator))
             .WithMiddleware(new IdentifierMiddleware<Connection>());
         CableTypes = cableTypeRepository
             .WithMiddleware(new CableTypeValidationMiddleware(_cableTypeValidator))
             .WithMiddleware(new IdentifierMiddleware<CableType>());
-        var reservationValidator = new InfraopsReservationValidator(entityLoader);
         Reservations = reservationRepository
-            .WithMiddleware(new InfraopsReservationValidationMiddleware(reservationValidator))
+            .WithMiddleware(new InfraopsReservationValidationMiddleware(_infraopsReservationValidator))
             .WithMiddleware(new IdentifierMiddleware<InfraopsReservation>());
+        Histories = historyRepository
+            .WithMiddleware(new HistoryValidationMiddleware(_historyValidator))
+            .WithMiddleware(new IdentifierMiddleware<History>());
     }
 
     public IAssetRepository Assets { get; }
@@ -104,12 +114,13 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
     public IAssetClassRepository AssetClasses { get; }
     public IBulkRepository<PowerPort> PowerPorts { get; }
     public IBulkRepository<DataPort> DataPorts { get; }
-    public IPortRepository Ports { get; }
+    public IPortReader Ports { get; }
     public IBulkRepository<DeviceType> DeviceTypes { get; }
     public IBulkRepository<PortType> PortTypes { get; }
     public IBulkRepository<Connection> Connections { get; }
     public IBulkRepository<CableType> CableTypes { get; }
     public IBulkRepository<InfraopsReservation> Reservations { get; }
+    public IBulkRepository<History> Histories { get; }
 
     public AssetValidator AssetValidator => _assetValidator;
 
@@ -124,4 +135,12 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
     public PortTypeValidator PortTypeValidator => _portTypeValidator;
 
     public CableTypeValidator CableTypeValidator => _cableTypeValidator;
+
+    public ConnectionValidator ConnectionValidator => _connectionValidator;
+
+    public InfraopsReservationValidator InfraopsReservationValidator => _infraopsReservationValidator;
+
+    public AssetManagerAppSettingsValidator AppSettingsValidator => _appSettingsValidator;
+
+    public HistoryValidator HistoryValidator => _historyValidator;
 }

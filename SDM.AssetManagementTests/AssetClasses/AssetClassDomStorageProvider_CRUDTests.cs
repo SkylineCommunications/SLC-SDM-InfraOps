@@ -14,6 +14,8 @@ namespace SDM.AssetManagement.Tests.AssetClasses
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.Extensions;
+    using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
+    using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
 
     /// <summary>
     /// CRUD tests for AssetClass repository operations.
@@ -31,7 +33,7 @@ namespace SDM.AssetManagement.Tests.AssetClasses
                 Identifier = Guid.NewGuid().ToString(),
                 Name = "Reference Class",
                 DeviceTypeId = new SdmObjectReference<DeviceType>(Guid.NewGuid().ToString()), // Will be updated in tests
-                Manufacturer = Guid.NewGuid(),
+                Manufacturer = new PnoObjectReference<Organization>(Guid.NewGuid()),
                 Lifecycle =
                 {
                     EndOfLife = DateTime.UtcNow.AddYears(5),
@@ -154,7 +156,7 @@ namespace SDM.AssetManagement.Tests.AssetClasses
                 Name = "My API Asset Class",
                 DeviceTypeId = new SdmObjectReference<DeviceType>("ca29a378-2ac2-d9b2-635a-94580d4691e8"),
                 Description = "My Test Asset Class Description",
-                Manufacturer = Guid.Parse("ca29a378-2ac2-d9b2-635a-94580d4691e8"),
+                Manufacturer = new PnoObjectReference<Organization>(Guid.Parse("ca29a378-2ac2-d9b2-635a-94580d4691e8")),
                 Depth = 6814.415912601139,
                 Height = 1709.5826972307093,
                 Width = 7849.388501550755,
@@ -228,7 +230,7 @@ namespace SDM.AssetManagement.Tests.AssetClasses
                 Identifier = referenceAssetClass.Identifier,
                 Name = "Updated Class Name",
                 DeviceTypeId = referenceAssetClass.DeviceTypeId,
-                Manufacturer = Guid.NewGuid(),
+                Manufacturer = new PnoObjectReference<Organization>(Guid.NewGuid()),
                 Lifecycle =
                 {
                     EndOfLife = DateTime.UtcNow.AddYears(10),

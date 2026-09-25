@@ -1,8 +1,7 @@
 ﻿namespace SDM.AssetManagement.Tests
 {
-    using SDM.AssetManagement.Tests.Setup;
     using Moq;
-
+    using SDM.AssetManagement.Tests.Setup;
     using Skyline.DataMiner.Net;
     using Skyline.DataMiner.Net.Messages;
     using Skyline.DataMiner.SDM.AssetManagement.Helpers;

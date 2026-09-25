@@ -1,17 +1,17 @@
 ﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
     using System;
-
+    using System.Collections.Generic;
+    using System.Linq;
     using Newtonsoft.Json;
-
     using SharedMappers.DomIds;
-
+    using Skyline.DataMiner.SDM.InfraOps.Core.Models;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)asset_management")]
-    public sealed class DataPort : SdmObject<DataPort>, IEquatable<DataPort>, IEntityTracking, IPort, IReadOnlyModuleIdReferencer
-    {
+    public sealed class DataPort : SdmObjectBase<DataPort>, IEquatable<DataPort>, IEntityTracking, IPort, IReadOnlyModuleIdReferencer
+	{
         [JsonIgnore]
         private DataPortInfo _dataPortInfo;
         [JsonIgnore]
@@ -27,6 +27,11 @@
         { 
         }
 
+        #region Module Tracking
+
+        public string ModuleId => SlcAsset_Management.ModuleId;
+
+        #endregion
         #region Properties
 
         public DataPortInfo DataPortInfo => _dataPortInfo ?? (_dataPortInfo = new DataPortInfo());
@@ -91,6 +96,26 @@
                 Equals(PrimaryPortRelation, other.PrimaryPortRelation);
         }
 
+        public static bool operator ==(DataPort left, DataPort right)
+        {
+            if (ReferenceEquals(left, right))
+            {
+                return true;
+            }
+
+            if (left is null || right is null)
+            {
+                return false;
+            }
+
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(DataPort left, DataPort right)
+        {
+            return !(left == right);
+        }
+
         public override bool Equals(object obj)
         {
             return Equals(obj as DataPort);
@@ -101,15 +126,23 @@
             unchecked
             {
                 int hash = (2 << 12) - 1;
-                hash = (hash * 23) + (DataPortInfo != null ? DataPortInfo.GetHashCode() : 0);
-                hash = (hash * 23) + (Asset != null ? Asset.GetHashCode() : 0);
-                hash = (hash * 23) + (AddressInfo != null ? AddressInfo.GetHashCode() : 0);
-                hash = (hash * 23) + (PrimaryPortRelation != null ? PrimaryPortRelation.GetHashCode() : 0);
+                hash = (hash * 23) + (DataPortInfo?.GetHashCode() ?? 0);
+                hash = (hash * 23) + (Asset.Identifier?.GetHashCode() ?? 0);
+                hash = (hash * 23) + (AddressInfo?.GetHashCode() ?? 0);
+                hash = (hash * 23) + (PrimaryPortRelation?.GetHashCode() ?? 0);
                 return hash;
             }
         }
 
         #endregion
+
+        public IEnumerable<TrackingFieldValueDifference> GetChanges()
+        {
+            return (_dataPortInfo?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>())
+                .Concat(_assetFk?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>())
+                .Concat(_addressInfo?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>())
+                .Concat(_primaryPortRelation?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>());
+        }
 
         /// <summary>
         /// Resets the change tracking state for all related properties to indicate that no changes have been made since
@@ -131,12 +164,6 @@
         [JsonIgnore]
         [SdmIgnore]
         internal Guid? AssetFkSectionId { get; set; }
-
-        #endregion
-
-        #region Module Tracking
-
-        public string ModuleId => SlcAsset_Management.ModuleId;
 
         #endregion
     }

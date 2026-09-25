@@ -8,7 +8,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
-    public sealed class AssetHolder : IEquatable<AssetHolder>, ISectionTrackable, ISectionEmptyState
+    public sealed class AssetHolder : ChangeTrackingBase, IEquatable<AssetHolder>, ISectionTrackable, ISectionEmptyState
 	{
 		[JsonIgnore]
 		[SdmIgnore]
@@ -19,11 +19,41 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			Label == default &&
 			HierarchyRole == default;
 
-		public long SlotNumber { get; set; }
+		public long SlotNumber
+		{
+			get => SlotNumberField.Value;
+			set => SlotNumberField.Value = value;
+		}
 
-        public string Label { get; set; }
+		public string Label
+		{
+			get => LabelField.Value;
+			set => LabelField.Value = value;
+		}
 
-        public SlcAsset_Management.Enums.HierarchyRoleEnum HierarchyRole { get; set; }
+		public SlcAsset_Management.Enums.HierarchyRoleEnum HierarchyRole
+		{
+			get => HierarchyRoleField.Value;
+			set => HierarchyRoleField.Value = value;
+		}
+
+		[JsonIgnore]
+		[SdmIgnore]
+		internal IChangeTrackingField<long> SlotNumberField => FieldHandler.GetOrCreateField(
+			nameof(SlotNumber),
+			() => new ChangeTrackingField<long>(default));
+
+		[JsonIgnore]
+		[SdmIgnore]
+		internal IChangeTrackingField<string> LabelField => FieldHandler.GetOrCreateField(
+			nameof(Label),
+			() => new ChangeTrackingStringField(null));
+
+		[JsonIgnore]
+		[SdmIgnore]
+		internal IChangeTrackingField<SlcAsset_Management.Enums.HierarchyRoleEnum> HierarchyRoleField => FieldHandler.GetOrCreateField(
+			nameof(HierarchyRole),
+			() => new ChangeTrackingField<SlcAsset_Management.Enums.HierarchyRoleEnum>(default));
 
 		public static bool operator ==(AssetHolder left, AssetHolder right)
 		{
@@ -64,6 +94,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
 			return
 				SlotNumber == other.SlotNumber &&
+				string.Equals(Label, other.Label, StringComparison.OrdinalIgnoreCase) &&
 				HierarchyRole == other.HierarchyRole;
 		}
 
@@ -73,6 +104,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			{
 				int hash = 17;
 				hash = (hash * 23) + SlotNumber.GetHashCode();
+				hash = (hash * 23) + (Label != null ? Label.GetHashCode() : 0);
 				hash = (hash * 23) + HierarchyRole.GetHashCode();
 				return hash;
 			}

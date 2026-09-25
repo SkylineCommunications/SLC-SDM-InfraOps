@@ -18,7 +18,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Helpers
 
 		IBulkRepository<DataPort> DataPorts { get; }
 
-		IPortRepository Ports { get; }
+		IPortReader Ports { get; }
 
 		IBulkRepository<DeviceType> DeviceTypes { get; }
 
@@ -29,6 +29,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Helpers
         IBulkRepository<CableType> CableTypes { get; }
 
         IBulkRepository<InfraopsReservation> Reservations { get; }
+
+        IBulkRepository<History> Histories { get; }
 
         AssetClassValidator AssetClassValidator { get; }
 
@@ -43,5 +45,13 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Helpers
         PortTypeValidator PortTypeValidator { get; }
 
         CableTypeValidator CableTypeValidator { get; }
+
+        ConnectionValidator ConnectionValidator { get; }
+
+        InfraopsReservationValidator InfraopsReservationValidator { get; }
+
+        AssetManagerAppSettingsValidator AppSettingsValidator { get; }
+
+        HistoryValidator HistoryValidator { get; }
     }
 }

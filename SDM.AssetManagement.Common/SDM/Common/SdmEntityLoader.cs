@@ -3,18 +3,16 @@ namespace Skyline.DataMiner.SDM.Common.Services
     using System;
     using System.Collections.Generic;
     using System.Linq;
-
-    using Skyline.DataMiner.SDM.AssetManagement.Models;
-
     using Skyline.DataMiner.Net;
     using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Helpers;
-    using Skyline.DataMiner.SDM.AssetManagement.Validation;
+    using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.SDM.FacilityManagement.Helpers;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
+    using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
 
     /// <summary>
     /// Shared service for loading and querying SDM entities across domains.
@@ -618,7 +616,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
             }
 
             var powerPortTypeExposer = new Exposer<PowerPort, Guid>(
-                obj => Guid.Parse(obj.PowerPortInfo.PortType.Identifier),
+                obj => obj.PowerPortInfo.PortType.HasValue() ? obj.PowerPortInfo.PortType.GetIdentifierAsGuid() : Guid.Empty,
                 "PowerPortInfo.PortType");
 
             return Tools.RetrieveBigOrFilter(
@@ -649,7 +647,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
                 obj => obj.DataPorts
                     .Where(port => port?.PortType != null && port.PortType.HasValue())
                     .Select(port => Guid.Parse(port.PortType.Identifier)),
-                "DataPorts.Type");
+                "DataPorts.PortType");
 
             var matches = Tools.RetrieveBigOrFilter(
                 portTypeGuids,
@@ -764,7 +762,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
 
             var portGuids = portIds
                 .Where(id => Guid.TryParse(id, out _))
-                .Select(Guid.Parse)
+                .Select(id => new ISdmObjectReference<IPort>(id))
                 .Distinct()
                 .ToList();
 

@@ -95,6 +95,15 @@ namespace SDM.AssetManagement.Tests.Setup
         {
             SafeDelete(() =>
             {
+                var histories = helper.AssetManagement.Histories.Read(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.History>());
+                if (histories.Any())
+                {
+                    helper.AssetManagement.Histories.Delete(histories);
+                }
+            });
+
+            SafeDelete(() =>
+            {
                 var connections = helper.AssetManagement.Connections.Read(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.Connection>());
                 if (connections.Any())
                 {
@@ -222,6 +231,7 @@ namespace SDM.AssetManagement.Tests.Setup
                 && helper.AssetManagement.PortTypes.Count(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.PortType>()) == 0
                 && helper.AssetManagement.CableTypes.Count(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.CableType>()) == 0
                 && helper.AssetManagement.Connections.Count(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.Connection>()) == 0
+                && helper.AssetManagement.Histories.Count(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.History>()) == 0
                 && helper.FacilityManagement.Racks.Count(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<Skyline.DataMiner.SDM.FacilityManagement.Models.Rack>()) == 0;
         }
 
@@ -257,6 +267,9 @@ namespace SDM.AssetManagement.Tests.Setup
             var powerPortCount = helper.AssetManagement.PowerPorts.Count(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort>());
             if (powerPortCount > 0) nonEmptyRepositories.Add($"PowerPorts ({powerPortCount})");
 
+            var historyCount = helper.AssetManagement.Histories.Count(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.History>());
+            if (historyCount > 0) nonEmptyRepositories.Add($"Histories ({historyCount})");
+
             var rackCount = helper.FacilityManagement.Racks.Count(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<Skyline.DataMiner.SDM.FacilityManagement.Models.Rack>());
             if (rackCount > 0) nonEmptyRepositories.Add($"Racks ({rackCount})");
 
@@ -286,6 +299,7 @@ namespace SDM.AssetManagement.Tests.Setup
                 ["DeviceTypes"] = helper.AssetManagement.DeviceTypes.Count(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.DeviceType>()),
                 ["DataPorts"] = helper.AssetManagement.DataPorts.Count(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.DataPort>()),
                 ["PowerPorts"] = helper.AssetManagement.PowerPorts.Count(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.PowerPort>()),
+                ["Histories"] = helper.AssetManagement.Histories.Count(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.History>()),
                 ["Racks"] = helper.FacilityManagement.Racks.Count(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<Skyline.DataMiner.SDM.FacilityManagement.Models.Rack>())
             };
         }

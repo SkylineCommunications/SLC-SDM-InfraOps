@@ -8,8 +8,8 @@
     <AssemblyName>Skyline.DataMiner.SDM.InfraOps.Core</AssemblyName>
     <RootNamespace>Skyline.DataMiner.SDM.InfraOps.Core</RootNamespace>
     <VersionSuffix Condition="'$(VersionSuffixValue)' != '' and '$(Configuration)' == 'Debug'">$(VersionSuffixValue)</VersionSuffix>
-    <VersionPrefix>1.0.1</VersionPrefix>
     <AssemblyVersion Condition="'$(AssemblyVersionValue)' != ''">$(AssemblyVersionValue)</AssemblyVersion>
+    <VersionPrefix>1.0.1</VersionPrefix>
     <PackageTags>Skyline;DataMiner</PackageTags>
     <PackageProjectUrl>https://skyline.be</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -35,7 +35,7 @@
     <PackageReference Include="Skyline.DataMiner.SDM" />
     <PackageReference Include="Skyline.DataMiner.SDM.Linq" />
     <PackageReference Include="Skyline.DataMiner.Utils.DOM" />
-    <PackageReference Include="Skyline.DataMiner.Dev.Automation" />
+    <PackageReference Include="Skyline.DataMiner.Dev.Utils.Solutions.PeopleAndOrganizations" />
     <PackageReference Include="Skyline.DataMiner.Utils.SecureCoding.Analyzers">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

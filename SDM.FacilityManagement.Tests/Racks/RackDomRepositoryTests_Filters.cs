@@ -247,5 +247,283 @@ namespace SDM.FacilityManagement.Tests.Racks
                 racksRetrieved.Select(r => r.RackId).Should().BeEquivalentTo(expected.Select(r => r.RackId));
             }
         }
+
+        [TestMethod]
+        public void RackDomRepository_ReadFilter_RacksWithoutRow()
+        {
+            var row = Helper.Rows.Create(new Row
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                RowId = $"ROW-{Guid.NewGuid():N}",
+                Name = "Row A",
+            });
+
+            var racks = new[]
+            {
+                new Rack
+                {
+                    Identifier = Guid.NewGuid().ToString(),
+                    RackId = "RCK-ROW-001",
+                    Name = "Rack Without Row",
+                },
+                new Rack
+                {
+                    Identifier = Guid.NewGuid().ToString(),
+                    RackId = "RCK-ROW-002",
+                    Name = "Rack With Row",
+                    RowFk =
+                    {
+                        Row = new SdmObjectReference<Row>(row.Identifier),
+                    },
+                },
+            };
+
+            racks[0].Capacity.MaximumRackCapacity = 42;
+            racks[1].Capacity.MaximumRackCapacity = 42;
+
+            Helper.Racks.Create(racks);
+
+            var filter = RackExposers.RowFk.Row.HasNoValue();
+            var expected = racks.Where(r => (!r.RowFk?.Row.HasValue()) ?? false).ToArray();
+
+            var racksRetrieved = Helper.Racks.Read(filter);
+
+            using (new AssertionScope())
+            {
+                racksRetrieved.Should().NotBeNull();
+                racksRetrieved.Should().NotBeEmpty();
+                racksRetrieved.Should().HaveCount(expected.Length);
+                racksRetrieved.Should().BeEquivalentTo(expected);
+            }
+        }
+
+        [TestMethod]
+        public void RackDomRepository_ReadFilter_NonExistentRow()
+        {
+            Helper.PopulateRacks();
+
+            var filter = RackExposers.RowFk.Row.Equal(new SdmObjectReference<Row>(Guid.NewGuid().ToString()));
+
+            var racksRetrieved = Helper.Racks.Read(filter);
+
+            using (new AssertionScope())
+            {
+                racksRetrieved.Should().NotBeNull();
+                racksRetrieved.Should().BeEmpty();
+                racksRetrieved.Should().HaveCount(0);
+            }
+        }
+
+        [TestMethod]
+        public void RackDomRepository_ReadFilter_RacksWithRow()
+        {
+            var firstRow = Helper.Rows.Create(new Row
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                RowId = $"ROW-{Guid.NewGuid():N}",
+                Name = "Row B1",
+            });
+            var secondRow = Helper.Rows.Create(new Row
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                RowId = $"ROW-{Guid.NewGuid():N}",
+                Name = "Row B2",
+            });
+
+            var racks = new[]
+            {
+                new Rack
+                {
+                    Identifier = Guid.NewGuid().ToString(),
+                    RackId = "RCK-ROW-003",
+                    Name = "Rack Without Row B",
+                },
+                new Rack
+                {
+                    Identifier = Guid.NewGuid().ToString(),
+                    RackId = "RCK-ROW-004",
+                    Name = "Rack With Row B1",
+                    RowFk =
+                    {
+                        Row = new SdmObjectReference<Row>(firstRow.Identifier),
+                    },
+                },
+                new Rack
+                {
+                    Identifier = Guid.NewGuid().ToString(),
+                    RackId = "RCK-ROW-005",
+                    Name = "Rack With Row B2",
+                    RowFk =
+                    {
+                        Row = new SdmObjectReference<Row>(secondRow.Identifier),
+                    },
+                },
+            };
+
+            foreach (var rack in racks)
+            {
+                rack.Capacity.MaximumRackCapacity = 42;
+            }
+
+            Helper.Racks.Create(racks);
+
+            var filter = RackExposers.RowFk.Row.HasValue();
+            var expected = racks.Where(r => (r.RowFk?.Row.HasValue()) ?? false).ToArray();
+
+            var racksRetrieved = Helper.Racks.Read(filter);
+
+            using (new AssertionScope())
+            {
+                racksRetrieved.Should().NotBeNull();
+                racksRetrieved.Should().NotBeEmpty();
+                racksRetrieved.Should().HaveCount(expected.Length);
+                racksRetrieved.Should().BeEquivalentTo(expected);
+            }
+        }
+
+        [TestMethod]
+        public void RackDomRepository_ReadFilter_RacksWithoutZone()
+        {
+            var zone = new Zone
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                ZoneId = $"ZONE-{Guid.NewGuid():N}",
+                Name = "Zone A",
+            };
+
+            zone.ZoneCapacity.CoolingCapacity = 1;
+
+            zone = Helper.Zones.Create(zone);
+
+            var racks = new[]
+            {
+                new Rack
+                {
+                    Identifier = Guid.NewGuid().ToString(),
+                    RackId = "RCK-ZONE-001",
+                    Name = "Rack Without Zone",
+                },
+                new Rack
+                {
+                    Identifier = Guid.NewGuid().ToString(),
+                    RackId = "RCK-ZONE-002",
+                    Name = "Rack With Zone",
+                    ZoneFk =
+                    {
+                        Zone = new SdmObjectReference<Zone>(zone.Identifier),
+                    },
+                },
+            };
+
+            racks[0].Capacity.MaximumRackCapacity = 42;
+            racks[1].Capacity.MaximumRackCapacity = 42;
+
+            Helper.Racks.Create(racks);
+
+            var filter = RackExposers.ZoneFk.Zone.HasNoValue();
+            var expected = racks.Where(r => (!r.ZoneFk?.Zone.HasValue()) ?? false).ToArray();
+
+            var racksRetrieved = Helper.Racks.Read(filter);
+
+            using (new AssertionScope())
+            {
+                racksRetrieved.Should().NotBeNull();
+                racksRetrieved.Should().NotBeEmpty();
+                racksRetrieved.Should().HaveCount(expected.Length);
+                racksRetrieved.Should().BeEquivalentTo(expected);
+            }
+        }
+
+        [TestMethod]
+        public void RackDomRepository_ReadFilter_NonExistentZone()
+        {
+            Helper.PopulateRacks();
+
+            var filter = RackExposers.ZoneFk.Zone.Equal(new SdmObjectReference<Zone>(Guid.NewGuid().ToString()));
+
+            var racksRetrieved = Helper.Racks.Read(filter);
+
+            using (new AssertionScope())
+            {
+                racksRetrieved.Should().NotBeNull();
+                racksRetrieved.Should().BeEmpty();
+                racksRetrieved.Should().HaveCount(0);
+            }
+        }
+
+        [TestMethod]
+        public void RackDomRepository_ReadFilter_RacksWithZone()
+        {
+            var firstZone = new Zone
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                ZoneId = $"ZONE-{Guid.NewGuid():N}",
+                Name = "Zone B1",
+            };
+
+            firstZone.ZoneCapacity.CoolingCapacity = 1;
+
+            firstZone = Helper.Zones.Create(firstZone);
+
+            var secondZone = new Zone
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                ZoneId = $"ZONE-{Guid.NewGuid():N}",
+                Name = "Zone B2",
+            };
+            secondZone.ZoneCapacity.CoolingCapacity = 1;
+
+            secondZone = Helper.Zones.Create(secondZone);
+
+            var racks = new[]
+            {
+                new Rack
+                {
+                    Identifier = Guid.NewGuid().ToString(),
+                    RackId = "RCK-ZONE-003",
+                    Name = "Rack Without Zone B",
+                },
+                new Rack
+                {
+                    Identifier = Guid.NewGuid().ToString(),
+                    RackId = "RCK-ZONE-004",
+                    Name = "Rack With Zone B1",
+                    ZoneFk =
+                    {
+                        Zone = new SdmObjectReference<Zone>(firstZone.Identifier),
+                    },
+                },
+                new Rack
+                {
+                    Identifier = Guid.NewGuid().ToString(),
+                    RackId = "RCK-ZONE-005",
+                    Name = "Rack With Zone B2",
+                    ZoneFk =
+                    {
+                        Zone = new SdmObjectReference<Zone>(secondZone.Identifier),
+                    },
+                },
+            };
+
+            foreach (var rack in racks)
+            {
+                rack.Capacity.MaximumRackCapacity = 42;
+            }
+
+            Helper.Racks.Create(racks);
+
+            var filter = RackExposers.ZoneFk.Zone.HasValue();
+            var expected = racks.Where(r => (r.ZoneFk?.Zone.HasValue()) ?? false).ToArray();
+
+            var racksRetrieved = Helper.Racks.Read(filter);
+
+            using (new AssertionScope())
+            {
+                racksRetrieved.Should().NotBeNull();
+                racksRetrieved.Should().NotBeEmpty();
+                racksRetrieved.Should().HaveCount(expected.Length);
+                racksRetrieved.Should().BeEquivalentTo(expected);
+            }
+        }
     }
 }
