@@ -41,6 +41,7 @@
   <ItemGroup>
     <ProjectReference Include="..\SDM.PlanAndBuild.Common\SDM.PlanAndBuild.Common.csproj" />
   </ItemGroup>
+
   <!-- Can be used to set the location of your local nuget store to copy to -->
   <Target Name="CopyNuGetPackage" AfterTargets="Pack" Condition="'$(NuGetStorePath)' != '' and '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <Copy SourceFiles="$(OutputPath)..\$(PackageId).$(PackageVersion).nupkg" DestinationFolder="$(NuGetStorePath)\$(PackageId)" />

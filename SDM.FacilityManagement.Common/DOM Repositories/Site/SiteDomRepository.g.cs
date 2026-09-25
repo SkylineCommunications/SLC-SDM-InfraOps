@@ -676,23 +676,23 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModifiedBy, comparer, (string)value);
                 case "SiteProperties.Name":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.SiteDomMapper.SiteProperties.Name), comparer, (string)value);
-                case "SiteProperties.Description":
+                case "Description":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.SiteDomMapper.SiteProperties.Description), comparer, (string)value);
-                case "SiteProperties.Address":
+                case "Address":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.SiteDomMapper.SiteProperties.Address), comparer, (string)value);
-                case "SiteProperties.City":
+                case "City":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.SiteDomMapper.SiteProperties.City), comparer, (string)value);
-                case "SiteProperties.ZipCode":
+                case "ZipCode":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.SiteDomMapper.SiteProperties.ZipCode), comparer, (string)value);
-                case "SiteProperties.Country":
+                case "Country":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.SiteDomMapper.SiteProperties.Country), comparer, (string)value);
-                case "SiteProperties.Latitude" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                case "Latitude" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
                     return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.SiteDomMapper.SiteProperties.Latitude.Id.ToString()).Equal(comparer == Comparer.NotEquals);
-                case "SiteProperties.Latitude":
+                case "Latitude":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.SiteDomMapper.SiteProperties.Latitude), comparer, (double)((double?)value).Value);
-                case "SiteProperties.Longitude" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                case "Longitude" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
                     return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.SiteDomMapper.SiteProperties.Longitude.Id.ToString()).Equal(comparer == Comparer.NotEquals);
-                case "SiteProperties.Longitude":
+                case "Longitude":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.SiteDomMapper.SiteProperties.Longitude), comparer, (double)((double?)value).Value);
                 case "SiteProperties.SiteId":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.SiteDomMapper.SiteProperties.SiteId), comparer, (string)value);
@@ -717,19 +717,19 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     return OrderByElementFactory.Create(DomInstanceExposers.LastModifiedBy, sortOrder, naturalSort);
                 case "SiteProperties.Name":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.SiteDomMapper.SiteProperties.Name), sortOrder, naturalSort);
-                case "SiteProperties.Description":
+                case "Description":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.SiteDomMapper.SiteProperties.Description), sortOrder, naturalSort);
-                case "SiteProperties.Address":
+                case "Address":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.SiteDomMapper.SiteProperties.Address), sortOrder, naturalSort);
-                case "SiteProperties.City":
+                case "City":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.SiteDomMapper.SiteProperties.City), sortOrder, naturalSort);
-                case "SiteProperties.ZipCode":
+                case "ZipCode":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.SiteDomMapper.SiteProperties.ZipCode), sortOrder, naturalSort);
-                case "SiteProperties.Country":
+                case "Country":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.SiteDomMapper.SiteProperties.Country), sortOrder, naturalSort);
-                case "SiteProperties.Latitude":
+                case "Latitude":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.SiteDomMapper.SiteProperties.Latitude), sortOrder, naturalSort);
-                case "SiteProperties.Longitude":
+                case "Longitude":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.SiteDomMapper.SiteProperties.Longitude), sortOrder, naturalSort);
                 case "SiteProperties.SiteId":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.SiteDomMapper.SiteProperties.SiteId), sortOrder, naturalSort);

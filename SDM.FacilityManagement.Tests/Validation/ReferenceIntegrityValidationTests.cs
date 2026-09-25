@@ -1,17 +1,18 @@
 namespace SDM.FacilityManagement.Tests.Validation
 {
-    using System;
+	using System;
+	using System.Collections.Generic;
+	using System.Linq;
 
-    using FluentAssertions;
+	using FluentAssertions;
 
-    using SDM.FacilityManagement.Tests.Setup;
+	using SDM.FacilityManagement.Tests.Setup;
 
-    using Skyline.DataMiner.SDM;
-    using Skyline.DataMiner.SDM.FacilityManagement.Models;
-    using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
-    using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
+	using Skyline.DataMiner.SDM;
+	using Skyline.DataMiner.SDM.FacilityManagement.Helpers;
+	using Skyline.DataMiner.SDM.FacilityManagement.Models;
 
-    [TestClass]
+	[TestClass]
 	public class ReferenceIntegrityValidationTests : BaseRepositoryTest
 	{
 		[TestMethod]
@@ -90,8 +91,8 @@ namespace SDM.FacilityManagement.Tests.Validation
 		public void Room_Create_WithExternalReferencesAndNullChecker_ShouldSucceed()
 		{
 			var room = NewRoom("ROOM-1");
-			room.Ownership.Owner = new PnoObjectReference<Person>(Guid.NewGuid());
-			room.Ownership.Team = new PnoObjectReference<Team>(Guid.NewGuid());
+			room.Ownership.Owner = Guid.NewGuid();
+			room.Ownership.Team = Guid.NewGuid();
 			room.ResourceLink.ResourceId = Guid.NewGuid();
 
 			Action action = () => Helper.Rooms.Create(room);
@@ -231,7 +232,7 @@ namespace SDM.FacilityManagement.Tests.Validation
 
 		private static Floor NewFloor(string id)
 		{
-			return new Floor { Identifier = Guid.NewGuid().ToString(), FloorId = id, Name = $"Floor {id}" };
+			return new Floor { Identifier = Guid.NewGuid().ToString(), FloorId = id };
 		}
 
 		private static Room NewRoom(string id)
@@ -246,9 +247,7 @@ namespace SDM.FacilityManagement.Tests.Validation
 
 		private static Zone NewZone(string id)
 		{
-            var zone = new Zone { Identifier = Guid.NewGuid().ToString(), ZoneId = id, Name = $"Zone {id}" };
-            zone.ZoneCapacity.CoolingCapacity = 1;
-            return zone;
+			return new Zone { Identifier = Guid.NewGuid().ToString(), ZoneId = id, Name = $"Zone {id}", ZoneCapacity = { CoolingCapacity = 5.0 } };
 		}
 
 		private static Desk NewDesk(string id)

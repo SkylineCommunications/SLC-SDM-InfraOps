@@ -88,5 +88,53 @@
 
 			return helper;
 		}
+
+		/// <summary>
+		/// Populates the Floors repository with default <see cref="Floor"/> test data.
+		/// </summary>
+		/// <param name="helper">Mocked API helper.</param>
+		/// <returns><see cref="IFacilityManagementApiHelper"/> API helper interface with populated data.</returns>
+		public static IFacilityManagementApiHelper PopulateFloors(this IFacilityManagementApiHelper helper)
+		{
+			helper.Floors.Create(DemoData.Floors);
+
+			return helper;
+		}
+
+		/// <summary>
+		/// Populates the Zones repository with default <see cref="Zone"/> test data.
+		/// </summary>
+		/// <param name="helper">Mocked API helper.</param>
+		/// <returns><see cref="IFacilityManagementApiHelper"/> API helper interface with populated data.</returns>
+		public static IFacilityManagementApiHelper PopulateZones(this IFacilityManagementApiHelper helper)
+		{
+			helper.Zones.Create(DemoData.Zones);
+
+			return helper;
+		}
+
+		/// <summary>
+		/// Populates the Rows repository with default <see cref="Row"/> test data.
+		/// </summary>
+		/// <param name="helper">Mocked API helper.</param>
+		/// <returns><see cref="IFacilityManagementApiHelper"/> API helper interface with populated data.</returns>
+		public static IFacilityManagementApiHelper PopulateRows(this IFacilityManagementApiHelper helper)
+		{
+			helper.Rows.Create(DemoData.Rows);
+
+			return helper;
+		}
+
+		/// <summary>
+		/// Populates the Sites repository with default <see cref="Site"/> test data.
+		/// </summary>
+		/// <param name="helper">Mocked API helper.</param>
+		/// <returns><see cref="IFacilityManagementApiHelper"/> API helper interface with populated data.</returns>
+		public static IFacilityManagementApiHelper PopulateSites(this IFacilityManagementApiHelper helper)
+		{
+			helper.Sites.Create(DemoData.Sites);
+
+			return helper;
+		}
 	}
 }

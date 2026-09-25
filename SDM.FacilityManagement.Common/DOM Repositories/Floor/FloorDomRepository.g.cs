@@ -649,9 +649,9 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModifiedBy, comparer, (string)value);
                 case "FloorProperties.Name":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.FloorDomMapper.FloorProperties.Name), comparer, (string)value);
-                case "FloorProperties.Plan":
+                case "Plan":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.FloorDomMapper.FloorProperties.Plan), comparer, (string)value);
-                case "FloorProperties.Description":
+                case "Description":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.FloorDomMapper.FloorProperties.Description), comparer, (string)value);
                 case "FloorProperties.FloorId":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.FloorDomMapper.FloorProperties.FloorId), comparer, (string)value);
@@ -680,9 +680,9 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     return OrderByElementFactory.Create(DomInstanceExposers.LastModifiedBy, sortOrder, naturalSort);
                 case "FloorProperties.Name":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.FloorDomMapper.FloorProperties.Name), sortOrder, naturalSort);
-                case "FloorProperties.Plan":
+                case "Plan":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.FloorDomMapper.FloorProperties.Plan), sortOrder, naturalSort);
-                case "FloorProperties.Description":
+                case "Description":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.FloorDomMapper.FloorProperties.Description), sortOrder, naturalSort);
                 case "FloorProperties.FloorId":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.FloorDomMapper.FloorProperties.FloorId), sortOrder, naturalSort);

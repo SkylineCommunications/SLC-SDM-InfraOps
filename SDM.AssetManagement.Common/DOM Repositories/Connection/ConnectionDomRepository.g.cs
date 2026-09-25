@@ -575,7 +575,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 var _sourceporttype = _sourceSection.GetValue<Guid>(AssetManagement.Models.ConnectionDomMapper.Source.PortType);
                 if (_sourceporttype != null)
                 {
-                    obj.Source.PortType = new SdmObjectReference<AssetManagement.Models.PortType>(Convert.ToString(_sourceporttype.Value));
+                    obj.Source.PortType = new SdmObjectReference<AssetManagement.Models.PortType>(_sourceporttype.Value.ToString());
                 }
             }
 
@@ -755,7 +755,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 case "Source.PortType" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && !SdmObjectReference<AssetManagement.Models.PortType>.Convert(value).HasValue():
                     return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.ConnectionDomMapper.Source.PortType.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Source.PortType":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ConnectionDomMapper.Source.PortType), comparer, SdmObjectReference<AssetManagement.Models.PortType>.Convert(value).Identifier);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ConnectionDomMapper.Source.PortType), comparer, Guid.Parse(SdmObjectReference<AssetManagement.Models.PortType>.Convert(value).Identifier));
                 case "Destination.CableTag":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ConnectionDomMapper.Destination.CableTag), comparer, (string)value);
                 case "Destination.Port" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && !ISdmObjectReference<IPort>.Convert<IPort>(value).HasValue():
@@ -765,7 +765,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 case "Destination.PortType" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && !SdmObjectReference<AssetManagement.Models.PortType>.Convert(value).HasValue():
                     return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.ConnectionDomMapper.Destination.PortType.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Destination.PortType":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ConnectionDomMapper.Destination.PortType), comparer, SdmObjectReference<AssetManagement.Models.PortType>.Convert(value).Identifier);
+                   return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.ConnectionDomMapper.Destination.PortType), comparer, Guid.Parse(SdmObjectReference<AssetManagement.Models.PortType>.Convert(value).Identifier));
                 default:
                     throw new NotImplementedException();
             }

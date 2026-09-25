@@ -57,6 +57,11 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                 }
             }
 
+            if (!ZoneValidationHandler.IsCoolingCapacityValid(entity, out var capacityResult))
+            {
+                result.AddFrom(capacityResult);
+            }
+
             result.AddFailuresFrom(ValidateReferencesAgainstDatabase(new List<Zone> { entity })[0]);
 
             return result;
@@ -108,20 +113,35 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
 
         /// <summary>
         /// Validates a batch of Zone entities in three phases:
-        /// 1. Non-database checks per item (id not empty).
+        /// 1. Non-database checks per item (id not empty, cooling capacity).
         /// 2. In-memory batch conflict detection (id uniqueness within batch).
         /// 3. Database uniqueness check (id uniqueness vs DB).
         /// Results are returned in the same order as the input list.
         /// </summary>
         protected override List<ValidationResult> ValidateBulk(List<Zone> entities)
         {
-            return FacilityBulkValidationHelper.RunBulkValidation(
+            if (entities == null || !entities.Any())
+            {
+                return new List<ValidationResult>();
+            }
+
+            var results = FacilityBulkValidationHelper.RunBulkValidation(
                 entities,
                 ZoneValidationHandler.IsZoneIdValid,
                 ZoneValidationHandler.IsZoneNameValid,
                 ValidateIdDuplicatesInBatch,
                 ValidateBulkIdsAgainstDatabase,
                 ValidateReferencesAgainstDatabase);
+
+            for (int i = 0; i < entities.Count; i++)
+            {
+                if (!ZoneValidationHandler.IsCoolingCapacityValid(entities[i], out var capacityResult))
+                {
+                    results[i].AddFrom(capacityResult);
+                }
+            }
+
+            return results;
         }
 
         private bool IsIdInUse(string id, string exceptIdentifier = null)

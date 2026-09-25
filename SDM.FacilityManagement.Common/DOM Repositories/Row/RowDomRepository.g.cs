@@ -697,17 +697,17 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModifiedBy, comparer, (string)value);
                 case "RowProperties.Name":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RowDomMapper.RowProperties.Name), comparer, (string)value);
-                case "RowProperties.Plan":
+                case "Plan":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RowDomMapper.RowProperties.Plan), comparer, (string)value);
-                case "RowProperties.Description":
+                case "Description":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RowDomMapper.RowProperties.Description), comparer, (string)value);
-                case "RowProperties.Label":
+                case "Label":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RowDomMapper.RowProperties.Label), comparer, (string)value);
                 case "RowProperties.RowId":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RowDomMapper.RowProperties.RowId), comparer, (string)value);
-                case "RowProperties.YPosition" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                case "YPosition" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
                     return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.RowDomMapper.RowProperties.YPosition.Id.ToString()).Equal(comparer == Comparer.NotEquals);
-                case "RowProperties.YPosition":
+                case "YPosition":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RowDomMapper.RowProperties.YPosition), comparer, (double)((double?)value).Value);
                 case "RoomFk.Room" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && !SdmObjectReference<FacilityManagement.Models.Room>.Convert(value).HasValue():
                     return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.RowDomMapper.RoomFk.Room.Id.ToString()).Equal(comparer == Comparer.NotEquals);
@@ -736,15 +736,15 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     return OrderByElementFactory.Create(DomInstanceExposers.LastModifiedBy, sortOrder, naturalSort);
                 case "RowProperties.Name":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RowDomMapper.RowProperties.Name), sortOrder, naturalSort);
-                case "RowProperties.Plan":
+                case "Plan":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RowDomMapper.RowProperties.Plan), sortOrder, naturalSort);
-                case "RowProperties.Description":
+                case "Description":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RowDomMapper.RowProperties.Description), sortOrder, naturalSort);
-                case "RowProperties.Label":
+                case "Label":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RowDomMapper.RowProperties.Label), sortOrder, naturalSort);
                 case "RowProperties.RowId":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RowDomMapper.RowProperties.RowId), sortOrder, naturalSort);
-                case "RowProperties.YPosition":
+                case "YPosition":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RowDomMapper.RowProperties.YPosition), sortOrder, naturalSort);
                 case "RoomFk.Room":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RowDomMapper.RoomFk.Room), sortOrder, naturalSort);
