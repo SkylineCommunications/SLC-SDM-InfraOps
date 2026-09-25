@@ -13,6 +13,7 @@
         {
             DeskId,
             Name,
+            RoomId,
         }
 
         /// <summary>

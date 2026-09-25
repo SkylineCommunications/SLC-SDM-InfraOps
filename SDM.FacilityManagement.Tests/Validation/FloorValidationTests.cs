@@ -35,10 +35,10 @@
         [TestMethod]
         public void Floor_Create_WithDuplicateIdInDatabase_ShouldThrow()
         {
-            var existing = new Floor { Identifier = Guid.NewGuid().ToString(), FloorId = "EXIST-1" };
+            var existing = new Floor { Identifier = Guid.NewGuid().ToString(), FloorId = "EXIST-1", Name = "Floor EXIST-1" };
             Helper.Floors.Create(existing);
 
-            var duplicate = new Floor { Identifier = Guid.NewGuid().ToString(), FloorId = "EXIST-1" };
+            var duplicate = new Floor { Identifier = Guid.NewGuid().ToString(), FloorId = "EXIST-1", Name = "Floor EXIST-1" };
             var action = () => Helper.Floors.Create(duplicate);
 
             action.Should().Throw<Exception>().WithMessage("*already in use*");

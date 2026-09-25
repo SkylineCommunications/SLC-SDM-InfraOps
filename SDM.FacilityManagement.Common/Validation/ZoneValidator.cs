@@ -50,6 +50,11 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                     result.AddFailReason(ZoneValidationHandler.ZoneValidationField.ZoneId,
                         $"Zone Id '{entity.ZoneId}' is already in use.");
                 }
+
+                if(!ZoneValidationHandler.IsCoolingCapacityValid(entity, out var coolingCapacityResult))
+                {
+                    result.AddFailuresFrom(coolingCapacityResult);
+                }
             }
 
             result.AddFailuresFrom(ValidateReferencesAgainstDatabase(new List<Zone> { entity })[0]);
@@ -194,7 +199,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
         {
             return FacilityReferenceValidationHelper.ValidateRoomReferences(
                 entities,
-                ZoneValidationHandler.ZoneValidationField.ZoneId,
+                ZoneValidationHandler.ZoneValidationField.RoomId,
                 entity => entity.RoomFk.IsEmpty ? null : ReferenceValidationHelper.GetId(entity.RoomFk.Room),
                 ids => ReferenceValidationHelper.ToIdentifierSet(_entityLoader.GetRoomsByIdentifiers(ids)));
         }

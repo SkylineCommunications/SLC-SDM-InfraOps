@@ -46,9 +46,11 @@
         public void Zone_Create_WithDuplicateIdInDatabase_ShouldThrow()
         {
             var existing = new Zone { Identifier = Guid.NewGuid().ToString(), Name = "Existing Zone", ZoneId = "EXIST-1" };
+            existing.ZoneCapacity.CoolingCapacity = 1;
             Helper.Zones.Create(existing);
 
             var duplicate = new Zone { Identifier = Guid.NewGuid().ToString(), Name = "Duplicate Zone", ZoneId = "EXIST-1" };
+            duplicate.ZoneCapacity.CoolingCapacity = 1;
             var action = () => Helper.Zones.Create(duplicate);
 
             action.Should().Throw<Exception>().WithMessage("*already in use*");

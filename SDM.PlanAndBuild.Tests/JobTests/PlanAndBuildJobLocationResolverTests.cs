@@ -42,7 +42,9 @@ namespace SDM.PlanAndBuild.Tests.JobTests
 			facility = facilityHelper.Facilities.Create(new Facility { Identifier = Guid.NewGuid().ToString(), Name = "Facility 1", FacilityId = "FAC-1" });
 			floor = facilityHelper.Floors.Create(new Floor { Identifier = Guid.NewGuid().ToString(), Name = "Floor 1", FloorId = "FLR-1" });
 			room = facilityHelper.Rooms.Create(new Room { Identifier = Guid.NewGuid().ToString(), Name = "Room 1", RoomId = "ROM-1" });
-			zone = facilityHelper.Zones.Create(new Zone { Identifier = Guid.NewGuid().ToString(), Name = "Zone 1", ZoneId = "ZON-1" });
+            var z = new Zone { Identifier = Guid.NewGuid().ToString(), Name = "Zone 1", ZoneId = "ZON-1" };
+            z.ZoneCapacity.CoolingCapacity = 1;
+            zone = facilityHelper.Zones.Create(z);
 			row = facilityHelper.Rows.Create(new Row { Identifier = Guid.NewGuid().ToString(), Name = "Row 1", RowId = "ROW-1" });
 			desk = facilityHelper.Desks.Create(new Desk { Identifier = Guid.NewGuid().ToString(), Name = "Desk 1", DeskID = "DSK-1" });
 			var rackToCreate = new Rack { Identifier = Guid.NewGuid().ToString(), Name = "Rack 1", RackId = "RCK-1" };
