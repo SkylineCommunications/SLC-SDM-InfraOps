@@ -43,12 +43,54 @@
         }
 
         [TestMethod]
+        public void Zone_Create_WithoutCoolingCapacity_ShouldThrow()
+        {
+            var entity = new Zone { Identifier = Guid.NewGuid().ToString(), Name = "Zone", ZoneId = "ZONE-CC-1" };
+
+            var action = () => Helper.Zones.Create(entity);
+
+            action.Should().Throw<Exception>().WithMessage("*cooling capacity must be defined*");
+        }
+
+        [TestMethod]
+        public void Zone_Create_WithNegativeCoolingCapacity_ShouldThrow()
+        {
+            var entity = new Zone
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                Name = "Zone",
+                ZoneId = "ZONE-CC-2",
+                ZoneCapacity = { CoolingCapacity = -1.0 },
+            };
+
+            var action = () => Helper.Zones.Create(entity);
+
+            action.Should().Throw<Exception>().WithMessage("*cooling capacity cannot be negative*");
+        }
+
+        [TestMethod]
+        public void Zone_Create_WithValidCoolingCapacity_ShouldSucceed()
+        {
+            var entity = new Zone
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                Name = "Zone",
+                ZoneId = "ZONE-CC-3",
+                ZoneCapacity = { CoolingCapacity = 12.5 },
+            };
+
+            var action = () => Helper.Zones.Create(entity);
+
+            action.Should().NotThrow();
+        }
+
+        [TestMethod]
         public void Zone_Create_WithDuplicateIdInDatabase_ShouldThrow()
         {
-            var existing = new Zone { Identifier = Guid.NewGuid().ToString(), Name = "Existing Zone", ZoneId = "EXIST-1" };
+            var existing = new Zone { Identifier = Guid.NewGuid().ToString(), Name = "Existing Zone", ZoneId = "EXIST-1", ZoneCapacity = { CoolingCapacity = 5.0 } };
             Helper.Zones.Create(existing);
 
-            var duplicate = new Zone { Identifier = Guid.NewGuid().ToString(), Name = "Duplicate Zone", ZoneId = "EXIST-1" };
+            var duplicate = new Zone { Identifier = Guid.NewGuid().ToString(), Name = "Duplicate Zone", ZoneId = "EXIST-1", ZoneCapacity = { CoolingCapacity = 5.0 } };
             var action = () => Helper.Zones.Create(duplicate);
 
             action.Should().Throw<Exception>().WithMessage("*already in use*");

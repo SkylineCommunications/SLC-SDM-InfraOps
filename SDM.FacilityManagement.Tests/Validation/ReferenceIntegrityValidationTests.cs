@@ -247,7 +247,7 @@ namespace SDM.FacilityManagement.Tests.Validation
 
 		private static Zone NewZone(string id)
 		{
-			return new Zone { Identifier = Guid.NewGuid().ToString(), ZoneId = id, Name = $"Zone {id}" };
+			return new Zone { Identifier = Guid.NewGuid().ToString(), ZoneId = id, Name = $"Zone {id}", ZoneCapacity = { CoolingCapacity = 5.0 } };
 		}
 
 		private static Desk NewDesk(string id)

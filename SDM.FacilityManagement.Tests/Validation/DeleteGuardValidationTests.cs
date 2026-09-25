@@ -262,6 +262,7 @@ namespace SDM.FacilityManagement.Tests.Validation
 				Identifier = Guid.NewGuid().ToString(),
 				ZoneId = id,
 				Name = $"Zone {id}",
+				ZoneCapacity = { CoolingCapacity = 5.0 },
 			};
 
 			if (room != null)
