@@ -28,7 +28,7 @@
         [SdmIgnore]
         internal IChangeTrackingField<SdmObjectReference<Site>> SiteField => FieldHandler.GetOrCreateField(
             nameof(Site),
-            () => new ChangeTrackingField<SdmObjectReference<Site>>(default));
+            () => new ChangeTrackingField<SdmObjectReference<Site>>(default, reference => reference.Identifier));
 
         public static bool operator ==(SiteRelation left, SiteRelation right)
         {

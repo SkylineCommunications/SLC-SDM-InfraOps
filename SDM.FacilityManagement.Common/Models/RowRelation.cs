@@ -29,7 +29,7 @@
         [SdmIgnore]
         internal IChangeTrackingField<SdmObjectReference<Row>> RowField => FieldHandler.GetOrCreateField(
             nameof(Row),
-            () => new ChangeTrackingField<SdmObjectReference<Row>>(default));
+            () => new ChangeTrackingField<SdmObjectReference<Row>>(default, reference => reference.Identifier));
 
         public static bool operator ==(RowRelation left, RowRelation right)
         {

@@ -71,13 +71,13 @@
         [SdmIgnore]
         internal IChangeTrackingField<ISdmObjectReference<ISdmObject>> JobField => FieldHandler.GetOrCreateField(
             nameof(Job),
-            () => new ChangeTrackingField<ISdmObjectReference<ISdmObject>>(default));
+            () => new ChangeTrackingField<ISdmObjectReference<ISdmObject>>(default, reference => reference.Identifier));
 
         [JsonIgnore]
         [SdmIgnore]
         internal IChangeTrackingField<ISdmObjectReference<ISdmObject>> ModifiedInstanceIDField => FieldHandler.GetOrCreateField(
             nameof(ModifiedInstanceID),
-            () => new ChangeTrackingField<ISdmObjectReference<ISdmObject>>(default));
+            () => new ChangeTrackingField<ISdmObjectReference<ISdmObject>>(default, reference => reference.Identifier));
 
         [JsonIgnore]
         [SdmIgnore]

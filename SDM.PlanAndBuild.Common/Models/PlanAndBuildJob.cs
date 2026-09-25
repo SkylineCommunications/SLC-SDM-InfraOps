@@ -245,7 +245,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
         [SdmIgnore]
         internal IChangeTrackingField<SdmObjectReference<JobType>> TypeField => FieldHandler.GetOrCreateField(
             nameof(Type),
-            () => new ChangeTrackingField<SdmObjectReference<JobType>>(default));
+            () => new ChangeTrackingField<SdmObjectReference<JobType>>(default, reference => reference.Identifier));
 
         [JsonIgnore]
         [SdmIgnore]

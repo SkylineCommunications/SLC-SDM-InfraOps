@@ -36,13 +36,13 @@
         [SdmIgnore]
         internal IChangeTrackingField<PnoObjectReference<Team>> TeamField => FieldHandler.GetOrCreateField(
             nameof(Team),
-            () => new ChangeTrackingField<PnoObjectReference<Team>>(default));
+            () => new ChangeTrackingField<PnoObjectReference<Team>>(default, reference => reference.Identifier));
 
         [JsonIgnore]
         [SdmIgnore]
         internal IChangeTrackingField<PnoObjectReference<Person>> OwnerField => FieldHandler.GetOrCreateField(
             nameof(Owner),
-            () => new ChangeTrackingField<PnoObjectReference<Person>>(default));
+            () => new ChangeTrackingField<PnoObjectReference<Person>>(default, reference => reference.Identifier));
 
         public static bool operator ==(RoomOwnership left, RoomOwnership right)
         {

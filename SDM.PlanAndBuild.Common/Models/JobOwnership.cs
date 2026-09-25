@@ -36,13 +36,13 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
         [SdmIgnore]
         internal IChangeTrackingField<PnoObjectReference<Person>> AssignedToField => FieldHandler.GetOrCreateField(
             nameof(AssignedTo),
-            () => new ChangeTrackingField<PnoObjectReference<Person>>(default));
+            () => new ChangeTrackingField<PnoObjectReference<Person>>(default, reference => reference.Identifier));
 
         [JsonIgnore]
         [SdmIgnore]
         internal IChangeTrackingField<PnoObjectReference<Team>> AssignmentGroupField => FieldHandler.GetOrCreateField(
             nameof(AssignmentGroup),
-            () => new ChangeTrackingField<PnoObjectReference<Team>>(default));
+            () => new ChangeTrackingField<PnoObjectReference<Team>>(default, reference => reference.Identifier));
 
         public static bool operator ==(JobOwnership left, JobOwnership right)
         {

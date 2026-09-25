@@ -45,13 +45,13 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         [SdmIgnore]
         internal IChangeTrackingField<ISdmObjectReference<IPort>> PortField => FieldHandler.GetOrCreateField(
             nameof(Port),
-            () => new ChangeTrackingField<ISdmObjectReference<IPort>>(default));
+            () => new ChangeTrackingField<ISdmObjectReference<IPort>>(default, reference => reference.Identifier));
 
         [JsonIgnore]
         [SdmIgnore]
         internal IChangeTrackingField<SdmObjectReference<PortType>> PortTypeField => FieldHandler.GetOrCreateField(
             nameof(PortType),
-            () => new ChangeTrackingField<SdmObjectReference<PortType>>(default));
+            () => new ChangeTrackingField<SdmObjectReference<PortType>>(default, reference => reference.Identifier));
 
         public static bool operator ==(SourceInfo left, SourceInfo right)
         {

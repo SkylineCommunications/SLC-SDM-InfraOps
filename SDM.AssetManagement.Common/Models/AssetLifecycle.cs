@@ -100,7 +100,7 @@
 		[SdmIgnore]
 		internal IChangeTrackingField<PnoObjectReference<Person>> InstallationUserIdField => FieldHandler.GetOrCreateField(
 			nameof(InstallationUserId),
-			() => new ChangeTrackingField<PnoObjectReference<Person>>(default));
+			() => new ChangeTrackingField<PnoObjectReference<Person>>(default, reference => reference.Identifier));
 
 		[JsonIgnore]
 		[SdmIgnore]
@@ -112,7 +112,7 @@
 		[SdmIgnore]
 		internal IChangeTrackingField<PnoObjectReference<Person>> ModificationUserIdField => FieldHandler.GetOrCreateField(
 			nameof(ModificationUserId),
-			() => new ChangeTrackingField<PnoObjectReference<Person>>(default));
+			() => new ChangeTrackingField<PnoObjectReference<Person>>(default, reference => reference.Identifier));
 
 		[JsonIgnore]
 		[SdmIgnore]

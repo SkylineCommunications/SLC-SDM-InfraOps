@@ -76,7 +76,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         [SdmIgnore]
         internal IChangeTrackingField<SdmObjectReference<Asset>> ParentAssetField => FieldHandler.GetOrCreateField(
             nameof(ParentAsset),
-            () => new ChangeTrackingField<SdmObjectReference<Asset>>(default));
+            () => new ChangeTrackingField<SdmObjectReference<Asset>>(default, reference => reference.Identifier));
 
         [JsonIgnore]
         [SdmIgnore]
@@ -88,7 +88,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         [SdmIgnore]
         internal IChangeTrackingField<SdmObjectReference<Rack>> RackIdField => FieldHandler.GetOrCreateField(
             nameof(RackId),
-            () => new ChangeTrackingField<SdmObjectReference<Rack>>(default));
+            () => new ChangeTrackingField<SdmObjectReference<Rack>>(default, reference => reference.Identifier));
 
         [JsonIgnore]
         [SdmIgnore]
@@ -106,19 +106,19 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         [SdmIgnore]
         internal IChangeTrackingField<SdmObjectReference<Desk>> DeskIdField => FieldHandler.GetOrCreateField(
             nameof(DeskId),
-            () => new ChangeTrackingField<SdmObjectReference<Desk>>(default));
+            () => new ChangeTrackingField<SdmObjectReference<Desk>>(default, reference => reference.Identifier));
 
         [JsonIgnore]
         [SdmIgnore]
         internal IChangeTrackingField<SdmObjectReference<Facility>> ContainerIdField => FieldHandler.GetOrCreateField(
             nameof(ContainerId),
-            () => new ChangeTrackingField<SdmObjectReference<Facility>>(default));
+            () => new ChangeTrackingField<SdmObjectReference<Facility>>(default, reference => reference.Identifier));
 
         [JsonIgnore]
         [SdmIgnore]
         internal IChangeTrackingField<SdmObjectReference<FacilityManagement.Models.Room>> RoomIdField => FieldHandler.GetOrCreateField(
             nameof(RoomId),
-            () => new ChangeTrackingField<SdmObjectReference<FacilityManagement.Models.Room>>(default));
+            () => new ChangeTrackingField<SdmObjectReference<FacilityManagement.Models.Room>>(default, reference => reference.Identifier));
 
         public static bool operator ==(AssetLocation left, AssetLocation right)
         {

@@ -127,7 +127,7 @@
         [SdmIgnore]
         internal IChangeTrackingField<SdmObjectReference<CableType>> CableTypeField => FieldHandler.GetOrCreateField(
             nameof(CableType),
-            () => new ChangeTrackingField<SdmObjectReference<CableType>>(default));
+            () => new ChangeTrackingField<SdmObjectReference<CableType>>(default, reference => reference.Identifier));
 
         [JsonIgnore]
         [SdmIgnore]

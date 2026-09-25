@@ -29,7 +29,7 @@
         [SdmIgnore]
         internal IChangeTrackingField<SdmObjectReference<Zone>> ZoneField => FieldHandler.GetOrCreateField(
             nameof(Zone),
-            () => new ChangeTrackingField<SdmObjectReference<Zone>>(default));
+            () => new ChangeTrackingField<SdmObjectReference<Zone>>(default, reference => reference.Identifier));
 
         public static bool operator ==(ZoneRelation left, ZoneRelation right)
         {

@@ -48,25 +48,25 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         [SdmIgnore]
         internal IChangeTrackingField<PnoObjectReference<Organization>> OrganizationField => FieldHandler.GetOrCreateField(
             nameof(Organization),
-            () => new ChangeTrackingField<PnoObjectReference<Organization>>(default));
+            () => new ChangeTrackingField<PnoObjectReference<Organization>>(default, reference => reference.Identifier));
 
         [JsonIgnore]
         [SdmIgnore]
         internal IChangeTrackingField<PnoObjectReference<Person>> ContactPersonField => FieldHandler.GetOrCreateField(
             nameof(ContactPerson),
-            () => new ChangeTrackingField<PnoObjectReference<Person>>(default));
+            () => new ChangeTrackingField<PnoObjectReference<Person>>(default, reference => reference.Identifier));
 
         [JsonIgnore]
         [SdmIgnore]
         internal IChangeTrackingField<PnoObjectReference<Role>> ContactPersonRoleField => FieldHandler.GetOrCreateField(
             nameof(ContactPersonRole),
-            () => new ChangeTrackingField<PnoObjectReference<Role>>(default));
+            () => new ChangeTrackingField<PnoObjectReference<Role>>(default, reference => reference.Identifier));
 
         [JsonIgnore]
         [SdmIgnore]
         internal IChangeTrackingField<PnoObjectReference<Team>> TeamField => FieldHandler.GetOrCreateField(
             nameof(Team),
-            () => new ChangeTrackingField<PnoObjectReference<Team>>(default));
+            () => new ChangeTrackingField<PnoObjectReference<Team>>(default, reference => reference.Identifier));
 
         public static bool operator ==(AssetOwnership left, AssetOwnership right)
         {

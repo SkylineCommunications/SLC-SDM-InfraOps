@@ -217,7 +217,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         [SdmIgnore]
         internal IChangeTrackingField<SdmObjectReference<DeviceType>> DeviceTypeIdField => FieldHandler.GetOrCreateField(
             nameof(DeviceTypeId),
-            () => new ChangeTrackingField<SdmObjectReference<DeviceType>>(default));
+            () => new ChangeTrackingField<SdmObjectReference<DeviceType>>(default, reference => reference.Identifier));
 
         [JsonIgnore]
         [SdmIgnore]
@@ -229,7 +229,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         [SdmIgnore]
         internal IChangeTrackingField<PnoObjectReference<Organization>> ManufacturerField => FieldHandler.GetOrCreateField(
             nameof(Manufacturer),
-            () => new ChangeTrackingField<PnoObjectReference<Organization>>(default));
+            () => new ChangeTrackingField<PnoObjectReference<Organization>>(default, reference => reference.Identifier));
 
         [JsonIgnore]
         [SdmIgnore]

@@ -271,7 +271,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         [SdmIgnore]
         internal IChangeTrackingField<SdmObjectReference<AssetClass>> AssetClassIdField => FieldHandler.GetOrCreateField(
             nameof(AssetClassId),
-            () => new ChangeTrackingField<SdmObjectReference<AssetClass>>(default));
+            () => new ChangeTrackingField<SdmObjectReference<AssetClass>>(default, reference => reference.Identifier));
 
         [JsonIgnore]
         [SdmIgnore]
@@ -321,7 +321,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         [SdmIgnore]
         internal IChangeTrackingField<PnoObjectReference<Person>> InstallationUserIdField => FieldHandler.GetOrCreateField(
             nameof(InstallationUserId),
-            () => new ChangeTrackingField<PnoObjectReference<Person>>(default));
+            () => new ChangeTrackingField<PnoObjectReference<Person>>(default, reference => reference.Identifier));
 
         [JsonIgnore]
         [SdmIgnore]
@@ -345,7 +345,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         [SdmIgnore]
         internal IChangeTrackingField<PnoObjectReference<Person>> ModificationUserIdField => FieldHandler.GetOrCreateField(
             nameof(ModificationUserId),
-            () => new ChangeTrackingField<PnoObjectReference<Person>>(default));
+            () => new ChangeTrackingField<PnoObjectReference<Person>>(default, reference => reference.Identifier));
 
         [JsonIgnore]
         [SdmIgnore]

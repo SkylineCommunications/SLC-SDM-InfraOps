@@ -25,7 +25,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         [SdmIgnore]
         internal IChangeTrackingField<SdmObjectReference<Rack>> RackField => FieldHandler.GetOrCreateField(
             nameof(Rack),
-            () => new ChangeTrackingField<SdmObjectReference<Rack>>(default));
+            () => new ChangeTrackingField<SdmObjectReference<Rack>>(default, reference => reference.Identifier));
 
         public static bool operator ==(RackRelation left, RackRelation right)
         {

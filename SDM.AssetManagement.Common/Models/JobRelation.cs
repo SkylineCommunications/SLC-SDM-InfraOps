@@ -26,7 +26,7 @@
         [SdmIgnore]
         internal IChangeTrackingField<ISdmObjectReference<ISdmObject>> JobField => FieldHandler.GetOrCreateField(
             nameof(Job),
-            () => new ChangeTrackingField<ISdmObjectReference<ISdmObject>>(default));
+            () => new ChangeTrackingField<ISdmObjectReference<ISdmObject>>(default, reference => reference.Identifier));
 
         public static bool operator ==(JobRelation left, JobRelation right)
         {
