@@ -1,18 +1,16 @@
 namespace SDM.FacilityManagement.Tests.Validation
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
+    using System;
 
-	using FluentAssertions;
+    using FluentAssertions;
 
-	using SDM.FacilityManagement.Tests.Setup;
+    using SDM.FacilityManagement.Tests.Setup;
 
-	using Skyline.DataMiner.SDM;
-	using Skyline.DataMiner.SDM.FacilityManagement.Helpers;
-	using Skyline.DataMiner.SDM.FacilityManagement.Models;
+    using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.FacilityManagement.Models;
+    using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
 
-	[TestClass]
+    [TestClass]
 	public class ReferenceIntegrityValidationTests : BaseRepositoryTest
 	{
 		[TestMethod]
@@ -91,8 +89,8 @@ namespace SDM.FacilityManagement.Tests.Validation
 		public void Room_Create_WithExternalReferencesAndNullChecker_ShouldSucceed()
 		{
 			var room = NewRoom("ROOM-1");
-			room.Ownership.Owner = Guid.NewGuid();
-			room.Ownership.Team = Guid.NewGuid();
+			room.Ownership.Owner = new PnoObjectReference<Skyline.DataMiner.Solutions.PeopleAndOrganizations.API.Person>(Guid.NewGuid());
+			room.Ownership.Team = new PnoObjectReference<Skyline.DataMiner.Solutions.PeopleAndOrganizations.API.Team>(Guid.NewGuid());
 			room.ResourceLink.ResourceId = Guid.NewGuid();
 
 			Action action = () => Helper.Rooms.Create(room);
@@ -232,8 +230,8 @@ namespace SDM.FacilityManagement.Tests.Validation
 
 		private static Floor NewFloor(string id)
 		{
-			return new Floor { Identifier = Guid.NewGuid().ToString(), FloorId = id };
-		}
+			return new Floor { Identifier = Guid.NewGuid().ToString(), FloorId = id, Name = $"Floor {id}" };
+        }
 
 		private static Room NewRoom(string id)
 		{

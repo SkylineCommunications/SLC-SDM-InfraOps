@@ -674,7 +674,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModified, comparer, (DateTime)value);
                 case "LastModifiedBy":
                     return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModifiedBy, comparer, (string)value);
-                case "SiteProperties.Name":
+                case "Name":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.SiteDomMapper.SiteProperties.Name), comparer, (string)value);
                 case "Description":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.SiteDomMapper.SiteProperties.Description), comparer, (string)value);
@@ -715,7 +715,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     return OrderByElementFactory.Create(DomInstanceExposers.LastModified, sortOrder, naturalSort);
                 case "LastModifiedBy":
                     return OrderByElementFactory.Create(DomInstanceExposers.LastModifiedBy, sortOrder, naturalSort);
-                case "SiteProperties.Name":
+                case "Name":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.SiteDomMapper.SiteProperties.Name), sortOrder, naturalSort);
                 case "Description":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.SiteDomMapper.SiteProperties.Description), sortOrder, naturalSort);
