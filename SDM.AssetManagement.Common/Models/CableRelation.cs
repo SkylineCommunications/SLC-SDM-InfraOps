@@ -26,7 +26,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         [SdmIgnore]
         internal ChangeTrackingArrayField<SdmObjectReference<CableType>> CableTypeFksField => FieldHandler.GetOrCreateArrayField(
             nameof(CableTypeFks),
-            () => new ChangeTrackingArrayField<SdmObjectReference<CableType>>(new List<SdmObjectReference<CableType>>()));
+            () => new ChangeTrackingArrayField<SdmObjectReference<CableType>>(new List<SdmObjectReference<CableType>>(), (list) => list.Select(entry => entry.Identifier).ToList()));
 
         public static bool operator ==(CableRelation left, CableRelation right)
         {
