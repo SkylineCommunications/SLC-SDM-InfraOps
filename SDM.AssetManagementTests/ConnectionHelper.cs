@@ -1,11 +1,10 @@
 ﻿namespace SDM.AssetManagement.Tests
 {
     using Moq;
-    using SDM.AssetManagement.Tests.Setup;
     using Skyline.DataMiner.Net;
     using Skyline.DataMiner.Net.Messages;
-    using Skyline.DataMiner.SDM.AssetManagement.Helpers;
-    using Skyline.DataMiner.SDM.FacilityManagement.Helpers;
+    using Skyline.DataMiner.SDM.AssetManagement.Common.Mock;
+    using Skyline.DataMiner.SDM.FacilityManagement.Common.Mock;
     using Skyline.DataMiner.Utils.DOM.UnitTesting;
 
     internal static class ConnectionHelper
@@ -13,26 +12,12 @@
 		internal static IConnection CreateConnection()
 		{
 			var messageHandler = new DomSLNetMessageHandler();
+			messageHandler.AddAssetManagementModule();
+			messageHandler.AddFacilityManagementModule();
 			return CreateConnection(messageHandler);
 		}
 
-        internal static IConnection CreateConnectionWithAssetBehavior()
-        {
-            var messageHandler = new DomSLNetMessageHandler();
-            messageHandler.SetDefinitions(AssetBehaviorFixture.ModuleId, new[] { AssetBehaviorFixture.BuildAssetDefinition() });
-            messageHandler.SetBehaviorDefinitions(AssetBehaviorFixture.ModuleId, new[] { AssetBehaviorFixture.BuildAssetBehaviorDefinition() });
-            return CreateConnection(messageHandler);
-        }
-
-        internal static IConnection CreateConnectionWithAssetClassBehavior()
-        {
-            var messageHandler = new DomSLNetMessageHandler();
-            messageHandler.SetDefinitions(AssetClassBehaviorFixture.ModuleId, new[] { AssetClassBehaviorFixture.BuildAssetClassDefinition() });
-            messageHandler.SetBehaviorDefinitions(AssetClassBehaviorFixture.ModuleId, new[] { AssetClassBehaviorFixture.BuildAssetClassBehaviorDefinition() });
-            return CreateConnection(messageHandler);
-        }
-
-		internal static IConnection CreateConnection(DomSLNetMessageHandler messageHandler)
+		private static IConnection CreateConnection(DomSLNetMessageHandler messageHandler)
 		{
 			var connectionMock = new Mock<IConnection>();
 			connectionMock.Setup(c => c.HandleMessages(It.IsAny<DMSMessage[]>()))
@@ -47,21 +32,8 @@
 			return connectionMock.Object;
 		}
 
-		internal static IAssetManagementApiHelper GetMockedAssetManagementHelper(
-            this IConnection connection, 
-            IFacilityManagementApiHelper facilityManagementHelper)
-		{
-            return new AssetManagementApiHelper(connection, facilityManagementHelper);
-        }
 
-        internal static IFacilityManagementApiHelper GetMockedFacilityManagementHelper(this IConnection connection)
-        {
-            return new FacilityManagementApiHelper(connection);
-        }
-
-
-
-        private static DMSMessage[] HandleSLNetMessages(DomSLNetMessageHandler messageHandler, DMSMessage[] messages)
+		private static DMSMessage[] HandleSLNetMessages(DomSLNetMessageHandler messageHandler, DMSMessage[] messages)
 		{
 			if (messages is null)
 			{

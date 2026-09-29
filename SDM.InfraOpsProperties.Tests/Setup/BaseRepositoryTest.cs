@@ -12,7 +12,7 @@
 		public void BaseTestInitialize()
 		{
 			// ✅ PRIMARY cleanup — fresh in-memory store even if a previous test crashed.
-			Helper = RepositoryInitialize.InitializeEmptyRepositories();
+			Helper = RepositoryInitialize.Initialize();
 		}
 
 		[TestCleanup]

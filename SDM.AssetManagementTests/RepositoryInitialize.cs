@@ -58,21 +58,9 @@ namespace SDM.AssetManagement.Tests
 
     public static partial class RepositoryInitialize
     {
-        public static ITestApiHelper InitializeEmptyRepositories()
+        public static ITestApiHelper Initialize()
         {
             var connection = ConnectionHelper.CreateConnection();
-            return new TestApiHelper(connection);
-        }
-
-        public static ITestApiHelper InitializeWithAssetBehavior()
-        {
-            var connection = ConnectionHelper.CreateConnectionWithAssetBehavior();
-            return new TestApiHelper(connection);
-        }
-
-        public static ITestApiHelper InitializeWithAssetClassBehavior()
-        {
-            var connection = ConnectionHelper.CreateConnectionWithAssetClassBehavior();
             return new TestApiHelper(connection);
         }
 

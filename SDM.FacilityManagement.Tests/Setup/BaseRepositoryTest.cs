@@ -11,7 +11,7 @@ namespace SDM.FacilityManagement.Tests.Setup
 		[TestInitialize]
 		public void BaseTestInitialize()
 		{
-			Helper = RepositoryInitialize.InitializeEmptyRepositories();
+			Helper = RepositoryInitialize.Initialize();
 		}
 
 		[TestCleanup]

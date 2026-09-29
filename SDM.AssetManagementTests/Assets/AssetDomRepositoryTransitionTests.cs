@@ -26,7 +26,7 @@ namespace SDM.AssetManagement.Tests.Assets
         [TestInitialize]
         public void Initialize()
         {
-            _helper = RepositoryInitialize.InitializeWithAssetBehavior();
+            _helper = RepositoryInitialize.Initialize();
             _helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
 
             // Deterministic, rack-mountable, non-PowerProvider device type (see RackMountableDeviceType).

@@ -6,7 +6,7 @@
 
 	public static class RepositoryInitialize
 	{
-		public static IFacilityManagementApiHelper InitializeEmptyRepositories()
+		public static IFacilityManagementApiHelper Initialize()
 		{
 			return ConnectionHelper.CreateConnection().GetMockedHelper();
 		}

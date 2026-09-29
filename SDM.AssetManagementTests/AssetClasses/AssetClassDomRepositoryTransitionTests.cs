@@ -22,7 +22,7 @@ namespace SDM.AssetManagement.Tests.AssetClasses
         [TestInitialize]
         public void Initialize()
         {
-            _helper = RepositoryInitialize.InitializeWithAssetClassBehavior();
+            _helper = RepositoryInitialize.Initialize();
             _helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
         }
 
