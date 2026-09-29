@@ -128,6 +128,24 @@
         }
 
         /// <summary>
+        /// Gets the failure reason for a specific enumerable T messages.
+        /// </summary>
+        public Dictionary<T, string> GetFailureReasons<T>() where T : Enum
+        {
+            var failures = new Dictionary<T, string>();
+
+            foreach (var entry in _failReasons)
+            {
+                if (IsFromEnum<T>(entry.Key))
+                {
+                    failures.Add(GetIdToField<T>(entry.Key), entry.Value);
+                }
+            }
+
+            return failures;
+        }
+
+        /// <summary>
         /// Adds all failures from another ValidationResult into this instance.
         /// Skips duplicate fields to prevent exceptions.
         /// </summary>
@@ -249,6 +267,22 @@
         private string GetFieldToId<T>(T field) where T : Enum
         {
             return $"{typeof(T).Name}_{Convert.ToString(field)}";
+        }
+
+        private bool IsFromEnum<T>(string field) where T : Enum
+        {
+            
+            return field.StartsWith($"{typeof(T).Name}_");
+        }
+
+        private T GetIdToField<T>(string field) where T : Enum
+        {
+            if(!IsFromEnum<T>(field))
+            {
+                throw new ArgumentException($"Field '{field}' is not from enum type '{typeof(T).Name}'.");
+            }
+
+            return (T)Enum.Parse(typeof(T), field.Replace($"{typeof(T).Name}_", string.Empty));
         }
 
         /// <summary>
