@@ -31,9 +31,12 @@
             return new Dictionary<SectionDefinitionID, SectionDefinition>
             {
                 {SlcPlan_And_Build.Sections.AssetsUsed.Id, GenerateSectionsDefinitions_AssetsUsed() },
+                {SlcPlan_And_Build.Sections.ConnectionsOnJob.Id, GenerateSectionsDefinitions_ConnectionsOnJob() },
+                {SlcPlan_And_Build.Sections.JobAttachment.Id, GenerateSectionsDefinitions_JobAttachment() },
                 {SlcPlan_And_Build.Sections.JobInformation.Id, GenerateSectionsDefinitions_JobInformation() },
                 {SlcPlan_And_Build.Sections.JobOwnership.Id, GenerateSectionsDefinitions_JobOwnership() },
                 {SlcPlan_And_Build.Sections.JobSettings.Id, GenerateSectionsDefinitions_JobSettings() },
+                {SlcPlan_And_Build.Sections.JobTypeInfo.Id, GenerateSectionsDefinitions_JobTypeInfo() },
             };
         }
 
@@ -51,6 +54,33 @@
             return BuildSectionDefinition(SlcPlan_And_Build.Sections.AssetsUsed.Id, "Assets Used", fields);
         }
 
+        private static SectionDefinition GenerateSectionsDefinitions_ConnectionsOnJob()
+        {
+            List<(FieldDescriptorID id, Type type, string name)> fields = new List<(FieldDescriptorID id, Type type, string name)>
+            {
+                (SlcPlan_And_Build.Sections.ConnectionsOnJob.Source, typeof(string), "Source"),
+                (SlcPlan_And_Build.Sections.ConnectionsOnJob.Destination, typeof(string), "Destination"),
+                (SlcPlan_And_Build.Sections.ConnectionsOnJob.Status, typeof(string), "Status"),
+                (SlcPlan_And_Build.Sections.ConnectionsOnJob.Cabletype, typeof(string), "CableType"),
+                (SlcPlan_And_Build.Sections.ConnectionsOnJob.CableLength, typeof(double), "Cable Length"),
+                (SlcPlan_And_Build.Sections.ConnectionsOnJob.ConnectionID, typeof(Guid), "Connection ID"),
+            };
+
+            return BuildSectionDefinition(SlcPlan_And_Build.Sections.ConnectionsOnJob.Id, "Connections on Job", fields);
+        }
+
+        private static SectionDefinition GenerateSectionsDefinitions_JobAttachment()
+        {
+            List<(FieldDescriptorID id, Type type, string name)> fields = new List<(FieldDescriptorID id, Type type, string name)>
+            {
+                (SlcPlan_And_Build.Sections.JobAttachment.FilePath, typeof(string), "File Path"),
+                (SlcPlan_And_Build.Sections.JobAttachment.AttachedAt, typeof(DateTime), "Attached At"),
+                (SlcPlan_And_Build.Sections.JobAttachment.AttachedBy, typeof(string), "Attached By"),
+            };
+
+            return BuildSectionDefinition(SlcPlan_And_Build.Sections.JobAttachment.Id, "Job Attachment", fields);
+        }
+
         private static SectionDefinition GenerateSectionsDefinitions_JobInformation()
         {
             List<(FieldDescriptorID id, Type type, string name)> fields = new List<(FieldDescriptorID id, Type type, string name)>
@@ -65,6 +95,7 @@
                 (SlcPlan_And_Build.Sections.JobInformation.Priority, typeof(string), "Priority"),
                 (SlcPlan_And_Build.Sections.JobInformation.SubState, typeof(string), "Sub State"),
                 (SlcPlan_And_Build.Sections.JobInformation.Locations, typeof(List<Guid>), "Locations"),
+                (SlcPlan_And_Build.Sections.JobInformation.Type, typeof(Guid), "Type"),
             };
 
             return BuildSectionDefinition(SlcPlan_And_Build.Sections.JobInformation.Id, "Job Information", fields);
@@ -75,7 +106,7 @@
             List<(FieldDescriptorID id, Type type, string name)> fields = new List<(FieldDescriptorID id, Type type, string name)>
             {
                 (SlcPlan_And_Build.Sections.JobOwnership.AssignedTo, typeof(Guid), "Assigned To"),
-                (SlcPlan_And_Build.Sections.JobOwnership.AssignmentGroup, typeof(Guid), "Job Name"),
+                (SlcPlan_And_Build.Sections.JobOwnership.AssignmentGroup, typeof(Guid), "Assignment Group"),
             };
 
             return BuildSectionDefinition(SlcPlan_And_Build.Sections.JobOwnership.Id, "Job Ownership", fields);
@@ -93,6 +124,18 @@
             };
 
             return BuildSectionDefinition(SlcPlan_And_Build.Sections.JobSettings.Id, "Job Settings", fields);
+        }
+
+        private static SectionDefinition GenerateSectionsDefinitions_JobTypeInfo()
+        {
+            List<(FieldDescriptorID id, Type type, string name)> fields = new List<(FieldDescriptorID id, Type type, string name)>
+            {
+                (SlcPlan_And_Build.Sections.JobTypeInfo.Name, typeof(string), "Name"),
+                (SlcPlan_And_Build.Sections.JobTypeInfo.Description, typeof(string), "Description"),
+                (SlcPlan_And_Build.Sections.JobTypeInfo.Icon, typeof(string), "Icon"),
+            };
+
+            return BuildSectionDefinition(SlcPlan_And_Build.Sections.JobTypeInfo.Id, "Job Type Info", fields);
         }
 
         private static SectionDefinition BuildSectionDefinition(SectionDefinitionID sectionId, string sectionName, List<(FieldDescriptorID id, Type type, string name)> fields)
@@ -119,6 +162,7 @@
             {
                 { SlcPlan_And_Build.Definitions.AppSettings, GenerateDefinitions_App_Settings() },
                 { SlcPlan_And_Build.Definitions.Job, GenerateDefinitions_Job(behaviors) },
+                { SlcPlan_And_Build.Definitions.JobType, GenerateDefinitions_JobType() },
             };
         }
 
@@ -152,6 +196,8 @@
                 new SectionDefinitionLink(SlcPlan_And_Build.Sections.JobInformation.Id),
                 new SectionDefinitionLink(SlcPlan_And_Build.Sections.JobOwnership.Id),
                 new SectionDefinitionLink(SlcPlan_And_Build.Sections.AssetsUsed.Id) { AllowMultipleSections = true },
+                new SectionDefinitionLink(SlcPlan_And_Build.Sections.JobAttachment.Id) { AllowMultipleSections = true },
+                new SectionDefinitionLink(SlcPlan_And_Build.Sections.ConnectionsOnJob.Id) { AllowMultipleSections = true },
             };
 
             foreach (var link in sectionLinks)
@@ -170,6 +216,38 @@
                     ConcatenationItems = new List<IDomInstanceConcatenationItem>
                     {
                         new FieldValueConcatenationItem(SlcPlan_And_Build.Sections.JobInformation.JobName),
+                    },
+                },
+            };
+
+            return definition;
+        }
+
+        private static DomDefinition GenerateDefinitions_JobType()
+        {
+            var builder = new DomDefinitionBuilder()
+                .WithID(SlcPlan_And_Build.Definitions.JobType.Id)
+                .WithName("Job Type");
+
+            List<SectionDefinitionLink> sectionLinks = new List<SectionDefinitionLink>
+            {
+                new SectionDefinitionLink(SlcPlan_And_Build.Sections.JobTypeInfo.Id),
+            };
+
+            foreach (var link in sectionLinks)
+            {
+                builder.AddSectionDefinitionLink(link);
+            }
+
+            var definition = builder.Build();
+
+            definition.ModuleSettingsOverrides = new ModuleSettingsOverrides()
+            {
+                NameDefinition = new DomInstanceNameDefinition()
+                {
+                    ConcatenationItems = new List<IDomInstanceConcatenationItem>
+                    {
+                        new FieldValueConcatenationItem(SlcPlan_And_Build.Sections.JobTypeInfo.Name),
                     },
                 },
             };

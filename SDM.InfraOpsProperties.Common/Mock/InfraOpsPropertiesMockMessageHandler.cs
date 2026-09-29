@@ -166,8 +166,8 @@
 
             List<SectionDefinitionLink> sectionLinks = new List<SectionDefinitionLink>
             {
-                new SectionDefinitionLink(InfraopsProperties.Sections.PropertyValue.Id),
-                new SectionDefinitionLink(InfraopsProperties.Sections.PropertyValueInfo.Id) { IsOptional = true, AllowMultipleSections = true },
+                new SectionDefinitionLink(InfraopsProperties.Sections.PropertyValueInfo.Id),
+                new SectionDefinitionLink(InfraopsProperties.Sections.PropertyValue.Id) { IsOptional = true, AllowMultipleSections = true },
             };
 
             foreach (var link in sectionLinks)

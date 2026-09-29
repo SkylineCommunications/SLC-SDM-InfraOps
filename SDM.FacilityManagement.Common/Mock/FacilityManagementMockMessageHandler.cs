@@ -45,6 +45,8 @@
                 {SlcFacility_Management.Sections.RoomOwnership.Id, GenerateSectionsDefinitions_RoomOwnership() },
                 {SlcFacility_Management.Sections.Row.Id, GenerateSectionsDefinitions_Row() },
                 {SlcFacility_Management.Sections.RowInformation.Id, GenerateSectionsDefinitions_RowInformation() },
+                {SlcFacility_Management.Sections.Site.Id, GenerateSectionsDefinitions_Site() },
+                {SlcFacility_Management.Sections.SiteInformation.Id, GenerateSectionsDefinitions_SiteInformation() },
                 {SlcFacility_Management.Sections.Zone.Id, GenerateSectionsDefinitions_Zone() },
                 {SlcFacility_Management.Sections.ZoneCapacity.Id, GenerateSectionsDefinitions_ZoneCapacity() },
                 {SlcFacility_Management.Sections.ZoneInformation.Id, GenerateSectionsDefinitions_ZoneInformation() },
@@ -96,7 +98,7 @@
                 (SlcFacility_Management.Sections.FacilityInformation.ZipCode, typeof(string), "Zip Code"),
                 (SlcFacility_Management.Sections.FacilityInformation.Country, typeof(string), "Country"),
                 (SlcFacility_Management.Sections.FacilityInformation.Latitude, typeof(double), "Latitude"),
-                (SlcFacility_Management.Sections.FacilityInformation.Latitude, typeof(double), "Longitude"),
+                (SlcFacility_Management.Sections.FacilityInformation.Longitude, typeof(double), "Longitude"),
                 (SlcFacility_Management.Sections.FacilityInformation.FacilityID, typeof(string), "Facility ID"),
             };
 
@@ -154,7 +156,7 @@
     {
         (SlcFacility_Management.Sections.RackInformation.Name, typeof(string), "Name"),
         (SlcFacility_Management.Sections.RackInformation.Model, typeof(string), "Model"),
-        (SlcFacility_Management.Sections.RackInformation.Position, typeof(long), "Position"),
+        (SlcFacility_Management.Sections.RackInformation.Position, typeof(string), "Position"),
         (SlcFacility_Management.Sections.RackInformation.Width, typeof(double), "Width"),
         (SlcFacility_Management.Sections.RackInformation.Depth, typeof(double), "Depth"),
         (SlcFacility_Management.Sections.RackInformation.Height, typeof(double), "Height"),
@@ -243,6 +245,34 @@
             return BuildSectionDefinition(SlcFacility_Management.Sections.RowInformation.Id, "Row Information", fields);
         }
 
+        private static SectionDefinition GenerateSectionsDefinitions_Site()
+        {
+            List<(FieldDescriptorID id, Type type, string name)> fields = new List<(FieldDescriptorID id, Type type, string name)>
+            {
+                (SlcFacility_Management.Sections.Site.Site_f08b42c7, typeof(Guid), "Site"),
+            };
+
+            return BuildSectionDefinition(SlcFacility_Management.Sections.Site.Id, "Site", fields);
+        }
+
+        private static SectionDefinition GenerateSectionsDefinitions_SiteInformation()
+        {
+            List<(FieldDescriptorID id, Type type, string name)> fields = new List<(FieldDescriptorID id, Type type, string name)>
+            {
+                (SlcFacility_Management.Sections.SiteInformation.Name, typeof(string), "Name"),
+                (SlcFacility_Management.Sections.SiteInformation.Description, typeof(string), "Description"),
+                (SlcFacility_Management.Sections.SiteInformation.Address, typeof(string), "Address"),
+                (SlcFacility_Management.Sections.SiteInformation.City, typeof(string), "City"),
+                (SlcFacility_Management.Sections.SiteInformation.ZipCode, typeof(string), "Zip Code"),
+                (SlcFacility_Management.Sections.SiteInformation.Country, typeof(string), "Country"),
+                (SlcFacility_Management.Sections.SiteInformation.Latitude, typeof(double), "Latitude"),
+                (SlcFacility_Management.Sections.SiteInformation.Longitude, typeof(double), "Longitude"),
+                (SlcFacility_Management.Sections.SiteInformation.SiteID, typeof(string), "Site ID"),
+            };
+
+            return BuildSectionDefinition(SlcFacility_Management.Sections.SiteInformation.Id, "Site Information", fields);
+        }
+
         private static SectionDefinition GenerateSectionsDefinitions_Zone()
         {
             List<(FieldDescriptorID id, Type type, string name)> fields = new List<(FieldDescriptorID id, Type type, string name)>
@@ -310,6 +340,7 @@
                 { SlcFacility_Management.Definitions.Rack, GenerateDefinitions_Rack(behaviors) },
                 { SlcFacility_Management.Definitions.Room, GenerateDefinitions_Room(behaviors) },
                 { SlcFacility_Management.Definitions.Row, GenerateDefinitions_Row(behaviors) },
+                { SlcFacility_Management.Definitions.Site, GenerateDefinitions_Site(behaviors) },
                 { SlcFacility_Management.Definitions.Zone, GenerateDefinitions_Zone(behaviors) },
             };
         }
@@ -359,6 +390,7 @@
             List<SectionDefinitionLink> sectionLinks = new List<SectionDefinitionLink>
             {
                 new SectionDefinitionLink(SlcFacility_Management.Sections.FacilityInformation.Id),
+                new SectionDefinitionLink(SlcFacility_Management.Sections.Site.Id),
             };
 
             foreach (var link in sectionLinks)
@@ -554,6 +586,40 @@
             return definition;
         }
 
+        private static DomDefinition GenerateDefinitions_Site(Dictionary<DomBehaviorDefinitionId, DomBehaviorDefinition> behaviors)
+        {
+            var builder = new DomDefinitionBuilder()
+                .WithID(SlcFacility_Management.Definitions.Site.Id)
+                .WithName("Site");
+
+            List<SectionDefinitionLink> sectionLinks = new List<SectionDefinitionLink>
+            {
+                new SectionDefinitionLink(SlcFacility_Management.Sections.SiteInformation.Id),
+            };
+
+            foreach (var link in sectionLinks)
+            {
+                builder.AddSectionDefinitionLink(link);
+            }
+
+            builder.WithDomBehaviorDefinition(behaviors[SlcFacility_Management.Behaviors.Site_Behaviour.Id]);
+
+            var definition = builder.Build();
+
+            definition.ModuleSettingsOverrides = new ModuleSettingsOverrides()
+            {
+                NameDefinition = new DomInstanceNameDefinition()
+                {
+                    ConcatenationItems = new List<IDomInstanceConcatenationItem>
+                    {
+                        new FieldValueConcatenationItem(SlcFacility_Management.Sections.SiteInformation.Name),
+                    },
+                },
+            };
+
+            return definition;
+        }
+
         private static DomDefinition GenerateDefinitions_Zone(Dictionary<DomBehaviorDefinitionId, DomBehaviorDefinition> behaviors)
         {
             var builder = new DomDefinitionBuilder()
@@ -601,6 +667,7 @@
                 { SlcFacility_Management.Behaviors.Rack_Behaviour.Id, GenerateBehaviorDefinitions_Rack_Behaviour() },
                 { SlcFacility_Management.Behaviors.Room_Behaviour.Id, GenerateBehaviorDefinitions_Room_Behaviour() },
                 { SlcFacility_Management.Behaviors.Row_Behaviour.Id, GenerateBehaviorDefinitions_Row_Behaviour() },
+                { SlcFacility_Management.Behaviors.Site_Behaviour.Id, GenerateBehaviorDefinitions_Site_Behaviour() },
                 { SlcFacility_Management.Behaviors.Zone_Behaviour.Id, GenerateBehaviorDefinitions_Zone_Behaviour() },
             };
         }
@@ -641,8 +708,8 @@
 
             List<DomStatusTransition> statusTransitions = new List<DomStatusTransition>
             {
-                new DomStatusTransition(SlcFacility_Management.Behaviors.Facility_Behaviour.Transitions.Draft_Active, SlcFacility_Management.Behaviors.Facility_Behaviour.Statuses.Draft, SlcFacility_Management.Behaviors.Desk_Behaviour.Statuses.Active),
-                new DomStatusTransition(SlcFacility_Management.Behaviors.Facility_Behaviour.Transitions.Active_Deprecated, SlcFacility_Management.Behaviors.Facility_Behaviour.Statuses.Active, SlcFacility_Management.Behaviors.Desk_Behaviour.Statuses.Deprecated),
+                new DomStatusTransition(SlcFacility_Management.Behaviors.Facility_Behaviour.Transitions.Draft_Active, SlcFacility_Management.Behaviors.Facility_Behaviour.Statuses.Draft, SlcFacility_Management.Behaviors.Facility_Behaviour.Statuses.Active),
+                new DomStatusTransition(SlcFacility_Management.Behaviors.Facility_Behaviour.Transitions.Active_Deprecated, SlcFacility_Management.Behaviors.Facility_Behaviour.Statuses.Active, SlcFacility_Management.Behaviors.Facility_Behaviour.Statuses.Deprecated),
             };
 
             DomBehaviorDefinitionBuilder builder = new DomBehaviorDefinitionBuilder()
@@ -666,8 +733,8 @@
 
             List<DomStatusTransition> statusTransitions = new List<DomStatusTransition>
             {
-                new DomStatusTransition(SlcFacility_Management.Behaviors.Floor_Behaviour.Transitions.Draft_Active, SlcFacility_Management.Behaviors.Floor_Behaviour.Statuses.Draft, SlcFacility_Management.Behaviors.Desk_Behaviour.Statuses.Active),
-                new DomStatusTransition(SlcFacility_Management.Behaviors.Floor_Behaviour.Transitions.Active_Deprecated, SlcFacility_Management.Behaviors.Floor_Behaviour.Statuses.Active, SlcFacility_Management.Behaviors.Desk_Behaviour.Statuses.Deprecated),
+                new DomStatusTransition(SlcFacility_Management.Behaviors.Floor_Behaviour.Transitions.Draft_Active, SlcFacility_Management.Behaviors.Floor_Behaviour.Statuses.Draft, SlcFacility_Management.Behaviors.Floor_Behaviour.Statuses.Active),
+                new DomStatusTransition(SlcFacility_Management.Behaviors.Floor_Behaviour.Transitions.Active_Deprecated, SlcFacility_Management.Behaviors.Floor_Behaviour.Statuses.Active, SlcFacility_Management.Behaviors.Floor_Behaviour.Statuses.Deprecated),
             };
 
             DomBehaviorDefinitionBuilder builder = new DomBehaviorDefinitionBuilder()
@@ -691,8 +758,8 @@
 
             List<DomStatusTransition> statusTransitions = new List<DomStatusTransition>
             {
-                new DomStatusTransition(SlcFacility_Management.Behaviors.Rack_Behaviour.Transitions.Draft_Active, SlcFacility_Management.Behaviors.Rack_Behaviour.Statuses.Draft, SlcFacility_Management.Behaviors.Desk_Behaviour.Statuses.Active),
-                new DomStatusTransition(SlcFacility_Management.Behaviors.Rack_Behaviour.Transitions.Active_Deprecated, SlcFacility_Management.Behaviors.Rack_Behaviour.Statuses.Active, SlcFacility_Management.Behaviors.Desk_Behaviour.Statuses.Deprecated),
+                new DomStatusTransition(SlcFacility_Management.Behaviors.Rack_Behaviour.Transitions.Draft_Active, SlcFacility_Management.Behaviors.Rack_Behaviour.Statuses.Draft, SlcFacility_Management.Behaviors.Rack_Behaviour.Statuses.Active),
+                new DomStatusTransition(SlcFacility_Management.Behaviors.Rack_Behaviour.Transitions.Active_Deprecated, SlcFacility_Management.Behaviors.Rack_Behaviour.Statuses.Active, SlcFacility_Management.Behaviors.Rack_Behaviour.Statuses.Deprecated),
             };
 
             DomBehaviorDefinitionBuilder builder = new DomBehaviorDefinitionBuilder()
@@ -716,8 +783,8 @@
 
             List<DomStatusTransition> statusTransitions = new List<DomStatusTransition>
             {
-                new DomStatusTransition(SlcFacility_Management.Behaviors.Room_Behaviour.Transitions.Draft_Active, SlcFacility_Management.Behaviors.Room_Behaviour.Statuses.Draft, SlcFacility_Management.Behaviors.Desk_Behaviour.Statuses.Active),
-                new DomStatusTransition(SlcFacility_Management.Behaviors.Room_Behaviour.Transitions.Active_Deprecated, SlcFacility_Management.Behaviors.Room_Behaviour.Statuses.Active, SlcFacility_Management.Behaviors.Desk_Behaviour.Statuses.Deprecated),
+                new DomStatusTransition(SlcFacility_Management.Behaviors.Room_Behaviour.Transitions.Draft_Active, SlcFacility_Management.Behaviors.Room_Behaviour.Statuses.Draft, SlcFacility_Management.Behaviors.Room_Behaviour.Statuses.Active),
+                new DomStatusTransition(SlcFacility_Management.Behaviors.Room_Behaviour.Transitions.Active_Deprecated, SlcFacility_Management.Behaviors.Room_Behaviour.Statuses.Active, SlcFacility_Management.Behaviors.Room_Behaviour.Statuses.Deprecated),
             };
 
             DomBehaviorDefinitionBuilder builder = new DomBehaviorDefinitionBuilder()
@@ -741,14 +808,39 @@
 
             List<DomStatusTransition> statusTransitions = new List<DomStatusTransition>
             {
-                new DomStatusTransition(SlcFacility_Management.Behaviors.Row_Behaviour.Transitions.Draft_Active, SlcFacility_Management.Behaviors.Row_Behaviour.Statuses.Draft, SlcFacility_Management.Behaviors.Desk_Behaviour.Statuses.Active),
-                new DomStatusTransition(SlcFacility_Management.Behaviors.Row_Behaviour.Transitions.Active_Deprecated, SlcFacility_Management.Behaviors.Row_Behaviour.Statuses.Active, SlcFacility_Management.Behaviors.Desk_Behaviour.Statuses.Deprecated),
+                new DomStatusTransition(SlcFacility_Management.Behaviors.Row_Behaviour.Transitions.Draft_Active, SlcFacility_Management.Behaviors.Row_Behaviour.Statuses.Draft, SlcFacility_Management.Behaviors.Row_Behaviour.Statuses.Active),
+                new DomStatusTransition(SlcFacility_Management.Behaviors.Row_Behaviour.Transitions.Active_Deprecated, SlcFacility_Management.Behaviors.Row_Behaviour.Statuses.Active, SlcFacility_Management.Behaviors.Row_Behaviour.Statuses.Deprecated),
             };
 
             DomBehaviorDefinitionBuilder builder = new DomBehaviorDefinitionBuilder()
                 .WithID(SlcFacility_Management.Behaviors.Row_Behaviour.Id)
                 .WithName("Row_Behaviour")
                 .WithInitialStatusId(SlcFacility_Management.Behaviors.Row_Behaviour.Statuses.Draft)
+                .WithStatuses(status)
+                .WithStatusTransitions(statusTransitions);
+
+            return builder.Build();
+        }
+
+        private static DomBehaviorDefinition GenerateBehaviorDefinitions_Site_Behaviour()
+        {
+            List<DomStatus> status = new List<DomStatus>
+            {
+                new DomStatus(SlcFacility_Management.Behaviors.Site_Behaviour.Statuses.Draft, "Draft"),
+                new DomStatus(SlcFacility_Management.Behaviors.Site_Behaviour.Statuses.Active, "Active"),
+                new DomStatus(SlcFacility_Management.Behaviors.Site_Behaviour.Statuses.Deprecated, "Deprecated"),
+            };
+
+            List<DomStatusTransition> statusTransitions = new List<DomStatusTransition>
+            {
+                new DomStatusTransition(SlcFacility_Management.Behaviors.Site_Behaviour.Transitions.Draft_Active, SlcFacility_Management.Behaviors.Site_Behaviour.Statuses.Draft, SlcFacility_Management.Behaviors.Site_Behaviour.Statuses.Active),
+                new DomStatusTransition(SlcFacility_Management.Behaviors.Site_Behaviour.Transitions.Active_Deprecated, SlcFacility_Management.Behaviors.Site_Behaviour.Statuses.Active, SlcFacility_Management.Behaviors.Site_Behaviour.Statuses.Deprecated),
+            };
+
+            DomBehaviorDefinitionBuilder builder = new DomBehaviorDefinitionBuilder()
+                .WithID(SlcFacility_Management.Behaviors.Site_Behaviour.Id)
+                .WithName("Site_Behaviour")
+                .WithInitialStatusId(SlcFacility_Management.Behaviors.Site_Behaviour.Statuses.Draft)
                 .WithStatuses(status)
                 .WithStatusTransitions(statusTransitions);
 
@@ -766,8 +858,8 @@
 
             List<DomStatusTransition> statusTransitions = new List<DomStatusTransition>
             {
-                new DomStatusTransition(SlcFacility_Management.Behaviors.Zone_Behaviour.Transitions.Draft_Active, SlcFacility_Management.Behaviors.Zone_Behaviour.Statuses.Draft, SlcFacility_Management.Behaviors.Desk_Behaviour.Statuses.Active),
-                new DomStatusTransition(SlcFacility_Management.Behaviors.Zone_Behaviour.Transitions.Active_Deprecated, SlcFacility_Management.Behaviors.Zone_Behaviour.Statuses.Active, SlcFacility_Management.Behaviors.Desk_Behaviour.Statuses.Deprecated),
+                new DomStatusTransition(SlcFacility_Management.Behaviors.Zone_Behaviour.Transitions.Draft_Active, SlcFacility_Management.Behaviors.Zone_Behaviour.Statuses.Draft, SlcFacility_Management.Behaviors.Zone_Behaviour.Statuses.Active),
+                new DomStatusTransition(SlcFacility_Management.Behaviors.Zone_Behaviour.Transitions.Active_Deprecated, SlcFacility_Management.Behaviors.Zone_Behaviour.Statuses.Active, SlcFacility_Management.Behaviors.Zone_Behaviour.Statuses.Deprecated),
             };
 
             DomBehaviorDefinitionBuilder builder = new DomBehaviorDefinitionBuilder()

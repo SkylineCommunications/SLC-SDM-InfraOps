@@ -42,6 +42,7 @@
                 {SlcAsset_Management.Sections.AssetLocationDestination.Id, GenerateSectionsDefinitions_AssetLocationDestination() },
                 {SlcAsset_Management.Sections.AssetNetworkDetails.Id, GenerateSectionsDefinitions_AssetNetworkDetails() },
                 {SlcAsset_Management.Sections.AssetOwnership.Id, GenerateSectionsDefinitions_AssetOwnership() },
+                {SlcAsset_Management.Sections.Attachment.Id, GenerateSectionsDefinitions_Attachment() },
                 {SlcAsset_Management.Sections.CableCompatibility.Id, GenerateSectionsDefinitions_CableCompatibility() },
                 {SlcAsset_Management.Sections.CableInformation.Id, GenerateSectionsDefinitions_CableInformation() },
                 {SlcAsset_Management.Sections.CableTypeInformation.Id, GenerateSectionsDefinitions_CableTypeInformation() },
@@ -58,6 +59,7 @@
                 {SlcAsset_Management.Sections.PortTypeInformation.Id, GenerateSectionsDefinitions_PortTypeInformation() },
                 {SlcAsset_Management.Sections.PowerPortInfo.Id, GenerateSectionsDefinitions_PowerPortInfo() },
                 {SlcAsset_Management.Sections.PrimaryPortRelation.Id, GenerateSectionsDefinitions_PrimaryPortRelation() },
+                {SlcAsset_Management.Sections.ProtocolLink.Id, GenerateSectionsDefinitions_ProtocolLink() },
                 {SlcAsset_Management.Sections.ReservationInfo.Id, GenerateSectionsDefinitions_ReservationInfo() },
                 {SlcAsset_Management.Sections.ReservationRack.Id, GenerateSectionsDefinitions_ReservationRack() },
                 {SlcAsset_Management.Sections.ReservedPositions.Id, GenerateSectionsDefinitions_ReservedPositions() },
@@ -88,6 +90,7 @@
                 (SlcAsset_Management.Sections.AppSettings.EnableConnectionHistory, typeof(bool), "Enable Connection History"),
                 (SlcAsset_Management.Sections.AppSettings.HistoryTTL, typeof(TimeSpan), "History TTL"),
                 (SlcAsset_Management.Sections.AppSettings.HistoryLimit, typeof(long), "History Limit"),
+                (SlcAsset_Management.Sections.AppSettings.EnableResourceLink, typeof(bool), "Enable Resource Link"),
             };
 
             return BuildSectionDefinition(SlcAsset_Management.Sections.AppSettings.Id, "App Settings", fields);
@@ -122,6 +125,7 @@
                 (SlcAsset_Management.Sections.AssetClassInfo.BackImage, typeof(string), "Back Image"),
                 (SlcAsset_Management.Sections.AssetClassInfo.PowerSupply, typeof(string), "Power Supply"),
                 (SlcAsset_Management.Sections.AssetClassInfo.Citype, typeof(string), "CIType"),
+                (SlcAsset_Management.Sections.AssetClassInfo.Isbookable, typeof(bool), "IsBookable"),
             };
 
             return BuildSectionDefinition(SlcAsset_Management.Sections.AssetClassInfo.Id, "Asset Class Info", fields);
@@ -133,7 +137,7 @@
             {
                 (SlcAsset_Management.Sections.AssetClassLifecycleInformation.EOLDate, typeof(DateTime), "EOL Date"),
                 (SlcAsset_Management.Sections.AssetClassLifecycleInformation.EOSDate, typeof(DateTime), "EOS Date"),
-                (SlcAsset_Management.Sections.AssetClassLifecycleInformation.NominalLifetime, typeof(double), "Nominal Lifetime"),
+                (SlcAsset_Management.Sections.AssetClassLifecycleInformation.NominalLifetime, typeof(TimeSpan), "Nominal Lifetime"),
             };
 
             return BuildSectionDefinition(SlcAsset_Management.Sections.AssetClassLifecycleInformation.Id, "Asset Class Lifecycle Information", fields);
@@ -165,7 +169,7 @@
                 (SlcAsset_Management.Sections.AssetInformation.FWOS, typeof(string), "FW/OS"),
                 (SlcAsset_Management.Sections.AssetInformation.AssetID, typeof(string), "Asset ID"),
                 (SlcAsset_Management.Sections.AssetInformation.HardwareVersion, typeof(string), "Hardware Version"),
-                (SlcAsset_Management.Sections.AssetInformation.OperationalFlags, typeof(int), "Operational Flags"),
+                (SlcAsset_Management.Sections.AssetInformation.OperationalFlags, typeof(List<int>), "Operational Flags"),
             };
 
             return BuildSectionDefinition(SlcAsset_Management.Sections.AssetInformation.Id, "Asset Information", fields);
@@ -247,6 +251,18 @@
             return BuildSectionDefinition(SlcAsset_Management.Sections.AssetOwnership.Id, "Asset Ownership", fields);
         }
 
+        private static SectionDefinition GenerateSectionsDefinitions_Attachment()
+        {
+            List<(FieldDescriptorID id, Type type, string name)> fields = new List<(FieldDescriptorID id, Type type, string name)>
+            {
+                (SlcAsset_Management.Sections.Attachment.Path, typeof(string), "Path"),
+                (SlcAsset_Management.Sections.Attachment.AttachedAt, typeof(DateTime), "Attached At"),
+                (SlcAsset_Management.Sections.Attachment.AttachedBy, typeof(string), "Attached By"),
+            };
+
+            return BuildSectionDefinition(SlcAsset_Management.Sections.Attachment.Id, "Attachment", fields);
+        }
+
         private static SectionDefinition GenerateSectionsDefinitions_CableCompatibility()
         {
             List<(FieldDescriptorID id, Type type, string name)> fields = new List<(FieldDescriptorID id, Type type, string name)>
@@ -308,7 +324,7 @@
                 (SlcAsset_Management.Sections.DataPortInfo.PortNumber, typeof(long), "Port Number"),
                 (SlcAsset_Management.Sections.DataPortInfo.PortName, typeof(string), "Port Name"),
                 (SlcAsset_Management.Sections.DataPortInfo.PortExposure, typeof(string), "Port Exposure"),
-                (SlcAsset_Management.Sections.DataPortInfo.OutputType, typeof(long), "Output Type"),
+                (SlcAsset_Management.Sections.DataPortInfo.OutputType, typeof(int), "Output Type"),
                 (SlcAsset_Management.Sections.DataPortInfo.PortType, typeof(Guid), "Port Type"),
                 (SlcAsset_Management.Sections.DataPortInfo.Label, typeof(string), "Label"),
             };
@@ -435,6 +451,16 @@
             return BuildSectionDefinition(SlcAsset_Management.Sections.PrimaryPortRelation.Id, "Primary Port Relation", fields);
         }
 
+        private static SectionDefinition GenerateSectionsDefinitions_ProtocolLink()
+        {
+            List<(FieldDescriptorID id, Type type, string name)> fields = new List<(FieldDescriptorID id, Type type, string name)>
+            {
+                (SlcAsset_Management.Sections.ProtocolLink.Protocol, typeof(string), "Protocol"),
+            };
+
+            return BuildSectionDefinition(SlcAsset_Management.Sections.ProtocolLink.Id, "Protocol Link", fields);
+        }
+
         private static SectionDefinition GenerateSectionsDefinitions_ReservationInfo()
         {
             List<(FieldDescriptorID id, Type type, string name)> fields = new List<(FieldDescriptorID id, Type type, string name)>
@@ -541,6 +567,7 @@
                 new SectionDefinitionLink(SlcAsset_Management.Sections.Holders.Id) { AllowMultipleSections = true },
                 new SectionDefinitionLink(SlcAsset_Management.Sections.ElementLink.Id) { AllowMultipleSections = true },
                 new SectionDefinitionLink(SlcAsset_Management.Sections.AssetNetworkDetails.Id),
+                new SectionDefinitionLink(SlcAsset_Management.Sections.Attachment.Id) { AllowMultipleSections = true },
             };
 
             foreach (var link in sectionLinks)
@@ -579,6 +606,8 @@
                 new SectionDefinitionLink(SlcAsset_Management.Sections.Holders.Id){ AllowMultipleSections = true },
                 new SectionDefinitionLink(SlcAsset_Management.Sections.DataPortInfo.Id){ IsOptional = true, AllowMultipleSections = true },
                 new SectionDefinitionLink(SlcAsset_Management.Sections.PowerPortInfo.Id){ IsOptional = true, AllowMultipleSections = true },
+                new SectionDefinitionLink(SlcAsset_Management.Sections.ProtocolLink.Id),
+                new SectionDefinitionLink(SlcAsset_Management.Sections.Attachment.Id){ AllowMultipleSections = true },
             };
 
             foreach (var link in sectionLinks)
