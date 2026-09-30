@@ -54,10 +54,6 @@
     <ProjectReference Include="..\SDM.InfraOps.Core\SDM.InfraOps.Core.csproj" />
     <ProjectReference Include="..\SDM.FacilityManagement.Common\SDM.FacilityManagement.Common.csproj" />
   </ItemGroup>
-  
-  <ItemGroup>
-    <Folder Include="Validation\NewFolder\" />
-  </ItemGroup>
 
   <!-- Can be used to set the location of your local nuget store to copy to -->
   <Target Name="CopyNuGetPackage" AfterTargets="Pack" Condition="'$(NuGetStorePath)' != '' and '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
