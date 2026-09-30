@@ -12,6 +12,13 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
 
     public class PortTypeValidator : ValidatorBase<PortType>
     {
+        public enum PortTypeValidationField
+        {
+            CableTypeFks,
+            AssetPorts,
+            AssetClassPorts,
+        }
+
         private readonly SdmEntityLoader _entityLoader;
 
         public PortTypeValidator(SdmEntityLoader entityLoader)
@@ -48,7 +55,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
                 {
                     if (reference.HasValue() && !existingCableTypeIds.Contains(reference.Identifier))
                     {
-                        results[i].AddFailReason("PortType.CableFKs.CableTypeFks", "CableTypeFks", $"Referenced Cable Type '{reference.Identifier}' does not exist.");
+                        results[i].AddFailReason(PortTypeValidationField.CableTypeFks, $"Referenced Cable Type '{reference.Identifier}' does not exist.");
                     }
                 }
             }
@@ -109,16 +116,14 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
                 if (portTypeIdsUsedByAssetPorts.Contains(portTypes[i].Identifier))
                 {
                     results[i].AddFailReason(
-                        "PortType.AssetPorts",
-                        "AssetPorts",
+                        PortTypeValidationField.AssetPorts,
                         "There are still asset with ports using this port type. Please remove them first.");
                 }
 
                 if (portTypeIdsUsedByAssetClassPorts.Contains(portTypes[i].Identifier))
                 {
                     results[i].AddFailReason(
-                        "PortType.AssetClassPorts",
-                        "AssetClassPorts",
+                        PortTypeValidationField.AssetClassPorts,
                         "There are still asset classes with ports using this port type. Please remove them first.");
                 }
             }

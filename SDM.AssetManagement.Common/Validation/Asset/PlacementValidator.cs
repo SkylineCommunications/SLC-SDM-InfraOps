@@ -78,6 +78,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
         /// <summary>
         /// Builds placement context - loads all affected parent assets and racks once.
         /// </summary>
+        //TODO: consider reviewing the bulk operations done on load. They are not fully bulk reads. And we are missing the fetch of reservations.
         private PlacementValidationContext BuildPlacementContext(List<Asset> assets)
         {
             var context = new PlacementValidationContext

@@ -394,8 +394,8 @@
                     }
                 }
 
-                ValidateDataPortTypeReferences(assetClass.DataPorts, "AssetClass.DataPorts.Type", "DataPorts", result);
-                ValidatePowerPortTypeReferences(assetClass.PowerPorts, "AssetClass.PowerPorts.PortType", "PowerPorts", result);
+                ValidateDataPortTypeReferences(assetClass.DataPorts, result);
+                ValidatePowerPortTypeReferences(assetClass.PowerPorts,  result);
 
                 return result;
             }
@@ -443,11 +443,12 @@
 
             private static void ValidatePortTypeReferences(AssetClass assetClass, ValidationResult result, HashSet<string> existingPortTypeIds)
             {
+                
                 foreach (var port in assetClass.DataPorts ?? new List<DataPortInfo>())
                 {
                     if (port?.PortType != null && port.PortType.HasValue() && !existingPortTypeIds.Contains(port.PortType.Identifier))
                     {
-                        result.AddFailReason("AssetClass.DataPorts.Type", "DataPorts", $"Referenced Port Type '{port.PortType.Identifier}' does not exist.");
+                        result.AddFailReason(AssetClassValidationHandler.AssetClassValidationField.DataPortType, "DataPorts", $"Referenced Port Type '{port.PortType.Identifier}' does not exist.");
                     }
                 }
 
@@ -455,12 +456,12 @@
                 {
                     if (port?.PortType != null && port.PortType.HasValue() && !existingPortTypeIds.Contains(port.PortType.Identifier))
                     {
-                        result.AddFailReason("AssetClass.PowerPorts.PortType", "PowerPorts", $"Referenced Port Type '{port.PortType.Identifier}' does not exist.");
+                        result.AddFailReason(AssetClassValidationHandler.AssetClassValidationField.PowerPortType, "PowerPorts", $"Referenced Port Type '{port.PortType.Identifier}' does not exist.");
                     }
                 }
             }
 
-            private void ValidateDataPortTypeReferences(IEnumerable<DataPortInfo> ports, string fieldId, string fieldName, ValidationResult result)
+            private void ValidateDataPortTypeReferences(IEnumerable<DataPortInfo> ports, ValidationResult result)
             {
                 foreach (var port in ports ?? Enumerable.Empty<DataPortInfo>())
                 {
@@ -472,12 +473,12 @@
                     var reference = port.PortType;
                     if (!_entityLoader.GetPortTypesByDomIds(new List<string> { reference.Identifier }).Any())
                     {
-                        result.AddFailReason(fieldId, fieldName, $"Referenced Port Type '{reference.Identifier}' does not exist.");
+                        result.AddFailReason(AssetClassValidationHandler.AssetClassValidationField.DataPortType, "DataPorts", $"Referenced Port Type '{reference.Identifier}' does not exist.");
                     }
                 }
             }
 
-            private void ValidatePowerPortTypeReferences(IEnumerable<PowerPortInfo> ports, string fieldId, string fieldName, ValidationResult result)
+            private void ValidatePowerPortTypeReferences(IEnumerable<PowerPortInfo> ports, ValidationResult result)
             {
                 foreach (var port in ports ?? Enumerable.Empty<PowerPortInfo>())
                 {
@@ -489,7 +490,7 @@
                     var reference = port.PortType;
                     if (!_entityLoader.GetPortTypesByDomIds(new List<string> { reference.Identifier }).Any())
                     {
-                        result.AddFailReason(fieldId, fieldName, $"Referenced Port Type '{reference.Identifier}' does not exist.");
+                        result.AddFailReason(AssetClassValidationHandler.AssetClassValidationField.PowerPortType, "PowerPorts", $"Referenced Port Type '{reference.Identifier}' does not exist.");
                     }
                 }
             }

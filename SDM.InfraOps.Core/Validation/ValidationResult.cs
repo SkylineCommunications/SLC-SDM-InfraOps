@@ -79,6 +79,19 @@
             _displayKey[field] = displayFieldName;
         }
 
+        public void AddFailReason<T>(T field, string displayFieldName, string reason) where T : Enum
+        {
+            _isValid = false;
+            var key = GetFieldToId(field);
+            if (_failReasons.ContainsKey(key))
+            {
+                return; // ignore - field already has an error
+            }
+
+            _failReasons[key] = reason;
+            _displayKey[key] = displayFieldName;
+        }
+
         /// <summary>
         /// Adds a warning to the validation result.
         /// Warnings don't affect IsValid, but provide notices to the user.

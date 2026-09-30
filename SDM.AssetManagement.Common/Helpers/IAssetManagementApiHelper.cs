@@ -1,5 +1,6 @@
 namespace Skyline.DataMiner.SDM.AssetManagement.Helpers
 {
+    using Skyline.DataMiner.SDM.AssetManagement.Common.Validation.Reservations;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
 
     using Skyline.DataMiner.SDM.AssetManagement.Validation;

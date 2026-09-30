@@ -35,8 +35,12 @@
             BackImage,
 
             DataPortNumber,
+            DataPortName,
+            DataPortType,
 
             PowerPortNumber,
+            PowerPortName,
+            PowerPortType,
 
             HolderSlotNumber,
         }
@@ -253,6 +257,9 @@
             result.AddFailuresFrom(PortNumberValidator.ValidateCollection(
                 assetClass.DataPorts, p => p.PortNumber, AssetClassValidationField.DataPortNumber, "Data Port"));
 
+            result.AddFailuresFrom(ValidatePortNameAndType(
+                assetClass.DataPorts, AssetClassValidationField.DataPortName, AssetClassValidationField.DataPortType, "Data Port"));
+
             return result;
         }
 
@@ -278,10 +285,40 @@
             result.AddFailuresFrom(PortNumberValidator.ValidateCollection(
                 assetClass.PowerPorts, p => p.PortNumber, AssetClassValidationField.PowerPortNumber, "Power Port"));
 
+            result.AddFailuresFrom(ValidatePortNameAndType(
+                assetClass.PowerPorts, AssetClassValidationField.PowerPortName, AssetClassValidationField.PowerPortType, "Power Port"));
+
             return result;
         }
 
         #endregion
+
+        /// <summary>
+        /// Validates that every port in <paramref name="ports"/> has a non-empty Name and a selected Port Type.
+        /// </summary>
+        private static ValidationResult ValidatePortNameAndType(
+            IEnumerable<IPortInfo> ports,
+            AssetClassValidationField nameField,
+            AssetClassValidationField typeField,
+            string portTypeName)
+        {
+            var result = new ValidationResult();
+
+            foreach (var port in ports)
+            {
+                if (string.IsNullOrWhiteSpace(port?.Name))
+                {
+                    result.AddFailReason(nameField, $"{portTypeName} name must have a value.");
+                }
+
+                if (port?.PortType == null || !port.PortType.HasValue())
+                {
+                    result.AddFailReason(typeField, $"{portTypeName} type must be selected.");
+                }
+            }
+
+            return result;
+        }
 
         #region Holders
 
