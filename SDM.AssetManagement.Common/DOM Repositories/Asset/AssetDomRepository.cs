@@ -1,48 +1,15 @@
 namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using SharedCommonLibrary.AssetManagement.State_Management;
     using SharedMappers.DomIds;
 
     using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-    using Skyline.DataMiner.Net.Helper;
-    using Skyline.DataMiner.Net.Messages.SLDataGateway;
-    using Skyline.DataMiner.SDM.AssetManagement.Common.Exceptions;
-    using Skyline.DataMiner.SDM.AssetManagement.Common.Validation;
-    using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Extensions;
+    using Skyline.DataMiner.SDM.AssetManagement.Common.Extensions;
 
-    /// <summary>
-    /// Defines methods for updating asset fields and managing asset state transitions in a repository. Extends bulk
-    /// operations for assets.
-    /// </summary>
-    /// <remarks>This interface provides operations to update asset properties and change their workflow
-    /// state, supporting scenarios where field updates and state transitions must occur in a specific order.
-    /// Implementations should ensure that combined operations are performed atomically to maintain data consistency.
-    /// The interface is intended for use in asset management systems where assets have lifecycle states and validation
-    /// rules that may depend on the current state.</remarks>
     [AllowSdmMiddleware]
     public interface IAssetRepository : IBulkRepository<Asset>
     {
-        /// <summary>
-        /// Reads the object matching the given identifier. Recommended to use <see cref="ReadByIdentifiers(IEnumerable{string})"/> when retrieving multiple values.
-        /// </summary>
-        /// <param name="id">The identifier to match.</param>
-        /// <returns>The matching object, or <see langword="null"/> if none exists.</returns>
-        Asset ReadByIdentifier(string id);
-
-        /// <summary>
-        /// Reads objects matching any supplied identifiers in one combined retrieval.
-        /// </summary>
-        /// <param name="identifiers">The identifiers to match.</param>
-        /// <returns>The matching objects, or <see langword="null"/> when no values are supplied.</returns>
-        IEnumerable<Asset> ReadByIdentifiers(IEnumerable<string> identifiers);
-
-        bool IsTransitionAllowed(Asset asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum newState);
-
-        List<SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum> GetTransitionPathStates(Asset asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum newState);
-
         /// <summary>
         /// Transitions asset to a new state.
         /// Use this AFTER updating fields if the new state has different validation rules.
@@ -50,74 +17,10 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         /// <param name="asset">The asset to transition.</param>
         /// <param name="newState">The new state to transition the asset to.</param>
         Asset TransitionTo(Asset asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum newState);
-
-        /// <summary>
-        /// Updates fields and transitions state in a single atomic operation.
-        /// Order: Fields are updated first, then state transition occurs.
-        /// Use when you need to prepare the asset for the new state.
-        /// </summary>
-        /// <param name="asset">The asset to update and transition.</param>
-        /// <param name="newState">The new state to transition the asset to.</param>
-        Asset UpdateAndTransitionTo(Asset asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum newState);
-
-        /// <summary>
-        /// Transitions state first, then updates fields.
-        /// Order: State transition occurs, then fields are updated.
-        /// Use when the new state enables certain field changes.
-        /// 
-        /// Example: Transitioning to Disposed before clearing Location.
-        /// </summary>
-        /// <param name="asset">The asset to transition and update.</param>
-        /// <param name="newState">The new state to transition the asset to.</param>
-        Asset TransitionAndUpdate(Asset asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum newState);
     }
 
     internal partial class AssetDomRepository : IAssetRepository
     {
-        public Asset ReadByIdentifier(string id)
-        {
-            if (string.IsNullOrWhiteSpace(id))
-            {
-                return null;
-            }
-
-            return ReadByIdentifiers(new[] { id }).SingleOrDefault();
-        }
-
-        public IEnumerable<Asset> ReadByIdentifiers(IEnumerable<string> identifiers)
-        {
-            if (identifiers.IsNullOrEmpty())
-            {
-                return Array.Empty<Asset>();
-            }
-
-            return RepositoryQueryExtensions.ReadByBigOrFilter(this, identifiers, value => AssetExposers.Identifier.Equal(value));
-        }
-
-        public bool IsTransitionAllowed(Asset asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum newState)
-        {
-            if (asset == null)
-            {
-                throw new ArgumentNullException(nameof(asset));
-            }
-            return StateMachine.IsTransitionAllowed(asset.State, newState);
-        }
-
-        public List<SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum> GetTransitionPathStates(Asset asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum newState)
-        {
-            if (asset == null)
-            {
-                throw new ArgumentNullException(nameof(asset));
-            }
-
-            if (!StateMachine.IsTransitionAllowed(asset.State, newState))
-            {
-                throw new InvalidOperationException($"State transition from {asset.State} to {newState} is not allowed.");
-            }
-
-            return StateMachine.GetTransitionDestinationStates(asset.State, newState);
-        }
-
         public Asset TransitionTo(Asset asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum newState)
         {
             if (asset == null) throw new ArgumentNullException(nameof(asset));
@@ -127,55 +30,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 throw new InvalidOperationException($"State transition from {asset.State} to {newState} is not allowed.");
             }
 
-            ValidateTransitionPath(asset, newState);
+            asset.ValidateTransitionPath(newState);
 
             return ExecuteStateTransition(asset, newState);
         }
 
-        public Asset UpdateAndTransitionTo(Asset asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum newState)
-        {
-            if (asset == null) throw new ArgumentNullException(nameof(asset));
-
-            if (!StateMachine.IsTransitionAllowed(asset.State, newState))
-            {
-                throw new InvalidOperationException($"State transition from {asset.State} to {newState} is not allowed.");
-            }
-
-            ValidateTransitionPath(asset, newState);
-            var updated = Update(asset);
-
-            return ExecuteStateTransition(updated, newState);
-        }
-
-        /// <summary>
-        /// Transitions state first, then updates fields.
-        /// Order: State transition occurs, then fields are updated.
-        /// Use when the new state enables certain field changes.
-        /// 
-        /// Example: Transitioning to Disposed before clearing Location.
-        /// </summary>
-        public Asset TransitionAndUpdate(Asset asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum newState)
-        {
-            if (asset == null) throw new ArgumentNullException(nameof(asset));
-
-            if (!StateMachine.IsTransitionAllowed(asset.State, newState))
-            {
-                throw new InvalidOperationException($"State transition from {asset.State} to {newState} is not allowed.");
-            }
-
-            ValidateTransitionPath(asset, newState);
-
-            var transitioned = ExecuteStateTransition(asset, newState);
-            asset.State = transitioned.State;
-
-            //TODO: apply changes to transision Asset and proceed. This is done to preserve external changes.
-            //transitioned.ApplyChanges(asset.GetChanges());
-            return Update(asset);
-        }
-
-        private Asset ExecuteStateTransition(
-            Asset asset,
-            SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum toState)
+        private Asset ExecuteStateTransition(Asset asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum toState)
         {
             if (asset == null) throw new ArgumentNullException(nameof(asset));
 
@@ -211,17 +71,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 throw new InvalidOperationException(
                     $"Failed to transition asset '{asset.Identifier}' from {asset.State} to {toState}: {ex.Message}",
                     ex);
-            }
-        }
-
-        private static void ValidateTransitionPath(
-            Asset asset,
-            SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum toState)
-        {
-            var validationResult = AssetTransitionValidator.ValidatePath(asset, toState);
-            if (!validationResult.IsValid)
-            {
-                throw new AssetTransitionValidationException(validationResult);
             }
         }
     }

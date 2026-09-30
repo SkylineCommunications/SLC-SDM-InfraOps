@@ -344,6 +344,7 @@ namespace SDM.AssetManagement.Tests.Setup
                 {
                     Name = $"Port {i}",
                     PortNumber = i,
+                    PortType = new SdmObjectReference<PortType>(Guid.NewGuid().ToString()),
                     OutputType = (SlcAsset_Management.Enums.Outputtype)(i % 3),
                     PortExposure = (SlcAsset_Management.Enums.PortExposureEnum)(i % 2),
                     Label = $"ETH{i}",
@@ -368,6 +369,7 @@ namespace SDM.AssetManagement.Tests.Setup
                 {
                     Name = $"PWR {i}",
                     PortNumber = i,
+                    PortType = new SdmObjectReference<PortType>(Guid.NewGuid().ToString()),
                     PortExposure = (SlcAsset_Management.Enums.PortExposureEnum)(i % 2),
                     OutputType = (SlcAsset_Management.Enums.Outputtype)(i % 3),
                     Label = $"PWR-{i}",
