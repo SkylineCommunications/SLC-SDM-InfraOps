@@ -322,7 +322,7 @@
                 },
                 CableFKs =
                 {
-                    CableTypeFks = new List<SdmObjectReference<CableType>>(),
+                    CableTypeFks = Helper.CreateCableTypeReferences($"{name} Cable Type"),
                 },
             };
 

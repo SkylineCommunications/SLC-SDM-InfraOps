@@ -199,6 +199,9 @@ namespace SDM.AssetManagement.Tests.Setup
             SlcAsset_Management.Enums.CategoriesEnum.Broadcast,
         ];
 
+        // Every Port Type requires at least one existing Cable Type; this one is created before the Port Types are populated.
+        public static readonly string PortTypeCableTypeId = Guid.NewGuid().ToString();
+
         public static readonly List<PortType> PortTypes =
         [
             CreatePortType(0),
@@ -307,7 +310,10 @@ namespace SDM.AssetManagement.Tests.Setup
                 AllCategories[(i + 3) % AllCategories.Length],
             };
 
-            var cableTypeFks = new List<SdmObjectReference<CableType>>();
+            var cableTypeFks = new List<SdmObjectReference<CableType>>
+            {
+                new SdmObjectReference<CableType>(PortTypeCableTypeId),
+            };
 
             return new PortType
             {

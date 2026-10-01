@@ -472,6 +472,11 @@ namespace SDM.AssetManagement.Tests
                 return helper;
             }
 
+            if (helper.AssetManagement.CableTypes.Count(CableTypeExposers.Identifier.Equal(DemoData.PortTypeCableTypeId)) == 0)
+            {
+                helper.AssetManagement.CableTypes.Create(PortTypeCableHelper.CreateCableTypeModel("Demo Port Type Cable Type", DemoData.PortTypeCableTypeId));
+            }
+
             helper.AssetManagement.PortTypes.Create(DemoData.PortTypes);
 
             // Refresh cache from database to ensure consistency

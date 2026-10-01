@@ -53,14 +53,19 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
 
             for (int i = 0; i < entities.Count; i++)
             {
-                if (entities[i]?.CategoryLinks.Categories.IsNotNullOrEmpty() ?? true)
+                if (entities[i]?.CategoryLinks.Categories.IsNullOrEmpty() ?? true)
                 {
                     results[i].AddFailReason(PortTypeValidationField.Category, "Port Type must have at least one category.");
                 }
 
+                if (entities[i]?.CableFKs.CableTypeFks.IsNullOrEmpty() ?? true)
+                {
+                    results[i].AddFailReason(PortTypeValidationField.CableTypeFks, "Port Type must have at least one cable type.");
+                }
+
                 foreach (var reference in entities[i]?.CableFKs.CableTypeFks ?? new List<SdmObjectReference<CableType>>())
                 {
-                    if (reference.HasValue() && !existingCableTypeIds.Contains(reference.Identifier))
+                    if (!reference.HasValue() || !existingCableTypeIds.Contains(reference.Identifier))
                     {
                         results[i].AddFailReason(PortTypeValidationField.CableTypeFks, $"Referenced Cable Type '{reference.Identifier}' does not exist.");
                     }

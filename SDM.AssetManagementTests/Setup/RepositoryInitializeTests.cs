@@ -241,6 +241,10 @@
                 {
                     Categories = [SlcAsset_Management.Enums.CategoriesEnum.Data],
                 },
+                CableFKs =
+                {
+                    CableTypeFks = Helper.CreateCableTypeReferences("Custom Data Port Type Cable"),
+                },
             };
             Helper.AssetManagement.PortTypes.Create(dataPortType);
 

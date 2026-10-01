@@ -6,6 +6,7 @@
     using FluentAssertions;
     using FluentAssertions.Execution;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using SDM.AssetManagement.Tests.Setup;
     using SharedMappers.DomIds;
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
@@ -194,9 +195,9 @@
                 new PortType
                 {
                     Identifier = Guid.NewGuid().ToString(),
-                    Name = "Port Type Without Cable FK",
+                    Name = "Port Type With Other Cable FK (Data)",
                     CategoryLinks = { Categories = new List<SlcAsset_Management.Enums.CategoriesEnum> { SlcAsset_Management.Enums.CategoriesEnum.Data } },
-                    CableFKs = { CableTypeFks = new List<SdmObjectReference<CableType>>() },
+                    CableFKs = { CableTypeFks = new List<SdmObjectReference<CableType>> { otherCableTypeFk } },
                 },
                 new PortType
                 {
@@ -240,6 +241,10 @@
                 {
                     Categories = new List<SlcAsset_Management.Enums.CategoriesEnum> { SlcAsset_Management.Enums.CategoriesEnum.Data },
                 },
+                CableFKs =
+                {
+                    CableTypeFks = Helper.CreateCableTypeReferences("Unrelated Cable Type"),
+                },
             });
 
             var filter = PortTypeExposers.CableFKs.CableTypeFks.Contains(new SdmObjectReference<CableType>(Guid.NewGuid().ToString()));
@@ -268,14 +273,15 @@
             });
 
             var targetCableTypeFk = new SdmObjectReference<CableType>(targetCableType.Identifier);
+            var otherCableTypeFk = new SdmObjectReference<CableType>(Helper.CreateCableType("Other Present Cable Type").Identifier);
             var portTypes = new[]
             {
                 new PortType
                 {
                     Identifier = Guid.NewGuid().ToString(),
-                    Name = "Port Type Empty Cable FKs",
+                    Name = "Port Type Other Cable FK",
                     CategoryLinks = { Categories = new List<SlcAsset_Management.Enums.CategoriesEnum> { SlcAsset_Management.Enums.CategoriesEnum.Data } },
-                    CableFKs = { CableTypeFks = new List<SdmObjectReference<CableType>>() },
+                    CableFKs = { CableTypeFks = new List<SdmObjectReference<CableType>> { otherCableTypeFk } },
                 },
                 new PortType
                 {

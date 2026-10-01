@@ -338,9 +338,10 @@
 
         private PortType CreatePortType(string name, SlcAsset_Management.Enums.CategoriesEnum category, CableType? compatibleCableType = null)
         {
-            var cableRefs = compatibleCableType == null
-                ? new List<SdmObjectReference<CableType>>()
-                : new List<SdmObjectReference<CableType>> { new SdmObjectReference<CableType>(compatibleCableType.Identifier) };
+            var cableRefs = new List<SdmObjectReference<CableType>>
+            {
+                new SdmObjectReference<CableType>((compatibleCableType ?? CreateCableType($"{name} Cable Type")).Identifier),
+            };
 
             var portType = new PortType
             {
