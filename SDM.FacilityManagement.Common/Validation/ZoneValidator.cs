@@ -48,11 +48,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                     result.AddFailReason(ZoneValidationHandler.ZoneValidationField.ZoneId,
                         $"Zone Id '{entity.ZoneId}' is already in use.");
                 }
-
-                if(!ZoneValidationHandler.IsCoolingCapacityValid(entity, out var coolingCapacityResult))
-                {
-                    result.AddFailuresFrom(coolingCapacityResult);
-                }
             }
 
             if (!ZoneValidationHandler.IsCoolingCapacityValid(entity, out var capacityResult))
