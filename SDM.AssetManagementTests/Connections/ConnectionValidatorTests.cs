@@ -1,4 +1,4 @@
-namespace SDM.AssetManagement.Tests.Connections
+﻿namespace SDM.AssetManagement.Tests.Connections
 {
     using System;
     using System.Collections.Generic;
@@ -277,6 +277,7 @@ namespace SDM.AssetManagement.Tests.Connections
         {
             var assetClass = new AssetClass
             {
+                Manufacturer = SDM.AssetManagement.Tests.Setup.PeopleApiMock.NewManufacturer(),
                 Identifier = Guid.NewGuid().ToString(),
                 Name = name,
                 State = state,

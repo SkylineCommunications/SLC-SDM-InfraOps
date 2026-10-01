@@ -5,6 +5,7 @@ using SharedMappers.DomIds;
 using System;
 using Newtonsoft.Json;
 using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
+using Skyline.DataMiner.Net.Helper;
 
 namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
@@ -15,7 +16,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         Guid? ISectionTrackable.SectionId { get; set; }
         [JsonIgnore]
         [SdmIgnore]
-        public bool IsEmpty => (Categories == null || Categories.Count == 0);
+        public bool IsEmpty => Categories.IsNullOrEmpty();
 
         public List<SlcAsset_Management.Enums.CategoriesEnum> Categories
         {

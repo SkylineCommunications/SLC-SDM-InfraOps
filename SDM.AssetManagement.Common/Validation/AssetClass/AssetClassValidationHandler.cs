@@ -20,6 +20,7 @@
             AssetClass,
             DeviceTypeId,
             DeviceTypeName,
+            Manufacturer,
             PowerSupply,
 
             Depth,
@@ -54,6 +55,17 @@
             {
                 result.AddFailReason(AssetClassValidationField.DeviceTypeId, "Asset Class Device Type id needs to be a Guid.");
             }
+            return result.IsValid;
+        }
+
+        public static bool IsManufacturerSet(AssetClass assetClass, out ValidationResult result)
+        {
+            result = new ValidationResult();
+            if (assetClass.Manufacturer == null || !assetClass.Manufacturer.HasValue())
+            {
+                result.AddFailReason(AssetClassValidationField.Manufacturer, "Please enter a valid manufacturer.");
+            }
+
             return result.IsValid;
         }
 

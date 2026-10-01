@@ -1,4 +1,4 @@
-﻿namespace SDM.AssetManagement.Tests.PortTypes
+namespace SDM.AssetManagement.Tests.PortTypes
 {
     using System;
     using System.Collections.Generic;
@@ -91,6 +91,39 @@
             AssertCreated();
         }
 
+        [TestMethod]
+        public void PortTypeDomStorageProvider_Create_WithoutCables_ShouldPass()
+        {
+            var portType = new PortType
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                Name = "Port Type Without Cables",
+                CategoryLinks =
+                {
+                    Categories = new List<SlcAsset_Management.Enums.CategoriesEnum> { SlcAsset_Management.Enums.CategoriesEnum.Data },
+                },
+            };
+
+            Helper.AssetManagement.PortTypes.Create(portType);
+
+            var persisted = Helper.AssetManagement.PortTypes.Read(new TRUEFilterElement<PortType>()).Single();
+            persisted.CategoryLinks.Categories.Should().BeEquivalentTo(portType.CategoryLinks.Categories);
+            persisted.CableFKs.CableTypeFks.Should().BeNullOrEmpty();
+        }
+
+        [TestMethod]
+        public void PortTypeDomStorageProvider_Create_WithoutCategories_ShouldFail()
+        {
+            var portType = new PortType
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                Name = "Port Type Without Categories",
+            };
+
+            Action act = () => Helper.AssetManagement.PortTypes.Create(portType);
+
+            act.Should().Throw<Exception>().WithMessage("*Port Type must have at least one category*");
+        }
         [TestMethod]
         public void PortTypeDomStorageProvider_EmptyDOM_CreateOrUpdate_Create()
         {

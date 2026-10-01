@@ -393,6 +393,7 @@
         {
             var assetClass = new AssetClass
             {
+                Manufacturer = SDM.AssetManagement.Tests.Setup.PeopleApiMock.NewManufacturer(),
                 DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier),
                 Name = name,
             };

@@ -1,4 +1,4 @@
-namespace SDM.AssetManagement.Tests.Assets
+﻿namespace SDM.AssetManagement.Tests.Assets
 {
     using System;
     using System.Linq;
@@ -34,6 +34,7 @@ namespace SDM.AssetManagement.Tests.Assets
 
             _assetClass = _helper.AssetManagement.AssetClasses.Create(new AssetClass
             {
+                Manufacturer = SDM.AssetManagement.Tests.Setup.PeopleApiMock.NewManufacturer(),
                 Name = "Transition asset class " + Guid.NewGuid(),
                 DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier),
                 State = SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Active,

@@ -108,6 +108,7 @@
             var deviceType = Helper.TestData.NonPowerProviderDeviceType();
             var draftAssetClass = Helper.AssetManagement.AssetClasses.Create(new AssetClass
             {
+                Manufacturer = SDM.AssetManagement.Tests.Setup.PeopleApiMock.NewManufacturer(),
                 Name = "Draft Asset Class",
                 DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier),
                 Depth = 10,

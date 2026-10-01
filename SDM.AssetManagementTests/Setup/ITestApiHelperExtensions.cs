@@ -1,7 +1,8 @@
-﻿using SharedMappers.DomIds;
+using SharedMappers.DomIds;
 
 using Skyline.DataMiner.SDM.AssetManagement.Validation;
 using Skyline.DataMiner.SDM.Common.Services;
+using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
 
 namespace SDM.AssetManagement.Tests.Setup
 {
@@ -29,7 +30,7 @@ namespace SDM.AssetManagement.Tests.Setup
         /// Creates an AssetClassValidator from the test helper repositories.
         /// Convenient for test validation scenarios.
         /// </summary>
-        public static AssetClassValidator CreateAssetClassValidator(this ITestApiHelper helper)
+        public static AssetClassValidator CreateAssetClassValidator(this ITestApiHelper helper, IPeopleAndOrganizationsApi? peopleApi = null)
         {
             if (helper == null)
             {
@@ -38,7 +39,7 @@ namespace SDM.AssetManagement.Tests.Setup
 
             var entityLoader = new SdmEntityLoader(helper.AssetManagement, helper.FacilityManagement);
 
-            return new AssetClassValidator(entityLoader);
+            return new AssetClassValidator(entityLoader, peopleApi ?? PeopleApiMock.CreateDefault());
         }
 
         /// <summary>

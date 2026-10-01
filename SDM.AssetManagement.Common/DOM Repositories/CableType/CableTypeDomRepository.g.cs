@@ -535,6 +535,17 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 }
             }
 
+            var _categorylinksSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(AssetManagement.Models.CableTypeDomMapper.CategoryRelation.SectionDefinitionId));
+            if (_categorylinksSection != default)
+            {
+                ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.CategoryLinks).SectionId = _categorylinksSection.ID.Id;
+                var _categorylinkscategories = _categorylinksSection.GetListValue<string>(AssetManagement.Models.CableTypeDomMapper.CategoryRelation.CategoryLinks);
+                if (_categorylinkscategories != null)
+                {
+                    obj.CategoryLinks.Categories = _categorylinkscategories.Values.Select(x => (SharedMappers.DomIds.SlcAsset_Management.Enums.Categories.ToEnum(x))).ToList();
+                }
+            }
+
             obj.ResetChangeTracking();
 
             return obj;
@@ -576,6 +587,23 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
 
             instance.Sections.Add(_cabletypeproperties);
+
+            if (!obj.CategoryLinks.IsEmpty)
+            {
+                var _categorylinks = new Section(AssetManagement.Models.CableTypeDomMapper.CategoryRelation.SectionDefinitionId);
+                var _categorylinksSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.CategoryLinks).SectionId;
+                if (_categorylinksSectionId.HasValue)
+                {
+                    _categorylinks.ID = new SectionID(_categorylinksSectionId.Value);
+                }
+                if (obj.CategoryLinks.Categories.IsNotNullOrEmpty())
+                {
+                    _categorylinks.AddOrUpdateListValue<string>(AssetManagement.Models.CableTypeDomMapper.CategoryRelation.CategoryLinks, obj.CategoryLinks.Categories.Select(x => SharedMappers.DomIds.SlcAsset_Management.Enums.Categories.ToValue(x)).ToList());
+                }
+
+                instance.Sections.Add(_categorylinks);
+            }
+
             return instance;
         }
 
@@ -597,6 +625,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.CableTypeDomMapper.CableTypeProperties.Name), comparer, (string)value);
                 case "Description":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.CableTypeDomMapper.CableTypeProperties.Description), comparer, (string)value);
+                case "CategoryLinks.Categories":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.CableTypeDomMapper.CategoryRelation.CategoryLinks), comparer, Convert.ToString(value));
                 default:
                     throw new NotImplementedException();
             }
@@ -620,6 +650,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.CableTypeDomMapper.CableTypeProperties.Name), sortOrder, naturalSort);
                 case "Description":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.CableTypeDomMapper.CableTypeProperties.Description), sortOrder, naturalSort);
+                case "CategoryLinks.Categories":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.CableTypeDomMapper.CategoryRelation.CategoryLinks), sortOrder, naturalSort);
                 default:
                     throw new NotImplementedException();
             }

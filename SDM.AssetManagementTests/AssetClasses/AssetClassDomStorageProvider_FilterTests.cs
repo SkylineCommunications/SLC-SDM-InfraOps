@@ -315,6 +315,7 @@
         {
             var assetClass = new AssetClass
             {
+                Manufacturer = SDM.AssetManagement.Tests.Setup.PeopleApiMock.NewManufacturer(),
                 Identifier = Guid.NewGuid().ToString(),
                 Name = name,
                 Description = $"{name} description",

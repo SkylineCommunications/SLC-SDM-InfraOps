@@ -9,6 +9,7 @@ using Skyline.DataMiner.SDM.AssetManagement.Helpers;
 using Skyline.DataMiner.SDM.AssetManagement.Validation;
 using Skyline.DataMiner.SDM.Common.Services;
 using Skyline.DataMiner.SDM.FacilityManagement.Helpers;
+using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
 using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Middleware;
 
 using Connection = Skyline.DataMiner.SDM.AssetManagement.Models.Connection;
@@ -29,7 +30,7 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
 
     // Public constructor for production use - creates its own FacilityManagementHelper
     public AssetManagementApiHelper(IConnection connection)
-        : this(connection, new FacilityManagementApiHelper(connection))
+        : this(connection, new FacilityManagementApiHelper(connection), connection.GetPeopleAndOrganizationsApi())
     {
     }
 
@@ -37,10 +38,24 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
     internal AssetManagementApiHelper(
         IConnection connection,
         IFacilityManagementApiHelper facilityManagementHelper)
+        : this(connection, facilityManagementHelper, connection.GetPeopleAndOrganizationsApi())
+    {
+    }
+
+    // Internal constructor for testing - allows injection of a mocked People & Organizations API
+    internal AssetManagementApiHelper(
+        IConnection connection,
+        IFacilityManagementApiHelper facilityManagementHelper,
+        IPeopleAndOrganizationsApi peopleApi)
     {
         if (facilityManagementHelper == null)
         {
             throw new ArgumentNullException(nameof(facilityManagementHelper));
+        }
+
+        if (peopleApi == null)
+        {
+            throw new ArgumentNullException(nameof(peopleApi));
         }
 
         // Initialize repositories
@@ -62,7 +77,7 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
         // Initialize validators
         _assetValidator = new AssetValidator(entityLoader);
 
-        _assetClassValidator = new AssetClassValidator(entityLoader);
+        _assetClassValidator = new AssetClassValidator(entityLoader, peopleApi);
         _dataPortValidator = new DataPortValidator(entityLoader);
         _powerPortValidator = new PowerPortValidator(entityLoader);
         _deviceTypeValidator = new DeviceTypeValidator(entityLoader);

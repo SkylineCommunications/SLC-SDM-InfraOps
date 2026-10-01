@@ -1,10 +1,11 @@
-﻿namespace SDM.AssetManagement.Tests.Setup
+namespace SDM.AssetManagement.Tests.Setup
 {
     using Skyline.DataMiner.Net;
     using Skyline.DataMiner.SDM.AssetManagement.Helpers;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.FacilityManagement.Helpers;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
+    using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
 
     /// <summary>
     /// Composite helper interface that provides access to both Asset Management and Facility Management APIs,
@@ -62,9 +63,9 @@
     /// </summary>
     public class TestApiHelper : ITestApiHelper
     {
-        public TestApiHelper(IConnection connection)
+        public TestApiHelper(IConnection connection, IPeopleAndOrganizationsApi? peopleApi = null)
         {
-            AssetManagement = new AssetManagementApiHelper(connection);
+            AssetManagement = new AssetManagementApiHelper(connection, new FacilityManagementApiHelper(connection), peopleApi ?? PeopleApiMock.CreateDefault());
             FacilityManagement = new FacilityManagementApiHelper(connection);
             TestData = new TestDataCache();
         }

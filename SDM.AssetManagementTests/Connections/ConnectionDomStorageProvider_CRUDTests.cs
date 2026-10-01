@@ -1,4 +1,4 @@
-namespace SDM.AssetManagement.Tests.Connections
+﻿namespace SDM.AssetManagement.Tests.Connections
 {
     using System;
     using System.Collections.Generic;
@@ -232,6 +232,7 @@ namespace SDM.AssetManagement.Tests.Connections
 
             var assetClass = Helper.AssetManagement.AssetClasses.Create(new AssetClass
             {
+                Manufacturer = SDM.AssetManagement.Tests.Setup.PeopleApiMock.NewManufacturer(),
                 Identifier = Guid.NewGuid().ToString(),
                 Name = $"{name} Asset Class",
                 State = SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Active,

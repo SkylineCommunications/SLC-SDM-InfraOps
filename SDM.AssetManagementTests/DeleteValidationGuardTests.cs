@@ -1,4 +1,4 @@
-namespace SDM.AssetManagement.Tests
+﻿namespace SDM.AssetManagement.Tests
 {
     using System;
     using System.Collections.Generic;
@@ -273,6 +273,7 @@ namespace SDM.AssetManagement.Tests
             deviceType = deviceType ?? CreateDeviceType($"{name} Device Type", deviceTags);
             var assetClass = new AssetClass
             {
+                Manufacturer = SDM.AssetManagement.Tests.Setup.PeopleApiMock.NewManufacturer(),
                 Identifier = Guid.NewGuid().ToString(),
                 Name = name,
                 State = state,
