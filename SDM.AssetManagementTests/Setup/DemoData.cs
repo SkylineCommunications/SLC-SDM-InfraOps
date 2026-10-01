@@ -388,19 +388,19 @@ namespace SDM.AssetManagement.Tests.Setup
         #endregion
 
         private static AssetClass CreateBaseAssetClass(
-       string deviceTypeName,
-       string deviceName,
-       string deviceDescription,
-       double depth,
-       double height,
-       double width,
-       double heightU,
-       double weight,
-       string frontImage,
-       string backImage,
-       double typicalPowerConsumption,
-       double maximumPowerConsumption,
-       List<AssetHolder>? holders = null)
+            string deviceTypeName,
+            string deviceName,
+            string deviceDescription,
+            double depth,
+            double height,
+            double width,
+            double heightU,
+            double weight,
+            string frontImage,
+            string backImage,
+            double typicalPowerConsumption,
+            double maximumPowerConsumption,
+            List<AssetHolder>? holders = null)
         {
             return new AssetClass
             {

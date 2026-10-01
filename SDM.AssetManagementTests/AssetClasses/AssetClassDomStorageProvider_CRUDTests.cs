@@ -12,6 +12,7 @@ namespace SDM.AssetManagement.Tests.AssetClasses
 
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.AssetManagement.Extensions;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
@@ -62,6 +63,7 @@ namespace SDM.AssetManagement.Tests.AssetClasses
                     {
                         PortNumber = 1,
                         Name = "Port1",
+                        PortType = new SdmObjectReference<PortType>(Guid.NewGuid().ToString()),
                         PortExposure = SlcAsset_Management.Enums.PortExposureEnum.Front,
                         OutputType = SlcAsset_Management.Enums.Outputtype.Out,
                         Label = "Label1",
@@ -73,6 +75,7 @@ namespace SDM.AssetManagement.Tests.AssetClasses
                     {
                         Name = "Power Port 1",
                         PortNumber = 1,
+                        PortType = new SdmObjectReference<PortType>(Guid.NewGuid().ToString()),
                         OutputType = SlcAsset_Management.Enums.Outputtype.Out,
                         PortExposure = SlcAsset_Management.Enums.PortExposureEnum.Front,
                         Label = "Primary Power Port",
@@ -81,6 +84,7 @@ namespace SDM.AssetManagement.Tests.AssetClasses
                     {
                         Name = "Power Port 2",
                         PortNumber = 2,
+                        PortType = new SdmObjectReference<PortType>(Guid.NewGuid().ToString()),
                         OutputType = SlcAsset_Management.Enums.Outputtype.In,
                         PortExposure = SlcAsset_Management.Enums.PortExposureEnum.Back,
                         Label = "Backup Power Port",
@@ -187,8 +191,21 @@ namespace SDM.AssetManagement.Tests.AssetClasses
         {
             // Arrange
             Helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
+
             var deviceType = Helper.TestData.DeviceTypes.First();
             referenceAssetClass.DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier);
+
+            var dataPortType = Helper.TestData.PortTypes.First(p => p.IsDataPortType());
+            foreach (var port in referenceAssetClass.DataPorts)
+            {
+                port.PortType = dataPortType;
+            }
+
+            var powerPortType = Helper.TestData.PortTypes.First(p => p.IsPowerPortType());
+            foreach (var port in referenceAssetClass.PowerPorts)
+            {
+                port.PortType = powerPortType;
+            }
 
             // Act
             Helper.AssetManagement.AssetClasses.Create(referenceAssetClass);
@@ -202,9 +219,21 @@ namespace SDM.AssetManagement.Tests.AssetClasses
         {
             // Arrange
             Helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
-
+            
             var deviceType = Helper.TestData.DeviceTypes.First();
             referenceAssetClass.DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier);
+
+            var dataPortType = Helper.TestData.PortTypes.First(p => p.IsDataPortType());
+            foreach (var port in referenceAssetClass.DataPorts)
+            {
+                port.PortType = dataPortType;
+            }
+
+            var powerPortType = Helper.TestData.PortTypes.First(p => p.IsPowerPortType());
+            foreach (var port in referenceAssetClass.PowerPorts)
+            {
+                port.PortType = powerPortType;
+            }
 
             // Act
             Helper.AssetManagement.AssetClasses.CreateOrUpdate([referenceAssetClass]);
@@ -221,6 +250,18 @@ namespace SDM.AssetManagement.Tests.AssetClasses
 
             var deviceType = Helper.TestData.DeviceTypes.First();
             referenceAssetClass.DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier);
+
+            var dataPortType = Helper.TestData.PortTypes.First(p => p.IsDataPortType());
+            foreach (var port in referenceAssetClass.DataPorts)
+            {
+                port.PortType = dataPortType;
+            }
+
+            var powerPortType = Helper.TestData.PortTypes.First(p => p.IsPowerPortType());
+            foreach (var port in referenceAssetClass.PowerPorts)
+            {
+                port.PortType = powerPortType;
+            }
 
             Helper.AssetManagement.AssetClasses.Create(referenceAssetClass);
 
@@ -259,6 +300,7 @@ namespace SDM.AssetManagement.Tests.AssetClasses
                     {
                         PortNumber = 2,
                         Name = "Port2",
+                        PortType = new SdmObjectReference<PortType>(Guid.NewGuid().ToString()),
                         PortExposure = SlcAsset_Management.Enums.PortExposureEnum.Back,
                         OutputType = SlcAsset_Management.Enums.Outputtype.In,
                         Label = "Label2",
@@ -267,6 +309,11 @@ namespace SDM.AssetManagement.Tests.AssetClasses
                 PowerPorts = new List<PowerPortInfo>(),
                 Holders = new List<AssetHolder>(),
             };
+
+            foreach (var port in updatedAssetClass.DataPorts)
+            {
+                port.PortType = dataPortType;
+            }
 
             // Act
             var persistedAssetClass = Helper.AssetManagement.AssetClasses.CreateOrUpdate([updatedAssetClass]).First();
@@ -416,7 +463,7 @@ namespace SDM.AssetManagement.Tests.AssetClasses
                 updated.DataPorts[0].Name.Should().Be("Port2");
                 updated.DataPorts[0].Label.Should().Be("Label2");
                 updated.DataPorts[0].PortType.Should().NotBeNull();
-                updated.DataPorts[0].PortType.HasValue().Should().BeFalse();
+                updated.DataPorts[0].PortType.HasValue().Should().BeTrue();
                 updated.DataPorts[0].PortExposure.Should().Be(SlcAsset_Management.Enums.PortExposureEnum.Back);
                 updated.DataPorts[0].OutputType.Should().Be(SlcAsset_Management.Enums.Outputtype.In);
 
@@ -468,7 +515,7 @@ namespace SDM.AssetManagement.Tests.AssetClasses
                 created.DataPorts[0].Name.Should().Be("Port1");
                 created.DataPorts[0].Label.Should().Be("Label1");
                 created.DataPorts[0].PortType.Should().NotBeNull();
-                created.DataPorts[0].PortType.HasValue().Should().BeFalse();
+                created.DataPorts[0].PortType.HasValue().Should().BeTrue();
                 created.DataPorts[0].PortExposure.Should().Be(SlcAsset_Management.Enums.PortExposureEnum.Front);
                 created.DataPorts[0].OutputType.Should().Be(SlcAsset_Management.Enums.Outputtype.Out);
 

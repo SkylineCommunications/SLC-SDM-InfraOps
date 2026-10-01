@@ -20,40 +20,41 @@ namespace SDM.AssetManagement.Tests
     /// </summary>
     public enum DemoDataLayer
     {
-        /// <summary>
-        /// Device types - no dependencies.
-        /// </summary>
-        DeviceTypes = 1,
-
-        /// <summary>
-        /// Racks - no dependencies (optional for Assets).
-        /// </summary>
-        Racks = 2,
-
-        /// <summary>
-        /// Asset classes - depends on DeviceTypes.
-        /// </summary>
-        AssetClasses = 3,
-
-        /// <summary>
-        /// Assets - depends on AssetClasses (and optionally Racks).
-        /// </summary>
-        Assets = 4,
-
-        /// <summary>
-        /// Data ports - depends on Assets.
-        /// </summary>
-        DataPorts = 5,
-
-        /// <summary>
-        /// Power ports - depends on Assets.
-        /// </summary>
-        PowerPorts = 6,
 
         /// <summary>
         /// Port types - no dependencies.
         /// </summary>
-        PortTypes = 7,
+        PortTypes = 1,
+
+        /// <summary>
+        /// Device types - no dependencies.
+        /// </summary>
+        DeviceTypes = 2,
+
+        /// <summary>
+        /// Racks - no dependencies (optional for Assets).
+        /// </summary>
+        Racks = 3,
+
+        /// <summary>
+        /// Asset classes - depends on DeviceTypes (and optionally PortTypes).
+        /// </summary>
+        AssetClasses = 4,
+
+        /// <summary>
+        /// Assets - depends on AssetClasses (and optionally Racks).
+        /// </summary>
+        Assets = 5,
+
+        /// <summary>
+        /// Data ports - depends on Assets.
+        /// </summary>
+        DataPorts = 6,
+
+        /// <summary>
+        /// Power ports - depends on Assets.
+        /// </summary>
+        PowerPorts = 7,
     }
 
     public static partial class RepositoryInitialize
@@ -76,31 +77,37 @@ namespace SDM.AssetManagement.Tests
             this ITestApiHelper helper,
             DemoDataLayer upTo)
         {
-            // Layer 1: DeviceTypes (required for AssetClasses and above)
+            // Layer 1: Port Types (required for AssetClasses and above)
+            if (upTo >= DemoDataLayer.PortTypes)
+            {
+                PopulatePortTypes(helper);
+            }
+
+            // Layer 2: DeviceTypes (required for AssetClasses and above)
             if (upTo >= DemoDataLayer.DeviceTypes)
             {
                 PopulateDeviceTypes(helper);
             }
 
-            // Layer 2: Racks (optional, but populate if requested and needed for Assets)
+            // Layer 3: Racks (optional, but populate if requested and needed for Assets)
             if (upTo >= DemoDataLayer.Racks)
             {
                 PopulateRacks(helper);
             }
 
-            // Layer 3: AssetClasses (required for Assets and above)
+            // Layer 4: AssetClasses (required for Assets and above)
             if (upTo >= DemoDataLayer.AssetClasses)
             {
                 PopulateAssetClasses(helper);
             }
 
-            // Layer 4: Assets (required for Ports)
+            // Layer 5: Assets (required for Ports)
             if (upTo >= DemoDataLayer.Assets)
             {
                 PopulateAssets(helper);
             }
 
-            // Layer 5 & 6: Ports (independent of each other)
+            // Layer 6 & 7: Ports (independent of each other)
             if (upTo >= DemoDataLayer.DataPorts)
             {
                 PopulateDataPorts(helper);
@@ -111,11 +118,6 @@ namespace SDM.AssetManagement.Tests
                 PopulatePowerPorts(helper);
             }
 
-            if (upTo >= DemoDataLayer.PortTypes)
-            {
-                PopulatePortTypes(helper);
-            }
-
             return helper;
         }
 
@@ -124,7 +126,7 @@ namespace SDM.AssetManagement.Tests
         /// </summary>
         public static ITestApiHelper PopulateWithDemoData(this ITestApiHelper helper)
         {
-            return PopulateWithDemoData(helper, DemoDataLayer.PortTypes);
+            return PopulateWithDemoData(helper, DemoDataLayer.PowerPorts);
         }
 
         #region Assets
@@ -276,6 +278,11 @@ namespace SDM.AssetManagement.Tests
                     "Cannot populate asset classes: No DeviceTypes found. Call PopulateDeviceTypes() first.");
             }
 
+            // Ensure PortTypes exist and pick a data-compatible one (validation requires a valid Port Type).
+            helper.PopulatePortTypes();
+            var dataPortType = helper.TestData.PortTypes.First(pt => pt.IsDataPortType());
+            var powerPortType = helper.TestData.PortTypes.First(pt => pt.IsPowerPortType());
+
             var deviceTypes = persistedDeviceTypes.ToDictionary(dt => dt.Name);
             var assetClasses = new List<AssetClass>();
             for (int i = 0; i < DemoData.BaseAssetClasses.Count; i++)
@@ -286,6 +293,15 @@ namespace SDM.AssetManagement.Tests
                 var assetClass = CloneAssetClass(baseClass);
                 assetClass.DeviceTypeId = new SdmObjectReference<DeviceType>(deviceTypes[deviceTypeName].Identifier);
 
+                foreach (var port in assetClass.DataPorts)
+                {
+                    port.PortType = new SdmObjectReference<PortType>(dataPortType.Identifier);
+                }
+
+                foreach (var port in assetClass.PowerPorts)
+                {
+                    port.PortType = new SdmObjectReference<PortType>(powerPortType.Identifier);
+                }
                 assetClasses.Add(assetClass);
             }
 

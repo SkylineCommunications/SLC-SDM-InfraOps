@@ -32,6 +32,18 @@ namespace SDM.AssetManagement.Tests.InfraopsReservations
                 {
                     Identifier = Guid.NewGuid().ToString(),
                     Description = "Reservation without rack",
+                    RackFk =
+                    {
+                        Rack = rack,
+                    },
+                    ReservedPositions = new List<InfraopsReservationBounderies>
+                    {
+                        new InfraopsReservationBounderies
+                        {
+                            LowerBound = 1,
+                            UpperBound = 2,
+                        },
+                    },
                 },
                 new InfraopsReservation
                 {
@@ -39,7 +51,15 @@ namespace SDM.AssetManagement.Tests.InfraopsReservations
                     Description = "Reservation with rack",
                     RackFk =
                     {
-                        Rack = new SdmObjectReference<Rack>(rack.Identifier),
+                        Rack = rack,
+                    },
+                    ReservedPositions = new List<InfraopsReservationBounderies>
+                    {
+                        new InfraopsReservationBounderies
+                        {
+                            LowerBound = 4,
+                            UpperBound = 5,
+                        },
                     },
                 },
             };
@@ -86,6 +106,18 @@ namespace SDM.AssetManagement.Tests.InfraopsReservations
                 {
                     Identifier = Guid.NewGuid().ToString(),
                     Description = "Reservation without rack B",
+                    RackFk =
+                    {
+                        Rack = firstRack,
+                    },
+                    ReservedPositions = new List<InfraopsReservationBounderies>
+                    {
+                        new InfraopsReservationBounderies
+                        {
+                            LowerBound = 1,
+                            UpperBound = 2,
+                        },
+                    },
                 },
                 new InfraopsReservation
                 {
@@ -93,7 +125,15 @@ namespace SDM.AssetManagement.Tests.InfraopsReservations
                     Description = "Reservation with first rack",
                     RackFk =
                     {
-                        Rack = new SdmObjectReference<Rack>(firstRack.Identifier),
+                        Rack = firstRack,
+                    },
+                    ReservedPositions = new List<InfraopsReservationBounderies>
+                    {
+                        new InfraopsReservationBounderies
+                        {
+                            LowerBound = 4,
+                            UpperBound = 5,
+                        },
                     },
                 },
                 new InfraopsReservation
@@ -102,7 +142,15 @@ namespace SDM.AssetManagement.Tests.InfraopsReservations
                     Description = "Reservation with second rack",
                     RackFk =
                     {
-                        Rack = new SdmObjectReference<Rack>(secondRack.Identifier),
+                        Rack = secondRack,
+                    },
+                    ReservedPositions = new List<InfraopsReservationBounderies>
+                    {
+                        new InfraopsReservationBounderies
+                        {
+                            LowerBound = 4,
+                            UpperBound = 5,
+                        },
                     },
                 },
             };
@@ -127,17 +175,43 @@ namespace SDM.AssetManagement.Tests.InfraopsReservations
         {
             var firstJob = new ISdmObjectReference<ISdmObject>(Guid.NewGuid().ToString());
 
+            var rack = CreateRack("Reservation Rack C", "RCK-RES-004");
+
             var reservations = new[]
             {
                 new InfraopsReservation
                 {
                     Identifier = Guid.NewGuid().ToString(),
                     Description = "Reservation without job",
+                    RackFk =
+                    {
+                        Rack = rack,
+                    },
+                    ReservedPositions = new List<InfraopsReservationBounderies>
+                    {
+                        new InfraopsReservationBounderies
+                        {
+                            LowerBound = 1,
+                            UpperBound = 2,
+                        },
+                    },
                 },
                 new InfraopsReservation
                 {
                     Identifier = Guid.NewGuid().ToString(),
                     Description = "Reservation with job",
+                    RackFk =
+                    {
+                        Rack = rack,
+                    },
+                    ReservedPositions = new List<InfraopsReservationBounderies>
+                    {
+                        new InfraopsReservationBounderies
+                        {
+                            LowerBound = 4,
+                            UpperBound = 5,
+                        },
+                    },
                     JobFk =
                     {
                         Job = firstJob,
@@ -178,6 +252,8 @@ namespace SDM.AssetManagement.Tests.InfraopsReservations
         [TestMethod]
         public void ReadFilter_Job_HasValue_ShouldReturnReservationsWithJob()
         {
+            var rack = CreateRack("Reservation Rack A", "RCK-RES-001");
+
             var firstJob = new ISdmObjectReference<ISdmObject>(Guid.NewGuid().ToString());
             var secondJob = new ISdmObjectReference<ISdmObject>(Guid.NewGuid().ToString());
 
@@ -187,6 +263,18 @@ namespace SDM.AssetManagement.Tests.InfraopsReservations
                 {
                     Identifier = Guid.NewGuid().ToString(),
                     Description = "Reservation without job B",
+                    RackFk =
+                    {
+                        Rack = rack,
+                    },
+                    ReservedPositions = new List<InfraopsReservationBounderies>
+                    {
+                        new InfraopsReservationBounderies
+                        {
+                            LowerBound = 1,
+                            UpperBound = 2,
+                        },
+                    },
                 },
                 new InfraopsReservation
                 {
@@ -196,6 +284,18 @@ namespace SDM.AssetManagement.Tests.InfraopsReservations
                     {
                         Job = firstJob,
                     },
+                    RackFk =
+                    {
+                        Rack = rack,
+                    },
+                    ReservedPositions = new List<InfraopsReservationBounderies>
+                    {
+                        new InfraopsReservationBounderies
+                        {
+                            LowerBound = 4,
+                            UpperBound = 5,
+                        },
+                    },
                 },
                 new InfraopsReservation
                 {
@@ -204,6 +304,18 @@ namespace SDM.AssetManagement.Tests.InfraopsReservations
                     JobFk =
                     {
                         Job = secondJob,
+                    },
+                    RackFk =
+                    {
+                        Rack = rack,
+                    },
+                    ReservedPositions = new List<InfraopsReservationBounderies>
+                    {
+                        new InfraopsReservationBounderies
+                        {
+                            LowerBound = 4,
+                            UpperBound = 5,
+                        },
                     },
                 },
             };
@@ -228,6 +340,7 @@ namespace SDM.AssetManagement.Tests.InfraopsReservations
             var rack = new Rack
             {
                 Identifier = Guid.NewGuid().ToString(),
+                Position = SharedMappers.DomIds.SlcFacility_Management.Enums.RackpositionenumEnum.Bottom,
                 RackId = rackId,
                 Name = name,
             };
