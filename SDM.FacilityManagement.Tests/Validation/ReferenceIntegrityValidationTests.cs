@@ -6,6 +6,8 @@ namespace SDM.FacilityManagement.Tests.Validation
 
     using SDM.FacilityManagement.Tests.Setup;
 
+    using SharedMappers.DomIds;
+
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
     using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
@@ -260,6 +262,7 @@ namespace SDM.FacilityManagement.Tests.Validation
 				Identifier = Guid.NewGuid().ToString(),
 				RackId = id,
 				Name = $"Rack {id}",
+				Position = SlcFacility_Management.Enums.RackpositionenumEnum.Bottom,
 			};
 
 			rack.Capacity.MaximumRackCapacity = 42;

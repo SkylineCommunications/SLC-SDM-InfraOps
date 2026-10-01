@@ -264,12 +264,14 @@ namespace SDM.FacilityManagement.Tests.Racks
                 {
                     Identifier = Guid.NewGuid().ToString(),
                     RackId = "RCK-ROW-001",
+                    Position = SlcFacility_Management.Enums.RackpositionenumEnum.Bottom,
                     Name = "Rack Without Row",
                 },
                 new Rack
                 {
                     Identifier = Guid.NewGuid().ToString(),
                     RackId = "RCK-ROW-002",
+                    Position = SlcFacility_Management.Enums.RackpositionenumEnum.Bottom,
                     Name = "Rack With Row",
                     RowFk =
                     {
@@ -336,12 +338,14 @@ namespace SDM.FacilityManagement.Tests.Racks
                 {
                     Identifier = Guid.NewGuid().ToString(),
                     RackId = "RCK-ROW-003",
+                    Position = SlcFacility_Management.Enums.RackpositionenumEnum.Bottom,
                     Name = "Rack Without Row B",
                 },
                 new Rack
                 {
                     Identifier = Guid.NewGuid().ToString(),
                     RackId = "RCK-ROW-004",
+                    Position = SlcFacility_Management.Enums.RackpositionenumEnum.Bottom,
                     Name = "Rack With Row B1",
                     RowFk =
                     {
@@ -352,6 +356,7 @@ namespace SDM.FacilityManagement.Tests.Racks
                 {
                     Identifier = Guid.NewGuid().ToString(),
                     RackId = "RCK-ROW-005",
+                    Position = SlcFacility_Management.Enums.RackpositionenumEnum.Bottom,
                     Name = "Rack With Row B2",
                     RowFk =
                     {
@@ -401,12 +406,14 @@ namespace SDM.FacilityManagement.Tests.Racks
                 {
                     Identifier = Guid.NewGuid().ToString(),
                     RackId = "RCK-ZONE-001",
+                    Position = SlcFacility_Management.Enums.RackpositionenumEnum.Bottom,
                     Name = "Rack Without Zone",
                 },
                 new Rack
                 {
                     Identifier = Guid.NewGuid().ToString(),
                     RackId = "RCK-ZONE-002",
+                    Position = SlcFacility_Management.Enums.RackpositionenumEnum.Bottom,
                     Name = "Rack With Zone",
                     ZoneFk =
                     {
@@ -481,12 +488,14 @@ namespace SDM.FacilityManagement.Tests.Racks
                 {
                     Identifier = Guid.NewGuid().ToString(),
                     RackId = "RCK-ZONE-003",
+                    Position = SlcFacility_Management.Enums.RackpositionenumEnum.Bottom,
                     Name = "Rack Without Zone B",
                 },
                 new Rack
                 {
                     Identifier = Guid.NewGuid().ToString(),
                     RackId = "RCK-ZONE-004",
+                    Position = SlcFacility_Management.Enums.RackpositionenumEnum.Bottom,
                     Name = "Rack With Zone B1",
                     ZoneFk =
                     {
@@ -497,6 +506,7 @@ namespace SDM.FacilityManagement.Tests.Racks
                 {
                     Identifier = Guid.NewGuid().ToString(),
                     RackId = "RCK-ZONE-005",
+                    Position = SlcFacility_Management.Enums.RackpositionenumEnum.Bottom,
                     Name = "Rack With Zone B2",
                     ZoneFk =
                     {

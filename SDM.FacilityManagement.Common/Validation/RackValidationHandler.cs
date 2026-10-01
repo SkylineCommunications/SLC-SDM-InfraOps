@@ -58,6 +58,24 @@
             return result.IsValid;
         }
 
+        public static bool IsRackPositionValid(Rack rack, out ValidationResult result)
+        {
+            result = new ValidationResult();
+
+            if (rack == null)
+            {
+                result.AddFailReason(RackValidationField.Rack, "Rack cannot be null.");
+                return result.IsValid;
+            }
+
+            if (rack.Position == null)
+            {
+                result.AddFailReason(RackValidationField.RackPosition, "Rack Position cannot be empty.");
+            }
+
+            return result.IsValid;
+        }
+
         #endregion
 
         #region Dimensions Validation
