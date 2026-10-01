@@ -47,7 +47,7 @@ namespace SDM.PlanAndBuild.Tests.JobTests
             zone = facilityHelper.Zones.Create(zoneToCreate);
 			row = facilityHelper.Rows.Create(new Row { Identifier = Guid.NewGuid().ToString(), Name = "Row 1", RowId = "ROW-1" });
 			desk = facilityHelper.Desks.Create(new Desk { Identifier = Guid.NewGuid().ToString(), Name = "Desk 1", DeskID = "DSK-1" });
-			var rackToCreate = new Rack { Identifier = Guid.NewGuid().ToString(), Name = "Rack 1", RackId = "RCK-1" };
+			var rackToCreate = new Rack { Identifier = Guid.NewGuid().ToString(), Name = "Rack 1", RackId = "RCK-1", Position = SharedMappers.DomIds.SlcFacility_Management.Enums.RackpositionenumEnum.Bottom };
 			rackToCreate.Capacity.MaximumRackCapacity = 42;
 			rack = facilityHelper.Racks.Create(rackToCreate);
 		}

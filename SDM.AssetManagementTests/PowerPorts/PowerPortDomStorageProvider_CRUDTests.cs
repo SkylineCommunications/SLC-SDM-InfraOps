@@ -40,6 +40,10 @@
                 {
                     Categories = [SlcAsset_Management.Enums.CategoriesEnum.Power],
                 },
+                CableFKs =
+                {
+                    CableTypeFks = Helper.CreateCableTypeReferences("Power Port Type Cable"),
+                },
             };
             Helper.AssetManagement.PortTypes.Create(powerPortType);
 

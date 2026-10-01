@@ -15,8 +15,8 @@
         {
             ZoneId,
             Name,
-
             CoolingCapacity,
+            RoomId,
         }
 
         /// <summary>

@@ -6,15 +6,16 @@
 	using FluentAssertions;
 
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-	using Skyline.DataMiner.SDM.PlanAndBuild.Extensions;
+    using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
+    using Skyline.DataMiner.SDM.PlanAndBuild.Extensions;
 	using Skyline.DataMiner.SDM.PlanAndBuild.Models;
+    using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
 
-	/// <summary>
-	/// Unit tests for the Locations convenience methods on <see cref="PlanAndBuildJob"/>
-	/// (AddLocation/RemoveLocation/SetLocations), mirroring InfraOpsShared's JobWrapper API.
-	/// </summary>
-	[TestClass]
+    /// <summary>
+    /// Unit tests for the Locations convenience methods on <see cref="PlanAndBuildJob"/>
+    /// (AddLocation/RemoveLocation/SetLocations), mirroring InfraOpsShared's JobWrapper API.
+    /// </summary>
+    [TestClass]
 	public class PlanAndBuildJobLocationsTests
 	{
 		[TestMethod]
@@ -94,7 +95,7 @@
 		public void IsAssignedToPerson_WithAssignedTo_ShouldBeTrue()
 		{
 			var job = new PlanAndBuildJob();
-			job.Ownership.AssignedTo = Guid.NewGuid();
+			job.Ownership.AssignedTo = new PnoObjectReference<Person>(Guid.NewGuid());
 
 			job.Ownership.IsAssignedToPerson().Should().BeTrue();
 		}
@@ -111,7 +112,7 @@
 		public void HasAssignmentGroup_WithAssignmentGroup_ShouldBeTrue()
 		{
 			var job = new PlanAndBuildJob();
-			job.Ownership.AssignmentGroup = Guid.NewGuid();
+			job.Ownership.AssignmentGroup = new PnoObjectReference<Team>(Guid.NewGuid());
 
 			job.Ownership.HasAssignmentGroup().Should().BeTrue();
 		}

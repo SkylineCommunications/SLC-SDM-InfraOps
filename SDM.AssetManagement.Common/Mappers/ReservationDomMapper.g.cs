@@ -31,6 +31,13 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             internal static FieldDescriptorID Rack = SharedMappers.DomIds.SlcAsset_Management.Sections.ReservationRack.Rack;
         }
 
+        internal static class JobFk
+        {
+            internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(SharedMappers.DomIds.SlcAsset_Management.Sections.LinkedJob.Id.Id)
+            {ModuleId = ModuleId};
+            internal static FieldDescriptorID Job = SharedMappers.DomIds.SlcAsset_Management.Sections.LinkedJob.Job;
+        }
+
         internal static class ReservedPositions
         {
             internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(SharedMappers.DomIds.SlcAsset_Management.Sections.ReservedPositions.Id.Id)

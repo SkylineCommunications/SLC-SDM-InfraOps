@@ -237,7 +237,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
             {
                 if (!existingIds.Contains(identifier))
                 {
-                    ReferenceValidationHelper.AddMissingReference(results[index], RoomValidationHandler.RoomValidationField.RoomId, referenceType, identifier);
+                    ReferenceValidationHelper.AddMissingReference(results[index], RoomValidationHandler.RoomValidationField.FloorId, referenceType, identifier);
                 }
             }
         }

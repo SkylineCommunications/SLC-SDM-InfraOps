@@ -54,8 +54,8 @@ namespace SDM.AssetManagement.Tests.AssetManagerAppSettings
             Helper.PopulateAssetManagerAppSettings();
 
             const int promptValue = 1;
-            var filter = AssetManagerAppSettingsExposers.PlanAndBuildJobPrompt.Equal(promptValue);
-            var expected = DemoData.AssetManagerAppSettings.Where(s => s.PlanAndBuildJobPrompt == promptValue).ToArray();
+            var filter = AssetManagerAppSettingsExposers.PlanAndBuildJobPrompt.Equal((SharedMappers.DomIds.SlcAsset_Management.Enums.Planandbuildjobpromptenum)promptValue);
+            var expected = DemoData.AssetManagerAppSettings.Where(s => (int)s.PlanAndBuildJobPrompt == promptValue).ToArray();
 
             var settingsRetrieved = Helper.AssetManagement.AppSettings.Read(filter);
 
@@ -107,9 +107,9 @@ namespace SDM.AssetManagement.Tests.AssetManagerAppSettings
             Helper.PopulateAssetManagerAppSettings();
 
             var filter = AssetManagerAppSettingsExposers.EnableAssetHistory.Equal(true)
-                .AND(AssetManagerAppSettingsExposers.PlanAndBuildJobPrompt.Equal(1));
+                .AND(AssetManagerAppSettingsExposers.PlanAndBuildJobPrompt.Equal(SharedMappers.DomIds.SlcAsset_Management.Enums.Planandbuildjobpromptenum.Enabled));
             var expected = DemoData.AssetManagerAppSettings
-                .Where(s => s.EnableAssetHistory && s.PlanAndBuildJobPrompt == 1)
+                .Where(s => s.EnableAssetHistory && s.PlanAndBuildJobPrompt == SharedMappers.DomIds.SlcAsset_Management.Enums.Planandbuildjobpromptenum.Enabled)
                 .ToArray();
 
             var settingsRetrieved = Helper.AssetManagement.AppSettings.Read(filter);

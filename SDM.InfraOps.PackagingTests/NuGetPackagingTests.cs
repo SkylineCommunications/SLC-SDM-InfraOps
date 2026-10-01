@@ -22,7 +22,7 @@
         [
             typeof(Skyline.DataMiner.SDM.PropertyDomRepository_Extensions).Assembly,   // SDM.InfraOpsProperties.Common
             typeof(Skyline.DataMiner.SDM.DeskDomRepository_Extensions).Assembly,        // SDM.FacilityManagement.Common
-            typeof(Skyline.DataMiner.SDM.AssetDomRepository_Extensions).Assembly,       // SDM.AssetManagement.Common
+            typeof(Skyline.DataMiner.SDM.AssetRepository_Extensions).Assembly,       // SDM.AssetManagement.Common
             typeof(Skyline.DataMiner.SDM.JobTypeDomRepository_Extensions).Assembly,     // SDM.PlanAndBuild.Common
         ];
 

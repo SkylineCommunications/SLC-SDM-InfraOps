@@ -8,7 +8,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
-    public class AssetLocation : ChangeTrackingBase, ISectionTrackable, ISectionEmptyState
+    public sealed class AssetLocation : ChangeTrackingBase, IEquatable<AssetLocation>, ISectionTrackable, ISectionEmptyState
     {
         [JsonIgnore]
         [SdmIgnore]
@@ -20,7 +20,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             !RackId.HasValue() &&
             RackPosition == default &&
             Side == default &&
-            DeskId == Guid.Empty &&
+            !DeskId.HasValue() &&
             !ContainerId.HasValue() &&
             !RoomId.HasValue();
 
@@ -54,19 +54,19 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             set => SideField.Value = value;
         }
 
-        public Guid DeskId
+        public SdmObjectReference<Desk> DeskId
         {
             get => DeskIdField.Value;
             set => DeskIdField.Value = value;
         }
 
-        public SdmObjectReference<FacilityManagement.Models.Facility> ContainerId
+        public SdmObjectReference<Facility> ContainerId
         {
             get => ContainerIdField.Value;
             set => ContainerIdField.Value = value;
         }
 
-        public SdmObjectReference<FacilityManagement.Models.Room> RoomId
+        public SdmObjectReference<Room> RoomId
         {
             get => RoomIdField.Value;
             set => RoomIdField.Value = value;
@@ -76,7 +76,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         [SdmIgnore]
         internal IChangeTrackingField<SdmObjectReference<Asset>> ParentAssetField => FieldHandler.GetOrCreateField(
             nameof(ParentAsset),
-            () => new ChangeTrackingField<SdmObjectReference<Asset>>(default));
+            () => new ChangeTrackingField<SdmObjectReference<Asset>>(default, reference => reference.Identifier));
 
         [JsonIgnore]
         [SdmIgnore]
@@ -88,7 +88,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         [SdmIgnore]
         internal IChangeTrackingField<SdmObjectReference<Rack>> RackIdField => FieldHandler.GetOrCreateField(
             nameof(RackId),
-            () => new ChangeTrackingField<SdmObjectReference<Rack>>(default));
+            () => new ChangeTrackingField<SdmObjectReference<Rack>>(default, reference => reference.Identifier));
 
         [JsonIgnore]
         [SdmIgnore]
@@ -104,20 +104,85 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
         [JsonIgnore]
         [SdmIgnore]
-        internal IChangeTrackingField<Guid> DeskIdField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<SdmObjectReference<Desk>> DeskIdField => FieldHandler.GetOrCreateField(
             nameof(DeskId),
-            () => new ChangeTrackingField<Guid>(Guid.Empty));
+            () => new ChangeTrackingField<SdmObjectReference<Desk>>(default, reference => reference.Identifier));
 
         [JsonIgnore]
         [SdmIgnore]
         internal IChangeTrackingField<SdmObjectReference<Facility>> ContainerIdField => FieldHandler.GetOrCreateField(
             nameof(ContainerId),
-            () => new ChangeTrackingField<SdmObjectReference<Facility>>(default));
+            () => new ChangeTrackingField<SdmObjectReference<Facility>>(default, reference => reference.Identifier));
 
         [JsonIgnore]
         [SdmIgnore]
         internal IChangeTrackingField<SdmObjectReference<FacilityManagement.Models.Room>> RoomIdField => FieldHandler.GetOrCreateField(
             nameof(RoomId),
-            () => new ChangeTrackingField<SdmObjectReference<FacilityManagement.Models.Room>>(default));
+            () => new ChangeTrackingField<SdmObjectReference<FacilityManagement.Models.Room>>(default, reference => reference.Identifier));
+
+        public static bool operator ==(AssetLocation left, AssetLocation right)
+        {
+            if (ReferenceEquals(left, right))
+            {
+                return true;
+            }
+
+            if (left is null || right is null)
+            {
+                return false;
+            }
+
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(AssetLocation left, AssetLocation right)
+        {
+            return !(left == right);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as AssetLocation);
+        }
+
+        public bool Equals(AssetLocation other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return
+                ParentAsset == other.ParentAsset &&
+                HolderNumber == other.HolderNumber &&
+                RackId == other.RackId &&
+                RackPosition == other.RackPosition &&
+                Side == other.Side &&
+                DeskId == other.DeskId &&
+                ContainerId == other.ContainerId &&
+                RoomId == other.RoomId;
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 17;
+                hash = (hash * 23) + (ParentAsset.Identifier?.GetHashCode() ?? 0);
+                hash = (hash * 23) + HolderNumber?.GetHashCode() ?? 0;
+                hash = (hash * 23) + (RackId.Identifier?.GetHashCode() ?? 0);
+                hash = (hash * 23) + RackPosition?.GetHashCode() ?? 0;
+                hash = (hash * 23) + Side?.GetHashCode() ?? 0;
+                hash = (hash * 23) + (DeskId.Identifier?.GetHashCode() ?? 0);
+                hash = (hash * 23) + (ContainerId.Identifier?.GetHashCode() ?? 0);
+                hash = (hash * 23) + (RoomId.Identifier?.GetHashCode() ?? 0);
+                return hash;
+            }
+        }
     }
 }

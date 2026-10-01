@@ -3,18 +3,17 @@ namespace Skyline.DataMiner.SDM.Common.Services
     using System;
     using System.Collections.Generic;
     using System.Linq;
-
-    using Skyline.DataMiner.SDM.AssetManagement.Models;
-
     using Skyline.DataMiner.Net;
     using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Helpers;
-    using Skyline.DataMiner.SDM.AssetManagement.Validation;
+    using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.SDM.FacilityManagement.Helpers;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
+    using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
+    using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Extensions;
 
     /// <summary>
     /// Shared service for loading and querying SDM entities across domains.
@@ -464,6 +463,45 @@ namespace Skyline.DataMiner.SDM.Common.Services
                 filter => assetManagerApiHelper.DeviceTypes.Read(filter).ToList());
         }
 
+        /// <summary>
+        /// Counts DeviceTypes with the specified name, excluding a single identifier (e.g. the current device type on edit).
+        /// <para><b>Not suitable for bulk scenarios</b>: use <see cref="GetDeviceTypesByNames"/> when checking multiple names at once.</para>
+        /// </summary>
+        public long CountDeviceTypesByName(string name, string exceptIdentifier = null)
+        {
+            if (assetManagerApiHelper?.DeviceTypes == null || string.IsNullOrWhiteSpace(name))
+            {
+                return 0;
+            }
+
+            FilterElement<DeviceType> filter = DeviceTypeExposers.Name.Equal(name);
+
+            if (!string.IsNullOrWhiteSpace(exceptIdentifier))
+            {
+                filter = filter.AND(DeviceTypeExposers.Identifier.NotEqual(exceptIdentifier));
+            }
+
+            return assetManagerApiHelper.DeviceTypes.Count(filter);
+        }
+
+        /// <summary>
+        /// Retrieves all DeviceTypes whose Name matches any of the provided names.
+        /// Uses <see cref="Tools.RetrieveBigOrFilter"/> to safely handle large sets without
+        /// creating an oversized OR filter in a single call.
+        /// </summary>
+        public List<DeviceType> GetDeviceTypesByNames(List<string> names)
+        {
+            if (assetManagerApiHelper?.DeviceTypes == null || names == null || !names.Any())
+            {
+                return new List<DeviceType>();
+            }
+
+            return Tools.RetrieveBigOrFilter(
+                names,
+                name => DeviceTypeExposers.Name.Equal(name),
+                filter => assetManagerApiHelper.DeviceTypes.Read(filter).ToList());
+        }
+
         public List<AssetClass> GetAssetClassesByDomIds(List<string> identifiers)
         {
             if (assetManagerApiHelper?.AssetClasses == null || identifiers == null || !identifiers.Any())
@@ -488,6 +526,23 @@ namespace Skyline.DataMiner.SDM.Common.Services
                 assetClassIds,
                 id => AssetExposers.AssetClass.Equal(new SdmObjectReference<AssetClass>(id)),
                 filter => assetManagerApiHelper.Assets.Read(filter).ToList());
+        }
+
+        /// <summary>
+        /// Determines whether any asset belonging to the given asset classes is not in the 'Disposed' state.
+        /// Counts in big-OR batches and short-circuits on the first batch with a match, without loading entities.
+        /// </summary>
+        public bool HasNonDisposedAssetsForAssetClasses(List<string> assetClassIds)
+        {
+            if (assetManagerApiHelper?.Assets == null || assetClassIds == null || !assetClassIds.Any())
+            {
+                return false;
+            }
+
+            return assetManagerApiHelper.Assets.HasAnyBigOrFilter(
+                assetClassIds,
+                id => AssetExposers.AssetClass.Equal(new SdmObjectReference<AssetClass>(id)),
+                batchFilter => batchFilter.AND(AssetExposers.State.NotEqual(SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Disposed)));
         }
 
         public List<AssetClass> GetAssetClassesByDeviceTypeIds(List<string> deviceTypeIds)
@@ -618,7 +673,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
             }
 
             var powerPortTypeExposer = new Exposer<PowerPort, Guid>(
-                obj => Guid.Parse(obj.PowerPortInfo.PortType.Identifier),
+                obj => obj.PowerPortInfo.PortType.HasValue() ? obj.PowerPortInfo.PortType.GetIdentifierAsGuid() : Guid.Empty,
                 "PowerPortInfo.PortType");
 
             return Tools.RetrieveBigOrFilter(
@@ -649,7 +704,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
                 obj => obj.DataPorts
                     .Where(port => port?.PortType != null && port.PortType.HasValue())
                     .Select(port => Guid.Parse(port.PortType.Identifier)),
-                "DataPorts.Type");
+                "DataPorts.PortType");
 
             var matches = Tools.RetrieveBigOrFilter(
                 portTypeGuids,
@@ -764,7 +819,7 @@ namespace Skyline.DataMiner.SDM.Common.Services
 
             var portGuids = portIds
                 .Where(id => Guid.TryParse(id, out _))
-                .Select(Guid.Parse)
+                .Select(id => new ISdmObjectReference<IPort>(id))
                 .Distinct()
                 .ToList();
 

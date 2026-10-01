@@ -194,7 +194,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
         {
             return FacilityReferenceValidationHelper.ValidateRoomReferences(
                 entities,
-                RowValidationHandler.RowValidationField.RowId,
+                RowValidationHandler.RowValidationField.RoomId,
                 entity => entity.RoomFk.IsEmpty ? null : ReferenceValidationHelper.GetId(entity.RoomFk.Room),
                 ids => ReferenceValidationHelper.ToIdentifierSet(_entityLoader.GetRoomsByIdentifiers(ids)));
         }

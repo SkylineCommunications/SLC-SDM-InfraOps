@@ -1,17 +1,18 @@
 ﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
-    using Newtonsoft.Json;
-
-    using SharedMappers.DomIds;
-
-    using Skyline.DataMiner.SDM;
-    using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using Newtonsoft.Json;
+    using SharedMappers.DomIds;
+    using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.InfraOps.Core.Models;
+    using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)asset_management")]
-    public class DeviceType : SdmObject<DeviceType>, IEntityTracking, IReadOnlyModuleIdReferencer
-    {
+    public sealed class DeviceType : SdmObjectBase<DeviceType>, IEquatable<DeviceType>, IEntityTracking, IReadOnlyModuleIdReferencer
+	{
         [JsonIgnore]
         private ChangeTrackingFieldHandler _fieldHandler;
         [JsonIgnore]
@@ -25,6 +26,12 @@
         {
             _fieldHandler = new ChangeTrackingFieldHandler();
         }
+
+        #region Module Tracking
+
+        public string ModuleId => SlcAsset_Management.ModuleId;
+
+        #endregion
 
         [JsonIgnore]
         [SdmIgnore]
@@ -93,11 +100,81 @@
             nameof(Description),
             () => new ChangeTrackingStringField(null));
 
+        public IEnumerable<TrackingFieldValueDifference> GetChanges()
+        {
+            return FieldHandler.GetChanges()
+                .Select(kvp => new TrackingFieldValueDifference
+                {
+                    FieldName = kvp.Key,
+                    OldValue = kvp.Value.prevVal,
+                    NewValue = kvp.Value.newVal,
+                })
+                .Concat(_tagsInfo?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>())
+                .Concat(_hierarchyInfo?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>());
+        }
+
         public void ResetChangeTracking()
         {
             FieldHandler?.ApplyChanges();
             _tagsInfo?.ResetChangeTracking();
             _hierarchyInfo?.ResetChangeTracking();
+        }
+
+        public static bool operator ==(DeviceType left, DeviceType right)
+        {
+            if (ReferenceEquals(left, right))
+            {
+                return true;
+            }
+
+            if (left is null || right is null)
+            {
+                return false;
+            }
+
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(DeviceType left, DeviceType right)
+        {
+            return !(left == right);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as DeviceType);
+        }
+
+        public bool Equals(DeviceType other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return
+                string.Equals(Name, other.Name, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(Description, other.Description, StringComparison.OrdinalIgnoreCase) &&
+                Equals(TagsInfo, other.TagsInfo) &&
+                Equals(HierarchyInfo, other.HierarchyInfo);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 17;
+                hash = (hash * 23) + (Name != null ? Name.GetHashCode() : 0);
+                hash = (hash * 23) + (Description != null ? Description.GetHashCode() : 0);
+                hash = (hash * 23) + (TagsInfo != null ? TagsInfo.GetHashCode() : 0);
+                hash = (hash * 23) + (HierarchyInfo != null ? HierarchyInfo.GetHashCode() : 0);
+                return hash;
+            }
         }
 
         #region Section Tracking
@@ -107,12 +184,5 @@
         internal Guid? DeviceTypePropertiesSectionId { get; set; }
 
         #endregion
-
-        #region Module Tracking
-
-        public string ModuleId => SlcAsset_Management.ModuleId;
-
-        #endregion
-
     }
 }

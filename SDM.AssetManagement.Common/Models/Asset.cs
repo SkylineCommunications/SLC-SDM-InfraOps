@@ -9,12 +9,15 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     using SharedMappers.DomIds;
 
     using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
+    using Skyline.DataMiner.SDM.InfraOps.Core.Models;
+    using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)asset_management")]
-    public class Asset : SdmObject<Asset>, IEntityTracking, IReadOnlyModuleIdReferencer
-    {
+    public sealed class Asset : SdmObjectBase<Asset>, IEquatable<Asset>, IEntityTracking, IReadOnlyModuleIdReferencer
+	{
         [JsonIgnore]
         private ChangeTrackingFieldHandler _fieldHandler;
         [JsonIgnore]
@@ -32,6 +35,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         {
             _fieldHandler = new ChangeTrackingFieldHandler();
         }
+
+        #region Module Tracking
+
+        public string ModuleId => SlcAsset_Management.ModuleId;
+
+        #endregion
 
         [JsonIgnore]
         [SdmIgnore]
@@ -136,10 +145,10 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             set => HardwareVersionField.Value = value;
         }
 
-        public long OperationalFlags
+        public List<SlcAsset_Management.Enums.Operationalflagsenum> OperationalFlags
         {
-            get => OperationalFlagsField.Value;
-            set => OperationalFlagsField.Value = value;
+            get => OperationalFlagsField.Value ?? (OperationalFlagsField.Value = new List<SlcAsset_Management.Enums.Operationalflagsenum>());
+            set => OperationalFlagsField.Value = value ?? new List<SlcAsset_Management.Enums.Operationalflagsenum>();
         }
 
         #endregion
@@ -164,7 +173,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
         #region Lifecycle Properties
 
-        public Guid InstallationUserId
+        public PnoObjectReference<Person> InstallationUserId
         {
             get => InstallationUserIdField.Value;
             set => InstallationUserIdField.Value = value;
@@ -188,7 +197,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             set => PurchaseDateField.Value = value;
         }
 
-        public Guid ModificationUserId
+        public PnoObjectReference<Person> ModificationUserId
         {
             get => ModificationUserIdField.Value;
             set => ModificationUserIdField.Value = value;
@@ -226,20 +235,20 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
         public List<AssetHolder> Holders
         {
-            get => HoldersField.Value ?? new List<AssetHolder>();
-            set => HoldersField.Value = value;
+            get => HoldersField.Value ?? (HoldersField.Value = new List<AssetHolder>());
+            set => HoldersField.Value = value ?? new List<AssetHolder>();
         }
 
         public List<ElementLink> ElementLinks
         {
-            get => ElementsField.Value ?? new List<ElementLink>();
-            set => ElementsField.Value = value;
+            get => ElementsField.Value ?? (ElementsField.Value = new List<ElementLink>());
+            set => ElementsField.Value = value ?? new List<ElementLink>();
         }
 
         public List<Attachment> Attachments
         {
-            get => AttachmentsField.Value ?? new List<Attachment>();
-            set => AttachmentsField.Value = value;
+            get => AttachmentsField.Value ?? (AttachmentsField.Value = new List<Attachment>());
+            set => AttachmentsField.Value = value ?? new List<Attachment>();
         }
 
         #endregion
@@ -262,7 +271,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         [SdmIgnore]
         internal IChangeTrackingField<SdmObjectReference<AssetClass>> AssetClassIdField => FieldHandler.GetOrCreateField(
             nameof(AssetClassId),
-            () => new ChangeTrackingField<SdmObjectReference<AssetClass>>(default));
+            () => new ChangeTrackingField<SdmObjectReference<AssetClass>>(default, reference => reference.Identifier));
 
         [JsonIgnore]
         [SdmIgnore]
@@ -290,9 +299,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
         [JsonIgnore]
         [SdmIgnore]
-        internal IChangeTrackingField<long> OperationalFlagsField => FieldHandler.GetOrCreateField(
+        internal ChangeTrackingArrayField<SlcAsset_Management.Enums.Operationalflagsenum> OperationalFlagsField => FieldHandler.GetOrCreateArrayField(
             nameof(OperationalFlags),
-            () => new ChangeTrackingField<long>(0));
+            () => new ChangeTrackingArrayField<SlcAsset_Management.Enums.Operationalflagsenum>(new List<SlcAsset_Management.Enums.Operationalflagsenum>()));
 
         #endregion
 
@@ -310,9 +319,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
         [JsonIgnore]
         [SdmIgnore]
-        internal IChangeTrackingField<Guid> InstallationUserIdField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<PnoObjectReference<Person>> InstallationUserIdField => FieldHandler.GetOrCreateField(
             nameof(InstallationUserId),
-            () => new ChangeTrackingField<Guid>(Guid.Empty));
+            () => new ChangeTrackingField<PnoObjectReference<Person>>(default, reference => reference.Identifier));
 
         [JsonIgnore]
         [SdmIgnore]
@@ -334,9 +343,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
         [JsonIgnore]
         [SdmIgnore]
-        internal IChangeTrackingField<Guid> ModificationUserIdField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<PnoObjectReference<Person>> ModificationUserIdField => FieldHandler.GetOrCreateField(
             nameof(ModificationUserId),
-            () => new ChangeTrackingField<Guid>(Guid.Empty));
+            () => new ChangeTrackingField<PnoObjectReference<Person>>(default, reference => reference.Identifier));
 
         [JsonIgnore]
         [SdmIgnore]
@@ -408,11 +417,20 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
         #endregion
 
-        #region Module Tracking
-
-        public string ModuleId => SlcAsset_Management.ModuleId;
-
-        #endregion
+        public IEnumerable<TrackingFieldValueDifference> GetChanges()
+        {
+            return FieldHandler.GetChanges()
+                .Select(kvp => new TrackingFieldValueDifference
+                {
+                    FieldName = kvp.Key,
+                    OldValue = kvp.Value.prevVal,
+                    NewValue = kvp.Value.newVal,
+                })
+                .Concat(Location?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>())
+                .Concat(DestinationLocation?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>())
+                .Concat(Ownership?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>())
+                .Concat(Custody?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>());
+        }
 
         public void ResetChangeTracking()
         {
@@ -447,5 +465,105 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 }
             }
         }
+
+        #region Equality
+
+        public static bool operator ==(Asset left, Asset right)
+        {
+            if (ReferenceEquals(left, right))
+            {
+                return true;
+            }
+
+            if (left is null || right is null)
+            {
+                return false;
+            }
+
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(Asset left, Asset right)
+        {
+            return !(left == right);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as Asset);
+        }
+
+        public bool Equals(Asset other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return
+                string.Equals(Name, other.Name, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(AssetID, other.AssetID, StringComparison.OrdinalIgnoreCase) &&
+                AssetClassId == other.AssetClassId &&
+                string.Equals(SerialNumber, other.SerialNumber, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(Description, other.Description, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(FW_OS, other.FW_OS, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(HardwareVersion, other.HardwareVersion, StringComparison.OrdinalIgnoreCase) &&
+                ListsEqual(OperationalFlags, other.OperationalFlags) &&
+                string.Equals(MacAddress, other.MacAddress, StringComparison.OrdinalIgnoreCase) &&
+                Equals(Location, other.Location) &&
+                Equals(DestinationLocation, other.DestinationLocation) &&
+                InstallationUserId == other.InstallationUserId &&
+                InstallationDate == other.InstallationDate &&
+                FirstUseDate == other.FirstUseDate &&
+                PurchaseDate == other.PurchaseDate &&
+                ModificationUserId == other.ModificationUserId &&
+                ModificationDate == other.ModificationDate &&
+                EndOfLifeDate == other.EndOfLifeDate &&
+                EndOfWarrantyDate == other.EndOfWarrantyDate &&
+                Equals(Ownership, other.Ownership) &&
+                Equals(Custody, other.Custody) &&
+                State == other.State &&
+                ListsEqual(Holders, other.Holders) &&
+                ListsEqual(ElementLinks, other.ElementLinks) &&
+                ListsEqual(Attachments, other.Attachments);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 17;
+                hash = (hash * 23) + (Name?.GetHashCode() ?? 0);
+                hash = (hash * 23) + (AssetID?.GetHashCode() ?? 0);
+                hash = (hash * 23) + (AssetClassId.Identifier?.GetHashCode() ?? 0);
+                hash = (hash * 23) + (SerialNumber?.GetHashCode() ?? 0);
+                hash = (hash * 23) + (Description?.GetHashCode() ?? 0);
+                hash = (hash * 23) + (MacAddress?.GetHashCode() ?? 0);
+                hash = (hash * 23) + State.GetHashCode();
+                return hash;
+            }
+        }
+
+        private static bool ListsEqual<T>(List<T> left, List<T> right)
+        {
+            if (ReferenceEquals(left, right))
+            {
+                return true;
+            }
+
+            if (left is null || right is null)
+            {
+                return false;
+            }
+
+            return left.SequenceEqual(right);
+        }
+
+        #endregion
     }
 }

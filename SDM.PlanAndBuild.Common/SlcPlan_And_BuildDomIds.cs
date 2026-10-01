@@ -656,6 +656,24 @@ namespace SharedMappers.DomIds
 				}
 
 				= new FieldDescriptorID(new Guid("6031de2d-5af0-4486-b69a-288c62fda1f6"));
+				public static FieldDescriptorID AssetName
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("f22ca595-a9f9-44e5-bfd9-8f4fd3d3d77d"));
+				public static FieldDescriptorID AssetClassName
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("6d772c54-ec75-4503-8b06-38adbbd321e9"));
+				public static FieldDescriptorID IPAddress
+				{
+					get;
+				}
+
+				= new FieldDescriptorID(new Guid("f7c5de7b-3b9c-44e1-a9f9-4c807d7066d5"));
 			}
 		}
 

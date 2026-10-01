@@ -22,6 +22,10 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
     public static partial class JobTypeExposers
     {
         public static readonly Exposer<PlanAndBuild.Models.JobType, string> Identifier = new Exposer<PlanAndBuild.Models.JobType, string>((obj) => obj.Identifier, "Identifier");
+        public static readonly Exposer<PlanAndBuild.Models.JobType, System.DateTime> CreatedAt = new Exposer<PlanAndBuild.Models.JobType, System.DateTime>((obj) => obj.CreatedAt, "CreatedAt");
+        public static readonly Exposer<PlanAndBuild.Models.JobType, string> CreatedBy = new Exposer<PlanAndBuild.Models.JobType, string>((obj) => obj.CreatedBy, "CreatedBy");
+        public static readonly Exposer<PlanAndBuild.Models.JobType, System.DateTime> LastModified = new Exposer<PlanAndBuild.Models.JobType, System.DateTime>((obj) => obj.LastModified, "LastModified");
+        public static readonly Exposer<PlanAndBuild.Models.JobType, string> LastModifiedBy = new Exposer<PlanAndBuild.Models.JobType, string>((obj) => obj.LastModifiedBy, "LastModifiedBy");
         public static readonly Exposer<PlanAndBuild.Models.JobType, string> Name = new Exposer<PlanAndBuild.Models.JobType, string>((obj) => obj.Name, "Name");
         public static readonly Exposer<PlanAndBuild.Models.JobType, string> Description = new Exposer<PlanAndBuild.Models.JobType, string>((obj) => obj.Description, "Description");
         public static readonly Exposer<PlanAndBuild.Models.JobType, string> Icon = new Exposer<PlanAndBuild.Models.JobType, string>((obj) => obj.Icon, "Icon");

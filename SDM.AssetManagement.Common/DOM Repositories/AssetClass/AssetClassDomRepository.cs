@@ -1,36 +1,22 @@
 namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
     using System;
-    using System.Linq;
 
     using SharedCommonLibrary.AssetManagement.State_Management;
 
     using SharedMappers.DomIds;
 
     using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-    using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
 
     [AllowSdmMiddleware]
     public interface IAssetClassRepository : IBulkRepository<AssetClass>
     {
-        AssetClass ReadAssetClassById(string id);
-
         AssetClass TransitionTo(AssetClass assetClass, SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum newState);
     }
 
     internal partial class AssetClassDomRepository : IAssetClassRepository
     {
-        public AssetClass ReadAssetClassById(string id)
-        {
-            if (string.IsNullOrWhiteSpace(id))
-            {
-                return null;
-            }
-
-            return Read(AssetClassExposers.Identifier.Equal(id)).SingleOrDefault();
-        }
-
         public AssetClass TransitionTo(
             AssetClass assetClass,
             SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum newState)

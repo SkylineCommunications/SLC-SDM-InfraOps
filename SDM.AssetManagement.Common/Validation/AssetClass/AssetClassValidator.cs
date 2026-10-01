@@ -6,10 +6,12 @@
 
     using SharedMappers.DomIds;
 
+    using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.Common.Services;
     using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.SDM.InfraOps.Common.Validation;
+    using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
     /// <summary>
@@ -18,6 +20,7 @@
     public class AssetClassValidator : ValidatorBase<AssetClass>
     {
         private readonly SdmEntityLoader _entityLoader;
+        private readonly IPeopleAndOrganizationsApi _peopleApi;
         private readonly Validator<AssetClass> _validationPipeline;
 
 
@@ -25,9 +28,11 @@
         /// Initializes a new instance of the <see cref="AssetClassValidator"/> class.
         /// </summary>
         /// <param name="entityLoader">The entity loader for querying asset classes and device types.</param>
-        public AssetClassValidator(SdmEntityLoader entityLoader)
+        /// <param name="peopleApi">The People &amp; Organizations API used to validate that the manufacturer exists.</param>
+        public AssetClassValidator(SdmEntityLoader entityLoader, IPeopleAndOrganizationsApi peopleApi)
         {
             _entityLoader = entityLoader ?? throw new ArgumentNullException(nameof(entityLoader));
+            _peopleApi = peopleApi ?? throw new ArgumentNullException(nameof(peopleApi));
             _validationPipeline = BuildValidationPipeline();
         }
 
@@ -283,7 +288,8 @@
                 .StopOnFailure();
 
             var standardChecks = Validator<AssetClass>
-                .Create(ValidateDimensions)
+                .Create(ValidateManufacturerIsSet)
+                .AndThen(ValidateDimensions)
                 .AndThen(ValidatePowerConsumption)
                 .AndThen(ValidateCollections)
                 .AndThen(ValidateImages);
@@ -304,9 +310,41 @@
             return result;
         }
 
+        private ValidationResult ValidateManufacturerIsSet(AssetClass assetClass)
+        {
+            if (assetClass.ShouldValidate(assetClass.ManufacturerField)
+                && !AssetClassValidationHandler.IsManufacturerSet(assetClass, out var manufacturerResult))
+            {
+                return manufacturerResult;
+            }
+
+            return new ValidationResult();
+        }
+
+        private bool ManufacturerExists(Guid manufacturerId)
+        {
+            return _peopleApi.Organizations.Count(OrganizationExposers.Id.Equal(manufacturerId)) > 0;
+        }
+
+        private static void AddManufacturerNotFound(ValidationResult result, Guid manufacturerId)
+        {
+            result.AddFailReason(AssetClassValidationHandler.AssetClassValidationField.Manufacturer,
+                $"Referenced Manufacturer '{manufacturerId}' does not exist.");
+        }
+
         private ValidationResult ValidateWithDatabaseAccess(AssetClass assetClass, Dictionary<string, DeviceType> deviceTypeCache = null)
         {
             var validations = new List<ValidationResult>();
+
+            if (assetClass.ShouldValidate(assetClass.ManufacturerField)
+                && assetClass.Manufacturer != null
+                && assetClass.Manufacturer.HasValue()
+                && !ManufacturerExists(assetClass.Manufacturer.Identifier))
+            {
+                var manufacturerResult = new ValidationResult();
+                AddManufacturerNotFound(manufacturerResult, assetClass.Manufacturer.Identifier);
+                validations.Add(manufacturerResult);
+            }
 
             if (assetClass.ShouldValidate(assetClass.NameField))
             {
@@ -394,8 +432,8 @@
                     }
                 }
 
-                ValidateDataPortTypeReferences(assetClass.DataPorts, "AssetClass.DataPorts.Type", "DataPorts", result);
-                ValidatePowerPortTypeReferences(assetClass.PowerPorts, "AssetClass.PowerPorts.PortType", "PowerPorts", result);
+                ValidateDataPortTypeReferences(assetClass.DataPorts, result);
+                ValidatePowerPortTypeReferences(assetClass.PowerPorts,  result);
 
                 return result;
             }
@@ -419,9 +457,23 @@
                     .ToList();
                 var existingPortTypeIds = _entityLoader.GetPortTypesByDomIds(portTypeIds).Select(pt => pt.Identifier).ToHashSet();
 
+                var manufacturerExistence = assetClasses
+                    .Where(ac => ac.ShouldValidate(ac.ManufacturerField) && ac.Manufacturer != null && ac.Manufacturer.HasValue())
+                    .Select(ac => ac.Manufacturer.Identifier)
+                    .Distinct()
+                    .ToDictionary(id => id, ManufacturerExists);
+
                 for (int i = 0; i < assetClasses.Count; i++)
                 {
                     var assetClass = assetClasses[i];
+
+                    if (assetClass.Manufacturer != null
+                        && manufacturerExistence.TryGetValue(assetClass.Manufacturer.Identifier, out var manufacturerFound)
+                        && !manufacturerFound)
+                    {
+                        AddManufacturerNotFound(results[i], assetClass.Manufacturer.Identifier);
+                    }
+
                     ValidateDeviceTypeReference(assetClass, results[i], existingDeviceTypeIds);
                     ValidatePortTypeReferences(assetClass, results[i], existingPortTypeIds);
                 }
@@ -443,11 +495,12 @@
 
             private static void ValidatePortTypeReferences(AssetClass assetClass, ValidationResult result, HashSet<string> existingPortTypeIds)
             {
+                
                 foreach (var port in assetClass.DataPorts ?? new List<DataPortInfo>())
                 {
                     if (port?.PortType != null && port.PortType.HasValue() && !existingPortTypeIds.Contains(port.PortType.Identifier))
                     {
-                        result.AddFailReason("AssetClass.DataPorts.Type", "DataPorts", $"Referenced Port Type '{port.PortType.Identifier}' does not exist.");
+                        result.AddFailReason(AssetClassValidationHandler.AssetClassValidationField.DataPortType, "DataPorts", $"Referenced Port Type '{port.PortType.Identifier}' does not exist.");
                     }
                 }
 
@@ -455,12 +508,12 @@
                 {
                     if (port?.PortType != null && port.PortType.HasValue() && !existingPortTypeIds.Contains(port.PortType.Identifier))
                     {
-                        result.AddFailReason("AssetClass.PowerPorts.PortType", "PowerPorts", $"Referenced Port Type '{port.PortType.Identifier}' does not exist.");
+                        result.AddFailReason(AssetClassValidationHandler.AssetClassValidationField.PowerPortType, "PowerPorts", $"Referenced Port Type '{port.PortType.Identifier}' does not exist.");
                     }
                 }
             }
 
-            private void ValidateDataPortTypeReferences(IEnumerable<DataPortInfo> ports, string fieldId, string fieldName, ValidationResult result)
+            private void ValidateDataPortTypeReferences(IEnumerable<DataPortInfo> ports, ValidationResult result)
             {
                 foreach (var port in ports ?? Enumerable.Empty<DataPortInfo>())
                 {
@@ -472,12 +525,12 @@
                     var reference = port.PortType;
                     if (!_entityLoader.GetPortTypesByDomIds(new List<string> { reference.Identifier }).Any())
                     {
-                        result.AddFailReason(fieldId, fieldName, $"Referenced Port Type '{reference.Identifier}' does not exist.");
+                        result.AddFailReason(AssetClassValidationHandler.AssetClassValidationField.DataPortType, "DataPorts", $"Referenced Port Type '{reference.Identifier}' does not exist.");
                     }
                 }
             }
 
-            private void ValidatePowerPortTypeReferences(IEnumerable<PowerPortInfo> ports, string fieldId, string fieldName, ValidationResult result)
+            private void ValidatePowerPortTypeReferences(IEnumerable<PowerPortInfo> ports, ValidationResult result)
             {
                 foreach (var port in ports ?? Enumerable.Empty<PowerPortInfo>())
                 {
@@ -489,7 +542,7 @@
                     var reference = port.PortType;
                     if (!_entityLoader.GetPortTypesByDomIds(new List<string> { reference.Identifier }).Any())
                     {
-                        result.AddFailReason(fieldId, fieldName, $"Referenced Port Type '{reference.Identifier}' does not exist.");
+                        result.AddFailReason(AssetClassValidationHandler.AssetClassValidationField.PowerPortType, "PowerPorts", $"Referenced Port Type '{reference.Identifier}' does not exist.");
                     }
                 }
             }

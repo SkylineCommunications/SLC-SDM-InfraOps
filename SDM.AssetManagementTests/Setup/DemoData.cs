@@ -8,6 +8,8 @@ namespace SDM.AssetManagement.Tests.Setup
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
+    using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
+    using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
 
     internal static class DemoData
     {
@@ -197,6 +199,9 @@ namespace SDM.AssetManagement.Tests.Setup
             SlcAsset_Management.Enums.CategoriesEnum.Broadcast,
         ];
 
+        // Every Port Type requires at least one existing Cable Type; this one is created before the Port Types are populated.
+        public static readonly string PortTypeCableTypeId = Guid.NewGuid().ToString();
+
         public static readonly List<PortType> PortTypes =
         [
             CreatePortType(0),
@@ -217,7 +222,7 @@ namespace SDM.AssetManagement.Tests.Setup
             {
                 Identifier = Guid.NewGuid().ToString(),
                 EnableAssetHistory = true,
-                PlanAndBuildJobPrompt = 1,
+                PlanAndBuildJobPrompt = SharedMappers.DomIds.SlcAsset_Management.Enums.Planandbuildjobpromptenum.Enabled,
                 EnableConnectionHistory = true,
                 HistoryTTL = TimeSpan.FromDays(30),
                 HistoryLimit = 1000L,
@@ -226,7 +231,7 @@ namespace SDM.AssetManagement.Tests.Setup
             {
                 Identifier = Guid.NewGuid().ToString(),
                 EnableAssetHistory = false,
-                PlanAndBuildJobPrompt = 0,
+                PlanAndBuildJobPrompt = SharedMappers.DomIds.SlcAsset_Management.Enums.Planandbuildjobpromptenum.Disabled,
                 EnableConnectionHistory = true,
                 HistoryTTL = null,
                 HistoryLimit = 1000L,
@@ -235,7 +240,7 @@ namespace SDM.AssetManagement.Tests.Setup
             {
                 Identifier = Guid.NewGuid().ToString(),
                 EnableAssetHistory = true,
-                PlanAndBuildJobPrompt = 0,
+                PlanAndBuildJobPrompt = SharedMappers.DomIds.SlcAsset_Management.Enums.Planandbuildjobpromptenum.Disabled,
                 EnableConnectionHistory = false,
                 HistoryTTL = TimeSpan.FromDays(30),
                 HistoryLimit = null,
@@ -244,7 +249,7 @@ namespace SDM.AssetManagement.Tests.Setup
             {
                 Identifier = Guid.NewGuid().ToString(),
                 EnableAssetHistory = false,
-                PlanAndBuildJobPrompt = 1,
+                PlanAndBuildJobPrompt = SharedMappers.DomIds.SlcAsset_Management.Enums.Planandbuildjobpromptenum.Enabled,
                 EnableConnectionHistory = false,
                 HistoryTTL = null,
                 HistoryLimit = null,
@@ -305,7 +310,10 @@ namespace SDM.AssetManagement.Tests.Setup
                 AllCategories[(i + 3) % AllCategories.Length],
             };
 
-            var cableTypeFks = new List<SdmObjectReference<CableType>>();
+            var cableTypeFks = new List<SdmObjectReference<CableType>>
+            {
+                new SdmObjectReference<CableType>(PortTypeCableTypeId),
+            };
 
             return new PortType
             {
@@ -342,6 +350,7 @@ namespace SDM.AssetManagement.Tests.Setup
                 {
                     Name = $"Port {i}",
                     PortNumber = i,
+                    PortType = new SdmObjectReference<PortType>(Guid.NewGuid().ToString()),
                     OutputType = (SlcAsset_Management.Enums.Outputtype)(i % 3),
                     PortExposure = (SlcAsset_Management.Enums.PortExposureEnum)(i % 2),
                     Label = $"ETH{i}",
@@ -366,6 +375,7 @@ namespace SDM.AssetManagement.Tests.Setup
                 {
                     Name = $"PWR {i}",
                     PortNumber = i,
+                    PortType = new SdmObjectReference<PortType>(Guid.NewGuid().ToString()),
                     PortExposure = (SlcAsset_Management.Enums.PortExposureEnum)(i % 2),
                     OutputType = (SlcAsset_Management.Enums.Outputtype)(i % 3),
                     Label = $"PWR-{i}",
@@ -378,19 +388,19 @@ namespace SDM.AssetManagement.Tests.Setup
         #endregion
 
         private static AssetClass CreateBaseAssetClass(
-       string deviceTypeName,
-       string deviceName,
-       string deviceDescription,
-       double depth,
-       double height,
-       double width,
-       double heightU,
-       double weight,
-       string frontImage,
-       string backImage,
-       double typicalPowerConsumption,
-       double maximumPowerConsumption,
-       List<AssetHolder>? holders = null)
+            string deviceTypeName,
+            string deviceName,
+            string deviceDescription,
+            double depth,
+            double height,
+            double width,
+            double heightU,
+            double weight,
+            string frontImage,
+            string backImage,
+            double typicalPowerConsumption,
+            double maximumPowerConsumption,
+            List<AssetHolder>? holders = null)
         {
             return new AssetClass
             {
@@ -399,7 +409,7 @@ namespace SDM.AssetManagement.Tests.Setup
                 State = SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Active,
                 // DeviceTypeId will be set at runtime
                 Description = deviceDescription,
-                Manufacturer = Guid.NewGuid(),
+                Manufacturer = new PnoObjectReference<Organization>(Guid.NewGuid()),
                 Depth = depth,
                 Height = height,
                 Width = width,
@@ -502,25 +512,25 @@ namespace SDM.AssetManagement.Tests.Setup
                 FirstUseDate = DateTime.UtcNow.AddYears(-orderNo).AddMonths(2),
                 EndOfWarrantyDate = DateTime.UtcNow.AddYears(-orderNo + 10),
                 InstallationDate = DateTime.UtcNow.AddYears(-orderNo).AddMonths(1),
-                InstallationUserId = Guid.NewGuid(),
+                InstallationUserId = new PnoObjectReference<Person>(Guid.NewGuid()),
                 ModificationDate = DateTime.UtcNow,
-                ModificationUserId = Guid.NewGuid(),
+                ModificationUserId = new PnoObjectReference<Person>(Guid.NewGuid()),
                 EndOfLifeDate = DateTime.UtcNow.AddYears(-orderNo + 15),
                 Ownership =
                 {
-                    Organization = Guid.NewGuid(),
-                    ContactPerson = Guid.NewGuid(),
-                    ContactPersonRole = Guid.NewGuid(),
-                    Team = Guid.NewGuid(),
+                    Organization = new PnoObjectReference<Organization>(Guid.NewGuid()),
+                    ContactPerson = new PnoObjectReference<Person>(Guid.NewGuid()),
+                    ContactPersonRole = new PnoObjectReference<Role>(Guid.NewGuid()),
+                    Team = new PnoObjectReference<Team>(Guid.NewGuid()),
                 },
                 Custody =
                 {
                     From = DateTime.UtcNow.AddMonths(-6),
                     Till = DateTime.UtcNow.AddMonths(6),
-                    ContactPerson = Guid.NewGuid(),
-                    Team = Guid.NewGuid(),
-                    Organization = Guid.NewGuid(),
-                    ContactPersonRole = Guid.NewGuid(),
+                    ContactPerson = new PnoObjectReference<Person>(Guid.NewGuid()),
+                    Team = new PnoObjectReference<Team>(Guid.NewGuid()),
+                    Organization = new PnoObjectReference<Organization>(Guid.NewGuid()),
+                    ContactPersonRole = new PnoObjectReference<Role>(Guid.NewGuid()),
                 },
                 ElementLinks = new List<ElementLink>
                 {

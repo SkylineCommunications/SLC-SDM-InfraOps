@@ -1,4 +1,4 @@
-namespace SDM.AssetManagement.Tests.AssetClasses
+﻿namespace SDM.AssetManagement.Tests.AssetClasses
 {
     using System;
     using System.Linq;
@@ -22,7 +22,7 @@ namespace SDM.AssetManagement.Tests.AssetClasses
         [TestInitialize]
         public void Initialize()
         {
-            _helper = RepositoryInitialize.InitializeWithAssetClassBehavior();
+            _helper = RepositoryInitialize.Initialize();
             _helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
         }
 
@@ -34,6 +34,7 @@ namespace SDM.AssetManagement.Tests.AssetClasses
             // The in-memory DOM double honors an explicitly supplied State on Create, matching CreateJobAt.
             return _helper.AssetManagement.AssetClasses.Create(new AssetClass
             {
+                Manufacturer = SDM.AssetManagement.Tests.Setup.PeopleApiMock.NewManufacturer(),
                 Name = "Transition class " + Guid.NewGuid(),
                 DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier),
                 State = state,

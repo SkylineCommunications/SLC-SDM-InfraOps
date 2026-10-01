@@ -8,6 +8,7 @@ namespace SDM.AssetManagement.Tests.Connections
 
     using Skyline.DataMiner.SDM.AssetManagement.Common.Validation;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
+    using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
 
     [TestClass]
     public class ConnectionValidationHandlerTests
@@ -147,7 +148,7 @@ namespace SDM.AssetManagement.Tests.Connections
         [TestMethod]
         public void IsNotSelfConnection_WithSamePort_ShouldFail()
         {
-            var port = System.Guid.NewGuid();
+            var port = new ISdmObjectReference<IPort>(Convert.ToString(Guid.NewGuid()));
 
             var isValid = ConnectionValidationHandler.IsNotSelfConnection(port, port, out var result);
 
@@ -159,7 +160,7 @@ namespace SDM.AssetManagement.Tests.Connections
         [TestMethod]
         public void IsNotSelfConnection_WithDifferentPorts_ShouldPass()
         {
-            var isValid = ConnectionValidationHandler.IsNotSelfConnection(System.Guid.NewGuid(), System.Guid.NewGuid(), out var result);
+            var isValid = ConnectionValidationHandler.IsNotSelfConnection(new ISdmObjectReference<IPort>(Convert.ToString(Guid.NewGuid())), new ISdmObjectReference<IPort>(Convert.ToString(Guid.NewGuid())), out var result);
 
             isValid.Should().BeTrue();
             result.IsValid.Should().BeTrue();
@@ -168,7 +169,7 @@ namespace SDM.AssetManagement.Tests.Connections
         [TestMethod]
         public void IsNotSelfConnection_WithEmptyPorts_ShouldPass()
         {
-            var isValid = ConnectionValidationHandler.IsNotSelfConnection(System.Guid.Empty, System.Guid.Empty, out var result);
+            var isValid = ConnectionValidationHandler.IsNotSelfConnection(default(ISdmObjectReference<IPort>), default(ISdmObjectReference<IPort>), out var result);
 
             isValid.Should().BeTrue();
             result.IsValid.Should().BeTrue();

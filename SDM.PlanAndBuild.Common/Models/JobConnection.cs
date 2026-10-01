@@ -93,12 +93,12 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             unchecked
             {
                 int hash = 17;
-                hash = (hash * 23) + ConnectionId.GetHashCode();
+                hash = (hash * 23) + (ConnectionId.Identifier?.GetHashCode() ?? 0);
                 hash = (hash * 23) + (Source?.GetHashCode() ?? 0);
                 hash = (hash * 23) + (Destination?.GetHashCode() ?? 0);
                 hash = (hash * 23) + (Status?.GetHashCode() ?? 0);
-                hash = (hash * 23) + CableType.GetHashCode();
-                hash = (hash * 23) + CableLength.GetHashCode();
+                hash = (hash * 23) + (CableType.Identifier?.GetHashCode() ?? 0);
+                hash = (hash * 23) + (CableLength?.GetHashCode() ?? 0);
                 return hash;
             }
         }

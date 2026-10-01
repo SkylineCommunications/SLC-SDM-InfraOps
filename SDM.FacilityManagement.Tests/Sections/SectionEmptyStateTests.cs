@@ -8,6 +8,8 @@
 
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
+    using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
+    using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
 
     [TestClass]
     public class SectionEmptyStateTests
@@ -83,8 +85,8 @@
         [TestMethod]
         public void RoomOwnership_AnyFieldSet_IsNotEmpty()
         {
-            new RoomOwnership().Also(x => x.Team = Guid.NewGuid()).IsEmpty.Should().BeFalse();
-            new RoomOwnership().Also(x => x.Owner = Guid.NewGuid()).IsEmpty.Should().BeFalse();
+            new RoomOwnership().Also(x => x.Team = new PnoObjectReference<Team>(Guid.NewGuid())).IsEmpty.Should().BeFalse();
+            new RoomOwnership().Also(x => x.Owner = new PnoObjectReference<Person>(Guid.NewGuid())).IsEmpty.Should().BeFalse();
         }
 
         [TestMethod]

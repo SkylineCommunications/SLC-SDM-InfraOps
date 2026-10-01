@@ -13,8 +13,10 @@ namespace SDM.AssetManagement.Tests.Assets
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Common.Validation;
     using Skyline.DataMiner.SDM.AssetManagement.Validation;
+    using Skyline.DataMiner.SDM.AssetManagement.Common.Validation.Reservations;
     using Skyline.DataMiner.SDM.Common.Services;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
+    using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
     [TestClass]
     public class AssetValidationHandlerRuleTests
@@ -111,22 +113,20 @@ namespace SDM.AssetManagement.Tests.Assets
         }
 
         [TestMethod]
-        public void ReservationPlacement_WithNullReservation_ShouldFail()
+        public void ReservationPlacement_WithNullReservation_ShouldThrowArgumentNullException()
         {
-            var validator = new AssetValidator(new SdmEntityLoader());
+            var validator = new InfraopsReservationValidator(new SdmEntityLoader());
 
-            var result = validator.ValidateReservationPlacement(null);
-
-            result.IsValid.Should().BeFalse();
-            result.FailureReasons.Should().Contain(reason => reason.ToString().Contains("Reservation cannot be null."));
+            validator.Invoking(v => v.Validate(null, RepositoryAction.Create))
+                .Should().Throw<ArgumentNullException>();
         }
 
         [TestMethod]
         public void ReservationPlacement_WithNoRack_ShouldFail()
         {
-            var validator = new AssetValidator(new SdmEntityLoader());
+            var validator = new InfraopsReservationValidator(new SdmEntityLoader());
 
-            var result = validator.ValidateReservationPlacement(new InfraopsReservation());
+            var result = validator.Validate(new InfraopsReservation(), RepositoryAction.Create);
 
             result.IsValid.Should().BeFalse();
             result.FailureReasons.Should().Contain(reason => reason.ToString().Contains("Reservation must have a Rack specified."));
@@ -135,7 +135,7 @@ namespace SDM.AssetManagement.Tests.Assets
         [TestMethod]
         public void ReservationPlacement_WithNoPositionRanges_ShouldFail()
         {
-            var validator = new AssetValidator(new SdmEntityLoader());
+            var validator = new InfraopsReservationValidator(new SdmEntityLoader());
             var reservation = new InfraopsReservation
             {
                 RackFk =
@@ -145,7 +145,7 @@ namespace SDM.AssetManagement.Tests.Assets
                 ReservedPositions = new List<InfraopsReservationBounderies>(),
             };
 
-            var result = validator.ValidateReservationPlacement(reservation);
+            var result = validator.Validate(reservation, RepositoryAction.Create);
 
             result.IsValid.Should().BeFalse();
             result.FailureReasons.Should().Contain(reason => reason.ToString().Contains("Reservation must have at least one position range."));
@@ -154,7 +154,7 @@ namespace SDM.AssetManagement.Tests.Assets
         [TestMethod]
         public void ReservationPlacement_WithUnknownRack_ShouldFail()
         {
-            var validator = new AssetValidator(new SdmEntityLoader());
+            var validator = new InfraopsReservationValidator(new SdmEntityLoader());
             var reservation = new InfraopsReservation
             {
                 RackFk =
@@ -167,7 +167,7 @@ namespace SDM.AssetManagement.Tests.Assets
                 ],
             };
 
-            var result = validator.ValidateReservationPlacement(reservation);
+            var result = validator.Validate(reservation, RepositoryAction.Create);
 
             result.IsValid.Should().BeFalse();
             result.FailureReasons.Should().Contain(reason => reason.ToString().Contains("Rack not found."));

@@ -8,6 +8,8 @@ namespace SDM.FacilityManagement.Tests.Validation
 
 	using SDM.FacilityManagement.Tests.Setup;
 
+	using SharedMappers.DomIds;
+
 	using Skyline.DataMiner.SDM;
 	using Skyline.DataMiner.SDM.FacilityManagement.Helpers;
 	using Skyline.DataMiner.SDM.FacilityManagement.Models;
@@ -211,7 +213,8 @@ namespace SDM.FacilityManagement.Tests.Validation
 			{
 				Identifier = Guid.NewGuid().ToString(),
 				FloorId = id,
-			};
+                Name = $"Floor {id}",
+            };
 
 			if (facility != null)
 			{
@@ -265,6 +268,8 @@ namespace SDM.FacilityManagement.Tests.Validation
 				ZoneCapacity = { CoolingCapacity = 5.0 },
 			};
 
+            zone.ZoneCapacity.CoolingCapacity = 1;
+
 			if (room != null)
 			{
 				zone.RoomFk.Room = new SdmObjectReference<Room>(room.Identifier);
@@ -297,6 +302,7 @@ namespace SDM.FacilityManagement.Tests.Validation
 				Identifier = Guid.NewGuid().ToString(),
 				RackId = id,
 				Name = $"Rack {id}",
+				Position = SlcFacility_Management.Enums.RackpositionenumEnum.Bottom,
 			};
 
 			rack.Capacity.MaximumRackCapacity = 42;

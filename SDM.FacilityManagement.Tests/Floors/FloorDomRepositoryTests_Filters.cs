@@ -19,7 +19,7 @@ namespace SDM.FacilityManagement.Tests.Floors
     /// These tests verify that every <see cref="FloorExposers"/> field used in a filter is
     /// correctly routed through <c>FloorDomRepository.CreateFilter</c>.
     /// The latent production bug: all <c>FloorProperties.*</c> switch cases were written as
-    /// <c>"FloorProperties.Name"</c>, <c>"FloorProperties.Plan"</c>, etc., but the
+    /// <c>"Name"</c>, <c>"Plan"</c>, etc., but the
     /// <see cref="FloorExposers.FloorProperties"/> exposers supply just the bare field name
     /// (<c>"Name"</c>, <c>"Plan"</c>, …), so every <c>FloorProperties</c> filter fell through
     /// to <c>default: throw new NotImplementedException()</c>. This surfaced as a

@@ -1,18 +1,20 @@
 ﻿namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 {
     using System;
-
+    using System.Collections.Generic;
+    using System.Linq;
     using Newtonsoft.Json;
 
     using SharedMappers.DomIds;
 
     using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.InfraOps.Core.Models;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)facility_management")]
-    public class Room : SdmObject<Room>, IEntityTracking, IReadOnlyModuleIdReferencer
-    {
+    public sealed class Room : SdmObjectBase<Room>, IEquatable<Room>, IEntityTracking, IReadOnlyModuleIdReferencer
+	{
         [JsonIgnore]
         private ChangeTrackingFieldHandler _fieldHandler;
         [JsonIgnore]
@@ -22,6 +24,12 @@
         {
             _fieldHandler = new ChangeTrackingFieldHandler();
         }
+
+        #region Module Tracking
+
+        public string ModuleId => SlcFacility_Management.ModuleId;
+
+        #endregion
 
         [JsonIgnore]
         [SdmIgnore]
@@ -39,7 +47,11 @@
 
         [JsonIgnore]
         [SdmIgnore]
-        public bool Changed => FieldHandler.HasChanges;
+        public bool Changed =>
+            FieldHandler.HasChanges ||
+            _ownership?.Changed == true ||
+            _resourceLink?.Changed == true ||
+            _floorFk?.Changed == true;
 
         [JsonIgnore]
         [SdmIgnore]
@@ -58,12 +70,6 @@
         [JsonIgnore]
         [SdmIgnore]
         internal Guid? RoomPropertiesSectionId { get; set; }
-
-        #endregion
-
-        #region Module Tracking
-
-        public string ModuleId => SlcFacility_Management.ModuleId;
 
         #endregion
 
@@ -146,9 +152,96 @@
         internal IChangeTrackingField<string> RoomIdField => FieldHandler.GetOrCreateField(
             nameof(RoomId), () => new ChangeTrackingStringField(null));
 
+        public IEnumerable<TrackingFieldValueDifference> GetChanges()
+        {
+            return FieldHandler.GetChanges()
+                .Select(kvp => new TrackingFieldValueDifference
+                {
+                    FieldName = kvp.Key,
+                    OldValue = kvp.Value.prevVal,
+                    NewValue = kvp.Value.newVal,
+                })
+                .Concat(_ownership?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>())
+                .Concat(_resourceLink?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>())
+                .Concat(_floorFk?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>());
+        }
+
         public void ResetChangeTracking()
         {
             FieldHandler.ApplyChanges();
+            _ownership?.ResetChangeTracking();
+            _resourceLink?.ResetChangeTracking();
+            _floorFk?.ResetChangeTracking();
         }
+
+        #region Equality
+
+        public static bool operator ==(Room left, Room right)
+        {
+            if (ReferenceEquals(left, right))
+            {
+                return true;
+            }
+
+            if (left is null || right is null)
+            {
+                return false;
+            }
+
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(Room left, Room right)
+        {
+            return !(left == right);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as Room);
+        }
+
+        public bool Equals(Room other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return
+                string.Equals(Name, other.Name, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(Plan, other.Plan, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(Description, other.Description, StringComparison.OrdinalIgnoreCase) &&
+                Width == other.Width &&
+                Depth == other.Depth &&
+                string.Equals(RoomId, other.RoomId, StringComparison.OrdinalIgnoreCase) &&
+                Equals(Ownership, other.Ownership) &&
+                Equals(ResourceLink, other.ResourceLink) &&
+                Equals(FloorFk, other.FloorFk) &&
+                State == other.State;
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 17;
+                hash = (hash * 23) + (Name != null ? Name.GetHashCode() : 0);
+                hash = (hash * 23) + (Plan != null ? Plan.GetHashCode() : 0);
+                hash = (hash * 23) + (Description != null ? Description.GetHashCode() : 0);
+                hash = (hash * 23) + (RoomId != null ? RoomId.GetHashCode() : 0);
+                hash = (hash * 23) + (Ownership != null ? Ownership.GetHashCode() : 0);
+                hash = (hash * 23) + (FloorFk != null ? FloorFk.GetHashCode() : 0);
+                hash = (hash * 23) + State.GetHashCode();
+                return hash;
+            }
+        }
+
+        #endregion
     }
 }

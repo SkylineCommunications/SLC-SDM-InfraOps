@@ -39,6 +39,12 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                     return result;
                 }
 
+                if(!FloorValidationHandler.IsFloorNameValid(entity, out var nameResult))
+                {
+                    result.AddFailuresFrom(nameResult);
+                    return result;
+                }
+
                 if (IsIdInUse(entity.FloorId, entity.Identifier))
                 {
                     result.AddFailReason(FloorValidationHandler.FloorValidationField.FloorId,

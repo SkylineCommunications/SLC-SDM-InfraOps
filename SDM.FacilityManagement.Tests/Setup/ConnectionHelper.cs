@@ -4,6 +4,7 @@
 
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Messages;
+	using Skyline.DataMiner.SDM.FacilityManagement.Common.Mock;
 	using Skyline.DataMiner.SDM.FacilityManagement.Helpers;
 	using Skyline.DataMiner.Utils.DOM.UnitTesting;
 
@@ -12,10 +13,16 @@
 		internal static IConnection CreateConnection()
 		{
 			var messageHandler = new DomSLNetMessageHandler();
+			messageHandler.AddFacilityManagementModule();
 			return CreateConnection(messageHandler);
 		}
 
-		internal static IConnection CreateConnection(DomSLNetMessageHandler messageHandler)
+		internal static IFacilityManagementApiHelper GetMockedHelper(this IConnection connection)
+		{
+			return new FacilityManagementApiHelper(connection);
+		}
+
+		private static IConnection CreateConnection(DomSLNetMessageHandler messageHandler)
 		{
 			var connectionMock = new Mock<IConnection>();
 			connectionMock.Setup(c => c.HandleMessages(It.IsAny<DMSMessage[]>()))
@@ -28,11 +35,6 @@
 				.Returns("Mocked User");
 
 			return connectionMock.Object;
-		}
-
-		internal static IFacilityManagementApiHelper GetMockedHelper(this IConnection connection)
-		{
-			return new FacilityManagementApiHelper(connection);
 		}
 
 		private static DMSMessage[] HandleSLNetMessages(DomSLNetMessageHandler messageHandler, DMSMessage[] messages)

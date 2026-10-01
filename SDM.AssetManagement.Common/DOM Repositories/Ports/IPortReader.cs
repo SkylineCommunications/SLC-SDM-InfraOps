@@ -10,25 +10,25 @@
     /// Filters are built with <see cref="PortExposers"/> and are applied to each definition
     /// using its own field descriptors. Both definitions are read in a single query and the
     /// results are split per definition.
-    /// When a filter uses definition-exclusive fields (<see cref="PortExposers.DataPortOnly"/> /
-    /// <see cref="PortExposers.PowerPortOnly"/>), the opposite definition is useless to filter and
+    /// When a filter uses definition-exclusive fields (<see cref="PortExposers.DataPortOnly"/>),
+    /// the opposite definition is useless to filter and
     /// is skipped. When exclusive fields of both definitions are combined in one filter, no instance
     /// can match and an empty result is returned without querying.
     /// </summary>
-    public interface IPortRepository
+    public interface IPortReader : IReadableRepository<IPort>, ICountableRepository<IPort>
     {
         /// <summary>
         /// Reads all ports from both the DataPort and PowerPort definitions.
         /// </summary>
         /// <returns>All ports, split per definition.</returns>
-        PortReadResult Read();
+        IEnumerable<IPort> Read();
 
         /// <summary>
         /// Reads the ports matching the given filter from both the DataPort and PowerPort definitions.
         /// </summary>
         /// <param name="filter">A filter built with <see cref="PortExposers"/>.</param>
         /// <returns>The matching ports, split per definition.</returns>
-        PortReadResult Read(FilterElement<IPort> filter);
+        IEnumerable<IPort> Read(FilterElement<IPort> filter);
 
         /// <summary>
         /// Reads the ports matching the given query from both the DataPort and PowerPort definitions.
@@ -40,14 +40,14 @@
         /// </summary>
         /// <param name="query">A query whose filter and order-by are built with <see cref="PortExposers"/>.</param>
         /// <returns>The matching ports in query order, also split per definition.</returns>
-        PortReadResult Read(IQuery<IPort> query);
+        IEnumerable<IPort> Read(IQuery<IPort> query);
 
         /// <summary>
         /// Reads all ports from both the DataPort and PowerPort definitions, one page at a time.
         /// </summary>
         /// <param name="pageSize">The maximum number of ports (across both definitions) per page.</param>
         /// <returns>A lazy sequence of pages, each split per definition.</returns>
-        IEnumerable<PortReadResult> ReadPaged(int pageSize = 500);
+        IEnumerable<IPagedResult<IPort>> ReadPaged(int pageSize = 500);
 
         /// <summary>
         /// Reads the ports matching the given filter, one page at a time.
@@ -55,7 +55,7 @@
         /// <param name="filter">A filter built with <see cref="PortExposers"/>.</param>
         /// <param name="pageSize">The maximum number of ports (across both definitions) per page.</param>
         /// <returns>A lazy sequence of pages, each split per definition.</returns>
-        IEnumerable<PortReadResult> ReadPaged(FilterElement<IPort> filter, int pageSize = 500);
+        IEnumerable<IPagedResult<IPort>> ReadPaged(FilterElement<IPort> filter, int pageSize = 500);
 
         /// <summary>
         /// Reads the ports matching the given query, one page at a time.
@@ -64,6 +64,6 @@
         /// <param name="query">A query whose filter and order-by are built with <see cref="PortExposers"/>.</param>
         /// <param name="pageSize">The maximum number of ports (across both definitions) per page.</param>
         /// <returns>A lazy sequence of pages in query order, each also split per definition.</returns>
-        IEnumerable<PortReadResult> ReadPaged(IQuery<IPort> query, int pageSize = 500);
+        IEnumerable<IPagedResult<IPort>> ReadPaged(IQuery<IPort> query, int pageSize = 500);
     }
 }

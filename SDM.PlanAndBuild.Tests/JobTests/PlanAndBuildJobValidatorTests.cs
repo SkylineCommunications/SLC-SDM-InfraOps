@@ -12,10 +12,12 @@ namespace SDM.PlanAndBuild.Tests.JobTests
 
 	using Skyline.DataMiner.SDM;
 	using Skyline.DataMiner.SDM.AssetManagement.Models;
-	using Skyline.DataMiner.SDM.PlanAndBuild.Helpers;
+    using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
+    using Skyline.DataMiner.SDM.PlanAndBuild.Helpers;
 	using Skyline.DataMiner.SDM.PlanAndBuild.Models;
 	using Skyline.DataMiner.SDM.PlanAndBuild.Validation;
-	using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
+    using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
+    using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
 	using Statuses = SharedMappers.DomIds.SlcPlan_And_Build.Behaviors.Job_Behavior.StatusesEnum;
 
@@ -423,7 +425,7 @@ namespace SDM.PlanAndBuild.Tests.JobTests
 				JobName = "Some Job",
 				Type = new SdmObjectReference<JobType>(_jobType.Identifier),
 			};
-			job.Ownership.AssignedTo = Guid.NewGuid();
+			job.Ownership.AssignedTo = new PnoObjectReference<Person>(Guid.NewGuid());
 
 			// Base test Helper is wired with the default People API mock, where any Guid "exists".
 			var result = _validator.Validate(job, RepositoryAction.Create);
@@ -445,7 +447,7 @@ namespace SDM.PlanAndBuild.Tests.JobTests
 				JobName = "Some Job",
 				Type = new SdmObjectReference<JobType>(jobType.Identifier),
 			};
-			job.Ownership.AssignedTo = Guid.NewGuid();
+			job.Ownership.AssignedTo = new PnoObjectReference<Person>(Guid.NewGuid());
 
 			var result = validator.Validate(job, RepositoryAction.Create);
 
@@ -471,7 +473,7 @@ namespace SDM.PlanAndBuild.Tests.JobTests
 				JobName = "Some Job",
 				Type = new SdmObjectReference<JobType>(jobType.Identifier),
 			};
-			job.Ownership.AssignmentGroup = Guid.NewGuid();
+			job.Ownership.AssignmentGroup = new PnoObjectReference<Team>(Guid.NewGuid());
 
 			var result = validator.Validate(job, RepositoryAction.Create);
 
@@ -479,35 +481,6 @@ namespace SDM.PlanAndBuild.Tests.JobTests
 			{
 				result.IsValid.Should().BeFalse();
 				result.TryGetFailReason(PlanAndBuildJobValidationHandler.PlanAndBuildJobValidationField.AssignmentGroup, out var reason).Should().BeTrue();
-				reason.Should().Contain("does not exist");
-			}
-		}
-
-		[TestMethod]
-		public void Validate_WithAttachmentAttachedByUnknownPerson_ShouldReturnInvalid()
-		{
-			var helper = ConnectionHelper.CreateConnection()
-				.GetMockedHelperWithPeopleApi(exists: false)
-				.PopulateAppSettings();
-			var jobType = helper.JobTypes.Create(new JobType { Name = "Installation" });
-			var validator = new PlanAndBuildJobValidator(helper, ConnectionHelper.CreatePeopleApiMock(exists: false));
-
-			var job = new PlanAndBuildJob
-			{
-				JobName = "Some Job",
-				Type = new SdmObjectReference<JobType>(jobType.Identifier),
-				Attachments = new System.Collections.Generic.List<JobAttachment>
-				{
-					new JobAttachment { FilePath = @"C:\attachments\plan.pdf", AttachedBy = Guid.NewGuid() },
-				},
-			};
-
-			var result = validator.Validate(job, RepositoryAction.Create);
-
-			using (new AssertionScope())
-			{
-				result.IsValid.Should().BeFalse();
-				result.TryGetFailReason(PlanAndBuildJobValidationHandler.PlanAndBuildJobValidationField.Attachments, out var reason).Should().BeTrue();
 				reason.Should().Contain("does not exist");
 			}
 		}

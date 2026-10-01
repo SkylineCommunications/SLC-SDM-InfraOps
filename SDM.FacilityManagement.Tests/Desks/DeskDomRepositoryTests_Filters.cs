@@ -10,6 +10,7 @@ namespace SDM.FacilityManagement.Tests.Desks
 
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
 
     public partial class DeskDomRepositoryTests : BaseRepositoryTest
@@ -123,5 +124,42 @@ namespace SDM.FacilityManagement.Tests.Desks
                 desksRetrieved.Should().BeEquivalentTo(expected);
             }
         }
+
+        [TestMethod]
+        public void DeskDomRepository_ReadFilter_DesksWithoutRoom()
+        {
+            Helper.PopulateDesks();
+
+            var filter = DeskExposers.RoomFk.Room.HasNoValue();
+            var expected = DemoData.Desks.Where(d => (!d.RoomFk?.Room.HasValue()) ?? false).ToArray();
+
+            var desksRetrieved = Helper.Desks.Read(filter);
+
+            using (new AssertionScope())
+            {
+                desksRetrieved.Should().NotBeNull();
+                desksRetrieved.Should().NotBeEmpty();
+                desksRetrieved.Should().HaveCount(expected.Length);
+                desksRetrieved.Should().BeEquivalentTo(expected);
+            }
+        }
+
+        [TestMethod]
+        public void DeskDomRepository_ReadFilter_NonExistentRoom()
+        {
+            Helper.PopulateDesks();
+
+            var filter = DeskExposers.RoomFk.Room.Equal(new SdmObjectReference<Room>(Guid.NewGuid().ToString()));
+
+            var desksRetrieved = Helper.Desks.Read(filter);
+
+            using (new AssertionScope())
+            {
+                desksRetrieved.Should().NotBeNull();
+                desksRetrieved.Should().BeEmpty();
+                desksRetrieved.Should().HaveCount(0);
+            }
+        }
+
     }
 }
