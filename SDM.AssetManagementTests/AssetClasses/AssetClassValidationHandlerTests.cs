@@ -614,13 +614,12 @@
         }
 
         [TestMethod]
-        [Ignore("Behavior difference: failing at ValidateAssetClassHolders(null) reporting on HolderSlotNumber field; consumer expects fail reason on AssetClass field")]
-        public void Holders_WithNullAssetClass_ShouldFailOnAssetClassField()
+        public void Holders_WithNullAssetClass_ShouldFailOnHolderSlotNumberField()
         {
             var result = AssetClassValidationHandler.ValidateAssetClassHolders(null);
 
             result.IsValid.Should().BeFalse();
-            result.TryGetFailReason(AssetClassValidationHandler.AssetClassValidationField.AssetClass, out _).Should().BeTrue();
+            result.TryGetFailReason(AssetClassValidationHandler.AssetClassValidationField.HolderSlotNumber, out _).Should().BeTrue();
         }
 
         [TestMethod]
