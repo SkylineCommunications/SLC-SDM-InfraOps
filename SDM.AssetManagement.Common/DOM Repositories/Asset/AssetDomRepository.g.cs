@@ -986,7 +986,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
             if (obj.OperationalFlags.IsNotNullOrEmpty())
             {
-                _assetproperties.AddOrUpdateValue<List<long>>(AssetManagement.Models.AssetDomMapper.AssetProperties.OperationalFlags, obj.OperationalFlags.Select(flag => (long)flag).ToList());
+                _assetproperties.AddOrUpdateListValue<long>(AssetManagement.Models.AssetDomMapper.AssetProperties.OperationalFlags, obj.OperationalFlags.Select(flag => (long)flag).ToList());
             }
 
             instance.Sections.Add(_assetproperties);

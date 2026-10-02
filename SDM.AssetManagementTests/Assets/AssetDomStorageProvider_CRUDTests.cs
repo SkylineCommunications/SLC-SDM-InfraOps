@@ -406,7 +406,6 @@
         }
 
         [TestMethod]
-        [Ignore("Behavior difference: failing at Assets.Create/CreateOrUpdate throwing ArgumentException ('value') when OperationalFlags is non-empty (AssetDomRepository uses AddOrUpdateValue<List<long>> instead of AddOrUpdateListValue); consumer expects flag to persist and reload")]
         public void OperationalFlags_SaveAndReload_FlagSurvives()
         {
             var asset = NewMinimalAsset("FLAG-3");
@@ -420,7 +419,6 @@
         }
 
         [TestMethod]
-        [Ignore("Behavior difference: failing at Assets.Create throwing ArgumentException ('value') when OperationalFlags is non-empty (AssetDomRepository uses AddOrUpdateValue<List<long>> instead of AddOrUpdateListValue); consumer expects save with flag, clear, save again and flag gone")]
         public void OperationalFlags_SaveWithFlag_ClearAndSaveAgain_FlagGone()
         {
             var asset = NewMinimalAsset("FLAG-4");
