@@ -169,7 +169,6 @@ namespace SDM.AssetManagement.Tests.Assets
         #region Destination Rack Placement
 
         [TestMethod]
-        [Ignore("SDM missing validation: DestinationLocation.RackPosition is not checked against destination rack capacity (AssetValidationHandler.IsDestinationRackPositionValid / PlacementValidator.ValidateBulkPlacements)")]
         public void Create_InTransitWithDestinationRackPositionOutOfRange_ShouldFail()
         {
             var rack = CreateRack(42, Bottom);
