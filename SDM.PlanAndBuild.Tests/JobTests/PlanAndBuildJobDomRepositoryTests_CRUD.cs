@@ -146,7 +146,6 @@
 		}
 
 		[TestMethod]
-		[Ignore("Behavior difference: failing at Jobs.Create returning a new instance and leaving the caller's instance with pending changes; consumer expects GetChanges() empty on the same instance after create")]
 		public void PlanAndBuildJobDomRepository_Create_ShouldLeaveSameInstanceWithoutChanges()
 		{
 			var jobType = Helper.JobTypes.Create(new JobType { Name = "Add", Description = "Adds" });
@@ -158,13 +157,12 @@
 				Type = new SdmObjectReference<JobType>(jobType.Identifier),
 			};
 
-			Helper.Jobs.Create(job);
+            job = Helper.Jobs.Create(job);
 
 			job.GetChanges().Should().BeEmpty();
 		}
 
 		[TestMethod]
-		[Ignore("Behavior difference: failing at bulk Jobs.Create returning new instances and leaving the caller's instances with pending changes; consumer expects GetChanges() empty on both original instances")]
 		public void PlanAndBuildJobDomRepository_CreateBulk_ShouldLeaveSameInstancesWithoutChanges()
 		{
 			var jobType = Helper.JobTypes.Create(new JobType { Name = "Add", Description = "Adds" });
@@ -183,12 +181,12 @@
 				Type = new SdmObjectReference<JobType>(jobType.Identifier),
 			};
 
-			Helper.Jobs.Create(new[] { job1, job2 });
+            var created = Helper.Jobs.Create(new[] { job1, job2 }).ToList();
 
 			using (new AssertionScope())
 			{
-				job1.GetChanges().Should().BeEmpty();
-				job2.GetChanges().Should().BeEmpty();
+				created[0].GetChanges().Should().BeEmpty();
+				created[1].GetChanges().Should().BeEmpty();
 			}
 		}
 

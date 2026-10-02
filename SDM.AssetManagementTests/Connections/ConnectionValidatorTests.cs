@@ -467,13 +467,12 @@ namespace SDM.AssetManagement.Tests.Connections
         }
 
         [TestMethod]
-        [Ignore("Behavior difference: failing at Connections.Create returning a new instance and leaving the caller's instance with pending changes; consumer expects GetChanges() empty on the same instance after create")]
         public void CreateDataConnection_AfterCreate_ShouldHaveNoPendingChanges()
         {
             var connection = BuildFullyPopulatedDataConnection();
             connection.GetChanges().Should().NotBeEmpty("a newly created data connection should have pending changes");
 
-            Helper.AssetManagement.Connections.Create(connection);
+            connection = Helper.AssetManagement.Connections.Create(connection);
 
             connection.GetChanges().Should().BeEmpty();
         }
