@@ -2,6 +2,12 @@
 
 ## About
 
+## Removed Job entries
+
+Asset entries with action `Removed` and Connection entries with status `Removed` or legacy
+`Removal` (case-insensitive) are historical snapshots. Reference-existence validation does not
+require their original Assets, Connections, or snapshot CableTypes to still exist. Active entries
+continue to require existing references; other validation, including Job state restrictions, remains unchanged.
 
 
 ### About DataMiner

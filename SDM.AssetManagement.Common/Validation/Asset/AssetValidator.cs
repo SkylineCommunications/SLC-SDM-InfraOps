@@ -204,7 +204,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
                 }
             }
 
-
             return results;
         }
 

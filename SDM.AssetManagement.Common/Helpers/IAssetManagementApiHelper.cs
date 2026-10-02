@@ -60,8 +60,25 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Helpers
         /// Retries cleanup after an Asset DOM deletion has already succeeded.
         /// </summary>
         /// <param name="assetIdentifier">The Asset DOM identifier.</param>
+        /// <remarks>
+        /// Identifier-only recovery supports only the default deletion policy, which removes Asset Job
+        /// entries and reads Connection snapshot cable tags from Connections that still exist.
+        /// It cannot reconstruct snapshots of already-deleted Connections.
+        /// Prefer <see cref="RecoverAssetDeletion(AssetDeletionRecoveryContext)"/> with the original failure
+        /// context whenever available. Custom policies require that context.
+        /// </remarks>
         void RecoverAssetDeletion(string assetIdentifier);
 
+        /// <summary>
+        /// Retries dependency cleanup after successful Asset DOM deletion using captured recovery data.
+        /// </summary>
+        /// <param name="context">The original recovery context from the failed deletion outcome.</param>
+        /// <remarks>
+        /// Preferred for both default and custom policies because captured Asset metadata and Connection
+        /// snapshots remain available even after their source objects have been deleted.
+        /// The context policy must match this helper's deletion policy, and the Asset must no longer exist.
+        /// If recovery fails, use the context from the new failure outcome for the next attempt.
+        /// </remarks>
         void RecoverAssetDeletion(AssetDeletionRecoveryContext context);
     }
 }

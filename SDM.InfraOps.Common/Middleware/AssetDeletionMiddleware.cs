@@ -3,6 +3,7 @@ namespace Skyline.DataMiner.SDM.InfraOps.Orchestration.AssetDeletion
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Security.Cryptography.Xml;
 
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
@@ -13,6 +14,7 @@ namespace Skyline.DataMiner.SDM.InfraOps.Orchestration.AssetDeletion
     using Skyline.DataMiner.SDM.InfraOpsProperties.Extensions;
     using Skyline.DataMiner.SDM.InfraOpsProperties.Helpers;
     using Skyline.DataMiner.SDM.PlanAndBuild.Deletion;
+    using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Extensions;
 
     using Connection = Skyline.DataMiner.SDM.AssetManagement.Models.Connection;
 
@@ -66,11 +68,11 @@ namespace Skyline.DataMiner.SDM.InfraOps.Orchestration.AssetDeletion
             _properties = properties;
         }
 
-        public override void OnDelete(Asset asset, Action<Asset> next)
+        public override void OnDelete(Asset item, Action<Asset> next)
         {
-            if (asset == null)
+            if (item == null)
             {
-                throw new ArgumentNullException(nameof(asset));
+                throw new ArgumentNullException(nameof(item));
             }
 
             if (next == null)
@@ -79,23 +81,24 @@ namespace Skyline.DataMiner.SDM.InfraOps.Orchestration.AssetDeletion
             }
 
             EnsureConfigured();
-            if (string.IsNullOrWhiteSpace(asset.Identifier))
+
+            if (string.IsNullOrWhiteSpace(item.Identifier))
             {
-                throw new ArgumentException("Asset identifier cannot be empty.", nameof(asset));
+                throw new ArgumentException("Asset identifier cannot be empty.", nameof(item));
             }
 
-            var existingAsset = _assetManagement.Assets
-                .Read(AssetExposers.Identifier.Equal(asset.Identifier))
-                .SingleOrDefault();
+            var existingAsset = _assetManagement.Assets.ReadByIdentifier(item.Identifier);
+
             var context = existingAsset == null ? null : CaptureAssetContext(
                 existingAsset,
                 new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
                 {
                     [existingAsset.Identifier] = existingAsset.Name,
                 });
+
             try
             {
-                next(asset);
+                next(item);
             }
             catch (Exception domException)
             {
@@ -103,7 +106,7 @@ namespace Skyline.DataMiner.SDM.InfraOps.Orchestration.AssetDeletion
                     new[]
                     {
                         new AssetDeletionOutcome(
-                            asset.Identifier,
+                            item.Identifier,
                             false,
                             "Asset DOM delete",
                             domException),
@@ -113,22 +116,11 @@ namespace Skyline.DataMiner.SDM.InfraOps.Orchestration.AssetDeletion
 
             if (context != null)
             {
-                try
-                {
-                    Cleanup(ref context);
-                }
-                catch (AssetDeletionStageFailureException failure)
+                var outcome = CleanupDeletedAsset(context);
+                if (!string.IsNullOrEmpty(outcome.FailedStage))
                 {
                     throw new AssetDeletionCascadeException(
-                        new[]
-                        {
-                            new AssetDeletionOutcome(
-                                asset.Identifier,
-                                true,
-                                failure.Stage,
-                                failure.InnerException,
-                                context),
-                        },
+                        new[] { outcome },
                         null);
                 }
             }
@@ -154,25 +146,23 @@ namespace Skyline.DataMiner.SDM.InfraOps.Orchestration.AssetDeletion
             }
 
             EnsureConfigured();
-            var identifiers = items
-                .Where(asset => asset != null)
-                .GroupBy(asset => asset.Identifier, StringComparer.OrdinalIgnoreCase)
-                .Select(group => group.Key)
-                .ToList();
-            if (identifiers.Any(string.IsNullOrWhiteSpace))
+
+
+            if (items.Any(asset => asset != null && string.IsNullOrWhiteSpace(asset.Identifier)))
             {
                 throw new ArgumentException("Asset identifier cannot be empty.", nameof(assets));
             }
 
-            var existingAssets = ReadExistingAssets(identifiers);
-            var names = existingAssets.ToDictionary(item => item.Identifier, item => item.Name, StringComparer.OrdinalIgnoreCase);
-            var contexts = existingAssets.ToDictionary(
-                item => item.Identifier,
-                item => CaptureAssetContext(item, names),
-                StringComparer.OrdinalIgnoreCase);
-            var existingBeforeDelete = new HashSet<string>(contexts.Keys, StringComparer.OrdinalIgnoreCase);
+            var identifiers = items
+                .Where(asset => asset != null)
+                .Select(asset => asset.Identifier)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            var contexts = CaptureDeletionContexts(identifiers);
 
             Exception domException = null;
+
             try
             {
                 next(items);
@@ -182,77 +172,20 @@ namespace Skyline.DataMiner.SDM.InfraOps.Orchestration.AssetDeletion
                 domException = exception;
             }
 
-            var successfulIdentifiers = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            if (domException == null)
-            {
-                successfulIdentifiers.UnionWith(existingBeforeDelete);
-            }
-            else
-            {
-                try
-                {
-                    var existingAfterDelete = ReadExistingAssetIdentifiers(identifiers);
-                    foreach (var identifier in existingBeforeDelete)
-                    {
-                        if (!existingAfterDelete.Contains(identifier))
-                        {
-                            successfulIdentifiers.Add(identifier);
-                        }
-                    }
-                }
-                catch (Exception discoveryException)
-                {
-                    var combinedException = new AggregateException(domException, discoveryException);
-                    throw new AssetDeletionCascadeException(
-                        identifiers.Select(identifier => new AssetDeletionOutcome(
-                            identifier,
-                            false,
-                            "Asset DOM result discovery",
-                            combinedException)).ToList(),
-                        domException);
-                }
-            }
-
-            var outcomes = new List<AssetDeletionOutcome>();
-            foreach (var identifier in identifiers)
-            {
-                if (successfulIdentifiers.Contains(identifier))
-                {
-                    continue;
-                }
-
-                outcomes.Add(new AssetDeletionOutcome(
-                    identifier,
-                    false,
-                    "Asset DOM delete",
-                    domException));
-            }
-
-            foreach (var identifier in successfulIdentifiers)
-            {
-                var context = contexts[identifier];
-                try
-                {
-                    Cleanup(ref context);
-                    outcomes.Add(new AssetDeletionOutcome(identifier, true, null, null));
-                }
-                catch (AssetDeletionStageFailureException failure)
-                {
-                    outcomes.Add(new AssetDeletionOutcome(
-                        identifier,
-                        true,
-                        failure.Stage,
-                        failure.InnerException,
-                        context));
-                }
-            }
-
-            if (domException != null || outcomes.Any(outcome => !string.IsNullOrEmpty(outcome.FailedStage)))
-            {
-                throw new AssetDeletionCascadeException(outcomes, domException);
-            }
+            CompleteBulkDeletion(identifiers, contexts, domException);
         }
 
+        /// <summary>
+        /// Retries dependency cleanup using only the identifier of an Asset whose DOM deletion has succeeded.
+        /// </summary>
+        /// <param name="assetIdentifier">The deleted Asset DOM identifier.</param>
+        /// <remarks>
+        /// Only the default deletion policy supports identifier-only recovery. Original Asset metadata is
+        /// unnecessary because this policy removes Asset Job entries. Connection snapshots use cable tags
+        /// from Connections that still exist; snapshots of already-deleted Connections cannot be reconstructed.
+        /// Prefer <see cref="RecoverAssetDeletion(AssetDeletionRecoveryContext)"/> with the original failure
+        /// context whenever available. Custom policies require that context.
+        /// </remarks>
         public override void RecoverAssetDeletion(string assetIdentifier)
         {
             if (string.IsNullOrWhiteSpace(assetIdentifier))
@@ -270,6 +203,16 @@ namespace Skyline.DataMiner.SDM.InfraOps.Orchestration.AssetDeletion
                 new Dictionary<string, string>(), Array.Empty<AssetDeletionConnectionSnapshot>()));
         }
 
+        /// <summary>
+        /// Retries dependency cleanup after successful Asset DOM deletion using captured recovery data.
+        /// </summary>
+        /// <param name="context">The original recovery context from the failed deletion outcome.</param>
+        /// <remarks>
+        /// Preferred for both default and custom policies because captured Asset metadata and Connection
+        /// snapshots remain available even after their source objects have been deleted.
+        /// The context policy must match this middleware's deletion policy, and the Asset must no longer exist.
+        /// If recovery fails, use the context from the new failure outcome for the next attempt.
+        /// </remarks>
         public override void RecoverAssetDeletion(AssetDeletionRecoveryContext context)
         {
             if (context == null)
@@ -290,15 +233,101 @@ namespace Skyline.DataMiner.SDM.InfraOps.Orchestration.AssetDeletion
                     $"Asset '{assetIdentifier}' still exists; recovery is only valid after its DOM deletion succeeds.");
             }
 
+            var outcome = CleanupDeletedAsset(context);
+            if (!string.IsNullOrEmpty(outcome.FailedStage))
+            {
+                throw new AssetDeletionCascadeException(
+                    new[] { outcome },
+                    null);
+            }
+        }
+
+        private Dictionary<string, AssetDeletionRecoveryContext> CaptureDeletionContexts(
+            IEnumerable<string> identifiers)
+        {
+            var existingAssets = _assetManagement.Assets.ReadByIdentifiers(identifiers);
+            var names = existingAssets.ToDictionary(item => item.Identifier, item => item.Name, StringComparer.OrdinalIgnoreCase);
+            return existingAssets.ToDictionary(
+                item => item.Identifier,
+                item => CaptureAssetContext(item, names),
+                StringComparer.OrdinalIgnoreCase);
+        }
+
+        private void CompleteBulkDeletion(
+            List<string> identifiers,
+            Dictionary<string, AssetDeletionRecoveryContext> contexts,
+            Exception domException)
+        {
+            var successfulIdentifiers = new HashSet<string>(contexts.Keys, StringComparer.OrdinalIgnoreCase);
+
+            if (domException != null)
+            {
+                try
+                {
+                    successfulIdentifiers = DiscoverSuccessfulAssetDeletions(identifiers, contexts.Keys);
+                }
+                catch (Exception discoveryException)
+                {
+                    var combinedException = new AggregateException(domException, discoveryException);
+                    throw new AssetDeletionCascadeException(
+                        identifiers.Select(identifier => new AssetDeletionOutcome(
+                            identifier,
+                            false,
+                            "Asset DOM result discovery",
+                            combinedException)).ToList(),
+                        domException);
+                }
+            }
+
+            var outcomes = identifiers
+                .Where(identifier => !successfulIdentifiers.Contains(identifier))
+                .Select(identifier => new AssetDeletionOutcome(
+                    identifier,
+                    false,
+                    "Asset DOM delete",
+                    domException))
+                .ToList();
+
+            foreach (var identifier in successfulIdentifiers)
+            {
+                outcomes.Add(CleanupDeletedAsset(contexts[identifier]));
+            }
+
+            if (domException != null || outcomes.Any(outcome => !string.IsNullOrEmpty(outcome.FailedStage)))
+            {
+                throw new AssetDeletionCascadeException(outcomes, domException);
+            }
+        }
+
+        private HashSet<string> DiscoverSuccessfulAssetDeletions(
+            List<string> identifiers,
+            IEnumerable<string> existingIdentifiers)
+        {
+            var successfulIdentifiers = new HashSet<string>(existingIdentifiers, StringComparer.OrdinalIgnoreCase);
+            var existingAfterDelete = _assetManagement.Assets.ReadByIdentifiers(identifiers)
+                .Select(asset => asset.Identifier);
+            successfulIdentifiers.ExceptWith(existingAfterDelete);
+
+            return successfulIdentifiers;
+        }
+
+        private AssetDeletionOutcome CleanupDeletedAsset(AssetDeletionRecoveryContext context)
+        {
             try
             {
-                Cleanup(ref context);
+                var preparation = PrepareCleanup(context);
+                context = preparation.RecoveryContext;
+                Cleanup(preparation);
+                return new AssetDeletionOutcome(context.AssetIdentifier, true, null, null);
             }
             catch (AssetDeletionStageFailureException failure)
             {
-                throw new AssetDeletionCascadeException(
-                    new[] { new AssetDeletionOutcome(assetIdentifier, true, failure.Stage, failure.InnerException, context) },
-                    null);
+                return new AssetDeletionOutcome(
+                    context.AssetIdentifier,
+                    true,
+                    failure.Stage,
+                    failure.InnerException,
+                    context);
             }
         }
 
@@ -313,7 +342,7 @@ namespace Skyline.DataMiner.SDM.InfraOps.Orchestration.AssetDeletion
                 if (!string.IsNullOrWhiteSpace(asset.AssetClassId.Identifier))
                 {
                     className = _assetManagement.AssetClasses
-                        .Read(AssetClassExposers.Identifier.Equal(asset.AssetClassId.Identifier))
+                        .ReadByIdentifiers(new[] { asset.AssetClassId.Identifier })
                         .SingleOrDefault()?.Name;
                 }
 
@@ -343,45 +372,102 @@ namespace Skyline.DataMiner.SDM.InfraOps.Orchestration.AssetDeletion
                 .ToList();
 
             var connections = ReadConnectionsByPortIds(portIds);
+
             var retainedSnapshots = context.ConnectionSnapshots
                 .GroupBy(snapshot => snapshot.ConnectionIdentifier, StringComparer.OrdinalIgnoreCase)
                 .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase);
+
             var endpointNames = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
             var useEndpointNames = _policy.ConnectionJobEntryMode == JobEntryRemovalMode.KeepRemovedSnapshot &&
                 _policy.ConnectionSnapshotFormat == ConnectionSnapshotFormat.AssetAndPortNames;
+
             if (useEndpointNames)
             {
-                foreach (var portReference in connections
-                    .Where(connection => !retainedSnapshots.ContainsKey(connection.Identifier))
-                    .SelectMany(connection =>
-                    new[] { connection.Source.Port, connection.Destination.Port })
-                    .Where(reference => !ReferenceEquals(reference, null))
-                    .GroupBy(reference => reference.Identifier, StringComparer.OrdinalIgnoreCase)
-                    .Select(group => group.First()))
-                {
-                    var port = _assetManagement.Ports.Read(PortExposers.Identifier.Equal(portReference.Identifier)).Single();
-                    if (!context.DeletedAssetNames.TryGetValue(port.Asset.Identifier, out var name))
-                    {
-                        name = _assetManagement.Assets
-                            .Read(AssetExposers.Identifier.Equal(port.Asset.Identifier)).Single().Name;
-                    }
-
-                    endpointNames[port.Identifier] = $"{name} - {port.PortInfo.Name}";
-                }
+                endpointNames = ReadConnectionEndpointNames(connections, retainedSnapshots, context);
             }
 
             var snapshots = connections
-                .Select(connection => retainedSnapshots.TryGetValue(connection.Identifier, out var retained)
-                    ? retained
-                    : new AssetDeletionConnectionSnapshot(
-                    connection.Identifier,
-                    useEndpointNames ? endpointNames[connection.Source.Port.Identifier] : connection.Source.CableTag,
-                    useEndpointNames ? endpointNames[connection.Destination.Port.Identifier] : connection.Destination.CableTag,
-                    connection.CableType.Identifier,
-                    connection.CableLength))
+                .Select(connection => CreateConnectionSnapshot(connection, retainedSnapshots, endpointNames, useEndpointNames))
                 .ToList();
 
             return new AssetDeletionSnapshot(connections, snapshots);
+        }
+
+        private Dictionary<string, string> ReadConnectionEndpointNames(
+            IEnumerable<Connection> connections,
+            IReadOnlyDictionary<string, AssetDeletionConnectionSnapshot> retainedSnapshots,
+            AssetDeletionRecoveryContext context)
+        {
+            var endpointIdentifiers = connections
+                .Where(connection => !retainedSnapshots.ContainsKey(connection.Identifier))
+                .SelectMany(connection =>
+                new[] { connection.Source.Port, connection.Destination.Port })
+                .Where(reference => !ReferenceEquals(reference, null))
+                .Select(reference => reference.Identifier)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            var portsByIdentifier = _assetManagement.Ports.ReadByBigOrFilter(
+                endpointIdentifiers,
+                identifier => PortExposers.Identifier.Equal(identifier))
+                .GroupBy(port => port.Identifier, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(group => group.Key, group => group.ToList(), StringComparer.OrdinalIgnoreCase);
+            var endpointPorts = endpointIdentifiers
+                .Select(identifier => portsByIdentifier.TryGetValue(identifier, out var matches)
+                    ? matches.Single()
+                    : throw new InvalidOperationException($"Connection endpoint port '{identifier}' was not found."))
+                .ToList();
+
+            var assetIdentifiers = endpointPorts
+                .Select(port => port.Asset.Identifier)
+                .Where(identifier => !context.DeletedAssetNames.ContainsKey(identifier))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+            var assetsByIdentifier = _assetManagement.Assets.ReadByIdentifiers(assetIdentifiers)
+                .GroupBy(asset => asset.Identifier, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(group => group.Key, group => group.ToList(), StringComparer.OrdinalIgnoreCase);
+
+            var endpointNames = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var port in endpointPorts)
+            {
+                if (!context.DeletedAssetNames.TryGetValue(port.Asset.Identifier, out var name))
+                {
+                    name = assetsByIdentifier.TryGetValue(port.Asset.Identifier, out var matches)
+                        ? matches.Single().Name
+                        : throw new InvalidOperationException($"Connection endpoint Asset '{port.Asset.Identifier}' was not found.");
+                }
+
+                endpointNames[port.Identifier] = $"{name} - {port.PortInfo.Name}";
+            }
+
+            return endpointNames;
+        }
+
+        private static AssetDeletionConnectionSnapshot CreateConnectionSnapshot(
+            Connection connection,
+            IReadOnlyDictionary<string, AssetDeletionConnectionSnapshot> retainedSnapshots,
+            IReadOnlyDictionary<string, string> endpointNames,
+            bool useEndpointNames)
+        {
+            if (retainedSnapshots.TryGetValue(connection.Identifier, out var retained))
+            {
+                return retained;
+            }
+
+            var source = useEndpointNames
+                ? endpointNames[connection.Source.Port.Identifier]
+                : connection.Source.CableTag;
+            var destination = useEndpointNames
+                ? endpointNames[connection.Destination.Port.Identifier]
+                : connection.Destination.CableTag;
+
+            return new AssetDeletionConnectionSnapshot(
+                connection.Identifier,
+                source,
+                destination,
+                connection.CableType.Identifier,
+                connection.CableLength);
         }
 
         private List<Connection> ReadConnectionsByPortIds(IReadOnlyCollection<Guid> portIds)
@@ -391,35 +477,16 @@ namespace Skyline.DataMiner.SDM.InfraOps.Orchestration.AssetDeletion
                 return new List<Connection>();
             }
 
-            var filters = portIds
-                .SelectMany(portId => new FilterElement<Connection>[]
-                {
-                    ConnectionExposers.Source.Port.Equal(new ISdmObjectReference<IPort>(portId.ToString())),
-                    ConnectionExposers.Destination.Port.Equal(new ISdmObjectReference<IPort>(portId.ToString())),
-                })
-                .ToArray();
-
-            var portIdSet = new HashSet<Guid>(portIds);
-            return _assetManagement.Connections
-                .Read(new ORFilterElement<Connection>(filters))
-                .Where(connection =>
-                    IsReferencedPort(connection.Source.Port, portIdSet) ||
-                    IsReferencedPort(connection.Destination.Port, portIdSet))
+            return _assetManagement.Connections.ReadByBigOrFilter(
+                portIds,
+                portId => ConnectionExposers.Source.Port.Equal(new ISdmObjectReference<IPort>(portId.ToString()))
+                .OR(ConnectionExposers.Destination.Port.Equal(new ISdmObjectReference<IPort>(portId.ToString()))))
                 .GroupBy(connection => connection.Identifier, StringComparer.OrdinalIgnoreCase)
                 .Select(group => group.First())
                 .ToList();
         }
 
-        private static bool IsReferencedPort(
-            ISdmObjectReference<IPort> portReference,
-            ISet<Guid> portIds)
-        {
-            return !ReferenceEquals(portReference, null) &&
-                Guid.TryParse(portReference.Identifier, out var portId) &&
-                portIds.Contains(portId);
-        }
-
-        private void Cleanup(ref AssetDeletionRecoveryContext context)
+        private AssetDeletionCleanupPreparation PrepareCleanup(AssetDeletionRecoveryContext context)
         {
             var assetIdentifier = context.AssetIdentifier;
             Guid linkedObjectId;
@@ -442,12 +509,21 @@ namespace Skyline.DataMiner.SDM.InfraOps.Orchestration.AssetDeletion
                 throw new AssetDeletionStageFailureException(assetIdentifier, "Dependency snapshot", exception);
             }
 
-            context = context.WithConnectionSnapshots(context.ConnectionSnapshots
+            var recoveryContext = context.WithConnectionSnapshots(context.ConnectionSnapshots
                 .Concat(currentSnapshot.JobConnectionSnapshots)
                 .GroupBy(snapshot => snapshot.ConnectionIdentifier, StringComparer.OrdinalIgnoreCase)
                 .Select(group => group.First())
                 .ToList());
-            var cleanupContext = context;
+
+            return new AssetDeletionCleanupPreparation(recoveryContext, currentSnapshot, linkedObjectId);
+        }
+
+        private void Cleanup(AssetDeletionCleanupPreparation preparation)
+        {
+            var cleanupContext = preparation.RecoveryContext;
+            var assetIdentifier = cleanupContext.AssetIdentifier;
+            var currentSnapshot = preparation.Snapshot;
+
             ExecuteStage(assetIdentifier, "PlanAndBuild Jobs", () =>
                 _jobCleanup.RemoveDeletedAssetReferences(cleanupContext));
 
@@ -495,7 +571,7 @@ namespace Skyline.DataMiner.SDM.InfraOps.Orchestration.AssetDeletion
             ExecuteStage(assetIdentifier, "PropertyValues", () =>
             {
                 var values = _properties.PropertyValues
-                    .GetByLinkedObjectID(linkedObjectId, "Asset", "*")
+                    .GetByLinkedObjectID(preparation.LinkedObjectId, "Asset", "*")
                     .ToList();
                 if (values.Count > 0)
                 {
@@ -533,28 +609,6 @@ namespace Skyline.DataMiner.SDM.InfraOps.Orchestration.AssetDeletion
                      child.DestinationLocation.ParentAsset.Identifier == assetIdentifier))
                 .GroupBy(child => child.Identifier, StringComparer.OrdinalIgnoreCase)
                 .Select(group => group.First())
-                .ToList();
-        }
-
-        private HashSet<string> ReadExistingAssetIdentifiers(IEnumerable<string> identifiers)
-        {
-            return new HashSet<string>(
-                ReadExistingAssets(identifiers).Select(asset => asset.Identifier),
-                StringComparer.OrdinalIgnoreCase);
-        }
-
-        private List<Asset> ReadExistingAssets(IEnumerable<string> identifiers)
-        {
-            var keys = identifiers.Where(identifier => !string.IsNullOrWhiteSpace(identifier)).Distinct().ToList();
-            if (keys.Count == 0)
-            {
-                return new List<Asset>();
-            }
-
-            var filter = new ORFilterElement<Asset>(
-                keys.Select(identifier => AssetExposers.Identifier.Equal(identifier)).ToArray());
-
-            return _assetManagement.Assets.Read(filter)
                 .ToList();
         }
 
@@ -596,19 +650,5 @@ namespace Skyline.DataMiner.SDM.InfraOps.Orchestration.AssetDeletion
             }
         }
 
-        private sealed class AssetDeletionSnapshot
-        {
-            public AssetDeletionSnapshot(
-                List<Connection> connections,
-                List<AssetDeletionConnectionSnapshot> connectionSnapshots)
-            {
-                Connections = connections;
-                JobConnectionSnapshots = connectionSnapshots;
-            }
-
-            public List<Connection> Connections { get; }
-
-            public List<AssetDeletionConnectionSnapshot> JobConnectionSnapshots { get; }
-        }
     }
 }

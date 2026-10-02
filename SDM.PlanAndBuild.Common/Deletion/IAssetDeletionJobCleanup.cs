@@ -5,7 +5,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Deletion
     /// <summary>
     /// Removes Asset references and records Connection snapshots in Plan &amp; Build Jobs.
     /// </summary>
-    public interface IAssetDeletionJobCleanup
+    internal interface IAssetDeletionJobCleanup
     {
         /// <summary>
         /// Applies the captured policy to existing Asset and Connection entries on Jobs.

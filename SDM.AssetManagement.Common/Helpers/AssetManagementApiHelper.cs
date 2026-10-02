@@ -150,14 +150,13 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
 
     public HistoryValidator HistoryValidator => _historyValidator;
 
-    /// <summary>
-    /// Retries dependency cleanup for an Asset whose DOM instance was deleted successfully.
-    /// </summary>
+    /// <inheritdoc cref="IAssetManagementApiHelper.RecoverAssetDeletion(string)"/>
     public void RecoverAssetDeletion(string assetIdentifier)
     {
         _assetDeletionCascadeMiddleware.RecoverAssetDeletion(assetIdentifier);
     }
 
+    /// <inheritdoc cref="IAssetManagementApiHelper.RecoverAssetDeletion(Skyline.DataMiner.SDM.AssetManagement.Deletion.AssetDeletionRecoveryContext)"/>
     public void RecoverAssetDeletion(Skyline.DataMiner.SDM.AssetManagement.Deletion.AssetDeletionRecoveryContext context)
     {
         _assetDeletionCascadeMiddleware.RecoverAssetDeletion(context);

@@ -298,6 +298,20 @@
                 },
             });
             var policy = new AssetDeletionPolicy(assetMode, connectionMode, ConnectionSnapshotFormat.AssetAndPortNames);
+            var connectionOnlyJob = Helper.PlanAndBuild.Jobs.Create(new PlanAndBuildJob
+            {
+                JobName = "Connection-only policy job",
+                Type = new SdmObjectReference<JobType>(jobType.Identifier),
+                ConnectionsOnJob = new List<JobConnection>
+                {
+                    new JobConnection { ConnectionId = new SdmObjectReference<Connection>(connection.Identifier), Status = "Connected" },
+                },
+            });
+            var unrelatedJob = Helper.PlanAndBuild.Jobs.Create(new PlanAndBuildJob
+            {
+                JobName = "Unrelated policy job",
+                Type = new SdmObjectReference<JobType>(jobType.Identifier),
+            });
             var selected = InfraOpsApiComposition.Create(((TestApiHelper)Helper).Connection, PeopleApiMock.CreateDefault(), policy);
             asset.State = otherAsset.State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable;
 
@@ -347,6 +361,12 @@
                 updated.AssetsUsed.Single(item => item.AssetId.Identifier == otherAsset.Identifier).Action
                     .Should().NotBe(SlcPlan_And_Build.Enums.ActionforassetenumEnum.Removed);
             }
+
+            var updatedConnectionOnlyJob = Helper.PlanAndBuild.Jobs.Read(
+                PlanAndBuildJobExposers.Identifier.Equal(connectionOnlyJob.Identifier)).Single();
+            updatedConnectionOnlyJob.ConnectionsOnJob.Should().BeEquivalentTo(updated.ConnectionsOnJob);
+            Helper.PlanAndBuild.Jobs.Read(PlanAndBuildJobExposers.Identifier.Equal(unrelatedJob.Identifier))
+                .Single().Should().BeEquivalentTo(unrelatedJob);
 
             Helper.AssetManagement.Connections.Count(new TRUEFilterElement<Connection>()).Should().Be(0);
             Helper.AssetManagement.DataPorts.Read(new TRUEFilterElement<DataPort>())

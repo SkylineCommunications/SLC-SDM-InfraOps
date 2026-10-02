@@ -15,6 +15,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Helpers
     using Skyline.DataMiner.SDM.PlanAndBuild.Models;
     using Skyline.DataMiner.SDM.PlanAndBuild.Validation;
     using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
+    using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Extensions;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Middleware;
 
     public class PlanAndBuildApiHelper : IPlanAndBuildApiHelper, IAssetDeletionJobCleanup
@@ -72,7 +73,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Helpers
             AppSettingsValidator = appSettingsValidator;
         }
 
-        public void RemoveDeletedAssetReferences(
+        void IAssetDeletionJobCleanup.RemoveDeletedAssetReferences(
             AssetDeletionRecoveryContext context)
         {
             if (context == null)
@@ -80,107 +81,19 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Helpers
                 throw new System.ArgumentNullException(nameof(context));
             }
 
-            var assetIdentifier = context.AssetIdentifier;
             var snapshotsById = context.ConnectionSnapshots
                 .GroupBy(snapshot => snapshot.ConnectionIdentifier, System.StringComparer.OrdinalIgnoreCase)
                 .ToDictionary(group => group.Key, group => group.Last(), System.StringComparer.OrdinalIgnoreCase);
 
+            // System cleanup bypasses user-edit validation so references can also be cleaned
+            // on Resolved or Cancelled Jobs, whose Asset and Connection collections are read-only to users.
+            var repository = new PlanAndBuildJobDomRepository(Connection);
             var jobsToUpdate = new List<PlanAndBuildJob>();
-            foreach (var job in new PlanAndBuildJobDomRepository(Connection).Read(new TRUEFilterElement<PlanAndBuildJob>()))
+            foreach (var job in ReadJobsForDeletedAsset(repository, context.AssetIdentifier, snapshotsById.Keys))
             {
-                var changed = false;
-                var assetsUsed = job.AssetsUsed ?? new List<JobAsset>();
-                if (context.Policy.AssetJobEntryMode == JobEntryRemovalMode.Remove)
-                {
-                    var remainingAssets = assetsUsed
-                        .Where(item => item?.AssetId == null ||
-                            !item.AssetId.HasValue() ||
-                            !string.Equals(item.AssetId.Identifier, assetIdentifier, System.StringComparison.OrdinalIgnoreCase))
-                        .ToList();
-                    if (remainingAssets.Count != assetsUsed.Count)
-                    {
-                        job.AssetsUsed = remainingAssets;
-                        changed = true;
-                    }
-                }
-                else
-                {
-                    foreach (var entry in assetsUsed.Where(item =>
-                        item?.AssetId != null &&
-                        string.Equals(item.AssetId.Identifier, assetIdentifier, System.StringComparison.OrdinalIgnoreCase)))
-                    {
-                        var removed = SharedMappers.DomIds.SlcPlan_And_Build.Enums.ActionforassetenumEnum.Removed;
-                        if (entry.Action == removed &&
-                            entry.AssetName == context.AssetName &&
-                            entry.AssetClassName == context.AssetClassName &&
-                            entry.IPAddress == context.IPAddress)
-                        {
-                            continue;
-                        }
-
-                        entry.Action = removed;
-                        entry.AssetName = context.AssetName;
-                        entry.AssetClassName = context.AssetClassName;
-                        entry.IPAddress = context.IPAddress;
-                        changed = true;
-                    }
-
-                    if (changed)
-                    {
-                        job.AssetsUsed = assetsUsed;
-                    }
-                }
-
-                var connectionsOnJob = job.ConnectionsOnJob ?? new List<JobConnection>();
-                if (connectionsOnJob.Count > 0 && snapshotsById.Count > 0)
-                {
-                    var connections = connectionsOnJob.ToList();
-                    var connectionsChanged = false;
-                    foreach (var jobConnection in connections.ToList())
-                    {
-                        if (jobConnection?.ConnectionId == null ||
-                            !jobConnection.ConnectionId.HasValue() ||
-                            !snapshotsById.TryGetValue(jobConnection.ConnectionId.Identifier, out var snapshot))
-                        {
-                            continue;
-                        }
-
-                        if (context.Policy.ConnectionJobEntryMode == JobEntryRemovalMode.Remove)
-                        {
-                            connections.Remove(jobConnection);
-                            connectionsChanged = true;
-                            continue;
-                        }
-
-                        if (string.Equals(jobConnection.Source, snapshot.Source, System.StringComparison.Ordinal) &&
-                            string.Equals(jobConnection.Destination, snapshot.Destination, System.StringComparison.Ordinal) &&
-                            string.Equals(
-                                jobConnection.CableType.Identifier,
-                                snapshot.CableTypeIdentifier,
-                                System.StringComparison.OrdinalIgnoreCase) &&
-                            Equals(jobConnection.CableLength, snapshot.CableLength) &&
-                            string.Equals(jobConnection.Status, "Removed", System.StringComparison.Ordinal))
-                        {
-                            continue;
-                        }
-
-                        jobConnection.Source = snapshot.Source;
-                        jobConnection.Destination = snapshot.Destination;
-                        jobConnection.CableType = new SdmObjectReference<CableType>(
-                            snapshot.CableTypeIdentifier);
-                        jobConnection.CableLength = snapshot.CableLength;
-                        jobConnection.Status = "Removed";
-                        connectionsChanged = true;
-                    }
-
-                    if (connectionsChanged)
-                    {
-                        job.ConnectionsOnJob = connections;
-                        changed = true;
-                    }
-                }
-
-                if (changed)
+                var assetsChanged = AdjustAssetsUsed(job, context);
+                var connectionsChanged = AdjustConnectionsOnJob(job, context.Policy.ConnectionJobEntryMode, snapshotsById);
+                if (assetsChanged || connectionsChanged)
                 {
                     jobsToUpdate.Add(job);
                 }
@@ -188,8 +101,137 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Helpers
 
             if (jobsToUpdate.Count > 0)
             {
-                new PlanAndBuildJobDomRepository(Connection).Update(jobsToUpdate);
+                repository.Update(jobsToUpdate);
             }
+        }
+
+        private static List<PlanAndBuildJob> ReadJobsForDeletedAsset(
+            PlanAndBuildJobDomRepository repository,
+            string assetIdentifier,
+            IEnumerable<string> connectionIdentifiers)
+        {
+            var assetJobs = repository.Read(
+                PlanAndBuildJobExposers.AssetsUsed.AssetId.Contains(new SdmObjectReference<Asset>(assetIdentifier)));
+            var connectionJobs = repository.ReadByBigOrFilter(
+                connectionIdentifiers,
+                identifier => PlanAndBuildJobExposers.ConnectionsOnJob.ConnectionId.Contains(
+                    new SdmObjectReference<AssetManagement.Models.Connection>(identifier)));
+
+            return assetJobs.Concat(connectionJobs)
+                .GroupBy(job => job.Identifier, System.StringComparer.OrdinalIgnoreCase)
+                .Select(group => group.First())
+                .ToList();
+        }
+
+        private static bool AdjustAssetsUsed(PlanAndBuildJob job, AssetDeletionRecoveryContext context)
+        {
+            var assetsUsed = job.AssetsUsed ?? new List<JobAsset>();
+            if (context.Policy.AssetJobEntryMode == JobEntryRemovalMode.Remove)
+            {
+                var remainingAssets = assetsUsed
+                    .Where(item => !ReferencesDeletedAsset(item, context.AssetIdentifier))
+                    .ToList();
+                if (remainingAssets.Count == assetsUsed.Count)
+                {
+                    return false;
+                }
+
+                job.AssetsUsed = remainingAssets;
+                return true;
+            }
+
+            var changed = false;
+            foreach (var entry in assetsUsed.Where(item => ReferencesDeletedAsset(item, context.AssetIdentifier)))
+            {
+                changed |= UpdateRemovedAssetSnapshot(entry, context);
+            }
+
+            if (changed)
+            {
+                job.AssetsUsed = assetsUsed;
+            }
+
+            return changed;
+        }
+
+        private static bool ReferencesDeletedAsset(JobAsset entry, string assetIdentifier)
+        {
+            return entry?.AssetId != null &&
+                entry.AssetId.HasValue() &&
+                string.Equals(entry.AssetId.Identifier, assetIdentifier, System.StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool UpdateRemovedAssetSnapshot(JobAsset entry, AssetDeletionRecoveryContext context)
+        {
+            var removed = SharedMappers.DomIds.SlcPlan_And_Build.Enums.ActionforassetenumEnum.Removed;
+            if (entry.Action == removed &&
+                entry.AssetName == context.AssetName &&
+                entry.AssetClassName == context.AssetClassName &&
+                entry.IPAddress == context.IPAddress)
+            {
+                return false;
+            }
+
+            entry.Action = removed;
+            entry.AssetName = context.AssetName;
+            entry.AssetClassName = context.AssetClassName;
+            entry.IPAddress = context.IPAddress;
+            return true;
+        }
+
+        private static bool AdjustConnectionsOnJob(
+            PlanAndBuildJob job,
+            JobEntryRemovalMode mode,
+            IReadOnlyDictionary<string, AssetDeletionConnectionSnapshot> snapshotsById)
+        {
+            var connections = job.ConnectionsOnJob?.ToList() ?? new List<JobConnection>();
+            var changed = false;
+            foreach (var entry in connections.ToList())
+            {
+                if (entry?.ConnectionId == null ||
+                    !entry.ConnectionId.HasValue() ||
+                    !snapshotsById.TryGetValue(entry.ConnectionId.Identifier, out var snapshot))
+                {
+                    continue;
+                }
+
+                if (mode == JobEntryRemovalMode.Remove)
+                {
+                    connections.Remove(entry);
+                    changed = true;
+                    continue;
+                }
+
+                changed |= UpdateRemovedConnectionSnapshot(entry, snapshot);
+            }
+
+            if (changed)
+            {
+                job.ConnectionsOnJob = connections;
+            }
+
+            return changed;
+        }
+
+        private static bool UpdateRemovedConnectionSnapshot(
+            JobConnection entry,
+            AssetDeletionConnectionSnapshot snapshot)
+        {
+            if (string.Equals(entry.Source, snapshot.Source, System.StringComparison.Ordinal) &&
+                string.Equals(entry.Destination, snapshot.Destination, System.StringComparison.Ordinal) &&
+                string.Equals(entry.CableType.Identifier, snapshot.CableTypeIdentifier, System.StringComparison.OrdinalIgnoreCase) &&
+                Equals(entry.CableLength, snapshot.CableLength) &&
+                string.Equals(entry.Status, "Removed", System.StringComparison.Ordinal))
+            {
+                return false;
+            }
+
+            entry.Source = snapshot.Source;
+            entry.Destination = snapshot.Destination;
+            entry.CableType = new SdmObjectReference<CableType>(snapshot.CableTypeIdentifier);
+            entry.CableLength = snapshot.CableLength;
+            entry.Status = "Removed";
+            return true;
         }
 
         public IConnection Connection { get; }

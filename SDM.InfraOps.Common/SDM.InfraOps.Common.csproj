@@ -39,4 +39,8 @@
   <ItemGroup>
     <InternalsVisibleTo Include="SDM.AssetManagement.Tests" />
   </ItemGroup>
+
+  <Target Name="CopyNuGetPackage" AfterTargets="Pack" Condition="'$(NuGetStorePath)' != '' and '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <Copy SourceFiles="$(OutputPath)..\$(PackageId).$(PackageVersion).nupkg" DestinationFolder="$(NuGetStorePath)\$(PackageId)" />
+  </Target>
 </Project>
