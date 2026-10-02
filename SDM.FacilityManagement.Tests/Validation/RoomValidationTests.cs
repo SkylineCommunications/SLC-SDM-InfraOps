@@ -1,12 +1,21 @@
 ﻿namespace SDM.FacilityManagement.Tests.Validation
 {
     using System;
+    using System.Linq;
 
     using FluentAssertions;
 
     using SDM.FacilityManagement.Tests.Setup;
 
+    using Skyline.DataMiner.Net.Messages.SLDataGateway;
+    using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
+    using Skyline.DataMiner.Net.Messages.SLDataGateway;
+    using Skyline.DataMiner.SDM.FacilityManagement.Services;
+    using Skyline.DataMiner.Net.Messages.SLDataGateway;
+    using Skyline.DataMiner.SDM.FacilityManagement.Validation;
+    using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
     [TestClass]
     public class RoomValidationTests : BaseRepositoryTest
@@ -52,6 +61,104 @@
             var action = () => Helper.Rooms.Create(duplicate);
 
             action.Should().Throw<Exception>().WithMessage("*already in use*");
+        }
+
+        [TestMethod]
+        [DataRow("")]
+        [DataRow("   ")]
+        public void RoomValidationHandler_WithEmptyOrWhitespaceRoomId_ShouldReturnExactMessage(string id)
+        {
+            var entity = new Room { RoomId = id };
+
+            RoomValidationHandler.IsRoomIdValid(entity, out var result).Should().BeFalse();
+
+            result.GetFailReason(RoomValidationHandler.RoomValidationField.RoomId).Should().Be("Room Id cannot be empty or whitespace.");
+        }
+
+        [TestMethod]
+        [DataRow("")]
+        [DataRow("   ")]
+        public void RoomValidator_IsRoomIdValid_WithEmptyOrWhitespaceId_ShouldReturnExactMessage(string id)
+        {
+            var validator = CreateValidator();
+
+            var result = validator.IsRoomIdValid(id);
+
+            result.IsValid.Should().BeFalse();
+            result.GetFailReason(RoomValidationHandler.RoomValidationField.RoomId).Should().Be("Room Id cannot be empty or whitespace.");
+        }
+
+        [TestMethod]
+        public void RoomValidator_IsRoomIdValid_WithUniqueId_ShouldBeValid()
+        {
+            var validator = CreateValidator();
+
+            var result = validator.IsRoomIdValid("UNIQUE");
+
+            result.IsValid.Should().BeTrue();
+        }
+
+        [TestMethod]
+        public void RoomValidator_IsRoomIdValid_WithIdAlreadyInStore_ShouldReturnExactMessage()
+        {
+            Helper.Rooms.Create(NewRoom("EXISTING"));
+            var validator = CreateValidator();
+
+            var result = validator.IsRoomIdValid("EXISTING");
+
+            result.IsValid.Should().BeFalse();
+            result.GetFailReason(RoomValidationHandler.RoomValidationField.RoomId).Should().Be("Room Id 'EXISTING' is already in use.");
+        }
+
+        [TestMethod]
+        public void RoomValidator_ValidateBulk_WithIdInOtherChangedEntries_ShouldReturnExactMessage()
+        {
+            var validator = CreateValidator();
+
+            var results = validator.ValidateBulk(new List<Room> { NewRoom("BASE"), NewRoom("DUP"), NewRoom("DUP") }, RepositoryAction.Create);
+
+            results[0].IsValid.Should().BeTrue(results[0].GetCombinedFailureReasons(";"));
+            results[1].IsValid.Should().BeFalse();
+            results[1].GetFailReason(RoomValidationHandler.RoomValidationField.RoomId).Should().Be("Room Id 'DUP' is duplicated within the batch.");
+            results[2].GetFailReason(RoomValidationHandler.RoomValidationField.RoomId).Should().Be("Room Id 'DUP' is duplicated within the batch.");
+        }
+
+        [TestMethod]
+        public void RoomValidator_Validate_WithValidRoom_ShouldBeValid()
+        {
+            var floor = Helper.Floors.Create(new Floor { Identifier = Guid.NewGuid().ToString(), FloorId = "FLR-VALID", Name = "Floor VALID" });
+            var entity = NewRoom("VALID");
+            entity.FloorFk.Floor = new SdmObjectReference<Floor>(floor.Identifier);
+            var validator = CreateValidator();
+
+            var result = validator.Validate(entity, RepositoryAction.Create);
+
+            result.IsValid.Should().BeTrue(result.GetCombinedFailureReasons(";"));
+        }
+
+        [TestMethod]
+        public void RoomValidator_Validate_SavedRoomWithClearedId_ShouldBeInvalid()
+        {
+            var created = NewRoom("VALID");
+            Helper.Rooms.Create(created);
+            var existing = Helper.Rooms.Read(RoomExposers.Identifier.Equal(created.Identifier)).Single();
+            existing.RoomId = string.Empty;
+            var validator = CreateValidator();
+
+            var result = validator.Validate(existing, RepositoryAction.Update);
+
+            result.IsValid.Should().BeFalse();
+            result.TryGetFailReason(RoomValidationHandler.RoomValidationField.RoomId, out _).Should().BeTrue();
+        }
+
+        private RoomValidator CreateValidator()
+        {
+            return new RoomValidator(new FacilityEntityLoader(Helper));
+        }
+
+        private static Room NewRoom(string id)
+        {
+            return new Room { Identifier = Guid.NewGuid().ToString(), Name = "Room " + id, RoomId = id };
         }
     }
 }

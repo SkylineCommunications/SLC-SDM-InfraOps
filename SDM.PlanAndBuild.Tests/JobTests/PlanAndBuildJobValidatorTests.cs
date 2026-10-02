@@ -230,6 +230,30 @@ namespace SDM.PlanAndBuild.Tests.JobTests
 			result.IsValid.Should().BeTrue();
 		}
 
+		[TestMethod]
+		public void Validate_SavedJobWithNameClearedToEmpty_ShouldReturnInvalid()
+		{
+			// Saved instance: the persisted name is the change-tracking baseline, so clearing it marks
+			// JobNameField as changed and the name validation must fire.
+			var created = Helper.Jobs.Create(new PlanAndBuildJob
+			{
+				JobName = "Valid",
+				JobDescription = "dest",
+				Type = new SdmObjectReference<JobType>(_jobType.Identifier),
+			});
+
+			created.JobName = string.Empty;
+
+			var result = _validator.Validate(created, RepositoryAction.Update);
+
+			using (new AssertionScope())
+			{
+				result.IsValid.Should().BeFalse();
+				result.TryGetFailReason(PlanAndBuildJobValidationHandler.PlanAndBuildJobValidationField.JobName, out var reason).Should().BeTrue();
+				reason.Should().Be("Job Name cannot be empty or whitespace.");
+			}
+		}
+
 		#endregion
 
 		#region ValidateBulk
@@ -290,6 +314,31 @@ namespace SDM.PlanAndBuild.Tests.JobTests
 				reason0.Should().Contain("duplicated within the validation batch");
 				results[1].TryGetFailReason(PlanAndBuildJobValidationHandler.PlanAndBuildJobValidationField.JobName, out var reason1).Should().BeTrue();
 				reason1.Should().Contain("duplicated within the validation batch");
+			}
+		}
+
+		[TestMethod]
+		public void ValidateBulk_WithNameInOtherBatchEntry_ShouldFlagOnlyDuplicatesWithExactReason()
+		{
+			var jobs = new System.Collections.Generic.List<PlanAndBuildJob>
+			{
+				new PlanAndBuildJob { JobName = "Base", Type = new SdmObjectReference<JobType>(_jobType.Identifier) },
+				new PlanAndBuildJob { JobName = "Duplicate", Type = new SdmObjectReference<JobType>(_jobType.Identifier) },
+				new PlanAndBuildJob { JobName = "Duplicate", Type = new SdmObjectReference<JobType>(_jobType.Identifier) },
+			};
+
+			var results = _validator.ValidateBulk(jobs, RepositoryAction.Create);
+
+			using (new AssertionScope())
+			{
+				results.Should().HaveCount(3);
+				results[0].IsValid.Should().BeTrue();
+				results[1].IsValid.Should().BeFalse();
+				results[1].TryGetFailReason(PlanAndBuildJobValidationHandler.PlanAndBuildJobValidationField.JobName, out var reason1).Should().BeTrue();
+				reason1.Should().Be("Job Name 'Duplicate' is duplicated within the validation batch.");
+				results[2].IsValid.Should().BeFalse();
+				results[2].TryGetFailReason(PlanAndBuildJobValidationHandler.PlanAndBuildJobValidationField.JobName, out var reason2).Should().BeTrue();
+				reason2.Should().Be("Job Name 'Duplicate' is duplicated within the validation batch.");
 			}
 		}
 

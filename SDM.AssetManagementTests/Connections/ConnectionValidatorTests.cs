@@ -1,7 +1,8 @@
-﻿namespace SDM.AssetManagement.Tests.Connections
+namespace SDM.AssetManagement.Tests.Connections
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
 
     using FluentAssertions;
 
@@ -11,10 +12,14 @@
 
     using SharedMappers.DomIds;
 
+    using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Exceptions;
+    using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
+
+    using static Skyline.DataMiner.SDM.AssetManagement.Common.Validation.ConnectionValidationHandler;
 
     [TestClass]
     public class ConnectionValidatorTests : BaseRepositoryTest
@@ -169,6 +174,325 @@
             act.Should().NotThrow();
         }
 
+        [TestMethod]
+        public void ValidateDataConnection_WithSourcePortInputOnly_ShouldReturnSourcePortFailure()
+        {
+            var source = CreateDataEndpoint("Source", SlcAsset_Management.Enums.Outputtype.In);
+            var destination = CreateDataEndpoint("Destination", SlcAsset_Management.Enums.Outputtype.IO);
+
+            var result = ValidateConnection(BuildConnection(SlcAsset_Management.Enums.ConnectionType.Data, source, destination));
+
+            result.IsValid.Should().BeFalse();
+            result.TryGetFailReason(ConnectionValidationField.SourcePort, out _).Should().BeTrue();
+        }
+
+        [TestMethod]
+        public void ValidateDataConnection_WithSourcePortAlreadyInUse_ShouldReturnSourcePortFailure()
+        {
+            var source = CreateDataEndpoint("Source", SlcAsset_Management.Enums.Outputtype.IO);
+            var firstDestination = CreateDataEndpoint("Destination1", SlcAsset_Management.Enums.Outputtype.IO);
+            var secondDestination = CreateDataEndpoint("Destination2", SlcAsset_Management.Enums.Outputtype.IO);
+            CreateDataConnection(source, firstDestination);
+
+            var result = ValidateConnection(BuildConnection(SlcAsset_Management.Enums.ConnectionType.Data, source, secondDestination));
+
+            result.IsValid.Should().BeFalse();
+            result.TryGetFailReason(ConnectionValidationField.SourcePort, out _).Should().BeTrue();
+        }
+
+        [TestMethod]
+        public void ValidateDataConnection_WithDestinationPortOutputOnly_ShouldReturnDestinationPortFailure()
+        {
+            var source = CreateDataEndpoint("Source", SlcAsset_Management.Enums.Outputtype.IO);
+            var destination = CreateDataEndpoint("Destination", SlcAsset_Management.Enums.Outputtype.Out);
+
+            var result = ValidateConnection(BuildConnection(SlcAsset_Management.Enums.ConnectionType.Data, source, destination));
+
+            result.IsValid.Should().BeFalse();
+            result.TryGetFailReason(ConnectionValidationField.DestinationPort, out _).Should().BeTrue();
+        }
+
+        [TestMethod]
+        public void ValidateDataConnection_WithDestinationPortAlreadyInUse_ShouldReturnDestinationPortFailure()
+        {
+            var firstSource = CreateDataEndpoint("Source1", SlcAsset_Management.Enums.Outputtype.IO);
+            var destination = CreateDataEndpoint("Destination", SlcAsset_Management.Enums.Outputtype.IO);
+            var secondSource = CreateDataEndpoint("Source2", SlcAsset_Management.Enums.Outputtype.IO);
+            CreateDataConnection(firstSource, destination);
+
+            var result = ValidateConnection(BuildConnection(SlcAsset_Management.Enums.ConnectionType.Data, secondSource, destination));
+
+            result.IsValid.Should().BeFalse();
+            result.TryGetFailReason(ConnectionValidationField.DestinationPort, out _).Should().BeTrue();
+        }
+
+        [TestMethod]
+        public void ValidateDataConnection_WithSourceAssetNotAvailable_ShouldReturnSourceAssetFailure()
+        {
+            var source = CreateDataEndpoint("Source", SlcAsset_Management.Enums.Outputtype.IO, assetState: SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable);
+            var destination = CreateDataEndpoint("Destination", SlcAsset_Management.Enums.Outputtype.IO);
+
+            var result = ValidateConnection(BuildConnection(SlcAsset_Management.Enums.ConnectionType.Data, source, destination));
+
+            result.IsValid.Should().BeFalse();
+            result.TryGetFailReason(ConnectionValidationField.SourceAsset, out _).Should().BeTrue();
+        }
+
+        [TestMethod]
+        public void ValidateDataConnection_WithDeviceMissingDataTag_ShouldReturnSourceAssetFailure()
+        {
+            var source = CreateDataEndpoint("Source", SlcAsset_Management.Enums.Outputtype.IO, acceptsData: false);
+            var destination = CreateDataEndpoint("Destination", SlcAsset_Management.Enums.Outputtype.IO);
+
+            var result = ValidateConnection(BuildConnection(SlcAsset_Management.Enums.ConnectionType.Data, source, destination));
+
+            result.IsValid.Should().BeFalse();
+            result.TryGetFailReason(ConnectionValidationField.SourceAsset, out _).Should().BeTrue();
+        }
+
+        [TestMethod]
+        public void ValidateDataConnection_WithSameSourceAndDestinationPort_ShouldReturnBothPortFailures()
+        {
+            var port = CreateDataEndpoint("Port", SlcAsset_Management.Enums.Outputtype.IO);
+
+            var result = ValidateConnection(BuildConnection(SlcAsset_Management.Enums.ConnectionType.Data, port, port));
+
+            result.IsValid.Should().BeFalse();
+            result.TryGetFailReason(ConnectionValidationField.SourcePort, out _).Should().BeTrue();
+            result.TryGetFailReason(ConnectionValidationField.DestinationPort, out _).Should().BeTrue();
+        }
+
+        [TestMethod]
+        public void ValidateDataConnection_WithValidEndpoints_ShouldReturnValid()
+        {
+            var source = CreateDataEndpoint("Source", SlcAsset_Management.Enums.Outputtype.IO);
+            var destination = CreateDataEndpoint("Destination", SlcAsset_Management.Enums.Outputtype.IO);
+
+            var result = ValidateConnection(BuildConnection(SlcAsset_Management.Enums.ConnectionType.Data, source, destination));
+
+            result.IsValid.Should().BeTrue(result.GetCombinedFailureReasons(";"));
+        }
+
+        [TestMethod]
+        public void ValidateConnection_WithFullyPopulatedDataConnection_ShouldReturnValid()
+        {
+            var connection = BuildFullyPopulatedDataConnection();
+
+            var result = ValidateConnection(connection);
+
+            result.IsValid.Should().BeTrue(result.GetCombinedFailureReasons(";"));
+        }
+
+        [TestMethod]
+        public void ValidateConnection_WithNegativeCableLengthAndSelfConnection_ShouldAccumulateFailures()
+        {
+            var port = CreateDataEndpoint("Port", SlcAsset_Management.Enums.Outputtype.IO);
+
+            var result = ValidateConnection(BuildConnection(SlcAsset_Management.Enums.ConnectionType.Data, port, port, cableLength: -1));
+
+            result.IsValid.Should().BeFalse();
+            result.TryGetFailReason(ConnectionValidationField.CableLength, out _).Should().BeTrue();
+            result.TryGetFailReason(ConnectionValidationField.SourcePort, out _).Should().BeTrue();
+            result.TryGetFailReason(ConnectionValidationField.DestinationPort, out _).Should().BeTrue();
+        }
+
+        [TestMethod]
+        public void ValidatePowerConnection_WithSourcePortInputOnly_ShouldReturnSourcePortFailure()
+        {
+            var source = CreatePowerEndpoint("Source", SlcAsset_Management.Enums.Outputtype.In, isPowerProvider: true);
+            var destination = CreatePowerEndpoint("Destination", SlcAsset_Management.Enums.Outputtype.IO, isPowerProvider: true);
+
+            var result = ValidateConnection(BuildConnection(SlcAsset_Management.Enums.ConnectionType.Power, source, destination));
+
+            result.IsValid.Should().BeFalse();
+            result.TryGetFailReason(ConnectionValidationField.SourcePort, out _).Should().BeTrue();
+        }
+
+        [TestMethod]
+        public void ValidatePowerConnection_WithSourcePortAlreadyInUse_ShouldReturnSourcePortFailure()
+        {
+            var source = CreatePowerEndpoint("Source", SlcAsset_Management.Enums.Outputtype.IO, isPowerProvider: true);
+            var firstDestination = CreatePowerEndpoint("Destination1", SlcAsset_Management.Enums.Outputtype.IO, isPowerProvider: true);
+            var secondDestination = CreatePowerEndpoint("Destination2", SlcAsset_Management.Enums.Outputtype.IO, isPowerProvider: true);
+            CreatePowerConnection(source, firstDestination);
+
+            var result = ValidateConnection(BuildConnection(SlcAsset_Management.Enums.ConnectionType.Power, source, secondDestination));
+
+            result.IsValid.Should().BeFalse();
+            result.TryGetFailReason(ConnectionValidationField.SourcePort, out _).Should().BeTrue();
+        }
+
+        [TestMethod]
+        public void ValidatePowerConnection_WithDestinationPortOutputOnly_ShouldReturnDestinationPortFailure()
+        {
+            var source = CreatePowerEndpoint("Source", SlcAsset_Management.Enums.Outputtype.IO, isPowerProvider: true);
+            var destination = CreatePowerEndpoint("Destination", SlcAsset_Management.Enums.Outputtype.Out, isPowerProvider: true);
+
+            var result = ValidateConnection(BuildConnection(SlcAsset_Management.Enums.ConnectionType.Power, source, destination));
+
+            result.IsValid.Should().BeFalse();
+            result.TryGetFailReason(ConnectionValidationField.DestinationPort, out _).Should().BeTrue();
+        }
+
+        [TestMethod]
+        public void ValidatePowerConnection_WithDestinationPortAlreadyInUse_ShouldReturnDestinationPortFailure()
+        {
+            var firstSource = CreatePowerEndpoint("Source1", SlcAsset_Management.Enums.Outputtype.IO, isPowerProvider: true);
+            var destination = CreatePowerEndpoint("Destination", SlcAsset_Management.Enums.Outputtype.IO, isPowerProvider: true);
+            var secondSource = CreatePowerEndpoint("Source2", SlcAsset_Management.Enums.Outputtype.IO, isPowerProvider: true);
+            CreatePowerConnection(firstSource, destination);
+
+            var result = ValidateConnection(BuildConnection(SlcAsset_Management.Enums.ConnectionType.Power, secondSource, destination));
+
+            result.IsValid.Should().BeFalse();
+            result.TryGetFailReason(ConnectionValidationField.DestinationPort, out _).Should().BeTrue();
+        }
+
+        [TestMethod]
+        public void ValidatePowerConnection_WithSourceAssetNotAvailable_ShouldReturnSourceAssetFailure()
+        {
+            var source = CreatePowerEndpoint("Source", SlcAsset_Management.Enums.Outputtype.IO, isPowerProvider: true, assetState: SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable);
+            var destination = CreatePowerEndpoint("Destination", SlcAsset_Management.Enums.Outputtype.IO, isPowerProvider: true);
+
+            var result = ValidateConnection(BuildConnection(SlcAsset_Management.Enums.ConnectionType.Power, source, destination));
+
+            result.IsValid.Should().BeFalse();
+            result.TryGetFailReason(ConnectionValidationField.SourceAsset, out _).Should().BeTrue();
+        }
+
+        [TestMethod]
+        public void ValidatePowerConnection_WithSourceMissingPowerProviderTag_ShouldReturnSourceAssetFailure()
+        {
+            var source = CreatePowerEndpoint("Source", SlcAsset_Management.Enums.Outputtype.IO, isPowerProvider: false);
+            var destination = CreatePowerEndpoint("Destination", SlcAsset_Management.Enums.Outputtype.IO, isPowerProvider: true);
+
+            var result = ValidateConnection(BuildConnection(SlcAsset_Management.Enums.ConnectionType.Power, source, destination));
+
+            result.IsValid.Should().BeFalse();
+            result.TryGetFailReason(ConnectionValidationField.SourceAsset, out _).Should().BeTrue();
+        }
+
+        [TestMethod]
+        public void ValidatePowerConnection_WithDestinationAssetNotAvailable_ShouldReturnDestinationAssetFailure()
+        {
+            var source = CreatePowerEndpoint("Source", SlcAsset_Management.Enums.Outputtype.IO, isPowerProvider: true);
+            var destination = CreatePowerEndpoint("Destination", SlcAsset_Management.Enums.Outputtype.IO, isPowerProvider: true, assetState: SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable);
+
+            var result = ValidateConnection(BuildConnection(SlcAsset_Management.Enums.ConnectionType.Power, source, destination));
+
+            result.IsValid.Should().BeFalse();
+            result.TryGetFailReason(ConnectionValidationField.DestinationAsset, out _).Should().BeTrue();
+        }
+
+        [TestMethod]
+        public void ValidatePowerConnection_WithDestinationMissingPowerProviderTag_ShouldReturnValid()
+        {
+            var source = CreatePowerEndpoint("Source", SlcAsset_Management.Enums.Outputtype.IO, isPowerProvider: true);
+            var destination = CreatePowerEndpoint("Destination", SlcAsset_Management.Enums.Outputtype.IO, isPowerProvider: false);
+
+            var result = ValidateConnection(BuildConnection(SlcAsset_Management.Enums.ConnectionType.Power, source, destination));
+
+            result.IsValid.Should().BeTrue(result.GetCombinedFailureReasons(";"));
+        }
+
+        [TestMethod]
+        public void ValidatePowerConnection_WithValidEndpoints_ShouldReturnValid()
+        {
+            var source = CreatePowerEndpoint("Source", SlcAsset_Management.Enums.Outputtype.IO, isPowerProvider: true);
+            var destination = CreatePowerEndpoint("Destination", SlcAsset_Management.Enums.Outputtype.IO, isPowerProvider: true);
+
+            var result = ValidateConnection(BuildConnection(SlcAsset_Management.Enums.ConnectionType.Power, source, destination));
+
+            result.IsValid.Should().BeTrue(result.GetCombinedFailureReasons(";"));
+        }
+
+        [TestMethod]
+        public void Connection_WithDataEndpoints_HasSourceDestinationAndType()
+        {
+            var source = CreateDataEndpoint("Source", SlcAsset_Management.Enums.Outputtype.IO);
+            var destination = CreateDataEndpoint("Destination", SlcAsset_Management.Enums.Outputtype.IO);
+
+            var connection = BuildConnection(SlcAsset_Management.Enums.ConnectionType.Data, source, destination);
+
+            connection.Source.IsEmpty.Should().BeFalse();
+            connection.Destination.IsEmpty.Should().BeFalse();
+            connection.ConnectionType.Should().Be(SlcAsset_Management.Enums.ConnectionType.Data);
+        }
+
+        [TestMethod]
+        public void NewDataConnection_BeforeCreate_ShouldHavePendingChanges()
+        {
+            var connection = BuildFullyPopulatedDataConnection();
+
+            connection.GetChanges().Should().NotBeEmpty("a newly created data connection should have pending changes");
+        }
+
+        [TestMethod]
+        public void Create_WithPowerConnection_ShouldPersistAndReadBack()
+        {
+            var source = CreatePowerEndpoint("Source", SlcAsset_Management.Enums.Outputtype.IO, isPowerProvider: true);
+            var destination = CreatePowerEndpoint("Destination", SlcAsset_Management.Enums.Outputtype.IO, isPowerProvider: true);
+            var cableType = Helper.CreateCableType("Power Cable");
+
+            var connection = BuildConnection(SlcAsset_Management.Enums.ConnectionType.Power, source, destination, cableLength: 6);
+            connection.Description = "Description";
+            connection.Notes = "Notes";
+            connection.CableType = new SdmObjectReference<CableType>(cableType.Identifier);
+            connection.GetChanges().Should().NotBeEmpty("a newly created power connection should have pending changes");
+
+            Helper.AssetManagement.Connections.Create(connection);
+
+            var persisted = Helper.AssetManagement.Connections.Read(new TRUEFilterElement<Connection>()).Single();
+            persisted.ConnectionType.Should().Be(SlcAsset_Management.Enums.ConnectionType.Power);
+            persisted.Source.Port.Identifier.Should().Be(source.PortId);
+            persisted.Destination.Port.Identifier.Should().Be(destination.PortId);
+            persisted.CableType.Identifier.Should().Be(cableType.Identifier);
+            persisted.CableLength.Should().Be(6);
+            persisted.Description.Should().Be("Description");
+            persisted.Notes.Should().Be("Notes");
+        }
+
+        private ValidationResult ValidateConnection(Connection connection)
+        {
+            return Helper.AssetManagement.ConnectionValidator.Validate(connection, RepositoryAction.Create);
+        }
+
+        private Connection BuildFullyPopulatedDataConnection()
+        {
+            var source = CreateDataEndpoint("Source", SlcAsset_Management.Enums.Outputtype.IO);
+            var destination = CreateDataEndpoint("Destination", SlcAsset_Management.Enums.Outputtype.IO);
+            var cableType = Helper.CreateCableType("Data Cable");
+
+            var connection = BuildConnection(SlcAsset_Management.Enums.ConnectionType.Data, source, destination, cableLength: 6);
+            connection.Description = "Description";
+            connection.Notes = "Notes";
+            connection.CableType = new SdmObjectReference<CableType>(cableType.Identifier);
+            connection.Source.CableTag = "STag";
+            connection.Destination.CableTag = "DTag";
+
+            return connection;
+        }
+
+        private static Connection BuildConnection(SlcAsset_Management.Enums.ConnectionType type, Endpoint source, Endpoint destination, double? cableLength = null)
+        {
+            return new Connection
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                ConnectionType = type,
+                CableLength = cableLength,
+                Source =
+                {
+                    Port = new ISdmObjectReference<IPort>(source.PortId),
+                    PortType = new SdmObjectReference<PortType>(source.PortType.Identifier),
+                },
+                Destination =
+                {
+                    Port = new ISdmObjectReference<IPort>(destination.PortId),
+                    PortType = new SdmObjectReference<PortType>(destination.PortType.Identifier),
+                },
+            };
+        }
+
         private Endpoint CreateDataEndpoint(
             string name,
             SlcAsset_Management.Enums.Outputtype outputType,
@@ -191,7 +515,8 @@
         private Endpoint CreatePowerEndpoint(
             string name,
             SlcAsset_Management.Enums.Outputtype outputType,
-            bool isPowerProvider)
+            bool isPowerProvider,
+            SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum assetState = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available)
         {
             var tags = isPowerProvider
                 ? new List<SlcAsset_Management.Enums.TagOption> { SlcAsset_Management.Enums.TagOption.PowerProvider }
@@ -202,7 +527,7 @@
 
             var deviceType = CreateDeviceType($"{name} Device Type", tags);
             var assetClass = CreateAssetClass($"{name} Asset Class", SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Active, deviceType, powerSupply);
-            var asset = CreateAsset(assetClass, $"{name}-ASSET", SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available);
+            var asset = CreateAsset(assetClass, $"{name}-ASSET", assetState);
             var portType = CreatePortType($"{name} Port Type", SlcAsset_Management.Enums.CategoriesEnum.Power);
             var port = CreatePowerPort(asset, portType, outputType, name);
 

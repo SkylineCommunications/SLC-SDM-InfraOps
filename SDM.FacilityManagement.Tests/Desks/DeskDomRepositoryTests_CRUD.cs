@@ -120,6 +120,26 @@ namespace SDM.FacilityManagement.Tests.Desks
             }
         }
 
+        [TestMethod]
+        public void DeskDomRepository_CreateWithRoomReference_ReadBack_PersistsDeskIdAndRoom()
+        {
+            var room = Helper.Rooms.Create(new Room { Identifier = Guid.NewGuid().ToString(), RoomId = "RM-DESK", Name = "Room DESK" });
+            var desk = new Desk { Identifier = Guid.NewGuid().ToString(), Name = "Desk 1", DeskID = "DK-1" };
+            desk.RoomFk.Room = new SdmObjectReference<Room>(room.Identifier);
+
+            Helper.Desks.Create(desk);
+
+            var reloaded = Helper.Desks.Read(DeskExposers.Identifier.Equal(desk.Identifier)).SingleOrDefault();
+
+            using (new AssertionScope())
+            {
+                reloaded.Should().NotBeNull();
+                reloaded!.DeskID.Should().Be("DK-1");
+                reloaded.RoomFk.Room.Should().NotBeNull();
+                reloaded.RoomFk.Room.Identifier.Should().Be(room.Identifier);
+            }
+        }
+
         private static void AssertDeskUpdateDifferences(Desk original, Desk updated)
         {
             using (new AssertionScope())

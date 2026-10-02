@@ -42,6 +42,25 @@ namespace SDM.AssetManagement.Tests.PowerPorts
         }
 
         [TestMethod]
+        public void PortTypeAgainst_WithPowerPortType_ShouldPass()
+        {
+            var powerPort = CreatePowerPort(1);
+            powerPort.PowerPortInfo.PortType = new SdmObjectReference<PortType>(Guid.NewGuid().ToString());
+            var powerPortType = new PortType
+            {
+                CategoryLinks =
+                {
+                    Categories = [SharedMappers.DomIds.SlcAsset_Management.Enums.CategoriesEnum.Power],
+                },
+            };
+            var core = new PowerPortValidationCore(null);
+
+            var result = core.ValidatePortTypeAgainst(powerPort, powerPortType);
+
+            result.IsValid.Should().BeTrue();
+        }
+
+        [TestMethod]
         public void PortTypeAgainst_WithDataPortType_ShouldFail()
         {
             var powerPort = CreatePowerPort(1);
