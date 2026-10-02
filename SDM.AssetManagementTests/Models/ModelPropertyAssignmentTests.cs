@@ -158,6 +158,15 @@ namespace SDM.AssetManagement.Tests.Models
         }
 
         [TestMethod]
+        [Ignore("Behavior difference: failing at AssetHolder accepting SlotNumber = -1 without exception (negative slot only rejected later by validation); consumer expects ArgumentOutOfRangeException on construction")]
+        public void AssetHolder_WithNegativeSlotNumber_ShouldThrowArgumentOutOfRange()
+        {
+            Action act = () => new AssetHolder { SlotNumber = -1, HierarchyRole = SlcAsset_Management.Enums.HierarchyRoleEnum.Card };
+
+            act.Should().Throw<ArgumentOutOfRangeException>();
+        }
+
+        [TestMethod]
         public void AssetHolder_WhenPropertiesAssigned_ShouldExposeAssignedValues()
         {
             var holder = new AssetHolder

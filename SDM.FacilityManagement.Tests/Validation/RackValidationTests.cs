@@ -325,6 +325,18 @@
         }
 
         [TestMethod]
+        [Ignore("Behavior difference: failing at IsRackUnitCapacityValid rejecting 0 rack units (SDM requires 1..70); consumer IsRackSizeValid accepts 0")]
+        public void RackValidationHandler_WithZeroRackUnits_ShouldBeValid()
+        {
+            var rack = new Rack();
+            rack.Capacity.MaximumRackCapacity = 0;
+
+            RackValidationHandler.IsRackUnitCapacityValid(rack, out var result).Should().BeTrue();
+
+            result.IsValid.Should().BeTrue();
+        }
+
+        [TestMethod]
         [DataRow(-1d)]
         [DataRow(0d)]
         public void RackValidationHandler_WithRackUnitsBelowMinimum_ShouldReturnExactMessage(double rackUnits)

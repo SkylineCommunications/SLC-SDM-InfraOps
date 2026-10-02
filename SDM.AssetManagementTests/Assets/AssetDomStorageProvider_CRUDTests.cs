@@ -406,6 +406,35 @@
         }
 
         [TestMethod]
+        [Ignore("Behavior difference: failing at Assets.Create/CreateOrUpdate throwing ArgumentException ('value') when OperationalFlags is non-empty (AssetDomRepository uses AddOrUpdateValue<List<long>> instead of AddOrUpdateListValue); consumer expects flag to persist and reload")]
+        public void OperationalFlags_SaveAndReload_FlagSurvives()
+        {
+            var asset = NewMinimalAsset("FLAG-3");
+            asset.OperationalFlags.Add(SlcAsset_Management.Enums.Operationalflagsenum.Faulty);
+
+            var created = Helper.AssetManagement.Assets.Create(asset);
+            var reloaded = ReloadAsset(created.Identifier);
+
+            reloaded.Should().NotBeNull();
+            reloaded.OperationalFlags.Should().Contain(SlcAsset_Management.Enums.Operationalflagsenum.Faulty);
+        }
+
+        [TestMethod]
+        [Ignore("Behavior difference: failing at Assets.Create throwing ArgumentException ('value') when OperationalFlags is non-empty (AssetDomRepository uses AddOrUpdateValue<List<long>> instead of AddOrUpdateListValue); consumer expects save with flag, clear, save again and flag gone")]
+        public void OperationalFlags_SaveWithFlag_ClearAndSaveAgain_FlagGone()
+        {
+            var asset = NewMinimalAsset("FLAG-4");
+            asset.OperationalFlags.Add(SlcAsset_Management.Enums.Operationalflagsenum.Faulty);
+            var created = Helper.AssetManagement.Assets.Create(asset);
+
+            var reloaded = ReloadAsset(created.Identifier);
+            reloaded.OperationalFlags.Clear();
+            Helper.AssetManagement.Assets.CreateOrUpdate([reloaded]);
+
+            ReloadAsset(created.Identifier).OperationalFlags.Should().BeEmpty();
+        }
+
+        [TestMethod]
         public void SerialNumber_HardwareVersion_MacAddress_ShouldPersistAcrossSaveReloadAndUpdate()
         {
             var asset = NewMinimalAsset("NET-1");

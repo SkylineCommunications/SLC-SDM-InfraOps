@@ -315,6 +315,62 @@ namespace SDM.AssetManagement.Tests.Assets
         }
 
         [TestMethod]
+        [Ignore("Behavior difference: failing at SDM reporting only InstallationDate when user is set without date; consumer expects fail reasons on both InstallationUserId and InstallationDate")]
+        public void InstallationInfo_UserWithoutDate_ShouldFailOnUserAndDate()
+        {
+            var asset = new Asset { InstallationUserId = new PnoObjectReference<Person>(Guid.NewGuid()) };
+
+            var isValid = AssetValidationHandler.IsInstallationInfoValid(asset, out var result);
+
+            isValid.Should().BeFalse();
+            result.IsValid.Should().BeFalse();
+            result.TryGetFailReason(AssetValidationHandler.AssetValidationField.InstallationUserId, out _).Should().BeTrue();
+            result.TryGetFailReason(AssetValidationHandler.AssetValidationField.InstallationDate, out _).Should().BeTrue();
+        }
+
+        [TestMethod]
+        [Ignore("Behavior difference: failing at SDM reporting only ModificationDate when user is set without date; consumer expects fail reasons on both ModificationUserId and ModificationDate")]
+        public void ModificationInfo_UserWithoutDate_ShouldFailOnUserAndDate()
+        {
+            var asset = new Asset { ModificationUserId = new PnoObjectReference<Person>(Guid.NewGuid()) };
+
+            var isValid = AssetValidationHandler.IsModificationInfoValid(asset, out var result);
+
+            isValid.Should().BeFalse();
+            result.IsValid.Should().BeFalse();
+            result.TryGetFailReason(AssetValidationHandler.AssetValidationField.ModificationUserId, out _).Should().BeTrue();
+            result.TryGetFailReason(AssetValidationHandler.AssetValidationField.ModificationDate, out _).Should().BeTrue();
+        }
+
+        [TestMethod]
+        [Ignore("Behavior difference: failing at SDM reporting only OwnerContactPersonRole when person is set without role; consumer expects fail reasons on both OwnerContactPerson and OwnerContactPersonRole")]
+        public void Ownership_PersonWithoutRole_ShouldFailOnPersonAndRole()
+        {
+            var asset = new Asset { Ownership = { ContactPerson = new PnoObjectReference<Person>(Guid.NewGuid()) } };
+
+            var isValid = AssetValidationHandler.IsOwnershipValid(asset, out var result);
+
+            isValid.Should().BeFalse();
+            result.IsValid.Should().BeFalse();
+            result.TryGetFailReason(AssetValidationHandler.AssetValidationField.OwnerContactPerson, out _).Should().BeTrue();
+            result.TryGetFailReason(AssetValidationHandler.AssetValidationField.OwnerContactPersonRole, out _).Should().BeTrue();
+        }
+
+        [TestMethod]
+        [Ignore("Behavior difference: failing at SDM reporting only CustodyContactPersonRole when person is set without role; consumer expects fail reasons on both CustodyContactPerson and CustodyContactPersonRole")]
+        public void Custody_PersonWithoutRole_ShouldFailOnPersonAndRole()
+        {
+            var asset = new Asset { Custody = { ContactPerson = new PnoObjectReference<Person>(Guid.NewGuid()) } };
+
+            var isValid = AssetValidationHandler.IsCustodyValid(asset, out var result);
+
+            isValid.Should().BeFalse();
+            result.IsValid.Should().BeFalse();
+            result.TryGetFailReason(AssetValidationHandler.AssetValidationField.CustodyContactPerson, out _).Should().BeTrue();
+            result.TryGetFailReason(AssetValidationHandler.AssetValidationField.CustodyContactPersonRole, out _).Should().BeTrue();
+        }
+
+        [TestMethod]
         public void AssetHolders_WithDistinctHolders_ShouldBeValid()
         {
             var asset = new Asset

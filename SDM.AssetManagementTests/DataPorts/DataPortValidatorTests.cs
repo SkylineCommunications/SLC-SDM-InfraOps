@@ -167,6 +167,27 @@ namespace SDM.AssetManagement.Tests.DataPorts
         }
 
         [TestMethod]
+        [Ignore("SDM missing validation: DataPortValidationCore only checks the asset link when AssetField changed, so DataPorts.Create with Asset = null succeeds; consumer expects rejection of a port without asset")]
+        public void Create_WithNullAsset_ShouldThrowValidationException()
+        {
+            var dataPort = new DataPort
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                DataPortInfo =
+                {
+                    Name = "eth0",
+                    PortNumber = 1,
+                    OutputType = SlcAsset_Management.Enums.Outputtype.IO,
+                    PortExposure = SlcAsset_Management.Enums.PortExposureEnum.Front,
+                    PortType = new SdmObjectReference<PortType>(dataPortType.Identifier),
+                },
+                Asset = null,
+            };
+
+            AssertCreateRejected(dataPort, "*Asset*");
+        }
+
+        [TestMethod]
         public void Update_WithPortTypeCleared_ShouldThrowValidationException()
         {
             Helper.AssetManagement.DataPorts.Create(CreateDataPort(1));

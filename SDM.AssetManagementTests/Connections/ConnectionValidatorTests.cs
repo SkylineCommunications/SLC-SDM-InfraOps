@@ -452,6 +452,32 @@ namespace SDM.AssetManagement.Tests.Connections
             persisted.Notes.Should().Be("Notes");
         }
 
+        [TestMethod]
+        [Ignore("Behavior difference: failing at ConnectionValidator skipping the DB phase (port direction) when cable length is invalid, so no SourcePort fail reason; consumer expects CableLength and SourcePort failures accumulated")]
+        public void ValidateConnection_WithNegativeCableLengthAndSourcePortInputOnly_ShouldAccumulateFailures()
+        {
+            var source = CreateDataEndpoint("Source", SlcAsset_Management.Enums.Outputtype.In);
+            var destination = CreateDataEndpoint("Destination", SlcAsset_Management.Enums.Outputtype.IO);
+
+            var result = ValidateConnection(BuildConnection(SlcAsset_Management.Enums.ConnectionType.Data, source, destination, cableLength: -1));
+
+            result.IsValid.Should().BeFalse();
+            result.TryGetFailReason(ConnectionValidationField.CableLength, out _).Should().BeTrue();
+            result.TryGetFailReason(ConnectionValidationField.SourcePort, out _).Should().BeTrue();
+        }
+
+        [TestMethod]
+        [Ignore("Behavior difference: failing at Connections.Create returning a new instance and leaving the caller's instance with pending changes; consumer expects GetChanges() empty on the same instance after create")]
+        public void CreateDataConnection_AfterCreate_ShouldHaveNoPendingChanges()
+        {
+            var connection = BuildFullyPopulatedDataConnection();
+            connection.GetChanges().Should().NotBeEmpty("a newly created data connection should have pending changes");
+
+            Helper.AssetManagement.Connections.Create(connection);
+
+            connection.GetChanges().Should().BeEmpty();
+        }
+
         private ValidationResult ValidateConnection(Connection connection)
         {
             return Helper.AssetManagement.ConnectionValidator.Validate(connection, RepositoryAction.Create);

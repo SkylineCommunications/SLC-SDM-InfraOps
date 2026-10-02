@@ -2035,6 +2035,19 @@
             result.TryGetFailReason(AssetValidationHandler.AssetValidationField.OwnerContactPersonRole, out _).Should().BeTrue();
         }
 
+        [TestMethod]
+        [Ignore("Behavior difference: failing at AssetValidator reporting InstallationDate (not InstallationUserId) when user is set without date; consumer expects a fail reason on InstallationUserId")]
+        public void Validate_WithInstallationUserWithoutDate_ShouldFailOnInstallationUser()
+        {
+            var validator = Helper.CreateAssetValidator();
+            baseValidAsset.InstallationUserId = new PnoObjectReference<Person>(Guid.NewGuid());
+
+            var result = validator.Validate(baseValidAsset, RepositoryAction.Create);
+
+            result.IsValid.Should().BeFalse();
+            result.TryGetFailReason(AssetValidationHandler.AssetValidationField.InstallationUserId, out _).Should().BeTrue();
+        }
+
         #endregion
     }
 }
