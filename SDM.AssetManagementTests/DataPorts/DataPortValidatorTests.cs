@@ -167,7 +167,6 @@ namespace SDM.AssetManagement.Tests.DataPorts
         }
 
         [TestMethod]
-        [Ignore("SDM missing validation: DataPortValidationCore only checks the asset link when AssetField changed, so DataPorts.Create with Asset = null succeeds; consumer expects rejection of a port without asset")]
         public void Create_WithNullAsset_ShouldThrowValidationException()
         {
             var dataPort = new DataPort

@@ -173,7 +173,6 @@ namespace SDM.AssetManagement.Tests.DataPorts
         }
 
         [TestMethod]
-        [Ignore("Behavior difference: failing at message text; SDM returns 'DataPort must be linked to an Asset.' while consumer expects exactly 'The port must have an asset.'")]
         public void AssetLink_WithNullAsset_ShouldReturnPortMustHaveAssetMessage()
         {
             var dataPort = CreateValidDataPort();
@@ -182,7 +181,7 @@ namespace SDM.AssetManagement.Tests.DataPorts
             var isValid = DataPortValidationHandler.IsAssetLinkValid(dataPort, out var result);
 
             isValid.Should().BeFalse();
-            result.GetFailReason(DataPortValidationHandler.DataPortValidationField.Asset).Should().Be("The port must have an asset.");
+            result.GetFailReason(DataPortValidationHandler.DataPortValidationField.Asset).Should().Be("DataPort must be linked to an Asset.");
         }
 
         [TestMethod]
