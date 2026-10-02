@@ -48,6 +48,8 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="Skyline.DataMiner.SDM.AssetManagement.GQI" />
+    <InternalsVisibleTo Include="Skyline.DataMiner.SDM.InfraOps.Common" />
+    <InternalsVisibleTo Include="Skyline.DataMiner.SDM.PlanAndBuild.Common" />
   </ItemGroup>
   
   <ItemGroup>

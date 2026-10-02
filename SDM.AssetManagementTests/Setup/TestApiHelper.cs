@@ -5,6 +5,9 @@ namespace SDM.AssetManagement.Tests.Setup
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.FacilityManagement.Helpers;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
+    using Skyline.DataMiner.SDM.InfraOps.Orchestration;
+    using Skyline.DataMiner.SDM.InfraOpsProperties.Helpers;
+    using Skyline.DataMiner.SDM.PlanAndBuild.Helpers;
     using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
 
     /// <summary>
@@ -22,6 +25,10 @@ namespace SDM.AssetManagement.Tests.Setup
         /// Access to Facility Management repositories.
         /// </summary>
         IFacilityManagementApiHelper FacilityManagement { get; }
+
+        IPlanAndBuildApiHelper PlanAndBuild { get; }
+
+        IInfraOpsPropertiesApiHelper InfraOpsProperties { get; }
 
         /// <summary>
         /// Test data cache - persisted entities from Populate methods.
@@ -65,13 +72,20 @@ namespace SDM.AssetManagement.Tests.Setup
     {
         public TestApiHelper(IConnection connection, IPeopleAndOrganizationsApi? peopleApi = null)
         {
-            AssetManagement = new AssetManagementApiHelper(connection, new FacilityManagementApiHelper(connection), peopleApi ?? PeopleApiMock.CreateDefault());
-            FacilityManagement = new FacilityManagementApiHelper(connection);
+            Connection = connection;
+            var composition = InfraOpsApiComposition.Create(connection, peopleApi ?? PeopleApiMock.CreateDefault());
+            AssetManagement = composition.AssetManagement;
+            PlanAndBuild = composition.PlanAndBuild;
+            InfraOpsProperties = composition.InfraOpsProperties;
+            FacilityManagement = composition.FacilityManagement;
             TestData = new TestDataCache();
         }
 
         public IAssetManagementApiHelper AssetManagement { get; }
         public IFacilityManagementApiHelper FacilityManagement { get; }
+        public IPlanAndBuildApiHelper PlanAndBuild { get; }
+        public IInfraOpsPropertiesApiHelper InfraOpsProperties { get; }
         public ITestDataCache TestData { get; }
+        internal IConnection Connection { get; }
     }
 }

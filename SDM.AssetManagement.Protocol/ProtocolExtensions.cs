@@ -4,6 +4,7 @@
 
     using Skyline.DataMiner.Scripting;
     using Skyline.DataMiner.SDM.AssetManagement.Helpers;
+    using Skyline.DataMiner.SDM.InfraOps.Orchestration;
 
     /// <summary>
     /// Provides extension methods for the <see cref="SLProtocol"/> class to support IpAddressApiHelper operations.
@@ -24,7 +25,7 @@
                 throw new ArgumentNullException(nameof(protocol), "protocol cannot be null.");
             }
 
-            return new AssetManagementApiHelper(protocol.SLNet.RawConnection);
+            return InfraOpsApiHelperFactory.CreateAssetManagementApiHelper(protocol.SLNet.RawConnection);
         }
     }
 }

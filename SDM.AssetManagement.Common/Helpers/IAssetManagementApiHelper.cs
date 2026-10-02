@@ -1,5 +1,6 @@
 namespace Skyline.DataMiner.SDM.AssetManagement.Helpers
 {
+    using Skyline.DataMiner.SDM.AssetManagement.Deletion;
     using Skyline.DataMiner.SDM.AssetManagement.Common.Validation.Reservations;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
 
@@ -54,5 +55,13 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Helpers
         AssetManagerAppSettingsValidator AppSettingsValidator { get; }
 
         HistoryValidator HistoryValidator { get; }
+
+        /// <summary>
+        /// Retries cleanup after an Asset DOM deletion has already succeeded.
+        /// </summary>
+        /// <param name="assetIdentifier">The Asset DOM identifier.</param>
+        void RecoverAssetDeletion(string assetIdentifier);
+
+        void RecoverAssetDeletion(AssetDeletionRecoveryContext context);
     }
 }

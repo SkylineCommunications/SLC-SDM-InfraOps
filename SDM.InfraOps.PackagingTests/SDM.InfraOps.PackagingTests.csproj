@@ -16,6 +16,7 @@
     <ProjectReference Include="..\SDM.FacilityManagement.Common\SDM.FacilityManagement.Common.csproj" />
     <ProjectReference Include="..\SDM.AssetManagement.Common\SDM.AssetManagement.Common.csproj" />
     <ProjectReference Include="..\SDM.PlanAndBuild.Common\SDM.PlanAndBuild.Common.csproj" />
+    <ProjectReference Include="..\SDM.InfraOps.Common\SDM.InfraOps.Common.csproj" />
   </ItemGroup>
 
 </Project>

@@ -2,10 +2,12 @@
 
 📋 **About**  
 **Skyline.DataMiner.SDM.InfraOps** is the umbrella name for this Standard Data Model (SDM) repository, which provides a strongly‑typed, high‑performance API for managing your infrastructure within the DataMiner ecosystem.  
-It is delivered as a set of NuGet packages covering two primary functional domains:
+It is delivered as a consumer-facing composition package and separate domain packages:
 
 - **Asset Management** — Assets, Ports, Classes, Types, Holders, Locations  
 - **Facility Management** — Facility metadata, geospatial attributes, hierarchical facility structures  
+- **Plan & Build** — Jobs and planning data
+- **InfraOps Properties** — Property definitions and values
 
 ---
 
@@ -34,6 +36,9 @@ It is delivered as a set of NuGet packages covering two primary functional domai
 
 ## 📦 NuGet Packages
 
+### Complete InfraOps composition
+- Skyline.DataMiner.SDM.InfraOps.Common
+
 ### Asset Management
 - Skyline.DataMiner.SDM.AssetManagement.Common  
 - Skyline.DataMiner.SDM.AssetManagement.Automation  
@@ -45,6 +50,10 @@ It is delivered as a set of NuGet packages covering two primary functional domai
 - Skyline.DataMiner.SDM.FacilityManagement.Automation  
 - Skyline.DataMiner.SDM.FacilityManagement.Protocol  
 - Skyline.DataMiner.SDM.FacilityManagement.GQI  
+
+The repository also contains Plan & Build, InfraOps Properties, and lower-level Core packages. Install `Skyline.DataMiner.SDM.InfraOps.Common` when a consumer needs a single composition containing all domain helpers or cross-domain workflows such as complete Asset deletion.
+
+See [ADR 0001: InfraOps package boundaries and composition](docs/adr/0001-infraops-package-boundaries-and-composition.md) for package ownership, dependency direction, cross-domain seams, and deletion recovery decisions.
 
 
 ## 🧬 Model Schema
@@ -75,7 +84,8 @@ var results = api.Assets.ReadPaged(filter, 100);
 
 ### ❌ Delete
 ```csharp
-api.Assets.Delete(assetToDelete);
+var infraOps = InfraOpsApiComposition.Create(connection);
+infraOps.AssetManagement.Assets.Delete(assetToDelete);
 ```
 
 ### 📝 Best Practices

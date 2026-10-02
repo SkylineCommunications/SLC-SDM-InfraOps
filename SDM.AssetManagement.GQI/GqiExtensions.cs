@@ -4,6 +4,7 @@
 
     using Skyline.DataMiner.Analytics.GenericInterface;
     using Skyline.DataMiner.SDM.AssetManagement.Helpers;
+    using Skyline.DataMiner.SDM.InfraOps.Orchestration;
 
     /// <summary>
     /// Provides extension methods for obtaining an asset management API helper from GQIDMS and OnInitInputArgs
@@ -24,7 +25,7 @@
                 throw new ArgumentNullException(nameof(dms), "dms cannot be null.");
             }
 
-            return new AssetManagementApiHelper(dms.GetConnection());
+            return InfraOpsApiHelperFactory.CreateAssetManagementApiHelper(dms.GetConnection());
         }
 
         /// <summary>

@@ -10,8 +10,8 @@
     /// A failure here means a CS0433 compiler error will surface in any project that
     /// references multiple SDM Common packages simultaneously.
     ///
-    /// This test acts as the acceptance criterion for SDM.InfraOps.Core (GitHub issue #9):
-    /// once shared types live in Core, each public type appears in exactly one assembly.
+    /// This test acts as the acceptance criterion for the Common package graph:
+    /// each public type appears in exactly one assembly.
     /// </summary>
     [TestClass]
     public class NuGetPackagingTests
@@ -24,6 +24,7 @@
             typeof(Skyline.DataMiner.SDM.DeskDomRepository_Extensions).Assembly,        // SDM.FacilityManagement.Common
             typeof(Skyline.DataMiner.SDM.AssetRepository_Extensions).Assembly,       // SDM.AssetManagement.Common
             typeof(Skyline.DataMiner.SDM.JobTypeDomRepository_Extensions).Assembly,     // SDM.PlanAndBuild.Common
+            typeof(Skyline.DataMiner.SDM.InfraOps.Orchestration.InfraOpsApiComposition).Assembly,
         ];
 
         [TestMethod]
@@ -45,7 +46,7 @@
         }
 
         [TestMethod]
-        public void AllFourCommonAssembliesShouldBeDistinct()
+        public void AllFiveCommonAssembliesShouldBeDistinct()
         {
             var names = CommonAssemblies.Select(a => a.GetName().Name).ToList();
             var distinct = names.Distinct().ToList();
@@ -53,7 +54,7 @@
             CollectionAssert.AreEquivalent(
                 distinct,
                 names,
-                "Expected 4 distinct assemblies but got duplicates. Check ProjectReference anchors.");
+                "Expected 5 distinct assemblies but got duplicates. Check ProjectReference anchors.");
         }
     }
 }

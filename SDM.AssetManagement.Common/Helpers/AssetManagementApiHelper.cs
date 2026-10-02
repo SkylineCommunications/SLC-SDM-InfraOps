@@ -3,6 +3,7 @@ using Skyline.DataMiner.Net;
 using Skyline.DataMiner.SDM;
 using Skyline.DataMiner.SDM.AssetManagement.Common.Middleware;
 using Skyline.DataMiner.SDM.AssetManagement.Common.Validation.Reservations;
+using Skyline.DataMiner.SDM.AssetManagement.Deletion;
 using Skyline.DataMiner.SDM.AssetManagement.Helpers;
 using Skyline.DataMiner.SDM.AssetManagement.Models;
 using Skyline.DataMiner.SDM.AssetManagement.Validation;
@@ -25,26 +26,13 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
     private readonly InfraopsReservationValidator _infraopsReservationValidator;
     private readonly AssetManagerAppSettingsValidator _appSettingsValidator;
     private readonly HistoryValidator _historyValidator;
+    private readonly IAssetDeletionMiddleware _assetDeletionCascadeMiddleware;
 
-    // Public constructor for production use - creates its own FacilityManagementHelper
-    public AssetManagementApiHelper(IConnection connection)
-        : this(connection, new FacilityManagementApiHelper(connection), connection.GetPeopleAndOrganizationsApi())
-    {
-    }
-
-    // Internal constructor for testing - allows injection of shared FacilityManagementHelper
-    internal AssetManagementApiHelper(
-        IConnection connection,
-        IFacilityManagementApiHelper facilityManagementHelper)
-        : this(connection, facilityManagementHelper, connection.GetPeopleAndOrganizationsApi())
-    {
-    }
-
-    // Internal constructor for testing - allows injection of a mocked People & Organizations API
     internal AssetManagementApiHelper(
         IConnection connection,
         IFacilityManagementApiHelper facilityManagementHelper,
-        IPeopleAndOrganizationsApi peopleApi)
+        IPeopleAndOrganizationsApi peopleApi,
+        IAssetDeletionMiddleware assetDeletionCascadeMiddleware)
     {
         if (facilityManagementHelper == null)
         {
@@ -55,6 +43,9 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
         {
             throw new ArgumentNullException(nameof(peopleApi));
         }
+
+        _assetDeletionCascadeMiddleware = assetDeletionCascadeMiddleware
+            ?? throw new ArgumentNullException(nameof(assetDeletionCascadeMiddleware));
 
         // Initialize repositories
         var assetRepository = new AssetDomRepository(connection);
@@ -87,6 +78,7 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
         _historyValidator = new HistoryValidator();
         // Wrap with middleware
         Assets = assetRepository
+            .WithMiddleware(_assetDeletionCascadeMiddleware)
             .WithMiddleware(new AssetValidationMiddleware(_assetValidator))
             .WithMiddleware(new IdentifierMiddleware<Asset>());
 
@@ -157,4 +149,17 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
     public AssetManagerAppSettingsValidator AppSettingsValidator => _appSettingsValidator;
 
     public HistoryValidator HistoryValidator => _historyValidator;
+
+    /// <summary>
+    /// Retries dependency cleanup for an Asset whose DOM instance was deleted successfully.
+    /// </summary>
+    public void RecoverAssetDeletion(string assetIdentifier)
+    {
+        _assetDeletionCascadeMiddleware.RecoverAssetDeletion(assetIdentifier);
+    }
+
+    public void RecoverAssetDeletion(Skyline.DataMiner.SDM.AssetManagement.Deletion.AssetDeletionRecoveryContext context)
+    {
+        _assetDeletionCascadeMiddleware.RecoverAssetDeletion(context);
+    }
 }
