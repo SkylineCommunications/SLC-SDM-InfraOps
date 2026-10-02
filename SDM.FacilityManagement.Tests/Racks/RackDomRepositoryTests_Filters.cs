@@ -535,5 +535,33 @@ namespace SDM.FacilityManagement.Tests.Racks
                 racksRetrieved.Should().BeEquivalentTo(expected);
             }
         }
+
+        [TestMethod]
+        public void RackDomRepository_CreateAndReload_PersistsProperties()
+        {
+            var rack = new Rack
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                Name = "RK-1",
+                RackId = "RK-1",
+                Position = SlcFacility_Management.Enums.RackpositionenumEnum.Bottom,
+                Height = 200.0,
+                Width = 60.0,
+                Depth = 80.0,
+            };
+            rack.Capacity.MaximumRackCapacity = 42;
+            rack.Capacity.MaximumPowerCapacity = 10.0;
+
+            Helper.Racks.Create(rack);
+
+            var reloaded = Helper.Racks.Read(RackExposers.Identifier.Equal(rack.Identifier)).SingleOrDefault();
+
+            using (new AssertionScope())
+            {
+                reloaded.Should().NotBeNull();
+                reloaded!.RackId.Should().Be("RK-1");
+                reloaded.Capacity.MaximumRackCapacity.Should().Be(42);
+            }
+        }
     }
 }

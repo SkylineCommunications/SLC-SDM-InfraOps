@@ -8,6 +8,7 @@
     using SDM.AssetManagement.Tests.Setup;
     using SharedCommonLibrary.AssetManagement.State_Management;
     using SharedMappers.DomIds;
+    using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Common.Exceptions;
     using Skyline.DataMiner.SDM.AssetManagement.Common.Validation;
@@ -1872,6 +1873,166 @@
             // Assert
             act.Should().Throw<Exception>()
                 .WithMessage("*already claimed by another asset in the validation batch*");
+        }
+
+        #endregion
+
+        #region Ported From Shared Tests
+
+        [TestMethod]
+        public void IsAssetNameValid_WithWhitespaceName_ShouldReturnInvalid()
+        {
+            var validator = Helper.CreateAssetValidator();
+
+            var result = validator.IsAssetNameValid("   ");
+
+            result.IsValid.Should().BeFalse();
+            result.TryGetFailReason(AssetValidationHandler.AssetValidationField.Name, out var reason).Should().BeTrue();
+            reason.Should().Contain("cannot be empty or whitespace");
+        }
+
+        [TestMethod]
+        public void IsAssetNameValid_WithNameNotInRepository_ShouldReturnValid()
+        {
+            Helper.AssetManagement.Assets.Create(baseValidAsset);
+            var validator = Helper.CreateAssetValidator();
+
+            var result = validator.IsAssetNameValid("Name Not In Repository");
+
+            result.IsValid.Should().BeTrue();
+            result.FailureReasons.Should().BeEmpty();
+        }
+
+        [TestMethod]
+        public void IsAssetNameValid_WithExistingNameExcludingOwnIdentifier_ShouldReturnValid()
+        {
+            var created = Helper.AssetManagement.Assets.Create(baseValidAsset);
+            var validator = Helper.CreateAssetValidator();
+
+            var withoutExclusion = validator.IsAssetNameValid(created.Name);
+            var withExclusion = validator.IsAssetNameValid(created.Name, created.Identifier);
+
+            withoutExclusion.IsValid.Should().BeFalse("name is already in use by the created asset");
+            withExclusion.IsValid.Should().BeTrue("the asset owning the name is excluded");
+        }
+
+        [TestMethod]
+        public void IsAssetIdValid_WithWhitespaceId_ShouldReturnInvalid()
+        {
+            var validator = Helper.CreateAssetValidator();
+
+            var result = validator.IsAssetIdValid("   ");
+
+            result.IsValid.Should().BeFalse();
+            result.TryGetFailReason(AssetValidationHandler.AssetValidationField.AssetId, out var reason).Should().BeTrue();
+            reason.Should().Contain("cannot be empty or whitespace");
+        }
+
+        [TestMethod]
+        public void IsAssetIdValid_WithIdNotInRepository_ShouldReturnValid()
+        {
+            Helper.AssetManagement.Assets.Create(baseValidAsset);
+            var validator = Helper.CreateAssetValidator();
+
+            var result = validator.IsAssetIdValid("ID-NOT-IN-REPOSITORY");
+
+            result.IsValid.Should().BeTrue();
+            result.FailureReasons.Should().BeEmpty();
+        }
+
+        [TestMethod]
+        public void IsAssetIdValid_WithExistingIdExcludingOwnIdentifier_ShouldReturnValid()
+        {
+            var created = Helper.AssetManagement.Assets.Create(baseValidAsset);
+            var validator = Helper.CreateAssetValidator();
+
+            var withoutExclusion = validator.IsAssetIdValid(created.AssetID);
+            var withExclusion = validator.IsAssetIdValid(created.AssetID, created.Identifier);
+
+            withoutExclusion.IsValid.Should().BeFalse("asset ID is already in use by the created asset");
+            withExclusion.IsValid.Should().BeTrue("the asset owning the ID is excluded");
+        }
+
+        [TestMethod]
+        public void Create_WithEmptySerialNumberOnTwoAssetsSameClass_ShouldSucceed()
+        {
+            Helper.AssetManagement.Assets.Create(new Asset
+            {
+                AssetID = "TEST-EMPTY-SN-001",
+                Name = "First Asset Without Serial",
+                AssetClassId = new SdmObjectReference<AssetClass>(testAssetClass.Identifier),
+                SerialNumber = string.Empty,
+            });
+
+            Action act = () => Helper.AssetManagement.Assets.Create(new Asset
+            {
+                AssetID = "TEST-EMPTY-SN-002",
+                Name = "Second Asset Without Serial",
+                AssetClassId = new SdmObjectReference<AssetClass>(testAssetClass.Identifier),
+                SerialNumber = string.Empty,
+            });
+
+            act.Should().NotThrow();
+        }
+
+        [TestMethod]
+        public void Create_WithUniqueSerialNumber_ShouldPersistSerialNumber()
+        {
+            baseValidAsset.SerialNumber = "UNIQUE-SN-0001";
+
+            var created = Helper.AssetManagement.Assets.Create(baseValidAsset);
+            var reloaded = Helper.AssetManagement.Assets.Read(AssetExposers.AssetName.Equal(baseValidAsset.Name)).Single();
+
+            created.SerialNumber.Should().Be("UNIQUE-SN-0001");
+            reloaded.SerialNumber.Should().Be("UNIQUE-SN-0001");
+        }
+
+        [TestMethod]
+        public void Create_WithDuplicateSerialNumberDifferentClass_ShouldSucceed()
+        {
+            var otherAssetClass = Helper.TestData.AssetClasses.First(ac => ac.Identifier != testAssetClass.Identifier);
+            Helper.AssetManagement.Assets.Create(new Asset
+            {
+                AssetID = "TEST-SN-CLASS-001",
+                Name = "Serial In First Class",
+                AssetClassId = new SdmObjectReference<AssetClass>(testAssetClass.Identifier),
+                SerialNumber = "SN-SHARED-ACROSS-CLASSES",
+            });
+
+            Action act = () => Helper.AssetManagement.Assets.Create(new Asset
+            {
+                AssetID = "TEST-SN-CLASS-002",
+                Name = "Serial In Other Class",
+                AssetClassId = new SdmObjectReference<AssetClass>(otherAssetClass.Identifier),
+                SerialNumber = "SN-SHARED-ACROSS-CLASSES",
+            });
+
+            act.Should().NotThrow();
+        }
+
+        [TestMethod]
+        public void Validate_WithBasicValidAsset_ShouldReturnValid()
+        {
+            var validator = Helper.CreateAssetValidator();
+
+            var result = validator.Validate(baseValidAsset, RepositoryAction.Create);
+
+            result.IsValid.Should().BeTrue();
+            result.FailureReasons.Should().BeEmpty();
+        }
+
+        [TestMethod]
+        public void Validate_WithMultipleIndependentFailures_ShouldAccumulateAllFailures()
+        {
+            var validator = Helper.CreateAssetValidator();
+            baseValidAsset.InstallationUserId = new PnoObjectReference<Person>(Guid.NewGuid());
+            baseValidAsset.Ownership.ContactPerson = new PnoObjectReference<Person>(Guid.NewGuid());
+
+            var result = validator.Validate(baseValidAsset, RepositoryAction.Create);
+
+            result.IsValid.Should().BeFalse();
+            result.TryGetFailReason(AssetValidationHandler.AssetValidationField.InstallationDate, out _).Should().BeTrue();
+            result.TryGetFailReason(AssetValidationHandler.AssetValidationField.OwnerContactPersonRole, out _).Should().BeTrue();
         }
 
         #endregion

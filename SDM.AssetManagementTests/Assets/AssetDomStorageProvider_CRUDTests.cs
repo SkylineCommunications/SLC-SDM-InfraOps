@@ -356,6 +356,90 @@
             }
         }
 
+        #region Ported From Shared Tests
+
+        private Asset NewMinimalAsset(string suffix)
+        {
+            Helper.PopulateWithDemoData(DemoDataLayer.AssetClasses);
+            return new Asset
+            {
+                AssetID = $"PORTED-{suffix}",
+                Name = $"Ported Asset {suffix}",
+                AssetClassId = new SdmObjectReference<AssetClass>(Helper.TestData.AssetClasses.First().Identifier),
+            };
+        }
+
+        private Asset ReloadAsset(string identifier)
+        {
+            return Helper.AssetManagement.Assets.Read(new TRUEFilterElement<Asset>()).Single(a => a.Identifier == identifier);
+        }
+
+        private Asset CopyForUpdate(Asset created)
+        {
+            return new Asset
+            {
+                Identifier = created.Identifier,
+                AssetID = created.AssetID,
+                Name = created.Name,
+                AssetClassId = created.AssetClassId,
+            };
+        }
+
+        [TestMethod]
+        public void OperationalFlags_OnNewAsset_ShouldBeEmpty()
+        {
+            var asset = new Asset();
+
+            asset.OperationalFlags.Should().NotBeNull();
+            asset.OperationalFlags.Should().BeEmpty();
+        }
+
+        [TestMethod]
+        public void OperationalFlags_WithEmptyFlags_ShouldStayEmptyAfterSaveAndReload()
+        {
+            var asset = NewMinimalAsset("FLAG-2");
+
+            var created = Helper.AssetManagement.Assets.Create(asset);
+            var reloaded = ReloadAsset(created.Identifier);
+
+            reloaded.OperationalFlags.Should().BeEmpty();
+        }
+
+        [TestMethod]
+        public void SerialNumber_HardwareVersion_MacAddress_ShouldPersistAcrossSaveReloadAndUpdate()
+        {
+            var asset = NewMinimalAsset("NET-1");
+            asset.SerialNumber = "SN-ROUNDTRIP-1";
+            asset.HardwareVersion = "HW-1.0";
+            asset.MacAddress = "AA-BB-CC-DD-EE-01";
+
+            var created = Helper.AssetManagement.Assets.Create(asset);
+            var reloaded = ReloadAsset(created.Identifier);
+
+            using (new AssertionScope())
+            {
+                reloaded.SerialNumber.Should().Be("SN-ROUNDTRIP-1");
+                reloaded.HardwareVersion.Should().Be("HW-1.0");
+                reloaded.MacAddress.Should().Be("AA-BB-CC-DD-EE-01");
+            }
+
+            var update = CopyForUpdate(created);
+            update.SerialNumber = "SN-ROUNDTRIP-2";
+            update.HardwareVersion = "HW-2.0";
+            update.MacAddress = "AA-BB-CC-DD-EE-02";
+            Helper.AssetManagement.Assets.CreateOrUpdate([update]);
+            var updated = ReloadAsset(created.Identifier);
+
+            using (new AssertionScope())
+            {
+                updated.SerialNumber.Should().Be("SN-ROUNDTRIP-2");
+                updated.HardwareVersion.Should().Be("HW-2.0");
+                updated.MacAddress.Should().Be("AA-BB-CC-DD-EE-02");
+            }
+        }
+
+        #endregion
+
         private void AssertCreated()
         {
             using (new AssertionScope())

@@ -288,6 +288,63 @@
 
         #endregion
 
+        #region Ported From Shared Tests
+
+        [TestMethod]
+        public void ReadFilter_Name_NonExistent_ShouldReturnEmptyWithoutThrowing()
+        {
+            // Arrange
+            SeedAssetClassesForDeviceTypeFilters();
+            var filter = AssetClassExposers.Name.Equal("Asset Class That Does Not Exist " + Guid.NewGuid());
+
+            // Act
+            Func<System.Collections.Generic.List<AssetClass>> act = () => Helper.AssetManagement.AssetClasses.Read(filter).ToList();
+
+            // Assert
+            act.Should().NotThrow().Which.Should().BeEmpty();
+        }
+
+        [TestMethod]
+        public void ReadFilter_Name_Existing_ShouldReturnSavedAssetClassWithSameIdentifier()
+        {
+            // Arrange
+            var (assetClasses, _) = SeedAssetClassesForDeviceTypeFilters();
+            var saved = assetClasses[0];
+            var filter = AssetClassExposers.Name.Equal(saved.Name);
+
+            // Act
+            var results = Helper.AssetManagement.AssetClasses.Read(filter).ToList();
+
+            // Assert
+            using (new AssertionScope())
+            {
+                results.Should().ContainSingle();
+                results[0].Identifier.Should().Be(saved.Identifier);
+                results[0].Name.Should().Be(saved.Name);
+            }
+        }
+
+        [TestMethod]
+        public void ReadFilter_DeviceTypeId_Existing_ShouldReturnMatchingAssetClasses()
+        {
+            // Arrange
+            var (assetClasses, targetDeviceType) = SeedAssetClassesForDeviceTypeFilters();
+            var filter = AssetClassExposers.DeviceTypeId.Equal(new SdmObjectReference<DeviceType>(targetDeviceType.Identifier));
+
+            // Act
+            var results = Helper.AssetManagement.AssetClasses.Read(filter).ToList();
+
+            // Assert
+            using (new AssertionScope())
+            {
+                results.Should().ContainSingle();
+                results[0].Identifier.Should().Be(assetClasses[0].Identifier);
+                results[0].DeviceTypeId.Identifier.Should().Be(targetDeviceType.Identifier);
+            }
+        }
+
+        #endregion
+
         private (AssetClass[] AssetClasses, DeviceType TargetDeviceType) SeedAssetClassesForDeviceTypeFilters()
         {
             var targetDeviceType = Helper.AssetManagement.DeviceTypes.Create(new DeviceType
