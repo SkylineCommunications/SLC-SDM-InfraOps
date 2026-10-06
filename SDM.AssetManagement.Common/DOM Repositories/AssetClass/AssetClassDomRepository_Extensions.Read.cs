@@ -17,11 +17,6 @@
         /// <returns>The matching object, or <see langword="null"/> if none exists.</returns>
         public static AssetClass ReadByIdentifier(this IReadableRepository<AssetClass> repository, string id)
         {
-            if (string.IsNullOrWhiteSpace(id))
-            {
-                return null;
-            }
-
             return ReadByIdentifiers(repository, new[] { id }).SingleOrDefault();
         }
 
@@ -33,12 +28,13 @@
         /// <returns>The matching objects, or <see langword="null"/> when no values are supplied.</returns>
         public static IEnumerable<AssetClass> ReadByIdentifiers(this IReadableRepository<AssetClass> repository, IEnumerable<string> identifiers)
         {
-            if (identifiers.IsNullOrEmpty())
+            var notNullIdentifiers = identifiers?.Where(identifier => Guid.TryParse(identifier, out _));
+            if (notNullIdentifiers.IsNullOrEmpty())
             {
                 return Array.Empty<AssetClass>();
             }
 
-            return RepositoryQueryExtensions.ReadByBigOrFilter(repository, identifiers, value => AssetClassExposers.Identifier.Equal(value));
+            return RepositoryQueryExtensions.ReadByBigOrFilter(repository, notNullIdentifiers, value => AssetClassExposers.Identifier.Equal(value));
         }
 
     }

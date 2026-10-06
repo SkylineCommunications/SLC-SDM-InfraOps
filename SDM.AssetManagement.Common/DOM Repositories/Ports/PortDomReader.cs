@@ -16,7 +16,7 @@
     /// Repository whose purpose is to read ports from both the DataPort and PowerPort DOM definitions, and split the results per definition.
     /// Filters built with <see cref="PortExposers"/> are translated per definition and combined as:
     /// (Definition = DataPort AND translated filter) OR (Definition = PowerPort AND translated filter).
-    /// When the filter uses definition-exclusive fields (<see cref="PortExposers.DataPortOnly"/> / <see cref="PortExposers.PowerPortOnly"/>),
+    /// When the filter uses definition-exclusive fields (<see cref="PortExposers.DataPortOnly"/>),
     /// the opposite definition is useless to filter and is skipped. When exclusive fields of both definitions
     /// are combined, no instance can match and an empty result is returned without querying.
     /// </summary>

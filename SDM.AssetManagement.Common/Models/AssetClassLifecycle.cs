@@ -51,24 +51,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             nameof(NominalLifetime),
             () => new ChangeTrackingField<TimeSpan?>(null));
 
-        public bool Equals(AssetClassLifecycle other)
-        {
-            if (other is null)
-            {
-                return false;
-            }
-
-            if (ReferenceEquals(this, other))
-            {
-                return true;
-            }
-
-            return
-                EndOfLife == other.EndOfLife &&
-                EndOfService == other.EndOfService &&
-                NominalLifetime == other.NominalLifetime;
-        }
-
         public static bool operator ==(AssetClassLifecycle left, AssetClassLifecycle right)
         {
             if (ReferenceEquals(left, right))
@@ -87,6 +69,24 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         public static bool operator !=(AssetClassLifecycle left, AssetClassLifecycle right)
         {
             return !(left == right);
+        }
+
+        public bool Equals(AssetClassLifecycle other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return
+                EndOfLife == other.EndOfLife &&
+                EndOfService == other.EndOfService &&
+                NominalLifetime == other.NominalLifetime;
         }
 
         public override bool Equals(object obj)
