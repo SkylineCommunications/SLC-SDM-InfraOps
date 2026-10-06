@@ -7,7 +7,7 @@
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Extensions;
 
-    public static partial class AssetClassDomRepository_Extensions
+    public static partial class AssetClassDomRepositoryExtensions
     {
         /// <summary>
         /// Reads the object matching the given identifier. Recommended to use <see cref="ReadByIdentifiers(IReadableRepository{AssetClass}, IEnumerable{string})"/> when retrieving multiple values.
