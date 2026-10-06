@@ -59,8 +59,8 @@ namespace SDM.PlanAndBuild.Tests.Models
         [DynamicData(nameof(ModelTypes))]
         public void GetHashCode_ShouldBeConsistentWithEquals_ForTwoDefaultInstances(Type modelType)
         {
-            object first = Activator.CreateInstance(modelType)!;
-            object second = Activator.CreateInstance(modelType)!;
+            object first = CreateDeterministicInstance(modelType);
+            object second = CreateDeterministicInstance(modelType);
 
             bool areEqual;
             try
@@ -96,12 +96,32 @@ namespace SDM.PlanAndBuild.Tests.Models
             act.Should().NotThrow($"{modelType.Name}.{propertyName} must tolerate a null Identifier in GetHashCode()");
 
             string identifier = Guid.NewGuid().ToString();
-            object first = Activator.CreateInstance(modelType)!;
-            object second = Activator.CreateInstance(modelType)!;
+            object first = CreateDeterministicInstance(modelType);
+            object second = CreateDeterministicInstance(modelType);
             property.SetValue(first, Activator.CreateInstance(referenceType, identifier));
             property.SetValue(second, Activator.CreateInstance(referenceType, identifier));
 
             first.GetHashCode().Should().Be(second.GetHashCode(), $"{modelType.Name}.{propertyName}: equal identifiers must produce equal hash codes");
+        }
+
+        // Some models default date properties to DateTime.UtcNow, which differs between instances on high-resolution clocks.
+        private static object CreateDeterministicInstance(Type modelType)
+        {
+            object instance = Activator.CreateInstance(modelType)!;
+            DateTime fixedTime = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
+            foreach (PropertyInfo property in modelType.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+            {
+                if (property.GetIndexParameters().Length == 0
+                    && property.CanRead
+                    && property.GetSetMethod() != null
+                    && (property.PropertyType == typeof(DateTime) || property.PropertyType == typeof(DateTime?)))
+                {
+                    property.SetValue(instance, fixedTime);
+                }
+            }
+
+            return instance;
         }
 
         private static IEnumerable<Type> GetModelTypes()
