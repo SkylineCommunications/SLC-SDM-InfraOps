@@ -29,6 +29,24 @@
             return new ManagedFilter<TFilter, ISdmObjectReference<TField>>(exposer, Comparer.NotEquals, default, (TFilter obj) => exposer.internalFunc(obj).HasValue());
         }
 
+        /// <summary>
+        /// Checks if the SdmObjectReference has a valid value (not null and identifier is not empty).
+        /// </summary>
+        public static bool HasValue<T>(this IObjectReference<T> reference)
+        {
+            if (!TryGetIdentifierAsGuid(reference, out var guid))
+            {
+                return false;
+            }
+
+            if (guid == Guid.Empty)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
         //
         // Summary:
         //     Creates a filter that checks if the exposed Reference field has no value.
@@ -50,24 +68,6 @@
         public static ManagedFilter<TFilter, ISdmObjectReference<TField>> HasNoValue<TFilter, TField>(this Exposer<TFilter, ISdmObjectReference<TField>> exposer) where TFilter : class where TField : ISdmObject
         {
             return new ManagedFilter<TFilter, ISdmObjectReference<TField>>(exposer, Comparer.Equals, default, (TFilter obj) => !exposer.internalFunc(obj).HasValue());
-        }
-
-        /// <summary>
-        /// Checks if the SdmObjectReference has a valid value (not null and identifier is not empty).
-        /// </summary>
-        public static bool HasValue<T>(this IObjectReference<T> reference)
-        {
-            if(!TryGetIdentifierAsGuid(reference, out var guid))
-            {
-                return false;
-            }
-
-            if (guid == Guid.Empty)
-            {
-                return false;
-            }
-
-            return true;
         }
 
         public static bool TryGetIdentifierAsGuid<T>(this IObjectReference<T> reference, out Guid guid)

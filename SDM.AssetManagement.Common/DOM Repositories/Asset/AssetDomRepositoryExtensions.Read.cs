@@ -7,7 +7,7 @@
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Extensions;
 
-    public static partial class AssetDomRepository_Extensions
+    public static partial class AssetDomRepositoryExtensions
     {
         /// <summary>
         /// Reads the object matching the given identifier. Recommended to use <see cref="ReadByIdentifiers(IReadableRepository{Asset}, IEnumerable{string})"/> when retrieving multiple values.
@@ -17,11 +17,6 @@
         /// <returns>The matching object, or <see langword="null"/> if none exists.</returns>
         public static Asset ReadByIdentifier(this IReadableRepository<Asset> repository, string id)
         {
-            if (string.IsNullOrWhiteSpace(id))
-            {
-                return null;
-            }
-
             return ReadByIdentifiers(repository, new[] { id }).SingleOrDefault();
         }
 
@@ -33,12 +28,13 @@
         /// <returns>The matching objects, or <see langword="null"/> when no values are supplied.</returns>
         public static IEnumerable<Asset> ReadByIdentifiers(this IReadableRepository<Asset> repository, IEnumerable<string> identifiers)
         {
-            if (identifiers.IsNullOrEmpty())
+            var notNullIdentifiers = identifiers?.Where(identifier => Guid.TryParse(identifier, out _));
+            if (notNullIdentifiers.IsNullOrEmpty())
             {
                 return Array.Empty<Asset>();
             }
 
-            return RepositoryQueryExtensions.ReadByBigOrFilter(repository, identifiers, value => AssetExposers.Identifier.Equal(value));
+            return RepositoryQueryExtensions.ReadByBigOrFilter(repository, notNullIdentifiers, value => AssetExposers.Identifier.Equal(value));
         }
 
     }

@@ -78,7 +78,7 @@
         //     are not null; otherwise, the default value.
         public static implicit operator ISdmObjectReference<T>(T sdmObject)
         {
-            if (sdmObject?.Identifier == null)
+            if (string.IsNullOrEmpty(sdmObject?.Identifier))
             {
                 return default(ISdmObjectReference<T>);
             }
@@ -174,9 +174,9 @@
         //     Thrown when the object cannot be converted to an Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences.ISdmObjectReference`1.
         public static ISdmObjectReference<R> Convert<R>(object obj) where R : ISdmObject
         {
-            if (obj is ISdmObjectReference<R>)
+            if (obj is ISdmObjectReference<R> reference)
             {
-                return (ISdmObjectReference<R>)obj;
+                return reference;
             }
 
             if (!(obj is ISdmObject sdmObject))
@@ -238,6 +238,12 @@
             }
 
             return Identifier.Equals(other.Identifier);
+        }
+
+
+        public bool Equals(T obj)
+        {
+            return Equals((ISdmObjectReference<T>)obj);
         }
 
         //

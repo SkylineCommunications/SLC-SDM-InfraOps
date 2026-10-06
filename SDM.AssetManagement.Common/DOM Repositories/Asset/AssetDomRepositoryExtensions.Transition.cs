@@ -4,7 +4,7 @@
     using SharedMappers.DomIds;
     using Skyline.DataMiner.SDM.AssetManagement.Common.Extensions;
 
-    public static partial class AssetDomRepository_Extensions
+    public static partial class AssetDomRepositoryExtensions
     {
         /// <summary>
         /// Updates fields and transitions state in a single atomic operation.
