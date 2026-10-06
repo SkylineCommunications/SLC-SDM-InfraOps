@@ -704,7 +704,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 					connectionsonjob.Status = _connectionsonjobstatus.Value;
 				}
 
-				var _connectionsonjobcabletype = _connectionsonjobSection.GetValue<Guid>(PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.CableType);
+				var _connectionsonjobcabletype = _connectionsonjobSection.GetValue<string>(PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.CableType);
 				if (_connectionsonjobcabletype != null)
 				{
 					connectionsonjob.CableType = new SdmObjectReference<AssetManagement.Models.CableType>(Convert.ToString(_connectionsonjobcabletype.Value));
@@ -921,7 +921,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 
 				if (connectionsonjob.CableType.HasValue())
 				{
-					_connectionsonjobSection.AddOrUpdateValue<Guid>(PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.CableType, connectionsonjob.CableType.GetIdentifierAsGuid());
+					_connectionsonjobSection.AddOrUpdateValue<string>(PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.CableType, connectionsonjob.CableType.Identifier);
 				}
 
 				if (connectionsonjob.CableLength != default)
@@ -1038,7 +1038,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 				case "ConnectionsOnJob.Status":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.Status), comparer, (string)value);
 				case "ConnectionsOnJob.CableType":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.CableType), comparer, SdmObjectReference<AssetManagement.Models.CableType>.Convert(value).GetIdentifierAsGuid());
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.CableType), comparer, SdmObjectReference<AssetManagement.Models.CableType>.Convert(value).Identifier);
 				case "ConnectionsOnJob.CableLength" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
 					return DomInstanceExposers.FieldValues.KeyExists(PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.CableLength.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "ConnectionsOnJob.CableLength":

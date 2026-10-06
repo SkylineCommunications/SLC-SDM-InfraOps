@@ -37,6 +37,7 @@
         /// <summary>
         /// Gets or sets the modified instance ID. Type of SDM Object is referenced in <see cref="ModifiedInstanceDefinitionID"/>.
         /// </summary>
+        /// <remarks>The reference identifier is stored verbatim in the string-valued History Info / Instance ID DOM field.</remarks>
         public ISdmObjectReference<ISdmObject> ModifiedInstanceID
         {
             get => ModifiedInstanceIDField.Value;
