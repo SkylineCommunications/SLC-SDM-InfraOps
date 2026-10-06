@@ -151,6 +151,21 @@ namespace SDM.FacilityManagement.Tests.Validation
             result.TryGetFailReason(RowValidationHandler.RowValidationField.RowId, out _).Should().BeTrue();
         }
 
+        [TestMethod]
+        public void RowValidator_Validate_SavedRowWithClearedName_ShouldBeInvalid()
+        {
+            var created = NewRow("VALID");
+            Helper.Rows.Create(Helper.AttachRoom(created));
+            var existing = Helper.Rows.Read(RowExposers.Identifier.Equal(created.Identifier)).Single();
+            existing.Name = string.Empty;
+            var validator = CreateValidator();
+
+            var result = validator.Validate(existing, RepositoryAction.Update);
+
+            result.IsValid.Should().BeFalse();
+            result.TryGetFailReason(RowValidationHandler.RowValidationField.Name, out _).Should().BeTrue();
+        }
+
         private RowValidator CreateValidator()
         {
             return new RowValidator(new FacilityEntityLoader(Helper));

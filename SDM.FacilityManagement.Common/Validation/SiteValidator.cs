@@ -35,22 +35,22 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
         {
             var result = new ValidationResult();
 
-            if (!SiteValidationHandler.IsSiteIdValid(site, out var idResult))
+            if (site.ShouldValidate(site.SiteIdField))
             {
-                result.AddFailuresFrom(idResult);
-                return result;
+                if (!SiteValidationHandler.IsSiteIdValid(site, out var idResult))
+                {
+                    result.AddFailuresFrom(idResult);
+                }
+                else if (IsSiteIdInUse(site.SiteId, site.Identifier))
+                {
+                    result.AddFailReason(SiteValidationHandler.SiteValidationField.SiteId,
+                        $"Site Id '{site.SiteId}' is already in use.");
+                }
             }
 
-            if (!SiteValidationHandler.IsSiteNameValid(site, out var nameResult))
+            if (site.ShouldValidate(site.NameField) && !SiteValidationHandler.IsSiteNameValid(site, out var nameResult))
             {
                 result.AddFailuresFrom(nameResult);
-                return result;
-            }
-
-            if (site.ShouldValidate(site.SiteIdField) && IsSiteIdInUse(site.SiteId, site.Identifier))
-            {
-                result.AddFailReason(SiteValidationHandler.SiteValidationField.SiteId,
-                    $"Site Id '{site.SiteId}' is already in use.");
             }
 
             return result;

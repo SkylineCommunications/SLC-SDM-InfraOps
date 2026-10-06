@@ -151,6 +151,21 @@
             result.TryGetFailReason(FacilityValidationHandler.FacilityValidationField.FacilityId, out _).Should().BeTrue();
         }
 
+        [TestMethod]
+        public void FacilityValidator_Validate_SavedFacilityWithClearedName_ShouldBeInvalid()
+        {
+            var created = NewFacility("VALID");
+            Helper.Facilities.Create(created);
+            var existing = Helper.Facilities.Read(FacilityExposers.Identifier.Equal(created.Identifier)).Single();
+            existing.Name = string.Empty;
+            var validator = CreateValidator();
+
+            var result = validator.Validate(existing, RepositoryAction.Update);
+
+            result.IsValid.Should().BeFalse();
+            result.TryGetFailReason(FacilityValidationHandler.FacilityValidationField.Name, out _).Should().BeTrue();
+        }
+
         private FacilityValidator CreateValidator()
         {
             return new FacilityValidator(new FacilityEntityLoader(Helper));

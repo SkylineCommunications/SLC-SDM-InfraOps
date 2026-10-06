@@ -36,20 +36,17 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                 if (!DeskValidationHandler.IsDeskIdValid(entity, out var idResult))
                 {
                     result.AddFailuresFrom(idResult);
-                    return result;
                 }
-
-                if (!DeskValidationHandler.IsDeskNameValid(entity, out var nameResult))
-                {
-                    result.AddFailuresFrom(nameResult);
-                    return result;
-                }
-
-                if (IsIdInUse(entity.DeskID, entity.Identifier))
+                else if (IsIdInUse(entity.DeskID, entity.Identifier))
                 {
                     result.AddFailReason(DeskValidationHandler.DeskValidationField.DeskId,
                         $"Desk Id '{entity.DeskID}' is already in use.");
                 }
+            }
+
+            if (entity.ShouldValidate(entity.NameField) && !DeskValidationHandler.IsDeskNameValid(entity, out var nameResult))
+            {
+                result.AddFailuresFrom(nameResult);
             }
 
             result.AddFailuresFrom(ValidateReferencesAgainstDatabase(new List<Desk> { entity })[0]);

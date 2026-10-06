@@ -1,4 +1,4 @@
-namespace SDM.FacilityManagement.Tests.Validation
+﻿namespace SDM.FacilityManagement.Tests.Validation
 {
     using System;
     using System.Linq;
@@ -139,6 +139,21 @@ namespace SDM.FacilityManagement.Tests.Validation
 
             result.IsValid.Should().BeFalse();
             result.TryGetFailReason(FloorValidationHandler.FloorValidationField.FloorId, out _).Should().BeTrue();
+        }
+
+        [TestMethod]
+        public void FloorValidator_Validate_SavedFloorWithClearedName_ShouldBeInvalid()
+        {
+            var created = NewFloor("VALID");
+            Helper.Floors.Create(Helper.AttachFacility(created));
+            var existing = Helper.Floors.Read(FloorExposers.Identifier.Equal(created.Identifier)).Single();
+            existing.Name = string.Empty;
+            var validator = CreateValidator();
+
+            var result = validator.Validate(existing, RepositoryAction.Update);
+
+            result.IsValid.Should().BeFalse();
+            result.TryGetFailReason(FloorValidationHandler.FloorValidationField.FloorName, out _).Should().BeTrue();
         }
 
         private FloorValidator CreateValidator()

@@ -150,6 +150,20 @@ namespace SDM.FacilityManagement.Tests.Validation
             result.TryGetFailReason(DeskValidationHandler.DeskValidationField.DeskId, out _).Should().BeTrue();
         }
 
+        [TestMethod]
+        public void DeskValidator_Validate_SavedDeskWithClearedName_ShouldBeInvalid()
+        {
+            Helper.Desks.Create(Helper.AttachRoom(NewDesk("VALID")));
+            var existing = Helper.Desks.Read(DeskExposers.DeskInformation.DeskID.Equal("VALID")).Single();
+            existing.Name = string.Empty;
+            var validator = CreateValidator();
+
+            var result = validator.Validate(existing, RepositoryAction.Update);
+
+            result.IsValid.Should().BeFalse();
+            result.TryGetFailReason(DeskValidationHandler.DeskValidationField.Name, out _).Should().BeTrue();
+        }
+
         private DeskValidator CreateValidator()
         {
             return new DeskValidator(new FacilityEntityLoader(Helper));

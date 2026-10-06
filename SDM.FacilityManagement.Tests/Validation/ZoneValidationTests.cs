@@ -207,6 +207,21 @@ namespace SDM.FacilityManagement.Tests.Validation
             result.TryGetFailReason(ZoneValidationHandler.ZoneValidationField.ZoneId, out _).Should().BeTrue();
         }
 
+        [TestMethod]
+        public void ZoneValidator_Validate_SavedZoneWithClearedName_ShouldBeInvalid()
+        {
+            var created = NewZone("VALID");
+            Helper.Zones.Create(Helper.AttachRoom(created));
+            var existing = Helper.Zones.Read(ZoneExposers.Identifier.Equal(created.Identifier)).Single();
+            existing.Name = string.Empty;
+            var validator = CreateValidator();
+
+            var result = validator.Validate(existing, RepositoryAction.Update);
+
+            result.IsValid.Should().BeFalse();
+            result.TryGetFailReason(ZoneValidationHandler.ZoneValidationField.Name, out _).Should().BeTrue();
+        }
+
         private ZoneValidator CreateValidator()
         {
             return new ZoneValidator(new FacilityEntityLoader(Helper));

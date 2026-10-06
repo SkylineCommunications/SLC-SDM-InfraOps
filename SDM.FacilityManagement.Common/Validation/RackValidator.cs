@@ -40,24 +40,20 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
 
             if (rack.ShouldValidate(rack.RackIdField))
             {
-                // Id not empty is critical - stop if invalid.
                 if (!RackValidationHandler.IsRackIdValid(rack, out var idResult))
                 {
                     result.AddFailuresFrom(idResult);
-                    return result;
                 }
-
-                if (!RackValidationHandler.IsRackNameValid(rack, out var nameResult))
-                {
-                    result.AddFailuresFrom(nameResult);
-                    return result;
-                }
-
-                if (IsRackIdInUse(rack.RackId, rack.Identifier))
+                else if (IsRackIdInUse(rack.RackId, rack.Identifier))
                 {
                     result.AddFailReason(RackValidationHandler.RackValidationField.RackId,
                         $"Rack Id '{rack.RackId}' is already in use.");
                 }
+            }
+
+            if (rack.ShouldValidate(rack.NameField) && !RackValidationHandler.IsRackNameValid(rack, out var nameResult))
+            {
+                result.AddFailuresFrom(nameResult);
             }
 
             if (rack.ShouldValidate(rack.PositionField) &&
@@ -66,7 +62,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                 result.AddFailuresFrom(positionResult);
             }
 
-            AddBusinessRuleFailures(rack, result);
+            AddBusinessRuleFailures(rack, result, onlyChangedFields: true);
 
             result.AddFailuresFrom(ValidateReferencesAgainstDatabase(new List<Rack> { rack })[0]);
 
@@ -176,29 +172,34 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
             return results;
         }
 
-        private static void AddBusinessRuleFailures(Rack rack, ValidationResult result)
+        private static void AddBusinessRuleFailures(Rack rack, ValidationResult result, bool onlyChangedFields = false)
         {
-            if (!RackValidationHandler.IsRackHeightValid(rack, out var heightResult))
+            if ((!onlyChangedFields || rack.ShouldValidate(rack.HeightField)) &&
+                !RackValidationHandler.IsRackHeightValid(rack, out var heightResult))
             {
                 result.AddFailuresFrom(heightResult);
             }
 
-            if (!RackValidationHandler.IsRackDepthValid(rack, out var depthResult))
+            if ((!onlyChangedFields || rack.ShouldValidate(rack.DepthField)) &&
+                !RackValidationHandler.IsRackDepthValid(rack, out var depthResult))
             {
                 result.AddFailuresFrom(depthResult);
             }
 
-            if (!RackValidationHandler.IsRackWidthValid(rack, out var widthResult))
+            if ((!onlyChangedFields || rack.ShouldValidate(rack.WidthField)) &&
+                !RackValidationHandler.IsRackWidthValid(rack, out var widthResult))
             {
                 result.AddFailuresFrom(widthResult);
             }
 
-            if (!RackValidationHandler.IsRackUnitCapacityValid(rack, out var unitResult))
+            if ((!onlyChangedFields || rack.ShouldValidate(rack.Capacity)) &&
+                !RackValidationHandler.IsRackUnitCapacityValid(rack, out var unitResult))
             {
                 result.AddFailuresFrom(unitResult);
             }
 
-            if (!RackValidationHandler.IsRackPowerCapacityValid(rack, out var powerResult))
+            if ((!onlyChangedFields || rack.ShouldValidate(rack.Capacity)) &&
+                !RackValidationHandler.IsRackPowerCapacityValid(rack, out var powerResult))
             {
                 result.AddFailuresFrom(powerResult);
             }

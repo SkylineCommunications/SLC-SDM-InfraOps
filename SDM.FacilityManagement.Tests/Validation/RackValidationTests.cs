@@ -479,6 +479,46 @@ namespace SDM.FacilityManagement.Tests.Validation
             result.IsValid.Should().BeTrue();
         }
 
+        [TestMethod]
+        public void RackValidator_Validate_SavedRackWithClearedName_ShouldBeInvalid()
+        {
+            Helper.Racks.Create(Helper.AttachRow(NewRack("NAME-1", SlcFacility_Management.Enums.RackpositionenumEnum.Top)));
+            var existing = Helper.Racks.Read(RackExposers.RackProperties.RackId.Equal("NAME-1")).Single();
+            existing.Name = string.Empty;
+
+            var result = CreateValidator().Validate(existing, RepositoryAction.Update);
+
+            result.IsValid.Should().BeFalse();
+            result.GetFailReason(RackValidationHandler.RackValidationField.Name).Should().Be("Rack Name cannot be empty or whitespace.");
+        }
+
+        [TestMethod]
+        public void RackValidator_Validate_SavedRackWithClearedNameAndId_ShouldReportBoth()
+        {
+            Helper.Racks.Create(Helper.AttachRow(NewRack("NAME-2", SlcFacility_Management.Enums.RackpositionenumEnum.Top)));
+            var existing = Helper.Racks.Read(RackExposers.RackProperties.RackId.Equal("NAME-2")).Single();
+            existing.Name = string.Empty;
+            existing.RackId = string.Empty;
+
+            var result = CreateValidator().Validate(existing, RepositoryAction.Update);
+
+            result.TryGetFailReason(RackValidationHandler.RackValidationField.Name, out _).Should().BeTrue();
+            result.TryGetFailReason(RackValidationHandler.RackValidationField.RackId, out _).Should().BeTrue();
+        }
+
+        [TestMethod]
+        public void RackValidator_Validate_SavedRackWithInvalidHeightOnly_ShouldFailOnHeight()
+        {
+            Helper.Racks.Create(Helper.AttachRow(NewRack("NAME-3", SlcFacility_Management.Enums.RackpositionenumEnum.Top)));
+            var existing = Helper.Racks.Read(RackExposers.RackProperties.RackId.Equal("NAME-3")).Single();
+            existing.Height = 1000;
+
+            var result = CreateValidator().Validate(existing, RepositoryAction.Update);
+
+            result.IsValid.Should().BeFalse();
+            result.TryGetFailReason(RackValidationHandler.RackValidationField.Height, out _).Should().BeTrue();
+        }
+
         private RackValidator CreateValidator()
         {
             return new RackValidator(new FacilityEntityLoader(Helper));

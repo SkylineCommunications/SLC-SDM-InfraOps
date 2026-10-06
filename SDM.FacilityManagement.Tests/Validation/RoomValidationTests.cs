@@ -151,6 +151,21 @@ namespace SDM.FacilityManagement.Tests.Validation
             result.TryGetFailReason(RoomValidationHandler.RoomValidationField.RoomId, out _).Should().BeTrue();
         }
 
+        [TestMethod]
+        public void RoomValidator_Validate_SavedRoomWithClearedName_ShouldBeInvalid()
+        {
+            var created = NewRoom("VALID");
+            Helper.Rooms.Create(Helper.AttachFloor(created));
+            var existing = Helper.Rooms.Read(RoomExposers.Identifier.Equal(created.Identifier)).Single();
+            existing.Name = string.Empty;
+            var validator = CreateValidator();
+
+            var result = validator.Validate(existing, RepositoryAction.Update);
+
+            result.IsValid.Should().BeFalse();
+            result.TryGetFailReason(RoomValidationHandler.RoomValidationField.Name, out _).Should().BeTrue();
+        }
+
         private RoomValidator CreateValidator()
         {
             return new RoomValidator(new FacilityEntityLoader(Helper));

@@ -149,6 +149,21 @@
             result.TryGetFailReason(SiteValidationHandler.SiteValidationField.SiteId, out _).Should().BeTrue();
         }
 
+        [TestMethod]
+        public void SiteValidator_Validate_SavedSiteWithClearedName_ShouldBeInvalid()
+        {
+            var created = NewSite("VALID");
+            Helper.Sites.Create(created);
+            var existing = Helper.Sites.Read(SiteExposers.Identifier.Equal(created.Identifier)).Single();
+            existing.Name = string.Empty;
+            var validator = CreateValidator();
+
+            var result = validator.Validate(existing, RepositoryAction.Update);
+
+            result.IsValid.Should().BeFalse();
+            result.TryGetFailReason(SiteValidationHandler.SiteValidationField.Name, out _).Should().BeTrue();
+        }
+
         private SiteValidator CreateValidator()
         {
             return new SiteValidator(new FacilityEntityLoader(Helper));
