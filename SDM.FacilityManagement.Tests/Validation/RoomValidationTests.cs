@@ -1,4 +1,4 @@
-﻿namespace SDM.FacilityManagement.Tests.Validation
+namespace SDM.FacilityManagement.Tests.Validation
 {
     using System;
     using System.Linq;
@@ -25,7 +25,7 @@
         {
             var entity = new Room { Identifier = Guid.NewGuid().ToString(), Name = "Room", RoomId = string.Empty };
 
-            var action = () => Helper.Rooms.Create(entity);
+            var action = () => Helper.Rooms.Create(Helper.AttachFloor(entity));
 
             action.Should().Throw<Exception>().WithMessage("*cannot be empty*");
         }
@@ -35,7 +35,7 @@
         {
             var entity = new Room { Identifier = Guid.NewGuid().ToString(), Name = string.Empty, RoomId = "ROOM-1" };
 
-            var action = () => Helper.Rooms.Create(entity);
+            var action = () => Helper.Rooms.Create(Helper.AttachFloor(entity));
 
             action.Should().Throw<Exception>().WithMessage("*Room Name cannot be empty*");
         }
@@ -55,10 +55,10 @@
         public void Room_Create_WithDuplicateIdInDatabase_ShouldThrow()
         {
             var existing = new Room { Identifier = Guid.NewGuid().ToString(), Name = "Existing Room", RoomId = "EXIST-1" };
-            Helper.Rooms.Create(existing);
+            Helper.Rooms.Create(Helper.AttachFloor(existing));
 
             var duplicate = new Room { Identifier = Guid.NewGuid().ToString(), Name = "Duplicate Room", RoomId = "EXIST-1" };
-            var action = () => Helper.Rooms.Create(duplicate);
+            var action = () => Helper.Rooms.Create(Helper.AttachFloor(duplicate));
 
             action.Should().Throw<Exception>().WithMessage("*already in use*");
         }
@@ -101,7 +101,7 @@
         [TestMethod]
         public void RoomValidator_IsRoomIdValid_WithIdAlreadyInStore_ShouldReturnExactMessage()
         {
-            Helper.Rooms.Create(NewRoom("EXISTING"));
+            Helper.Rooms.Create(Helper.AttachFloor(NewRoom("EXISTING")));
             var validator = CreateValidator();
 
             var result = validator.IsRoomIdValid("EXISTING");
@@ -126,7 +126,7 @@
         [TestMethod]
         public void RoomValidator_Validate_WithValidRoom_ShouldBeValid()
         {
-            var floor = Helper.Floors.Create(new Floor { Identifier = Guid.NewGuid().ToString(), FloorId = "FLR-VALID", Name = "Floor VALID" });
+            var floor = Helper.Floors.Create(Helper.AttachFacility(new Floor { Identifier = Guid.NewGuid().ToString(), FloorId = "FLR-VALID", Name = "Floor VALID" }));
             var entity = NewRoom("VALID");
             entity.FloorFk.Floor = new SdmObjectReference<Floor>(floor.Identifier);
             var validator = CreateValidator();
@@ -140,7 +140,7 @@
         public void RoomValidator_Validate_SavedRoomWithClearedId_ShouldBeInvalid()
         {
             var created = NewRoom("VALID");
-            Helper.Rooms.Create(created);
+            Helper.Rooms.Create(Helper.AttachFloor(created));
             var existing = Helper.Rooms.Read(RoomExposers.Identifier.Equal(created.Identifier)).Single();
             existing.RoomId = string.Empty;
             var validator = CreateValidator();

@@ -813,7 +813,7 @@ namespace SDM.PlanAndBuild.Tests.JobTests
 
 		private PlanAndBuildJob CreateValidJob(Statuses status = Statuses.New)
 		{
-			return new PlanAndBuildJob
+			var job = new PlanAndBuildJob
 			{
 				JobName = $"Job {Guid.NewGuid()}",
 				Type = new SdmObjectReference<JobType>(_jobType.Identifier),
@@ -821,6 +821,9 @@ namespace SDM.PlanAndBuild.Tests.JobTests
 				End = new DateTime(2026, 1, 15),
 				State = status,
 			};
+			job.Ownership.AssignedTo = new PnoObjectReference<Person>(Guid.NewGuid());
+			job.Ownership.AssignmentGroup = new PnoObjectReference<Team>(Guid.NewGuid());
+			return job;
 		}
 
 		private void ChangeStateGatedField(PlanAndBuildJob job, string fieldName)

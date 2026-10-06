@@ -1,4 +1,4 @@
-﻿namespace SDM.FacilityManagement.Tests.Validation
+namespace SDM.FacilityManagement.Tests.Validation
 {
     using System;
     using System.Linq;
@@ -25,7 +25,7 @@
         {
             var entity = new Row { Identifier = Guid.NewGuid().ToString(), Name = "Row", RowId = string.Empty };
 
-            var action = () => Helper.Rows.Create(entity);
+            var action = () => Helper.Rows.Create(Helper.AttachRoom(entity));
 
             action.Should().Throw<Exception>().WithMessage("*cannot be empty*");
         }
@@ -35,7 +35,7 @@
         {
             var entity = new Row { Identifier = Guid.NewGuid().ToString(), Name = string.Empty, RowId = "ROW-1" };
 
-            var action = () => Helper.Rows.Create(entity);
+            var action = () => Helper.Rows.Create(Helper.AttachRoom(entity));
 
             action.Should().Throw<Exception>().WithMessage("*Row Name cannot be empty*");
         }
@@ -55,10 +55,10 @@
         public void Row_Create_WithDuplicateIdInDatabase_ShouldThrow()
         {
             var existing = new Row { Identifier = Guid.NewGuid().ToString(), Name = "Existing Row", RowId = "EXIST-1" };
-            Helper.Rows.Create(existing);
+            Helper.Rows.Create(Helper.AttachRoom(existing));
 
             var duplicate = new Row { Identifier = Guid.NewGuid().ToString(), Name = "Duplicate Row", RowId = "EXIST-1" };
-            var action = () => Helper.Rows.Create(duplicate);
+            var action = () => Helper.Rows.Create(Helper.AttachRoom(duplicate));
 
             action.Should().Throw<Exception>().WithMessage("*already in use*");
         }
@@ -101,7 +101,7 @@
         [TestMethod]
         public void RowValidator_IsRowIdValid_WithIdAlreadyInStore_ShouldReturnExactMessage()
         {
-            Helper.Rows.Create(NewRow("EXISTING"));
+            Helper.Rows.Create(Helper.AttachRoom(NewRow("EXISTING")));
             var validator = CreateValidator();
 
             var result = validator.IsRowIdValid("EXISTING");
@@ -126,7 +126,7 @@
         [TestMethod]
         public void RowValidator_Validate_WithValidRow_ShouldBeValid()
         {
-            var room = Helper.Rooms.Create(new Room { Identifier = Guid.NewGuid().ToString(), RoomId = "ROOM-VALID", Name = "Room VALID" });
+            var room = Helper.Rooms.Create(Helper.AttachFloor(new Room { Identifier = Guid.NewGuid().ToString(), RoomId = "ROOM-VALID", Name = "Room VALID" }));
             var entity = NewRow("VALID");
             entity.RoomFk.Room = new SdmObjectReference<Room>(room.Identifier);
             var validator = CreateValidator();
@@ -140,7 +140,7 @@
         public void RowValidator_Validate_SavedRowWithClearedId_ShouldBeInvalid()
         {
             var created = NewRow("VALID");
-            Helper.Rows.Create(created);
+            Helper.Rows.Create(Helper.AttachRoom(created));
             var existing = Helper.Rows.Read(RowExposers.Identifier.Equal(created.Identifier)).Single();
             existing.RowId = string.Empty;
             var validator = CreateValidator();

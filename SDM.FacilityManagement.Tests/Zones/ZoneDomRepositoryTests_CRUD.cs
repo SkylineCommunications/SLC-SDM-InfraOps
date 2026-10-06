@@ -16,7 +16,7 @@ namespace SDM.FacilityManagement.Tests.Zones
         [TestMethod]
         public void ZoneDomRepository_CreateWithRoomReference_ReadBack_PersistsZoneIdRoomWidthAndDepth()
         {
-            var room = Helper.Rooms.Create(new Room { Identifier = Guid.NewGuid().ToString(), RoomId = "RM-ZONE", Name = "Room ZONE" });
+            var room = Helper.Rooms.Create(Helper.AttachFloor(new Room { Identifier = Guid.NewGuid().ToString(), RoomId = "RM-ZONE", Name = "Room ZONE" }));
             var zone = new Zone
             {
                 Identifier = Guid.NewGuid().ToString(),
@@ -28,7 +28,7 @@ namespace SDM.FacilityManagement.Tests.Zones
             };
             zone.RoomFk.Room = new SdmObjectReference<Room>(room.Identifier);
 
-            Helper.Zones.Create(zone);
+            Helper.Zones.Create(Helper.AttachRoom(zone));
 
             var reloaded = Helper.Zones.Read(ZoneExposers.Identifier.Equal(zone.Identifier)).SingleOrDefault();
 

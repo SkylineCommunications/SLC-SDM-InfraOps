@@ -1,4 +1,4 @@
-﻿namespace SDM.FacilityManagement.Tests.Validation
+namespace SDM.FacilityManagement.Tests.Validation
 {
     using System;
     using System.Linq;
@@ -24,7 +24,7 @@
             var entity = new Rack { Identifier = Guid.NewGuid().ToString(), Name = "Rack", RackId = string.Empty };
             entity.Capacity.MaximumRackCapacity = 42;
 
-            var action = () => Helper.Racks.Create(entity);
+            var action = () => Helper.Racks.Create(Helper.AttachRow(entity));
 
             action.Should().Throw<Exception>().WithMessage("*cannot be empty*");
         }
@@ -34,7 +34,7 @@
         {
             var entity = new Rack { Identifier = Guid.NewGuid().ToString(), Name = string.Empty, RackId = "RACK-1" };
 
-            var action = () => Helper.Racks.Create(entity);
+            var action = () => Helper.Racks.Create(Helper.AttachRow(entity));
 
             action.Should().Throw<Exception>().WithMessage("*Rack Name cannot be empty*");
         }
@@ -57,11 +57,11 @@
         {
             var existing = new Rack { Identifier = Guid.NewGuid().ToString(), Name = "Existing Rack", RackId = "EXIST-1", Position = SlcFacility_Management.Enums.RackpositionenumEnum.Bottom };
             existing.Capacity.MaximumRackCapacity = 42;
-            Helper.Racks.Create(existing);
+            Helper.Racks.Create(Helper.AttachRow(existing));
 
             var duplicate = new Rack { Identifier = Guid.NewGuid().ToString(), Name = "Duplicate Rack", RackId = "EXIST-1", Position = SlcFacility_Management.Enums.RackpositionenumEnum.Bottom };
             duplicate.Capacity.MaximumRackCapacity = 42;
-            var action = () => Helper.Racks.Create(duplicate);
+            var action = () => Helper.Racks.Create(Helper.AttachRow(duplicate));
 
             action.Should().Throw<Exception>().WithMessage("*already in use*");
         }
@@ -169,7 +169,7 @@
         {
             var entity = NewRack("POS-1", null);
 
-            var action = () => Helper.Racks.Create(entity);
+            var action = () => Helper.Racks.Create(Helper.AttachRow(entity));
 
             action.Should().Throw<Exception>().WithMessage("*Rack Position cannot be empty*");
         }
@@ -192,7 +192,7 @@
         {
             var entity = NewRack("POS-4", position);
 
-            var action = () => Helper.Racks.Create(entity);
+            var action = () => Helper.Racks.Create(Helper.AttachRow(entity));
 
             action.Should().NotThrow();
         }
@@ -200,7 +200,7 @@
         [TestMethod]
         public void Rack_Update_ClearingPosition_ShouldThrow()
         {
-            Helper.Racks.Create(NewRack("POS-5", SlcFacility_Management.Enums.RackpositionenumEnum.Top));
+            Helper.Racks.Create(Helper.AttachRow(NewRack("POS-5", SlcFacility_Management.Enums.RackpositionenumEnum.Top)));
             var existing = Helper.Racks.Read(RackExposers.RackProperties.RackId.Equal("POS-5")).Single();
             existing.Position = null;
 
@@ -212,7 +212,7 @@
         [TestMethod]
         public void Rack_Update_WithoutTouchingPosition_ShouldSucceed()
         {
-            Helper.Racks.Create(NewRack("POS-6", SlcFacility_Management.Enums.RackpositionenumEnum.Top));
+            Helper.Racks.Create(Helper.AttachRow(NewRack("POS-6", SlcFacility_Management.Enums.RackpositionenumEnum.Top)));
             var existing = Helper.Racks.Read(RackExposers.RackProperties.RackId.Equal("POS-6")).Single();
             existing.Name = "Renamed Rack";
 
@@ -246,7 +246,7 @@
         [TestMethod]
         public void RackValidator_IsRackIdValid_WithIdAlreadyInStore_ShouldReturnExactMessage()
         {
-            Helper.Racks.Create(NewRack("EXISTING", SlcFacility_Management.Enums.RackpositionenumEnum.Bottom));
+            Helper.Racks.Create(Helper.AttachRow(NewRack("EXISTING", SlcFacility_Management.Enums.RackpositionenumEnum.Bottom)));
             var validator = CreateValidator();
 
             var result = validator.IsRackIdValid("EXISTING");
@@ -274,7 +274,7 @@
         [TestMethod]
         public void RackValidator_Validate_WithValidRack_ShouldBeValid()
         {
-            var rack = NewRack("VALID", SlcFacility_Management.Enums.RackpositionenumEnum.Bottom);
+            var rack = Helper.AttachRow(NewRack("VALID", SlcFacility_Management.Enums.RackpositionenumEnum.Bottom));
             rack.Height = 200.0;
             rack.Width = 60.0;
             rack.Depth = 80.0;
@@ -289,7 +289,7 @@
         [TestMethod]
         public void Rack_Update_ClearingRackId_ShouldThrow()
         {
-            Helper.Racks.Create(NewRack("VALID-UPD", SlcFacility_Management.Enums.RackpositionenumEnum.Bottom));
+            Helper.Racks.Create(Helper.AttachRow(NewRack("VALID-UPD", SlcFacility_Management.Enums.RackpositionenumEnum.Bottom)));
             var existing = Helper.Racks.Read(RackExposers.RackProperties.RackId.Equal("VALID-UPD")).Single();
             existing.RackId = string.Empty;
 
@@ -353,7 +353,7 @@
         [TestMethod]
         public void Rack_Update_WithRackUnitsWithinRange_ShouldSucceed()
         {
-            Helper.Racks.Create(NewRack("CAP-1", SlcFacility_Management.Enums.RackpositionenumEnum.Bottom));
+            Helper.Racks.Create(Helper.AttachRow(NewRack("CAP-1", SlcFacility_Management.Enums.RackpositionenumEnum.Bottom)));
             var existing = Helper.Racks.Read(RackExposers.RackProperties.RackId.Equal("CAP-1")).Single();
             existing.Capacity.MaximumRackCapacity = 42;
 
@@ -367,7 +367,7 @@
         {
             var rack = NewRack("CAP-2", SlcFacility_Management.Enums.RackpositionenumEnum.Bottom);
             rack.Capacity.MaximumPowerCapacity = 10.0;
-            Helper.Racks.Create(rack);
+            Helper.Racks.Create(Helper.AttachRow(rack));
             var existing = Helper.Racks.Read(RackExposers.RackProperties.RackId.Equal("CAP-2")).Single();
             existing.Capacity.MaximumRackCapacity = 0;
 

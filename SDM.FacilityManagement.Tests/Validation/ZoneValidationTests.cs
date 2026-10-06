@@ -1,4 +1,4 @@
-﻿namespace SDM.FacilityManagement.Tests.Validation
+namespace SDM.FacilityManagement.Tests.Validation
 {
     using System;
     using System.Linq;
@@ -25,7 +25,7 @@
         {
             var entity = new Zone { Identifier = Guid.NewGuid().ToString(), Name = "Zone", ZoneId = string.Empty };
 
-            var action = () => Helper.Zones.Create(entity);
+            var action = () => Helper.Zones.Create(Helper.AttachRoom(entity));
 
             action.Should().Throw<Exception>().WithMessage("*cannot be empty*");
         }
@@ -35,7 +35,7 @@
         {
             var entity = new Zone { Identifier = Guid.NewGuid().ToString(), Name = string.Empty, ZoneId = "ZONE-1" };
 
-            var action = () => Helper.Zones.Create(entity);
+            var action = () => Helper.Zones.Create(Helper.AttachRoom(entity));
 
             action.Should().Throw<Exception>().WithMessage("*Zone Name cannot be empty*");
         }
@@ -56,7 +56,7 @@
         {
             var entity = new Zone { Identifier = Guid.NewGuid().ToString(), Name = "Zone", ZoneId = "ZONE-CC-1" };
 
-            var action = () => Helper.Zones.Create(entity);
+            var action = () => Helper.Zones.Create(Helper.AttachRoom(entity));
 
             action.Should().Throw<Exception>().WithMessage("*cooling capacity must be defined*");
         }
@@ -72,7 +72,7 @@
                 ZoneCapacity = { CoolingCapacity = -1.0 },
             };
 
-            var action = () => Helper.Zones.Create(entity);
+            var action = () => Helper.Zones.Create(Helper.AttachRoom(entity));
 
             action.Should().Throw<Exception>().WithMessage("*cooling capacity cannot be negative*");
         }
@@ -88,7 +88,7 @@
                 ZoneCapacity = { CoolingCapacity = 12.5 },
             };
 
-            var action = () => Helper.Zones.Create(entity);
+            var action = () => Helper.Zones.Create(Helper.AttachRoom(entity));
 
             action.Should().NotThrow();
         }
@@ -97,10 +97,10 @@
         public void Zone_Create_WithDuplicateIdInDatabase_ShouldThrow()
         {
             var existing = new Zone { Identifier = Guid.NewGuid().ToString(), Name = "Existing Zone", ZoneId = "EXIST-1", ZoneCapacity = { CoolingCapacity = 5.0 } };
-            Helper.Zones.Create(existing);
+            Helper.Zones.Create(Helper.AttachRoom(existing));
 
             var duplicate = new Zone { Identifier = Guid.NewGuid().ToString(), Name = "Duplicate Zone", ZoneId = "EXIST-1", ZoneCapacity = { CoolingCapacity = 5.0 } };
-            var action = () => Helper.Zones.Create(duplicate);
+            var action = () => Helper.Zones.Create(Helper.AttachRoom(duplicate));
 
             action.Should().Throw<Exception>().WithMessage("*already in use*");
         }
@@ -143,7 +143,7 @@
         [TestMethod]
         public void ZoneValidator_IsZoneIdValid_WithIdAlreadyInStore_ShouldReturnExactMessage()
         {
-            Helper.Zones.Create(NewZone("EXISTING"));
+            Helper.Zones.Create(Helper.AttachRoom(NewZone("EXISTING")));
             var validator = CreateValidator();
 
             var result = validator.IsZoneIdValid("EXISTING");
@@ -168,7 +168,7 @@
         [TestMethod]
         public void ZoneValidator_Validate_WithValidZone_ShouldBeValid()
         {
-            var room = Helper.Rooms.Create(new Room { Identifier = Guid.NewGuid().ToString(), RoomId = "ROOM-VALID", Name = "Room VALID" });
+            var room = Helper.Rooms.Create(Helper.AttachFloor(new Room { Identifier = Guid.NewGuid().ToString(), RoomId = "ROOM-VALID", Name = "Room VALID" }));
             var entity = NewZone("VALID");
             entity.RoomFk.Room = new SdmObjectReference<Room>(room.Identifier);
             var validator = CreateValidator();
@@ -182,7 +182,7 @@
         [Ignore("Behavior difference: failing at ZoneValidator requiring CoolingCapacity ('Zone cooling capacity must be defined.'); consumer accepts a zone without cooling capacity")]
         public void ZoneValidator_Validate_WithZoneWithoutCoolingCapacity_ShouldBeValid()
         {
-            var room = Helper.Rooms.Create(new Room { Identifier = Guid.NewGuid().ToString(), RoomId = "ROOM-VALID", Name = "Room VALID" });
+            var room = Helper.Rooms.Create(Helper.AttachFloor(new Room { Identifier = Guid.NewGuid().ToString(), RoomId = "ROOM-VALID", Name = "Room VALID" }));
             var entity = new Zone { Identifier = Guid.NewGuid().ToString(), Name = "VALID", ZoneId = "VALID" };
             entity.RoomFk.Room = new SdmObjectReference<Room>(room.Identifier);
             var validator = CreateValidator();
@@ -196,7 +196,7 @@
         public void ZoneValidator_Validate_SavedZoneWithClearedId_ShouldBeInvalid()
         {
             var created = NewZone("VALID");
-            Helper.Zones.Create(created);
+            Helper.Zones.Create(Helper.AttachRoom(created));
             var existing = Helper.Zones.Read(ZoneExposers.Identifier.Equal(created.Identifier)).Single();
             existing.ZoneId = string.Empty;
             var validator = CreateValidator();

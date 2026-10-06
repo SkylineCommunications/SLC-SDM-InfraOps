@@ -16,11 +16,11 @@ namespace SDM.FacilityManagement.Tests.Rows
         [TestMethod]
         public void RowDomRepository_CreateWithRoomReference_ReadBack_PersistsRowIdRoomAndYPosition()
         {
-            var room = Helper.Rooms.Create(new Room { Identifier = Guid.NewGuid().ToString(), RoomId = "RM-ROW", Name = "Room ROW" });
+            var room = Helper.Rooms.Create(Helper.AttachFloor(new Room { Identifier = Guid.NewGuid().ToString(), RoomId = "RM-ROW", Name = "Room ROW" }));
             var row = new Row { Identifier = Guid.NewGuid().ToString(), Name = "Row 1", RowId = "RW-1", YPosition = 12.5 };
             row.RoomFk.Room = new SdmObjectReference<Room>(room.Identifier);
 
-            Helper.Rows.Create(row);
+            Helper.Rows.Create(Helper.AttachRoom(row));
 
             var reloaded = Helper.Rows.Read(RowExposers.Identifier.Equal(row.Identifier)).SingleOrDefault();
 

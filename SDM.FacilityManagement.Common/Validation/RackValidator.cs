@@ -251,6 +251,15 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
         private List<ValidationResult> ValidateReferencesAgainstDatabase(List<Rack> racks)
         {
             var results = racks.Select(_ => new ValidationResult()).ToList();
+            for (int i = 0; i < racks.Count; i++)
+            {
+                if (ReferenceValidationHelper.ShouldValidateReferences(racks[i]) &&
+                    (racks[i].RowFk.IsEmpty || !ReferenceValidationHelper.HasId(ReferenceValidationHelper.GetId(racks[i].RowFk.Row))))
+                {
+                    ReferenceValidationHelper.AddRequiredReference(results[i], RackValidationHandler.RackValidationField.RowId, "Row");
+                }
+            }
+
             var rowCandidates = racks
                 .Select((rack, index) => new
                 {

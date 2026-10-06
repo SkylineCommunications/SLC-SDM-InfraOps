@@ -210,6 +210,15 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
         private List<ValidationResult> ValidateReferencesAgainstDatabase(List<Room> entities)
         {
             var results = entities.Select(_ => new ValidationResult()).ToList();
+            for (int i = 0; i < entities.Count; i++)
+            {
+                if (ReferenceValidationHelper.ShouldValidateReferences(entities[i]) &&
+                    (entities[i].FloorFk.IsEmpty || !ReferenceValidationHelper.HasId(ReferenceValidationHelper.GetId(entities[i].FloorFk.Floor))))
+                {
+                    ReferenceValidationHelper.AddRequiredReference(results[i], RoomValidationHandler.RoomValidationField.FloorId, "Floor");
+                }
+            }
+
             var floorCandidates = entities
                 .Select((entity, index) => new
                 {

@@ -131,16 +131,13 @@ namespace SDM.FacilityManagement.Tests.Desks
             Helper.PopulateDesks();
 
             var filter = DeskExposers.RoomFk.Room.HasNoValue();
-            var expected = DemoData.Desks.Where(d => (!d.RoomFk?.Room.HasValue()) ?? false).ToArray();
-
             var desksRetrieved = Helper.Desks.Read(filter);
 
             using (new AssertionScope())
             {
                 desksRetrieved.Should().NotBeNull();
-                desksRetrieved.Should().NotBeEmpty();
-                desksRetrieved.Should().HaveCount(expected.Length);
-                desksRetrieved.Should().BeEquivalentTo(expected);
+                // Room is required, so no stored desk can be without one.
+                desksRetrieved.Should().BeEmpty();
             }
         }
 

@@ -20,7 +20,7 @@ namespace SDM.FacilityManagement.Tests.Floors
             var floor = new Floor { Identifier = Guid.NewGuid().ToString(), Name = "Floor 1", FloorId = "FL-1" };
             floor.FacilityFk.Facility = new SdmObjectReference<Facility>(facility.Identifier);
 
-            Helper.Floors.Create(floor);
+            Helper.Floors.Create(Helper.AttachFacility(floor));
 
             var reloaded = Helper.Floors.Read(FloorExposers.Identifier.Equal(floor.Identifier)).SingleOrDefault();
 

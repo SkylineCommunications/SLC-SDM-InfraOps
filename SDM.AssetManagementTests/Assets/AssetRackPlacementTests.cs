@@ -209,7 +209,7 @@ namespace SDM.AssetManagement.Tests.Assets
             };
             rack.Capacity.MaximumRackCapacity = capacity;
 
-            return Helper.FacilityManagement.Racks.Create(rack);
+            return Helper.FacilityManagement.Racks.Create(Helper.FacilityManagement.AttachRow(rack));
         }
 
         private AssetClass CreateRackAssetClass(int heightU)

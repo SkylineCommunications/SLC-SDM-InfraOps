@@ -235,6 +235,10 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
                 && !AssetValidationHandler.IsInstallationInfoValid(asset, out var installationResult))
                 validations.Add(installationResult);
 
+            if (asset.ShouldValidateAny(asset.StateField, asset.InstallationUserIdField)
+                && !AssetValidationHandler.IsInstallationUserSetForState(asset, out var installationUserResult))
+                validations.Add(installationUserResult);
+
             if (asset.ShouldValidateAny(asset.ModificationUserIdField, asset.ModificationDateField)
                 && !AssetValidationHandler.IsModificationInfoValid(asset, out var modificationResult))
                 validations.Add(modificationResult);

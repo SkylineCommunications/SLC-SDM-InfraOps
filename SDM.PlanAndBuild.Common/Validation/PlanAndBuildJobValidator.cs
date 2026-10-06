@@ -454,6 +454,8 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
         {
             var result = new ValidationResult();
 
+            ValidateAssignmentRequired(job, result);
+
             if (job.ShouldValidate(job.Ownership.AssignedToField) &&
                 job.Ownership.AssignedTo.HasValue() &&
                 !IsPersonValid(job.Ownership.AssignedTo))
@@ -492,6 +494,8 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
         private ValidationResult ValidatePeopleAndOrganizations(PlanAndBuildJob job, HashSet<Guid> existingPersonIds, HashSet<Guid> existingTeamIds)
         {
             var result = new ValidationResult();
+
+            ValidateAssignmentRequired(job, result);
 
             if (job.ShouldValidate(job.Ownership.AssignedToField) &&
                 job.Ownership.AssignedTo.HasValue() &&
@@ -655,6 +659,29 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
                 .ReadByBigOrFilter(keys, id => TeamExposers.Id.Equal(id))
                 .Select(t => t.Id)
                 .ToHashSet();
+        }
+
+        private static void ValidateAssignmentRequired(PlanAndBuildJob job, ValidationResult result)
+        {
+            var requiresAssignment = job.State == SharedMappers.DomIds.SlcPlan_And_Build.Behaviors.Job_Behavior.StatusesEnum.Active
+                || job.State == SharedMappers.DomIds.SlcPlan_And_Build.Behaviors.Job_Behavior.StatusesEnum.Assigned
+                || job.State == SharedMappers.DomIds.SlcPlan_And_Build.Behaviors.Job_Behavior.StatusesEnum.Review
+                || job.State == SharedMappers.DomIds.SlcPlan_And_Build.Behaviors.Job_Behavior.StatusesEnum.Resolved;
+
+            if (!requiresAssignment)
+            {
+                return;
+            }
+
+            if (job.ShouldValidateAny(job.StateField, job.Ownership.AssignedToField) && !job.Ownership.AssignedTo.HasValue())
+            {
+                ReferenceValidationHelper.AddRequiredReference(result, PlanAndBuildJobValidationField.AssignedTo, "Assigned To");
+            }
+
+            if (job.ShouldValidateAny(job.StateField, job.Ownership.AssignmentGroupField) && !job.Ownership.AssignmentGroup.HasValue())
+            {
+                ReferenceValidationHelper.AddRequiredReference(result, PlanAndBuildJobValidationField.AssignmentGroup, "Assignment Group");
+            }
         }
 
         private static bool IsReferenceSet<T>(SdmObjectReference<T> reference)

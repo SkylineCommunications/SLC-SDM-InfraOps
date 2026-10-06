@@ -1,4 +1,4 @@
-﻿namespace SDM.AssetManagement.Tests.Assets
+namespace SDM.AssetManagement.Tests.Assets
 {
     using System;
     using System.Collections.Generic;
@@ -289,12 +289,12 @@
             // instead of _locationroom.Value, causing NullReferenceException when ContainerId was absent.
             PrepareReferenceAssetWithAssetClass();
             var roomId = Guid.NewGuid();
-            var room = Helper.FacilityManagement.Rooms.Create(new Room
+            var room = Helper.FacilityManagement.Rooms.Create(Helper.FacilityManagement.AttachFloor(new Room
             {
                 Identifier = roomId.ToString(),
                 RoomId = $"ROOM-{roomId}",
                 Name = "Asset Location Room",
-            });
+            }));
             referenceAsset.Location.RoomId = new SdmObjectReference<Room>(room.Identifier);
 
             // Act

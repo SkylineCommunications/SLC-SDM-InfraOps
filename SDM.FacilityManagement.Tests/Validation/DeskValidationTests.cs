@@ -1,4 +1,4 @@
-﻿namespace SDM.FacilityManagement.Tests.Validation
+namespace SDM.FacilityManagement.Tests.Validation
 {
     using System;
     using System.Linq;
@@ -25,7 +25,7 @@
         {
             var entity = new Desk { Identifier = Guid.NewGuid().ToString(), Name = "Desk", DeskID = string.Empty };
 
-            var action = () => Helper.Desks.Create(entity);
+            var action = () => Helper.Desks.Create(Helper.AttachRoom(entity));
 
             action.Should().Throw<Exception>().WithMessage("*cannot be empty*");
         }
@@ -35,7 +35,7 @@
         {
             var entity = new Desk { Identifier = Guid.NewGuid().ToString(), Name = string.Empty, DeskID = "DSK-1" };
 
-            var action = () => Helper.Desks.Create(entity);
+            var action = () => Helper.Desks.Create(Helper.AttachRoom(entity));
 
             action.Should().Throw<Exception>().WithMessage("*Desk Name cannot be empty*");
         }
@@ -55,10 +55,10 @@
         public void Desk_Create_WithDuplicateIdInDatabase_ShouldThrow()
         {
             var existing = new Desk { Identifier = Guid.NewGuid().ToString(), Name = "Existing Desk", DeskID = "EXIST-1" };
-            Helper.Desks.Create(existing);
+            Helper.Desks.Create(Helper.AttachRoom(existing));
 
             var duplicate = new Desk { Identifier = Guid.NewGuid().ToString(), Name = "Duplicate Desk", DeskID = "EXIST-1" };
-            var action = () => Helper.Desks.Create(duplicate);
+            var action = () => Helper.Desks.Create(Helper.AttachRoom(duplicate));
 
             action.Should().Throw<Exception>().WithMessage("*already in use*");
         }
@@ -101,7 +101,7 @@
         [TestMethod]
         public void DeskValidator_IsDeskIdValid_WithIdAlreadyInStore_ShouldReturnExactMessage()
         {
-            Helper.Desks.Create(NewDesk("EXISTING"));
+            Helper.Desks.Create(Helper.AttachRoom(NewDesk("EXISTING")));
             var validator = CreateValidator();
 
             var result = validator.IsDeskIdValid("EXISTING");
@@ -126,7 +126,7 @@
         [TestMethod]
         public void DeskValidator_Validate_WithValidDesk_ShouldBeValid()
         {
-            var room = Helper.Rooms.Create(new Room { Identifier = Guid.NewGuid().ToString(), RoomId = "ROOM-VALID", Name = "Room VALID" });
+            var room = Helper.Rooms.Create(Helper.AttachFloor(new Room { Identifier = Guid.NewGuid().ToString(), RoomId = "ROOM-VALID", Name = "Room VALID" }));
             var desk = NewDesk("VALID");
             desk.RoomFk.Room = new SdmObjectReference<Room>(room.Identifier);
             var validator = CreateValidator();
@@ -139,7 +139,7 @@
         [TestMethod]
         public void DeskValidator_Validate_SavedDeskWithClearedId_ShouldBeInvalid()
         {
-            Helper.Desks.Create(NewDesk("VALID"));
+            Helper.Desks.Create(Helper.AttachRoom(NewDesk("VALID")));
             var existing = Helper.Desks.Read(DeskExposers.DeskInformation.DeskID.Equal("VALID")).Single();
             existing.DeskID = string.Empty;
             var validator = CreateValidator();

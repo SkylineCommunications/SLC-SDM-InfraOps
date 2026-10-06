@@ -25,7 +25,7 @@ namespace SDM.FacilityManagement.Tests.Racks
             };
             rack.Capacity.MaximumRackCapacity = 42;
 
-            Helper.Racks.Create(rack);
+            Helper.Racks.Create(Helper.AttachRow(rack));
 
             var reloaded = Helper.Racks.Read(RackExposers.Identifier.Equal(rack.Identifier)).SingleOrDefault();
 

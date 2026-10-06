@@ -511,6 +511,30 @@
         }
 
         /// <summary>
+        /// Validates that an Installation User is set while the asset is in a state that requires it (Installed, In Service).
+        /// </summary>
+        public static bool IsInstallationUserSetForState(Asset asset, out ValidationResult result)
+        {
+            result = new ValidationResult();
+
+            if (asset == null)
+            {
+                result.AddFailReason(AssetValidationField.Asset, "Asset cannot be null.");
+                return result.IsValid;
+            }
+
+            var requiresInstallationUser = asset.State == SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Installed
+                || asset.State == SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InService;
+
+            if (requiresInstallationUser && asset.InstallationUserId == Guid.Empty)
+            {
+                ReferenceValidationHelper.AddRequiredReference(result, AssetValidationField.InstallationUserId, "Installation User");
+            }
+
+            return result.IsValid;
+        }
+
+        /// <summary>
         /// Validates if installation information can be edited based on asset state.
         /// </summary>
         public static bool IsInstallationInformationChangeAllowed(Asset asset, out ValidationResult result)

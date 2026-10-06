@@ -1,4 +1,4 @@
-﻿namespace SDM.FacilityManagement.Tests.Validation
+namespace SDM.FacilityManagement.Tests.Validation
 {
     using System;
     using System.Linq;
@@ -25,7 +25,7 @@
         {
             var entity = new Floor { Identifier = Guid.NewGuid().ToString(), FloorId = string.Empty };
 
-            var action = () => Helper.Floors.Create(entity);
+            var action = () => Helper.Floors.Create(Helper.AttachFacility(entity));
 
             action.Should().Throw<Exception>().WithMessage("*cannot be empty*");
         }
@@ -45,10 +45,10 @@
         public void Floor_Create_WithDuplicateIdInDatabase_ShouldThrow()
         {
             var existing = new Floor { Identifier = Guid.NewGuid().ToString(), FloorId = "EXIST-1", Name = "Floor EXIST-1" };
-            Helper.Floors.Create(existing);
+            Helper.Floors.Create(Helper.AttachFacility(existing));
 
             var duplicate = new Floor { Identifier = Guid.NewGuid().ToString(), FloorId = "EXIST-1", Name = "Floor EXIST-1" };
-            var action = () => Helper.Floors.Create(duplicate);
+            var action = () => Helper.Floors.Create(Helper.AttachFacility(duplicate));
 
             action.Should().Throw<Exception>().WithMessage("*already in use*");
         }
@@ -91,7 +91,7 @@
         [TestMethod]
         public void FloorValidator_IsFloorIdValid_WithIdAlreadyInStore_ShouldReturnExactMessage()
         {
-            Helper.Floors.Create(NewFloor("EXISTING"));
+            Helper.Floors.Create(Helper.AttachFacility(NewFloor("EXISTING")));
             var validator = CreateValidator();
 
             var result = validator.IsFloorIdValid("EXISTING");
@@ -130,7 +130,7 @@
         public void FloorValidator_Validate_SavedFloorWithClearedId_ShouldBeInvalid()
         {
             var created = NewFloor("VALID");
-            Helper.Floors.Create(created);
+            Helper.Floors.Create(Helper.AttachFacility(created));
             var existing = Helper.Floors.Read(FloorExposers.Identifier.Equal(created.Identifier)).Single();
             existing.FloorId = string.Empty;
             var validator = CreateValidator();
