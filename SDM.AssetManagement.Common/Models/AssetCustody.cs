@@ -3,10 +3,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     using System;
 
     using Newtonsoft.Json;
-
+    using Skyline.DataMiner.SDM.Extensions;
+    using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
+    using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
-    public class AssetCustody : ChangeTrackingBase, ISectionTrackable, ISectionEmptyState
+    public sealed class AssetCustody : ChangeTrackingBase, IEquatable<AssetCustody>, ISectionTrackable, ISectionEmptyState
     {
         [JsonIgnore]
         [SdmIgnore]
@@ -15,10 +17,10 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         [SdmIgnore]
         public bool IsEmpty => From == default &&
             Till == default &&
-            ContactPerson == Guid.Empty &&
-            Team == Guid.Empty &&
-            Organization == Guid.Empty &&
-            ContactPersonRole == Guid.Empty;
+            !ContactPerson.HasValue() &&
+            !Team.HasValue() &&
+            !Organization.HasValue() &&
+            !ContactPersonRole.HasValue();
 
         public DateTime? From
         {
@@ -32,25 +34,25 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             set => TillField.Value = value;
         }
 
-        public Guid ContactPerson
+        public PnoObjectReference<Person> ContactPerson
         {
             get => ContactPersonField.Value;
             set => ContactPersonField.Value = value;
         }
 
-        public Guid Team
+        public PnoObjectReference<Team> Team
         {
             get => TeamField.Value;
             set => TeamField.Value = value;
         }
 
-        public Guid Organization
+        public PnoObjectReference<Organization> Organization
         {
             get => OrganizationField.Value;
             set => OrganizationField.Value = value;
         }
 
-        public Guid ContactPersonRole
+        public PnoObjectReference<Role> ContactPersonRole
         {
             get => ContactPersonRoleField.Value;
             set => ContactPersonRoleField.Value = value;
@@ -70,26 +72,87 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
         [JsonIgnore]
         [SdmIgnore]
-        internal IChangeTrackingField<Guid> ContactPersonField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<PnoObjectReference<Person>> ContactPersonField => FieldHandler.GetOrCreateField(
             nameof(ContactPerson),
-            () => new ChangeTrackingField<Guid>(Guid.Empty));
+            () => new ChangeTrackingField<PnoObjectReference<Person>>(default, reference => reference.Identifier));
 
         [JsonIgnore]
         [SdmIgnore]
-        internal IChangeTrackingField<Guid> TeamField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<PnoObjectReference<Team>> TeamField => FieldHandler.GetOrCreateField(
             nameof(Team),
-            () => new ChangeTrackingField<Guid>(Guid.Empty));
+            () => new ChangeTrackingField<PnoObjectReference<Team>>(default, reference => reference.Identifier));
 
         [JsonIgnore]
         [SdmIgnore]
-        internal IChangeTrackingField<Guid> OrganizationField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<PnoObjectReference<Organization>> OrganizationField => FieldHandler.GetOrCreateField(
             nameof(Organization),
-            () => new ChangeTrackingField<Guid>(Guid.Empty));
+            () => new ChangeTrackingField<PnoObjectReference<Organization>>(default, reference => reference.Identifier));
 
         [JsonIgnore]
         [SdmIgnore]
-        internal IChangeTrackingField<Guid> ContactPersonRoleField => FieldHandler.GetOrCreateField(
+        internal IChangeTrackingField<PnoObjectReference<Role>> ContactPersonRoleField => FieldHandler.GetOrCreateField(
             nameof(ContactPersonRole),
-            () => new ChangeTrackingField<Guid>(Guid.Empty));
+            () => new ChangeTrackingField<PnoObjectReference<Role>>(default, reference => reference.Identifier));
+
+        public static bool operator ==(AssetCustody left, AssetCustody right)
+        {
+            if (ReferenceEquals(left, right))
+            {
+                return true;
+            }
+
+            if (left is null || right is null)
+            {
+                return false;
+            }
+
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(AssetCustody left, AssetCustody right)
+        {
+            return !(left == right);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as AssetCustody);
+        }
+
+        public bool Equals(AssetCustody other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return
+                From.Equals(other.From) &&
+                Till.Equals(other.Till) &&
+                ContactPerson == other.ContactPerson &&
+                Team == other.Team &&
+                Organization == other.Organization &&
+                ContactPersonRole == other.ContactPersonRole;
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 17;
+                hash = (hash * 23) + From.GetHashCode();
+                hash = (hash * 23) + Till.GetHashCode();
+                hash = (hash * 23) + ContactPerson.GetHashCode();
+                hash = (hash * 23) + Team.GetHashCode();
+                hash = (hash * 23) + Organization.GetHashCode();
+                hash = (hash * 23) + ContactPersonRole.GetHashCode();
+                return hash;
+            }
+        }
     }
 }

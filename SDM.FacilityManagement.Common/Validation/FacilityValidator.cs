@@ -218,7 +218,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                 {
                     ReferenceValidationHelper.AddMissingReference(
                         results[candidate.Index],
-                        FacilityValidationHandler.FacilityValidationField.FacilityId,
+                        FacilityValidationHandler.FacilityValidationField.SiteId,
                         "Site",
                         candidate.SiteIdentifier);
                 }

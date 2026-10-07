@@ -22,6 +22,10 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
     public static partial class FacilityManagerAppSettingsExposers
     {
         public static readonly Exposer<FacilityManagement.Models.FacilityManagerAppSettings, string> Identifier = new Exposer<FacilityManagement.Models.FacilityManagerAppSettings, string>((obj) => obj.Identifier, "Identifier");
+        public static readonly Exposer<FacilityManagement.Models.FacilityManagerAppSettings, System.DateTime> CreatedAt = new Exposer<FacilityManagement.Models.FacilityManagerAppSettings, System.DateTime>((obj) => obj.CreatedAt, "CreatedAt");
+        public static readonly Exposer<FacilityManagement.Models.FacilityManagerAppSettings, string> CreatedBy = new Exposer<FacilityManagement.Models.FacilityManagerAppSettings, string>((obj) => obj.CreatedBy, "CreatedBy");
+        public static readonly Exposer<FacilityManagement.Models.FacilityManagerAppSettings, System.DateTime> LastModified = new Exposer<FacilityManagement.Models.FacilityManagerAppSettings, System.DateTime>((obj) => obj.LastModified, "LastModified");
+        public static readonly Exposer<FacilityManagement.Models.FacilityManagerAppSettings, string> LastModifiedBy = new Exposer<FacilityManagement.Models.FacilityManagerAppSettings, string>((obj) => obj.LastModifiedBy, "LastModifiedBy");
         static FacilityManagerAppSettingsExposers()
         {
             RuntimeHelpers.RunClassConstructor(typeof(AppSettings).TypeHandle);

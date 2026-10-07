@@ -1,18 +1,20 @@
 namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 {
     using System;
-
+    using System.Collections.Generic;
+    using System.Linq;
     using Newtonsoft.Json;
 
     using SharedMappers.DomIds;
 
     using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.InfraOps.Core.Models;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)plan_and_build")]
-    public class JobType : SdmObject<JobType>, IEntityTracking, IReadOnlyModuleIdReferencer
-    {
+    public sealed class JobType : SdmObjectBase<JobType>, IEquatable<JobType>, IEntityTracking, IReadOnlyModuleIdReferencer
+	{
         [JsonIgnore]
         private ChangeTrackingFieldHandler _fieldHandler;
         [JsonIgnore]
@@ -22,6 +24,12 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
         {
             _fieldHandler = new ChangeTrackingFieldHandler();
         }
+
+        #region Module Tracking
+
+        public string ModuleId => SlcPlan_And_Build.ModuleId;
+
+        #endregion
 
         [JsonIgnore]
         [SdmIgnore]
@@ -103,15 +111,75 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 
         #endregion
 
-        #region Module Tracking
-
-        public string ModuleId => SlcPlan_And_Build.ModuleId;
-
-        #endregion
+        public IEnumerable<TrackingFieldValueDifference> GetChanges()
+        {
+            return FieldHandler.GetChanges()
+                .Select(kvp => new TrackingFieldValueDifference
+                {
+                    FieldName = kvp.Key,
+                    OldValue = kvp.Value.prevVal,
+                    NewValue = kvp.Value.newVal,
+                });
+        }
 
         public void ResetChangeTracking()
         {
             FieldHandler?.ApplyChanges();
+        }
+
+        public static bool operator ==(JobType left, JobType right)
+        {
+            if (ReferenceEquals(left, right))
+            {
+                return true;
+            }
+
+            if (left is null || right is null)
+            {
+                return false;
+            }
+
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(JobType left, JobType right)
+        {
+            return !(left == right);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as JobType);
+        }
+
+        public bool Equals(JobType other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return
+                string.Equals(Name, other.Name, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(Description, other.Description, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(Icon, other.Icon, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 17;
+                hash = (hash * 23) + (Name != null ? Name.GetHashCode() : 0);
+                hash = (hash * 23) + (Description != null ? Description.GetHashCode() : 0);
+                hash = (hash * 23) + (Icon != null ? Icon.GetHashCode() : 0);
+                return hash;
+            }
         }
     }
 }

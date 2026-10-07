@@ -7,7 +7,7 @@
 
 	public static class RepositoryInitialize
 	{
-		public static IInfraOpsPropertiesApiHelper InitializeEmptyRepositories()
+		public static IInfraOpsPropertiesApiHelper Initialize()
 		{
 			return ConnectionHelper.CreateConnection().GetMockedHelper();
 		}
@@ -18,7 +18,7 @@
 		/// <param name="cascadeDeleteOnProperty">
 		/// When <c>false</c>, deleting a Property will not cascade-remove referencing PropertyValue entries.
 		/// </param>
-		public static IInfraOpsPropertiesApiHelper InitializeEmptyRepositories(bool cascadeDeleteOnProperty)
+		public static IInfraOpsPropertiesApiHelper Initialize(bool cascadeDeleteOnProperty)
 		{
 			return ConnectionHelper.CreateConnection().GetMockedHelper(cascadeDeleteOnProperty);
 		}

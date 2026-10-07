@@ -26,6 +26,7 @@
             PowerCapacity,
             RackSpacePosition,
             RackSpaceOccupied,
+            RowId,
         }
 
         #region Identity Validation
@@ -52,6 +53,24 @@
             if (rack == null || string.IsNullOrWhiteSpace(rack.Name))
             {
                 result.AddFailReason(RackValidationField.Name, "Rack Name cannot be empty or whitespace.");
+            }
+
+            return result.IsValid;
+        }
+
+        public static bool IsRackPositionValid(Rack rack, out ValidationResult result)
+        {
+            result = new ValidationResult();
+
+            if (rack == null)
+            {
+                result.AddFailReason(RackValidationField.Rack, "Rack cannot be null.");
+                return result.IsValid;
+            }
+
+            if (rack.Position == null)
+            {
+                result.AddFailReason(RackValidationField.RackPosition, "Rack Position cannot be empty.");
             }
 
             return result.IsValid;

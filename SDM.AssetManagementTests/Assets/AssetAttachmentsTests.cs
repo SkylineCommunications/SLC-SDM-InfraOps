@@ -124,7 +124,7 @@ namespace SDM.AssetManagement.Tests.Assets
             var assetClass = Helper.TestData.AssetClasses.First();
 
             var attachedAt = new DateTime(2024, 1, 15, 8, 30, 0, DateTimeKind.Utc);
-            var attachedBy = Guid.NewGuid();
+            var attachedBy = Convert.ToString(Guid.NewGuid());
 
             var asset = new Asset
             {

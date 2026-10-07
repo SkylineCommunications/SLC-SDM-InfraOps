@@ -3,26 +3,23 @@
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-
 	using FluentAssertions;
 	using FluentAssertions.Execution;
-
 	using Microsoft.VisualStudio.TestTools.UnitTesting;
-
 	using SDM.PlanAndBuild.Tests.Setup;
-
+	using SharedMappers.DomIds;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.SDM;
 	using Skyline.DataMiner.SDM.AssetManagement.Models;
+    using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
 	using Skyline.DataMiner.SDM.PlanAndBuild.Models;
+    using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
 
-	using SharedMappers.DomIds;
-
-	/// <summary>
-	/// Round-trip tests for the PlanAndBuildJob DOM mapper (ToInstance/FromInstance), exercising every mapped
-	/// field including the Ownership section and the AssetsUsed/Attachments/ConnectionsOnJob collections.
-	/// </summary>
-	[TestClass]
+    /// <summary>
+    /// Round-trip tests for the PlanAndBuildJob DOM mapper (ToInstance/FromInstance), exercising every mapped
+    /// field including the Ownership section and the AssetsUsed/Attachments/ConnectionsOnJob collections.
+    /// </summary>
+    [TestClass]
 	public class PlanAndBuildJobMapperRoundTripTests : BaseRepositoryTest
 	{
 		[TestMethod]
@@ -48,15 +45,15 @@
 				SubState = SlcPlan_And_Build.Enums.SubStateEnum.Scheduled,
 				Locations = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() },
 			};
-			original.Ownership.AssignedTo = Guid.NewGuid();
-			original.Ownership.AssignmentGroup = Guid.NewGuid();
+			original.Ownership.AssignedTo = new PnoObjectReference<Person>(Guid.NewGuid());
+			original.Ownership.AssignmentGroup = new PnoObjectReference<Team>(Guid.NewGuid());
 			original.AssetsUsed = new List<JobAsset>
 			{
 				new JobAsset { AssetId = new SdmObjectReference<Asset>(Guid.NewGuid().ToString()), Action = SlcPlan_And_Build.Enums.ActionforassetenumEnum.NewlyInstalled },
 			};
 			original.Attachments = new List<JobAttachment>
 			{
-				new JobAttachment { FilePath = @"C:\attachments\plan.pdf", AttachedAt = new DateTime(2026, 1, 9), AttachedBy = Guid.NewGuid() },
+				new JobAttachment { FilePath = @"C:\attachments\plan.pdf", AttachedAt = new DateTime(2026, 1, 9), AttachedBy = Convert.ToString(Guid.NewGuid()) },
 			};
 			original.ConnectionsOnJob = new List<JobConnection>
 			{

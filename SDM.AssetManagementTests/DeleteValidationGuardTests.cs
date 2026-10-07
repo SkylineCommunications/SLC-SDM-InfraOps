@@ -1,8 +1,7 @@
-namespace SDM.AssetManagement.Tests
+﻿namespace SDM.AssetManagement.Tests
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
 
     using FluentAssertions;
 
@@ -14,6 +13,7 @@ namespace SDM.AssetManagement.Tests
 
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
+    using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Exceptions;
 
     [TestClass]
@@ -273,6 +273,7 @@ namespace SDM.AssetManagement.Tests
             deviceType = deviceType ?? CreateDeviceType($"{name} Device Type", deviceTags);
             var assetClass = new AssetClass
             {
+                Manufacturer = SDM.AssetManagement.Tests.Setup.PeopleApiMock.NewManufacturer(),
                 Identifier = Guid.NewGuid().ToString(),
                 Name = name,
                 State = state,
@@ -337,9 +338,10 @@ namespace SDM.AssetManagement.Tests
 
         private PortType CreatePortType(string name, SlcAsset_Management.Enums.CategoriesEnum category, CableType? compatibleCableType = null)
         {
-            var cableRefs = compatibleCableType == null
-                ? new List<SdmObjectReference<CableType>>()
-                : new List<SdmObjectReference<CableType>> { new SdmObjectReference<CableType>(compatibleCableType.Identifier) };
+            var cableRefs = new List<SdmObjectReference<CableType>>
+            {
+                new SdmObjectReference<CableType>((compatibleCableType ?? CreateCableType($"{name} Cable Type")).Identifier),
+            };
 
             var portType = new PortType
             {
@@ -419,12 +421,12 @@ namespace SDM.AssetManagement.Tests
                 CableType = cableType == null ? null : new SdmObjectReference<CableType>(cableType.Identifier),
                 Source =
                 {
-                    Port = Guid.Parse(sourcePortId),
+                    Port = new ISdmObjectReference<IPort>(Convert.ToString(Guid.Parse(sourcePortId))),
                     PortType = sourcePortType,
                 },
                 Destination =
                 {
-                    Port = Guid.Empty,
+                    Port = new ISdmObjectReference<IPort>(Convert.ToString(Guid.Empty)),
                     PortType = null,
                 },
             };

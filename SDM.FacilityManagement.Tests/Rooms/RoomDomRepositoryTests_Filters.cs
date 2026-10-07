@@ -12,6 +12,7 @@ namespace SDM.FacilityManagement.Tests.Rooms
 
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
 
     /// <summary>
@@ -249,6 +250,21 @@ namespace SDM.FacilityManagement.Tests.Rooms
                 roomsRetrieved.Should().NotBeNull();
                 roomsRetrieved.Should().HaveCount(expected.Length);
                 roomsRetrieved.Should().BeEquivalentTo(expected);
+            }
+        }
+
+        [TestMethod]
+        public void RoomDomRepository_ReadFilter_NonExistentFloor()
+        {
+            var filter = RoomExposers.FloorFk.Floor.Equal(new SdmObjectReference<Floor>(Guid.NewGuid().ToString()));
+
+            var roomsRetrieved = Helper.Rooms.Read(filter);
+
+            using (new AssertionScope())
+            {
+                roomsRetrieved.Should().NotBeNull();
+                roomsRetrieved.Should().BeEmpty();
+                roomsRetrieved.Should().HaveCount(0);
             }
         }
     }

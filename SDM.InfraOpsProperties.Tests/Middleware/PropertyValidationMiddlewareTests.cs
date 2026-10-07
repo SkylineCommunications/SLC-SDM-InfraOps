@@ -258,7 +258,7 @@
 		[TestMethod]
 		public void Delete_Single_WhenCascadeOptedOut_LeavesReferencingValuesInPlace()
 		{
-			var optedOutHelper = RepositoryInitialize.InitializeEmptyRepositories(cascadeDeleteOnProperty: false);
+			var optedOutHelper = RepositoryInitialize.Initialize(cascadeDeleteOnProperty: false);
 			optedOutHelper.PopulateProperties();
 			optedOutHelper.PopulatePropertyValues();
 

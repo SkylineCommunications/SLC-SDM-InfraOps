@@ -77,7 +77,7 @@
                 int hash = 17;
                 hash = (hash * 23) + (PropertyName?.GetHashCode() ?? 0);
                 hash = (hash * 23) + (Value?.GetHashCode() ?? 0);
-                hash = (hash * 23) + PropertyId.GetHashCode();
+                hash = (hash * 23) + (PropertyId.Identifier?.GetHashCode() ?? 0);
                 return hash;
             }
         }

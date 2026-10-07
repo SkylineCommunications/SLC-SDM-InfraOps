@@ -1,4 +1,4 @@
-﻿namespace SDM.AssetManagement.Tests.PortTypes
+namespace SDM.AssetManagement.Tests.PortTypes
 {
     using System;
     using System.Collections.Generic;
@@ -43,7 +43,7 @@
                 },
                 CableFKs =
                 {
-                    CableTypeFks = new List<SdmObjectReference<CableType>>(),
+                    CableTypeFks = Helper.CreateCableTypeReferences("Reference Cable Type"),
                 },
             };
         }
@@ -92,6 +92,75 @@
         }
 
         [TestMethod]
+        public void PortTypeDomStorageProvider_Create_WithoutCables_ShouldFail()
+        {
+            var portType = new PortType
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                Name = "Port Type Without Cables",
+                CategoryLinks =
+                {
+                    Categories = new List<SlcAsset_Management.Enums.CategoriesEnum> { SlcAsset_Management.Enums.CategoriesEnum.Data },
+                },
+            };
+
+            Action act = () => Helper.AssetManagement.PortTypes.Create(portType);
+
+            act.Should().Throw<Exception>().WithMessage("*Port Type must have at least one cable type*");
+            Helper.AssetManagement.PortTypes.Count(new TRUEFilterElement<PortType>()).Should().Be(0);
+        }
+
+        [TestMethod]
+        public void PortTypeDomStorageProvider_Create_WithEmptyCableTypeList_ShouldFail()
+        {
+            referencePortType.CableFKs.CableTypeFks = new List<SdmObjectReference<CableType>>();
+
+            Action act = () => Helper.AssetManagement.PortTypes.Create(referencePortType);
+
+            act.Should().Throw<Exception>().WithMessage("*Port Type must have at least one cable type*");
+        }
+
+        [TestMethod]
+        public void PortTypeDomStorageProvider_Create_WithoutCablesAndCategories_ShouldReportBoth()
+        {
+            var portType = new PortType
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                Name = "Port Type Without Cables And Categories",
+            };
+
+            Action act = () => Helper.AssetManagement.PortTypes.Create(portType);
+
+            act.Should().Throw<Exception>()
+                .Where(e => e.Message.Contains("Port Type must have at least one category") && e.Message.Contains("Port Type must have at least one cable type"));
+        }
+
+        [TestMethod]
+        public void PortTypeDomStorageProvider_Update_RemovingAllCableTypes_ShouldFail()
+        {
+            Helper.AssetManagement.PortTypes.Create(referencePortType);
+            var persisted = Helper.AssetManagement.PortTypes.Read(PortTypeExposers.Identifier.Equal(referencePortType.Identifier)).Single();
+            persisted.CableFKs.CableTypeFks = new List<SdmObjectReference<CableType>>();
+
+            Action act = () => Helper.AssetManagement.PortTypes.Update(persisted);
+
+            act.Should().Throw<Exception>().WithMessage("*Port Type must have at least one cable type*");
+        }
+
+        [TestMethod]
+        public void PortTypeDomStorageProvider_Create_WithoutCategories_ShouldFail()
+        {
+            var portType = new PortType
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                Name = "Port Type Without Categories",
+            };
+
+            Action act = () => Helper.AssetManagement.PortTypes.Create(portType);
+
+            act.Should().Throw<Exception>().WithMessage("*Port Type must have at least one category*");
+        }
+        [TestMethod]
         public void PortTypeDomStorageProvider_EmptyDOM_CreateOrUpdate_Create()
         {
             // Act
@@ -122,7 +191,7 @@
                 },
                 CableFKs =
                 {
-                    CableTypeFks = new List<SdmObjectReference<CableType>>(),
+                    CableTypeFks = Helper.CreateCableTypeReferences("Updated Cable Type"),
                 },
             };
 
@@ -131,7 +200,7 @@
 
             // Assert
             var persisted = Helper.AssetManagement.PortTypes.Read(new TRUEFilterElement<PortType>()).First();
-            AssertPortTypeUpdateDifferences(referencePortType, persisted);
+            AssertPortTypeUpdateDifferences(referencePortType, persisted, updatedPortType);
         }
 
         #endregion
@@ -233,7 +302,7 @@
 
         #region Assertion Helpers
 
-        private static void AssertPortTypeUpdateDifferences(PortType original, PortType updated)
+        private static void AssertPortTypeUpdateDifferences(PortType original, PortType updated, PortType expected)
         {
             using (new AssertionScope())
             {
@@ -252,10 +321,11 @@
                     SlcAsset_Management.Enums.CategoriesEnum.Video,
                 });
 
-                // CableFKs changes - updated with an empty CableTypeFks list, so the section is
-                // empty (ISectionEmptyState.IsEmpty) and omitted from the persisted DOM instance.
-                // The section property is never null (auto-vivified), so it reads back empty.
-                updated.CableFKs.IsEmpty.Should().BeTrue();
+                // CableFKs changes
+                updated.CableFKs.CableTypeFks.Select(fk => fk.Identifier).Should()
+                    .NotBeEquivalentTo(original.CableFKs.CableTypeFks.Select(fk => fk.Identifier));
+                updated.CableFKs.CableTypeFks.Select(fk => fk.Identifier).Should()
+                    .BeEquivalentTo(expected.CableFKs.CableTypeFks.Select(fk => fk.Identifier));
             }
         }
 
@@ -276,18 +346,10 @@
                 created.CategoryLinks.Should().NotBeNull();
                 created.CategoryLinks.Categories.Should().BeEquivalentTo(referencePortType.CategoryLinks.Categories);
 
-                // CableFKs - an empty CableTypeFks list makes the section empty
-                // (ISectionEmptyState.IsEmpty), so it is omitted from the persisted DOM instance;
-                // a populated list is persisted as usual.
-                if (referencePortType.CableFKs.IsEmpty || referencePortType.CableFKs.CableTypeFks.Count == 0)
-                {
-                    created.CableFKs.IsEmpty.Should().BeTrue();
-                }
-                else
-                {
-                    created.CableFKs.Should().NotBeNull();
-                    created.CableFKs.CableTypeFks.Should().HaveCount(referencePortType.CableFKs.CableTypeFks.Count);
-                }
+                // CableFKs
+                created.CableFKs.Should().NotBeNull();
+                created.CableFKs.CableTypeFks.Select(fk => fk.Identifier).Should()
+                    .BeEquivalentTo(referencePortType.CableFKs.CableTypeFks.Select(fk => fk.Identifier));
             }
         }
 

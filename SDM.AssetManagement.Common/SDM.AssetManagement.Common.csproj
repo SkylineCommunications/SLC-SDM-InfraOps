@@ -41,6 +41,7 @@
 		<PackageReference Include="Skyline.DataMiner.SDM.Linq" />
 		<!--<PackageReference Include="Skyline.DataMiner.SDM.SourceGenerator" Version="0.3.1" OutputItemType="Analyzer" ReferenceoutputAssembly="false" />-->
 		<PackageReference Include="Skyline.DataMiner.Utils.DOM" />
+    <PackageReference Include="Skyline.DataMiner.Dev.Utils.Solutions.PeopleAndOrganizations" />
 		<PackageReference Include="Skyline.DataMiner.Utils.PerformanceAnalyzer" />
 		<PackageReference Include="Skyline.DataMiner.Utils.SecureCoding" />
   </ItemGroup>

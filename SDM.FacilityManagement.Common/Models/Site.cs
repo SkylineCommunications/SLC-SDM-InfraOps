@@ -1,18 +1,20 @@
 namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 {
     using System;
-
+    using System.Collections.Generic;
+    using System.Linq;
     using Newtonsoft.Json;
 
     using SharedMappers.DomIds;
 
     using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.InfraOps.Core.Models;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     // [GenerateExposers]
     //[SdmDomStorage("(slc)facility_management")]
-    public class Site : SdmObject<Site>, IEntityTracking, IReadOnlyModuleIdReferencer
-    {
+    public sealed class Site : SdmObjectBase<Site>, IEquatable<Site>, IEntityTracking, IReadOnlyModuleIdReferencer
+	{
         [JsonIgnore]
         private ChangeTrackingFieldHandler _fieldHandler;
         [JsonIgnore]
@@ -22,6 +24,12 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
         {
             _fieldHandler = new ChangeTrackingFieldHandler();
         }
+
+        #region Module Tracking
+
+        public string ModuleId => SlcFacility_Management.ModuleId;
+
+        #endregion
 
         // Ensure _fieldHandler is always initialized (handles JSON deserialization without constructor)
         [JsonIgnore]
@@ -59,12 +67,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
         [JsonIgnore]
         [SdmIgnore]
         internal Guid? SitePropertiesSectionId { get; set; }
-
-        #endregion
-
-        #region Module Tracking
-
-        public string ModuleId => SlcFacility_Management.ModuleId;
 
         #endregion
 
@@ -170,10 +172,90 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
         internal IChangeTrackingField<string> SiteIdField => FieldHandler.GetOrCreateField(
             nameof(SiteId), () => new ChangeTrackingStringField(null));
 
+        public IEnumerable<TrackingFieldValueDifference> GetChanges()
+        {
+            return FieldHandler.GetChanges()
+                .Select(kvp => new TrackingFieldValueDifference
+                {
+                    FieldName = kvp.Key,
+                    OldValue = kvp.Value.prevVal,
+                    NewValue = kvp.Value.newVal,
+                });
+        }
+
         // Reset change tracking after deserialization or save
         public void ResetChangeTracking()
         {
             FieldHandler.ApplyChanges();
         }
+
+        #region Equality
+
+        public static bool operator ==(Site left, Site right)
+        {
+            if (ReferenceEquals(left, right))
+            {
+                return true;
+            }
+
+            if (left is null || right is null)
+            {
+                return false;
+            }
+
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(Site left, Site right)
+        {
+            return !(left == right);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as Site);
+        }
+
+        public bool Equals(Site other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return
+                string.Equals(Name, other.Name, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(Description, other.Description, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(Address, other.Address, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(City, other.City, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(ZipCode, other.ZipCode, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(Country, other.Country, StringComparison.OrdinalIgnoreCase) &&
+                Latitude == other.Latitude &&
+                Longitude == other.Longitude &&
+                string.Equals(SiteId, other.SiteId, StringComparison.OrdinalIgnoreCase) &&
+                State == other.State;
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 17;
+                hash = (hash * 23) + (Name != null ? Name.GetHashCode() : 0);
+                hash = (hash * 23) + (Description != null ? Description.GetHashCode() : 0);
+                hash = (hash * 23) + (Address != null ? Address.GetHashCode() : 0);
+                hash = (hash * 23) + (City != null ? City.GetHashCode() : 0);
+                hash = (hash * 23) + (SiteId != null ? SiteId.GetHashCode() : 0);
+                hash = (hash * 23) + State.GetHashCode();
+                return hash;
+            }
+        }
+
+        #endregion
     }
 }

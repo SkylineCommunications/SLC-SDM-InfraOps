@@ -373,6 +373,77 @@
             }
         }
 
+        [TestMethod]
+        public void DataPorts_WithMissingName_ShouldBeInvalid()
+        {
+            // Arrange
+            var assetClass = new AssetClass
+            {
+                DataPorts = new List<DataPortInfo>
+                {
+                    new DataPortInfo { PortNumber = 1, Name = string.Empty, PortType = new SdmObjectReference<PortType>(System.Guid.NewGuid().ToString()) },
+                }
+            };
+
+            // Act
+            var result = AssetClassValidationHandler.ValidateAssetClassDataPort(assetClass);
+
+            // Assert
+            using (new AssertionScope())
+            {
+                result.IsValid.Should().BeFalse();
+                result.TryGetFailReason(
+                    AssetClassValidationHandler.AssetClassValidationField.DataPortName,
+                    out var reason).Should().BeTrue();
+                reason.Should().Contain("name must have a value");
+            }
+        }
+
+        [TestMethod]
+        public void DataPorts_WithMissingPortType_ShouldBeInvalid()
+        {
+            // Arrange
+            var assetClass = new AssetClass
+            {
+                DataPorts = new List<DataPortInfo>
+                {
+                    new DataPortInfo { PortNumber = 1, Name = "Data 1", PortType = null },
+                }
+            };
+
+            // Act
+            var result = AssetClassValidationHandler.ValidateAssetClassDataPort(assetClass);
+
+            // Assert
+            using (new AssertionScope())
+            {
+                result.IsValid.Should().BeFalse();
+                result.TryGetFailReason(
+                    AssetClassValidationHandler.AssetClassValidationField.DataPortType,
+                    out var reason).Should().BeTrue();
+                reason.Should().Contain("type must be selected");
+            }
+        }
+
+        [TestMethod]
+        public void DataPorts_WithNameAndPortTypeSet_ShouldBeValid()
+        {
+            // Arrange
+            var assetClass = new AssetClass
+            {
+                DataPorts = new List<DataPortInfo>
+                {
+                    new DataPortInfo { PortNumber = 1, Name = "Data 1", PortType = new SdmObjectReference<PortType>(System.Guid.NewGuid().ToString()) },
+                }
+            };
+
+            // Act
+            var result = AssetClassValidationHandler.ValidateAssetClassDataPort(assetClass);
+
+            // Assert
+            result.IsValid.Should().BeTrue();
+        }
+
         #endregion
 
         #region Power Port Validation
@@ -454,6 +525,77 @@
                     out var reason).Should().BeTrue();
                 reason.Should().Contain("Duplicate Power Port number found");
             }
+        }
+
+        [TestMethod]
+        public void PowerPorts_WithMissingName_ShouldBeInvalid()
+        {
+            // Arrange
+            var assetClass = new AssetClass
+            {
+                PowerPorts = new List<PowerPortInfo>
+                {
+                    new PowerPortInfo { PortNumber = 1, Name = string.Empty, PortType = new SdmObjectReference<PortType>(System.Guid.NewGuid().ToString()) },
+                }
+            };
+
+            // Act
+            var result = AssetClassValidationHandler.ValidateAssetClassPowerPort(assetClass);
+
+            // Assert
+            using (new AssertionScope())
+            {
+                result.IsValid.Should().BeFalse();
+                result.TryGetFailReason(
+                    AssetClassValidationHandler.AssetClassValidationField.PowerPortName,
+                    out var reason).Should().BeTrue();
+                reason.Should().Contain("name must have a value");
+            }
+        }
+
+        [TestMethod]
+        public void PowerPorts_WithMissingPortType_ShouldBeInvalid()
+        {
+            // Arrange
+            var assetClass = new AssetClass
+            {
+                PowerPorts = new List<PowerPortInfo>
+                {
+                    new PowerPortInfo { PortNumber = 1, Name = "Power 1", PortType = null },
+                }
+            };
+
+            // Act
+            var result = AssetClassValidationHandler.ValidateAssetClassPowerPort(assetClass);
+
+            // Assert
+            using (new AssertionScope())
+            {
+                result.IsValid.Should().BeFalse();
+                result.TryGetFailReason(
+                    AssetClassValidationHandler.AssetClassValidationField.PowerPortType,
+                    out var reason).Should().BeTrue();
+                reason.Should().Contain("type must be selected");
+            }
+        }
+
+        [TestMethod]
+        public void PowerPorts_WithNameAndPortTypeSet_ShouldBeValid()
+        {
+            // Arrange
+            var assetClass = new AssetClass
+            {
+                PowerPorts = new List<PowerPortInfo>
+                {
+                    new PowerPortInfo { PortNumber = 1, Name = "Power 1", PortType = new SdmObjectReference<PortType>(System.Guid.NewGuid().ToString()) },
+                }
+            };
+
+            // Act
+            var result = AssetClassValidationHandler.ValidateAssetClassPowerPort(assetClass);
+
+            // Assert
+            result.IsValid.Should().BeTrue();
         }
 
         #endregion

@@ -12,8 +12,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
     using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
-    using static Skyline.DataMiner.SDM.FacilityManagement.Validation.RackValidationHandler;
-
     /// <summary>
     /// Public validator service for Asset validation with comprehensive error handling.
     /// </summary>
@@ -255,80 +253,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             }
 
             return results;
-        }
-
-        #endregion
-
-        #region Public API - Reservation Placement
-
-        /// <summary>
-        /// Validates if a reservation can be placed in the specified rack.
-        /// Automatically loads all necessary data (rack, assets, other reservations).
-        /// </summary>
-        public ValidationResult ValidateReservationPlacement(InfraopsReservation reservation)
-        {
-            var result = new ValidationResult();
-
-            if (reservation == null)
-            {
-                result.AddFailReason(RackValidationField.RackSpacePosition, "Reservation cannot be null.");
-                return result;
-            }
-
-            if (reservation.RackFk.IsEmpty)
-            {
-                result.AddFailReason(RackValidationField.Rack, "Reservation must have a Rack specified.");
-                return result;
-            }
-
-            if (reservation.ReservedPositions == null || !reservation.ReservedPositions.Any())
-            {
-                result.AddFailReason(RackValidationField.RackSpacePosition,
-                    "Reservation must have at least one position range.");
-                return result;
-            }
-
-            try
-            {
-                var rack = _entityLoader.LoadRack(reservation.RackFk.Rack);
-                if (rack == null)
-                {
-                    result.AddFailReason(RackValidationField.Rack, "Rack not found.");
-                    return result;
-                }
-
-                // Load all occupants (excluding current reservation)
-                var occupiedAssets = _validationCore.LoadAllAssetsInRack(rack.Identifier);
-                var otherReservations = _validationCore.LoadReservationsForRack(rack, reservation.Identifier);
-
-                // Validate each range in the reservation
-                foreach (var position in reservation.ReservedPositions)
-                {
-                    if (position.LowerBound == default || position.UpperBound == default)
-                    {
-                        continue;
-                    }
-
-                    int rangePosition = (int)position.LowerBound;
-                    int rangeHeight = (int)(position.UpperBound - position.LowerBound + 1);
-
-                    result.AddFailuresFrom(_validationCore.ValidateRangeOccupancy(
-                        rack,
-                        rangePosition,
-                        rangeHeight,
-                        null, // No current asset
-                        reservation,
-                        occupiedAssets,
-                        otherReservations));
-                }
-            }
-            catch (Exception ex)
-            {
-                result.AddFailReason(RackValidationField.RackSpacePosition,
-                    $"Error validating reservation placement: {ex.Message}");
-            }
-
-            return result;
         }
 
         #endregion

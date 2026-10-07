@@ -42,6 +42,10 @@
                 {
                     Categories = [SlcAsset_Management.Enums.CategoriesEnum.Data],
                 },
+                CableFKs =
+                {
+                    CableTypeFks = Helper.CreateCableTypeReferences("Data Port Type Cable"),
+                },
             };
             Helper.AssetManagement.PortTypes.Create(dataPortType);
 
@@ -53,6 +57,10 @@
                 CategoryLinks =
                 {
                     Categories = [SlcAsset_Management.Enums.CategoriesEnum.Data],
+                },
+                CableFKs =
+                {
+                    CableTypeFks = Helper.CreateCableTypeReferences("Data Port Type Update Cable"),
                 },
             };
             Helper.AssetManagement.PortTypes.Create(updateDataPortType);

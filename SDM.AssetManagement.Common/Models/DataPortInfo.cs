@@ -91,13 +91,33 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         [SdmIgnore]
         internal IChangeTrackingField<SdmObjectReference<PortType>> PortTypeField => FieldHandler.GetOrCreateField(
             nameof(PortType),
-            () => new ChangeTrackingField<SdmObjectReference<PortType>>(default));
+            () => new ChangeTrackingField<SdmObjectReference<PortType>>(default, reference => reference.Identifier));
 
         [JsonIgnore]
         [SdmIgnore]
         internal IChangeTrackingField<string> LabelField => FieldHandler.GetOrCreateField(
             nameof(Label),
             () => new ChangeTrackingStringField(null));
+
+        public static bool operator ==(DataPortInfo left, DataPortInfo right)
+        {
+            if (ReferenceEquals(left, right))
+            {
+                return true;
+            }
+
+            if (left is null || right is null)
+            {
+                return false;
+            }
+
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(DataPortInfo left, DataPortInfo right)
+        {
+            return !(left == right);
+        }
 
         public bool Equals(DataPortInfo other)
         {
@@ -129,12 +149,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             unchecked
             {
                 int hash = (2 << 12) - 1;
-                hash = (hash * 23) + (Name != null ? Name.GetHashCode() : 0);
-                hash = (hash * 23) + PortNumber.GetHashCode();
-                hash = (hash * 23) + OutputType.GetHashCode();
+                hash = (hash * 23) + (Name?.GetHashCode() ?? 0);
+                hash = (hash * 23) + PortNumber?.GetHashCode() ?? 0;
+                hash = (hash * 23) + OutputType?.GetHashCode() ?? 0;
                 hash = (hash * 23) + PortExposure.GetHashCode();
-                hash = (hash * 23) + PortType.GetHashCode();
-                hash = (hash * 23) + (Label != null ? Label.GetHashCode() : 0);
+                hash = (hash * 23) + (PortType.Identifier?.GetHashCode() ?? 0);
+                hash = (hash * 23) + (Label?.GetHashCode() ?? 0);
                 return hash;
             }
         }

@@ -23,14 +23,197 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
 
         protected override ValidationResult Validate(DeviceType entity)
         {
-            return ValidateInfo(entity);
+            var result = ValidateInfo(entity);
+            result.AddFailuresFrom(ValidateNameUniqueness(entity));
+
+            if (result.IsValid)
+            {
+                result.AddFailuresFrom(ValidateNoActiveAssetsForUpdate(entity));
+            }
+
+            return result;
         }
 
         protected override List<ValidationResult> ValidateBulk(List<DeviceType> entities)
         {
-            return entities == null
-                ? new List<ValidationResult>()
-                : entities.Select(ValidateInfo).ToList();
+            if (entities == null || !entities.Any())
+            {
+                return new List<ValidationResult>();
+            }
+
+            var results = entities.Select(ValidateInfo).ToList();
+
+            if (results.AnyInvalid())
+            {
+                return results;
+            }
+
+            var batchConflicts = ValidateNameDuplicatesInBatch(entities);
+            results.MergeFrom(batchConflicts);
+
+            if (results.AnyInvalid())
+            {
+                return results;
+            }
+
+            var nameDbConflicts = ValidateBulkNamesAgainstDatabase(entities);
+            results.MergeFrom(nameDbConflicts);
+
+            if (results.AnyInvalid())
+            {
+                return results;
+            }
+
+            results.MergeFrom(ValidateBulkNoActiveAssetsForUpdate(entities));
+
+            return results;
+        }
+
+        /// <summary>
+        /// Blocks updating an existing DeviceType while assets not in the 'Disposed' state are assigned to it.
+        /// <para><b>Not suitable for bulk scenarios</b>: issues DB queries per call. Use <see cref="ValidateBulk"/> instead.</para>
+        /// </summary>
+        private ValidationResult ValidateNoActiveAssetsForUpdate(DeviceType deviceType)
+        {
+            var result = new ValidationResult();
+
+            if (deviceType == null || string.IsNullOrWhiteSpace(deviceType.Identifier))
+            {
+                return result;
+            }
+
+            var assetClassIds = _entityLoader.GetAssetClassesByDeviceTypeIds(new List<string> { deviceType.Identifier })
+                .Select(assetClass => assetClass.Identifier)
+                .ToList();
+
+            if (_entityLoader.HasNonDisposedAssetsForAssetClasses(assetClassIds))
+            {
+                result.AddFailReason(
+                    DeviceTypeValidationHandler.DeviceTypeValidationField.Asset,
+                    "There are already assets assigned to this device type not in the 'Disposed' State");
+            }
+
+            return result;
+        }
+
+        private List<ValidationResult> ValidateBulkNoActiveAssetsForUpdate(List<DeviceType> deviceTypes)
+        {
+            var results = deviceTypes.Select(_ => new ValidationResult()).ToList();
+
+            var identifiers = deviceTypes
+                .Select(dt => dt.Identifier)
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .Distinct()
+                .ToList();
+
+            if (!identifiers.Any())
+            {
+                return results;
+            }
+
+            var assetClassIdsByDeviceType = _entityLoader.GetAssetClassesByDeviceTypeIds(identifiers)
+                .Where(assetClass => assetClass.DeviceTypeId.HasValue())
+                .GroupBy(assetClass => assetClass.DeviceTypeId.Identifier)
+                .ToDictionary(group => group.Key, group => group.Select(assetClass => assetClass.Identifier).ToList());
+
+            for (int i = 0; i < deviceTypes.Count; i++)
+            {
+                if (!string.IsNullOrWhiteSpace(deviceTypes[i].Identifier)
+                    && assetClassIdsByDeviceType.TryGetValue(deviceTypes[i].Identifier, out var assetClassIds)
+                    && _entityLoader.HasNonDisposedAssetsForAssetClasses(assetClassIds))
+                {
+                    results[i].AddFailReason(
+                        DeviceTypeValidationHandler.DeviceTypeValidationField.Asset,
+                        "There are already assets assigned to this device type not in the 'Disposed' State");
+                }
+            }
+
+            return results;
+        }
+
+        /// <summary>
+        /// Validates name uniqueness for a single DeviceType against the database.
+        /// <para><b>Not suitable for bulk scenarios</b>: issues one DB query per call. Use <see cref="ValidateBulk"/> instead.</para>
+        /// </summary>
+        private ValidationResult ValidateNameUniqueness(DeviceType deviceType)
+        {
+            var result = new ValidationResult();
+
+            if (deviceType == null || string.IsNullOrWhiteSpace(deviceType.Name))
+            {
+                return result;
+            }
+
+            if (_entityLoader.CountDeviceTypesByName(deviceType.Name, deviceType.Identifier) > 0)
+            {
+                result.AddFailReason(
+                    DeviceTypeValidationHandler.DeviceTypeValidationField.Name,
+                    $"Device Type Name '{deviceType.Name}' is already in use.");
+            }
+
+            return result;
+        }
+
+        private static List<ValidationResult> ValidateNameDuplicatesInBatch(List<DeviceType> deviceTypes)
+        {
+            var results = deviceTypes.Select(_ => new ValidationResult()).ToList();
+
+            var duplicateNames = deviceTypes
+                .Select((dt, idx) => new { dt.Name, Index = idx })
+                .Where(x => !string.IsNullOrWhiteSpace(x.Name))
+                .GroupBy(x => x.Name, StringComparer.OrdinalIgnoreCase)
+                .Where(g => g.Count() > 1);
+
+            foreach (var group in duplicateNames)
+            {
+                foreach (var item in group)
+                {
+                    results[item.Index].AddFailReason(
+                        DeviceTypeValidationHandler.DeviceTypeValidationField.Name,
+                        $"Device Type Name '{item.Name}' is duplicated within the batch.");
+                }
+            }
+
+            return results;
+        }
+
+        private List<ValidationResult> ValidateBulkNamesAgainstDatabase(List<DeviceType> deviceTypes)
+        {
+            var results = deviceTypes.Select(_ => new ValidationResult()).ToList();
+
+            var uniqueNames = deviceTypes
+                .Select(dt => dt.Name)
+                .Where(n => !string.IsNullOrWhiteSpace(n))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            if (!uniqueNames.Any())
+            {
+                return results;
+            }
+
+            var batchIds = new HashSet<string>(
+                deviceTypes.Select(dt => dt.Identifier).Where(id => !string.IsNullOrWhiteSpace(id)));
+
+            var dbMatches = _entityLoader.GetDeviceTypesByNames(uniqueNames);
+
+            var externalConflictNames = dbMatches
+                .Where(r => !batchIds.Contains(r.Identifier))
+                .Select(r => r.Name)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            for (int i = 0; i < deviceTypes.Count; i++)
+            {
+                var name = deviceTypes[i].Name;
+                if (!string.IsNullOrWhiteSpace(name) && externalConflictNames.Contains(name))
+                {
+                    results[i].AddFailReason(
+                        DeviceTypeValidationHandler.DeviceTypeValidationField.Name,
+                        $"Device Type Name '{name}' is already in use.");
+                }
+            }
+
+            return results;
         }
 
         protected override ValidationResult ValidateForDelete(DeviceType deviceType)

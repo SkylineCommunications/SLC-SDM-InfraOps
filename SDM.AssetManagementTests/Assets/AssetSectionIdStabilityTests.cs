@@ -17,6 +17,8 @@
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
+    using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
+    using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     /// <summary>
@@ -58,7 +60,7 @@
                 FirstUseDate = DateTime.UtcNow.AddMonths(-11),
                 EndOfWarrantyDate = DateTime.UtcNow.AddYears(1),
                 InstallationDate = DateTime.UtcNow.AddMonths(-10),
-                InstallationUserId = Guid.NewGuid(),
+                InstallationUserId = new PnoObjectReference<Person>(Guid.NewGuid()),
                 EndOfLifeDate = DateTime.UtcNow.AddYears(5),
                 State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit,
                 Location =
@@ -71,16 +73,16 @@
                 },
                 Ownership =
                 {
-                    Organization = Guid.NewGuid(),
-                    ContactPerson = Guid.NewGuid(),
-                    ContactPersonRole = Guid.NewGuid(),
+                    Organization = new PnoObjectReference<Organization>(Guid.NewGuid()),
+                    ContactPerson = new PnoObjectReference<Person>(Guid.NewGuid()),
+                    ContactPersonRole = new PnoObjectReference<Role>(Guid.NewGuid()),
                 },
                 Custody =
                 {
                     From = DateTime.UtcNow.AddMonths(-6),
                     Till = DateTime.UtcNow.AddMonths(6),
-                    ContactPerson = Guid.NewGuid(),
-                    ContactPersonRole = Guid.NewGuid(),
+                    ContactPerson = new PnoObjectReference<Person>(Guid.NewGuid()),
+                    ContactPersonRole = new PnoObjectReference<Role>(Guid.NewGuid()),
                 },
                 Holders = new List<AssetHolder>
                 {

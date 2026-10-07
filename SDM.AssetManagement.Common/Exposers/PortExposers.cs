@@ -76,7 +76,6 @@
 		/// Exposers for fields that only exist on the DataPort definition.
 		/// Using any of these in a filter makes the PowerPort definition useless to filter,
 		/// so the repository will only query the DataPort definition.
-		/// Combining these with <see cref="PowerPortOnly"/> exposers yields an empty result.
 		/// </summary>
 		public static class DataPortOnly
 		{
@@ -109,16 +108,6 @@
 					(obj) => obj is DataPort dataPort && dataPort.PrimaryPortRelation.IsPrimaryIpv4,
 					"PrimaryPortRelation.IsPrimaryIpv4");
 			}
-		}
-
-		/// <summary>
-		/// Exposers for fields that only exist on the PowerPort definition.
-		/// Using any of these in a filter makes the DataPort definition useless to filter,
-		/// so the repository will only query the PowerPort definition.
-		/// Combining these with <see cref="DataPortOnly"/> exposers yields an empty result.
-		/// </summary>
-		public static class PowerPortOnly
-		{
 		}
 	}
 }

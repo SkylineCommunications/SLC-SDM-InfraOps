@@ -1,18 +1,19 @@
 ﻿namespace SDM.PlanAndBuild.Tests
 {
-	using Moq;
+    using Moq;
 
-	using SDM.PlanAndBuild.Tests.Setup;
+    using Skyline.DataMiner.Net;
+    using Skyline.DataMiner.Net.Messages;
+    using Skyline.DataMiner.Net.Messages.SLDataGateway;
+    using Skyline.DataMiner.SDM.AssetManagement.Common.Mock;
+    using Skyline.DataMiner.SDM.FacilityManagement.Common.Mock;
+    using Skyline.DataMiner.SDM.FacilityManagement.Helpers;
+    using Skyline.DataMiner.SDM.PlanAndBuild.Common.Mock;
+    using Skyline.DataMiner.SDM.PlanAndBuild.Helpers;
+    using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
+    using Skyline.DataMiner.Utils.DOM.UnitTesting;
 
-	using Skyline.DataMiner.Net;
-	using Skyline.DataMiner.Net.Messages;
-	using Skyline.DataMiner.Net.Messages.SLDataGateway;
-	using Skyline.DataMiner.SDM.FacilityManagement.Helpers;
-	using Skyline.DataMiner.SDM.PlanAndBuild.Helpers;
-	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
-	using Skyline.DataMiner.Utils.DOM.UnitTesting;
-
-	internal static class ConnectionHelper
+    internal static class ConnectionHelper
 	{
 		internal static IConnection CreateConnection()
 		{
@@ -28,25 +29,11 @@
 		internal static IConnection CreateConnectionWithJobBehavior()
 		{
 			var messageHandler = new DomSLNetMessageHandler();
-			messageHandler.SetDefinitions(JobBehaviorFixture.ModuleId, new[] { JobBehaviorFixture.BuildJobDefinition() });
-			messageHandler.SetBehaviorDefinitions(JobBehaviorFixture.ModuleId, new[] { JobBehaviorFixture.BuildJobBehaviorDefinition() });
+            messageHandler.AddAssetManagementModule();
+            messageHandler.AddFacilityManagementModule();
+            messageHandler.AddPlanAndBuildModule();
 
 			return CreateConnection(messageHandler);
-		}
-
-		internal static IConnection CreateConnection(DomSLNetMessageHandler messageHandler)
-		{
-			var connectionMock = new Mock<IConnection>();
-			connectionMock.Setup(c => c.HandleMessages(It.IsAny<DMSMessage[]>()))
-				.Returns((DMSMessage[] messages) => HandleSLNetMessages(messageHandler, messages));
-			connectionMock.Setup(c => c.HandleMessage(It.IsAny<DMSMessage>()))
-				.Returns((DMSMessage message) => HandleSLNetMessage(messageHandler, message));
-			connectionMock.Setup(c => c.HandleSingleResponseMessage(It.IsAny<DMSMessage>()))
-				.Returns((DMSMessage message) => HandleSLNetMessage(messageHandler, message)[0]);
-			connectionMock.Setup(c => c.UserDomainName)
-				.Returns("Mocked User");
-
-			return connectionMock.Object;
 		}
 
 		internal static IPlanAndBuildApiHelper GetMockedHelper(this IConnection connection)
@@ -104,9 +91,24 @@
 			peopleApiMock.Setup(a => a.Teams).Returns(teamsRepositoryMock.Object);
 
 			return peopleApiMock.Object;
-		}
+        }
 
-		private static DMSMessage[] HandleSLNetMessages(DomSLNetMessageHandler messageHandler, DMSMessage[] messages)
+        private static IConnection CreateConnection(DomSLNetMessageHandler messageHandler)
+        {
+            var connectionMock = new Mock<IConnection>();
+            connectionMock.Setup(c => c.HandleMessages(It.IsAny<DMSMessage[]>()))
+                .Returns((DMSMessage[] messages) => HandleSLNetMessages(messageHandler, messages));
+            connectionMock.Setup(c => c.HandleMessage(It.IsAny<DMSMessage>()))
+                .Returns((DMSMessage message) => HandleSLNetMessage(messageHandler, message));
+            connectionMock.Setup(c => c.HandleSingleResponseMessage(It.IsAny<DMSMessage>()))
+                .Returns((DMSMessage message) => HandleSLNetMessage(messageHandler, message)[0]);
+            connectionMock.Setup(c => c.UserDomainName)
+                .Returns("Mocked User");
+
+            return connectionMock.Object;
+        }
+
+        private static DMSMessage[] HandleSLNetMessages(DomSLNetMessageHandler messageHandler, DMSMessage[] messages)
 		{
 			if (messages is null)
 			{

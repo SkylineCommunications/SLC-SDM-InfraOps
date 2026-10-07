@@ -1,4 +1,4 @@
-namespace SDM.AssetManagement.Tests.Assets
+﻿namespace SDM.AssetManagement.Tests.Assets
 {
     using System;
     using System.Linq;
@@ -14,6 +14,8 @@ namespace SDM.AssetManagement.Tests.Assets
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
+    using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
+    using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
 
     [TestClass]
     public class AssetDomRepositoryTransitionTests
@@ -24,7 +26,7 @@ namespace SDM.AssetManagement.Tests.Assets
         [TestInitialize]
         public void Initialize()
         {
-            _helper = RepositoryInitialize.InitializeWithAssetBehavior();
+            _helper = RepositoryInitialize.Initialize();
             _helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
 
             // Deterministic, rack-mountable, non-PowerProvider device type (see RackMountableDeviceType).
@@ -32,6 +34,7 @@ namespace SDM.AssetManagement.Tests.Assets
 
             _assetClass = _helper.AssetManagement.AssetClasses.Create(new AssetClass
             {
+                Manufacturer = SDM.AssetManagement.Tests.Setup.PeopleApiMock.NewManufacturer(),
                 Name = "Transition asset class " + Guid.NewGuid(),
                 DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier),
                 State = SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Active,
@@ -63,7 +66,7 @@ namespace SDM.AssetManagement.Tests.Assets
 
             if (installation)
             {
-                asset.InstallationUserId = Guid.NewGuid();
+                asset.InstallationUserId = new PnoObjectReference<Person>(Guid.NewGuid());
                 asset.InstallationDate = DateTime.UtcNow;
             }
 

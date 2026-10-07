@@ -1,4 +1,4 @@
-namespace SDM.AssetManagement.Tests.Connections
+﻿namespace SDM.AssetManagement.Tests.Connections
 {
     using System;
     using System.Collections.Generic;
@@ -198,13 +198,13 @@ namespace SDM.AssetManagement.Tests.Connections
                 Description = "Connection description",
                 Source =
                 {
-                    Port = Guid.Parse(sourcePort.Identifier),
+                    Port = sourcePort,
                     PortType = sourcePort.DataPortInfo.PortType,
                     CableTag = "Source cable",
                 },
                 Destination =
                 {
-                    Port = Guid.Parse(destinationPort.Identifier),
+                    Port = destinationPort,
                     PortType = destinationPort.DataPortInfo.PortType,
                     CableTag = "Destination cable",
                 },
@@ -232,6 +232,7 @@ namespace SDM.AssetManagement.Tests.Connections
 
             var assetClass = Helper.AssetManagement.AssetClasses.Create(new AssetClass
             {
+                Manufacturer = SDM.AssetManagement.Tests.Setup.PeopleApiMock.NewManufacturer(),
                 Identifier = Guid.NewGuid().ToString(),
                 Name = $"{name} Asset Class",
                 State = SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Active,
@@ -263,7 +264,7 @@ namespace SDM.AssetManagement.Tests.Connections
                 },
                 CableFKs =
                 {
-                    CableTypeFks = new List<SdmObjectReference<CableType>>(),
+                    CableTypeFks = Helper.CreateCableTypeReferences($"{name} Port Type Cable"),
                 },
             });
 

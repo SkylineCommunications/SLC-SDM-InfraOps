@@ -48,6 +48,7 @@ namespace SDM.AssetManagement.Tests.AssetClasses
 
             var assetClass = new AssetClass
             {
+                Manufacturer = SDM.AssetManagement.Tests.Setup.PeopleApiMock.NewManufacturer(),
                 Name = "Valid Device",
                 DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier),
                 Depth = 10,
@@ -94,6 +95,7 @@ namespace SDM.AssetManagement.Tests.AssetClasses
 
             var assetClass = new AssetClass
             {
+                Manufacturer = SDM.AssetManagement.Tests.Setup.PeopleApiMock.NewManufacturer(),
                 Name = "Test",
                 DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier),
                 Depth = -5,      // Invalid: negative
@@ -123,6 +125,7 @@ namespace SDM.AssetManagement.Tests.AssetClasses
 
             var assetClass = new AssetClass
             {
+                Manufacturer = SDM.AssetManagement.Tests.Setup.PeopleApiMock.NewManufacturer(),
                 Name = "Test",
                 DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier),
                 Depth = -10,
@@ -223,6 +226,7 @@ namespace SDM.AssetManagement.Tests.AssetClasses
             // Arrange
             var assetClass = new AssetClass
             {
+                Manufacturer = SDM.AssetManagement.Tests.Setup.PeopleApiMock.NewManufacturer(),
                 Identifier = Guid.NewGuid().ToString(),
                 Name = "Test Device",
             };
@@ -244,6 +248,7 @@ namespace SDM.AssetManagement.Tests.AssetClasses
             // Arrange
             var assetClass = new AssetClass
             {
+                Manufacturer = SDM.AssetManagement.Tests.Setup.PeopleApiMock.NewManufacturer(),
                 Name = "Test Device",
                 DeviceTypeId = new SdmObjectReference<DeviceType>("dt-missing"),
             };
@@ -263,11 +268,67 @@ namespace SDM.AssetManagement.Tests.AssetClasses
         }
 
         [TestMethod]
+        public void Validate_WithoutManufacturer_ShouldReturnInvalid()
+        {
+            var assetClass = new AssetClass
+            {
+                Name = "No Manufacturer",
+                DeviceTypeId = new SdmObjectReference<DeviceType>(Guid.NewGuid().ToString()),
+            };
+
+            var result = _validator.Validate(assetClass, RepositoryAction.Create);
+
+            result.IsValid.Should().BeFalse();
+            result.FailureReasons.Should().Contain(reason => reason.ToString().Contains("Please enter a valid manufacturer."));
+        }
+
+        [TestMethod]
+        public void Validate_WithNonExistingManufacturer_ShouldReturnInvalid()
+        {
+            _helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
+            var deviceType = _helper.TestData.NonPowerProviderDeviceType();
+            var validator = _helper.CreateAssetClassValidator(PeopleApiMock.WithOrganizations());
+
+            var assetClass = new AssetClass
+            {
+                Manufacturer = PeopleApiMock.NewManufacturer(),
+                Name = "Unknown Manufacturer",
+                DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier),
+            };
+
+            var result = validator.Validate(assetClass, RepositoryAction.Create);
+
+            result.IsValid.Should().BeFalse();
+            result.FailureReasons.Should().Contain(reason => reason.ToString().Contains("manufacturer", StringComparison.OrdinalIgnoreCase));
+        }
+
+        [TestMethod]
+        public void Validate_WithSeededManufacturer_ShouldNotFailOnManufacturer()
+        {
+            _helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
+            var deviceType = _helper.TestData.NonPowerProviderDeviceType();
+            var manufacturer = PeopleApiMock.NewManufacturer();
+            var validator = _helper.CreateAssetClassValidator(PeopleApiMock.WithOrganizations(manufacturer.Identifier));
+
+            var assetClass = new AssetClass
+            {
+                Manufacturer = manufacturer,
+                Name = "Known Manufacturer",
+                DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier),
+            };
+
+            var result = validator.Validate(assetClass, RepositoryAction.Create);
+
+            result.FailureReasons.Should().NotContain(reason => reason.ToString().Contains("manufacturer", StringComparison.OrdinalIgnoreCase));
+        }
+
+        [TestMethod]
         public void Validate_WithNonExistingDeviceTypeGuid_ShouldReturnInvalid()
         {
             var missingId = Guid.NewGuid().ToString();
             var assetClass = new AssetClass
             {
+                Manufacturer = SDM.AssetManagement.Tests.Setup.PeopleApiMock.NewManufacturer(),
                 Name = "Missing Device Type",
                 DeviceTypeId = new SdmObjectReference<DeviceType>(missingId),
             };
@@ -296,6 +357,7 @@ namespace SDM.AssetManagement.Tests.AssetClasses
 
             var assetClass = new AssetClass
             {
+                Manufacturer = SDM.AssetManagement.Tests.Setup.PeopleApiMock.NewManufacturer(),
                 Name = "Power Device",
                 DeviceTypeId = new SdmObjectReference<DeviceType>(powerProviderDeviceType.Identifier),
                 PowerSupply = SlcAsset_Management.Enums.PowerSupplyEnum.AC,
@@ -321,6 +383,7 @@ namespace SDM.AssetManagement.Tests.AssetClasses
 
             var assetClass = new AssetClass
             {
+                Manufacturer = SDM.AssetManagement.Tests.Setup.PeopleApiMock.NewManufacturer(),
                 Name = "Test",
                 DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier),
                 DataPorts = new List<DataPortInfo>
@@ -353,6 +416,7 @@ namespace SDM.AssetManagement.Tests.AssetClasses
 
             var assetClass = new AssetClass
             {
+                Manufacturer = SDM.AssetManagement.Tests.Setup.PeopleApiMock.NewManufacturer(),
                 Name = "Test",
                 DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier),
                 PowerPorts = new List<PowerPortInfo>
@@ -384,6 +448,7 @@ namespace SDM.AssetManagement.Tests.AssetClasses
 
             var assetClass = new AssetClass
             {
+                Manufacturer = SDM.AssetManagement.Tests.Setup.PeopleApiMock.NewManufacturer(),
                 Name = "Test",
                 DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier),
                 Holders = new List<AssetHolder>
@@ -429,6 +494,7 @@ namespace SDM.AssetManagement.Tests.AssetClasses
             // Create a valid asset class and persist it
             var assetClass = new AssetClass
             {
+                Manufacturer = SDM.AssetManagement.Tests.Setup.PeopleApiMock.NewManufacturer(),
                 Name = "Test Change Tracking",
                 DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier),
                 HeightU = 1,     // Required when the device type is a Rack Unit Consumer
@@ -472,6 +538,7 @@ namespace SDM.AssetManagement.Tests.AssetClasses
            
             var newAssetClass = new AssetClass
             {
+                Manufacturer = SDM.AssetManagement.Tests.Setup.PeopleApiMock.NewManufacturer(),
                 Name = "Brand New Device",
                 DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier),
                 HeightU = 1, // Required when the device type is a Rack Unit Consumer
@@ -496,6 +563,7 @@ namespace SDM.AssetManagement.Tests.AssetClasses
 
             var assetClass = new AssetClass
             {
+                Manufacturer = SDM.AssetManagement.Tests.Setup.PeopleApiMock.NewManufacturer(),
                 Name = "Rack Consumer Without HeightU",
                 DeviceTypeId = new SdmObjectReference<DeviceType>(rackUnitConsumerDeviceType.Identifier),
             };

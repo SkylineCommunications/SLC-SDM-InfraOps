@@ -65,6 +65,9 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 
             public static readonly FieldDescriptorID AssetId = SharedMappers.DomIds.SlcPlan_And_Build.Sections.AssetsUsed.AssetID;
             public static readonly FieldDescriptorID Action = SharedMappers.DomIds.SlcPlan_And_Build.Sections.AssetsUsed.Action;
+            public static readonly FieldDescriptorID AssetName = SharedMappers.DomIds.SlcPlan_And_Build.Sections.AssetsUsed.AssetName;
+            public static readonly FieldDescriptorID AssetClassName = SharedMappers.DomIds.SlcPlan_And_Build.Sections.AssetsUsed.AssetClassName;
+            public static readonly FieldDescriptorID IPAddress = SharedMappers.DomIds.SlcPlan_And_Build.Sections.AssetsUsed.IPAddress;
         }
 
         public static class Attachments

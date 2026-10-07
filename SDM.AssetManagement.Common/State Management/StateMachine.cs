@@ -2,13 +2,11 @@
 {
     using System;
     using System.Collections.Generic;
-
     using SharedMappers.DomIds;
-
-    using AssetStatuses = SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum;
-    using AssetTransitions = SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum;
     using AssetClassStatuses = SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum;
     using AssetClassTransitions = SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Class_Behavior.TransitionsEnum;
+    using AssetStatuses = SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum;
+    using AssetTransitions = SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum;
 
     internal static class StateMachine
     {

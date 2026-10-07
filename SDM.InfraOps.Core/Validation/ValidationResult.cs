@@ -79,6 +79,19 @@
             _displayKey[field] = displayFieldName;
         }
 
+        public void AddFailReason<T>(T field, string displayFieldName, string reason) where T : Enum
+        {
+            _isValid = false;
+            var key = GetFieldToId(field);
+            if (_failReasons.ContainsKey(key))
+            {
+                return; // ignore - field already has an error
+            }
+
+            _failReasons[key] = reason;
+            _displayKey[key] = displayFieldName;
+        }
+
         /// <summary>
         /// Adds a warning to the validation result.
         /// Warnings don't affect IsValid, but provide notices to the user.
@@ -125,6 +138,24 @@
             }
 
             return string.Join(separator, warnings);
+        }
+
+        /// <summary>
+        /// Gets the failure reason for a specific enumerable T messages.
+        /// </summary>
+        public Dictionary<T, string> GetFailureReasons<T>() where T : Enum
+        {
+            var failures = new Dictionary<T, string>();
+
+            foreach (var entry in _failReasons)
+            {
+                if (IsFromEnum<T>(entry.Key))
+                {
+                    failures.Add(GetIdToField<T>(entry.Key), entry.Value);
+                }
+            }
+
+            return failures;
         }
 
         /// <summary>
@@ -249,6 +280,22 @@
         private string GetFieldToId<T>(T field) where T : Enum
         {
             return $"{typeof(T).Name}_{Convert.ToString(field)}";
+        }
+
+        private bool IsFromEnum<T>(string field) where T : Enum
+        {
+            
+            return field.StartsWith($"{typeof(T).Name}_");
+        }
+
+        private T GetIdToField<T>(string field) where T : Enum
+        {
+            if(!IsFromEnum<T>(field))
+            {
+                throw new ArgumentException($"Field '{field}' is not from enum type '{typeof(T).Name}'.");
+            }
+
+            return (T)Enum.Parse(typeof(T), field.Replace($"{typeof(T).Name}_", string.Empty));
         }
 
         /// <summary>

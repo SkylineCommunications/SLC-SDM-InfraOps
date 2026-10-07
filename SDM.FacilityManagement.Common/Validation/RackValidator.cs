@@ -3,8 +3,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
     using System;
     using System.Collections.Generic;
     using System.Linq;
-
-    using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
     using Skyline.DataMiner.SDM.FacilityManagement.Services;
     using Skyline.DataMiner.SDM.InfraOps.Common.Validation;
@@ -60,6 +58,12 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                     result.AddFailReason(RackValidationHandler.RackValidationField.RackId,
                         $"Rack Id '{rack.RackId}' is already in use.");
                 }
+            }
+
+            if (rack.ShouldValidate(rack.PositionField) &&
+                !RackValidationHandler.IsRackPositionValid(rack, out var positionResult))
+            {
+                result.AddFailuresFrom(positionResult);
             }
 
             AddBusinessRuleFailures(rack, result);
@@ -132,6 +136,12 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                 if (!RackValidationHandler.IsRackNameValid(racks[i], out var nameResult))
                 {
                     results[i].AddFailuresFrom(nameResult);
+                }
+
+                if (racks[i].ShouldValidate(racks[i].PositionField) &&
+                    !RackValidationHandler.IsRackPositionValid(racks[i], out var positionResult))
+                {
+                    results[i].AddFailuresFrom(positionResult);
                 }
 
                 AddBusinessRuleFailures(racks[i], results[i]);
@@ -289,7 +299,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                 {
                     ReferenceValidationHelper.AddMissingReference(
                         results[index],
-                        RackValidationHandler.RackValidationField.RackId,
+                        RackValidationHandler.RackValidationField.RowId,
                         referenceType,
                         identifier);
                 }

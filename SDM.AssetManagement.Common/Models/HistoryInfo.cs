@@ -1,0 +1,161 @@
+﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
+{
+    using System;
+    using Newtonsoft.Json;
+    using SharedMappers.DomIds;
+    using Skyline.DataMiner.SDM.Extensions;
+    using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
+    using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
+
+    public sealed class HistoryInfo : ChangeTrackingBase, IEquatable<HistoryInfo>, ISectionTrackable, ISectionEmptyState
+    {
+        [JsonIgnore]
+        [SdmIgnore]
+        Guid? ISectionTrackable.SectionId { get; set; }
+
+        [JsonIgnore]
+        [SdmIgnore]
+        public bool IsEmpty => Description == default
+                               && !Job.HasValue()
+                               && !ModifiedInstanceID.HasValue()
+                               && ModifiedInstanceDefinitionID == default
+                               && ExtraInfo == default
+                               && TypeOfHistory == default;
+
+        public string Description
+        {
+            get => DescriptionField.Value;
+            set => DescriptionField.Value = value;
+        }
+
+        public ISdmObjectReference<ISdmObject> Job
+        {
+            get => JobField.Value;
+            set => JobField.Value = value;
+        }
+
+        /// <summary>
+        /// Gets or sets the modified instance ID. Type of SDM Object is referenced in <see cref="ModifiedInstanceDefinitionID"/>.
+        /// </summary>
+        public ISdmObjectReference<ISdmObject> ModifiedInstanceID
+        {
+            get => ModifiedInstanceIDField.Value;
+            set => ModifiedInstanceIDField.Value = value;
+        }
+
+        public string ModifiedInstanceDefinitionID
+        {
+            get => ModifiedInstanceDefinitionIDField.Value;
+            set => ModifiedInstanceDefinitionIDField.Value = value;
+        }
+
+        public string ExtraInfo
+        {
+            get => ExtraInfoField.Value;
+            set => ExtraInfoField.Value = value;
+        }
+
+        public SlcAsset_Management.Enums.TypeOfHistoryEnum? TypeOfHistory
+        {
+            get => TypeOfHistoryField.Value;
+            set => TypeOfHistoryField.Value = value;
+        }
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal IChangeTrackingField<string> DescriptionField => FieldHandler.GetOrCreateField(
+            nameof(Description),
+            () => new ChangeTrackingField<string>(null));
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal IChangeTrackingField<ISdmObjectReference<ISdmObject>> JobField => FieldHandler.GetOrCreateField(
+            nameof(Job),
+            () => new ChangeTrackingField<ISdmObjectReference<ISdmObject>>(default, reference => reference.Identifier));
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal IChangeTrackingField<ISdmObjectReference<ISdmObject>> ModifiedInstanceIDField => FieldHandler.GetOrCreateField(
+            nameof(ModifiedInstanceID),
+            () => new ChangeTrackingField<ISdmObjectReference<ISdmObject>>(default, reference => reference.Identifier));
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal IChangeTrackingField<string> ModifiedInstanceDefinitionIDField => FieldHandler.GetOrCreateField(
+            nameof(ModifiedInstanceDefinitionID),
+            () => new ChangeTrackingField<string>(null));
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal IChangeTrackingField<string> ExtraInfoField => FieldHandler.GetOrCreateField(
+            nameof(ExtraInfo),
+            () => new ChangeTrackingField<string>(null));
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal IChangeTrackingField<SlcAsset_Management.Enums.TypeOfHistoryEnum?> TypeOfHistoryField => FieldHandler.GetOrCreateField(
+            nameof(TypeOfHistory),
+            () => new ChangeTrackingField<SlcAsset_Management.Enums.TypeOfHistoryEnum?>(null));
+
+        public static bool operator ==(HistoryInfo left, HistoryInfo right)
+        {
+            if (ReferenceEquals(left, right))
+            {
+                return true;
+            }
+
+            if (left is null || right is null)
+            {
+                return false;
+            }
+
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(HistoryInfo left, HistoryInfo right)
+        {
+            return !(left == right);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as HistoryInfo);
+        }
+
+        public bool Equals(HistoryInfo other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return
+                string.Equals(Description, other.Description, StringComparison.OrdinalIgnoreCase) &&
+                Job == other.Job &&
+                ModifiedInstanceID == other.ModifiedInstanceID &&
+                string.Equals(ModifiedInstanceDefinitionID, other.ModifiedInstanceDefinitionID, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(ExtraInfo, other.ExtraInfo, StringComparison.OrdinalIgnoreCase) &&
+                TypeOfHistory == other.TypeOfHistory;
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 17;
+                hash = (hash * 23) + (Description?.GetHashCode() ?? 0);
+                hash = (hash * 23) + (Job.Identifier?.GetHashCode() ?? 0);
+                hash = (hash * 23) + (ModifiedInstanceID.Identifier?.GetHashCode() ?? 0);
+                hash = (hash * 23) + (ModifiedInstanceDefinitionID?.GetHashCode() ?? 0);
+                hash = (hash * 23) + (ExtraInfo?.GetHashCode() ?? 0);
+                hash = (hash * 23) + (TypeOfHistory?.GetHashCode() ?? 0);
+                return hash;
+            }
+        }
+    }
+}

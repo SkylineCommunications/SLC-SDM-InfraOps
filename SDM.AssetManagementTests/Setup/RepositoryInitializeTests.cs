@@ -241,6 +241,10 @@
                 {
                     Categories = [SlcAsset_Management.Enums.CategoriesEnum.Data],
                 },
+                CableFKs =
+                {
+                    CableTypeFks = Helper.CreateCableTypeReferences("Custom Data Port Type Cable"),
+                },
             };
             Helper.AssetManagement.PortTypes.Create(dataPortType);
 
@@ -393,6 +397,7 @@
         {
             var assetClass = new AssetClass
             {
+                Manufacturer = SDM.AssetManagement.Tests.Setup.PeopleApiMock.NewManufacturer(),
                 DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier),
                 Name = name,
             };

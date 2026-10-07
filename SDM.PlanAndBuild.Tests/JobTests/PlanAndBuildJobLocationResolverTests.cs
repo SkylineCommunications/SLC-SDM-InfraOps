@@ -47,7 +47,7 @@ namespace SDM.PlanAndBuild.Tests.JobTests
             zone = facilityHelper.Zones.Create(zoneToCreate);
 			row = facilityHelper.Rows.Create(new Row { Identifier = Guid.NewGuid().ToString(), Name = "Row 1", RowId = "ROW-1" });
 			desk = facilityHelper.Desks.Create(new Desk { Identifier = Guid.NewGuid().ToString(), Name = "Desk 1", DeskID = "DSK-1" });
-			var rackToCreate = new Rack { Identifier = Guid.NewGuid().ToString(), Name = "Rack 1", RackId = "RCK-1" };
+			var rackToCreate = new Rack { Identifier = Guid.NewGuid().ToString(), Name = "Rack 1", RackId = "RCK-1", Position = SharedMappers.DomIds.SlcFacility_Management.Enums.RackpositionenumEnum.Bottom };
 			rackToCreate.Capacity.MaximumRackCapacity = 42;
 			rack = facilityHelper.Racks.Create(rackToCreate);
 		}
@@ -75,19 +75,19 @@ namespace SDM.PlanAndBuild.Tests.JobTests
 				resolved.Should().NotContain(jl => jl.Kind == FacilityLocationKind.Unknown);
 
 				resolved.Single(jl => jl.Id == Guid.Parse(facility.Identifier)).Should().Match<JobLocation>(jl =>
-					jl.Kind == FacilityLocationKind.Facility && jl.Facility != null && jl.Value == jl.Facility);
+					jl.Kind == FacilityLocationKind.Facility && jl.Facility != null && (Facility)jl.Value == jl.Facility);
 				resolved.Single(jl => jl.Id == Guid.Parse(floor.Identifier)).Should().Match<JobLocation>(jl =>
-					jl.Kind == FacilityLocationKind.Floor && jl.Floor != null && jl.Value == jl.Floor);
+					jl.Kind == FacilityLocationKind.Floor && jl.Floor != null && (Floor)jl.Value == jl.Floor);
 				resolved.Single(jl => jl.Id == Guid.Parse(room.Identifier)).Should().Match<JobLocation>(jl =>
-					jl.Kind == FacilityLocationKind.Room && jl.Room != null && jl.Value == jl.Room);
+					jl.Kind == FacilityLocationKind.Room && jl.Room != null && (Room)jl.Value == jl.Room);
 				resolved.Single(jl => jl.Id == Guid.Parse(zone.Identifier)).Should().Match<JobLocation>(jl =>
-					jl.Kind == FacilityLocationKind.Zone && jl.Zone != null && jl.Value == jl.Zone);
+					jl.Kind == FacilityLocationKind.Zone && jl.Zone != null && (Zone)jl.Value == jl.Zone);
 				resolved.Single(jl => jl.Id == Guid.Parse(row.Identifier)).Should().Match<JobLocation>(jl =>
-					jl.Kind == FacilityLocationKind.Row && jl.Row != null && jl.Value == jl.Row);
+					jl.Kind == FacilityLocationKind.Row && jl.Row != null && (Row)jl.Value == jl.Row);
 				resolved.Single(jl => jl.Id == Guid.Parse(desk.Identifier)).Should().Match<JobLocation>(jl =>
-					jl.Kind == FacilityLocationKind.Desk && jl.Desk != null && jl.Value == jl.Desk);
+					jl.Kind == FacilityLocationKind.Desk && jl.Desk != null && (Desk)jl.Value == jl.Desk);
 				resolved.Single(jl => jl.Id == Guid.Parse(rack.Identifier)).Should().Match<JobLocation>(jl =>
-					jl.Kind == FacilityLocationKind.Rack && jl.Rack != null && jl.Value == jl.Rack);
+					jl.Kind == FacilityLocationKind.Rack && jl.Rack != null && (Rack)jl.Value == jl.Rack);
 			}
 		}
 

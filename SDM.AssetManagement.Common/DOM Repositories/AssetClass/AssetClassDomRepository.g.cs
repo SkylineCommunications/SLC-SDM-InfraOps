@@ -6,28 +6,24 @@
 //------------------------------------------------------------------------------
 namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Diagnostics;
-	using System.Linq;
-
-	using Skyline.DataMiner.Net;
-	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-	using Skyline.DataMiner.Net.Apps.Sections.Sections;
-	using Skyline.DataMiner.Net.Helper;
-	using Skyline.DataMiner.Net.ManagerStore;
-	using Skyline.DataMiner.Net.Messages;
-	using Skyline.DataMiner.Net.Messages.SLDataGateway;
-	using Skyline.DataMiner.Net.Sections;
-	using Skyline.DataMiner.Net.SubscriptionFilters;
-	using Skyline.DataMiner.SDM;
-	using Skyline.DataMiner.SDM.AssetManagement.Validation;
-
-    using SLDataGateway.API.Querying;
-	using SLDataGateway.API.Types.Querying;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using SharedMappers.DomIds;
+    using Skyline.DataMiner.Net;
+    using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+    using Skyline.DataMiner.Net.Helper;
+    using Skyline.DataMiner.Net.ManagerStore;
+    using Skyline.DataMiner.Net.Messages.SLDataGateway;
+    using Skyline.DataMiner.Net.Sections;
+    using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.Extensions;
+    using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
+    using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
+    using SLDataGateway.API.Querying;
+    using SLDataGateway.API.Types.Querying;
 
-	internal partial class AssetClassDomRepository : IBulkRepository<AssetClass>
+    internal partial class AssetClassDomRepository : IBulkRepository<AssetClass>
     {
 		private readonly IConnection connection;
 		private readonly DomHelper helper;
@@ -570,6 +566,10 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				Identifier = instance.ID.Id.ToString(),
                 IsNewInternal = false,
                 State = SlcAsset_Management.Behaviors.Asset_Class_Behavior.Statuses.ToEnum(instance.StatusId),
+                CreatedAt = ((ITrackBase)instance).CreatedAt,
+                CreatedBy = ((ITrackBase)instance).CreatedBy,
+                LastModified = ((ITrackBase)instance).LastModified,
+                LastModifiedBy = ((ITrackBase)instance).LastModifiedBy,
             };
 
 			var _assetclasspropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.SectionDefinitionId));
@@ -591,7 +591,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				var _manufacturer = _assetclasspropertiesSection.GetValue<System.Guid>(AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Manufacturer);
 				if (_manufacturer != null)
 				{
-					obj.Manufacturer = _manufacturer.Value;
+					obj.Manufacturer = new PnoObjectReference<Organization>(_manufacturer.Value);
 				}
 
 				var _devicedescription = _assetclasspropertiesSection.GetValue<string>(AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.DeviceDescription);
@@ -664,6 +664,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				if (_powersupply != null)
 				{
 					obj.PowerSupply = SharedMappers.DomIds.SlcAsset_Management.Enums.Powersupply.ToEnum(_powersupply.Value);
+				}
+
+				var _citype = _assetclasspropertiesSection.GetValue<string>(AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.CIType);
+				if (_citype != null)
+				{
+					obj.CIType = _citype.Value;
 				}
 			}
 
@@ -799,6 +805,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 					holders.HierarchyRole = SlcAsset_Management.Enums.Hierarchyrole.ToEnum(_holdershierarchyrole.Value);
 				}
 
+				var _holderslabel = _holdersSection.GetValue<string>(AssetManagement.Models.AssetClassDomMapper.Holders.Label);
+				if (_holderslabel != null)
+				{
+					holders.Label = _holderslabel.Value;
+				}
+
 				_holdersList.Add(holders);
 			}
 
@@ -823,14 +835,13 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				var _attachmentsattachedby = _attachmentsSection.GetValue<string>(AssetManagement.Models.AssetClassDomMapper.Attachments.AttachedBy);
 				if (_attachmentsattachedby != null)
 				{
-					attachments.AttachedBy = System.Guid.Parse(Convert.ToString(_attachmentsattachedby.Value));
+					attachments.AttachedBy = _attachmentsattachedby.Value;
 				}
 
 				_attachmentsList.Add(attachments);
 			}
 
 			obj.Attachments = _attachmentsList;
-            obj.ResetChangeTracking();
 
             var _protocolLinkSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(AssetManagement.Models.AssetClassDomMapper.ProtocolLink.SectionDefinitionId));
             if (_protocolLinkSection != default)
@@ -842,6 +853,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     obj.ProtocolLink.Protocol = _protocolLinkProtocol.Value;
                 }
             }
+
+            obj.ResetChangeTracking();
 
             return obj;
 		}
@@ -880,12 +893,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				_assetclassproperties.AddOrUpdateValue<string>(AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.DeviceName, Convert.ToString(obj.Name));
 			}
 
-			if (obj.DeviceTypeId != default && System.Guid.TryParse(obj.DeviceTypeId.Identifier, out var deviceTypeGuid) && deviceTypeGuid != System.Guid.Empty)
+			if (obj.DeviceTypeId.HasValue())
 			{
-				_assetclassproperties.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.DeviceType, deviceTypeGuid);
+				_assetclassproperties.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.DeviceType, obj.DeviceTypeId.GetIdentifierAsGuid());
 			}
 
-			if (obj.Manufacturer != default)
+			if (obj.Manufacturer.HasValue())
 			{
 				_assetclassproperties.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.Manufacturer, obj.Manufacturer);
 			}
@@ -945,6 +958,11 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				_assetclassproperties.AddOrUpdateValue<string>(AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.PowerSupply, SharedMappers.DomIds.SlcAsset_Management.Enums.Powersupply.ToValue((obj.PowerSupply).Value));
 			}
 
+			if (obj.CIType != default)
+			{
+				_assetclassproperties.AddOrUpdateValue<string>(AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.CIType, Convert.ToString(obj.CIType));
+			}
+
 			instance.Sections.Add(_assetclassproperties);
 			if (!obj.Lifecycle.IsEmpty)
 			{
@@ -993,9 +1011,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
 				_dataportsSection.AddOrUpdateValue<int>(AssetManagement.Models.AssetClassDomMapper.DataPorts.OutputType, (int)dataports.OutputType);
 				_dataportsSection.AddOrUpdateValue<string>(AssetManagement.Models.AssetClassDomMapper.DataPorts.PortExposure, SharedMappers.DomIds.SlcAsset_Management.Enums.Portexposure.ToValue(dataports.PortExposure));
-				if (dataports.PortType != default && System.Guid.TryParse(dataports.PortType.Identifier, out var dataPortTypeGuid) && dataPortTypeGuid != System.Guid.Empty)
+				if (dataports.PortType.HasValue())
 				{
-					_dataportsSection.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetClassDomMapper.DataPorts.Type, dataPortTypeGuid);
+					_dataportsSection.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetClassDomMapper.DataPorts.Type, dataports.PortType.GetIdentifierAsGuid());
 				}
 
 				if (dataports.Label != default)
@@ -1027,9 +1045,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
 				_powerportsSection.AddOrUpdateValue<int>(AssetManagement.Models.AssetClassDomMapper.PowerPorts.OutputType, (int)powerports.OutputType);
 				_powerportsSection.AddOrUpdateValue<string>(AssetManagement.Models.AssetClassDomMapper.PowerPorts.PortExposure, SharedMappers.DomIds.SlcAsset_Management.Enums.Portexposure.ToValue(powerports.PortExposure));
-				if (powerports.PortType != default && System.Guid.TryParse(powerports.PortType.Identifier, out var powerPortTypeGuid) && powerPortTypeGuid != System.Guid.Empty)
+				if (powerports.PortType.HasValue())
 				{
-					_powerportsSection.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetClassDomMapper.PowerPorts.PortType, powerPortTypeGuid);
+					_powerportsSection.AddOrUpdateValue<System.Guid>(AssetManagement.Models.AssetClassDomMapper.PowerPorts.PortType, powerports.PortType.GetIdentifierAsGuid());
 				}
 
 				if (powerports.Label != default)
@@ -1055,6 +1073,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				}
 
 				_holdersSection.AddOrUpdateValue<string>(AssetManagement.Models.AssetClassDomMapper.Holders.HierarchyRole, SlcAsset_Management.Enums.Hierarchyrole.ToValue(holders.HierarchyRole));
+
+				if (holders.Label != default)
+				{
+					_holdersSection.AddOrUpdateValue<string>(AssetManagement.Models.AssetClassDomMapper.Holders.Label, Convert.ToString(holders.Label));
+				}
+
 				instance.Sections.Add(_holdersSection);
 			}
 
@@ -1079,7 +1103,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
 				if (attachments.AttachedBy != default)
 				{
-					_attachmentsSection.AddOrUpdateValue<string>(AssetManagement.Models.AssetClassDomMapper.Attachments.AttachedBy, Convert.ToString((attachments.AttachedBy).Value));
+					_attachmentsSection.AddOrUpdateValue<string>(AssetManagement.Models.AssetClassDomMapper.Attachments.AttachedBy, attachments.AttachedBy);
 				}
 
 				instance.Sections.Add(_attachmentsSection);
@@ -1094,8 +1118,18 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			{
 				case "Identifier":
 					return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.Id, comparer, Guid.Parse((string)value));
+				case "CreatedAt":
+					return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.CreatedAt, comparer, (DateTime)value);
+				case "CreatedBy":
+					return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.CreatedBy, comparer, (string)value);
+				case "LastModified":
+					return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModified, comparer, (DateTime)value);
+				case "LastModifiedBy":
+					return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModifiedBy, comparer, (string)value);
 				case "Name":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.DeviceName), comparer, (string)value);
+				case "DeviceTypeId" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && !SdmObjectReference<AssetManagement.Models.DeviceType>.Convert(value).HasValue():
+					return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.DeviceType.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "DeviceTypeId":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.DeviceType), comparer, System.Guid.Parse(SdmObjectReference<AssetManagement.Models.DeviceType>.Convert(value).Identifier));
 				case "Manufacturer" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
@@ -1144,6 +1178,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 					return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.PowerSupply.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "PowerSupply":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.PowerSupply), comparer, SharedMappers.DomIds.SlcAsset_Management.Enums.Powersupply.ToValue(((SharedMappers.DomIds.SlcAsset_Management.Enums.PowerSupplyEnum?)value).Value));
+				case "CIType":
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.CIType), comparer, (string)value);
 				case "Lifecycle.EndOfLife":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetClassDomMapper.Lifecycle.EndOfLife), comparer, (DateTime)(DateTime)value);
 				case "Lifecycle.EndOfService":
@@ -1164,7 +1200,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetClassDomMapper.DataPorts.OutputType), comparer, (int)((SharedMappers.DomIds.SlcAsset_Management.Enums.Outputtype?)value).Value);
 				case "DataPorts.PortExposure":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetClassDomMapper.DataPorts.PortExposure), comparer, SharedMappers.DomIds.SlcAsset_Management.Enums.Portexposure.ToValue((SharedMappers.DomIds.SlcAsset_Management.Enums.PortExposureEnum)value));
-				case "DataPorts.Type":
+				case "DataPorts.PortType":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetClassDomMapper.DataPorts.Type), comparer, Convert.ToString((System.Guid)value));
 				case "DataPorts.Label":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetClassDomMapper.DataPorts.Label), comparer, (string)value);
@@ -1192,6 +1228,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetClassDomMapper.Holders.SlotNumber), comparer, (long)value);
 				case "Holders.HierarchyRole":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetClassDomMapper.Holders.HierarchyRole), comparer, (int)(SlcAsset_Management.Enums.HierarchyRoleEnum)value);
+				case "Holders.Label":
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetClassDomMapper.Holders.Label), comparer, (string)value);
 				case "Attachments.FilePath" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
 					return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.AssetClassDomMapper.Attachments.FilePath.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "Attachments.FilePath":
@@ -1217,6 +1255,14 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			{
 				case "Identifier":
 					return OrderByElementFactory.Create(DomInstanceExposers.Id, sortOrder, naturalSort);
+				case "CreatedAt":
+					return OrderByElementFactory.Create(DomInstanceExposers.CreatedAt, sortOrder, naturalSort);
+				case "CreatedBy":
+					return OrderByElementFactory.Create(DomInstanceExposers.CreatedBy, sortOrder, naturalSort);
+				case "LastModified":
+					return OrderByElementFactory.Create(DomInstanceExposers.LastModified, sortOrder, naturalSort);
+				case "LastModifiedBy":
+					return OrderByElementFactory.Create(DomInstanceExposers.LastModifiedBy, sortOrder, naturalSort);
 				case "Name":
 					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.DeviceName), sortOrder, naturalSort);
 				case "DeviceTypeId":
@@ -1245,6 +1291,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.MaximumPowerConsumption), sortOrder, naturalSort);
 				case "PowerSupply":
 					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.PowerSupply), sortOrder, naturalSort);
+				case "CIType":
+					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.CIType), sortOrder, naturalSort);
 				case "Lifecycle.EndOfLife":
 					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetClassDomMapper.Lifecycle.EndOfLife), sortOrder, naturalSort);
 				case "Lifecycle.EndOfService":
@@ -1261,7 +1309,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetClassDomMapper.DataPorts.OutputType), sortOrder, naturalSort);
 				case "DataPorts.PortExposure":
 					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetClassDomMapper.DataPorts.PortExposure), sortOrder, naturalSort);
-				case "DataPorts.Type":
+				case "DataPorts.PortType":
 					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetClassDomMapper.DataPorts.Type), sortOrder, naturalSort);
 				case "DataPorts.Label":
 					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetClassDomMapper.DataPorts.Label), sortOrder, naturalSort);
@@ -1285,6 +1333,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetClassDomMapper.Holders.SlotNumber), sortOrder, naturalSort);
 				case "Holders.HierarchyRole":
 					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetClassDomMapper.Holders.HierarchyRole), sortOrder, naturalSort);
+				case "Holders.Label":
+					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetClassDomMapper.Holders.Label), sortOrder, naturalSort);
 				case "Attachments.FilePath":
 					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetClassDomMapper.Attachments.FilePath), sortOrder, naturalSort);
 				case "Attachments.AttachedAt":

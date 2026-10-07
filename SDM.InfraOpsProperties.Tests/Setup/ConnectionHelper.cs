@@ -1,21 +1,28 @@
 ﻿namespace SDM.InfraOpsProperties.Tests
 {
 	using Moq;
-
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Messages;
+	using Skyline.DataMiner.SDM.InfraOpsProperties.Common.Mock;
 	using Skyline.DataMiner.SDM.InfraOpsProperties.Helpers;
 	using Skyline.DataMiner.Utils.DOM.UnitTesting;
+
 
 	internal static class ConnectionHelper
 	{
 		internal static IConnection CreateConnection()
 		{
 			var messageHandler = new DomSLNetMessageHandler();
+			messageHandler.AddInfraOpsPropertiesModule();
 			return CreateConnection(messageHandler);
 		}
 
-		internal static IConnection CreateConnection(DomSLNetMessageHandler messageHandler)
+		internal static IInfraOpsPropertiesApiHelper GetMockedHelper(this IConnection connection, bool cascadeDeleteOnProperty = true)
+		{
+			return new InfraOpsPropertiesApiHelper(connection, cascadeDeleteOnProperty);
+		}
+
+		private static IConnection CreateConnection(DomSLNetMessageHandler messageHandler)
 		{
 			var connectionMock = new Mock<IConnection>();
 			connectionMock.Setup(c => c.HandleMessages(It.IsAny<DMSMessage[]>()))
@@ -28,11 +35,6 @@
 				.Returns("Mocked User");
 
 			return connectionMock.Object;
-		}
-
-		internal static IInfraOpsPropertiesApiHelper GetMockedHelper(this IConnection connection, bool cascadeDeleteOnProperty = true)
-		{
-			return new InfraOpsPropertiesApiHelper(connection, cascadeDeleteOnProperty);
 		}
 
 		private static DMSMessage[] HandleSLNetMessages(DomSLNetMessageHandler messageHandler, DMSMessage[] messages)

@@ -1,19 +1,16 @@
 ﻿namespace SDM.AssetManagement.Tests.PowerPorts
 {
+    using System;
     using System.Linq;
-
     using FluentAssertions;
     using FluentAssertions.Execution;
-
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-
     using SDM.AssetManagement.Tests.Setup;
-
     using SharedMappers.DomIds;
-
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
+    using Skyline.DataMiner.SDM.Extensions;
 
     /// <summary>
     /// Filter and query tests for PowerPort repository operations.
@@ -156,6 +153,19 @@
             {
                 results.Should().NotBeEmpty($"should find power ports linked to asset '{targetAsset.Name}'");
                 results.Should().OnlyContain(pp => pp.Asset.Identifier == targetAsset.Identifier);
+            }
+        }
+
+        [TestMethod]
+        public void ReadFilter_Asset_NonExistent_ShouldReturnNoPowerPorts()
+        {
+            var results = Helper.AssetManagement.PowerPorts.Read(PowerPortExposers.Asset.Equal(new SdmObjectReference<Asset>(Guid.NewGuid().ToString()))).ToList();
+
+            using (new AssertionScope())
+            {
+                results.Should().NotBeNull();
+                results.Should().BeEmpty();
+                results.Should().HaveCount(0);
             }
         }
 

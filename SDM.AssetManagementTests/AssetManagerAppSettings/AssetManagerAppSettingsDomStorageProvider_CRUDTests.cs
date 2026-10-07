@@ -24,7 +24,7 @@ namespace SDM.AssetManagement.Tests.AssetManagerAppSettings
             {
                 Identifier = Guid.NewGuid().ToString(),
                 EnableAssetHistory = true,
-                PlanAndBuildJobPrompt = 1,
+                PlanAndBuildJobPrompt = SharedMappers.DomIds.SlcAsset_Management.Enums.Planandbuildjobpromptenum.Enabled,
                 EnableConnectionHistory = true,
                 HistoryTTL = TimeSpan.FromDays(30),
                 HistoryLimit = 1000L,
@@ -102,7 +102,7 @@ namespace SDM.AssetManagement.Tests.AssetManagerAppSettings
             Helper.PopulateAssetManagerAppSettings();
 
             var filter = AssetManagerAppSettingsExposers.EnableAssetHistory.Equal(false)
-                .AND(AssetManagerAppSettingsExposers.PlanAndBuildJobPrompt.Equal(1));
+                .AND(AssetManagerAppSettingsExposers.PlanAndBuildJobPrompt.Equal(SharedMappers.DomIds.SlcAsset_Management.Enums.Planandbuildjobpromptenum.Enabled));
             var settingsToDelete = Helper.AssetManagement.AppSettings.Read(filter).ToList();
 
             Helper.AssetManagement.AppSettings.Delete(settingsToDelete);
