@@ -41,6 +41,84 @@
         }
 
         [TestMethod]
+        [DataRow(-90.1)]
+        [DataRow(90.1)]
+        public void Facility_Create_WithLatitudeOutOfRange_ShouldThrow(double latitude)
+        {
+            var entity = new Facility { Identifier = Guid.NewGuid().ToString(), Name = "Facility", FacilityId = "FAC-1", Latitude = latitude };
+
+            var action = () => Helper.Facilities.Create(entity);
+
+            action.Should().Throw<Exception>().WithMessage("*latitude must be between -90 and 90*");
+        }
+
+        [TestMethod]
+        [DataRow(-180.1)]
+        [DataRow(180.1)]
+        public void Facility_Create_WithLongitudeOutOfRange_ShouldThrow(double longitude)
+        {
+            var entity = new Facility { Identifier = Guid.NewGuid().ToString(), Name = "Facility", FacilityId = "FAC-1", Longitude = longitude };
+
+            var action = () => Helper.Facilities.Create(entity);
+
+            action.Should().Throw<Exception>().WithMessage("*longitude must be between -180 and 180*");
+        }
+
+        [TestMethod]
+        public void Facility_CreateOrUpdate_WithLatitudeOutOfRangeInBatch_ShouldThrow()
+        {
+            var first = new Facility { Identifier = Guid.NewGuid().ToString(), Name = "Facility 1", FacilityId = "FAC-1", Latitude = 91 };
+            var second = new Facility { Identifier = Guid.NewGuid().ToString(), Name = "Facility 2", FacilityId = "FAC-2" };
+
+            var action = () => Helper.Facilities.CreateOrUpdate(new[] { first, second });
+
+            action.Should().Throw<Exception>().WithMessage("*latitude must be between -90 and 90*");
+        }
+
+        [TestMethod]
+        [DataRow(null, null)]
+        [DataRow(-90.0, -180.0)]
+        [DataRow(0.0, 0.0)]
+        [DataRow(90.0, 180.0)]
+        public void FacilityValidationHandler_WithNullOrInRangeCoordinates_ShouldBeValid(double? latitude, double? longitude)
+        {
+            var entity = new Facility { Latitude = latitude, Longitude = longitude };
+
+            FacilityValidationHandler.IsFacilityLatitudeValid(entity, out _).Should().BeTrue();
+            FacilityValidationHandler.IsFacilityLongitudeValid(entity, out _).Should().BeTrue();
+        }
+
+        [TestMethod]
+        [DataRow(double.NaN)]
+        [DataRow(double.PositiveInfinity)]
+        [DataRow(double.NegativeInfinity)]
+        [DataRow(-91.0)]
+        [DataRow(91.0)]
+        public void FacilityValidationHandler_WithInvalidLatitude_ShouldReturnExactMessage(double latitude)
+        {
+            var entity = new Facility { Latitude = latitude };
+
+            FacilityValidationHandler.IsFacilityLatitudeValid(entity, out var result).Should().BeFalse();
+
+            result.GetFailReason(FacilityValidationHandler.FacilityValidationField.Latitude).Should().Be("The latitude must be between -90 and 90.");
+        }
+
+        [TestMethod]
+        [DataRow(double.NaN)]
+        [DataRow(double.PositiveInfinity)]
+        [DataRow(double.NegativeInfinity)]
+        [DataRow(-181.0)]
+        [DataRow(181.0)]
+        public void FacilityValidationHandler_WithInvalidLongitude_ShouldReturnExactMessage(double longitude)
+        {
+            var entity = new Facility { Longitude = longitude };
+
+            FacilityValidationHandler.IsFacilityLongitudeValid(entity, out var result).Should().BeFalse();
+
+            result.GetFailReason(FacilityValidationHandler.FacilityValidationField.Longitude).Should().Be("The longitude must be between -180 and 180.");
+        }
+
+        [TestMethod]
         public void Facility_CreateOrUpdate_WithDuplicateIdInBatch_ShouldThrow()
         {
             var first = new Facility { Identifier = Guid.NewGuid().ToString(), Name = "Facility 1", FacilityId = "DUP-1" };

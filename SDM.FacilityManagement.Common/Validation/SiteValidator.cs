@@ -53,6 +53,16 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                 result.AddFailuresFrom(nameResult);
             }
 
+            if (site.ShouldValidate(site.LatitudeField) && !SiteValidationHandler.IsSiteLatitudeValid(site, out var latitudeResult))
+            {
+                result.AddFailuresFrom(latitudeResult);
+            }
+
+            if (site.ShouldValidate(site.LongitudeField) && !SiteValidationHandler.IsSiteLongitudeValid(site, out var longitudeResult))
+            {
+                result.AddFailuresFrom(longitudeResult);
+            }
+
             return result;
         }
 
@@ -129,6 +139,16 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                 if (!SiteValidationHandler.IsSiteNameValid(sites[i], out var nameResult))
                 {
                     results[i].AddFailuresFrom(nameResult);
+                }
+
+                if (!SiteValidationHandler.IsSiteLatitudeValid(sites[i], out var latitudeResult))
+                {
+                    results[i].AddFailuresFrom(latitudeResult);
+                }
+
+                if (!SiteValidationHandler.IsSiteLongitudeValid(sites[i], out var longitudeResult))
+                {
+                    results[i].AddFailuresFrom(longitudeResult);
                 }
             }
 

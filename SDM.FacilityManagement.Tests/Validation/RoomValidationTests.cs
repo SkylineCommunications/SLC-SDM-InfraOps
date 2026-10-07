@@ -41,6 +41,61 @@ namespace SDM.FacilityManagement.Tests.Validation
         }
 
         [TestMethod]
+        public void Room_Create_WithNegativeWidth_ShouldThrow()
+        {
+            var entity = new Room { Identifier = Guid.NewGuid().ToString(), Name = "Room", RoomId = "ROOM-1", Width = -1 };
+
+            var action = () => Helper.Rooms.Create(Helper.AttachFloor(entity));
+
+            action.Should().Throw<Exception>().WithMessage("*width cannot be negative*");
+        }
+
+        [TestMethod]
+        public void Room_Create_WithNegativeDepth_ShouldThrow()
+        {
+            var entity = new Room { Identifier = Guid.NewGuid().ToString(), Name = "Room", RoomId = "ROOM-1", Depth = -1 };
+
+            var action = () => Helper.Rooms.Create(Helper.AttachFloor(entity));
+
+            action.Should().Throw<Exception>().WithMessage("*depth cannot be negative*");
+        }
+
+        [TestMethod]
+        public void Room_CreateOrUpdate_WithNegativeWidthInBatch_ShouldThrow()
+        {
+            var first = new Room { Identifier = Guid.NewGuid().ToString(), Name = "Room 1", RoomId = "ROOM-1", Width = -5 };
+            var second = new Room { Identifier = Guid.NewGuid().ToString(), Name = "Room 2", RoomId = "ROOM-2" };
+
+            var action = () => Helper.Rooms.CreateOrUpdate(new[] { first, second });
+
+            action.Should().Throw<Exception>().WithMessage("*width cannot be negative*");
+        }
+
+        [TestMethod]
+        [DataRow(null)]
+        [DataRow(0L)]
+        [DataRow(10L)]
+        public void RoomValidationHandler_WithNullOrNonNegativeWidthAndDepth_ShouldBeValid(long? value)
+        {
+            var entity = new Room { Width = value, Depth = value };
+
+            RoomValidationHandler.IsRoomWidthValid(entity, out _).Should().BeTrue();
+            RoomValidationHandler.IsRoomDepthValid(entity, out _).Should().BeTrue();
+        }
+
+        [TestMethod]
+        public void RoomValidationHandler_WithNegativeWidthAndDepth_ShouldReturnExactMessage()
+        {
+            var entity = new Room { Width = -1, Depth = -2 };
+
+            RoomValidationHandler.IsRoomWidthValid(entity, out var widthResult).Should().BeFalse();
+            RoomValidationHandler.IsRoomDepthValid(entity, out var depthResult).Should().BeFalse();
+
+            widthResult.GetFailReason(RoomValidationHandler.RoomValidationField.Width).Should().Be("The width cannot be negative.");
+            depthResult.GetFailReason(RoomValidationHandler.RoomValidationField.Depth).Should().Be("The depth cannot be negative.");
+        }
+
+        [TestMethod]
         public void Room_CreateOrUpdate_WithDuplicateIdInBatch_ShouldThrow()
         {
             var first = new Room { Identifier = Guid.NewGuid().ToString(), Name = "Room 1", RoomId = "DUP-1" };

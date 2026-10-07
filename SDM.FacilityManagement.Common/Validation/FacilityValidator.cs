@@ -49,6 +49,16 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                 result.AddFailuresFrom(nameResult);
             }
 
+            if (entity.ShouldValidate(entity.LatitudeField) && !FacilityValidationHandler.IsFacilityLatitudeValid(entity, out var latitudeResult))
+            {
+                result.AddFailuresFrom(latitudeResult);
+            }
+
+            if (entity.ShouldValidate(entity.LongitudeField) && !FacilityValidationHandler.IsFacilityLongitudeValid(entity, out var longitudeResult))
+            {
+                result.AddFailuresFrom(longitudeResult);
+            }
+
             result.AddFailuresFrom(ValidateReferencesAgainstDatabase(new List<Facility> { entity })[0]);
 
             return result;
@@ -110,7 +120,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
             return FacilityBulkValidationHelper.RunBulkValidation(
                 entities,
                 FacilityValidationHandler.IsFacilityIdValid,
-                FacilityValidationHandler.IsFacilityNameValid,
+                FacilityValidationHandler.IsFacilityNameAndCoordinatesValid,
                 ValidateIdDuplicatesInBatch,
                 ValidateBulkIdsAgainstDatabase,
                 ValidateReferencesAgainstDatabase);

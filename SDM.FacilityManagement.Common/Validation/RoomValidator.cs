@@ -49,6 +49,16 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                 result.AddFailuresFrom(nameResult);
             }
 
+            if (entity.ShouldValidate(entity.WidthField) && !RoomValidationHandler.IsRoomWidthValid(entity, out var widthResult))
+            {
+                result.AddFailuresFrom(widthResult);
+            }
+
+            if (entity.ShouldValidate(entity.DepthField) && !RoomValidationHandler.IsRoomDepthValid(entity, out var depthResult))
+            {
+                result.AddFailuresFrom(depthResult);
+            }
+
             result.AddFailuresFrom(ValidateReferencesAgainstDatabase(new List<Room> { entity })[0]);
 
             return result;
@@ -110,7 +120,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
             return FacilityBulkValidationHelper.RunBulkValidation(
                 entities,
                 RoomValidationHandler.IsRoomIdValid,
-                RoomValidationHandler.IsRoomNameValid,
+                RoomValidationHandler.IsRoomNameAndDimensionsValid,
                 ValidateIdDuplicatesInBatch,
                 ValidateBulkIdsAgainstDatabase,
                 ValidateReferencesAgainstDatabase);
