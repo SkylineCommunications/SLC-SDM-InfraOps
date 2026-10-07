@@ -476,7 +476,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
                 {
                     if (string.IsNullOrEmpty(attachment?.AttachedBy))
                     {
-                        result.AddFailReason(PlanAndBuildJobValidationField.Attachments, $"AttachedBy '{attachment.AttachedBy}' cannot be empty.");
+                        result.AddFailReason(PlanAndBuildJobValidationField.Attachments, $"AttachedBy cannot be empty.");
                     }
                 }
             }
@@ -517,7 +517,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
                 {
                     if (string.IsNullOrEmpty(attachment?.AttachedBy))
                     {
-                        result.AddFailReason(PlanAndBuildJobValidationField.Attachments, $"AttachedBy '{attachment.AttachedBy}' cannot be empty.");
+                        result.AddFailReason(PlanAndBuildJobValidationField.Attachments, $"AttachedBy cannot be empty.");
                     }
                 }
             }

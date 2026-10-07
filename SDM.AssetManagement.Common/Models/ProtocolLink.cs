@@ -25,22 +25,6 @@
             nameof(Protocol),
             () => new ChangeTrackingField<string>(null));
 
-        public bool Equals(ProtocolLink other)
-        {
-            if (other is null)
-            {
-                return false;
-            }
-
-            if (ReferenceEquals(this, other))
-            {
-                return true;
-            }
-
-            return
-                Protocol == other.Protocol;
-        }
-
         public static bool operator ==(ProtocolLink left, ProtocolLink right)
         {
             if (ReferenceEquals(left, right))
@@ -59,6 +43,22 @@
         public static bool operator !=(ProtocolLink left, ProtocolLink right)
         {
             return !(left == right);
+        }
+
+        public bool Equals(ProtocolLink other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return
+                Protocol == other.Protocol;
         }
 
         public override bool Equals(object obj)

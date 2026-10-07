@@ -124,7 +124,7 @@
         //     are not null; otherwise, the default value.
         public static implicit operator PnoObjectReference<T>(ApiObject pnoObject)
         {
-            if (pnoObject?.Id == null || pnoObject?.Id == Guid.Empty)
+            if (pnoObject == null || pnoObject.Id == Guid.Empty)
             {
                 return default(PnoObjectReference<T>);
             }
@@ -187,9 +187,9 @@
         //     Thrown when the object cannot be converted to an Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences.PnoObjectReference`1.
         public static PnoObjectReference<T> Convert(object obj)
         {
-            if (obj is PnoObjectReference<T>)
+            if (obj is PnoObjectReference<T> reference)
             {
-                return (PnoObjectReference<T>)obj;
+                return reference;
             }
 
             if (!(obj is ApiObject pnoObject))
@@ -251,6 +251,11 @@
             }
 
             return Identifier.Equals(other.Identifier);
+        }
+
+        public bool Equals(T obj)
+        {
+            return Equals((PnoObjectReference<T>)obj);
         }
 
         //

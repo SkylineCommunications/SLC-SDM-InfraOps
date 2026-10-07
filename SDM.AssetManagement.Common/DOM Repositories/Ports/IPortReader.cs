@@ -28,7 +28,7 @@
         /// </summary>
         /// <param name="filter">A filter built with <see cref="PortExposers"/>.</param>
         /// <returns>The matching ports, split per definition.</returns>
-        IEnumerable<IPort> Read(FilterElement<IPort> filter);
+        new IEnumerable<IPort> Read(FilterElement<IPort> filter);
 
         /// <summary>
         /// Reads the ports matching the given query from both the DataPort and PowerPort definitions.
@@ -40,7 +40,7 @@
         /// </summary>
         /// <param name="query">A query whose filter and order-by are built with <see cref="PortExposers"/>.</param>
         /// <returns>The matching ports in query order, also split per definition.</returns>
-        IEnumerable<IPort> Read(IQuery<IPort> query);
+        new IEnumerable<IPort> Read(IQuery<IPort> query);
 
         /// <summary>
         /// Reads all ports from both the DataPort and PowerPort definitions, one page at a time.
