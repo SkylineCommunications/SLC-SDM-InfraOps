@@ -99,26 +99,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             nameof(Label),
             () => new ChangeTrackingStringField(null));
 
-        public bool Equals(DataPortInfo other)
-        {
-            if (other is null)
-            {
-                return false;
-            }
-
-            if (ReferenceEquals(this, other))
-            {
-                return true;
-            }
-
-            return string.Equals(Name, other.Name, StringComparison.OrdinalIgnoreCase) &&
-                   PortNumber == other.PortNumber &&
-                   OutputType == other.OutputType &&
-                   PortExposure == other.PortExposure &&
-                   PortType == other.PortType &&
-                   string.Equals(Label, other.Label, StringComparison.OrdinalIgnoreCase);
-        }
-
         public static bool operator ==(DataPortInfo left, DataPortInfo right)
         {
             if (ReferenceEquals(left, right))
@@ -137,6 +117,26 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         public static bool operator !=(DataPortInfo left, DataPortInfo right)
         {
             return !(left == right);
+        }
+
+        public bool Equals(DataPortInfo other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return string.Equals(Name, other.Name, StringComparison.OrdinalIgnoreCase) &&
+                   PortNumber == other.PortNumber &&
+                   OutputType == other.OutputType &&
+                   PortExposure == other.PortExposure &&
+                   PortType == other.PortType &&
+                   string.Equals(Label, other.Label, StringComparison.OrdinalIgnoreCase);
         }
 
         public override bool Equals(object obj)

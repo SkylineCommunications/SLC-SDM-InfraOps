@@ -77,25 +77,6 @@
 
         #region Equality
 
-        public bool Equals(DataPort other)
-        {
-            if (other is null)
-            {
-                return false;
-            }
-
-            if (ReferenceEquals(this, other))
-            {
-                return true;
-            }
-
-            return
-                Equals(DataPortInfo, other.DataPortInfo) &&
-                Equals(Asset, other.Asset) &&
-                Equals(AddressInfo, other.AddressInfo) &&
-                Equals(PrimaryPortRelation, other.PrimaryPortRelation);
-        }
-
         public static bool operator ==(DataPort left, DataPort right)
         {
             if (ReferenceEquals(left, right))
@@ -114,6 +95,25 @@
         public static bool operator !=(DataPort left, DataPort right)
         {
             return !(left == right);
+        }
+
+        public bool Equals(DataPort other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return
+                Equals(DataPortInfo, other.DataPortInfo) &&
+                Equals(Asset, other.Asset) &&
+                Equals(AddressInfo, other.AddressInfo) &&
+                Equals(PrimaryPortRelation, other.PrimaryPortRelation);
         }
 
         public override bool Equals(object obj)

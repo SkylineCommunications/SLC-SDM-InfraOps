@@ -76,7 +76,6 @@
 		/// Exposers for fields that only exist on the DataPort definition.
 		/// Using any of these in a filter makes the PowerPort definition useless to filter,
 		/// so the repository will only query the DataPort definition.
-		/// Combining these with <see cref="PowerPortOnly"/> exposers yields an empty result.
 		/// </summary>
 		public static class DataPortOnly
 		{

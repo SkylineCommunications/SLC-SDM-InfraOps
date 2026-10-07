@@ -16,7 +16,7 @@
         {
             var sections = GenerateSectionsDefinitions();
             var behaviorDefinitions = GenerateBehaviorDefinitions();
-            var definitions = GenerateDefinitions(behaviorDefinitions);
+            var definitions = GenerateDefinitions();
 
             messageHandler.SetSectionDefinitions(InfraopsProperties.ModuleId, sections.Values);
 
@@ -115,7 +115,7 @@
             return builder.Build();
         }
 
-        private static Dictionary<DomDefinitionId, DomDefinition> GenerateDefinitions(Dictionary<DomBehaviorDefinitionId, DomBehaviorDefinition> behaviors)
+        private static Dictionary<DomDefinitionId, DomDefinition> GenerateDefinitions()
         {
             return new Dictionary<DomDefinitionId, DomDefinition>
             {
