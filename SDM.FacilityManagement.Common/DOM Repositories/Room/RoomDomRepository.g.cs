@@ -735,33 +735,44 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 					return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModified, comparer, (DateTime)value);
 				case "LastModifiedBy":
 					return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModifiedBy, comparer, (string)value);
-				case "Name":
+
+                case "Name":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.RoomProperties.Name), comparer, (string)value);
-				case "Plan":
+
+                case "Plan":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.RoomProperties.Plan), comparer, (string)value);
-				case "Description":
+
+                case "Description":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.RoomProperties.Description), comparer, (string)value);
-				case "Width" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+
+                case "Width" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
 					return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.RoomDomMapper.RoomProperties.Width.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "Width":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.RoomProperties.Width), comparer, (long)((long?)value).Value);
-				case "Depth" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+
+                case "Depth" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
 					return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.RoomDomMapper.RoomProperties.Depth.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "Depth":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.RoomProperties.Depth), comparer, (long)((long?)value).Value);
-				case "RoomId":
+
+                case "RoomId":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.RoomProperties.RoomId), comparer, (string)value);
-				case "Ownership.Team":
+
+                case "Ownership.Team":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.Ownership.Team), comparer, Convert.ToString((System.Guid)value));
-				case "Ownership.Owner":
+
+                case "Ownership.Owner":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.Ownership.Owner), comparer, Convert.ToString((System.Guid)value));
-				case "ResourceLink.ResourceId":
+
+                case "ResourceLink.ResourceId":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.ResourceLink.ResourceId), comparer, Convert.ToString((System.Guid)value));
-				case "FloorFk.Floor" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && !SdmObjectReference<FacilityManagement.Models.Floor>.Convert(value).HasValue():
+
+                case "FloorFk.Floor" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && !SdmObjectReference<FacilityManagement.Models.Floor>.Convert(value).HasValue():
 					return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.RoomDomMapper.FloorFk.Floor.Id.ToString()).Equal(comparer == Comparer.NotEquals);
-				case "FloorFk.Floor":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.FloorFk.Floor), comparer, System.Guid.Parse(SdmObjectReference<FacilityManagement.Models.Floor>.Convert(value).Identifier));
-				default:
+                case "FloorFk.Floor":
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.FloorFk.Floor), comparer, SdmObjectReference<FacilityManagement.Models.Floor>.Convert(value).GetIdentifierAsGuid());
+
+                default:
 					throw new NotImplementedException();
 			}
 		}

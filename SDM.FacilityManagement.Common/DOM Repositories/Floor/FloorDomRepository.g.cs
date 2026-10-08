@@ -647,18 +647,24 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModified, comparer, (DateTime)value);
                 case "LastModifiedBy":
                     return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModifiedBy, comparer, (string)value);
+
                 case "Name":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.FloorDomMapper.FloorProperties.Name), comparer, (string)value);
+
                 case "Plan":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.FloorDomMapper.FloorProperties.Plan), comparer, (string)value);
+
                 case "Description":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.FloorDomMapper.FloorProperties.Description), comparer, (string)value);
+
                 case "FloorProperties.FloorId":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.FloorDomMapper.FloorProperties.FloorId), comparer, (string)value);
+
                 case "FacilityFk.Facility" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && !SdmObjectReference<FacilityManagement.Models.Facility>.Convert(value).HasValue():
                     return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.FloorDomMapper.FacilityFk.Facility.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "FacilityFk.Facility":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.FloorDomMapper.FacilityFk.Facility), comparer, System.Guid.Parse(SdmObjectReference<FacilityManagement.Models.Facility>.Convert(value).Identifier));
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.FloorDomMapper.FacilityFk.Facility), comparer, SdmObjectReference<FacilityManagement.Models.Facility>.Convert(value).GetIdentifierAsGuid());
+
                 default:
                     throw new NotImplementedException();
             }

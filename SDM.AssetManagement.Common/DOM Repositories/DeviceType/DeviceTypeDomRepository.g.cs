@@ -6,513 +6,513 @@
 //------------------------------------------------------------------------------
 namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
 
     using SharedMappers.DomIds;
 
     using Skyline.DataMiner.Net;
-	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-	using Skyline.DataMiner.Net.Apps.Sections.Sections;
-	using Skyline.DataMiner.Net.Helper;
-	using Skyline.DataMiner.Net.ManagerStore;
-	using Skyline.DataMiner.Net.Messages;
-	using Skyline.DataMiner.Net.Messages.SLDataGateway;
-	using Skyline.DataMiner.Net.Sections;
-	using Skyline.DataMiner.Net.SubscriptionFilters;
-	using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+    using Skyline.DataMiner.Net.Apps.Sections.Sections;
+    using Skyline.DataMiner.Net.Helper;
+    using Skyline.DataMiner.Net.ManagerStore;
+    using Skyline.DataMiner.Net.Messages;
+    using Skyline.DataMiner.Net.Messages.SLDataGateway;
+    using Skyline.DataMiner.Net.Sections;
+    using Skyline.DataMiner.Net.SubscriptionFilters;
+    using Skyline.DataMiner.SDM;
 
     using SLDataGateway.API.Querying;
-	using SLDataGateway.API.Types.Querying;
+    using SLDataGateway.API.Types.Querying;
 
-	internal partial class DeviceTypeDomRepository : IBulkRepository<DeviceType>
-	{
-		private readonly IConnection connection;
-		private readonly DomHelper helper;
-		public DeviceTypeDomRepository(IConnection connection)
-		{
-			this.connection = connection;
-			this.helper = new DomHelper(connection.HandleMessages, AssetManagement.Models.DeviceTypeDomMapper.ModuleId);
-		}
+    internal partial class DeviceTypeDomRepository : IBulkRepository<DeviceType>
+    {
+        private readonly IConnection connection;
+        private readonly DomHelper helper;
+        public DeviceTypeDomRepository(IConnection connection)
+        {
+            this.connection = connection;
+            this.helper = new DomHelper(connection.HandleMessages, AssetManagement.Models.DeviceTypeDomMapper.ModuleId);
+        }
 
-		public DeviceType Create(DeviceType createObject)
-		{
-			if (createObject is null)
-			{
-				throw new ArgumentNullException(nameof(createObject));
-			}
+        public DeviceType Create(DeviceType createObject)
+        {
+            if (createObject is null)
+            {
+                throw new ArgumentNullException(nameof(createObject));
+            }
 
-			var instance = ToInstance(createObject);
-			instance = helper.DomInstances.Create(instance);
-			return FromInstance(instance);
-		}
+            var instance = ToInstance(createObject);
+            instance = helper.DomInstances.Create(instance);
+            return FromInstance(instance);
+        }
 
-		public IReadOnlyCollection<DeviceType> Create(IEnumerable<DeviceType> createObjects)
-		{
-			if (createObjects is null || !createObjects.Any())
-			{
-				return Array.Empty<DeviceType>();
-			}
+        public IReadOnlyCollection<DeviceType> Create(IEnumerable<DeviceType> createObjects)
+        {
+            if (createObjects is null || !createObjects.Any())
+            {
+                return Array.Empty<DeviceType>();
+            }
 
-			// Check if some of the objects already exist
-			var existing = new HashSet<string>();
-			foreach (var batch in createObjects.Batch(500))
-			{
-				existing.UnionWith(Read(new ORFilterElement<DeviceType>(batch.Where(obj => !String.IsNullOrWhiteSpace(obj.Identifier)).Select(obj => DeviceTypeExposers.Identifier.Equal(obj.Identifier)).ToArray())).Select(obj => obj.Identifier));
-			}
+            // Check if some of the objects already exist
+            var existing = new HashSet<string>();
+            foreach (var batch in createObjects.Batch(500))
+            {
+                existing.UnionWith(Read(new ORFilterElement<DeviceType>(batch.Where(obj => !String.IsNullOrWhiteSpace(obj.Identifier)).Select(obj => DeviceTypeExposers.Identifier.Equal(obj.Identifier)).ToArray())).Select(obj => obj.Identifier));
+            }
 
-			// Create the remainder
-			var SuccessfulItems = new List<DeviceType>();
-			var failures = new Dictionary<string, Exception>();
+            // Create the remainder
+            var SuccessfulItems = new List<DeviceType>();
+            var failures = new Dictionary<string, Exception>();
 
             foreach (var batch in createObjects.Select(ToInstance).Batch(helper.DomInstances.MaxAmountBulkOperation))
-			{
-				helper.DomInstances.TryCreateOrUpdate(batch.ToList(), out var result);
-				foreach (var failure in result.UnsuccessfulIds)
-				{
-					failures.Add(failure.Id.ToString(), new CrudFailedException(result.TraceDataPerItem[failure]));
-				}
+            {
+                helper.DomInstances.TryCreateOrUpdate(batch.ToList(), out var result);
+                foreach (var failure in result.UnsuccessfulIds)
+                {
+                    failures.Add(failure.Id.ToString(), new CrudFailedException(result.TraceDataPerItem[failure]));
+                }
 
-				foreach (var success in result.SuccessfulItems)
-				{
-					SuccessfulItems.Add(FromInstance(success));
-				}
-			}
+                foreach (var success in result.SuccessfulItems)
+                {
+                    SuccessfulItems.Add(FromInstance(success));
+                }
+            }
 
-			// If everything went fine, return the successful creations
-			if (!existing.Any() && !failures.Any())
-			{
-				return SuccessfulItems;
-			}
+            // If everything went fine, return the successful creations
+            if (!existing.Any() && !failures.Any())
+            {
+                return SuccessfulItems;
+            }
 
-			// Otherwise, build and throw an exception
-			var exceptionBuilder = new SdmBulkCrudException<DeviceType>.Builder();
-			foreach (var obj in createObjects)
-			{
-				if (existing.Contains(obj.Identifier))
-				{
-					exceptionBuilder.AddFailed(obj, new SdmCrudException<DeviceType>(obj, $"Could not create DeviceType with guid: '{obj.Identifier}', it already exists."));
-					continue;
-				}
+            // Otherwise, build and throw an exception
+            var exceptionBuilder = new SdmBulkCrudException<DeviceType>.Builder();
+            foreach (var obj in createObjects)
+            {
+                if (existing.Contains(obj.Identifier))
+                {
+                    exceptionBuilder.AddFailed(obj, new SdmCrudException<DeviceType>(obj, $"Could not create DeviceType with guid: '{obj.Identifier}', it already exists."));
+                    continue;
+                }
 
-				if (failures.ContainsKey(obj.Identifier))
-				{
-					exceptionBuilder.AddFailed(obj, failures[obj.Identifier]);
-					continue;
-				}
+                if (failures.ContainsKey(obj.Identifier))
+                {
+                    exceptionBuilder.AddFailed(obj, failures[obj.Identifier]);
+                    continue;
+                }
 
-				exceptionBuilder.AddSuccessful(obj);
-			}
+                exceptionBuilder.AddSuccessful(obj);
+            }
 
-			throw exceptionBuilder.Build();
-		}
+            throw exceptionBuilder.Build();
+        }
 
-		public IReadOnlyCollection<DeviceType> CreateOrUpdate(IEnumerable<DeviceType> items)
-		{
-			if (items is null || !items.Any())
-			{
-				return Array.Empty<DeviceType>();
-			}
+        public IReadOnlyCollection<DeviceType> CreateOrUpdate(IEnumerable<DeviceType> items)
+        {
+            if (items is null || !items.Any())
+            {
+                return Array.Empty<DeviceType>();
+            }
 
-			var successful = new List<DeviceType>();
-			var exceptionBuilder = new SdmBulkCrudException<DeviceType>.Builder();
-			var objects = items.ToDictionary(obj => obj.Identifier);
-			foreach (var batch in items.Select(ToInstance).Batch(helper.DomInstances.MaxAmountBulkOperation))
-			{
-				helper.DomInstances.TryCreateOrUpdate(batch.ToList(), out var result);
-				foreach (var failure in result.UnsuccessfulIds)
-				{
-					exceptionBuilder.AddFailed(objects[failure.Id.ToString()], new CrudFailedException(result.TraceDataPerItem[failure]));
-				}
+            var successful = new List<DeviceType>();
+            var exceptionBuilder = new SdmBulkCrudException<DeviceType>.Builder();
+            var objects = items.ToDictionary(obj => obj.Identifier);
+            foreach (var batch in items.Select(ToInstance).Batch(helper.DomInstances.MaxAmountBulkOperation))
+            {
+                helper.DomInstances.TryCreateOrUpdate(batch.ToList(), out var result);
+                foreach (var failure in result.UnsuccessfulIds)
+                {
+                    exceptionBuilder.AddFailed(objects[failure.Id.ToString()], new CrudFailedException(result.TraceDataPerItem[failure]));
+                }
 
-				foreach (var success in result.SuccessfulItems)
-				{
-					var item = FromInstance(success);
-					exceptionBuilder.AddSuccessful(item);
-					successful.Add(item);
-				}
-			}
+                foreach (var success in result.SuccessfulItems)
+                {
+                    var item = FromInstance(success);
+                    exceptionBuilder.AddSuccessful(item);
+                    successful.Add(item);
+                }
+            }
 
-			if (exceptionBuilder.HasFailure)
-			{
-				throw exceptionBuilder.Build();
-			}
+            if (exceptionBuilder.HasFailure)
+            {
+                throw exceptionBuilder.Build();
+            }
 
-			return successful;
-		}
+            return successful;
+        }
 
-		public long Count(FilterElement<DeviceType> filter)
-		{
-			if (filter is null)
-			{
-				throw new ArgumentNullException(nameof(filter));
-			}
+        public long Count(FilterElement<DeviceType> filter)
+        {
+            if (filter is null)
+            {
+                throw new ArgumentNullException(nameof(filter));
+            }
 
-			var domFilter = TranslateFullFilter(filter);
-			domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(AssetManagement.Models.DeviceTypeDomMapper.DomDefinitionId.Id));
-			return helper.DomInstances.Count(domFilter);
-		}
+            var domFilter = TranslateFullFilter(filter);
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(AssetManagement.Models.DeviceTypeDomMapper.DomDefinitionId.Id));
+            return helper.DomInstances.Count(domFilter);
+        }
 
-		public long Count(IQuery<DeviceType> query)
-		{
-			if (query is null)
-			{
-				throw new ArgumentNullException(nameof(query));
-			}
+        public long Count(IQuery<DeviceType> query)
+        {
+            if (query is null)
+            {
+                throw new ArgumentNullException(nameof(query));
+            }
 
-			var domFilter = TranslateFullFilter(query.Filter);
-			domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(AssetManagement.Models.DeviceTypeDomMapper.DomDefinitionId.Id));
-			var domOrder = TranslateFullOrderBy(query.Order);
-			var domQuery = query.WithFilter(domFilter).WithOrder(domOrder);
-			return helper.DomInstances.Count(domQuery);
-		}
+            var domFilter = TranslateFullFilter(query.Filter);
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(AssetManagement.Models.DeviceTypeDomMapper.DomDefinitionId.Id));
+            var domOrder = TranslateFullOrderBy(query.Order);
+            var domQuery = query.WithFilter(domFilter).WithOrder(domOrder);
+            return helper.DomInstances.Count(domQuery);
+        }
 
-		public IEnumerable<DeviceType> Read(FilterElement<DeviceType> filter)
-		{
-			if (filter is null)
-			{
-				throw new ArgumentNullException(nameof(filter));
-			}
+        public IEnumerable<DeviceType> Read(FilterElement<DeviceType> filter)
+        {
+            if (filter is null)
+            {
+                throw new ArgumentNullException(nameof(filter));
+            }
 
-			var domFilter = TranslateFullFilter(filter);
-			return Read(domFilter);
-		}
+            var domFilter = TranslateFullFilter(filter);
+            return Read(domFilter);
+        }
 
-		public IEnumerable<DeviceType> Read(IQuery<DeviceType> query)
-		{
-			if (query is null)
-			{
-				throw new ArgumentNullException(nameof(query));
-			}
+        public IEnumerable<DeviceType> Read(IQuery<DeviceType> query)
+        {
+            if (query is null)
+            {
+                throw new ArgumentNullException(nameof(query));
+            }
 
-			var domFilter = TranslateFullFilter(query.Filter);
-			var domOrder = TranslateFullOrderBy(query.Order);
-			var domQuery = query.WithFilter(domFilter).WithOrder(domOrder);
-			return Read(domQuery);
-		}
+            var domFilter = TranslateFullFilter(query.Filter);
+            var domOrder = TranslateFullOrderBy(query.Order);
+            var domQuery = query.WithFilter(domFilter).WithOrder(domOrder);
+            return Read(domQuery);
+        }
 
-		public IEnumerable<IPagedResult<DeviceType>> ReadPaged(FilterElement<DeviceType> filter)
-		{
-			return ReadPaged(filter, 500);
-		}
+        public IEnumerable<IPagedResult<DeviceType>> ReadPaged(FilterElement<DeviceType> filter)
+        {
+            return ReadPaged(filter, 500);
+        }
 
-		public IEnumerable<IPagedResult<DeviceType>> ReadPaged(FilterElement<DeviceType> filter, int pageSize)
-		{
-			if (filter is null)
-			{
-				throw new ArgumentNullException(nameof(filter));
-			}
+        public IEnumerable<IPagedResult<DeviceType>> ReadPaged(FilterElement<DeviceType> filter, int pageSize)
+        {
+            if (filter is null)
+            {
+                throw new ArgumentNullException(nameof(filter));
+            }
 
-			if (pageSize <= 0)
-			{
-				throw new ArgumentOutOfRangeException(nameof(pageSize), "The page size must be 1 or higher");
-			}
+            if (pageSize <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(pageSize), "The page size must be 1 or higher");
+            }
 
-			var domFilter = TranslateFullFilter(filter);
-			var paging = ReadPaged(domFilter, pageSize).GetEnumerator();
-			var moveNext = paging.MoveNext();
-			var i = 0;
-			while (moveNext)
-			{
-				var page = paging.Current.ToList();
-				moveNext = paging.MoveNext();
-				var result = new PagedResult<DeviceType>(page, i, pageSize, moveNext);
-				yield return result;
-				i++;
-			}
-		}
+            var domFilter = TranslateFullFilter(filter);
+            var paging = ReadPaged(domFilter, pageSize).GetEnumerator();
+            var moveNext = paging.MoveNext();
+            var i = 0;
+            while (moveNext)
+            {
+                var page = paging.Current.ToList();
+                moveNext = paging.MoveNext();
+                var result = new PagedResult<DeviceType>(page, i, pageSize, moveNext);
+                yield return result;
+                i++;
+            }
+        }
 
-		public IEnumerable<IPagedResult<DeviceType>> ReadPaged(IQuery<DeviceType> query)
-		{
-			return ReadPaged(query, 500);
-		}
+        public IEnumerable<IPagedResult<DeviceType>> ReadPaged(IQuery<DeviceType> query)
+        {
+            return ReadPaged(query, 500);
+        }
 
-		public IEnumerable<IPagedResult<DeviceType>> ReadPaged(IQuery<DeviceType> query, int pageSize)
-		{
-			if (query is null)
-			{
-				throw new ArgumentNullException(nameof(query));
-			}
+        public IEnumerable<IPagedResult<DeviceType>> ReadPaged(IQuery<DeviceType> query, int pageSize)
+        {
+            if (query is null)
+            {
+                throw new ArgumentNullException(nameof(query));
+            }
 
-			if (pageSize <= 0)
-			{
-				throw new ArgumentOutOfRangeException(nameof(pageSize), "The page size must be 1 or higher");
-			}
+            if (pageSize <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(pageSize), "The page size must be 1 or higher");
+            }
 
-			var domFilter = TranslateFullFilter(query.Filter);
-			var domOrder = TranslateFullOrderBy(query.Order);
-			var domQuery = query.WithFilter(domFilter).WithOrder(domOrder);
-			var paging = ReadPaged(domQuery, pageSize).GetEnumerator();
-			var moveNext = paging.MoveNext();
-			var i = 0;
-			while (moveNext)
-			{
-				var page = paging.Current.ToList();
-				moveNext = paging.MoveNext();
-				var result = new PagedResult<DeviceType>(page, i, pageSize, moveNext);
-				yield return result;
-				i++;
-			}
-		}
+            var domFilter = TranslateFullFilter(query.Filter);
+            var domOrder = TranslateFullOrderBy(query.Order);
+            var domQuery = query.WithFilter(domFilter).WithOrder(domOrder);
+            var paging = ReadPaged(domQuery, pageSize).GetEnumerator();
+            var moveNext = paging.MoveNext();
+            var i = 0;
+            while (moveNext)
+            {
+                var page = paging.Current.ToList();
+                moveNext = paging.MoveNext();
+                var result = new PagedResult<DeviceType>(page, i, pageSize, moveNext);
+                yield return result;
+                i++;
+            }
+        }
 
-		public DeviceType Update(DeviceType updateObject)
-		{
-			if (updateObject is null)
-			{
-				throw new ArgumentNullException(nameof(updateObject));
-			}
+        public DeviceType Update(DeviceType updateObject)
+        {
+            if (updateObject is null)
+            {
+                throw new ArgumentNullException(nameof(updateObject));
+            }
 
-			var instance = ToInstance(updateObject);
-			instance = helper.DomInstances.Update(instance);
-			return FromInstance(instance);
-		}
+            var instance = ToInstance(updateObject);
+            instance = helper.DomInstances.Update(instance);
+            return FromInstance(instance);
+        }
 
-		public IReadOnlyCollection<DeviceType> Update(IEnumerable<DeviceType> updateObjects)
-		{
-			if (updateObjects is null || !updateObjects.Any())
-			{
-				return Array.Empty<DeviceType>();
-			}
+        public IReadOnlyCollection<DeviceType> Update(IEnumerable<DeviceType> updateObjects)
+        {
+            if (updateObjects is null || !updateObjects.Any())
+            {
+                return Array.Empty<DeviceType>();
+            }
 
-			// Check if which objects already exist
-			var existing = new HashSet<string>();
-			foreach (var batch in updateObjects.Batch(500))
-			{
-				existing.UnionWith(Read(new ORFilterElement<DeviceType>(batch.Select(obj => DeviceTypeExposers.Identifier.Equal(obj.Identifier)).ToArray())).Select(obj => obj.Identifier));
-			}
+            // Check if which objects already exist
+            var existing = new HashSet<string>();
+            foreach (var batch in updateObjects.Batch(500))
+            {
+                existing.UnionWith(Read(new ORFilterElement<DeviceType>(batch.Select(obj => DeviceTypeExposers.Identifier.Equal(obj.Identifier)).ToArray())).Select(obj => obj.Identifier));
+            }
 
-			// Update the existing objects
-			var successfulItems = new List<DeviceType>();
-			var failures = new Dictionary<string, Exception>();
-			var objects = updateObjects.Where(obj => existing.Contains(obj.Identifier)).ToDictionary(obj => obj.Identifier);
-			foreach (var batch in updateObjects.Select(ToInstance).Batch(helper.DomInstances.MaxAmountBulkOperation))
-			{
-				helper.DomInstances.TryCreateOrUpdate(batch.ToList(), out var result);
-				foreach (var failure in result.UnsuccessfulIds)
-				{
-					failures.Add(failure.Id.ToString(), new CrudFailedException(result.TraceDataPerItem[failure]));
-				}
+            // Update the existing objects
+            var successfulItems = new List<DeviceType>();
+            var failures = new Dictionary<string, Exception>();
+            var objects = updateObjects.Where(obj => existing.Contains(obj.Identifier)).ToDictionary(obj => obj.Identifier);
+            foreach (var batch in updateObjects.Select(ToInstance).Batch(helper.DomInstances.MaxAmountBulkOperation))
+            {
+                helper.DomInstances.TryCreateOrUpdate(batch.ToList(), out var result);
+                foreach (var failure in result.UnsuccessfulIds)
+                {
+                    failures.Add(failure.Id.ToString(), new CrudFailedException(result.TraceDataPerItem[failure]));
+                }
 
-				foreach (var success in result.SuccessfulItems)
-				{
-					successfulItems.Add(FromInstance(success));
-				}
-			}
+                foreach (var success in result.SuccessfulItems)
+                {
+                    successfulItems.Add(FromInstance(success));
+                }
+            }
 
-			// Check for failures and build exception if needed
-			var exceptionBuilder = new SdmBulkCrudException<DeviceType>.Builder();
-			foreach (var obj in updateObjects)
-			{
-				if (!existing.Contains(obj.Identifier))
-				{
-					exceptionBuilder.AddFailed(obj, new SdmCrudException<DeviceType>(obj, "Could not update a non existing DeviceType"));
-					continue;
-				}
+            // Check for failures and build exception if needed
+            var exceptionBuilder = new SdmBulkCrudException<DeviceType>.Builder();
+            foreach (var obj in updateObjects)
+            {
+                if (!existing.Contains(obj.Identifier))
+                {
+                    exceptionBuilder.AddFailed(obj, new SdmCrudException<DeviceType>(obj, "Could not update a non existing DeviceType"));
+                    continue;
+                }
 
-				if (failures.ContainsKey(obj.Identifier))
-				{
-					exceptionBuilder.AddFailed(obj, failures[obj.Identifier]);
-					continue;
-				}
+                if (failures.ContainsKey(obj.Identifier))
+                {
+                    exceptionBuilder.AddFailed(obj, failures[obj.Identifier]);
+                    continue;
+                }
 
-				exceptionBuilder.AddSuccessful(obj);
-			}
+                exceptionBuilder.AddSuccessful(obj);
+            }
 
-			if (exceptionBuilder.HasFailure)
-			{
-				throw exceptionBuilder.Build();
-			}
+            if (exceptionBuilder.HasFailure)
+            {
+                throw exceptionBuilder.Build();
+            }
 
-			return successfulItems;
-		}
+            return successfulItems;
+        }
 
-		public void Delete(DeviceType deleteObject)
-		{
-			if (deleteObject is null)
-			{
-				throw new ArgumentNullException(nameof(deleteObject));
-			}
+        public void Delete(DeviceType deleteObject)
+        {
+            if (deleteObject is null)
+            {
+                throw new ArgumentNullException(nameof(deleteObject));
+            }
 
-			var instance = ToInstance(deleteObject);
-			helper.DomInstances.Delete(instance);
-		}
+            var instance = ToInstance(deleteObject);
+            helper.DomInstances.Delete(instance);
+        }
 
-		public void Delete(IEnumerable<DeviceType> deleteObjects)
-		{
-			if (deleteObjects is null || !deleteObjects.Any())
-			{
-				return;
-			}
+        public void Delete(IEnumerable<DeviceType> deleteObjects)
+        {
+            if (deleteObjects is null || !deleteObjects.Any())
+            {
+                return;
+            }
 
-			var exceptionBuilder = new SdmBulkCrudException<DeviceType>.Builder();
-			var objects = deleteObjects.ToDictionary(obj => obj.Identifier);
-			foreach (var batch in deleteObjects.Select(ToInstance).Batch(helper.DomInstances.MaxAmountBulkOperation))
-			{
-				helper.DomInstances.TryDelete(batch.ToList(), out var result);
-				foreach (var failure in result.UnsuccessfulIds)
-				{
-					exceptionBuilder.AddFailed(objects[failure.Id.ToString()], new CrudFailedException(result.TraceDataPerItem[failure]));
-				}
+            var exceptionBuilder = new SdmBulkCrudException<DeviceType>.Builder();
+            var objects = deleteObjects.ToDictionary(obj => obj.Identifier);
+            foreach (var batch in deleteObjects.Select(ToInstance).Batch(helper.DomInstances.MaxAmountBulkOperation))
+            {
+                helper.DomInstances.TryDelete(batch.ToList(), out var result);
+                foreach (var failure in result.UnsuccessfulIds)
+                {
+                    exceptionBuilder.AddFailed(objects[failure.Id.ToString()], new CrudFailedException(result.TraceDataPerItem[failure]));
+                }
 
-				foreach (var success in result.SuccessfulIds)
-				{
-					exceptionBuilder.AddSuccessful(objects[success.Id.ToString()]);
-				}
-			}
+                foreach (var success in result.SuccessfulIds)
+                {
+                    exceptionBuilder.AddSuccessful(objects[success.Id.ToString()]);
+                }
+            }
 
-			if (exceptionBuilder.HasFailure)
-			{
-				throw exceptionBuilder.Build();
-			}
-		}
+            if (exceptionBuilder.HasFailure)
+            {
+                throw exceptionBuilder.Build();
+            }
+        }
 
-		private IEnumerable<DeviceType> Read(FilterElement<DomInstance> domFilter)
-		{
-			if (domFilter is null)
-			{
-				throw new ArgumentNullException(nameof(domFilter));
-			}
+        private IEnumerable<DeviceType> Read(FilterElement<DomInstance> domFilter)
+        {
+            if (domFilter is null)
+            {
+                throw new ArgumentNullException(nameof(domFilter));
+            }
 
-			domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(AssetManagement.Models.DeviceTypeDomMapper.DomDefinitionId.Id));
-			var domInstances = helper.DomInstances.Read(domFilter);
-			return domInstances.Select(FromInstance);
-		}
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(AssetManagement.Models.DeviceTypeDomMapper.DomDefinitionId.Id));
+            var domInstances = helper.DomInstances.Read(domFilter);
+            return domInstances.Select(FromInstance);
+        }
 
-		private IEnumerable<DeviceType> Read(IQuery<DomInstance> domQuery)
-		{
-			if (domQuery is null)
-			{
-				throw new ArgumentNullException(nameof(domQuery));
-			}
+        private IEnumerable<DeviceType> Read(IQuery<DomInstance> domQuery)
+        {
+            if (domQuery is null)
+            {
+                throw new ArgumentNullException(nameof(domQuery));
+            }
 
-			var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(AssetManagement.Models.DeviceTypeDomMapper.DomDefinitionId.Id));
-			domQuery = domQuery.WithFilter(domFilter);
-			var domInstances = helper.DomInstances.Read(domQuery);
-			return domInstances.Select(FromInstance);
-		}
+            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(AssetManagement.Models.DeviceTypeDomMapper.DomDefinitionId.Id));
+            domQuery = domQuery.WithFilter(domFilter);
+            var domInstances = helper.DomInstances.Read(domQuery);
+            return domInstances.Select(FromInstance);
+        }
 
-		private IEnumerable<IEnumerable<DeviceType>> ReadPaged(FilterElement<DomInstance> domFilter, int pageSize)
-		{
-			if (domFilter is null)
-			{
-				throw new ArgumentNullException(nameof(domFilter));
-			}
+        private IEnumerable<IEnumerable<DeviceType>> ReadPaged(FilterElement<DomInstance> domFilter, int pageSize)
+        {
+            if (domFilter is null)
+            {
+                throw new ArgumentNullException(nameof(domFilter));
+            }
 
-			domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(AssetManagement.Models.DeviceTypeDomMapper.DomDefinitionId.Id));
-			var pagingHelper = helper.DomInstances.PreparePaging(domFilter, pageSize);
-			while (pagingHelper.MoveToNextPage())
-			{
-				yield return pagingHelper.GetCurrentPage().Select(FromInstance);
-			}
-		}
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(AssetManagement.Models.DeviceTypeDomMapper.DomDefinitionId.Id));
+            var pagingHelper = helper.DomInstances.PreparePaging(domFilter, pageSize);
+            while (pagingHelper.MoveToNextPage())
+            {
+                yield return pagingHelper.GetCurrentPage().Select(FromInstance);
+            }
+        }
 
-		private IEnumerable<IEnumerable<DeviceType>> ReadPaged(IQuery<DomInstance> domQuery, int pageSize)
-		{
-			if (domQuery is null)
-			{
-				throw new ArgumentNullException(nameof(domQuery));
-			}
+        private IEnumerable<IEnumerable<DeviceType>> ReadPaged(IQuery<DomInstance> domQuery, int pageSize)
+        {
+            if (domQuery is null)
+            {
+                throw new ArgumentNullException(nameof(domQuery));
+            }
 
-			var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(AssetManagement.Models.DeviceTypeDomMapper.DomDefinitionId.Id));
-			domQuery = domQuery.WithFilter(domFilter);
-			var pagingHelper = helper.DomInstances.PreparePaging(domQuery, pageSize);
-			while (pagingHelper.MoveToNextPage())
-			{
-				yield return pagingHelper.GetCurrentPage().Select(FromInstance);
-			}
-		}
+            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(AssetManagement.Models.DeviceTypeDomMapper.DomDefinitionId.Id));
+            domQuery = domQuery.WithFilter(domFilter);
+            var pagingHelper = helper.DomInstances.PreparePaging(domQuery, pageSize);
+            while (pagingHelper.MoveToNextPage())
+            {
+                yield return pagingHelper.GetCurrentPage().Select(FromInstance);
+            }
+        }
 
-		private FilterElement<DomInstance> TranslateFullFilter(FilterElement<DeviceType> filter)
-		{
-			if (filter is null)
-			{
-				throw new ArgumentNullException(nameof(filter));
-			}
+        private FilterElement<DomInstance> TranslateFullFilter(FilterElement<DeviceType> filter)
+        {
+            if (filter is null)
+            {
+                throw new ArgumentNullException(nameof(filter));
+            }
 
-			FilterElement<DomInstance> translated;
-			if (filter is ANDFilterElement<DeviceType> and)
-			{
-				translated = new ANDFilterElement<DomInstance>(and.subFilters.Select(TranslateFullFilter).ToArray());
-			}
-			else if (filter is ORFilterElement<DeviceType> or)
-			{
-				translated = new ORFilterElement<DomInstance>(or.subFilters.Select(TranslateFullFilter).ToArray());
-			}
-			else if (filter is NOTFilterElement<DeviceType> not)
-			{
-				translated = new NOTFilterElement<DomInstance>(TranslateFullFilter(not));
-			}
-			else if (filter is TRUEFilterElement<DeviceType>)
-			{
-				translated = new TRUEFilterElement<DomInstance>();
-			}
-			else if (filter is FALSEFilterElement<DeviceType>)
-			{
-				translated = new FALSEFilterElement<DomInstance>();
-			}
-			else if (filter is ManagedFilterIdentifier managedFilter)
-			{
-				translated = TranslateFilter(managedFilter);
-			}
-			else
-			{
-				throw new NotSupportedException($"Unsupported filter: {filter}");
-			}
+            FilterElement<DomInstance> translated;
+            if (filter is ANDFilterElement<DeviceType> and)
+            {
+                translated = new ANDFilterElement<DomInstance>(and.subFilters.Select(TranslateFullFilter).ToArray());
+            }
+            else if (filter is ORFilterElement<DeviceType> or)
+            {
+                translated = new ORFilterElement<DomInstance>(or.subFilters.Select(TranslateFullFilter).ToArray());
+            }
+            else if (filter is NOTFilterElement<DeviceType> not)
+            {
+                translated = new NOTFilterElement<DomInstance>(TranslateFullFilter(not));
+            }
+            else if (filter is TRUEFilterElement<DeviceType>)
+            {
+                translated = new TRUEFilterElement<DomInstance>();
+            }
+            else if (filter is FALSEFilterElement<DeviceType>)
+            {
+                translated = new FALSEFilterElement<DomInstance>();
+            }
+            else if (filter is ManagedFilterIdentifier managedFilter)
+            {
+                translated = TranslateFilter(managedFilter);
+            }
+            else
+            {
+                throw new NotSupportedException($"Unsupported filter: {filter}");
+            }
 
-			return translated;
-		}
+            return translated;
+        }
 
-		private IOrderBy TranslateFullOrderBy(IOrderBy order)
-		{
-			if (order is null)
-			{
-				throw new ArgumentNullException(nameof(order));
-			}
+        private IOrderBy TranslateFullOrderBy(IOrderBy order)
+        {
+            if (order is null)
+            {
+                throw new ArgumentNullException(nameof(order));
+            }
 
-			var translatedElements = new List<IOrderByElement>();
-			foreach (var orderByElement in order.Elements)
-			{
-				var translated = TranslateOrderBy(orderByElement);
-				translatedElements.Add(translated);
-			}
+            var translatedElements = new List<IOrderByElement>();
+            foreach (var orderByElement in order.Elements)
+            {
+                var translated = TranslateOrderBy(orderByElement);
+                translatedElements.Add(translated);
+            }
 
-			return new OrderBy(translatedElements);
-		}
+            return new OrderBy(translatedElements);
+        }
 
-		private FilterElement<DomInstance> TranslateFilter(ManagedFilterIdentifier managedFilter)
-		{
-			if (managedFilter is null)
-			{
-				throw new ArgumentNullException(nameof(managedFilter));
-			}
+        private FilterElement<DomInstance> TranslateFilter(ManagedFilterIdentifier managedFilter)
+        {
+            if (managedFilter is null)
+            {
+                throw new ArgumentNullException(nameof(managedFilter));
+            }
 
-			var fieldName = managedFilter.getFieldName().fieldName;
-			var comparer = managedFilter.getComparer();
-			var value = managedFilter.getValue();
-			var translated = CreateFilter(fieldName, comparer, value);
-			return translated;
-		}
+            var fieldName = managedFilter.getFieldName().fieldName;
+            var comparer = managedFilter.getComparer();
+            var value = managedFilter.getValue();
+            var translated = CreateFilter(fieldName, comparer, value);
+            return translated;
+        }
 
-		private IOrderByElement TranslateOrderBy(IOrderByElement orderByElement)
-		{
-			if (orderByElement is null)
-			{
-				throw new ArgumentNullException(nameof(orderByElement));
-			}
+        private IOrderByElement TranslateOrderBy(IOrderByElement orderByElement)
+        {
+            if (orderByElement is null)
+            {
+                throw new ArgumentNullException(nameof(orderByElement));
+            }
 
-			var fieldName = orderByElement.Exposer.fieldName;
-			var sortOrder = orderByElement.SortOrder;
-			var naturalSort = orderByElement.Options.NaturalSort;
-			var translated = CreateOrderBy(fieldName, sortOrder, naturalSort);
-			return translated;
-		}
+            var fieldName = orderByElement.Exposer.fieldName;
+            var sortOrder = orderByElement.SortOrder;
+            var naturalSort = orderByElement.Options.NaturalSort;
+            var translated = CreateOrderBy(fieldName, sortOrder, naturalSort);
+            return translated;
+        }
 
-		private DeviceType FromInstance(DomInstance instance)
-		{
-			var obj = new DeviceType
-			{
-				Identifier = instance.ID.Id.ToString(),
+        private DeviceType FromInstance(DomInstance instance)
+        {
+            var obj = new DeviceType
+            {
+                Identifier = instance.ID.Id.ToString(),
                 IsNewInternal = false,
                 CreatedAt = ((ITrackBase)instance).CreatedAt,
                 CreatedBy = ((ITrackBase)instance).CreatedBy,
@@ -520,80 +520,80 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 LastModifiedBy = ((ITrackBase)instance).LastModifiedBy,
             };
 
-			var _devicetypepropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(AssetManagement.Models.DeviceTypeDomMapper.DeviceTypeProperties.SectionDefinitionId));
-			if (_devicetypepropertiesSection != default)
-			{
-				obj.DeviceTypePropertiesSectionId = _devicetypepropertiesSection.ID.Id;
-				var _name = _devicetypepropertiesSection.GetValue<string>(AssetManagement.Models.DeviceTypeDomMapper.DeviceTypeProperties.Name);
-				if (_name != null)
-				{
-					obj.Name = _name.Value;
-				}
+            var _devicetypepropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(AssetManagement.Models.DeviceTypeDomMapper.DeviceTypeProperties.SectionDefinitionId));
+            if (_devicetypepropertiesSection != default)
+            {
+                obj.DeviceTypePropertiesSectionId = _devicetypepropertiesSection.ID.Id;
+                var _name = _devicetypepropertiesSection.GetValue<string>(AssetManagement.Models.DeviceTypeDomMapper.DeviceTypeProperties.Name);
+                if (_name != null)
+                {
+                    obj.Name = _name.Value;
+                }
 
-				var _description = _devicetypepropertiesSection.GetValue<string>(AssetManagement.Models.DeviceTypeDomMapper.DeviceTypeProperties.Description);
-				if (_description != null)
-				{
-					obj.Description = _description.Value;
-				}
-			}
+                var _description = _devicetypepropertiesSection.GetValue<string>(AssetManagement.Models.DeviceTypeDomMapper.DeviceTypeProperties.Description);
+                if (_description != null)
+                {
+                    obj.Description = _description.Value;
+                }
+            }
 
-			var _tagsinfoSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(AssetManagement.Models.DeviceTypeDomMapper.TagsInfo.SectionDefinitionId));
-			if (_tagsinfoSection != default)
-			{
+            var _tagsinfoSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(AssetManagement.Models.DeviceTypeDomMapper.TagsInfo.SectionDefinitionId));
+            if (_tagsinfoSection != default)
+            {
                 ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.TagsInfo).SectionId = _tagsinfoSection.ID.Id;
 
-				var _tags = _tagsinfoSection.GetListValue<int>(AssetManagement.Models.DeviceTypeDomMapper.TagsInfo.Tags);
-				if (_tags != null)
-				{
-					obj.TagsInfo.Tags = _tags.Values.Select(v => (SlcAsset_Management.Enums.TagOption)v).ToList();
-				}
-			}
+                var _tags = _tagsinfoSection.GetListValue<int>(AssetManagement.Models.DeviceTypeDomMapper.TagsInfo.Tags);
+                if (_tags != null)
+                {
+                    obj.TagsInfo.Tags = _tags.Values.Select(v => (SlcAsset_Management.Enums.TagOption)v).ToList();
+                }
+            }
 
-			var _hierarchyinfoSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(AssetManagement.Models.DeviceTypeDomMapper.HierarchyInfo.SectionDefinitionId));
-			if (_hierarchyinfoSection != default)
-			{
+            var _hierarchyinfoSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(AssetManagement.Models.DeviceTypeDomMapper.HierarchyInfo.SectionDefinitionId));
+            if (_hierarchyinfoSection != default)
+            {
                 ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.HierarchyInfo).SectionId = _hierarchyinfoSection.ID.Id;
 
-				var _hierarchyinfohierarchyrole = _hierarchyinfoSection.GetValue<string>(AssetManagement.Models.DeviceTypeDomMapper.HierarchyInfo.HierarchyRole);
-				if (_hierarchyinfohierarchyrole != null)
-				{
-					obj.HierarchyInfo.HierarchyRole = FromDomHierarchyRole(_hierarchyinfohierarchyrole.Value);
-				}
-			}
+                var _hierarchyinfohierarchyrole = _hierarchyinfoSection.GetValue<string>(AssetManagement.Models.DeviceTypeDomMapper.HierarchyInfo.HierarchyRole);
+                if (_hierarchyinfohierarchyrole != null)
+                {
+                    obj.HierarchyInfo.HierarchyRole = FromDomHierarchyRole(_hierarchyinfohierarchyrole.Value);
+                }
+            }
 
-			obj.ResetChangeTracking();
+            obj.ResetChangeTracking();
 
-			return obj;
-		}
+            return obj;
+        }
 
-		private static SlcAsset_Management.Enums.HierarchyRoleEnum FromDomHierarchyRole(string value)
+        private static SlcAsset_Management.Enums.HierarchyRoleEnum FromDomHierarchyRole(string value)
 
-		{
-			switch (value)
-			{
-				case "Sub-Card":
-					return SlcAsset_Management.Enums.HierarchyRoleEnum.SubCard;
+        {
+            switch (value)
+            {
+                case "Sub-Card":
+                    return SlcAsset_Management.Enums.HierarchyRoleEnum.SubCard;
 
-				case "Power Supply":
-					return SlcAsset_Management.Enums.HierarchyRoleEnum.PowerSupply;
+                case "Power Supply":
+                    return SlcAsset_Management.Enums.HierarchyRoleEnum.PowerSupply;
 
-				default:
-					return (SlcAsset_Management.Enums.HierarchyRoleEnum)
-						Enum.Parse(typeof(SlcAsset_Management.Enums.HierarchyRoleEnum), value);
-			}
-		}
+                default:
+                    return (SlcAsset_Management.Enums.HierarchyRoleEnum)
+                        Enum.Parse(typeof(SlcAsset_Management.Enums.HierarchyRoleEnum), value);
+            }
+        }
 
-		private DomInstance ToInstance(DeviceType obj)
-		{
-			Guid id = default(Guid);
-			if (!String.IsNullOrEmpty(obj.Identifier))
-			{
-				id = Guid.Parse(obj.Identifier);
-			}
-			else
-			{
-				id = Guid.NewGuid();
-			}
+        private DomInstance ToInstance(DeviceType obj)
+        {
+            Guid id = default(Guid);
+            if (!String.IsNullOrEmpty(obj.Identifier))
+            {
+                id = Guid.Parse(obj.Identifier);
+            }
+            else
+            {
+                id = Guid.NewGuid();
+            }
 
             Asset a = new Asset
             {
@@ -601,32 +601,32 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
             };
 
-			var instance = new DomInstance
-			{
-				DomDefinitionId = AssetManagement.Models.DeviceTypeDomMapper.DomDefinitionId,
-				ID = new DomInstanceId(id)
-				{
-					ModuleId = AssetManagement.Models.DeviceTypeDomMapper.ModuleId
-				}
-			};
-			var _devicetypeproperties = new Section(AssetManagement.Models.DeviceTypeDomMapper.DeviceTypeProperties.SectionDefinitionId);
-			if (obj.DeviceTypePropertiesSectionId.HasValue)
-			{
-				_devicetypeproperties.ID = new SectionID(obj.DeviceTypePropertiesSectionId.Value);
-			}
-			if (obj.Name != default)
-			{
-				_devicetypeproperties.AddOrUpdateValue<string>(AssetManagement.Models.DeviceTypeDomMapper.DeviceTypeProperties.Name, Convert.ToString(obj.Name));
-			}
+            var instance = new DomInstance
+            {
+                DomDefinitionId = AssetManagement.Models.DeviceTypeDomMapper.DomDefinitionId,
+                ID = new DomInstanceId(id)
+                {
+                    ModuleId = AssetManagement.Models.DeviceTypeDomMapper.ModuleId
+                }
+            };
+            var _devicetypeproperties = new Section(AssetManagement.Models.DeviceTypeDomMapper.DeviceTypeProperties.SectionDefinitionId);
+            if (obj.DeviceTypePropertiesSectionId.HasValue)
+            {
+                _devicetypeproperties.ID = new SectionID(obj.DeviceTypePropertiesSectionId.Value);
+            }
+            if (obj.Name != default)
+            {
+                _devicetypeproperties.AddOrUpdateValue<string>(AssetManagement.Models.DeviceTypeDomMapper.DeviceTypeProperties.Name, Convert.ToString(obj.Name));
+            }
 
-			if (obj.Description != default)
-			{
-				_devicetypeproperties.AddOrUpdateValue<string>(AssetManagement.Models.DeviceTypeDomMapper.DeviceTypeProperties.Description, Convert.ToString(obj.Description));
-			}
+            if (obj.Description != default)
+            {
+                _devicetypeproperties.AddOrUpdateValue<string>(AssetManagement.Models.DeviceTypeDomMapper.DeviceTypeProperties.Description, Convert.ToString(obj.Description));
+            }
 
-			instance.Sections.Add(_devicetypeproperties);
-			if (!obj.TagsInfo.IsEmpty)
-			{
+            instance.Sections.Add(_devicetypeproperties);
+            if (!obj.TagsInfo.IsEmpty)
+            {
                 var _tagsinfo = new Section(AssetManagement.Models.DeviceTypeDomMapper.TagsInfo.SectionDefinitionId);
                 var _tagsinfoSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.TagsInfo).SectionId;
                 if (_tagsinfoSectionId.HasValue)
@@ -634,16 +634,16 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     _tagsinfo.ID = new SectionID(_tagsinfoSectionId.Value);
                 }
 
-				if (obj.TagsInfo.Tags != null)
-				{
-					_tagsinfo.AddOrUpdateListValue<int>(AssetManagement.Models.DeviceTypeDomMapper.TagsInfo.Tags, obj.TagsInfo.Tags.Select(v => (int)v).ToList());
-				}
+                if (obj.TagsInfo.Tags != null)
+                {
+                    _tagsinfo.AddOrUpdateListValue<int>(AssetManagement.Models.DeviceTypeDomMapper.TagsInfo.Tags, obj.TagsInfo.Tags.Select(v => (int)v).ToList());
+                }
 
-				instance.Sections.Add(_tagsinfo);
-			}
+                instance.Sections.Add(_tagsinfo);
+            }
 
-			if (!obj.HierarchyInfo.IsEmpty)
-			{
+            if (!obj.HierarchyInfo.IsEmpty)
+            {
                 var _hierarchyinfo = new Section(AssetManagement.Models.DeviceTypeDomMapper.HierarchyInfo.SectionDefinitionId);
                 var _hierarchyinfoSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.HierarchyInfo).SectionId;
                 if (_hierarchyinfoSectionId.HasValue)
@@ -653,90 +653,97 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
                 if (obj.HierarchyInfo.HierarchyRole != null)
                 {
-                    _hierarchyinfo.AddOrUpdateValue<string>(AssetManagement.Models.DeviceTypeDomMapper.HierarchyInfo.HierarchyRole, ToDomHierarchyRole(obj.HierarchyInfo.HierarchyRole.Value)); 
+                    _hierarchyinfo.AddOrUpdateValue<string>(AssetManagement.Models.DeviceTypeDomMapper.HierarchyInfo.HierarchyRole, ToDomHierarchyRole(obj.HierarchyInfo.HierarchyRole.Value));
                 }
 
-				instance.Sections.Add(_hierarchyinfo);
-			}
+                instance.Sections.Add(_hierarchyinfo);
+            }
 
-			return instance;
-		}
+            return instance;
+        }
 
-		private static string ToDomHierarchyRole(SlcAsset_Management.Enums.HierarchyRoleEnum role)
-		{
-			switch (role)
-			{
-				case SlcAsset_Management.Enums.HierarchyRoleEnum.SubCard:
-					return "Sub-Card";
+        private static string ToDomHierarchyRole(SlcAsset_Management.Enums.HierarchyRoleEnum role)
+        {
+            switch (role)
+            {
+                case SlcAsset_Management.Enums.HierarchyRoleEnum.SubCard:
+                    return "Sub-Card";
 
-				case SlcAsset_Management.Enums.HierarchyRoleEnum.PowerSupply:
-					return "Power Supply";
+                case SlcAsset_Management.Enums.HierarchyRoleEnum.PowerSupply:
+                    return "Power Supply";
 
-				default:
-					return role.ToString();
-			}
-		}
+                default:
+                    return role.ToString();
+            }
+        }
 
-		private FilterElement<DomInstance> CreateFilter(string fieldName, Comparer comparer, object value)
-		{
-			switch (fieldName)
-			{
-				case "Identifier":
-					return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.Id, comparer, Guid.Parse((string)value));
-				case "CreatedAt":
-					return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.CreatedAt, comparer, (DateTime)value);
-				case "CreatedBy":
-					return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.CreatedBy, comparer, (string)value);
-				case "LastModified":
-					return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModified, comparer, (DateTime)value);
-				case "LastModifiedBy":
-					return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModifiedBy, comparer, (string)value);
-				case "Name":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DeviceTypeDomMapper.DeviceTypeProperties.Name), comparer, (string)value);
-				case "Description":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DeviceTypeDomMapper.DeviceTypeProperties.Description), comparer, (string)value);
-				case "TagsInfo.Identifier":
-					return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.SectionIds, comparer, Guid.Parse((string)value));
-				case "TagsInfo.Tags":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DeviceTypeDomMapper.TagsInfo.Tags), comparer, (int)value);
-				case "HierarchyInfo.Identifier":
-					return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.SectionIds, comparer, Guid.Parse((string)value));
-				case "HierarchyInfo.HierarchyRole":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DeviceTypeDomMapper.HierarchyInfo.HierarchyRole), comparer, ToDomHierarchyRole((SlcAsset_Management.Enums.HierarchyRoleEnum)(int)value));
-				default:
-					throw new NotImplementedException();
-			}
-		}
+        private FilterElement<DomInstance> CreateFilter(string fieldName, Comparer comparer, object value)
+        {
+            switch (fieldName)
+            {
+                case "Identifier":
+                    return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.Id, comparer, Guid.Parse((string)value));
+                case "CreatedAt":
+                    return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.CreatedAt, comparer, (DateTime)value);
+                case "CreatedBy":
+                    return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.CreatedBy, comparer, (string)value);
+                case "LastModified":
+                    return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModified, comparer, (DateTime)value);
+                case "LastModifiedBy":
+                    return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModifiedBy, comparer, (string)value);
 
-		private IOrderByElement CreateOrderBy(string fieldName, SortOrder sortOrder, bool naturalSort = false)
-		{
-			switch (fieldName)
-			{
-				case "Identifier":
-					return OrderByElementFactory.Create(DomInstanceExposers.Id, sortOrder, naturalSort);
-				case "CreatedAt":
-					return OrderByElementFactory.Create(DomInstanceExposers.CreatedAt, sortOrder, naturalSort);
-				case "CreatedBy":
-					return OrderByElementFactory.Create(DomInstanceExposers.CreatedBy, sortOrder, naturalSort);
-				case "LastModified":
-					return OrderByElementFactory.Create(DomInstanceExposers.LastModified, sortOrder, naturalSort);
-				case "LastModifiedBy":
-					return OrderByElementFactory.Create(DomInstanceExposers.LastModifiedBy, sortOrder, naturalSort);
-				case "Name":
-					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DeviceTypeDomMapper.DeviceTypeProperties.Name), sortOrder, naturalSort);
-				case "Description":
-					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DeviceTypeDomMapper.DeviceTypeProperties.Description), sortOrder, naturalSort);
-				case "TagsInfo.Identifier":
-					return OrderByElementFactory.Create(DomInstanceExposers.SectionIds, sortOrder, naturalSort);
-				case "TagsInfo.Tags":
-					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DeviceTypeDomMapper.TagsInfo.Tags), sortOrder, naturalSort);
-				case "HierarchyInfo.Identifier":
-					return OrderByElementFactory.Create(DomInstanceExposers.SectionIds, sortOrder, naturalSort);
-				case "HierarchyInfo.HierarchyRole":
-					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DeviceTypeDomMapper.HierarchyInfo.HierarchyRole), sortOrder, naturalSort);
-				default:
-					throw new NotImplementedException();
-			}
-		}
-	}
+                case "Name":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DeviceTypeDomMapper.DeviceTypeProperties.Name), comparer, (string)value);
+
+                case "Description":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DeviceTypeDomMapper.DeviceTypeProperties.Description), comparer, (string)value);
+
+                case "TagsInfo.Identifier":
+                    return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.SectionIds, comparer, Guid.Parse((string)value));
+
+                case "TagsInfo.Tags":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DeviceTypeDomMapper.TagsInfo.Tags), comparer, (int)value);
+
+                case "HierarchyInfo.Identifier":
+                    return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.SectionIds, comparer, Guid.Parse((string)value));
+
+                case "HierarchyInfo.HierarchyRole":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DeviceTypeDomMapper.HierarchyInfo.HierarchyRole), comparer, ToDomHierarchyRole((SlcAsset_Management.Enums.HierarchyRoleEnum)(int)value));
+
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        private IOrderByElement CreateOrderBy(string fieldName, SortOrder sortOrder, bool naturalSort = false)
+        {
+            switch (fieldName)
+            {
+                case "Identifier":
+                    return OrderByElementFactory.Create(DomInstanceExposers.Id, sortOrder, naturalSort);
+                case "CreatedAt":
+                    return OrderByElementFactory.Create(DomInstanceExposers.CreatedAt, sortOrder, naturalSort);
+                case "CreatedBy":
+                    return OrderByElementFactory.Create(DomInstanceExposers.CreatedBy, sortOrder, naturalSort);
+                case "LastModified":
+                    return OrderByElementFactory.Create(DomInstanceExposers.LastModified, sortOrder, naturalSort);
+                case "LastModifiedBy":
+                    return OrderByElementFactory.Create(DomInstanceExposers.LastModifiedBy, sortOrder, naturalSort);
+                case "Name":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DeviceTypeDomMapper.DeviceTypeProperties.Name), sortOrder, naturalSort);
+                case "Description":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DeviceTypeDomMapper.DeviceTypeProperties.Description), sortOrder, naturalSort);
+                case "TagsInfo.Identifier":
+                    return OrderByElementFactory.Create(DomInstanceExposers.SectionIds, sortOrder, naturalSort);
+                case "TagsInfo.Tags":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DeviceTypeDomMapper.TagsInfo.Tags), sortOrder, naturalSort);
+                case "HierarchyInfo.Identifier":
+                    return OrderByElementFactory.Create(DomInstanceExposers.SectionIds, sortOrder, naturalSort);
+                case "HierarchyInfo.HierarchyRole":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DeviceTypeDomMapper.HierarchyInfo.HierarchyRole), sortOrder, naturalSort);
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+    }
 }

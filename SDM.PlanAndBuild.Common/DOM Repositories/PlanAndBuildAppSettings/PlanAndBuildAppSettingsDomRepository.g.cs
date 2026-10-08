@@ -626,18 +626,24 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
                     return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModified, comparer, (DateTime)value);
                 case "LastModifiedBy":
                     return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModifiedBy, comparer, (string)value);
+
                 case "JobIDPrefix" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
                     return DomInstanceExposers.FieldValues.KeyExists(PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDPrefix.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "JobIDPrefix":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDPrefix), comparer, (string)value);
+
                 case "JobIDNextSequence":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDNextSequence), comparer, (long)value);
+
                 case "JobIDIncrement":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDIncrement), comparer, (long)value);
+
                 case "JobIDStartingSeed":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDStartingSeed), comparer, (long)value);
+
                 case "JobIDMinimumDigits":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDMinimumDigits), comparer, (long)value);
+
                 default:
                     throw new NotImplementedException();
             }

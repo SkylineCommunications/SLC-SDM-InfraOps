@@ -651,14 +651,18 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModifiedBy, comparer, (string)value);
                 case "Name":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.PortTypeDomMapper.PortTypeProperties.Name), comparer, (string)value);
+
                 case "Description":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.PortTypeDomMapper.PortTypeProperties.Description), comparer, (string)value);
+
                 case "CableFKs.CableTypeFks" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && !SdmObjectReference<AssetManagement.Models.CableType>.Convert(value).HasValue():
                     return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.PortTypeDomMapper.CableFKs.CableTypeFks.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "CableFKs.CableTypeFks":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.PortTypeDomMapper.CableFKs.CableTypeFks), comparer, System.Guid.Parse(SdmObjectReference<AssetManagement.Models.CableType>.Convert(value).Identifier));
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.PortTypeDomMapper.CableFKs.CableTypeFks), comparer, SdmObjectReference<AssetManagement.Models.CableType>.Convert(value).GetIdentifierAsGuid());
+
                 case "CategoryLinks.Categories":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.PortTypeDomMapper.CategoryRelation.CategoryLinks), comparer, Convert.ToString(value));
+
                 default:
                     throw new NotImplementedException();
             }
