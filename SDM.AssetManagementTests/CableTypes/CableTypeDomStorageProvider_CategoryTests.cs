@@ -42,6 +42,28 @@ namespace SDM.AssetManagement.Tests.CableTypes
         }
 
         [TestMethod]
+        public void CableTypeDomStorageProvider_Create_PersistsNameDescriptionAndCategories()
+        {
+            var cableType = new CableType
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                Name = "Cat6",
+                Description = "An ethernet cable",
+                CategoryLinks =
+                {
+                    Categories = new List<SlcAsset_Management.Enums.CategoriesEnum> { SlcAsset_Management.Enums.CategoriesEnum.Data },
+                },
+            };
+
+            Helper.AssetManagement.CableTypes.Create(cableType);
+
+            var persisted = Helper.AssetManagement.CableTypes.Read(new TRUEFilterElement<CableType>()).Single();
+            persisted.Name.Should().Be("Cat6");
+            persisted.Description.Should().Be("An ethernet cable");
+            persisted.CategoryLinks.Categories.Should().BeEquivalentTo(new[] { SlcAsset_Management.Enums.CategoriesEnum.Data });
+        }
+
+        [TestMethod]
         public void CableTypeDomStorageProvider_Update_PersistsCategories()
         {
             var cableType = Helper.AssetManagement.CableTypes.Create(new CableType

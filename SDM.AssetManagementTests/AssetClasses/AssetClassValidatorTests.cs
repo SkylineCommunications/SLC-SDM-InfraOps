@@ -583,5 +583,371 @@ namespace SDM.AssetManagement.Tests.AssetClasses
         }
 
         #endregion
+
+        #region Ported From Shared Tests
+
+        private AssetClass NewValidAssetClass(string name, DeviceType deviceType)
+        {
+            return new AssetClass
+            {
+                Manufacturer = SDM.AssetManagement.Tests.Setup.PeopleApiMock.NewManufacturer(),
+                Name = name,
+                DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier),
+                HeightU = 1,
+            };
+        }
+
+        private DeviceType PowerProviderDeviceType()
+        {
+            return _helper.TestData.DeviceTypes.First(dt =>
+                dt.TagsInfo.Tags.Contains(SlcAsset_Management.Enums.TagOption.PowerProvider)
+                && !dt.TagsInfo.Tags.Contains(SlcAsset_Management.Enums.TagOption.RackUnitConsumer));
+        }
+
+        [TestMethod]
+        public void NameValidation_WithEmptyName_ShouldReturnFailReasonOnNameField()
+        {
+            // Act
+            var result = _validator.IsAssetClassNameValid(string.Empty, null);
+
+            // Assert
+            using (new AssertionScope())
+            {
+                result.IsValid.Should().BeFalse();
+                result.TryGetFailReason(
+                    AssetClassValidationHandler.AssetClassValidationField.Name,
+                    out var reason).Should().BeTrue();
+                reason.Should().Contain("cannot be empty or whitespace");
+            }
+        }
+
+        [TestMethod]
+        public void Validate_WithoutDeviceType_ShouldNotReturnPowerSupplyFailure()
+        {
+            // Arrange
+            var assetClass = new AssetClass
+            {
+                Manufacturer = SDM.AssetManagement.Tests.Setup.PeopleApiMock.NewManufacturer(),
+                Name = "No Device Type",
+            };
+
+            // Act
+            var result = _validator.Validate(assetClass, RepositoryAction.Create);
+
+            // Assert
+            result.TryGetFailReason(
+                AssetClassValidationHandler.AssetClassValidationField.PowerSupply,
+                out _).Should().BeFalse("power supply is only required for Power Provider device types");
+        }
+
+        [TestMethod]
+        public void Validate_WithNonPowerProviderDeviceType_AndNoPowerSupply_ShouldReturnValid()
+        {
+            // Arrange
+            _helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
+            var assetClass = NewValidAssetClass("Non Power Device", _helper.TestData.NonPowerProviderDeviceType());
+
+            // Act
+            var result = _validator.Validate(assetClass, RepositoryAction.Create);
+
+            // Assert
+            using (new AssertionScope())
+            {
+                result.IsValid.Should().BeTrue();
+                result.TryGetFailReason(
+                    AssetClassValidationHandler.AssetClassValidationField.PowerSupply,
+                    out _).Should().BeFalse();
+            }
+        }
+
+        [TestMethod]
+        public void Validate_WithPowerProviderDeviceType_AndNullPowerSupply_ShouldReturnInvalid()
+        {
+            // Arrange
+            _helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
+            var assetClass = new AssetClass
+            {
+                Manufacturer = SDM.AssetManagement.Tests.Setup.PeopleApiMock.NewManufacturer(),
+                Name = "Power Device Without Supply",
+                DeviceTypeId = new SdmObjectReference<DeviceType>(PowerProviderDeviceType().Identifier),
+                PowerSupply = null,
+            };
+
+            // Act
+            var result = _validator.Validate(assetClass, RepositoryAction.Create);
+
+            // Assert
+            using (new AssertionScope())
+            {
+                result.IsValid.Should().BeFalse();
+                result.TryGetFailReason(
+                    AssetClassValidationHandler.AssetClassValidationField.PowerSupply,
+                    out var reason).Should().BeTrue();
+                reason.Should().Contain("must have a Power Supply");
+            }
+        }
+
+        [TestMethod]
+        public void Validate_WithPowerProviderDeviceType_AndPowerSupply_ShouldNotReturnPowerSupplyFailure()
+        {
+            // Arrange
+            _helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
+            var assetClass = new AssetClass
+            {
+                Manufacturer = SDM.AssetManagement.Tests.Setup.PeopleApiMock.NewManufacturer(),
+                Name = "Power Device With Supply",
+                DeviceTypeId = new SdmObjectReference<DeviceType>(PowerProviderDeviceType().Identifier),
+                PowerSupply = SlcAsset_Management.Enums.PowerSupplyEnum.DC,
+            };
+
+            // Act
+            var result = _validator.Validate(assetClass, RepositoryAction.Create);
+
+            // Assert
+            using (new AssertionScope())
+            {
+                result.IsValid.Should().BeTrue();
+                result.TryGetFailReason(
+                    AssetClassValidationHandler.AssetClassValidationField.PowerSupply,
+                    out _).Should().BeFalse();
+            }
+        }
+
+        [TestMethod]
+        public void ValidateBulk_WithDuplicateNamesInBatch_ShouldReturnInvalidOnName()
+        {
+            // Arrange
+            _helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
+            var deviceType = _helper.TestData.NonPowerProviderDeviceType();
+            var first = NewValidAssetClass("Batch Duplicate", deviceType);
+            var second = NewValidAssetClass("Batch Duplicate", deviceType);
+
+            // Act
+            var results = _validator.ValidateBulk(new List<AssetClass> { first, second }, RepositoryAction.Create);
+
+            // Assert
+            using (new AssertionScope())
+            {
+                results.Should().Contain(r => !r.IsValid);
+                var failed = results.Where(r => !r.IsValid).ToList();
+                foreach (var failure in failed)
+                {
+                    failure.TryGetFailReason(
+                        AssetClassValidationHandler.AssetClassValidationField.Name,
+                        out var reason).Should().BeTrue();
+                    reason.Should().Contain("duplicated within the batch");
+                }
+            }
+        }
+
+        [TestMethod]
+        public void Validate_WithFullyPopulatedAssetClass_ShouldReturnValid()
+        {
+            // Arrange
+            _helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
+            var portType = _helper.TestData.PortTypes.First();
+            var assetClass = NewValidAssetClass("Fully Populated", _helper.TestData.RackMountableDeviceType());
+            assetClass.Depth = 50;
+            assetClass.Width = 40;
+            assetClass.Height = 4.4;
+            assetClass.Weight = 10;
+            assetClass.TypicalPowerConsumption = 100;
+            assetClass.MaximumPowerConsumption = 200;
+            assetClass.DataPorts = new List<DataPortInfo>
+            {
+                new DataPortInfo { PortNumber = 1, Name = "eth1", PortType = new SdmObjectReference<PortType>(portType.Identifier) },
+                new DataPortInfo { PortNumber = 2, Name = "eth2", PortType = new SdmObjectReference<PortType>(portType.Identifier) },
+            };
+            assetClass.PowerPorts = new List<PowerPortInfo>
+            {
+                new PowerPortInfo { PortNumber = 1, Name = "psu1", PortType = new SdmObjectReference<PortType>(portType.Identifier) },
+            };
+            assetClass.Holders = new List<AssetHolder>
+            {
+                new AssetHolder { SlotNumber = 0, HierarchyRole = SlcAsset_Management.Enums.HierarchyRoleEnum.Card },
+                new AssetHolder { SlotNumber = 1, HierarchyRole = SlcAsset_Management.Enums.HierarchyRoleEnum.Card },
+            };
+
+            // Act
+            var result = _validator.Validate(assetClass, RepositoryAction.Create);
+
+            // Assert
+            using (new AssertionScope())
+            {
+                result.IsValid.Should().BeTrue();
+                result.FailureReasons.Should().BeEmpty();
+            }
+        }
+
+        [TestMethod]
+        public void Validate_WithDuplicateDataPortNumberDifferentPortTypes_ShouldReturnInvalid()
+        {
+            // Arrange
+            _helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
+            var portTypes = _helper.TestData.PortTypes.Take(2).ToList();
+            var assetClass = NewValidAssetClass("Dup Data Port", _helper.TestData.RackMountableDeviceType());
+            assetClass.DataPorts = new List<DataPortInfo>
+            {
+                new DataPortInfo { PortNumber = 1, Name = "a", PortType = new SdmObjectReference<PortType>(portTypes[0].Identifier) },
+                new DataPortInfo { PortNumber = 1, Name = "b", PortType = new SdmObjectReference<PortType>(portTypes[1].Identifier) },
+            };
+
+            // Act
+            var result = _validator.Validate(assetClass, RepositoryAction.Create);
+
+            // Assert
+            using (new AssertionScope())
+            {
+                result.IsValid.Should().BeFalse();
+                result.TryGetFailReason(
+                    AssetClassValidationHandler.AssetClassValidationField.DataPortNumber,
+                    out var reason).Should().BeTrue();
+                reason.Should().Contain("Duplicate Data Port number found");
+            }
+        }
+
+        [TestMethod]
+        public void Validate_WithDuplicatePowerPortNumberDifferentPortTypes_ShouldReturnInvalid()
+        {
+            // Arrange
+            _helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
+            var portTypes = _helper.TestData.PortTypes.Take(2).ToList();
+            var assetClass = NewValidAssetClass("Dup Power Port", _helper.TestData.RackMountableDeviceType());
+            assetClass.PowerPorts = new List<PowerPortInfo>
+            {
+                new PowerPortInfo { PortNumber = 1, Name = "a", PortType = new SdmObjectReference<PortType>(portTypes[0].Identifier) },
+                new PowerPortInfo { PortNumber = 1, Name = "b", PortType = new SdmObjectReference<PortType>(portTypes[1].Identifier) },
+            };
+
+            // Act
+            var result = _validator.Validate(assetClass, RepositoryAction.Create);
+
+            // Assert
+            using (new AssertionScope())
+            {
+                result.IsValid.Should().BeFalse();
+                result.TryGetFailReason(
+                    AssetClassValidationHandler.AssetClassValidationField.PowerPortNumber,
+                    out var reason).Should().BeTrue();
+                reason.Should().NotBeNullOrWhiteSpace();
+            }
+        }
+
+        [TestMethod]
+        public void Validate_WithNegativeDataPortNumber_ShouldReturnInvalid()
+        {
+            // Arrange
+            _helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
+            var portType = _helper.TestData.PortTypes.First();
+            var assetClass = NewValidAssetClass("Negative Data Port", _helper.TestData.RackMountableDeviceType());
+            assetClass.DataPorts = new List<DataPortInfo>
+            {
+                new DataPortInfo { PortNumber = -1, Name = "neg", PortType = new SdmObjectReference<PortType>(portType.Identifier) },
+            };
+
+            // Act
+            var result = _validator.Validate(assetClass, RepositoryAction.Create);
+
+            // Assert
+            using (new AssertionScope())
+            {
+                result.IsValid.Should().BeFalse();
+                result.TryGetFailReason(
+                    AssetClassValidationHandler.AssetClassValidationField.DataPortNumber,
+                    out var reason).Should().BeTrue();
+                reason.Should().Contain("cannot be negative");
+            }
+        }
+
+        [TestMethod]
+        public void Validate_WithNegativeHolderSlot_ShouldReturnInvalid()
+        {
+            // Arrange
+            _helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
+            var assetClass = NewValidAssetClass("Negative Holder", _helper.TestData.RackMountableDeviceType());
+            assetClass.Holders = new List<AssetHolder>
+            {
+                new AssetHolder { SlotNumber = -1, HierarchyRole = SlcAsset_Management.Enums.HierarchyRoleEnum.Card },
+            };
+
+            // Act
+            var result = _validator.Validate(assetClass, RepositoryAction.Create);
+
+            // Assert
+            using (new AssertionScope())
+            {
+                result.IsValid.Should().BeFalse();
+                result.TryGetFailReason(
+                    AssetClassValidationHandler.AssetClassValidationField.HolderSlotNumber,
+                    out var reason).Should().BeTrue();
+                reason.Should().Contain("cannot be negative");
+            }
+        }
+
+        [TestMethod]
+        public void Validate_WithDuplicateExistingName_ShouldReturnInvalidOnName()
+        {
+            // Arrange
+            _helper.PopulateWithDemoData(upTo: DemoDataLayer.AssetClasses);
+            var existingName = _helper.TestData.AssetClasses.First().Name;
+            var assetClass = NewValidAssetClass(existingName, _helper.TestData.RackMountableDeviceType());
+
+            // Act
+            var result = _validator.Validate(assetClass, RepositoryAction.Create);
+
+            // Assert
+            using (new AssertionScope())
+            {
+                result.IsValid.Should().BeFalse();
+                result.TryGetFailReason(
+                    AssetClassValidationHandler.AssetClassValidationField.Name,
+                    out var reason).Should().BeTrue();
+                reason.Should().Contain("already in use");
+            }
+        }
+
+        [TestMethod]
+        public void Validate_WithNegativeDepth_ShouldReturnFailReasonOnDepth()
+        {
+            // Arrange
+            _helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
+            var assetClass = NewValidAssetClass("Negative Depth", _helper.TestData.RackMountableDeviceType());
+            assetClass.Depth = -1;
+
+            // Act
+            var result = _validator.Validate(assetClass, RepositoryAction.Create);
+
+            // Assert
+            using (new AssertionScope())
+            {
+                result.IsValid.Should().BeFalse();
+                result.TryGetFailReason(
+                    AssetClassValidationHandler.AssetClassValidationField.Depth,
+                    out _).Should().BeTrue();
+            }
+        }
+
+        [TestMethod]
+        public void Validate_WithNegativeDepthAndWidth_ShouldAccumulateBothFailReasons()
+        {
+            // Arrange
+            _helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
+            var assetClass = NewValidAssetClass("Negative Depth Width", _helper.TestData.RackMountableDeviceType());
+            assetClass.Depth = -1;
+            assetClass.Width = -1;
+
+            // Act
+            var result = _validator.Validate(assetClass, RepositoryAction.Create);
+
+            // Assert
+            using (new AssertionScope())
+            {
+                result.IsValid.Should().BeFalse();
+                result.TryGetFailReason(AssetClassValidationHandler.AssetClassValidationField.Depth, out _).Should().BeTrue();
+                result.TryGetFailReason(AssetClassValidationHandler.AssetClassValidationField.Width, out _).Should().BeTrue();
+            }
+        }
+
+        #endregion
     }
 }

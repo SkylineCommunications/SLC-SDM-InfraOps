@@ -346,7 +346,7 @@ namespace SDM.AssetManagement.Tests.InfraopsReservations
             };
             rack.Capacity.MaximumRackCapacity = 42;
 
-            return Helper.FacilityManagement.Racks.Create(rack);
+            return Helper.FacilityManagement.Racks.Create(Helper.FacilityManagement.AttachRow(rack));
         }
     }
 }

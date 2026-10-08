@@ -43,12 +43,12 @@
 				return typedField;
 			}
 
-			throw new InvalidOperationException($"Field '{fieldName}' is not of type '{typeof(ChangeTrackingField<T1>).FullName}', expected '{field.GetType().FullName}'.");
+			throw new InvalidOperationException($"Field '{fieldName}' is not of type '{typeof(ChangeTrackingArrayField<T1>).FullName}', expected '{field.GetType().FullName}'.");
 		}
 
 		public Dictionary<string, (object prevVal, object newVal)> GetChanges()
 		{
-			return _fields.ToDictionary(entry => entry.Key, entry => entry.Value.GetChanges());
+			return _fields.Where(entry => entry.Value.Changed).ToDictionary(entry => entry.Key, entry => entry.Value.GetChanges());
 		}
 
 		public void ApplyChanges()

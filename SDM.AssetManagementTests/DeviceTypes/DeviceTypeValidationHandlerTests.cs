@@ -35,6 +35,18 @@ namespace SDM.AssetManagement.Tests.DeviceTypes
         }
 
         [TestMethod]
+        public void CanDelete_WithNoReferencingAssets_ShouldPass()
+        {
+            // Act
+            var isValid = DeviceTypeValidationHandler.CanDelete(new List<Asset>(), out var result);
+
+            // Assert
+            isValid.Should().BeTrue();
+            result.IsValid.Should().BeTrue();
+            result.FailureReasons.Should().BeEmpty();
+        }
+
+        [TestMethod]
         public void CanDelete_WithOnlyDisposedReferencingAssets_ShouldPass()
         {
             // Arrange

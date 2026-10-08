@@ -1,4 +1,4 @@
-﻿namespace SDM.AssetManagement.Tests.Assets
+namespace SDM.AssetManagement.Tests.Assets
 {
     using System;
     using System.Collections.Generic;
@@ -34,19 +34,19 @@
             Helper.PopulateWithDemoData(DemoDataLayer.AssetClasses);
             var assetClass = Helper.TestData.AssetClasses.First();
 
-            var originRoom = Helper.FacilityManagement.Rooms.Create(new Room
+            var originRoom = Helper.FacilityManagement.Rooms.Create(Helper.FacilityManagement.AttachFloor(new Room
             {
                 Identifier = Guid.NewGuid().ToString(),
                 RoomId = $"ROOM-ORIGIN-{Guid.NewGuid()}",
                 Name = "Origin Room",
-            });
+            }));
 
-            var destinationRoom = Helper.FacilityManagement.Rooms.Create(new Room
+            var destinationRoom = Helper.FacilityManagement.Rooms.Create(Helper.FacilityManagement.AttachFloor(new Room
             {
                 Identifier = Guid.NewGuid().ToString(),
                 RoomId = $"ROOM-DEST-{Guid.NewGuid()}",
                 Name = "Destination Room",
-            });
+            }));
 
             return new Asset
             {

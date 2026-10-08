@@ -10,6 +10,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
     using static Skyline.DataMiner.SDM.AssetManagement.Common.Validation.AssetValidationHandler;
+    using static Skyline.DataMiner.SDM.FacilityManagement.Validation.RackValidationHandler;
 
     /// <summary>
     /// Validates physical asset placement (both rack positions and parent asset holders).
@@ -55,6 +56,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
 
                     // Validate rack placement
                     results[i].AddFailuresFrom(ValidateRackPlacement(asset, context));
+
+                    // Validate destination rack placement
+                    results[i].AddFailuresFrom(ValidateDestinationRackPlacement(asset, context));
 
                     // todo Validate destination parent holder placement
                 }
@@ -119,6 +123,11 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
                 if (asset.Location.RackId.HasValue())
                 {
                     rackIds.Add(asset.Location.RackId.Identifier);
+                }
+
+                if (asset.DestinationLocation.RackId.HasValue())
+                {
+                    rackIds.Add(asset.DestinationLocation.RackId.Identifier);
                 }
             }
 
@@ -262,6 +271,36 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
                 {
                     result.AddFailuresFrom(spaceResult);
                 }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Validates the destination rack position against the rack boundaries using pre-loaded context.
+        /// Only bounds are checked: the destination is a future location, so occupancy is not evaluated.
+        /// </summary>
+        private ValidationResult ValidateDestinationRackPlacement(Asset asset, PlacementValidationContext context)
+        {
+            var result = new ValidationResult();
+            var destination = asset.DestinationLocation;
+
+            if (destination.IsEmpty || !destination.RackId.HasValue() || destination.RackPosition == null)
+            {
+                return result;
+            }
+
+            if (!context.LoadedRacks.TryGetValue(destination.RackId.Identifier, out var rack))
+            {
+                result.AddFailReason(AssetValidationField.DestinationRackId, "Destination Rack not found.");
+                return result;
+            }
+
+            var assetClass = _entityLoader.LoadAssetClass(asset.AssetClassId);
+            if (assetClass != null && assetClass.HeightU > 0
+                && !RackPlacementValidation.ValidatePositionAndBounds(rack, (int)destination.RackPosition, (int)assetClass.HeightU, out var boundsResult))
+            {
+                result.AddFailReason(AssetValidationField.DestinationRackPosition, boundsResult.GetFailReason(RackValidationField.RackSpacePosition));
             }
 
             return result;

@@ -215,6 +215,54 @@ namespace SDM.AssetManagement.Tests.AssetClasses
         }
 
         [TestMethod]
+        public void Create_WithIsBookableAndProtocolLink_ShouldRoundTrip()
+        {
+            // Arrange
+            Helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
+
+            referenceAssetClass.DeviceTypeId = new SdmObjectReference<DeviceType>(Helper.TestData.DeviceTypes.First().Identifier);
+            var dataPortType = Helper.TestData.PortTypes.First(p => p.IsDataPortType());
+            foreach (var port in referenceAssetClass.DataPorts)
+            {
+                port.PortType = dataPortType;
+            }
+
+            var powerPortType = Helper.TestData.PortTypes.First(p => p.IsPowerPortType());
+            foreach (var port in referenceAssetClass.PowerPorts)
+            {
+                port.PortType = powerPortType;
+            }
+
+            referenceAssetClass.IsBookable = true;
+            referenceAssetClass.ProtocolLink.Protocol = "Generic Protocol";
+
+            // Act
+            Helper.AssetManagement.AssetClasses.Create(referenceAssetClass);
+            var created = Helper.AssetManagement.AssetClasses.Read(new TRUEFilterElement<AssetClass>()).Single();
+
+            // Assert
+            using (new AssertionScope())
+            {
+                created.IsBookable.Should().BeTrue();
+                created.ProtocolLink.Protocol.Should().Be("Generic Protocol");
+                created.PowerPorts.Should().OnlyContain(p => p.PortType.HasValue());
+            }
+
+            // Act: update both flags
+            created.IsBookable = false;
+            created.ProtocolLink.Protocol = "Other Protocol";
+            Helper.AssetManagement.AssetClasses.Update(created);
+            var updated = Helper.AssetManagement.AssetClasses.Read(new TRUEFilterElement<AssetClass>()).Single();
+
+            // Assert
+            using (new AssertionScope())
+            {
+                updated.IsBookable.Should().BeFalse();
+                updated.ProtocolLink.Protocol.Should().Be("Other Protocol");
+            }
+        }
+
+        [TestMethod]
         public void CreateOrUpdate_WithNewAssetClass_ShouldCreate()
         {
             // Arrange

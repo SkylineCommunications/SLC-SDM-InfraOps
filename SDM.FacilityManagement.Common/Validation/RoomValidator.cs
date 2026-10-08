@@ -36,20 +36,27 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                 if (!RoomValidationHandler.IsRoomIdValid(entity, out var idResult))
                 {
                     result.AddFailuresFrom(idResult);
-                    return result;
                 }
-
-                if (!RoomValidationHandler.IsRoomNameValid(entity, out var nameResult))
-                {
-                    result.AddFailuresFrom(nameResult);
-                    return result;
-                }
-
-                if (IsIdInUse(entity.RoomId, entity.Identifier))
+                else if (IsIdInUse(entity.RoomId, entity.Identifier))
                 {
                     result.AddFailReason(RoomValidationHandler.RoomValidationField.RoomId,
                         $"Room Id '{entity.RoomId}' is already in use.");
                 }
+            }
+
+            if (entity.ShouldValidate(entity.NameField) && !RoomValidationHandler.IsRoomNameValid(entity, out var nameResult))
+            {
+                result.AddFailuresFrom(nameResult);
+            }
+
+            if (entity.ShouldValidate(entity.WidthField) && !RoomValidationHandler.IsRoomWidthValid(entity, out var widthResult))
+            {
+                result.AddFailuresFrom(widthResult);
+            }
+
+            if (entity.ShouldValidate(entity.DepthField) && !RoomValidationHandler.IsRoomDepthValid(entity, out var depthResult))
+            {
+                result.AddFailuresFrom(depthResult);
             }
 
             result.AddFailuresFrom(ValidateReferencesAgainstDatabase(new List<Room> { entity })[0]);
@@ -113,7 +120,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
             return FacilityBulkValidationHelper.RunBulkValidation(
                 entities,
                 RoomValidationHandler.IsRoomIdValid,
-                RoomValidationHandler.IsRoomNameValid,
+                RoomValidationHandler.IsRoomNameAndDimensionsValid,
                 ValidateIdDuplicatesInBatch,
                 ValidateBulkIdsAgainstDatabase,
                 ValidateReferencesAgainstDatabase);
@@ -210,6 +217,15 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
         private List<ValidationResult> ValidateReferencesAgainstDatabase(List<Room> entities)
         {
             var results = entities.Select(_ => new ValidationResult()).ToList();
+            for (int i = 0; i < entities.Count; i++)
+            {
+                if (ReferenceValidationHelper.ShouldValidateReferences(entities[i]) &&
+                    (entities[i].FloorFk.IsEmpty || !ReferenceValidationHelper.HasId(ReferenceValidationHelper.GetId(entities[i].FloorFk.Floor))))
+                {
+                    ReferenceValidationHelper.AddRequiredReference(results[i], RoomValidationHandler.RoomValidationField.FloorId, "Floor");
+                }
+            }
+
             var floorCandidates = entities
                 .Select((entity, index) => new
                 {

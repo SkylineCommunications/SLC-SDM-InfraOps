@@ -772,7 +772,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 					powerports.PortExposure = SharedMappers.DomIds.SlcAsset_Management.Enums.Portexposure.ToEnum(_powerportsportexposure.Value);
 				}
 
-				var _powerportsporttype = _powerportsSection.GetValue<string>(AssetManagement.Models.AssetClassDomMapper.PowerPorts.PortType);
+				var _powerportsporttype = _powerportsSection.GetValue<Guid>(AssetManagement.Models.AssetClassDomMapper.PowerPorts.PortType);
 				if (_powerportsporttype != null)
 				{
 					powerports.PortType = new SdmObjectReference<PortType>(Convert.ToString(_powerportsporttype.Value));
@@ -847,6 +847,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             if (_protocolLinkSection != default)
             {
                 obj.ProtocolLink = new AssetManagement.Models.ProtocolLink();
+                ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.ProtocolLink).SectionId = _protocolLinkSection.ID.Id;
                 var _protocolLinkProtocol = _protocolLinkSection.GetValue<string>(AssetManagement.Models.AssetClassDomMapper.ProtocolLink.Protocol);
                 if (_protocolLinkProtocol != null)
                 {
@@ -942,6 +943,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			{
 				_assetclassproperties.AddOrUpdateValue<string>(AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.BackImage, Convert.ToString(obj.BackImage));
 			}
+
+			_assetclassproperties.AddOrUpdateValue<bool>(AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.IsBookable, obj.IsBookable);
 
 			if (obj.TypicalPowerConsumption != default)
 			{
@@ -1107,6 +1110,23 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				}
 
 				instance.Sections.Add(_attachmentsSection);
+			}
+
+			var _protocolLinkSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.ProtocolLink).SectionId;
+			if (!obj.ProtocolLink.IsEmpty || _protocolLinkSectionId.HasValue)
+			{
+				var _protocolLink = new Section(AssetManagement.Models.AssetClassDomMapper.ProtocolLink.SectionDefinitionId);
+				if (_protocolLinkSectionId.HasValue)
+				{
+					_protocolLink.ID = new SectionID(_protocolLinkSectionId.Value);
+				}
+
+				if (obj.ProtocolLink.Protocol != default)
+				{
+					_protocolLink.AddOrUpdateValue<string>(AssetManagement.Models.AssetClassDomMapper.ProtocolLink.Protocol, Convert.ToString(obj.ProtocolLink.Protocol));
+				}
+
+				instance.Sections.Add(_protocolLink);
 			}
 
 			return instance;

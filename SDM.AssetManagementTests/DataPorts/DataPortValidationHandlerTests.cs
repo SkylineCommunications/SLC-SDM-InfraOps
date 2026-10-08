@@ -85,6 +85,82 @@ namespace SDM.AssetManagement.Tests.DataPorts
         }
 
         [TestMethod]
+        public void MandatoryFields_WithValidDataPort_ShouldPass()
+        {
+            var isValid = DataPortValidationHandler.AreMandatoryFieldsValid(CreateValidDataPort(), out var result);
+
+            isValid.Should().BeTrue();
+            result.IsValid.Should().BeTrue();
+        }
+
+        [TestMethod]
+        public void MandatoryFields_WithZeroPortNumber_ShouldPass()
+        {
+            var dataPort = CreateValidDataPort();
+            dataPort.DataPortInfo.PortNumber = 0;
+
+            var isValid = DataPortValidationHandler.AreMandatoryFieldsValid(dataPort, out var result);
+
+            isValid.Should().BeTrue();
+            result.IsValid.Should().BeTrue();
+        }
+
+        [TestMethod]
+        public void MandatoryFields_WithNullName_ShouldFail()
+        {
+            var dataPort = CreateValidDataPort();
+            dataPort.DataPortInfo.Name = null;
+
+            var isValid = DataPortValidationHandler.AreMandatoryFieldsValid(dataPort, out var result);
+
+            isValid.Should().BeFalse();
+            result.GetFailReason(DataPortValidationHandler.DataPortValidationField.Name).Should().Contain("DataPort Name cannot be empty.");
+        }
+
+        [TestMethod]
+        public void MandatoryFields_WithEmptyStringName_ShouldFail()
+        {
+            var dataPort = CreateValidDataPort();
+            dataPort.DataPortInfo.Name = string.Empty;
+
+            var isValid = DataPortValidationHandler.AreMandatoryFieldsValid(dataPort, out var result);
+
+            isValid.Should().BeFalse();
+            result.GetFailReason(DataPortValidationHandler.DataPortValidationField.Name).Should().Contain("DataPort Name cannot be empty.");
+        }
+
+        [TestMethod]
+        public void MandatoryFields_WithNegativePortNumber_ShouldReportPortNumberField()
+        {
+            var dataPort = CreateValidDataPort();
+            dataPort.DataPortInfo.PortNumber = -1;
+
+            DataPortValidationHandler.AreMandatoryFieldsValid(dataPort, out var result);
+
+            result.GetFailReason(DataPortValidationHandler.DataPortValidationField.PortNumber).Should().Contain("DataPort Number cannot be negative. Found: -1");
+        }
+
+        [TestMethod]
+        public void MandatoryFields_WithMissingPortNumber_ShouldReportPortNumberField()
+        {
+            var dataPort = CreateValidDataPort();
+            dataPort.DataPortInfo.PortNumber = null;
+
+            DataPortValidationHandler.AreMandatoryFieldsValid(dataPort, out var result);
+
+            result.GetFailReason(DataPortValidationHandler.DataPortValidationField.PortNumber).Should().Contain("DataPort Number must be provided.");
+        }
+
+        [TestMethod]
+        public void AssetLink_WithValidAsset_ShouldPass()
+        {
+            var isValid = DataPortValidationHandler.IsAssetLinkValid(CreateValidDataPort(), out var result);
+
+            isValid.Should().BeTrue();
+            result.IsValid.Should().BeTrue();
+        }
+
+        [TestMethod]
         public void AssetLink_WithMissingAsset_ShouldFail()
         {
             var dataPort = CreateValidDataPort();
@@ -94,6 +170,18 @@ namespace SDM.AssetManagement.Tests.DataPorts
 
             isValid.Should().BeFalse();
             result.FailureReasons.Should().Contain(reason => reason.ToString().Contains("DataPort must be linked to an Asset."));
+        }
+
+        [TestMethod]
+        public void AssetLink_WithNullAsset_ShouldReturnPortMustHaveAssetMessage()
+        {
+            var dataPort = CreateValidDataPort();
+            dataPort.Asset = null;
+
+            var isValid = DataPortValidationHandler.IsAssetLinkValid(dataPort, out var result);
+
+            isValid.Should().BeFalse();
+            result.GetFailReason(DataPortValidationHandler.DataPortValidationField.Asset).Should().Be("DataPort must be linked to an Asset.");
         }
 
         [TestMethod]

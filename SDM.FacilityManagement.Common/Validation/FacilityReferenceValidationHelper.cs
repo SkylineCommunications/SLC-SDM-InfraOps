@@ -13,7 +13,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
     {
         /// <summary>
         /// Validates the Room references shared by the Desk, Row and Zone validators.
-        /// Only entities flagged for reference validation with a non-empty reference are checked.
+        /// Entities flagged for reference validation must have a Room, and a non-empty reference must exist.
         /// </summary>
         /// <typeparam name="TEntity">The entity type being validated.</typeparam>
         /// <typeparam name="TField">The validation field enum used to report failures.</typeparam>
@@ -31,6 +31,14 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
             where TField : Enum
         {
             var results = entities.Select(_ => new ValidationResult()).ToList();
+
+            for (int i = 0; i < entities.Count; i++)
+            {
+                if (ShouldValidateReferences(entities[i]) && !HasId(roomIdentifierSelector(entities[i])))
+                {
+                    AddRequiredReference(results[i], field, "Room");
+                }
+            }
 
             var roomCandidates = entities
                 .Select((entity, index) => new { Index = index, Entity = entity, RoomIdentifier = roomIdentifierSelector(entity) })

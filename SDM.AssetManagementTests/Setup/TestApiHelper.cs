@@ -35,6 +35,11 @@ namespace SDM.AssetManagement.Tests.Setup
         /// Use these instead of DemoData templates for accurate test assertions.
         /// </summary>
         ITestDataCache TestData { get; }
+
+        /// <summary>
+        /// Underlying mocked connection, for inspecting raw DOM instances.
+        /// </summary>
+        IConnection Connection { get; }
     }
 
     /// <summary>
@@ -86,6 +91,6 @@ namespace SDM.AssetManagement.Tests.Setup
         public IPlanAndBuildApiHelper PlanAndBuild { get; }
         public IInfraOpsPropertiesApiHelper InfraOpsProperties { get; }
         public ITestDataCache TestData { get; }
-        internal IConnection Connection { get; }
+        public IConnection Connection { get; }
     }
 }

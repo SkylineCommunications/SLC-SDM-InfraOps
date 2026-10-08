@@ -35,22 +35,32 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
         {
             var result = new ValidationResult();
 
-            if (!SiteValidationHandler.IsSiteIdValid(site, out var idResult))
+            if (site.ShouldValidate(site.SiteIdField))
             {
-                result.AddFailuresFrom(idResult);
-                return result;
+                if (!SiteValidationHandler.IsSiteIdValid(site, out var idResult))
+                {
+                    result.AddFailuresFrom(idResult);
+                }
+                else if (IsSiteIdInUse(site.SiteId, site.Identifier))
+                {
+                    result.AddFailReason(SiteValidationHandler.SiteValidationField.SiteId,
+                        $"Site Id '{site.SiteId}' is already in use.");
+                }
             }
 
-            if (!SiteValidationHandler.IsSiteNameValid(site, out var nameResult))
+            if (site.ShouldValidate(site.NameField) && !SiteValidationHandler.IsSiteNameValid(site, out var nameResult))
             {
                 result.AddFailuresFrom(nameResult);
-                return result;
             }
 
-            if (site.ShouldValidate(site.SiteIdField) && IsSiteIdInUse(site.SiteId, site.Identifier))
+            if (site.ShouldValidate(site.LatitudeField) && !SiteValidationHandler.IsSiteLatitudeValid(site, out var latitudeResult))
             {
-                result.AddFailReason(SiteValidationHandler.SiteValidationField.SiteId,
-                    $"Site Id '{site.SiteId}' is already in use.");
+                result.AddFailuresFrom(latitudeResult);
+            }
+
+            if (site.ShouldValidate(site.LongitudeField) && !SiteValidationHandler.IsSiteLongitudeValid(site, out var longitudeResult))
+            {
+                result.AddFailuresFrom(longitudeResult);
             }
 
             return result;
@@ -129,6 +139,16 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                 if (!SiteValidationHandler.IsSiteNameValid(sites[i], out var nameResult))
                 {
                     results[i].AddFailuresFrom(nameResult);
+                }
+
+                if (!SiteValidationHandler.IsSiteLatitudeValid(sites[i], out var latitudeResult))
+                {
+                    results[i].AddFailuresFrom(latitudeResult);
+                }
+
+                if (!SiteValidationHandler.IsSiteLongitudeValid(sites[i], out var longitudeResult))
+                {
+                    results[i].AddFailuresFrom(longitudeResult);
                 }
             }
 

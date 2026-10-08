@@ -9,6 +9,7 @@
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.Common.Services;
     using Skyline.DataMiner.SDM.Extensions;
+    using Skyline.DataMiner.SDM.InfraOps.Common.Validation;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
     using static Skyline.DataMiner.SDM.AssetManagement.Common.Validation.DataPortValidationHandler;
@@ -44,7 +45,7 @@
             }
 
             // Asset link
-            if (dataPort.AssetField.Changed
+            if ((dataPort.ShouldValidate(dataPort.AssetField))
                 && !DataPortValidationHandler.IsAssetLinkValid(dataPort, out var assetLinkResult))
                 result.AddFailuresFrom(assetLinkResult);
 

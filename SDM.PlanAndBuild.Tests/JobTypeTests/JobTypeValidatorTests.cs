@@ -257,6 +257,50 @@ using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 		}
 
 		[TestMethod]
+		public void ValidateBulk_WithNameInOtherBatchEntry_ShouldFlagOnlyDuplicatesWithExactReason()
+		{
+			var jobTypes = new System.Collections.Generic.List<JobType>
+			{
+				new JobType { Name = "Base", Description = "Desc" },
+				new JobType { Name = "Duplicate", Description = "Desc" },
+				new JobType { Name = "Duplicate", Description = "Desc" },
+			};
+
+			var results = _validator.ValidateBulk(jobTypes, RepositoryAction.Create);
+
+			using (new AssertionScope())
+			{
+				results.Should().HaveCount(3);
+				results[0].IsValid.Should().BeTrue();
+				results[1].IsValid.Should().BeFalse();
+				results[1].TryGetFailReason(JobTypeValidationHandler.JobTypeValidationField.Name, out var reason1).Should().BeTrue();
+				reason1.Should().Be("Job Type Name 'Duplicate' is duplicated within the validation batch.");
+				results[2].IsValid.Should().BeFalse();
+				results[2].TryGetFailReason(JobTypeValidationHandler.JobTypeValidationField.Name, out var reason2).Should().BeTrue();
+				reason2.Should().Be("Job Type Name 'Duplicate' is duplicated within the validation batch.");
+			}
+		}
+
+		[TestMethod]
+		public void Validate_SavedJobTypeWithNameClearedToEmpty_ShouldReturnInvalid()
+		{
+			// Saved instance: the persisted name is the change-tracking baseline, so clearing it marks
+			// NameField as changed and the name validation must fire.
+			var jobType = Helper.JobTypes.Create(new JobType { Name = "Valid", Description = "Desc" });
+
+			jobType.Name = string.Empty;
+
+			var result = _validator.Validate(jobType, RepositoryAction.Update);
+
+			using (new AssertionScope())
+			{
+				result.IsValid.Should().BeFalse();
+				result.TryGetFailReason(JobTypeValidationHandler.JobTypeValidationField.Name, out var reason).Should().BeTrue();
+				reason.Should().Be("Job Type Name cannot be empty or whitespace.");
+			}
+		}
+
+		[TestMethod]
 		public void ValidateBulk_WithDuplicateNamesDifferentCasing_ShouldFlagBothAsInvalid()
 		{
 			var jobTypes = new System.Collections.Generic.List<JobType>

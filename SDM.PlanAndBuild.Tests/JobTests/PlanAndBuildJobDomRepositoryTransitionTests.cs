@@ -11,8 +11,10 @@ namespace SDM.PlanAndBuild.Tests.JobTests
 
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.SDM;
+	using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
 	using Skyline.DataMiner.SDM.PlanAndBuild.Helpers;
 	using Skyline.DataMiner.SDM.PlanAndBuild.Models;
+	using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
 	using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Exceptions;
 
 	using Statuses = SharedMappers.DomIds.SlcPlan_And_Build.Behaviors.Job_Behavior.StatusesEnum;
@@ -48,7 +50,11 @@ namespace SDM.PlanAndBuild.Tests.JobTests
 			// Reuse a single JobType across calls within a test so multiple CreateJobAt calls in the same test
 			// don't collide with JobTypeValidator's name-uniqueness check.
 			_sharedJobType ??= _helper.JobTypes.Create(new JobType { Name = "TestType" });
-			return _helper.Jobs.Create(new PlanAndBuildJob { JobName = jobName, Type = new SdmObjectReference<JobType>(_sharedJobType.Identifier), State = status });
+			var job = new PlanAndBuildJob { JobName = jobName, Type = new SdmObjectReference<JobType>(_sharedJobType.Identifier), State = status };
+			// Active, Assigned, Review and Resolved jobs require an assignee and an assignment group.
+			job.Ownership.AssignedTo = new PnoObjectReference<Person>(Guid.NewGuid());
+			job.Ownership.AssignmentGroup = new PnoObjectReference<Team>(Guid.NewGuid());
+			return _helper.Jobs.Create(job);
 		}
 
 		#region TransitionTo - valid single-hop and multi-hop transitions

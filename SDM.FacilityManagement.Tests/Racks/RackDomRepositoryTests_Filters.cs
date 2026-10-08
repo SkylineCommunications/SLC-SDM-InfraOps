@@ -251,12 +251,12 @@ namespace SDM.FacilityManagement.Tests.Racks
         [TestMethod]
         public void RackDomRepository_ReadFilter_RacksWithoutRow()
         {
-            var row = Helper.Rows.Create(new Row
+            var row = Helper.Rows.Create(Helper.AttachRoom(new Row
             {
                 Identifier = Guid.NewGuid().ToString(),
                 RowId = $"ROW-{Guid.NewGuid():N}",
                 Name = "Row A",
-            });
+            }));
 
             var racks = new[]
             {
@@ -283,19 +283,17 @@ namespace SDM.FacilityManagement.Tests.Racks
             racks[0].Capacity.MaximumRackCapacity = 42;
             racks[1].Capacity.MaximumRackCapacity = 42;
 
-            Helper.Racks.Create(racks);
+            Helper.Racks.Create(racks.Select(Helper.AttachRow).ToArray());
 
             var filter = RackExposers.RowFk.Row.HasNoValue();
-            var expected = racks.Where(r => (!r.RowFk?.Row.HasValue()) ?? false).ToArray();
+            // Row is required, so no stored rack can be without one.
 
             var racksRetrieved = Helper.Racks.Read(filter);
 
             using (new AssertionScope())
             {
                 racksRetrieved.Should().NotBeNull();
-                racksRetrieved.Should().NotBeEmpty();
-                racksRetrieved.Should().HaveCount(expected.Length);
-                racksRetrieved.Should().BeEquivalentTo(expected);
+                racksRetrieved.Should().BeEmpty();
             }
         }
 
@@ -319,18 +317,18 @@ namespace SDM.FacilityManagement.Tests.Racks
         [TestMethod]
         public void RackDomRepository_ReadFilter_RacksWithRow()
         {
-            var firstRow = Helper.Rows.Create(new Row
+            var firstRow = Helper.Rows.Create(Helper.AttachRoom(new Row
             {
                 Identifier = Guid.NewGuid().ToString(),
                 RowId = $"ROW-{Guid.NewGuid():N}",
                 Name = "Row B1",
-            });
-            var secondRow = Helper.Rows.Create(new Row
+            }));
+            var secondRow = Helper.Rows.Create(Helper.AttachRoom(new Row
             {
                 Identifier = Guid.NewGuid().ToString(),
                 RowId = $"ROW-{Guid.NewGuid():N}",
                 Name = "Row B2",
-            });
+            }));
 
             var racks = new[]
             {
@@ -370,7 +368,7 @@ namespace SDM.FacilityManagement.Tests.Racks
                 rack.Capacity.MaximumRackCapacity = 42;
             }
 
-            Helper.Racks.Create(racks);
+            Helper.Racks.Create(racks.Select(Helper.AttachRow).ToArray());
 
             var filter = RackExposers.RowFk.Row.HasValue();
             var expected = racks.Where(r => (r.RowFk?.Row.HasValue()) ?? false).ToArray();
@@ -398,7 +396,7 @@ namespace SDM.FacilityManagement.Tests.Racks
 
             zone.ZoneCapacity.CoolingCapacity = 1;
 
-            zone = Helper.Zones.Create(zone);
+            zone = Helper.Zones.Create(Helper.AttachRoom(zone));
 
             var racks = new[]
             {
@@ -425,7 +423,7 @@ namespace SDM.FacilityManagement.Tests.Racks
             racks[0].Capacity.MaximumRackCapacity = 42;
             racks[1].Capacity.MaximumRackCapacity = 42;
 
-            Helper.Racks.Create(racks);
+            Helper.Racks.Create(racks.Select(Helper.AttachRow).ToArray());
 
             var filter = RackExposers.ZoneFk.Zone.HasNoValue();
             var expected = racks.Where(r => (!r.ZoneFk?.Zone.HasValue()) ?? false).ToArray();
@@ -470,7 +468,7 @@ namespace SDM.FacilityManagement.Tests.Racks
 
             firstZone.ZoneCapacity.CoolingCapacity = 1;
 
-            firstZone = Helper.Zones.Create(firstZone);
+            firstZone = Helper.Zones.Create(Helper.AttachRoom(firstZone));
 
             var secondZone = new Zone
             {
@@ -480,7 +478,7 @@ namespace SDM.FacilityManagement.Tests.Racks
             };
             secondZone.ZoneCapacity.CoolingCapacity = 1;
 
-            secondZone = Helper.Zones.Create(secondZone);
+            secondZone = Helper.Zones.Create(Helper.AttachRoom(secondZone));
 
             var racks = new[]
             {
@@ -520,7 +518,7 @@ namespace SDM.FacilityManagement.Tests.Racks
                 rack.Capacity.MaximumRackCapacity = 42;
             }
 
-            Helper.Racks.Create(racks);
+            Helper.Racks.Create(racks.Select(Helper.AttachRow).ToArray());
 
             var filter = RackExposers.ZoneFk.Zone.HasValue();
             var expected = racks.Where(r => (r.ZoneFk?.Zone.HasValue()) ?? false).ToArray();
@@ -533,6 +531,34 @@ namespace SDM.FacilityManagement.Tests.Racks
                 racksRetrieved.Should().NotBeEmpty();
                 racksRetrieved.Should().HaveCount(expected.Length);
                 racksRetrieved.Should().BeEquivalentTo(expected);
+            }
+        }
+
+        [TestMethod]
+        public void RackDomRepository_CreateAndReload_PersistsProperties()
+        {
+            var rack = new Rack
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                Name = "RK-1",
+                RackId = "RK-1",
+                Position = SlcFacility_Management.Enums.RackpositionenumEnum.Bottom,
+                Height = 200.0,
+                Width = 60.0,
+                Depth = 80.0,
+            };
+            rack.Capacity.MaximumRackCapacity = 42;
+            rack.Capacity.MaximumPowerCapacity = 10.0;
+
+            Helper.Racks.Create(Helper.AttachRow(rack));
+
+            var reloaded = Helper.Racks.Read(RackExposers.Identifier.Equal(rack.Identifier)).SingleOrDefault();
+
+            using (new AssertionScope())
+            {
+                reloaded.Should().NotBeNull();
+                reloaded!.RackId.Should().Be("RK-1");
+                reloaded.Capacity.MaximumRackCapacity.Should().Be(42);
             }
         }
     }

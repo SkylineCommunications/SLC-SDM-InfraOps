@@ -34,23 +34,21 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                 if (!ZoneValidationHandler.IsZoneIdValid(entity, out var idResult))
                 {
                     result.AddFailuresFrom(idResult);
-                    return result;
                 }
-
-                if (!ZoneValidationHandler.IsZoneNameValid(entity, out var nameResult))
-                {
-                    result.AddFailuresFrom(nameResult);
-                    return result;
-                }
-
-                if (IsIdInUse(entity.ZoneId, entity.Identifier))
+                else if (IsIdInUse(entity.ZoneId, entity.Identifier))
                 {
                     result.AddFailReason(ZoneValidationHandler.ZoneValidationField.ZoneId,
                         $"Zone Id '{entity.ZoneId}' is already in use.");
                 }
             }
 
-            if (!ZoneValidationHandler.IsCoolingCapacityValid(entity, out var capacityResult))
+            if (entity.ShouldValidate(entity.NameField) && !ZoneValidationHandler.IsZoneNameValid(entity, out var nameResult))
+            {
+                result.AddFailuresFrom(nameResult);
+            }
+
+            if (entity.ShouldValidate(entity.ZoneCapacity) &&
+                !ZoneValidationHandler.IsCoolingCapacityValid(entity, out var capacityResult))
             {
                 result.AddFrom(capacityResult);
             }

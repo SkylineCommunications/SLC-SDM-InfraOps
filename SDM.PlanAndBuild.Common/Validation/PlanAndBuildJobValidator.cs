@@ -207,9 +207,17 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
             return jobs
                 .Where(j => j.ShouldValidateAny(j.AssetsUsedField) && j.AssetsUsed != null)
                 .SelectMany(j => j.AssetsUsed)
-                .Where(asset => asset != null && !IsRemovedAssetEntry(asset) && IsReferenceSet(asset.AssetId))
+                .Where(RequiresExistingAsset)
                 .Select(asset => asset.AssetId.Identifier)
                 .ToList();
+        }
+
+        // Assets flagged as removed are historical entries; the asset is expected to be gone.
+        private static bool RequiresExistingAsset(JobAsset asset)
+        {
+            return asset != null
+                && IsReferenceSet(asset.AssetId)
+                && asset.Action != SharedMappers.DomIds.SlcPlan_And_Build.Enums.ActionforassetenumEnum.Removed;
         }
 
         private static List<string> CollectReferencedConnectionIds(List<PlanAndBuildJob> jobs)
@@ -454,6 +462,8 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
         {
             var result = new ValidationResult();
 
+            ValidateAssignmentRequired(job, result);
+
             if (job.ShouldValidate(job.Ownership.AssignedToField) &&
                 job.Ownership.AssignedTo.HasValue() &&
                 !IsPersonValid(job.Ownership.AssignedTo))
@@ -492,6 +502,8 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
         private ValidationResult ValidatePeopleAndOrganizations(PlanAndBuildJob job, HashSet<Guid> existingPersonIds, HashSet<Guid> existingTeamIds)
         {
             var result = new ValidationResult();
+
+            ValidateAssignmentRequired(job, result);
 
             if (job.ShouldValidate(job.Ownership.AssignedToField) &&
                 job.Ownership.AssignedTo.HasValue() &&
@@ -576,7 +588,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
             }
 
             var existing = existingAssetIds.ToHashSet();
-            foreach (var assetId in job.AssetsUsed.Where(asset => asset != null && !IsRemovedAssetEntry(asset) && IsReferenceSet(asset.AssetId)).Select(asset => asset.AssetId.Identifier))
+            foreach (var assetId in job.AssetsUsed.Where(RequiresExistingAsset).Select(asset => asset.AssetId.Identifier))
             {
                 if (!existing.Contains(assetId))
                 {
@@ -662,6 +674,29 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
                 .ReadByBigOrFilter(keys, id => TeamExposers.Id.Equal(id))
                 .Select(t => t.Id)
                 .ToHashSet();
+        }
+
+        private static void ValidateAssignmentRequired(PlanAndBuildJob job, ValidationResult result)
+        {
+            var requiresAssignment = job.State == SharedMappers.DomIds.SlcPlan_And_Build.Behaviors.Job_Behavior.StatusesEnum.Active
+                || job.State == SharedMappers.DomIds.SlcPlan_And_Build.Behaviors.Job_Behavior.StatusesEnum.Assigned
+                || job.State == SharedMappers.DomIds.SlcPlan_And_Build.Behaviors.Job_Behavior.StatusesEnum.Review
+                || job.State == SharedMappers.DomIds.SlcPlan_And_Build.Behaviors.Job_Behavior.StatusesEnum.Resolved;
+
+            if (!requiresAssignment)
+            {
+                return;
+            }
+
+            if (job.ShouldValidateAny(job.StateField, job.Ownership.AssignedToField) && !job.Ownership.AssignedTo.HasValue())
+            {
+                ReferenceValidationHelper.AddRequiredReference(result, PlanAndBuildJobValidationField.AssignedTo, "Assigned To");
+            }
+
+            if (job.ShouldValidateAny(job.StateField, job.Ownership.AssignmentGroupField) && !job.Ownership.AssignmentGroup.HasValue())
+            {
+                ReferenceValidationHelper.AddRequiredReference(result, PlanAndBuildJobValidationField.AssignmentGroup, "Assignment Group");
+            }
         }
 
         private static bool IsReferenceSet<T>(SdmObjectReference<T> reference)

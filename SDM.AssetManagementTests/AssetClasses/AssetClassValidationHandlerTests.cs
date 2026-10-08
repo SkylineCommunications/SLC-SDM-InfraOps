@@ -12,6 +12,7 @@
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.AssetManagement.Validation;
+    using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
     /// <summary>
     /// Unit tests for AssetClass validation business rules.
@@ -613,6 +614,15 @@
         }
 
         [TestMethod]
+        public void Holders_WithNullAssetClass_ShouldFailOnHolderSlotNumberField()
+        {
+            var result = AssetClassValidationHandler.ValidateAssetClassHolders(null);
+
+            result.IsValid.Should().BeFalse();
+            result.TryGetFailReason(AssetClassValidationHandler.AssetClassValidationField.HolderSlotNumber, out _).Should().BeTrue();
+        }
+
+        [TestMethod]
         public void Holders_WithNullHoldersList_ShouldBeValid()
         {
             // Arrange
@@ -717,6 +727,154 @@
 
             // Assert
             result.IsValid.Should().BeTrue("same slot number with different roles is allowed");
+        }
+
+        #endregion
+
+        #region Ported From Shared Tests
+
+        [TestMethod]
+        [DataRow("Depth", null, DisplayName = "Null Depth")]
+        [DataRow("Width", 20.0, DisplayName = "Positive Width")]
+        [DataRow("Width", 0.0, DisplayName = "Zero Width")]
+        [DataRow("Width", null, DisplayName = "Null Width")]
+        [DataRow("Height", 15.0, DisplayName = "Positive Height")]
+        [DataRow("Height", 0.0, DisplayName = "Zero Height")]
+        [DataRow("Height", null, DisplayName = "Null Height")]
+        [DataRow("HeightU", 2.0, DisplayName = "Positive HeightU")]
+        [DataRow("Weight", 7.5, DisplayName = "Positive Weight")]
+        [DataRow("Weight", 0.0, DisplayName = "Zero Weight")]
+        [DataRow("Weight", null, DisplayName = "Null Weight")]
+        [DataRow("Typical", 0.0, DisplayName = "Zero Typical Power")]
+        [DataRow("Typical", null, DisplayName = "Null Typical Power")]
+        [DataRow("Maximum", 0.0, DisplayName = "Zero Maximum Power")]
+        [DataRow("Maximum", null, DisplayName = "Null Maximum Power")]
+        public void NumericProperty_WithNonNegativeOrNullValue_ShouldBeValid(string property, double? value)
+        {
+            // Arrange
+            var deviceType = new DeviceType();
+            var assetClass = new AssetClass { DeviceTypeId = deviceType };
+
+            switch (property)
+            {
+                case "Depth": assetClass.Depth = value; break;
+                case "Width": assetClass.Width = value; break;
+                case "Height": assetClass.Height = value; break;
+                case "HeightU": assetClass.HeightU = value; break;
+                case "Weight": assetClass.Weight = value; break;
+                case "Typical": assetClass.TypicalPowerConsumption = value; break;
+                case "Maximum": assetClass.MaximumPowerConsumption = value; break;
+            }
+
+            // Act
+            ValidationResult result;
+            var isValid = property switch
+            {
+                "Depth" => AssetClassValidationHandler.IsDepthValid(assetClass, out result),
+                "Width" => AssetClassValidationHandler.IsWidthValid(assetClass, out result),
+                "Height" => AssetClassValidationHandler.IsHeightValid(assetClass, out result),
+                "HeightU" => AssetClassValidationHandler.IsHeightUnitValid(assetClass, deviceType, out result),
+                "Weight" => AssetClassValidationHandler.IsWeightValid(assetClass, out result),
+                "Typical" => AssetClassValidationHandler.IsTypicalPowerConsumptionValid(assetClass, out result),
+                _ => AssetClassValidationHandler.IsMaxPowerConsumptionValid(assetClass, out result),
+            };
+
+            // Assert
+            using (new AssertionScope())
+            {
+                isValid.Should().BeTrue();
+                result.IsValid.Should().BeTrue();
+                result.FailureReasons.Should().BeEmpty();
+            }
+        }
+
+        [TestMethod]
+        [DataRow("Depth", -1.0, DisplayName = "Negative Depth")]
+        [DataRow("Width", -1.0, DisplayName = "Negative Width")]
+        [DataRow("Height", -1.0, DisplayName = "Negative Height")]
+        [DataRow("HeightU", -1.0, DisplayName = "Negative HeightU")]
+        [DataRow("Weight", -1.0, DisplayName = "Negative Weight")]
+        [DataRow("Typical", -1.0, DisplayName = "Negative Typical Power")]
+        [DataRow("Maximum", -1.0, DisplayName = "Negative Maximum Power")]
+        public void NumericProperty_WithNegativeValue_ShouldReturnFailReasonOnField(string property, double value)
+        {
+            // Arrange
+            var deviceType = new DeviceType();
+            var assetClass = new AssetClass { DeviceTypeId = deviceType };
+            AssetClassValidationHandler.AssetClassValidationField expectedField;
+
+            switch (property)
+            {
+                case "Depth": assetClass.Depth = value; expectedField = AssetClassValidationHandler.AssetClassValidationField.Depth; break;
+                case "Width": assetClass.Width = value; expectedField = AssetClassValidationHandler.AssetClassValidationField.Width; break;
+                case "Height": assetClass.Height = value; expectedField = AssetClassValidationHandler.AssetClassValidationField.Height; break;
+                case "HeightU": assetClass.HeightU = value; expectedField = AssetClassValidationHandler.AssetClassValidationField.HeightU; break;
+                case "Weight": assetClass.Weight = value; expectedField = AssetClassValidationHandler.AssetClassValidationField.Weight; break;
+                case "Typical": assetClass.TypicalPowerConsumption = value; expectedField = AssetClassValidationHandler.AssetClassValidationField.TypicalPowerConsumption; break;
+                default: assetClass.MaximumPowerConsumption = value; expectedField = AssetClassValidationHandler.AssetClassValidationField.MaxPowerConsumption; break;
+            }
+
+            // Act
+            ValidationResult result;
+            var isValid = property switch
+            {
+                "Depth" => AssetClassValidationHandler.IsDepthValid(assetClass, out result),
+                "Width" => AssetClassValidationHandler.IsWidthValid(assetClass, out result),
+                "Height" => AssetClassValidationHandler.IsHeightValid(assetClass, out result),
+                "HeightU" => AssetClassValidationHandler.IsHeightUnitValid(assetClass, deviceType, out result),
+                "Weight" => AssetClassValidationHandler.IsWeightValid(assetClass, out result),
+                "Typical" => AssetClassValidationHandler.IsTypicalPowerConsumptionValid(assetClass, out result),
+                _ => AssetClassValidationHandler.IsMaxPowerConsumptionValid(assetClass, out result),
+            };
+
+            // Assert
+            using (new AssertionScope())
+            {
+                isValid.Should().BeFalse();
+                result.IsValid.Should().BeFalse();
+                result.TryGetFailReason(expectedField, out var reason).Should().BeTrue();
+                reason.Should().NotBeNullOrWhiteSpace();
+            }
+        }
+
+        [TestMethod]
+        [DataRow(false, 1L, SlcAsset_Management.Enums.HierarchyRoleEnum.Module, true, DisplayName = "No holders, new slot 1")]
+        [DataRow(false, 0L, SlcAsset_Management.Enums.HierarchyRoleEnum.Module, true, DisplayName = "No holders, slot 0 boundary")]
+        [DataRow(true, 0L, SlcAsset_Management.Enums.HierarchyRoleEnum.Card, false, DisplayName = "Existing slot and role duplicated")]
+        [DataRow(true, 0L, SlcAsset_Management.Enums.HierarchyRoleEnum.Module, true, DisplayName = "Existing slot, different role")]
+        [DataRow(true, -1L, SlcAsset_Management.Enums.HierarchyRoleEnum.Chassis, false, DisplayName = "Negative slot")]
+        public void Holders_WithCandidateSlot_ShouldValidateAgainstExistingHolders(
+            bool withExistingHolders,
+            long candidateSlot,
+            SlcAsset_Management.Enums.HierarchyRoleEnum candidateRole,
+            bool expectedValid)
+        {
+            // Arrange
+            var holders = new List<AssetHolder>();
+            if (withExistingHolders)
+            {
+                holders.Add(new AssetHolder { SlotNumber = 0, HierarchyRole = SlcAsset_Management.Enums.HierarchyRoleEnum.Card });
+                holders.Add(new AssetHolder { SlotNumber = 1, HierarchyRole = SlcAsset_Management.Enums.HierarchyRoleEnum.Card });
+                holders.Add(new AssetHolder { SlotNumber = 0, HierarchyRole = SlcAsset_Management.Enums.HierarchyRoleEnum.Fan });
+            }
+
+            holders.Add(new AssetHolder { SlotNumber = candidateSlot, HierarchyRole = candidateRole });
+            var assetClass = new AssetClass { Holders = holders };
+
+            // Act
+            var result = AssetClassValidationHandler.ValidateAssetClassHolders(assetClass);
+
+            // Assert
+            using (new AssertionScope())
+            {
+                result.IsValid.Should().Be(expectedValid);
+                if (!expectedValid)
+                {
+                    result.TryGetFailReason(
+                        AssetClassValidationHandler.AssetClassValidationField.HolderSlotNumber,
+                        out var reason).Should().BeTrue();
+                }
+            }
         }
 
         #endregion

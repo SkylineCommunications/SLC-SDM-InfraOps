@@ -230,6 +230,30 @@ namespace SDM.PlanAndBuild.Tests.JobTests
 			result.IsValid.Should().BeTrue();
 		}
 
+		[TestMethod]
+		public void Validate_SavedJobWithNameClearedToEmpty_ShouldReturnInvalid()
+		{
+			// Saved instance: the persisted name is the change-tracking baseline, so clearing it marks
+			// JobNameField as changed and the name validation must fire.
+			var created = Helper.Jobs.Create(new PlanAndBuildJob
+			{
+				JobName = "Valid",
+				JobDescription = "dest",
+				Type = new SdmObjectReference<JobType>(_jobType.Identifier),
+			});
+
+			created.JobName = string.Empty;
+
+			var result = _validator.Validate(created, RepositoryAction.Update);
+
+			using (new AssertionScope())
+			{
+				result.IsValid.Should().BeFalse();
+				result.TryGetFailReason(PlanAndBuildJobValidationHandler.PlanAndBuildJobValidationField.JobName, out var reason).Should().BeTrue();
+				reason.Should().Be("Job Name cannot be empty or whitespace.");
+			}
+		}
+
 		#endregion
 
 		#region ValidateBulk
@@ -290,6 +314,31 @@ namespace SDM.PlanAndBuild.Tests.JobTests
 				reason0.Should().Contain("duplicated within the validation batch");
 				results[1].TryGetFailReason(PlanAndBuildJobValidationHandler.PlanAndBuildJobValidationField.JobName, out var reason1).Should().BeTrue();
 				reason1.Should().Contain("duplicated within the validation batch");
+			}
+		}
+
+		[TestMethod]
+		public void ValidateBulk_WithNameInOtherBatchEntry_ShouldFlagOnlyDuplicatesWithExactReason()
+		{
+			var jobs = new System.Collections.Generic.List<PlanAndBuildJob>
+			{
+				new PlanAndBuildJob { JobName = "Base", Type = new SdmObjectReference<JobType>(_jobType.Identifier) },
+				new PlanAndBuildJob { JobName = "Duplicate", Type = new SdmObjectReference<JobType>(_jobType.Identifier) },
+				new PlanAndBuildJob { JobName = "Duplicate", Type = new SdmObjectReference<JobType>(_jobType.Identifier) },
+			};
+
+			var results = _validator.ValidateBulk(jobs, RepositoryAction.Create);
+
+			using (new AssertionScope())
+			{
+				results.Should().HaveCount(3);
+				results[0].IsValid.Should().BeTrue();
+				results[1].IsValid.Should().BeFalse();
+				results[1].TryGetFailReason(PlanAndBuildJobValidationHandler.PlanAndBuildJobValidationField.JobName, out var reason1).Should().BeTrue();
+				reason1.Should().Be("Job Name 'Duplicate' is duplicated within the validation batch.");
+				results[2].IsValid.Should().BeFalse();
+				results[2].TryGetFailReason(PlanAndBuildJobValidationHandler.PlanAndBuildJobValidationField.JobName, out var reason2).Should().BeTrue();
+				reason2.Should().Be("Job Name 'Duplicate' is duplicated within the validation batch.");
 			}
 		}
 
@@ -556,6 +605,61 @@ namespace SDM.PlanAndBuild.Tests.JobTests
 				result.IsValid.Should().BeFalse();
 				result.TryGetFailReason(PlanAndBuildJobValidationHandler.PlanAndBuildJobValidationField.AssetsUsed, out var reason).Should().BeTrue();
 				reason.Should().Be($"Referenced Asset '{assetId}' does not exist.");
+			}
+		}
+
+		[TestMethod]
+		public void Validate_WithRemovedActionOnUnknownAsset_ShouldReturnValid()
+		{
+			var assetId = Guid.NewGuid().ToString();
+			var validator = new PlanAndBuildJobValidator(Helper, ConnectionHelper.CreateDefaultPeopleApiMock(), new ExternalReferenceCheckerStub());
+			var job = CreateValidJob();
+			job.AssetsUsed = new List<JobAsset>
+			{
+				new JobAsset
+				{
+					AssetId = new SdmObjectReference<Asset>(assetId),
+					Action = SharedMappers.DomIds.SlcPlan_And_Build.Enums.ActionforassetenumEnum.Removed,
+				},
+			};
+
+			var result = validator.Validate(job, RepositoryAction.Create);
+
+			using (new AssertionScope())
+			{
+				result.IsValid.Should().BeTrue();
+				result.TryGetFailReason(PlanAndBuildJobValidationHandler.PlanAndBuildJobValidationField.AssetsUsed, out _).Should().BeFalse();
+			}
+		}
+
+		[TestMethod]
+		public void Validate_WithRemovedAndUnknownNonRemovedAssets_ShouldOnlyReportNonRemoved()
+		{
+			var removedId = Guid.NewGuid().ToString();
+			var unknownId = Guid.NewGuid().ToString();
+			var validator = new PlanAndBuildJobValidator(Helper, ConnectionHelper.CreateDefaultPeopleApiMock(), new ExternalReferenceCheckerStub());
+			var job = CreateValidJob();
+			job.AssetsUsed = new List<JobAsset>
+			{
+				new JobAsset
+				{
+					AssetId = new SdmObjectReference<Asset>(removedId),
+					Action = SharedMappers.DomIds.SlcPlan_And_Build.Enums.ActionforassetenumEnum.Removed,
+				},
+				new JobAsset
+				{
+					AssetId = new SdmObjectReference<Asset>(unknownId),
+					Action = SharedMappers.DomIds.SlcPlan_And_Build.Enums.ActionforassetenumEnum.NewlyInstalled,
+				},
+			};
+
+			var result = validator.Validate(job, RepositoryAction.Create);
+
+			using (new AssertionScope())
+			{
+				result.IsValid.Should().BeFalse();
+				result.TryGetFailReason(PlanAndBuildJobValidationHandler.PlanAndBuildJobValidationField.AssetsUsed, out var reason).Should().BeTrue();
+				reason.Should().Contain(unknownId).And.NotContain(removedId);
 			}
 		}
 
@@ -845,7 +949,7 @@ namespace SDM.PlanAndBuild.Tests.JobTests
 
 		private PlanAndBuildJob CreateValidJob(Statuses status = Statuses.New)
 		{
-			return new PlanAndBuildJob
+			var job = new PlanAndBuildJob
 			{
 				JobName = $"Job {Guid.NewGuid()}",
 				Type = new SdmObjectReference<JobType>(_jobType.Identifier),
@@ -853,6 +957,9 @@ namespace SDM.PlanAndBuild.Tests.JobTests
 				End = new DateTime(2026, 1, 15),
 				State = status,
 			};
+			job.Ownership.AssignedTo = new PnoObjectReference<Person>(Guid.NewGuid());
+			job.Ownership.AssignmentGroup = new PnoObjectReference<Team>(Guid.NewGuid());
+			return job;
 		}
 
 		private void ChangeStateGatedField(PlanAndBuildJob job, string fieldName)
