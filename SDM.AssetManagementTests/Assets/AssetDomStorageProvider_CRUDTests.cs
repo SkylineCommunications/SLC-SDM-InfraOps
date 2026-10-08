@@ -8,7 +8,12 @@ namespace SDM.AssetManagement.Tests.Assets
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using SDM.AssetManagement.Tests.Setup;
     using SharedMappers.DomIds;
+    using Moq;
+    using Skyline.DataMiner.Net;
+    using Skyline.DataMiner.Net.Messages;
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
+    using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+    using Skyline.DataMiner.Net.ManagerStore;
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.Extensions;
@@ -416,6 +421,25 @@ namespace SDM.AssetManagement.Tests.Assets
 
             reloaded.Should().NotBeNull();
             reloaded.OperationalFlags.Should().Contain(SlcAsset_Management.Enums.Operationalflagsenum.Faulty);
+        }
+
+        [TestMethod]
+        public void OperationalFlags_AddFlagToExistingAsset_StoresInt32ListMatchingFieldDefinition()
+        {
+            var created = Helper.AssetManagement.Assets.Create(NewMinimalAsset("FLAG-5"));
+
+            var toUpdate = ReloadAsset(created.Identifier);
+            toUpdate.OperationalFlags.Add(SlcAsset_Management.Enums.Operationalflagsenum.Faulty);
+
+            // The in-memory DOM mock normalizes list values on read, so inspect what the repository sends.
+            // DomHelper and the in-memory DOM normalize list values, so inspect the instance the repository builds.
+            var toInstance = typeof(AssetDomRepository).GetMethod("ToInstance", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            var instance = (DomInstance)toInstance.Invoke(new AssetDomRepository(Helper.Connection), new object[] { toUpdate });
+
+            // The operational flags field is an Int32 generic enum; the DOM rejects any other element type.
+            instance.Sections.SelectMany(s => s.FieldValues)
+                .Single(f => f.FieldDescriptorID.Equals(SlcAsset_Management.Sections.AssetInformation.OperationalFlags))
+                .Value.Type.Should().Be(typeof(List<int>));
         }
 
         [TestMethod]

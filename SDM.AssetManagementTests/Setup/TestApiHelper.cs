@@ -28,6 +28,11 @@ namespace SDM.AssetManagement.Tests.Setup
         /// Use these instead of DemoData templates for accurate test assertions.
         /// </summary>
         ITestDataCache TestData { get; }
+
+        /// <summary>
+        /// Underlying mocked connection, for inspecting raw DOM instances.
+        /// </summary>
+        IConnection Connection { get; }
     }
 
     /// <summary>
@@ -65,6 +70,7 @@ namespace SDM.AssetManagement.Tests.Setup
     {
         public TestApiHelper(IConnection connection, IPeopleAndOrganizationsApi? peopleApi = null)
         {
+            Connection = connection;
             AssetManagement = new AssetManagementApiHelper(connection, new FacilityManagementApiHelper(connection), peopleApi ?? PeopleApiMock.CreateDefault());
             FacilityManagement = new FacilityManagementApiHelper(connection);
             TestData = new TestDataCache();
@@ -73,5 +79,6 @@ namespace SDM.AssetManagement.Tests.Setup
         public IAssetManagementApiHelper AssetManagement { get; }
         public IFacilityManagementApiHelper FacilityManagement { get; }
         public ITestDataCache TestData { get; }
+        public IConnection Connection { get; }
     }
 }
