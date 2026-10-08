@@ -609,6 +609,61 @@ namespace SDM.PlanAndBuild.Tests.JobTests
 		}
 
 		[TestMethod]
+		public void Validate_WithRemovedActionOnUnknownAsset_ShouldReturnValid()
+		{
+			var assetId = Guid.NewGuid().ToString();
+			var validator = new PlanAndBuildJobValidator(Helper, ConnectionHelper.CreateDefaultPeopleApiMock(), new ExternalReferenceCheckerStub());
+			var job = CreateValidJob();
+			job.AssetsUsed = new List<JobAsset>
+			{
+				new JobAsset
+				{
+					AssetId = new SdmObjectReference<Asset>(assetId),
+					Action = SharedMappers.DomIds.SlcPlan_And_Build.Enums.ActionforassetenumEnum.Removed,
+				},
+			};
+
+			var result = validator.Validate(job, RepositoryAction.Create);
+
+			using (new AssertionScope())
+			{
+				result.IsValid.Should().BeTrue();
+				result.TryGetFailReason(PlanAndBuildJobValidationHandler.PlanAndBuildJobValidationField.AssetsUsed, out _).Should().BeFalse();
+			}
+		}
+
+		[TestMethod]
+		public void Validate_WithRemovedAndUnknownNonRemovedAssets_ShouldOnlyReportNonRemoved()
+		{
+			var removedId = Guid.NewGuid().ToString();
+			var unknownId = Guid.NewGuid().ToString();
+			var validator = new PlanAndBuildJobValidator(Helper, ConnectionHelper.CreateDefaultPeopleApiMock(), new ExternalReferenceCheckerStub());
+			var job = CreateValidJob();
+			job.AssetsUsed = new List<JobAsset>
+			{
+				new JobAsset
+				{
+					AssetId = new SdmObjectReference<Asset>(removedId),
+					Action = SharedMappers.DomIds.SlcPlan_And_Build.Enums.ActionforassetenumEnum.Removed,
+				},
+				new JobAsset
+				{
+					AssetId = new SdmObjectReference<Asset>(unknownId),
+					Action = SharedMappers.DomIds.SlcPlan_And_Build.Enums.ActionforassetenumEnum.NewlyInstalled,
+				},
+			};
+
+			var result = validator.Validate(job, RepositoryAction.Create);
+
+			using (new AssertionScope())
+			{
+				result.IsValid.Should().BeFalse();
+				result.TryGetFailReason(PlanAndBuildJobValidationHandler.PlanAndBuildJobValidationField.AssetsUsed, out var reason).Should().BeTrue();
+				reason.Should().Contain(unknownId).And.NotContain(removedId);
+			}
+		}
+
+		[TestMethod]
 		public void Validate_WithUnknownConnectionAndExternalChecker_ShouldReturnInvalid()
 		{
 			var connectionId = Guid.NewGuid().ToString();

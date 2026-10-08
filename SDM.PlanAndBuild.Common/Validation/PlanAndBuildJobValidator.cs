@@ -207,9 +207,17 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
             return jobs
                 .Where(j => j.ShouldValidateAny(j.AssetsUsedField) && j.AssetsUsed != null)
                 .SelectMany(j => j.AssetsUsed)
-                .Where(asset => asset != null && IsReferenceSet(asset.AssetId))
+                .Where(RequiresExistingAsset)
                 .Select(asset => asset.AssetId.Identifier)
                 .ToList();
+        }
+
+        // Assets flagged as removed are historical entries; the asset is expected to be gone.
+        private static bool RequiresExistingAsset(JobAsset asset)
+        {
+            return asset != null
+                && IsReferenceSet(asset.AssetId)
+                && asset.Action != SharedMappers.DomIds.SlcPlan_And_Build.Enums.ActionforassetenumEnum.Removed;
         }
 
         private static List<string> CollectReferencedConnectionIds(List<PlanAndBuildJob> jobs)
@@ -580,7 +588,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
             }
 
             var existing = existingAssetIds.ToHashSet();
-            foreach (var assetId in job.AssetsUsed.Where(asset => asset != null && IsReferenceSet(asset.AssetId)).Select(asset => asset.AssetId.Identifier))
+            foreach (var assetId in job.AssetsUsed.Where(RequiresExistingAsset).Select(asset => asset.AssetId.Identifier))
             {
                 if (!existing.Contains(assetId))
                 {
