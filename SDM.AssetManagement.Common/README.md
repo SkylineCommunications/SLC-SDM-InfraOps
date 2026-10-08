@@ -4,6 +4,12 @@
 
 Standard API for InfraOps
 
+### History instance identifiers
+
+`HistoryInfo.ModifiedInstanceID` remains an `ISdmObjectReference<ISdmObject>`, but its identifier is read, written, and filtered as a string in DOM. History Info section `cec87feb-30d0-4270-8bf8-7e8282d0513c`, Instance ID field `4d913684-12ec-4666-98a2-5e4db7fb5acf`, is `System.String`; do not convert its value to a GUID. The History Job field remains GUID-backed.
+
+The repository does not contain the external code generator's schema or templates, and its source-generator package reference is disabled. When regenerating the checked-in History repository, preserve this string storage mapping and run the History repository tests. The mock section definition already declares Instance ID as `typeof(string)`.
+
 ### About DataMiner
 
 DataMiner is a transformational platform that provides vendor-independent control and monitoring of devices and services. Out of the box and by design, it addresses key challenges such as security, complexity, multi-cloud, and much more. It has a pronounced open architecture and powerful capabilities enabling users to evolve easily and continuously.

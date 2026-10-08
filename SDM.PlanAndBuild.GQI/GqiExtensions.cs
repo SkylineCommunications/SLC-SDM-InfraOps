@@ -4,6 +4,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.GQI
 
     using Skyline.DataMiner.Analytics.GenericInterface;
     using Skyline.DataMiner.SDM.PlanAndBuild.Helpers;
+    using Skyline.DataMiner.SDM.InfraOps.Orchestration;
 
     /// <summary>
     /// Provides extension methods for obtaining a Plan and Build API helper from GQIDMS and OnInitInputArgs
@@ -24,7 +25,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.GQI
                 throw new ArgumentNullException(nameof(dms), "dms cannot be null.");
             }
 
-            return new PlanAndBuildApiHelper(dms.GetConnection());
+            return InfraOpsApiHelperFactory.CreatePlanAndBuildApiHelper(dms.GetConnection());
         }
 
         /// <summary>

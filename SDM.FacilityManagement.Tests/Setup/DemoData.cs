@@ -1,8 +1,10 @@
-﻿namespace SDM.FacilityManagement.Tests.Setup
+namespace SDM.FacilityManagement.Tests.Setup
 {
     using System.Collections.Generic;
 
     using SharedMappers.DomIds;
+
+    using Skyline.DataMiner.SDM;
 
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
 
@@ -437,5 +439,16 @@
 			new Site { Identifier = Guid.NewGuid().ToString(), Name = "Austin Office",   Description = "US south office", Address = "321 Congress Ave",    City = "Austin",   ZipCode = "73301",   Country = "USA",            Latitude = 30.2672,  Longitude = -97.7431, SiteId = "ST-005" },
 			new Site { Identifier = Guid.NewGuid().ToString(), Name = "Sydney Office",   Description = "APAC office",    Address = "888 George St",        City = "Sydney",   ZipCode = "2000",    Country = "Australia",      Latitude = -33.8688, Longitude = 151.2093, SiteId = "ST-006" },
 		];
+
+		static DemoData()
+		{
+			// Every demo entity hangs off one shared chain: Facility[0] > Floor[0] > Room[0] > Row[0].
+			Floors.ForEach(floor => floor.FacilityFk.Facility = new SdmObjectReference<Facility>(Facilities[0].Identifier));
+			Rooms.ForEach(room => room.FloorFk.Floor = new SdmObjectReference<Floor>(Floors[0].Identifier));
+			Rows.ForEach(row => row.RoomFk.Room = new SdmObjectReference<Room>(Rooms[0].Identifier));
+			Zones.ForEach(zone => zone.RoomFk.Room = new SdmObjectReference<Room>(Rooms[0].Identifier));
+			Desks.ForEach(desk => desk.RoomFk.Room = new SdmObjectReference<Room>(Rooms[0].Identifier));
+			Racks.ForEach(rack => rack.RowFk.Row = new SdmObjectReference<Row>(Rows[0].Identifier));
+		}
 	}
 }

@@ -36,20 +36,17 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                 if (!RowValidationHandler.IsRowIdValid(entity, out var idResult))
                 {
                     result.AddFailuresFrom(idResult);
-                    return result;
                 }
-
-                if (!RowValidationHandler.IsRowNameValid(entity, out var nameResult))
-                {
-                    result.AddFailuresFrom(nameResult);
-                    return result;
-                }
-
-                if (IsIdInUse(entity.RowId, entity.Identifier))
+                else if (IsIdInUse(entity.RowId, entity.Identifier))
                 {
                     result.AddFailReason(RowValidationHandler.RowValidationField.RowId,
                         $"Row Id '{entity.RowId}' is already in use.");
                 }
+            }
+
+            if (entity.ShouldValidate(entity.NameField) && !RowValidationHandler.IsRowNameValid(entity, out var nameResult))
+            {
+                result.AddFailuresFrom(nameResult);
             }
 
             result.AddFailuresFrom(ValidateReferencesAgainstDatabase(new List<Row> { entity })[0]);

@@ -36,20 +36,27 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                 if (!FacilityValidationHandler.IsFacilityIdValid(entity, out var idResult))
                 {
                     result.AddFailuresFrom(idResult);
-                    return result;
                 }
-
-                if (!FacilityValidationHandler.IsFacilityNameValid(entity, out var nameResult))
-                {
-                    result.AddFailuresFrom(nameResult);
-                    return result;
-                }
-
-                if (IsIdInUse(entity.FacilityId, entity.Identifier))
+                else if (IsIdInUse(entity.FacilityId, entity.Identifier))
                 {
                     result.AddFailReason(FacilityValidationHandler.FacilityValidationField.FacilityId,
                         $"Facility Id '{entity.FacilityId}' is already in use.");
                 }
+            }
+
+            if (entity.ShouldValidate(entity.NameField) && !FacilityValidationHandler.IsFacilityNameValid(entity, out var nameResult))
+            {
+                result.AddFailuresFrom(nameResult);
+            }
+
+            if (entity.ShouldValidate(entity.LatitudeField) && !FacilityValidationHandler.IsFacilityLatitudeValid(entity, out var latitudeResult))
+            {
+                result.AddFailuresFrom(latitudeResult);
+            }
+
+            if (entity.ShouldValidate(entity.LongitudeField) && !FacilityValidationHandler.IsFacilityLongitudeValid(entity, out var longitudeResult))
+            {
+                result.AddFailuresFrom(longitudeResult);
             }
 
             result.AddFailuresFrom(ValidateReferencesAgainstDatabase(new List<Facility> { entity })[0]);
@@ -113,7 +120,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
             return FacilityBulkValidationHelper.RunBulkValidation(
                 entities,
                 FacilityValidationHandler.IsFacilityIdValid,
-                FacilityValidationHandler.IsFacilityNameValid,
+                FacilityValidationHandler.IsFacilityNameAndCoordinatesValid,
                 ValidateIdDuplicatesInBatch,
                 ValidateBulkIdsAgainstDatabase,
                 ValidateReferencesAgainstDatabase);

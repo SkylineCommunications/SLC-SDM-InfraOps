@@ -22,6 +22,16 @@ namespace SDM.AssetManagement.Tests.CableTypes
         }
 
         [TestMethod]
+        public void Name_WithEmptyString_ShouldFail()
+        {
+            var isValid = CableTypeValidationHandler.IsCableTypeNameValid(string.Empty, out var result);
+
+            isValid.Should().BeFalse();
+            result.GetFailReason(CableTypeValidationHandler.CableTypeValidationField.Name)
+                .Should().Be("Cable Type Name cannot be empty or whitespace.");
+        }
+
+        [TestMethod]
         public void Categories_WithNullCableType_ShouldFail()
         {
             var isValid = CableTypeValidationHandler.IsCableTypeCategoriesValid(null, out var result);

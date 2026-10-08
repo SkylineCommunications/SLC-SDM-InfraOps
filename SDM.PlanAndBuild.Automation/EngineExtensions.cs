@@ -4,6 +4,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Automation
 
     using Skyline.DataMiner.Automation;
     using Skyline.DataMiner.SDM.PlanAndBuild.Helpers;
+    using Skyline.DataMiner.SDM.InfraOps.Orchestration;
 
     /// <summary>
     /// Provides extension methods for the <see cref="IEngine"/> interface for obtaining the Plan and Build API helper.
@@ -23,7 +24,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Automation
                 throw new ArgumentNullException(nameof(engine), "Engine cannot be null.");
             }
 
-            return new PlanAndBuildApiHelper(engine.GetUserConnection());
+            return InfraOpsApiHelperFactory.CreatePlanAndBuildApiHelper(engine.GetUserConnection());
         }
     }
 }

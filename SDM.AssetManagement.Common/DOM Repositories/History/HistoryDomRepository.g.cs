@@ -549,10 +549,10 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     obj.HistoryInfo.Job = new ISdmObjectReference<ISdmObject>(Convert.ToString(_job.Value));
                 }
 
-                var _modifiedInstanceId = _historyInfoSection.GetValue<Guid>(AssetManagement.Models.HistoryDomMapper.HistoryInfo.ModifiedInstanceId);
+                var _modifiedInstanceId = _historyInfoSection.GetValue<string>(AssetManagement.Models.HistoryDomMapper.HistoryInfo.ModifiedInstanceId);
                 if (_modifiedInstanceId != null)
                 {
-                    obj.HistoryInfo.ModifiedInstanceID = new ISdmObjectReference<ISdmObject>(Convert.ToString(_modifiedInstanceId.Value));
+                    obj.HistoryInfo.ModifiedInstanceID = new ISdmObjectReference<ISdmObject>(_modifiedInstanceId.Value);
                 }
 
                 var _modifiedInstanceDefinitionId = _historyInfoSection.GetValue<string>(AssetManagement.Models.HistoryDomMapper.HistoryInfo.ModifiedInstanceDefinitionId);
@@ -613,7 +613,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
                 if (info.ModifiedInstanceID.HasValue())
                 {
-                    section.AddOrUpdateValue<Guid>(HistoryDomMapper.HistoryInfo.ModifiedInstanceId, info.ModifiedInstanceID.GetIdentifierAsGuid());
+                    section.AddOrUpdateValue<string>(HistoryDomMapper.HistoryInfo.ModifiedInstanceId, info.ModifiedInstanceID.Identifier);
                 }
 
                 if (info.ModifiedInstanceDefinitionID != default)
@@ -651,25 +651,32 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModified, comparer, (DateTime)value);
                 case "LastModifiedBy":
                     return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModifiedBy, comparer, (string)value);
+
                 case "HistoryInfo.Description":
                     return FieldFilter(HistoryDomMapper.HistoryInfo.Description, comparer, value);
+
                 case "HistoryInfo.Job" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && !ISdmObjectReference<ISdmObject>.Convert<ISdmObject>(value).HasValue():
                     return DomInstanceExposers.FieldValues.KeyExists(HistoryDomMapper.HistoryInfo.Job.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "HistoryInfo.Job":
-                    return FieldFilter(HistoryDomMapper.HistoryInfo.Job, comparer, System.Guid.Parse(ISdmObjectReference<ISdmObject>.Convert<ISdmObject>(value).Identifier));
+                    return FieldFilter(HistoryDomMapper.HistoryInfo.Job, comparer, ISdmObjectReference<ISdmObject>.Convert<ISdmObject>(value).GetIdentifierAsGuid());
+
                 case "HistoryInfo.ModifiedInstanceID" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && !ISdmObjectReference<ISdmObject>.Convert<ISdmObject>(value).HasValue():
                     return DomInstanceExposers.FieldValues.KeyExists(HistoryDomMapper.HistoryInfo.ModifiedInstanceId.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "HistoryInfo.ModifiedInstanceID":
-                    return FieldFilter(HistoryDomMapper.HistoryInfo.ModifiedInstanceId, comparer, System.Guid.Parse(ISdmObjectReference<ISdmObject>.Convert<ISdmObject>(value).Identifier));
+                    return FieldFilter(HistoryDomMapper.HistoryInfo.ModifiedInstanceId, comparer, ISdmObjectReference<ISdmObject>.Convert<ISdmObject>(value).Identifier);
+
                 case "HistoryInfo.ModifiedInstanceDefinitionID":
                     return FieldFilter(HistoryDomMapper.HistoryInfo.ModifiedInstanceDefinitionId, comparer, value);
+
                 case "HistoryInfo.ExtraInfo":
                     return FieldFilter(HistoryDomMapper.HistoryInfo.ExtraInfo, comparer, value);
+
                 case "HistoryInfo.TypeOfHistory":
                     return FieldFilter(
                         HistoryDomMapper.HistoryInfo.TypeOfHistory,
                         comparer,
                         value == null ? null : SlcAsset_Management.Enums.Typeofhistory.ToValue((SlcAsset_Management.Enums.TypeOfHistoryEnum)value));
+
                 default:
                     throw new NotImplementedException($"Filtering by '{fieldName}' is not supported.");
             }

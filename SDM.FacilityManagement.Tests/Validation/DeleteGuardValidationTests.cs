@@ -42,7 +42,7 @@ namespace SDM.FacilityManagement.Tests.Validation
 		public void Facility_Delete_WithAssignedFloor_ShouldThrow()
 		{
 			var facility = Helper.Facilities.Create(NewFacility("FAC-1"));
-			Helper.Floors.Create(NewFloor("FLR-1", facility));
+			Helper.Floors.Create(Helper.AttachFacility(NewFloor("FLR-1", facility)));
 
 			var action = () => Helper.Facilities.Delete(facility);
 
@@ -62,8 +62,8 @@ namespace SDM.FacilityManagement.Tests.Validation
 		[TestMethod]
 		public void Floor_Delete_WithAssignedRoom_ShouldThrow()
 		{
-			var floor = Helper.Floors.Create(NewFloor("FLR-1"));
-			Helper.Rooms.Create(NewRoom("ROOM-1", floor));
+			var floor = Helper.Floors.Create(Helper.AttachFacility(NewFloor("FLR-1")));
+			Helper.Rooms.Create(Helper.AttachFloor(NewRoom("ROOM-1", floor)));
 
 			var action = () => Helper.Floors.Delete(floor);
 
@@ -73,7 +73,7 @@ namespace SDM.FacilityManagement.Tests.Validation
 		[TestMethod]
 		public void Floor_Delete_WithoutAssignedRooms_ShouldSucceed()
 		{
-			var floor = Helper.Floors.Create(NewFloor("FLR-1"));
+			var floor = Helper.Floors.Create(Helper.AttachFacility(NewFloor("FLR-1")));
 
 			Action action = () => Helper.Floors.Delete(floor);
 
@@ -83,8 +83,8 @@ namespace SDM.FacilityManagement.Tests.Validation
 		[TestMethod]
 		public void Room_Delete_WithAssignedRow_ShouldThrow()
 		{
-			var room = Helper.Rooms.Create(NewRoom("ROOM-1"));
-			Helper.Rows.Create(NewRow("ROW-1", room));
+			var room = Helper.Rooms.Create(Helper.AttachFloor(NewRoom("ROOM-1")));
+			Helper.Rows.Create(Helper.AttachRoom(NewRow("ROW-1", room)));
 
 			var action = () => Helper.Rooms.Delete(room);
 
@@ -94,8 +94,8 @@ namespace SDM.FacilityManagement.Tests.Validation
 		[TestMethod]
 		public void Room_Delete_WithAssignedZone_ShouldThrow()
 		{
-			var room = Helper.Rooms.Create(NewRoom("ROOM-1"));
-			Helper.Zones.Create(NewZone("ZONE-1", room));
+			var room = Helper.Rooms.Create(Helper.AttachFloor(NewRoom("ROOM-1")));
+			Helper.Zones.Create(Helper.AttachRoom(NewZone("ZONE-1", room)));
 
 			var action = () => Helper.Rooms.Delete(room);
 
@@ -105,8 +105,8 @@ namespace SDM.FacilityManagement.Tests.Validation
 		[TestMethod]
 		public void Room_Delete_WithAssignedDesk_ShouldThrow()
 		{
-			var room = Helper.Rooms.Create(NewRoom("ROOM-1"));
-			Helper.Desks.Create(NewDesk("DSK-1", room));
+			var room = Helper.Rooms.Create(Helper.AttachFloor(NewRoom("ROOM-1")));
+			Helper.Desks.Create(Helper.AttachRoom(NewDesk("DSK-1", room)));
 
 			var action = () => Helper.Rooms.Delete(room);
 
@@ -116,7 +116,7 @@ namespace SDM.FacilityManagement.Tests.Validation
 		[TestMethod]
 		public void Room_Delete_WithoutAssignedRowsZonesDesksOrAssets_ShouldSucceed()
 		{
-			var room = Helper.Rooms.Create(NewRoom("ROOM-1"));
+			var room = Helper.Rooms.Create(Helper.AttachFloor(NewRoom("ROOM-1")));
 
 			Action action = () => Helper.Rooms.Delete(room);
 
@@ -126,8 +126,8 @@ namespace SDM.FacilityManagement.Tests.Validation
 		[TestMethod]
 		public void Row_Delete_WithAssignedRack_ShouldThrow()
 		{
-			var row = Helper.Rows.Create(NewRow("ROW-1"));
-			Helper.Racks.Create(NewRack("RACK-1", row: row));
+			var row = Helper.Rows.Create(Helper.AttachRoom(NewRow("ROW-1")));
+			Helper.Racks.Create(Helper.AttachRow(NewRack("RACK-1", row: row)));
 
 			var action = () => Helper.Rows.Delete(row);
 
@@ -137,7 +137,7 @@ namespace SDM.FacilityManagement.Tests.Validation
 		[TestMethod]
 		public void Row_Delete_WithoutAssignedRacks_ShouldSucceed()
 		{
-			var row = Helper.Rows.Create(NewRow("ROW-1"));
+			var row = Helper.Rows.Create(Helper.AttachRoom(NewRow("ROW-1")));
 
 			Action action = () => Helper.Rows.Delete(row);
 
@@ -147,8 +147,8 @@ namespace SDM.FacilityManagement.Tests.Validation
 		[TestMethod]
 		public void Zone_Delete_WithAssignedRack_ShouldThrow()
 		{
-			var zone = Helper.Zones.Create(NewZone("ZONE-1"));
-			Helper.Racks.Create(NewRack("RACK-1", zone: zone));
+			var zone = Helper.Zones.Create(Helper.AttachRoom(NewZone("ZONE-1")));
+			Helper.Racks.Create(Helper.AttachRow(NewRack("RACK-1", zone: zone)));
 
 			var action = () => Helper.Zones.Delete(zone);
 
@@ -158,7 +158,7 @@ namespace SDM.FacilityManagement.Tests.Validation
 		[TestMethod]
 		public void Zone_Delete_WithoutAssignedRacks_ShouldSucceed()
 		{
-			var zone = Helper.Zones.Create(NewZone("ZONE-1"));
+			var zone = Helper.Zones.Create(Helper.AttachRoom(NewZone("ZONE-1")));
 
 			Action action = () => Helper.Zones.Delete(zone);
 
@@ -168,7 +168,7 @@ namespace SDM.FacilityManagement.Tests.Validation
 		[TestMethod]
 		public void Desk_Delete_WithoutAssignedAssets_ShouldSucceed()
 		{
-			var desk = Helper.Desks.Create(NewDesk("DSK-1"));
+			var desk = Helper.Desks.Create(Helper.AttachRoom(NewDesk("DSK-1")));
 
 			Action action = () => Helper.Desks.Delete(desk);
 
@@ -178,7 +178,7 @@ namespace SDM.FacilityManagement.Tests.Validation
 		[TestMethod]
 		public void Rack_Delete_WithoutAssignedAssets_ShouldSucceed()
 		{
-			var rack = Helper.Racks.Create(NewRack("RACK-1"));
+			var rack = Helper.Racks.Create(Helper.AttachRow(NewRack("RACK-1")));
 
 			Action action = () => Helper.Racks.Delete(rack);
 

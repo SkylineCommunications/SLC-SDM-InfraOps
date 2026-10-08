@@ -13,6 +13,8 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
         {
             SiteId,
             Name,
+            Latitude,
+            Longitude,
         }
 
         /// <summary>
@@ -37,6 +39,59 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
             if (entity == null || string.IsNullOrWhiteSpace(entity.Name))
             {
                 result.AddFailReason(SiteValidationField.Name, "Site Name cannot be empty or whitespace.");
+            }
+
+            return result.IsValid;
+        }
+
+        /// <summary>
+        /// Validates that, when defined, the Site latitude is between -90 and 90.
+        /// </summary>
+        public static bool IsSiteLatitudeValid(Site entity, out ValidationResult result)
+        {
+            if (entity?.Latitude == null)
+            {
+                result = new ValidationResult();
+                return true;
+            }
+
+            return NumericValidators.ValidateRange(entity.Latitude.Value, -90d, 90d, SiteValidationField.Latitude, out result);
+        }
+
+        /// <summary>
+        /// Validates that, when defined, the Site longitude is between -180 and 180.
+        /// </summary>
+        public static bool IsSiteLongitudeValid(Site entity, out ValidationResult result)
+        {
+            if (entity?.Longitude == null)
+            {
+                result = new ValidationResult();
+                return true;
+            }
+
+            return NumericValidators.ValidateRange(entity.Longitude.Value, -180d, 180d, SiteValidationField.Longitude, out result);
+        }
+
+        /// <summary>
+        /// Validates the Site name together with its coordinates.
+        /// </summary>
+        internal static bool IsSiteNameAndCoordinatesValid(Site entity, out ValidationResult result)
+        {
+            result = new ValidationResult();
+
+            if (!IsSiteNameValid(entity, out var nameResult))
+            {
+                result.AddFailuresFrom(nameResult);
+            }
+
+            if (!IsSiteLatitudeValid(entity, out var latitudeResult))
+            {
+                result.AddFailuresFrom(latitudeResult);
+            }
+
+            if (!IsSiteLongitudeValid(entity, out var longitudeResult))
+            {
+                result.AddFailuresFrom(longitudeResult);
             }
 
             return result.IsValid;

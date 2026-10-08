@@ -1,0 +1,46 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../Directory.Build.props.user" Condition="Exists('../Directory.Build.props.user')" />
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <AssemblyName>Skyline.DataMiner.SDM.InfraOps.Common</AssemblyName>
+    <RootNamespace>Skyline.DataMiner.SDM.InfraOps.Orchestration</RootNamespace>
+    <VersionSuffix Condition="'$(VersionSuffixValue)' != '' and '$(Configuration)' == 'Debug'">$(VersionSuffixValue)</VersionSuffix>
+    <AssemblyVersion Condition="'$(AssemblyVersionValue)' != ''">$(AssemblyVersionValue)</AssemblyVersion>
+    <VersionPrefix>1.0.1</VersionPrefix>
+    <PackageTags>Skyline;DataMiner</PackageTags>
+    <PackageProjectUrl>https://skyline.be</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <PackageIcon>Icon.png</PackageIcon>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <NoWarn>CS1591</NoWarn>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Authors>SkylineCommunications</Authors>
+    <Company>Skyline Communications</Company>
+    <Description>Consumer-facing composition package for InfraOps SDM helpers and cross-domain operations.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="" />
+    <None Include="../SDM.AssetManagement.Common/LICENSE.txt" Pack="true" PackagePath="LICENSE.txt" Link="LICENSE.txt" />
+    <None Include="../SDM.AssetManagement.Common/nuget/Icon.png" Pack="true" PackagePath="Icon.png" Link="Icon.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SDM.AssetManagement.Common\SDM.AssetManagement.Common.csproj" />
+    <ProjectReference Include="..\SDM.PlanAndBuild.Common\SDM.PlanAndBuild.Common.csproj" />
+    <ProjectReference Include="..\SDM.InfraOpsProperties.Common\SDM.InfraOpsProperties.Common.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="SDM.AssetManagement.Tests" />
+  </ItemGroup>
+
+  <Target Name="CopyNuGetPackage" AfterTargets="Pack" Condition="'$(NuGetStorePath)' != '' and '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <Copy SourceFiles="$(OutputPath)..\$(PackageId).$(PackageVersion).nupkg" DestinationFolder="$(NuGetStorePath)\$(PackageId)" />
+  </Target>
+</Project>

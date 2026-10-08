@@ -52,6 +52,15 @@ namespace Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations
                 .ToHashSet();
         }
 
+        internal static void AddRequiredReference<TEnum>(
+            ValidationResult result,
+            TEnum field,
+            string target)
+            where TEnum : Enum
+        {
+            result.AddFailReason(field, $"{target} is required.");
+        }
+
         internal static void AddMissingReference<TEnum>(
             ValidationResult result,
             TEnum field,

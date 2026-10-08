@@ -4,8 +4,8 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
     using System.Collections.Generic;
     using System.Linq;
 
+    using Skyline.DataMiner.Net;
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
-    using Skyline.DataMiner.SDM.AssetManagement.Helpers;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.FacilityManagement.Helpers;
     using Skyline.DataMiner.SDM.PlanAndBuild.Extensions;
@@ -18,14 +18,18 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
     internal sealed class PlanAndBuildExternalReferenceChecker : IPlanAndBuildExternalReferenceChecker
     {
         private readonly IFacilityManagementApiHelper _facilityManagementHelper;
-        private readonly IAssetManagementApiHelper _assetManagementHelper;
+        private readonly AssetDomRepository _assetRepository;
+        private readonly ConnectionDomRepository _connectionRepository;
+        private readonly CableTypeDomRepository _cableTypeRepository;
 
         public PlanAndBuildExternalReferenceChecker(
-            IFacilityManagementApiHelper facilityManagementHelper = null,
-            IAssetManagementApiHelper assetManagementHelper = null)
+            IConnection connection,
+            IFacilityManagementApiHelper facilityManagementHelper = null)
         {
             _facilityManagementHelper = facilityManagementHelper;
-            _assetManagementHelper = assetManagementHelper;
+            _assetRepository = new AssetDomRepository(connection);
+            _connectionRepository = new ConnectionDomRepository(connection);
+            _cableTypeRepository = new CableTypeDomRepository(connection);
         }
 
         public IReadOnlyCollection<Guid> GetExistingLocationIds(IReadOnlyCollection<Guid> locationIds)
@@ -48,12 +52,12 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
         public IReadOnlyCollection<string> GetExistingAssetIds(IReadOnlyCollection<string> assetIds)
         {
             var keys = Normalize(assetIds);
-            if (_assetManagementHelper == null || keys.Count == 0)
+            if (keys.Count == 0)
             {
                 return keys;
             }
 
-            return _assetManagementHelper.Assets
+            return _assetRepository
                 .ReadByBigOrFilter(keys, id => AssetExposers.Identifier.Equal(id))
                 .Select(asset => asset.Identifier)
                 .ToList();
@@ -62,12 +66,12 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
         public IReadOnlyCollection<string> GetExistingConnectionIds(IReadOnlyCollection<string> connectionIds)
         {
             var keys = Normalize(connectionIds);
-            if (_assetManagementHelper == null || keys.Count == 0)
+            if (keys.Count == 0)
             {
                 return keys;
             }
 
-            return _assetManagementHelper.Connections
+            return _connectionRepository
                 .ReadByBigOrFilter(keys, id => ConnectionExposers.Identifier.Equal(id))
                 .Select(connection => connection.Identifier)
                 .ToList();
@@ -76,12 +80,12 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
         public IReadOnlyCollection<string> GetExistingCableTypeIds(IReadOnlyCollection<string> cableTypeIds)
         {
             var keys = Normalize(cableTypeIds);
-            if (_assetManagementHelper == null || keys.Count == 0)
+            if (keys.Count == 0)
             {
                 return keys;
             }
 
-            return _assetManagementHelper.CableTypes
+            return _cableTypeRepository
                 .ReadByBigOrFilter(keys, id => CableTypeExposers.Identifier.Equal(id))
                 .Select(cableType => cableType.Identifier)
                 .ToList();

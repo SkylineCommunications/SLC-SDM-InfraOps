@@ -1,4 +1,4 @@
-﻿namespace SDM.AssetManagement.Tests.Assets
+namespace SDM.AssetManagement.Tests.Assets
 {
     using System;
     using System.Collections.Generic;
@@ -8,7 +8,12 @@
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using SDM.AssetManagement.Tests.Setup;
     using SharedMappers.DomIds;
+    using Moq;
+    using Skyline.DataMiner.Net;
+    using Skyline.DataMiner.Net.Messages;
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
+    using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+    using Skyline.DataMiner.Net.ManagerStore;
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.Extensions;
@@ -289,12 +294,12 @@
             // instead of _locationroom.Value, causing NullReferenceException when ContainerId was absent.
             PrepareReferenceAssetWithAssetClass();
             var roomId = Guid.NewGuid();
-            var room = Helper.FacilityManagement.Rooms.Create(new Room
+            var room = Helper.FacilityManagement.Rooms.Create(Helper.FacilityManagement.AttachFloor(new Room
             {
                 Identifier = roomId.ToString(),
                 RoomId = $"ROOM-{roomId}",
                 Name = "Asset Location Room",
-            });
+            }));
             referenceAsset.Location.RoomId = new SdmObjectReference<Room>(room.Identifier);
 
             // Act
@@ -355,6 +360,136 @@
                 updated.ElementLinks[0].ElementID.Should().Be("100546/34");
             }
         }
+
+        #region Ported From Shared Tests
+
+        private Asset NewMinimalAsset(string suffix)
+        {
+            Helper.PopulateWithDemoData(DemoDataLayer.AssetClasses);
+            return new Asset
+            {
+                AssetID = $"PORTED-{suffix}",
+                Name = $"Ported Asset {suffix}",
+                AssetClassId = new SdmObjectReference<AssetClass>(Helper.TestData.AssetClasses.First().Identifier),
+            };
+        }
+
+        private Asset ReloadAsset(string identifier)
+        {
+            return Helper.AssetManagement.Assets.Read(new TRUEFilterElement<Asset>()).Single(a => a.Identifier == identifier);
+        }
+
+        private Asset CopyForUpdate(Asset created)
+        {
+            return new Asset
+            {
+                Identifier = created.Identifier,
+                AssetID = created.AssetID,
+                Name = created.Name,
+                AssetClassId = created.AssetClassId,
+            };
+        }
+
+        [TestMethod]
+        public void OperationalFlags_OnNewAsset_ShouldBeEmpty()
+        {
+            var asset = new Asset();
+
+            asset.OperationalFlags.Should().NotBeNull();
+            asset.OperationalFlags.Should().BeEmpty();
+        }
+
+        [TestMethod]
+        public void OperationalFlags_WithEmptyFlags_ShouldStayEmptyAfterSaveAndReload()
+        {
+            var asset = NewMinimalAsset("FLAG-2");
+
+            var created = Helper.AssetManagement.Assets.Create(asset);
+            var reloaded = ReloadAsset(created.Identifier);
+
+            reloaded.OperationalFlags.Should().BeEmpty();
+        }
+
+        [TestMethod]
+        public void OperationalFlags_SaveAndReload_FlagSurvives()
+        {
+            var asset = NewMinimalAsset("FLAG-3");
+            asset.OperationalFlags.Add(SlcAsset_Management.Enums.Operationalflagsenum.Faulty);
+
+            var created = Helper.AssetManagement.Assets.Create(asset);
+            var reloaded = ReloadAsset(created.Identifier);
+
+            reloaded.Should().NotBeNull();
+            reloaded.OperationalFlags.Should().Contain(SlcAsset_Management.Enums.Operationalflagsenum.Faulty);
+        }
+
+        [TestMethod]
+        public void OperationalFlags_AddFlagToExistingAsset_StoresInt32ListMatchingFieldDefinition()
+        {
+            var created = Helper.AssetManagement.Assets.Create(NewMinimalAsset("FLAG-5"));
+
+            var toUpdate = ReloadAsset(created.Identifier);
+            toUpdate.OperationalFlags.Add(SlcAsset_Management.Enums.Operationalflagsenum.Faulty);
+
+            // The in-memory DOM mock normalizes list values on read, so inspect what the repository sends.
+            // DomHelper and the in-memory DOM normalize list values, so inspect the instance the repository builds.
+            var toInstance = typeof(AssetDomRepository).GetMethod("ToInstance", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            var instance = (DomInstance)toInstance.Invoke(new AssetDomRepository(Helper.Connection), new object[] { toUpdate });
+
+            // The operational flags field is an Int32 generic enum; the DOM rejects any other element type.
+            instance.Sections.SelectMany(s => s.FieldValues)
+                .Single(f => f.FieldDescriptorID.Equals(SlcAsset_Management.Sections.AssetInformation.OperationalFlags))
+                .Value.Type.Should().Be(typeof(List<int>));
+        }
+
+        [TestMethod]
+        public void OperationalFlags_SaveWithFlag_ClearAndSaveAgain_FlagGone()
+        {
+            var asset = NewMinimalAsset("FLAG-4");
+            asset.OperationalFlags.Add(SlcAsset_Management.Enums.Operationalflagsenum.Faulty);
+            var created = Helper.AssetManagement.Assets.Create(asset);
+
+            var reloaded = ReloadAsset(created.Identifier);
+            reloaded.OperationalFlags.Clear();
+            Helper.AssetManagement.Assets.CreateOrUpdate([reloaded]);
+
+            ReloadAsset(created.Identifier).OperationalFlags.Should().BeEmpty();
+        }
+
+        [TestMethod]
+        public void SerialNumber_HardwareVersion_MacAddress_ShouldPersistAcrossSaveReloadAndUpdate()
+        {
+            var asset = NewMinimalAsset("NET-1");
+            asset.SerialNumber = "SN-ROUNDTRIP-1";
+            asset.HardwareVersion = "HW-1.0";
+            asset.MacAddress = "AA-BB-CC-DD-EE-01";
+
+            var created = Helper.AssetManagement.Assets.Create(asset);
+            var reloaded = ReloadAsset(created.Identifier);
+
+            using (new AssertionScope())
+            {
+                reloaded.SerialNumber.Should().Be("SN-ROUNDTRIP-1");
+                reloaded.HardwareVersion.Should().Be("HW-1.0");
+                reloaded.MacAddress.Should().Be("AA-BB-CC-DD-EE-01");
+            }
+
+            var update = CopyForUpdate(created);
+            update.SerialNumber = "SN-ROUNDTRIP-2";
+            update.HardwareVersion = "HW-2.0";
+            update.MacAddress = "AA-BB-CC-DD-EE-02";
+            Helper.AssetManagement.Assets.CreateOrUpdate([update]);
+            var updated = ReloadAsset(created.Identifier);
+
+            using (new AssertionScope())
+            {
+                updated.SerialNumber.Should().Be("SN-ROUNDTRIP-2");
+                updated.HardwareVersion.Should().Be("HW-2.0");
+                updated.MacAddress.Should().Be("AA-BB-CC-DD-EE-02");
+            }
+        }
+
+        #endregion
 
         private void AssertCreated()
         {
