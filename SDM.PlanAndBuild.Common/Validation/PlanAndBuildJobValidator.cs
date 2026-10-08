@@ -225,7 +225,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
             return jobs
                 .Where(j => j.ShouldValidateAny(j.ConnectionsOnJobField) && j.ConnectionsOnJob != null)
                 .SelectMany(j => j.ConnectionsOnJob)
-                .Where(connection => connection != null && IsReferenceSet(connection.ConnectionId))
+                .Where(connection => connection != null && !IsRemovedConnectionEntry(connection) && IsReferenceSet(connection.ConnectionId))
                 .Select(connection => connection.ConnectionId.Identifier)
                 .ToList();
         }
@@ -235,7 +235,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
             return jobs
                 .Where(j => j.ShouldValidateAny(j.ConnectionsOnJobField) && j.ConnectionsOnJob != null)
                 .SelectMany(j => j.ConnectionsOnJob)
-                .Where(connection => connection != null && IsReferenceSet(connection.CableType))
+                .Where(connection => connection != null && !IsRemovedConnectionEntry(connection) && IsReferenceSet(connection.CableType))
                 .Select(connection => connection.CableType.Identifier)
                 .ToList();
         }
@@ -605,7 +605,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
             }
 
             var existing = existingConnectionIds.ToHashSet();
-            foreach (var connectionId in job.ConnectionsOnJob.Where(connection => connection != null && IsReferenceSet(connection.ConnectionId)).Select(connection => connection.ConnectionId.Identifier))
+            foreach (var connectionId in job.ConnectionsOnJob.Where(connection => connection != null && !IsRemovedConnectionEntry(connection) && IsReferenceSet(connection.ConnectionId)).Select(connection => connection.ConnectionId.Identifier))
             {
                 if (!existing.Contains(connectionId))
                 {
@@ -622,7 +622,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
             }
 
             var existing = existingCableTypeIds.ToHashSet();
-            foreach (var cableTypeId in job.ConnectionsOnJob.Where(connection => connection != null && IsReferenceSet(connection.CableType)).Select(connection => connection.CableType.Identifier))
+            foreach (var cableTypeId in job.ConnectionsOnJob.Where(connection => connection != null && !IsRemovedConnectionEntry(connection) && IsReferenceSet(connection.CableType)).Select(connection => connection.CableType.Identifier))
             {
                 if (!existing.Contains(cableTypeId))
                 {
@@ -630,6 +630,13 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
                 }
             }
         }
+
+        private static bool IsRemovedAssetEntry(JobAsset entry) =>
+            entry.Action == SharedMappers.DomIds.SlcPlan_And_Build.Enums.ActionforassetenumEnum.Removed;
+
+        private static bool IsRemovedConnectionEntry(JobConnection entry) =>
+            string.Equals(entry.Status, "Removed", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(entry.Status, SharedMappers.DomIds.SlcAsset_Management.Enums.Typeofhistory.Removal, StringComparison.OrdinalIgnoreCase);
 
         private bool IsPersonValid(PnoObjectReference<Person> personId)
         {

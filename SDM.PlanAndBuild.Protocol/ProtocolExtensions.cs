@@ -4,6 +4,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Protocol
 
     using Skyline.DataMiner.Scripting;
     using Skyline.DataMiner.SDM.PlanAndBuild.Helpers;
+    using Skyline.DataMiner.SDM.InfraOps.Orchestration;
 
     /// <summary>
     /// Provides extension methods for the <see cref="SLProtocol"/> class for obtaining the Plan and Build API helper.
@@ -24,7 +25,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Protocol
                 throw new ArgumentNullException(nameof(protocol), "protocol cannot be null.");
             }
 
-            return new PlanAndBuildApiHelper(protocol.SLNet.RawConnection);
+            return InfraOpsApiHelperFactory.CreatePlanAndBuildApiHelper(protocol.SLNet.RawConnection);
         }
     }
 }

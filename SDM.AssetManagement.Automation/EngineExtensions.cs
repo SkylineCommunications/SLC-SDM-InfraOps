@@ -4,6 +4,7 @@
 
     using Skyline.DataMiner.Automation;
     using Skyline.DataMiner.SDM.AssetManagement.Helpers;
+    using Skyline.DataMiner.SDM.InfraOps.Orchestration;
 
     /// <summary>
     /// Provides extension methods for the <see cref="IEngine"/> interface related to IpAddressApiHelper.
@@ -23,7 +24,7 @@
                 throw new ArgumentNullException(nameof(engine), "Engine cannot be null.");
             }
 
-            return new AssetManagementApiHelper(engine.GetUserConnection());
+            return InfraOpsApiHelperFactory.CreateAssetManagementApiHelper(engine.GetUserConnection());
         }
     }
 }

@@ -66,7 +66,7 @@
         }
 
         [TestMethod]
-        public void Asset_Delete_WhenAnyPortHasConnection_ShouldBeBlocked()
+        public void Asset_Delete_WhenAnyPortHasConnection_ShouldCascadeDependencies()
         {
             var assetClass = CreateAssetClass("Asset Connection Class", SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Active, deviceTags: new List<SlcAsset_Management.Enums.TagOption> { SlcAsset_Management.Enums.TagOption.AcceptsDataConnection });
             var asset = CreateAsset(assetClass, "ASSET-CONNECTION-BLOCK");
@@ -74,10 +74,54 @@
             var dataPort = CreateDataPort(asset, CreateDataPortType("Asset Connection Port Type"));
             CreateConnection(dataPort.Identifier, dataPort.DataPortInfo.PortType);
 
+            Helper.AssetManagement.Assets.Delete(asset);
+
+            Helper.AssetManagement.Assets.Read(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<Asset>())
+                .Should().NotContain(item => item.Identifier == asset.Identifier);
+            Helper.AssetManagement.DataPorts.Read(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<DataPort>())
+                .Should().NotContain(item => item.Identifier == dataPort.Identifier);
+            Helper.AssetManagement.Connections.Read(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<Connection>()).Should().BeEmpty();
+        }
+
+        [TestMethod]
+        public void Asset_Delete_WhenLifecycleIsInvalid_ShouldLeaveDependenciesUntouched()
+        {
+            var assetClass = CreateAssetClass("Invalid Lifecycle Connection Class", SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Active, deviceTags: new List<SlcAsset_Management.Enums.TagOption> { SlcAsset_Management.Enums.TagOption.AcceptsDataConnection });
+            var asset = CreateAsset(assetClass, "ASSET-INVALID-LIFECYCLE");
+            var dataPort = CreateDataPort(asset, CreateDataPortType("Invalid Lifecycle Port Type"));
+            CreateConnection(dataPort.Identifier, dataPort.DataPortInfo.PortType);
+
             Action act = () => Helper.AssetManagement.Assets.Delete(asset);
 
             act.Should().Throw<ValidationException>()
-                .WithMessage("*This asset has connections assigned. Please delete all of the connections first.*");
+                .WithMessage("*Asset must be in 'Not Available' or 'Disposed' State to Delete*");
+            Helper.AssetManagement.Assets.Read(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<Asset>())
+                .Should().ContainSingle(item => item.Identifier == asset.Identifier);
+            Helper.AssetManagement.DataPorts.Read(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<DataPort>())
+                .Should().ContainSingle(item => item.Identifier == dataPort.Identifier);
+            Helper.AssetManagement.Connections.Read(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<Connection>()).Should().ContainSingle();
+        }
+
+        [TestMethod]
+        public void Asset_Delete_MixedLifecycleBatch_ShouldFailBeforeDeletingAnyAssetOrDependency()
+        {
+            var assetClass = CreateAssetClass("Mixed Lifecycle Connection Class", SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Active, deviceTags: new List<SlcAsset_Management.Enums.TagOption> { SlcAsset_Management.Enums.TagOption.AcceptsDataConnection });
+            var connectedAsset = CreateAsset(assetClass, "ASSET-MIXED-CONNECTED");
+            connectedAsset.State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable;
+            var dataPort = CreateDataPort(connectedAsset, CreateDataPortType("Mixed Lifecycle Port Type"));
+            CreateConnection(dataPort.Identifier, dataPort.DataPortInfo.PortType);
+            var invalidAsset = CreateAsset(assetClass, "ASSET-MIXED-INVALID");
+
+            Action act = () => Helper.AssetManagement.Assets.Delete(new[] { connectedAsset, invalidAsset });
+
+            act.Should().Throw<Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations.BulkValidationException<Asset>>()
+                .WithMessage("*Asset must be in 'Not Available' or 'Disposed' State to Delete*");
+            Helper.AssetManagement.Assets.Read(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<Asset>())
+                .Where(item => item.Identifier == connectedAsset.Identifier || item.Identifier == invalidAsset.Identifier)
+                .Should().HaveCount(2);
+            Helper.AssetManagement.DataPorts.Read(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<DataPort>())
+                .Should().ContainSingle(item => item.Identifier == dataPort.Identifier);
+            Helper.AssetManagement.Connections.Read(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<Connection>()).Should().ContainSingle();
         }
 
         [TestMethod]

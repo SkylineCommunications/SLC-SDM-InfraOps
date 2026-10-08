@@ -681,6 +681,87 @@ namespace SDM.PlanAndBuild.Tests.JobTests
 			}
 		}
 
+        [DataTestMethod]
+        [DataRow("Removed", RepositoryAction.Create)]
+        [DataRow("Removal", RepositoryAction.Create)]
+        [DataRow("removed", RepositoryAction.Update)]
+        [DataRow("removal", RepositoryAction.Update)]
+        public void Validate_WithRemovedSnapshotsAndMissingReferences_ShouldReturnValid(string status, RepositoryAction action)
+        {
+            var validator = new PlanAndBuildJobValidator(
+                Helper, ConnectionHelper.CreateDefaultPeopleApiMock(), new ExternalReferenceCheckerStub());
+            var job = CreateValidJob();
+            job.AssetsUsed = new List<JobAsset>
+            {
+                new JobAsset
+                {
+                    AssetId = new SdmObjectReference<Asset>(Guid.NewGuid().ToString()),
+                    Action = SharedMappers.DomIds.SlcPlan_And_Build.Enums.ActionforassetenumEnum.Removed,
+                },
+            };
+            job.ConnectionsOnJob = new List<JobConnection>
+            {
+                new JobConnection
+                {
+                    ConnectionId = new SdmObjectReference<Connection>(Guid.NewGuid().ToString()),
+                    CableType = new SdmObjectReference<CableType>(Guid.NewGuid().ToString()),
+                    Status = status,
+                },
+            };
+
+            validator.Validate(job, action).IsValid.Should().BeTrue();
+        }
+
+        [TestMethod]
+        public void Validate_WithRemovedAndActiveMissingReferences_ShouldRejectOnlyActiveEntries()
+        {
+            var validator = new PlanAndBuildJobValidator(
+                Helper, ConnectionHelper.CreateDefaultPeopleApiMock(), new ExternalReferenceCheckerStub());
+            var job = CreateValidJob();
+            var assetId = Guid.NewGuid().ToString();
+            var connectionId = Guid.NewGuid().ToString();
+            var cableTypeId = Guid.NewGuid().ToString();
+            job.AssetsUsed = new List<JobAsset>
+            {
+                new JobAsset
+                {
+                    AssetId = new SdmObjectReference<Asset>(Guid.NewGuid().ToString()),
+                    Action = SharedMappers.DomIds.SlcPlan_And_Build.Enums.ActionforassetenumEnum.Removed,
+                },
+                new JobAsset { AssetId = new SdmObjectReference<Asset>(assetId) },
+            };
+            job.ConnectionsOnJob = new List<JobConnection>
+            {
+                new JobConnection
+                {
+                    ConnectionId = new SdmObjectReference<Connection>(Guid.NewGuid().ToString()),
+                    CableType = new SdmObjectReference<CableType>(Guid.NewGuid().ToString()),
+                    Status = "Removed",
+                },
+                new JobConnection
+                {
+                    ConnectionId = new SdmObjectReference<Connection>(connectionId),
+                    CableType = new SdmObjectReference<CableType>(cableTypeId),
+                    Status = "Connected",
+                },
+            };
+
+            var result = validator.Validate(job, RepositoryAction.Create);
+            result.IsValid.Should().BeFalse();
+            result.TryGetFailReason(PlanAndBuildJobValidationHandler.PlanAndBuildJobValidationField.AssetsUsed, out var assetReason)
+                .Should().BeTrue();
+            assetReason.Should().Be($"Referenced Asset '{assetId}' does not exist.");
+            result.TryGetFailReason(PlanAndBuildJobValidationHandler.PlanAndBuildJobValidationField.Connections, out var connectionReason)
+                .Should().BeTrue();
+            connectionReason.Should().Be($"Referenced Connection '{connectionId}' does not exist.");
+
+            job.ConnectionsOnJob[1].ConnectionId = default;
+            var cableResult = validator.Validate(job, RepositoryAction.Create);
+            cableResult.TryGetFailReason(PlanAndBuildJobValidationHandler.PlanAndBuildJobValidationField.Connections, out var cableReason)
+                .Should().BeTrue();
+            cableReason.Should().Be($"Referenced CableType '{cableTypeId}' does not exist.");
+        }
+
 		[TestMethod]
 		public void Validate_WithValidExternalReferencesAndExternalChecker_ShouldReturnValid()
 		{

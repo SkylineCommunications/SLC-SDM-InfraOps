@@ -614,22 +614,29 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModified, comparer, (DateTime)value);
                 case "LastModifiedBy":
                     return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModifiedBy, comparer, (string)value);
+
                 case "EnableAssetHistory":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.EnableAssetHistory), comparer, (bool)value);
+
                 case "PlanAndBuildJobPrompt":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.PlanAndBuildJobPrompt), comparer, (int)value);
+
                 case "EnableConnectionHistory":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.EnableConnectionHistory), comparer, (bool)value);
+
                 case "HistoryTTL" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
                     return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.HistoryTTL.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "HistoryTTL":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.HistoryTTL), comparer, (TimeSpan)(TimeSpan)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.HistoryTTL), comparer, (TimeSpan)value);
+
                 case "HistoryLimit" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
                     return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.HistoryLimit.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "HistoryLimit":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.HistoryLimit), comparer, ((long?)value).Value);
+
                 case "EnableResourceLink":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.EnableResourceLink), comparer, (bool)value);
+
                 default:
                     throw new NotImplementedException();
             }
