@@ -1224,8 +1224,10 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 case "DataPorts.PortExposure":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetClassDomMapper.DataPorts.PortExposure), comparer, SharedMappers.DomIds.SlcAsset_Management.Enums.Portexposure.ToValue((SharedMappers.DomIds.SlcAsset_Management.Enums.PortExposureEnum)value));
 
+                case "DataPorts.PortType" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && !SdmObjectReference<AssetManagement.Models.PortType>.Convert(value).HasValue():
+                    return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.AssetClassDomMapper.DataPorts.Type.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "DataPorts.PortType":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetClassDomMapper.DataPorts.Type), comparer, Convert.ToString((System.Guid)value));
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetClassDomMapper.DataPorts.Type), comparer, SdmObjectReference<AssetManagement.Models.PortType>.Convert(value).GetIdentifierAsGuid());
 
                 case "DataPorts.Label":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetClassDomMapper.DataPorts.Label), comparer, (string)value);
@@ -1249,8 +1251,10 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 case "PowerPorts.PortExposure":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetClassDomMapper.PowerPorts.PortExposure), comparer, SharedMappers.DomIds.SlcAsset_Management.Enums.Portexposure.ToValue((SlcAsset_Management.Enums.PortExposureEnum)value));
 
+                case "PowerPorts.PortType" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && !SdmObjectReference<AssetManagement.Models.PortType>.Convert(value).HasValue():
+                    return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.AssetClassDomMapper.PowerPorts.PortType.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "PowerPorts.PortType":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetClassDomMapper.PowerPorts.PortType), comparer, Convert.ToString((System.Guid)value));
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetClassDomMapper.PowerPorts.PortType), comparer, SdmObjectReference<AssetManagement.Models.PortType>.Convert(value).GetIdentifierAsGuid());
 
                 case "PowerPorts.Label":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetClassDomMapper.PowerPorts.Label), comparer, (string)value);

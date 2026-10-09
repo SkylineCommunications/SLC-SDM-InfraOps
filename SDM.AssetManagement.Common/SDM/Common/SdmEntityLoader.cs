@@ -662,8 +662,8 @@ namespace Skyline.DataMiner.SDM.Common.Services
             }
 
             var portTypeGuids = portTypeIds
-                .Where(id => Guid.TryParse(id, out _))
-                .Select(Guid.Parse)
+                .Select(id => SdmObjectReference<PortType>.Convert(id))
+                .Where(id => id.HasValue())
                 .Distinct()
                 .ToList();
 
@@ -672,13 +672,9 @@ namespace Skyline.DataMiner.SDM.Common.Services
                 return new List<PowerPort>();
             }
 
-            var powerPortTypeExposer = new Exposer<PowerPort, Guid>(
-                obj => obj.PowerPortInfo.PortType.HasValue() ? obj.PowerPortInfo.PortType.GetIdentifierAsGuid() : Guid.Empty,
-                "PowerPortInfo.PortType");
-
             return Tools.RetrieveBigOrFilter(
                 portTypeGuids,
-                id => powerPortTypeExposer.Equal(id),
+                id => PowerPortExposers.PowerPortInfo.PortType.Equal(id),
                 filter => assetManagerApiHelper.PowerPorts.Read(filter).ToList());
         }
 
@@ -690,8 +686,8 @@ namespace Skyline.DataMiner.SDM.Common.Services
             }
 
             var portTypeGuids = portTypeIds
-                .Where(id => Guid.TryParse(id, out _))
-                .Select(Guid.Parse)
+                .Select(id => SdmObjectReference<PortType>.Convert(id))
+                .Where(id => id.HasValue())
                 .Distinct()
                 .ToList();
 
@@ -700,15 +696,9 @@ namespace Skyline.DataMiner.SDM.Common.Services
                 return new List<AssetClass>();
             }
 
-            var dataPortTypeExposer = new Exposers.CollectionExposer<AssetClass, Guid>(
-                obj => obj.DataPorts
-                    .Where(port => port?.PortType != null && port.PortType.HasValue())
-                    .Select(port => Guid.Parse(port.PortType.Identifier)),
-                "DataPorts.PortType");
-
             var matches = Tools.RetrieveBigOrFilter(
                 portTypeGuids,
-                id => dataPortTypeExposer.Contains(id),
+                id => AssetClassExposers.DataPorts.Type.Contains(id),
                 filter => assetManagerApiHelper.AssetClasses.Read(filter).ToList());
 
             if (matches.Any())
@@ -732,8 +722,8 @@ namespace Skyline.DataMiner.SDM.Common.Services
             }
 
             var portTypeGuids = portTypeIds
-                .Where(id => Guid.TryParse(id, out _))
-                .Select(Guid.Parse)
+                .Select(id => SdmObjectReference<PortType>.Convert(id))
+                .Where(id => id.HasValue())
                 .Distinct()
                 .ToList();
 
@@ -742,15 +732,9 @@ namespace Skyline.DataMiner.SDM.Common.Services
                 return new List<AssetClass>();
             }
 
-            var powerPortTypeExposer = new Exposers.CollectionExposer<AssetClass, Guid>(
-                obj => obj.PowerPorts
-                    .Where(port => port?.PortType != null && port.PortType.HasValue())
-                    .Select(port => Guid.Parse(port.PortType.Identifier)),
-                "PowerPorts.PortType");
-
             var matches = Tools.RetrieveBigOrFilter(
                 portTypeGuids,
-                id => powerPortTypeExposer.Contains(id),
+                id => AssetClassExposers.PowerPorts.PortType.Contains(id),
                 filter => assetManagerApiHelper.AssetClasses.Read(filter).ToList());
 
             if (matches.Any())
