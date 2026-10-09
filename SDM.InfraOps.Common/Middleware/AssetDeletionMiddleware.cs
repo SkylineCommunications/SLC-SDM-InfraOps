@@ -3,7 +3,6 @@ namespace Skyline.DataMiner.SDM.InfraOps.Orchestration.AssetDeletion
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Security.Cryptography.Xml;
 
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
@@ -126,11 +125,11 @@ namespace Skyline.DataMiner.SDM.InfraOps.Orchestration.AssetDeletion
             }
         }
 
-        public override void OnDelete(IEnumerable<Asset> assets, Action<IEnumerable<Asset>> next)
+        public override void OnDelete(IEnumerable<Asset> items, Action<IEnumerable<Asset>> next)
         {
-            if (assets == null)
+            if (items == null)
             {
-                throw new ArgumentNullException(nameof(assets));
+                throw new ArgumentNullException(nameof(items));
             }
 
             if (next == null)
@@ -138,22 +137,22 @@ namespace Skyline.DataMiner.SDM.InfraOps.Orchestration.AssetDeletion
                 throw new ArgumentNullException(nameof(next));
             }
 
-            var items = assets.ToList();
-            if (items.Count == 0)
+            var itemList = items.ToList();
+            if (itemList.Count == 0)
             {
-                next(items);
+                next(itemList);
                 return;
             }
 
             EnsureConfigured();
 
 
-            if (items.Any(asset => asset != null && string.IsNullOrWhiteSpace(asset.Identifier)))
+            if (itemList.Any(asset => asset != null && string.IsNullOrWhiteSpace(asset.Identifier)))
             {
-                throw new ArgumentException("Asset identifier cannot be empty.", nameof(assets));
+                throw new ArgumentException("Asset identifier cannot be empty.", nameof(items));
             }
 
-            var identifiers = items
+            var identifiers = itemList
                 .Where(asset => asset != null)
                 .Select(asset => asset.Identifier)
                 .Distinct(StringComparer.OrdinalIgnoreCase)
@@ -165,7 +164,7 @@ namespace Skyline.DataMiner.SDM.InfraOps.Orchestration.AssetDeletion
 
             try
             {
-                next(items);
+                next(itemList);
             }
             catch (Exception exception)
             {
