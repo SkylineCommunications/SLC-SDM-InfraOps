@@ -754,44 +754,58 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModified, comparer, (DateTime)value);
                 case "LastModifiedBy":
                     return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModifiedBy, comparer, (string)value);
+
                 case "Name":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Name), comparer, (string)value);
+
                 case "Plan":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Plan), comparer, (string)value);
+
                 case "Description":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Description), comparer, (string)value);
+
                 case "ThermalType" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
                     return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.ThermalType.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "ThermalType":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.ThermalType), comparer, (int)((SharedMappers.DomIds.SlcFacility_Management.Enums.ThermalType?)value).Value);
+
                 case "XPosition" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
                     return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.XPosition.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "XPosition":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.XPosition), comparer, (double)((double?)value).Value);
+
                 case "YPosition" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
                     return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.YPosition.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "YPosition":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.YPosition), comparer, (double)((double?)value).Value);
+
                 case "Width" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
                     return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Width.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Width":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Width), comparer, (double)((double?)value).Value);
+
                 case "ZoneProperties.Depth" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
                     return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Depth.Id.ToString()).Equal(comparer == Comparer.NotEquals);
+
                 case "ZoneProperties.Depth":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Depth), comparer, (double)((double?)value).Value);
+
                 case "ZoneProperties.ZoneId":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.ZoneId), comparer, (string)value);
+
                 case "ZoneCapacity.CoolingCapacity" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
                     return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.ZoneDomMapper.ZoneCapacity.CoolingCapacity.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "ZoneCapacity.CoolingCapacity":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.ZoneCapacity.CoolingCapacity), comparer, (double)((double?)value).Value);
+
                 case "RoomFk.Room" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && !SdmObjectReference<FacilityManagement.Models.Room>.Convert(value).HasValue():
                     return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.ZoneDomMapper.RoomFk.Room.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "RoomFk.Room":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.RoomFk.Room), comparer, System.Guid.Parse(SdmObjectReference<FacilityManagement.Models.Room>.Convert(value).Identifier));
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.RoomFk.Room), comparer, SdmObjectReference<FacilityManagement.Models.Room>.Convert(value).GetIdentifierAsGuid());
+
                 case "Resource.ResourceId":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.Resource.ResourceId), comparer, Convert.ToString((System.Guid)value));
+
                 default:
                     throw new NotImplementedException();
             }

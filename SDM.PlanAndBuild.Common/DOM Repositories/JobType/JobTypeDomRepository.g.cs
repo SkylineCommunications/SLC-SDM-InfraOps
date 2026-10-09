@@ -604,18 +604,22 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
                     return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModified, comparer, (DateTime)value);
                 case "LastModifiedBy":
                     return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModifiedBy, comparer, (string)value);
+
                 case "Name" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
                     return DomInstanceExposers.FieldValues.KeyExists(PlanAndBuild.Models.JobTypeDomMapper.JobTypeProperties.Name.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Name":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.JobTypeDomMapper.JobTypeProperties.Name), comparer, (string)value);
+
                 case "Description" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
                     return DomInstanceExposers.FieldValues.KeyExists(PlanAndBuild.Models.JobTypeDomMapper.JobTypeProperties.Description.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Description":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.JobTypeDomMapper.JobTypeProperties.Description), comparer, (string)value);
+
                 case "Icon" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
                     return DomInstanceExposers.FieldValues.KeyExists(PlanAndBuild.Models.JobTypeDomMapper.JobTypeProperties.Icon.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Icon":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.JobTypeDomMapper.JobTypeProperties.Icon), comparer, (string)value);
+
                 default:
                     throw new NotImplementedException();
             }

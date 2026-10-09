@@ -621,12 +621,16 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModified, comparer, (DateTime)value);
                 case "LastModifiedBy":
                     return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModifiedBy, comparer, (string)value);
+
                 case "Name":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.CableTypeDomMapper.CableTypeProperties.Name), comparer, (string)value);
+
                 case "Description":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.CableTypeDomMapper.CableTypeProperties.Description), comparer, (string)value);
+
                 case "CategoryLinks.Categories":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.CableTypeDomMapper.CategoryRelation.CategoryLinks), comparer, Convert.ToString(value));
+
                 default:
                     throw new NotImplementedException();
             }
