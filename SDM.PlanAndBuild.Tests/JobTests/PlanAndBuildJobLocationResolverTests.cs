@@ -75,19 +75,19 @@ namespace SDM.PlanAndBuild.Tests.JobTests
 				resolved.Should().NotContain(jl => jl.Kind == FacilityLocationKind.Unknown);
 
 				resolved.Single(jl => jl.Id == Guid.Parse(facility.Identifier)).Should().Match<JobLocation>(jl =>
-					jl.Kind == FacilityLocationKind.Facility && jl.Facility != null && jl.Value == jl.Facility);
+					jl.Kind == FacilityLocationKind.Facility && jl.Facility != null && (Facility)jl.Value == jl.Facility);
 				resolved.Single(jl => jl.Id == Guid.Parse(floor.Identifier)).Should().Match<JobLocation>(jl =>
-					jl.Kind == FacilityLocationKind.Floor && jl.Floor != null && jl.Value == jl.Floor);
+					jl.Kind == FacilityLocationKind.Floor && jl.Floor != null && (Floor)jl.Value == jl.Floor);
 				resolved.Single(jl => jl.Id == Guid.Parse(room.Identifier)).Should().Match<JobLocation>(jl =>
-					jl.Kind == FacilityLocationKind.Room && jl.Room != null && jl.Value == jl.Room);
+					jl.Kind == FacilityLocationKind.Room && jl.Room != null && (Room)jl.Value == jl.Room);
 				resolved.Single(jl => jl.Id == Guid.Parse(zone.Identifier)).Should().Match<JobLocation>(jl =>
-					jl.Kind == FacilityLocationKind.Zone && jl.Zone != null && jl.Value == jl.Zone);
+					jl.Kind == FacilityLocationKind.Zone && jl.Zone != null && (Zone)jl.Value == jl.Zone);
 				resolved.Single(jl => jl.Id == Guid.Parse(row.Identifier)).Should().Match<JobLocation>(jl =>
-					jl.Kind == FacilityLocationKind.Row && jl.Row != null && jl.Value == jl.Row);
+					jl.Kind == FacilityLocationKind.Row && jl.Row != null && (Row)jl.Value == jl.Row);
 				resolved.Single(jl => jl.Id == Guid.Parse(desk.Identifier)).Should().Match<JobLocation>(jl =>
-					jl.Kind == FacilityLocationKind.Desk && jl.Desk != null && jl.Value == jl.Desk);
+					jl.Kind == FacilityLocationKind.Desk && jl.Desk != null && (Desk)jl.Value == jl.Desk);
 				resolved.Single(jl => jl.Id == Guid.Parse(rack.Identifier)).Should().Match<JobLocation>(jl =>
-					jl.Kind == FacilityLocationKind.Rack && jl.Rack != null && jl.Value == jl.Rack);
+					jl.Kind == FacilityLocationKind.Rack && jl.Rack != null && (Rack)jl.Value == jl.Rack);
 			}
 		}
 

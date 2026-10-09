@@ -68,23 +68,6 @@
 
         #region Equality
 
-        public bool Equals(PowerPort other)
-        {
-            if (other is null)
-            {
-                return false;
-            }
-
-            if (ReferenceEquals(this, other))
-            {
-                return true;
-            }
-
-            return
-                Equals(PowerPortInfo, other.PowerPortInfo) &&
-                Equals(Asset, other.Asset);
-        }
-
         public static bool operator ==(PowerPort left, PowerPort right)
         {
             if (ReferenceEquals(left, right))
@@ -103,6 +86,23 @@
         public static bool operator !=(PowerPort left, PowerPort right)
         {
             return !(left == right);
+        }
+
+        public bool Equals(PowerPort other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return
+                Equals(PowerPortInfo, other.PowerPortInfo) &&
+                Equals(Asset, other.Asset);
         }
 
         public override bool Equals(object obj)
