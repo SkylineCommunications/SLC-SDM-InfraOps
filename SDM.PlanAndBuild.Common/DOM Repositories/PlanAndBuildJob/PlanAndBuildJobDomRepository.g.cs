@@ -704,7 +704,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 					connectionsonjob.Status = _connectionsonjobstatus.Value;
 				}
 
-				var _connectionsonjobcabletype = _connectionsonjobSection.GetValue<Guid>(PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.CableType);
+				var _connectionsonjobcabletype = _connectionsonjobSection.GetValue<string>(PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.CableType);
 				if (_connectionsonjobcabletype != null)
 				{
 					connectionsonjob.CableType = new SdmObjectReference<AssetManagement.Models.CableType>(Convert.ToString(_connectionsonjobcabletype.Value));
@@ -921,7 +921,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 
 				if (connectionsonjob.CableType.HasValue())
 				{
-					_connectionsonjobSection.AddOrUpdateValue<Guid>(PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.CableType, connectionsonjob.CableType.GetIdentifierAsGuid());
+					_connectionsonjobSection.AddOrUpdateValue<string>(PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.CableType, connectionsonjob.CableType.Identifier);
 				}
 
 				if (connectionsonjob.CableLength != default)
@@ -949,103 +949,138 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 					return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModified, comparer, (DateTime)value);
 				case "LastModifiedBy":
 					return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModifiedBy, comparer, (string)value);
-				case "Ownership.AssignedTo" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+
+                case "Ownership.AssignedTo" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
 					return DomInstanceExposers.FieldValues.KeyExists(PlanAndBuild.Models.PlanAndBuildJobDomMapper.Ownership.AssignedTo.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "Ownership.AssignedTo":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.Ownership.AssignedTo), comparer, Convert.ToString(((System.Guid?)value).Value));
-				case "Ownership.AssignmentGroup" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+
+                case "Ownership.AssignmentGroup" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
 					return DomInstanceExposers.FieldValues.KeyExists(PlanAndBuild.Models.PlanAndBuildJobDomMapper.Ownership.AssignmentGroup.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "Ownership.AssignmentGroup":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.Ownership.AssignmentGroup), comparer, Convert.ToString(((System.Guid?)value).Value));
-				case "JobID" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+
+                case "JobID" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
 					return DomInstanceExposers.FieldValues.KeyExists(PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.JobID.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "JobID":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.JobID), comparer, (string)value);
-				case "JobName" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+
+                case "JobName" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
 					return DomInstanceExposers.FieldValues.KeyExists(PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.JobName.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "JobName":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.JobName), comparer, (string)value);
-				case "Start" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+
+                case "Start" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
 					return DomInstanceExposers.FieldValues.KeyExists(PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.Start.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "Start":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.Start), comparer, (DateTime)((System.DateTime?)value).Value);
-				case "End" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+
+                case "End" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
 					return DomInstanceExposers.FieldValues.KeyExists(PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.End.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "End":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.End), comparer, (DateTime)((System.DateTime?)value).Value);
-				case "JobType":
+
+                case "JobType":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.JobType), comparer, SharedMappers.DomIds.SlcPlan_And_Build.Enums.Jobtype.ToValue((SharedMappers.DomIds.SlcPlan_And_Build.Enums.JobtypeEnum)value));
+
+                case "Type" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && !SdmObjectReference<PlanAndBuild.Models.JobType>.Convert(value).HasValue():
+                    return DomInstanceExposers.FieldValues.KeyExists(PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.Type.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "Type":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.Type), comparer, SdmObjectReference<PlanAndBuild.Models.JobType>.Convert(value).GetIdentifierAsGuid());
-				case "JobDescription" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+
+                case "JobDescription" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
 					return DomInstanceExposers.FieldValues.KeyExists(PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.JobDescription.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "JobDescription":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.JobDescription), comparer, (string)value);
-				case "Remarks" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+
+                case "Remarks" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
 					return DomInstanceExposers.FieldValues.KeyExists(PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.Remarks.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "Remarks":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.Remarks), comparer, (string)value);
-				case "Priority":
+
+                case "Priority":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.Priority), comparer, SharedMappers.DomIds.SlcPlan_And_Build.Enums.Priority.ToValue((SharedMappers.DomIds.SlcPlan_And_Build.Enums.PriorityEnum)value));
-				case "SubState" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+
+                case "SubState" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
 					return DomInstanceExposers.FieldValues.KeyExists(PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.SubState.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "SubState":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.SubState), comparer, SharedMappers.DomIds.SlcPlan_And_Build.Enums.Substate.ToValue(((SharedMappers.DomIds.SlcPlan_And_Build.Enums.SubStateEnum?)value).Value));
-				case "Locations" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+
+                case "Locations" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
 					return DomInstanceExposers.FieldValues.KeyExists(PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.Locations.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "Locations":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.PlanAndBuildJobProperties.Locations), comparer, (Guid)value);
-				case "AssetsUsed.AssetId":
+
+                case "AssetsUsed.AssetId":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.AssetsUsed.AssetId), comparer, SdmObjectReference<AssetManagement.Models.Asset>.Convert(value).GetIdentifierAsGuid());
-				case "AssetsUsed.Action":
+
+                case "AssetsUsed.Action":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.AssetsUsed.Action), comparer, SharedMappers.DomIds.SlcPlan_And_Build.Enums.Actionforassetenum.ToValue((SharedMappers.DomIds.SlcPlan_And_Build.Enums.ActionforassetenumEnum)value));
-				case "AssetsUsed.AssetName" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+
+                case "AssetsUsed.AssetName" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
 					return DomInstanceExposers.FieldValues.KeyExists(PlanAndBuild.Models.PlanAndBuildJobDomMapper.AssetsUsed.AssetName.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "AssetsUsed.AssetName":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.AssetsUsed.AssetName), comparer, (string)value);
-				case "AssetsUsed.AssetClassName" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+
+                case "AssetsUsed.AssetClassName" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
 					return DomInstanceExposers.FieldValues.KeyExists(PlanAndBuild.Models.PlanAndBuildJobDomMapper.AssetsUsed.AssetClassName.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "AssetsUsed.AssetClassName":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.AssetsUsed.AssetClassName), comparer, (string)value);
-				case "AssetsUsed.IPAddress" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+
+                case "AssetsUsed.IPAddress" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
 					return DomInstanceExposers.FieldValues.KeyExists(PlanAndBuild.Models.PlanAndBuildJobDomMapper.AssetsUsed.IPAddress.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "AssetsUsed.IPAddress":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.AssetsUsed.IPAddress), comparer, (string)value);
-				case "Attachments.FilePath" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+
+                case "Attachments.FilePath" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
 					return DomInstanceExposers.FieldValues.KeyExists(PlanAndBuild.Models.PlanAndBuildJobDomMapper.Attachments.FilePath.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "Attachments.FilePath":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.Attachments.FilePath), comparer, (string)value);
-				case "Attachments.AttachedAt" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+
+                case "Attachments.AttachedAt" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
 					return DomInstanceExposers.FieldValues.KeyExists(PlanAndBuild.Models.PlanAndBuildJobDomMapper.Attachments.AttachedAt.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "Attachments.AttachedAt":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.Attachments.AttachedAt), comparer, (DateTime)((System.DateTime?)value).Value);
-				case "Attachments.AttachedBy" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+
+                case "Attachments.AttachedBy" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
 					return DomInstanceExposers.FieldValues.KeyExists(PlanAndBuild.Models.PlanAndBuildJobDomMapper.Attachments.AttachedBy.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "Attachments.AttachedBy":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.Attachments.AttachedBy), comparer, Convert.ToString(((System.Guid?)value).Value));
-				case "ConnectionsOnJob.ConnectionId":
+
+                case "ConnectionsOnJob.ConnectionId" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && !SdmObjectReference<AssetManagement.Models.Connection>.Convert(value).HasValue():
+                    return DomInstanceExposers.FieldValues.KeyExists(PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.ConnectionId.Id.ToString()).Equal(comparer == Comparer.NotEquals);
+                case "ConnectionsOnJob.ConnectionId":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.ConnectionId), comparer, SdmObjectReference<AssetManagement.Models.Connection>.Convert(value).GetIdentifierAsGuid());
-				case "ConnectionsOnJob.Source" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+
+                case "ConnectionsOnJob.Source" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
 					return DomInstanceExposers.FieldValues.KeyExists(PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.Source.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "ConnectionsOnJob.Source":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.Source), comparer, (string)value);
-				case "ConnectionsOnJob.Destination" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+
+                case "ConnectionsOnJob.Destination" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
 					return DomInstanceExposers.FieldValues.KeyExists(PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.Destination.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "ConnectionsOnJob.Destination":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.Destination), comparer, (string)value);
-				case "ConnectionsOnJob.Status" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+
+                case "ConnectionsOnJob.Status" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
 					return DomInstanceExposers.FieldValues.KeyExists(PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.Status.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "ConnectionsOnJob.Status":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.Status), comparer, (string)value);
-				case "ConnectionsOnJob.CableType":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.CableType), comparer, SdmObjectReference<AssetManagement.Models.CableType>.Convert(value).GetIdentifierAsGuid());
-				case "ConnectionsOnJob.CableLength" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+
+                case "ConnectionsOnJob.CableType" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && !SdmObjectReference<AssetManagement.Models.CableType>.Convert(value).HasValue():
+                    return DomInstanceExposers.FieldValues.KeyExists(PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.CableType.Id.ToString()).Equal(comparer == Comparer.NotEquals);
+                case "ConnectionsOnJob.CableType":
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.CableType), comparer, SdmObjectReference<AssetManagement.Models.CableType>.Convert(value).Identifier);
+
+                case "ConnectionsOnJob.CableLength" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
 					return DomInstanceExposers.FieldValues.KeyExists(PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.CableLength.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "ConnectionsOnJob.CableLength":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(PlanAndBuild.Models.PlanAndBuildJobDomMapper.ConnectionsOnJob.CableLength), comparer, (double)((System.Double?)value).Value);
-				case "State":
+
+                case "State":
 					return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.StatusId, comparer, SlcPlan_And_Build.Behaviors.Job_Behavior.Statuses.ToValue((SlcPlan_And_Build.Behaviors.Job_Behavior.StatusesEnum)value));
-				default:
+
+                default:
 					throw new NotImplementedException();
 			}
 		}

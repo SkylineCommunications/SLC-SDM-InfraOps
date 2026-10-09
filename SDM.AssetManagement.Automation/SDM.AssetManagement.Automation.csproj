@@ -40,6 +40,7 @@
   
   <ItemGroup>
     <ProjectReference Include="..\SDM.AssetManagement.Common\SDM.AssetManagement.Common.csproj" />
+    <ProjectReference Include="..\SDM.InfraOps.Common\SDM.InfraOps.Common.csproj" />
   </ItemGroup>
   <!-- Can be used to set the location of your local nuget store to copy to -->
   <Target Name="CopyNuGetPackage" AfterTargets="Pack" Condition="'$(NuGetStorePath)' != '' and '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">

@@ -105,6 +105,24 @@ namespace SDM.AssetManagement.Tests.Setup
 
             SafeDelete(() =>
             {
+                var jobs = helper.PlanAndBuild.Jobs.Read(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<Skyline.DataMiner.SDM.PlanAndBuild.Models.PlanAndBuildJob>());
+                if (jobs.Any())
+                {
+                    helper.PlanAndBuild.Jobs.Delete(jobs);
+                }
+            });
+
+            SafeDelete(() =>
+            {
+                var values = helper.InfraOpsProperties.PropertyValues.Read(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<Skyline.DataMiner.SDM.InfraOpsProperties.Models.PropertyValues>());
+                if (values.Any())
+                {
+                    helper.InfraOpsProperties.PropertyValues.Delete(values);
+                }
+            });
+
+            SafeDelete(() =>
+            {
                 var connections = helper.AssetManagement.Connections.Read(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<Skyline.DataMiner.SDM.AssetManagement.Models.Connection>());
                 if (connections.Any())
                 {
@@ -172,6 +190,24 @@ namespace SDM.AssetManagement.Tests.Setup
                 if (settings.Any())
                 {
                     helper.AssetManagement.AppSettings.Delete(settings);
+                }
+            });
+
+            SafeDelete(() =>
+            {
+                var jobTypes = helper.PlanAndBuild.JobTypes.Read(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<Skyline.DataMiner.SDM.PlanAndBuild.Models.JobType>());
+                if (jobTypes.Any())
+                {
+                    helper.PlanAndBuild.JobTypes.Delete(jobTypes);
+                }
+            });
+
+            SafeDelete(() =>
+            {
+                var properties = helper.InfraOpsProperties.Properties.Read(new Skyline.DataMiner.Net.Messages.SLDataGateway.TRUEFilterElement<Skyline.DataMiner.SDM.InfraOpsProperties.Models.Property>());
+                if (properties.Any())
+                {
+                    helper.InfraOpsProperties.Properties.Delete(properties);
                 }
             });
 

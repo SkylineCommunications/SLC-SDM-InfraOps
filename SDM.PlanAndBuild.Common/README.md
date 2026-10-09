@@ -2,6 +2,16 @@
 
 ## About
 
+## Removed Job entries
+
+Asset entries with action `Removed` and Connection entries with status `Removed` or legacy
+`Removal` (case-insensitive) are historical snapshots. Reference-existence validation does not
+require their original Assets, Connections, or snapshot CableTypes to still exist. Active entries
+continue to require existing references; other validation, including Job state restrictions, remains unchanged.
+
+`ConnectionsOnJob.CableType` retains its SDK reference type but is stored, read and filtered
+as a string identifier, matching the installed Connections on Job section. Preserve this
+string mapping when regenerating the DOM repository; it is not a GUID-typed DOM field.
 
 
 ### About DataMiner
