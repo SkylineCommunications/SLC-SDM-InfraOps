@@ -79,6 +79,36 @@
                 result.AddFailuresFrom(ValidateAssetContext(dataPort));
             }
 
+            result.AddFailuresFrom(ValidateConnectionConflicts(dataPort));
+
+            return result;
+        }
+
+        /// <summary>
+        /// Validates that a changed output type does not invalidate the port's existing connections.
+        /// Only reads the database when the output type of a saved port actually changed.
+        /// </summary>
+        private ValidationResult ValidateConnectionConflicts(DataPort dataPort)
+        {
+            var result = new ValidationResult();
+
+            if (dataPort.IsNew || dataPort.DataPortInfo.OutputTypeField.Changed != true)
+            {
+                return result;
+            }
+
+            try
+            {
+                var connections = _entityLoader.GetConnectionsByPortIds(new List<string> { dataPort.Identifier });
+                DataPortValidationHandler.IsOutputTypeCompatibleWithConnections(dataPort, connections, out var conflictResult);
+                result.AddFailuresFrom(conflictResult);
+            }
+            catch (Exception ex)
+            {
+                result.AddFailReason(DataPortValidationField.DataPort,
+                    $"Error validating connections: {ex.Message}");
+            }
+
             return result;
         }
 

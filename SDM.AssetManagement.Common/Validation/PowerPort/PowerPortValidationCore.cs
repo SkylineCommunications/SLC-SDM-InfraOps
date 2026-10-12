@@ -71,6 +71,36 @@
                 result.AddFailuresFrom(ValidateAssetContext(powerPort));
             }
 
+            result.AddFailuresFrom(ValidateConnectionConflicts(powerPort));
+
+            return result;
+        }
+
+        /// <summary>
+        /// Validates that a changed output type does not invalidate the port's existing connections.
+        /// Only reads the database when the output type of a saved port actually changed.
+        /// </summary>
+        private ValidationResult ValidateConnectionConflicts(PowerPort powerPort)
+        {
+            var result = new ValidationResult();
+
+            if (powerPort.IsNew || powerPort.PowerPortInfo.OutputTypeField.Changed != true)
+            {
+                return result;
+            }
+
+            try
+            {
+                var connections = _entityLoader.GetConnectionsByPortIds(new List<string> { powerPort.Identifier });
+                PowerPortValidationHandler.IsOutputTypeCompatibleWithConnections(powerPort, connections, out var conflictResult);
+                result.AddFailuresFrom(conflictResult);
+            }
+            catch (Exception ex)
+            {
+                result.AddFailReason(PowerPortValidationField.PowerPort,
+                    $"Error validating connections: {ex.Message}");
+            }
+
             return result;
         }
 

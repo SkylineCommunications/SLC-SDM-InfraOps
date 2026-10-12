@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Linq;
 
+    using Skyline.DataMiner.SDM.AssetManagement.Common.Validation;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.Common.Services;
     using Skyline.DataMiner.SDM.Extensions;
@@ -101,8 +102,32 @@
             }
 
             ValidateAssetContext(powerPorts, results, indexByIdentifier);
+            ValidateConnectionConflicts(powerPorts, results);
 
             return results;
+        }
+
+        private void ValidateConnectionConflicts(List<PowerPort> powerPorts, List<ValidationResult> results)
+        {
+            var changedIndexes = Enumerable.Range(0, powerPorts.Count)
+                .Where(i => !powerPorts[i].IsNew
+                    && powerPorts[i].PowerPortInfo.OutputTypeField.Changed == true
+                    && !string.IsNullOrWhiteSpace(powerPorts[i].Identifier))
+                .ToList();
+
+            if (!changedIndexes.Any())
+            {
+                return;
+            }
+
+            var portIds = changedIndexes.Select(i => powerPorts[i].Identifier).Distinct().ToList();
+            var connections = _entityLoader.GetConnectionsByPortIds(portIds);
+
+            foreach (var i in changedIndexes)
+            {
+                PowerPortValidationHandler.IsOutputTypeCompatibleWithConnections(powerPorts[i], connections, out var conflictResult);
+                results[i].AddFailuresFrom(conflictResult);
+            }
         }
 
         private void ValidateBusinessRules(List<PowerPort> powerPorts, List<ValidationResult> results)
