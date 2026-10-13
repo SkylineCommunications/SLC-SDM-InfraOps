@@ -3,25 +3,20 @@ namespace SDM.AssetManagement.Tests.Assets
     using System;
     using System.Collections.Generic;
     using System.Linq;
-
     using FluentAssertions;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-
     using SDM.AssetManagement.Tests.Setup;
-
     using SharedMappers.DomIds;
-
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
-    using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.AssetManagement.Deletion;
+    using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.Extensions;
-    using Skyline.DataMiner.SDM.AssetManagement.Helpers;
     using Skyline.DataMiner.SDM.InfraOps.Orchestration;
     using Skyline.DataMiner.SDM.InfraOps.Orchestration.AssetDeletion;
     using Skyline.DataMiner.SDM.InfraOpsProperties.Models;
-    using Skyline.DataMiner.SDM.PlanAndBuild.Models;
     using Skyline.DataMiner.SDM.PlanAndBuild.Deletion;
+    using Skyline.DataMiner.SDM.PlanAndBuild.Models;
 
     [TestClass]
     public class AssetDeletionCascadeTests : BaseRepositoryTest
@@ -413,7 +408,7 @@ namespace SDM.AssetManagement.Tests.Assets
         private static PropertyValues CreatePropertyValues(
             Guid linkedObjectId,
             string scope,
-            string subId,
+            string? subId,
             Property property)
         {
             return new PropertyValues
