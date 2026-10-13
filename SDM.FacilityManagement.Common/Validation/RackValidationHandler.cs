@@ -1,5 +1,7 @@
 ﻿namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
 {
+    using System;
+    using System.Linq;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
@@ -27,7 +29,42 @@
             RackSpacePosition,
             RackSpaceOccupied,
             RowId,
+            ImageDetails,
         }
+
+        #region Image Validation
+
+        /// <summary>
+        /// Validates that the same image file path (case-insensitive) is not present more than once on the Rack.
+        /// </summary>
+        public static bool AreRackImagesValid(Rack rack, out ValidationResult result)
+        {
+            result = new ValidationResult();
+
+            if (rack == null)
+            {
+                result.AddFailReason(RackValidationField.Rack, "Rack cannot be null.");
+                return result.IsValid;
+            }
+
+            var duplicatePaths = (rack.ImageDetails ?? new System.Collections.Generic.List<ImageInfo>())
+                .Where(image => image != null && !string.IsNullOrWhiteSpace(image.ImageFilePath))
+                .GroupBy(image => image.ImageFilePath, StringComparer.OrdinalIgnoreCase)
+                .Where(group => group.Count() > 1)
+                .Select(group => group.Key)
+                .ToList();
+
+            if (duplicatePaths.Count > 0)
+            {
+                result.AddFailReason(
+                    RackValidationField.ImageDetails,
+                    $"Image(s) {string.Join(", ", duplicatePaths.Select(path => $"'{path}'"))} duplicated on this rack.");
+            }
+
+            return result.IsValid;
+        }
+
+        #endregion
 
         #region Identity Validation
 

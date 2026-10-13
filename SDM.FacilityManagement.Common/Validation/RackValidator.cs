@@ -62,6 +62,12 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                 result.AddFailuresFrom(positionResult);
             }
 
+            if (rack.ShouldValidate(rack.ImageDetailsField) &&
+                !RackValidationHandler.AreRackImagesValid(rack, out var imageResult))
+            {
+                result.AddFailuresFrom(imageResult);
+            }
+
             AddBusinessRuleFailures(rack, result, onlyChangedFields: true);
 
             result.AddFailuresFrom(ValidateReferencesAgainstDatabase(new List<Rack> { rack })[0]);
@@ -138,6 +144,12 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                     !RackValidationHandler.IsRackPositionValid(racks[i], out var positionResult))
                 {
                     results[i].AddFailuresFrom(positionResult);
+                }
+
+                if (racks[i].ShouldValidate(racks[i].ImageDetailsField) &&
+                    !RackValidationHandler.AreRackImagesValid(racks[i], out var imageResult))
+                {
+                    results[i].AddFailuresFrom(imageResult);
                 }
 
                 AddBusinessRuleFailures(racks[i], results[i]);

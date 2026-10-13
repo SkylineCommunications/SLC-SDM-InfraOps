@@ -519,6 +519,72 @@ namespace SDM.FacilityManagement.Tests.Validation
             result.TryGetFailReason(RackValidationHandler.RackValidationField.Height, out _).Should().BeTrue();
         }
 
+        [TestMethod]
+        public void Rack_Create_WithDuplicateImage_ShouldThrow()
+        {
+            var rack = NewRack("IMG-1", SlcFacility_Management.Enums.RackpositionenumEnum.Top);
+            rack.ImageDetails.Add(new ImageInfo { ImageFilePath = "racks/a.png", UploadTimestamp = DateTime.UtcNow });
+            rack.ImageDetails.Add(new ImageInfo { ImageFilePath = "RACKS/A.png", UploadTimestamp = DateTime.UtcNow });
+
+            var action = () => Helper.Racks.Create(Helper.AttachRow(rack));
+
+            action.Should().Throw<Exception>().WithMessage("*duplicated on this rack*");
+        }
+
+        [TestMethod]
+        public void Rack_Update_AddingExistingImage_ShouldThrow()
+        {
+            var rack = NewRack("IMG-2", SlcFacility_Management.Enums.RackpositionenumEnum.Top);
+            rack.ImageDetails.Add(new ImageInfo { ImageFilePath = "racks/a.png", UploadTimestamp = DateTime.UtcNow });
+            Helper.Racks.Create(Helper.AttachRow(rack));
+
+            var existing = Helper.Racks.Read(RackExposers.RackProperties.RackId.Equal("IMG-2")).Single();
+            existing.ImageDetails.Add(new ImageInfo { ImageFilePath = "racks/a.png", UploadTimestamp = DateTime.UtcNow });
+
+            var action = () => Helper.Racks.Update(existing);
+
+            action.Should().Throw<Exception>().WithMessage("*duplicated on this rack*");
+        }
+
+        [TestMethod]
+        public void Rack_Update_AddingDifferentImage_ShouldSucceed()
+        {
+            var rack = NewRack("IMG-3", SlcFacility_Management.Enums.RackpositionenumEnum.Top);
+            rack.ImageDetails.Add(new ImageInfo { ImageFilePath = "racks/a.png", UploadTimestamp = DateTime.UtcNow });
+            Helper.Racks.Create(Helper.AttachRow(rack));
+
+            var existing = Helper.Racks.Read(RackExposers.RackProperties.RackId.Equal("IMG-3")).Single();
+            existing.ImageDetails.Add(new ImageInfo { ImageFilePath = "racks/b.png", UploadTimestamp = DateTime.UtcNow });
+
+            var action = () => Helper.Racks.Update(existing);
+
+            action.Should().NotThrow();
+        }
+
+        [TestMethod]
+        public void Rack_Create_SameImageOnDifferentRacks_ShouldSucceed()
+        {
+            var first = NewRack("IMG-4", SlcFacility_Management.Enums.RackpositionenumEnum.Top);
+            first.ImageDetails.Add(new ImageInfo { ImageFilePath = "racks/shared.png", UploadTimestamp = DateTime.UtcNow });
+            var second = NewRack("IMG-5", SlcFacility_Management.Enums.RackpositionenumEnum.Top);
+            second.ImageDetails.Add(new ImageInfo { ImageFilePath = "racks/shared.png", UploadTimestamp = DateTime.UtcNow });
+
+            Helper.Racks.Create(Helper.AttachRow(first));
+            var action = () => Helper.Racks.Create(Helper.AttachRow(second));
+
+            action.Should().NotThrow();
+        }
+
+        [TestMethod]
+        public void RackValidationHandler_AreRackImagesValid_IgnoresEmptyPaths()
+        {
+            var rack = new Rack();
+            rack.ImageDetails.Add(new ImageInfo { ImageFilePath = null });
+            rack.ImageDetails.Add(new ImageInfo { ImageFilePath = string.Empty });
+
+            RackValidationHandler.AreRackImagesValid(rack, out _).Should().BeTrue();
+        }
+
         private RackValidator CreateValidator()
         {
             return new RackValidator(new FacilityEntityLoader(Helper));
