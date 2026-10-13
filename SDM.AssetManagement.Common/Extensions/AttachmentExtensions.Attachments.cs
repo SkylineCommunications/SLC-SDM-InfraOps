@@ -25,7 +25,6 @@
                 case "jpg":
                 case "jpeg":
                 case "bmp":
-                case "webp":
                     return true;
                 default:
                     return false;
