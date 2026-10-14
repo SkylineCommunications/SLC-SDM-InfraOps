@@ -109,7 +109,7 @@
 
             // Validate before mutating anything, so an invalid job is rejected atomically: neither the field
             // update nor the transition is applied.
-            Validator?.ValidateAndThrow(job);
+            Validator?.ValidateAndThrow(job, Utils.InfraOps.SharedCommonLibrary.Validations.RepositoryAction.Update);
 
             var updated = Update(job);
 
@@ -132,7 +132,7 @@
 
             // Validate before mutating anything, so an invalid job is rejected atomically: the transition is
             // never executed if the pending field values wouldn't pass validation.
-            Validator?.ValidateAndThrow(job);
+            Validator?.ValidateAndThrow(job, Utils.InfraOps.SharedCommonLibrary.Validations.RepositoryAction.Update);
 
             var transitioned = ExecuteStateTransition(job, newState);
 

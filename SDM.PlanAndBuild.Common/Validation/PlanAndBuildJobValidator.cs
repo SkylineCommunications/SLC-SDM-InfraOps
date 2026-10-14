@@ -25,7 +25,6 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
         private readonly IPlanAndBuildApiHelper _helper;
         private readonly IPeopleAndOrganizationsApi _peopleApi;
         private readonly IPlanAndBuildExternalReferenceChecker _externalReferenceChecker;
-        private readonly Validator<PlanAndBuildJob> _validationPipeline;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PlanAndBuildJobValidator"/> class.
@@ -53,7 +52,6 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
             _helper = helper ?? throw new ArgumentNullException(nameof(helper));
             _peopleApi = peopleApi ?? throw new ArgumentNullException(nameof(peopleApi));
             _externalReferenceChecker = externalReferenceChecker;
-            _validationPipeline = BuildValidationPipeline();
         }
 
         /// <summary>
@@ -62,85 +60,35 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
         /// </summary>
         internal bool HasExternalReferenceChecker => _externalReferenceChecker != null;
 
-        #region PlanAndBuildJob Validation
-
-        /// <summary>
-        /// Validates a PlanAndBuildJob and returns a ValidationResult.
-        /// Collects all errors without throwing exceptions.
-        /// </summary>
-        protected override ValidationResult Validate(PlanAndBuildJob job)
+        protected override List<ValidationResult> ValidateBulkNoDatabaseBusinessRules(List<PlanAndBuildJob> entities)
         {
-            return _validationPipeline.Validate(job);
-        }
-
-        /// <summary>
-        /// Validates a PlanAndBuildJob and throws a ValidationException if invalid.
-        /// Use this when you want fail-fast behavior.
-        /// </summary>
-        public void ValidateAndThrow(PlanAndBuildJob job)
-        {
-            _validationPipeline.ValidateAndThrow(job);
-        }
-
-        /// <summary>
-        /// Validates with a custom error handling callback.
-        /// </summary>
-        public ValidationResult ValidateWithHandler(PlanAndBuildJob job, Action<ValidationResult> onError)
-        {
-            return _validationPipeline.ValidateWithHandler(job, onError);
-        }
-
-        /// <summary>
-        /// Validates multiple Jobs in bulk. Results are returned in the same order as the input jobs.
-        /// In addition to the per-job checks, this also detects JobName conflicts <em>within the batch itself</em>
-        /// (i.e. two jobs being saved together that share the same JobName), which a single-job DB uniqueness
-        /// query cannot catch since none of the batch's entries are persisted yet.
-        /// Mirrors InfraOpsShared.DOM_Classes.DOM.Applications.Plan_And_Build.Validation.JobValidationHandler's
-        /// OtherChangedEntries check.
-        /// </summary>
-        protected override List<ValidationResult> ValidateBulk(List<PlanAndBuildJob> jobs)
-        {
-            if (jobs == null || !jobs.Any())
-            {
-                return new List<ValidationResult>();
-            }
-
-            // Initialize results - same order as input
-            var results = jobs.Select(j => new ValidationResult()).ToList();
-
             // ============================================================
             // PHASE 1: NO DATABASE ACCESS CHECKS (BUSINESS RULES)
             // ============================================================
-            for (int i = 0; i < jobs.Count; i++)
-            {
-                results[i].AddFailuresFrom(ValidateInfo(jobs[i]));
-            }
+            return entities.Select(ValidateInfo).ToList();
+        }
 
-            // Fast-fail if business rules fail
-            if (results.AnyInvalid())
-            {
-                return results;
-            }
-
+        protected override List<ValidationResult> ValidateBulkNoDatabaseBatchConflicts(List<PlanAndBuildJob> entities)
+        {
             // ============================================================
             // PHASE 2: IN-MEMORY BATCH CONFLICT DETECTION (NO DATABASE)
             // ============================================================
-            var batchConflicts = ValidateBatchConflicts(jobs);
-            results.MergeFrom(batchConflicts);
+            return ValidateBatchConflicts(entities);
+        }
 
-            // Fast-fail if batch conflicts exist
-            if (results.AnyInvalid())
-            {
-                return results;
-            }
+        protected override List<ValidationResult> ValidateBulkWithDatabase(List<PlanAndBuildJob> entities)
+        {
+            var results = entities.Select(j => new ValidationResult()).ToList();
 
             // ============================================================
             // PHASE 3: DATABASE ACCESS CHECKS (UNIQUENESS) + REMAINING RULES
             // ============================================================
-            ValidateAgainstDatabase(jobs, results);
+            ValidateAgainstDatabase(entities, results);
 
             return results;
         }
+
+        #region PlanAndBuildJob Validation
 
         /// <summary>
         /// Runs the database-backed validation phase. Batch-fetches every JobName that needs a uniqueness
@@ -287,36 +235,6 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
             }
 
             return results;
-        }
-
-        #endregion
-
-        #region Pipeline Construction
-
-        private Validator<PlanAndBuildJob> BuildValidationPipeline()
-        {
-            // Critical validations - stop on failure. Uniqueness/other checks are meaningless without a name.
-            var criticalValidations = Validator<PlanAndBuildJob>
-                .Create(ValidateInfo)
-                .StopOnFailure();
-
-            // No database access checks - fail fast before hitting the database. ValidateStateGatedChanges
-            // self-gates on job.IsNew (it is a no-op for new jobs), so it is safe to include unconditionally
-            // for both create and update.
-            var noDatabaseChecks = Validator<PlanAndBuildJob>
-                .Create(ValidateJobTypeAndDates)
-                .AndThen(ValidateStateGatedChanges)
-                .StopOnFailure();
-
-            // Database access checks (uniqueness, People/Team existence)
-            var databaseChecks = Validator<PlanAndBuildJob>
-                .Create(ValidateJobNameUniqueness)
-                .AndThen(ValidatePeopleAndOrganizations)
-                .AndThen(ValidateJobTypeReference)
-                .AndThen(ValidateExternalReferences);
-
-            // Combine: critical first, then no-database checks, then database checks
-            return criticalValidations.AndThen(noDatabaseChecks.AndThen(databaseChecks));
         }
 
         #endregion

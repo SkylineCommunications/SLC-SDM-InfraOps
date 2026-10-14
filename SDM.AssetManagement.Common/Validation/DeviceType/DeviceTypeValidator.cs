@@ -4,8 +4,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
     using System.Collections.Generic;
     using System.Linq;
 
-    using SharedMappers.DomIds;
-
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.Common.Services;
     using Skyline.DataMiner.SDM.Extensions;
@@ -21,43 +19,19 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             _entityLoader = entityLoader ?? throw new ArgumentNullException(nameof(entityLoader));
         }
 
-        protected override ValidationResult Validate(DeviceType entity)
+        protected override List<ValidationResult> ValidateBulkNoDatabaseBusinessRules(List<DeviceType> entities)
         {
-            var result = ValidateInfo(entity);
-            result.AddFailuresFrom(ValidateNameUniqueness(entity));
-
-            if (result.IsValid)
-            {
-                result.AddFailuresFrom(ValidateNoActiveAssetsForUpdate(entity));
-            }
-
-            return result;
+            return entities.Select(ValidateInfo).ToList();
         }
 
-        protected override List<ValidationResult> ValidateBulk(List<DeviceType> entities)
+        protected override List<ValidationResult> ValidateBulkNoDatabaseBatchConflicts(List<DeviceType> entities)
         {
-            if (entities == null || !entities.Any())
-            {
-                return new List<ValidationResult>();
-            }
+            return ValidateNameDuplicatesInBatch(entities);
+        }
 
-            var results = entities.Select(ValidateInfo).ToList();
-
-            if (results.AnyInvalid())
-            {
-                return results;
-            }
-
-            var batchConflicts = ValidateNameDuplicatesInBatch(entities);
-            results.MergeFrom(batchConflicts);
-
-            if (results.AnyInvalid())
-            {
-                return results;
-            }
-
-            var nameDbConflicts = ValidateBulkNamesAgainstDatabase(entities);
-            results.MergeFrom(nameDbConflicts);
+        protected override List<ValidationResult> ValidateBulkWithDatabase(List<DeviceType> entities)
+        {
+            var results = ValidateBulkNamesAgainstDatabase(entities);
 
             if (results.AnyInvalid())
             {
@@ -67,33 +41,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             results.MergeFrom(ValidateBulkNoActiveAssetsForUpdate(entities));
 
             return results;
-        }
-
-        /// <summary>
-        /// Blocks updating an existing DeviceType while assets not in the 'Disposed' state are assigned to it.
-        /// <para><b>Not suitable for bulk scenarios</b>: issues DB queries per call. Use <see cref="ValidateBulk"/> instead.</para>
-        /// </summary>
-        private ValidationResult ValidateNoActiveAssetsForUpdate(DeviceType deviceType)
-        {
-            var result = new ValidationResult();
-
-            if (deviceType == null || string.IsNullOrWhiteSpace(deviceType.Identifier))
-            {
-                return result;
-            }
-
-            var assetClassIds = _entityLoader.GetAssetClassesByDeviceTypeIds(new List<string> { deviceType.Identifier })
-                .Select(assetClass => assetClass.Identifier)
-                .ToList();
-
-            if (_entityLoader.HasNonDisposedAssetsForAssetClasses(assetClassIds))
-            {
-                result.AddFailReason(
-                    DeviceTypeValidationHandler.DeviceTypeValidationField.Asset,
-                    "There are already assets assigned to this device type not in the 'Disposed' State");
-            }
-
-            return result;
         }
 
         private List<ValidationResult> ValidateBulkNoActiveAssetsForUpdate(List<DeviceType> deviceTypes)
@@ -129,29 +76,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             }
 
             return results;
-        }
-
-        /// <summary>
-        /// Validates name uniqueness for a single DeviceType against the database.
-        /// <para><b>Not suitable for bulk scenarios</b>: issues one DB query per call. Use <see cref="ValidateBulk"/> instead.</para>
-        /// </summary>
-        private ValidationResult ValidateNameUniqueness(DeviceType deviceType)
-        {
-            var result = new ValidationResult();
-
-            if (deviceType == null || string.IsNullOrWhiteSpace(deviceType.Name))
-            {
-                return result;
-            }
-
-            if (_entityLoader.CountDeviceTypesByName(deviceType.Name, deviceType.Identifier) > 0)
-            {
-                result.AddFailReason(
-                    DeviceTypeValidationHandler.DeviceTypeValidationField.Name,
-                    $"Device Type Name '{deviceType.Name}' is already in use.");
-            }
-
-            return result;
         }
 
         private static List<ValidationResult> ValidateNameDuplicatesInBatch(List<DeviceType> deviceTypes)
@@ -192,8 +116,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
                 return results;
             }
 
-            var batchIds = new HashSet<string>(
-                deviceTypes.Select(dt => dt.Identifier).Where(id => !string.IsNullOrWhiteSpace(id)));
+            var batchIds = new HashSet<string>(deviceTypes.Select(dt => dt.Identifier).Where(id => !string.IsNullOrWhiteSpace(id)));
 
             var dbMatches = _entityLoader.GetDeviceTypesByNames(uniqueNames);
 
@@ -214,16 +137,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             }
 
             return results;
-        }
-
-        protected override ValidationResult ValidateForDelete(DeviceType deviceType)
-        {
-            if (deviceType == null)
-            {
-                throw new ArgumentNullException(nameof(deviceType));
-            }
-
-            return ValidateNotInUseWhenDeleted(new List<DeviceType> { deviceType })[0];
         }
 
         protected override List<ValidationResult> ValidateBulkForDelete(List<DeviceType> deviceTypes)

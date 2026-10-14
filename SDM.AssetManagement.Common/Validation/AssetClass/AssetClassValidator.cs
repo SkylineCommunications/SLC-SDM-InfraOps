@@ -21,7 +21,6 @@
     {
         private readonly SdmEntityLoader _entityLoader;
         private readonly IPeopleAndOrganizationsApi _peopleApi;
-        private readonly Validator<AssetClass> _validationPipeline;
 
 
         /// <summary>
@@ -33,195 +32,6 @@
         {
             _entityLoader = entityLoader ?? throw new ArgumentNullException(nameof(entityLoader));
             _peopleApi = peopleApi ?? throw new ArgumentNullException(nameof(peopleApi));
-            _validationPipeline = BuildValidationPipeline();
-        }
-
-        /// <summary>
-        /// Validates an AssetClass and returns ValidationResult.
-        /// Collects all errors without throwing exceptions.
-        /// <para><b>Not suitable for bulk scenarios</b>: issues one DB query per item. Use <see cref="ValidateBulk"/> instead.</para>
-        /// </summary>
-        protected override ValidationResult Validate(AssetClass assetClass)
-        {
-            return _validationPipeline.Validate(assetClass);
-        }
-
-        /// <summary>
-        /// Validates an AssetClass and throws ValidationException if invalid.
-        /// Use this when you want fail-fast behavior.
-        /// <para><b>Not suitable for bulk scenarios</b>: issues one DB query per item. Use <see cref="ValidateBulk"/> instead.</para>
-        /// </summary>
-        public void ValidateAndThrow(AssetClass assetClass)
-        {
-            _validationPipeline.ValidateAndThrow(assetClass);
-        }
-
-        /// <summary>
-        /// Validates with custom error handling callback.
-        /// <para><b>Not suitable for bulk scenarios</b>: issues one DB query per item. Use <see cref="ValidateBulk"/> instead.</para>
-        /// </summary>
-        public ValidationResult ValidateWithHandler(AssetClass assetClass, Action<ValidationResult> onError)
-        {
-            return _validationPipeline.ValidateWithHandler(assetClass, onError);
-        }
-
-        /// <summary>
-        /// Validates a batch of AssetClasses in three phases:
-        /// 1. Non-database checks per item (fast-fail on business rule violations).
-        /// 2. In-memory batch conflict detection (name uniqueness within batch).
-        /// 3. Database checks per item (name uniqueness vs DB, power supply against device type).
-        /// Results are returned in the same order as the input list.
-        /// </summary>
-        protected override List<ValidationResult> ValidateBulk(List<AssetClass> assetClasses)
-        {
-            if (assetClasses == null || !assetClasses.Any())
-            {
-                return new List<ValidationResult>();
-            }
-
-            var results = assetClasses.Select(_ => new ValidationResult()).ToList();
-
-            // ============================================================
-            // PHASE 1: NO DATABASE ACCESS CHECKS (BUSINESS RULES)
-            // ============================================================
-            for (int i = 0; i < assetClasses.Count; i++)
-            {
-                results[i].AddFailuresFrom(ValidateWithoutDatabaseAccess(assetClasses[i]));
-            }
-
-            if (results.AnyInvalid())
-            {
-                return results;
-            }
-
-            // ============================================================
-            // PHASE 2: IN-MEMORY BATCH CONFLICT DETECTION
-            // ============================================================
-            var batchConflicts = ValidateNameDuplicatesInBatch(assetClasses);
-            results.MergeFrom(batchConflicts);
-
-            if (results.AnyInvalid())
-            {
-                return results;
-            }
-
-            // ============================================================
-            // PHASE 2.5: BULK NAME UNIQUENESS CHECK AGAINST DATABASE
-            // One OR-based query via Tools.RetrieveBigOrFilter — no large AND filter.
-            // Phase 3 per-item check skips name when context is present.
-            // ============================================================
-            var nameDbConflicts = ValidateBulkNamesAgainstDatabase(assetClasses);
-            results.MergeFrom(nameDbConflicts);
-
-            if (results.AnyInvalid())
-            {
-                return results;
-            }
-
-            // ============================================================
-            // PHASE 3: DATABASE ACCESS CHECKS
-            // Load device types once and reuse the same map for both the
-            // reference existence checks and the per-item behavioral checks,
-            // avoiding a second GetDeviceTypesByDomIds query for the same data.
-            // ============================================================
-            var deviceTypeMap = _entityLoader.GetDeviceTypesByDomIds(
-                    assetClasses
-                        .Where(ac => ac.DeviceTypeId != null && ac.DeviceTypeId.HasValue())
-                        .Select(ac => ac.DeviceTypeId.Identifier)
-                        .Distinct()
-                        .ToList())
-                .ToDictionary(dt => dt.Identifier);
-
-            for (int assetIdx = 0; assetIdx < assetClasses.Count; assetIdx++)
-            {
-                var assetClass = assetClasses[assetIdx];
-
-                // TODO: code duplicated in "ValidateWithDatabaseAccess". There should only be one.
-                if ((assetClass.DeviceTypeIdField.Changed || assetClass.PowerSupplyField.Changed || assetClass.HeightUField.Changed)
-                && assetClass.DeviceTypeId.HasValue())
-                {
-                    try
-                    {
-                        results[assetIdx].AddFailuresFrom(ValidateAgainstDeviceType(assetClass, deviceTypeMap));
-                    }
-                    catch (Exception ex)
-                    {
-                        var r = new ValidationResult();
-                        r.AddFailReason(AssetClassValidationHandler.AssetClassValidationField.DeviceTypeId,
-                            $"Error validating against device type: {ex.Message}");
-                        results[assetIdx].AddFailuresFrom(r);
-                    }
-                }
-            }
-
-            if (results.AnyInvalid())
-            {
-                return results;
-            }
-
-            results.MergeFrom(ValidateBulkReferencesAgainstDatabase(assetClasses, deviceTypeMap));
-
-            return results;
-        }
-
-        protected override ValidationResult ValidateForDelete(AssetClass assetClass)
-        {
-            if (assetClass == null)
-            {
-                throw new ArgumentNullException(nameof(assetClass));
-            }
-
-            return ValidateNotInUseWhenDeleted(assetClass);
-        }
-
-        protected override List<ValidationResult> ValidateBulkForDelete(List<AssetClass> assetClasses)
-        {
-            if (assetClasses == null || !assetClasses.Any())
-            {
-                return new List<ValidationResult>();
-            }
-
-            return ValidateNotInUseWhenDeleted(assetClasses);
-        }
-
-        private ValidationResult ValidateNotInUseWhenDeleted(AssetClass assetClass)
-        {
-            return ValidateNotInUseWhenDeleted(new List<AssetClass> { assetClass })[0];
-        }
-
-        private List<ValidationResult> ValidateNotInUseWhenDeleted(List<AssetClass> assetClasses)
-        {
-            var results = assetClasses.Select(_ => new ValidationResult()).ToList();
-
-            var identifiers = assetClasses
-                .Select(ac => ac.Identifier)
-                .Where(id => !string.IsNullOrWhiteSpace(id))
-                .Distinct()
-                .ToList();
-
-            var assetClassIdsInUse = _entityLoader.GetAssetsByAssetClassIds(identifiers)
-                .Where(asset => asset.AssetClassId != null && asset.AssetClassId.HasValue())
-                .Select(asset => asset.AssetClassId.Identifier)
-                .ToHashSet();
-
-            for (int i = 0; i < assetClasses.Count; i++)
-            {
-                if (assetClasses[i].State == SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Active)
-                {
-                    results[i].AddFailReason(
-                        AssetClassValidationHandler.AssetClassValidationField.State,
-                        "Asset Class must not be in 'Active' State to Delete");
-                }
-
-                if (assetClassIdsInUse.Contains(assetClasses[i].Identifier))
-                {
-                    results[i].AddFailReason(
-                        AssetClassValidationHandler.AssetClassValidationField.AssetClass,
-                        "There are still Assets in this Asset Class. Please remove them first");
-                }
-            }
-
-            return results;
         }
 
         /// <summary>
@@ -260,23 +70,124 @@
             return IsAssetClassNameValid(assetClass.Name, assetClass.Identifier);
         }
 
-        #region Pipeline Construction
-
-        private Validator<AssetClass> BuildValidationPipeline()
+        protected override List<ValidationResult> ValidateBulkNoDatabaseBusinessRules(List<AssetClass> entities)
         {
-            // Phase 1: No database access checks (fail fast on business rules)
-            var noDatabaseChecks = Validator<AssetClass>
-                .Create(ValidateWithoutDatabaseAccess)
-                .StopOnFailure();
-
-            // Phase 2: Database access checks (uniqueness, relationships)
-            var databaseChecks = Validator<AssetClass>
-                .Create(ac => ValidateWithDatabaseAccess(ac));
-
-            return noDatabaseChecks.AndThen(databaseChecks);
+            // ============================================================
+            // PHASE 1: NO DATABASE ACCESS CHECKS (BUSINESS RULES)
+            // ============================================================
+            return entities.Select(ValidateWithoutDatabaseAccess).ToList();
         }
 
-        #endregion
+        protected override List<ValidationResult> ValidateBulkNoDatabaseBatchConflicts(List<AssetClass> entities)
+        {
+            // ============================================================
+            // PHASE 2: IN-MEMORY BATCH CONFLICT DETECTION
+            // ============================================================
+            return ValidateNameDuplicatesInBatch(entities);
+        }
+
+        protected override List<ValidationResult> ValidateBulkWithDatabase(List<AssetClass> entities)
+        {
+            // ============================================================
+            // PHASE 2.5: BULK NAME UNIQUENESS CHECK AGAINST DATABASE
+            // One OR-based query via Tools.RetrieveBigOrFilter — no large AND filter.
+            // Phase 3 per-item check skips name when context is present.
+            // ============================================================
+            var results = ValidateBulkNamesAgainstDatabase(entities);
+
+            if (results.AnyInvalid())
+            {
+                return results;
+            }
+
+            // ============================================================
+            // PHASE 3: DATABASE ACCESS CHECKS
+            // Load device types once and reuse the same map for both the
+            // reference existence checks and the per-item behavioral checks,
+            // avoiding a second GetDeviceTypesByDomIds query for the same data.
+            // ============================================================
+            var deviceTypeMap = _entityLoader.GetDeviceTypesByDomIds(
+                    entities
+                        .Where(ac => ac.DeviceTypeId != null && ac.DeviceTypeId.HasValue())
+                        .Select(ac => ac.DeviceTypeId.Identifier)
+                        .Distinct()
+                        .ToList())
+                .ToDictionary(dt => dt.Identifier);
+
+            for (int assetIdx = 0; assetIdx < entities.Count; assetIdx++)
+            {
+                var assetClass = entities[assetIdx];
+
+                // TODO: code duplicated in "ValidateWithDatabaseAccess". There should only be one.
+                if ((assetClass.DeviceTypeIdField.Changed || assetClass.PowerSupplyField.Changed || assetClass.HeightUField.Changed) && assetClass.DeviceTypeId.HasValue())
+                {
+                    try
+                    {
+                        results[assetIdx].AddFailuresFrom(ValidateAgainstDeviceType(assetClass, deviceTypeMap));
+                    }
+                    catch (Exception ex)
+                    {
+                        var r = new ValidationResult();
+                        r.AddFailReason(AssetClassValidationHandler.AssetClassValidationField.DeviceTypeId, $"Error validating against device type: {ex.Message}");
+                        results[assetIdx].AddFailuresFrom(r);
+                    }
+                }
+            }
+
+            if (results.AnyInvalid())
+            {
+                return results;
+            }
+
+            results.MergeFrom(ValidateBulkReferencesAgainstDatabase(entities, deviceTypeMap));
+
+            return results;
+        }
+
+        protected override List<ValidationResult> ValidateBulkForDelete(List<AssetClass> assetClasses)
+        {
+            if (assetClasses == null || !assetClasses.Any())
+            {
+                return new List<ValidationResult>();
+            }
+
+            return ValidateNotInUseWhenDeleted(assetClasses);
+        }
+
+        private List<ValidationResult> ValidateNotInUseWhenDeleted(List<AssetClass> assetClasses)
+        {
+            var results = assetClasses.Select(_ => new ValidationResult()).ToList();
+
+            var identifiers = assetClasses
+                .Select(ac => ac.Identifier)
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .Distinct()
+                .ToList();
+
+            var assetClassIdsInUse = _entityLoader.GetAssetsByAssetClassIds(identifiers)
+                .Where(asset => asset.AssetClassId != null && asset.AssetClassId.HasValue())
+                .Select(asset => asset.AssetClassId.Identifier)
+                .ToHashSet();
+
+            for (int i = 0; i < assetClasses.Count; i++)
+            {
+                if (assetClasses[i].State == SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Active)
+                {
+                    results[i].AddFailReason(
+                        AssetClassValidationHandler.AssetClassValidationField.State,
+                        "Asset Class must not be in 'Active' State to Delete");
+                }
+
+                if (assetClassIdsInUse.Contains(assetClasses[i].Identifier))
+                {
+                    results[i].AddFailReason(
+                        AssetClassValidationHandler.AssetClassValidationField.AssetClass,
+                        "There are still Assets in this Asset Class. Please remove them first");
+                }
+            }
+
+            return results;
+        }
 
         #region Validation Methods
 
@@ -301,10 +212,14 @@
         {
             var result = new ValidationResult();
 
-            if (assetClass.ShouldValidate(assetClass.DeviceTypeIdField)
-                && !AssetClassValidationHandler.IsAssetClassDeviceTypeValid(assetClass, out var deviceTypeResult))
+            if (assetClass.ShouldValidate(assetClass.DeviceTypeIdField) && !AssetClassValidationHandler.IsAssetClassDeviceTypeValid(assetClass, out var deviceTypeResult))
             {
                 result.AddFailuresFrom(deviceTypeResult);
+            }
+
+            if (assetClass.ShouldValidate(assetClass.NameField) && !AssetClassValidationHandler.IsAssetClassNameValid(assetClass, out var nameResult))
+            {
+                result.AddFailuresFrom(nameResult);
             }
 
             return result;

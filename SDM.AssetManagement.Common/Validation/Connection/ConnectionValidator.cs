@@ -30,41 +30,31 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             _entityLoader = entityLoader ?? throw new ArgumentNullException(nameof(entityLoader));
         }
 
-        protected override ValidationResult Validate(Connection connection)
+        protected override List<ValidationResult> ValidateBulkNoDatabaseBusinessRules(List<Connection> entities)
         {
-            return ValidateBulk(new List<Connection> { connection })[0];
+            var results = entities.Select(_ => new ValidationResult()).ToList();
+
+            for (int idx = 0; idx < entities.Count; idx++)
+            {
+                ValidateWithoutDatabaseAccess(entities[idx], results[idx]);
+            }
+            return results;
         }
 
-        protected override List<ValidationResult> ValidateBulk(List<Connection> connections)
+        protected override List<ValidationResult> ValidateBulkNoDatabaseBatchConflicts(List<Connection> entities)
         {
-            if (connections == null || !connections.Any())
+            return entities.Select(_ => new ValidationResult()).ToList();
+        }
+
+        protected override List<ValidationResult> ValidateBulkWithDatabase(List<Connection> entities)
+        {
+            var results = entities.Select(_ => new ValidationResult()).ToList();
+
+            var lookups = BuildLookups(entities);
+
+            for (int idx = 0; idx < entities.Count; idx++)
             {
-                return new List<ValidationResult>();
-            }
-
-            var results = connections.Select(_ => new ValidationResult()).ToList();
-            var indexesRequiringDatabaseAccess = new List<int>();
-
-            for (int i = 0; i < connections.Count; i++)
-            {
-                ValidateWithoutDatabaseAccess(connections[i], results[i]);
-                if (results[i].IsValid)
-                {
-                    indexesRequiringDatabaseAccess.Add(i);
-                }
-            }
-
-            if (!indexesRequiringDatabaseAccess.Any())
-            {
-                return results;
-            }
-
-            var connectionsRequiringDatabaseAccess = indexesRequiringDatabaseAccess.Select(index => connections[index]).ToList();
-            var lookups = BuildLookups(connectionsRequiringDatabaseAccess);
-
-            foreach (var index in indexesRequiringDatabaseAccess)
-            {
-                ValidateWithDatabaseAccess(connections[index], lookups, results[index]);
+                ValidateWithDatabaseAccess(entities[idx], lookups, results[idx]);
             }
 
             return results;

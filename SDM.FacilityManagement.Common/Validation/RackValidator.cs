@@ -25,48 +25,56 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
             _entityLoader = entityLoader ?? throw new ArgumentNullException(nameof(entityLoader));
         }
 
-        /// <summary>
-        /// Validates a single Rack.
-        /// <para><b>Not suitable for bulk scenarios</b>: issues one DB query per item. Use <see cref="ValidateBulk"/> instead.</para>
-        /// </summary>
-        protected override ValidationResult Validate(Rack rack)
+        protected override List<ValidationResult> ValidateBulkNoDatabaseBusinessRules(List<Rack> entities)
         {
-            if (rack == null)
-            {
-                throw new ArgumentNullException(nameof(rack));
-            }
+            var results = entities.Select(_ => new ValidationResult()).ToList();
 
-            var result = new ValidationResult();
-
-            if (rack.ShouldValidate(rack.RackIdField))
+            // ============================================================
+            // PHASE 1: NO DATABASE ACCESS CHECKS (BUSINESS RULES)
+            // ============================================================
+            for (int i = 0; i < entities.Count; i++)
             {
-                if (!RackValidationHandler.IsRackIdValid(rack, out var idResult))
+                if (entities[i].ShouldValidate(entities[i].RackIdField) && !RackValidationHandler.IsRackIdValid(entities[i], out var idResult))
                 {
-                    result.AddFailuresFrom(idResult);
+                    results[i].AddFailuresFrom(idResult);
                 }
-                else if (IsRackIdInUse(rack.RackId, rack.Identifier))
+
+                if (entities[i].ShouldValidate(entities[i].NameField) && !RackValidationHandler.IsRackNameValid(entities[i], out var nameResult))
                 {
-                    result.AddFailReason(RackValidationHandler.RackValidationField.RackId,
-                        $"Rack Id '{rack.RackId}' is already in use.");
+                    results[i].AddFailuresFrom(nameResult);
                 }
+
+                if (entities[i].ShouldValidate(entities[i].PositionField) && !RackValidationHandler.IsRackPositionValid(entities[i], out var positionResult))
+                {
+                    results[i].AddFailuresFrom(positionResult);
+                }
+
+                AddBusinessRuleFailures(entities[i], results[i], true);
             }
 
-            if (rack.ShouldValidate(rack.NameField) && !RackValidationHandler.IsRackNameValid(rack, out var nameResult))
-            {
-                result.AddFailuresFrom(nameResult);
-            }
+            return results;
+        }
 
-            if (rack.ShouldValidate(rack.PositionField) &&
-                !RackValidationHandler.IsRackPositionValid(rack, out var positionResult))
-            {
-                result.AddFailuresFrom(positionResult);
-            }
+        protected override List<ValidationResult> ValidateBulkNoDatabaseBatchConflicts(List<Rack> entities)
+        {
+            // ============================================================
+            // PHASE 2: IN-MEMORY BATCH CONFLICT DETECTION
+            // ============================================================
+            return ValidateRackIdDuplicatesInBatch(entities);
+        }
 
-            AddBusinessRuleFailures(rack, result, onlyChangedFields: true);
+        protected override List<ValidationResult> ValidateBulkWithDatabase(List<Rack> entities)
+        {
+            // ============================================================
+            // PHASE 2.5: BULK ID UNIQUENESS CHECK AGAINST DATABASE
+            // One OR-based query via Tools.RetrieveBigOrFilter — no large AND filter.
+            // ============================================================
+            var results = ValidateBulkRackIdsAgainstDatabase(entities);
 
-            result.AddFailuresFrom(ValidateReferencesAgainstDatabase(new List<Rack> { rack })[0]);
+            var referenceConflicts = ValidateReferencesAgainstDatabase(entities);
+            results.MergeFrom(referenceConflicts);
 
-            return result;
+            return results;
         }
 
         protected override List<ValidationResult> ValidateBulkForDelete(List<Rack> racks)
@@ -103,103 +111,29 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
             return result;
         }
 
-        /// <summary>
-        /// Validates a batch of Racks in three phases:
-        /// 1. Non-database checks per item (id not empty + dimension/capacity rules).
-        /// 2. In-memory batch conflict detection (id uniqueness within batch).
-        /// 3. Database uniqueness check (id uniqueness vs DB).
-        /// Results are returned in the same order as the input list.
-        /// </summary>
-        protected override List<ValidationResult> ValidateBulk(List<Rack> racks)
-        {
-            if (racks == null || !racks.Any())
-            {
-                return new List<ValidationResult>();
-            }
-
-            var results = racks.Select(_ => new ValidationResult()).ToList();
-
-            // ============================================================
-            // PHASE 1: NO DATABASE ACCESS CHECKS (BUSINESS RULES)
-            // ============================================================
-            for (int i = 0; i < racks.Count; i++)
-            {
-                if (!RackValidationHandler.IsRackIdValid(racks[i], out var idResult))
-                {
-                    results[i].AddFailuresFrom(idResult);
-                }
-
-                if (!RackValidationHandler.IsRackNameValid(racks[i], out var nameResult))
-                {
-                    results[i].AddFailuresFrom(nameResult);
-                }
-
-                if (racks[i].ShouldValidate(racks[i].PositionField) &&
-                    !RackValidationHandler.IsRackPositionValid(racks[i], out var positionResult))
-                {
-                    results[i].AddFailuresFrom(positionResult);
-                }
-
-                AddBusinessRuleFailures(racks[i], results[i]);
-            }
-
-            if (results.AnyInvalid())
-            {
-                return results;
-            }
-
-            // ============================================================
-            // PHASE 2: IN-MEMORY BATCH CONFLICT DETECTION
-            // ============================================================
-            var batchConflicts = ValidateRackIdDuplicatesInBatch(racks);
-            results.MergeFrom(batchConflicts);
-
-            if (results.AnyInvalid())
-            {
-                return results;
-            }
-
-            // ============================================================
-            // PHASE 2.5: BULK ID UNIQUENESS CHECK AGAINST DATABASE
-            // One OR-based query via Tools.RetrieveBigOrFilter — no large AND filter.
-            // ============================================================
-            var dbConflicts = ValidateBulkRackIdsAgainstDatabase(racks);
-            results.MergeFrom(dbConflicts);
-
-            var referenceConflicts = ValidateReferencesAgainstDatabase(racks);
-            results.MergeFrom(referenceConflicts);
-
-            return results;
-        }
-
         private static void AddBusinessRuleFailures(Rack rack, ValidationResult result, bool onlyChangedFields = false)
         {
-            if ((!onlyChangedFields || rack.ShouldValidate(rack.HeightField)) &&
-                !RackValidationHandler.IsRackHeightValid(rack, out var heightResult))
+            if ((!onlyChangedFields || rack.ShouldValidate(rack.HeightField)) && !RackValidationHandler.IsRackHeightValid(rack, out var heightResult))
             {
                 result.AddFailuresFrom(heightResult);
             }
 
-            if ((!onlyChangedFields || rack.ShouldValidate(rack.DepthField)) &&
-                !RackValidationHandler.IsRackDepthValid(rack, out var depthResult))
+            if ((!onlyChangedFields || rack.ShouldValidate(rack.DepthField)) && !RackValidationHandler.IsRackDepthValid(rack, out var depthResult))
             {
                 result.AddFailuresFrom(depthResult);
             }
 
-            if ((!onlyChangedFields || rack.ShouldValidate(rack.WidthField)) &&
-                !RackValidationHandler.IsRackWidthValid(rack, out var widthResult))
+            if ((!onlyChangedFields || rack.ShouldValidate(rack.WidthField)) && !RackValidationHandler.IsRackWidthValid(rack, out var widthResult))
             {
                 result.AddFailuresFrom(widthResult);
             }
 
-            if ((!onlyChangedFields || rack.ShouldValidate(rack.Capacity)) &&
-                !RackValidationHandler.IsRackUnitCapacityValid(rack, out var unitResult))
+            if ((!onlyChangedFields || rack.ShouldValidate(rack.Capacity)) && !RackValidationHandler.IsRackUnitCapacityValid(rack, out var unitResult))
             {
                 result.AddFailuresFrom(unitResult);
             }
 
-            if ((!onlyChangedFields || rack.ShouldValidate(rack.Capacity)) &&
-                !RackValidationHandler.IsRackPowerCapacityValid(rack, out var powerResult))
+            if ((!onlyChangedFields || rack.ShouldValidate(rack.Capacity)) && !RackValidationHandler.IsRackPowerCapacityValid(rack, out var powerResult))
             {
                 result.AddFailuresFrom(powerResult);
             }

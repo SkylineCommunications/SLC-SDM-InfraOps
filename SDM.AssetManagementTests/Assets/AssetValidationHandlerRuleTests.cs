@@ -157,11 +157,12 @@ namespace SDM.AssetManagement.Tests.Assets
         public void ReservationPlacement_WithUnknownRack_ShouldFail()
         {
             var validator = new InfraopsReservationValidator(new SdmEntityLoader());
+            var rackfK = Guid.NewGuid().ToString();
             var reservation = new InfraopsReservation
             {
                 RackFk =
                 {
-                    Rack = new SdmObjectReference<Rack>(Guid.NewGuid().ToString()),
+                    Rack = new SdmObjectReference<Rack>(rackfK),
                 },
                 ReservedPositions =
                 [
@@ -172,7 +173,7 @@ namespace SDM.AssetManagement.Tests.Assets
             var result = validator.Validate(reservation, RepositoryAction.Create);
 
             result.IsValid.Should().BeFalse();
-            result.FailureReasons.Should().Contain(reason => reason.ToString().Contains("Rack not found."));
+            result.FailureReasons.Should().Contain(reason => reason.ToString().Contains($"Referenced Rack '{rackfK}' does not exist."));
         }
 
         [TestMethod]

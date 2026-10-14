@@ -3,8 +3,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
     using System;
     using System.Collections.Generic;
     using System.Linq;
-
-    using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
     using Skyline.DataMiner.SDM.FacilityManagement.Services;
     using Skyline.DataMiner.SDM.InfraOps.Common.Validation;
@@ -27,53 +25,54 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
             _entityLoader = entityLoader ?? throw new ArgumentNullException(nameof(entityLoader));
         }
 
-        /// <summary>
-        /// Validates a single Site.
-        /// <para><b>Not suitable for bulk scenarios</b>: issues one DB query per item. Use <see cref="ValidateBulk"/> instead.</para>
-        /// </summary>
-        protected override ValidationResult Validate(Site site)
+        protected override List<ValidationResult> ValidateBulkNoDatabaseBusinessRules(List<Site> entities)
         {
-            var result = new ValidationResult();
+            var results = entities.Select(_ => new ValidationResult()).ToList();
 
-            if (site.ShouldValidate(site.SiteIdField))
+            // ============================================================
+            // PHASE 1: NO DATABASE ACCESS CHECKS (BUSINESS RULES)
+            // ============================================================
+            for (int i = 0; i < entities.Count; i++)
             {
-                if (!SiteValidationHandler.IsSiteIdValid(site, out var idResult))
+                if (entities[i].ShouldValidate(entities[i].SiteIdField) && !SiteValidationHandler.IsSiteIdValid(entities[i], out var idResult))
                 {
-                    result.AddFailuresFrom(idResult);
+                    results[i].AddFailuresFrom(idResult);
                 }
-                else if (IsSiteIdInUse(site.SiteId, site.Identifier))
+
+                if (entities[i].ShouldValidate(entities[i].NameField) && !SiteValidationHandler.IsSiteNameValid(entities[i], out var nameResult))
                 {
-                    result.AddFailReason(SiteValidationHandler.SiteValidationField.SiteId,
-                        $"Site Id '{site.SiteId}' is already in use.");
+                    results[i].AddFailuresFrom(nameResult);
+                }
+
+                if (entities[i].ShouldValidate(entities[i].LatitudeField) && !SiteValidationHandler.IsSiteLatitudeValid(entities[i], out var latitudeResult))
+                {
+                    results[i].AddFailuresFrom(latitudeResult);
+                }
+
+                if (entities[i].ShouldValidate(entities[i].LongitudeField) && !SiteValidationHandler.IsSiteLongitudeValid(entities[i], out var longitudeResult))
+                {
+                    results[i].AddFailuresFrom(longitudeResult);
                 }
             }
 
-            if (site.ShouldValidate(site.NameField) && !SiteValidationHandler.IsSiteNameValid(site, out var nameResult))
-            {
-                result.AddFailuresFrom(nameResult);
-            }
-
-            if (site.ShouldValidate(site.LatitudeField) && !SiteValidationHandler.IsSiteLatitudeValid(site, out var latitudeResult))
-            {
-                result.AddFailuresFrom(latitudeResult);
-            }
-
-            if (site.ShouldValidate(site.LongitudeField) && !SiteValidationHandler.IsSiteLongitudeValid(site, out var longitudeResult))
-            {
-                result.AddFailuresFrom(longitudeResult);
-            }
-
-            return result;
+            return results;
         }
 
-        protected override ValidationResult ValidateForDelete(Site site)
+        protected override List<ValidationResult> ValidateBulkNoDatabaseBatchConflicts(List<Site> entities)
         {
-            if (site == null)
-            {
-                throw new ArgumentNullException(nameof(site));
-            }
+            // ============================================================
+            // PHASE 2: IN-MEMORY BATCH CONFLICT DETECTION
+            // ============================================================
+            return ValidateSiteIdDuplicatesInBatch(entities);
+        }
 
-            return ValidateNoFacilitiesAssigned(new List<Site> { site })[0];
+        protected override List<ValidationResult> ValidateBulkWithDatabase(List<Site> entities)
+        {
+            // ============================================================
+            // PHASE 2.5: BULK ID UNIQUENESS CHECK AGAINST DATABASE
+            // One OR-based query via Tools.RetrieveBigOrFilter — no large AND filter.
+            // ============================================================
+            return ValidateBulkSiteIdsAgainstDatabase(entities);
         }
 
         protected override List<ValidationResult> ValidateBulkForDelete(List<Site> sites)
@@ -108,74 +107,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
             }
 
             return result;
-        }
-
-        /// <summary>
-        /// Validates a batch of Sites in three phases:
-        /// 1. Non-database checks per item (id not empty).
-        /// 2. In-memory batch conflict detection (id uniqueness within batch).
-        /// 3. Database uniqueness check (id uniqueness vs DB).
-        /// Results are returned in the same order as the input list.
-        /// </summary>
-        protected override List<ValidationResult> ValidateBulk(List<Site> sites)
-        {
-            if (sites == null || !sites.Any())
-            {
-                return new List<ValidationResult>();
-            }
-
-            var results = sites.Select(_ => new ValidationResult()).ToList();
-
-            // ============================================================
-            // PHASE 1: NO DATABASE ACCESS CHECKS (BUSINESS RULES)
-            // ============================================================
-            for (int i = 0; i < sites.Count; i++)
-            {
-                if (!SiteValidationHandler.IsSiteIdValid(sites[i], out var idResult))
-                {
-                    results[i].AddFailuresFrom(idResult);
-                }
-
-                if (!SiteValidationHandler.IsSiteNameValid(sites[i], out var nameResult))
-                {
-                    results[i].AddFailuresFrom(nameResult);
-                }
-
-                if (!SiteValidationHandler.IsSiteLatitudeValid(sites[i], out var latitudeResult))
-                {
-                    results[i].AddFailuresFrom(latitudeResult);
-                }
-
-                if (!SiteValidationHandler.IsSiteLongitudeValid(sites[i], out var longitudeResult))
-                {
-                    results[i].AddFailuresFrom(longitudeResult);
-                }
-            }
-
-            if (results.AnyInvalid())
-            {
-                return results;
-            }
-
-            // ============================================================
-            // PHASE 2: IN-MEMORY BATCH CONFLICT DETECTION
-            // ============================================================
-            var batchConflicts = ValidateSiteIdDuplicatesInBatch(sites);
-            results.MergeFrom(batchConflicts);
-
-            if (results.AnyInvalid())
-            {
-                return results;
-            }
-
-            // ============================================================
-            // PHASE 2.5: BULK ID UNIQUENESS CHECK AGAINST DATABASE
-            // One OR-based query via Tools.RetrieveBigOrFilter — no large AND filter.
-            // ============================================================
-            var dbConflicts = ValidateBulkSiteIdsAgainstDatabase(sites);
-            results.MergeFrom(dbConflicts);
-
-            return results;
         }
 
         private bool IsSiteIdInUse(string siteId, string exceptIdentifier = null)

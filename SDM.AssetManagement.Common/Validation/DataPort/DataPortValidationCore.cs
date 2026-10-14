@@ -61,82 +61,6 @@
         #region Database Access Validation
 
         /// <summary>
-        /// Validates DataPort with database access (PortType, Asset context).
-        /// Only called after no-database checks pass.
-        /// </summary>
-        public ValidationResult ValidateWithDatabaseAccess(DataPort dataPort)
-        {
-            var result = new ValidationResult();
-
-            // Port Type validation
-            result.AddFailuresFrom(ValidatePortType(dataPort));
-            if (!result.IsValid) return result;
-
-
-            // Asset context validation (port number uniqueness, primary ports)
-            if (dataPort.Asset.HasValue())
-            {
-                result.AddFailuresFrom(ValidateAssetContext(dataPort));
-            }
-
-            result.AddFailuresFrom(ValidateConnectionConflicts(dataPort));
-
-            return result;
-        }
-
-        /// <summary>
-        /// Validates that a changed output type does not invalidate the port's existing connections.
-        /// Only reads the database when the output type of a saved port actually changed.
-        /// </summary>
-        private ValidationResult ValidateConnectionConflicts(DataPort dataPort)
-        {
-            var result = new ValidationResult();
-
-            if (dataPort.IsNew || dataPort.DataPortInfo.OutputTypeField.Changed != true)
-            {
-                return result;
-            }
-
-            try
-            {
-                var connections = _entityLoader.GetConnectionsByPortIds(new List<string> { dataPort.Identifier });
-                DataPortValidationHandler.IsOutputTypeCompatibleWithConnections(dataPort, connections, out var conflictResult);
-                result.AddFailuresFrom(conflictResult);
-            }
-            catch (Exception ex)
-            {
-                result.AddFailReason(DataPortValidationField.DataPort,
-                    $"Error validating connections: {ex.Message}");
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// Validates Port Type (must exist and be DataPortType).
-        /// </summary>
-        private ValidationResult ValidatePortType(DataPort dataPort)
-        {
-            if (dataPort.DataPortInfo.PortType == null || !dataPort.DataPortInfo.PortType.HasValue())
-            {
-                return PortTypeRequiredFailure();
-            }
-
-            try
-            {
-                var portType = _entityLoader.LoadPortType(dataPort.DataPortInfo.PortType);
-                return ValidatePortTypeAgainst(dataPort, portType);
-            }
-            catch (Exception ex)
-            {
-                var result = new ValidationResult();
-                result.AddFailReason(DataPortValidationField.PortType,
-                    $"Error validating Port Type: {ex.Message}");
-                return result;
-            }
-        }
-
-        /// <summary>
         /// Builds the required-field failure for a missing Port Type reference.
         /// Shared by the single-item and bulk validation paths so the message stays consistent.
         /// </summary>
@@ -174,42 +98,6 @@
                 result.AddFailReason(DataPortValidationField.PortType,
                     "Port Type must be a Data Port Type.");
                 return result;
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// Validates DataPort in context of its Asset.
-        /// </summary>
-        private ValidationResult ValidateAssetContext(DataPort dataPort)
-        {
-            var result = new ValidationResult();
-
-            try
-            {
-                var asset = _entityLoader.LoadAsset(dataPort.Asset);
-                if (asset == null)
-                {
-                    result.AddFailReason(DataPortValidationField.Asset,
-                        $"Referenced Asset '{dataPort.Asset.Identifier}' does not exist.");
-                    return result;
-                }
-
-                // Load all ports for asset
-                var allPorts = _entityLoader.LoadDataPorts(asset)
-                    .Where(p => p.Identifier != dataPort.Identifier)
-                    .ToList();
-
-                allPorts.Add(dataPort);
-
-                // Validate collection (uniqueness + primary ports)
-                result.AddFailuresFrom(ValidateDataPortCollection(allPorts));
-            }
-            catch (Exception ex)
-            {
-                result.AddFailReason(DataPortValidationField.Asset,
-                    $"Error validating Asset context: {ex.Message}");
             }
 
             return result;

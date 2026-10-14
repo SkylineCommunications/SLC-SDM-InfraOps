@@ -3,8 +3,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
     using System;
     using System.Collections.Generic;
     using System.Linq;
-
-    using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
     using Skyline.DataMiner.SDM.FacilityManagement.Services;
     using Skyline.DataMiner.SDM.InfraOps.Common.Validation;
@@ -23,36 +21,39 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
             _entityLoader = entityLoader ?? throw new ArgumentNullException(nameof(entityLoader));
         }
 
-        /// <summary>
-        /// Validates a single Desk.
-        /// <para><b>Not suitable for bulk scenarios</b>: issues one DB query per item. Use <see cref="ValidateBulk"/> instead.</para>
-        /// </summary>
-        protected override ValidationResult Validate(Desk entity)
+        protected override List<ValidationResult> ValidateBulkNoDatabaseBusinessRules(List<Desk> entities)
         {
-            var result = new ValidationResult();
+            var results = entities.Select(_ => new ValidationResult()).ToList();
 
-            if (entity.ShouldValidate(entity.DeskIdField))
+            for (int i = 0; i < entities.Count; i++)
             {
-                if (!DeskValidationHandler.IsDeskIdValid(entity, out var idResult))
+                if (entities[i].ShouldValidate(entities[i].DeskIdField) && !DeskValidationHandler.IsDeskIdValid(entities[i], out var idResult))
                 {
-                    result.AddFailuresFrom(idResult);
+                    results[i].AddFailuresFrom(idResult);
                 }
-                else if (IsIdInUse(entity.DeskID, entity.Identifier))
+
+                if (entities[i].ShouldValidate(entities[i].NameField) && !DeskValidationHandler.IsDeskNameValid(entities[i], out var nameResult))
                 {
-                    result.AddFailReason(DeskValidationHandler.DeskValidationField.DeskId,
-                        $"Desk Id '{entity.DeskID}' is already in use.");
+                    results[i].AddFailuresFrom(nameResult);
                 }
             }
 
-            if (entity.ShouldValidate(entity.NameField) && !DeskValidationHandler.IsDeskNameValid(entity, out var nameResult))
-            {
-                result.AddFailuresFrom(nameResult);
-            }
-
-            result.AddFailuresFrom(ValidateReferencesAgainstDatabase(new List<Desk> { entity })[0]);
-
-            return result;
+            return results;
         }
+
+        protected override List<ValidationResult> ValidateBulkNoDatabaseBatchConflicts(List<Desk> entities)
+        {
+            return ValidateIdDuplicatesInBatch(entities);
+        }
+
+        protected override List<ValidationResult> ValidateBulkWithDatabase(List<Desk> entities)
+        {
+            var results = ValidateBulkIdsAgainstDatabase(entities);
+            results.MergeFrom(ValidateReferencesAgainstDatabase(entities));
+
+            return results;
+        }
+
 
         protected override List<ValidationResult> ValidateBulkForDelete(List<Desk> desks)
         {
@@ -86,24 +87,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
             }
 
             return result;
-        }
-
-        /// <summary>
-        /// Validates a batch of Desk entities in three phases:
-        /// 1. Non-database checks per item (id not empty).
-        /// 2. In-memory batch conflict detection (id uniqueness within batch).
-        /// 3. Database uniqueness check (id uniqueness vs DB).
-        /// Results are returned in the same order as the input list.
-        /// </summary>
-        protected override List<ValidationResult> ValidateBulk(List<Desk> entities)
-        {
-            return FacilityBulkValidationHelper.RunBulkValidation(
-                entities,
-                DeskValidationHandler.IsDeskIdValid,
-                DeskValidationHandler.IsDeskNameValid,
-                ValidateIdDuplicatesInBatch,
-                ValidateBulkIdsAgainstDatabase,
-                ValidateReferencesAgainstDatabase);
         }
 
         private bool IsIdInUse(string id, string exceptIdentifier = null)

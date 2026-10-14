@@ -81,7 +81,7 @@
 				.Setup(r => r.Count(It.IsAny<FilterElement<Person>>()))
 				.Returns(exists ? 1 : 0);
 
-			var teamsRepositoryMock = new Mock<ITeamsRepository>();
+            var teamsRepositoryMock = new Mock<ITeamsRepository>();
 			teamsRepositoryMock
 				.Setup(r => r.Count(It.IsAny<FilterElement<Team>>()))
 				.Returns(exists ? 1 : 0);
