@@ -1,5 +1,9 @@
 ﻿namespace SDM.PlanAndBuild.Tests
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+
     using Moq;
 
     using Skyline.DataMiner.Net;
@@ -61,8 +65,8 @@
 		}
 
 		/// <summary>
-		/// Creates a mocked <see cref="IPeopleAndOrganizationsApi"/> whose People/Teams <c>Count</c> queries always
-		/// return 1 (i.e. "exists"), so existing tests that use arbitrary Guids for
+		/// Creates a mocked <see cref="IPeopleAndOrganizationsApi"/> whose People/Teams <c>Count</c> and ID-based
+		/// <c>Read</c> queries treat every requested ID as existing, so tests that use arbitrary Guids for
 		/// <see cref="JobOwnership.AssignedTo"/>/<see cref="JobOwnership.AssignmentGroup"/>/
 		/// <see cref="JobAttachment.AttachedBy"/> keep passing existence validation by default.
 		/// Tests that specifically exercise rejection behavior should build their own mock instead
@@ -71,8 +75,8 @@
 		internal static IPeopleAndOrganizationsApi CreateDefaultPeopleApiMock() => CreatePeopleApiMock(exists: true);
 
 		/// <summary>
-		/// Creates a mocked <see cref="IPeopleAndOrganizationsApi"/> whose People/Teams <c>Count</c> queries return
-		/// either 1 ("exists") or 0 ("does not exist"), depending on <paramref name="exists"/>.
+		/// Creates a mocked <see cref="IPeopleAndOrganizationsApi"/> whose People/Teams <c>Count</c> and ID-based
+		/// <c>Read</c> queries reflect <paramref name="exists"/>.
 		/// </summary>
 		internal static IPeopleAndOrganizationsApi CreatePeopleApiMock(bool exists)
 		{
@@ -80,17 +84,42 @@
 			peopleRepositoryMock
 				.Setup(r => r.Count(It.IsAny<FilterElement<Person>>()))
 				.Returns(exists ? 1 : 0);
+            peopleRepositoryMock
+                .Setup(r => r.Read(It.IsAny<FilterElement<Person>>()))
+                .Returns((FilterElement<Person> filter) => exists
+                    ? GetRequestedIds(filter).Select(id => new Person(id)).ToArray()
+                    : Array.Empty<Person>());
 
             var teamsRepositoryMock = new Mock<ITeamsRepository>();
 			teamsRepositoryMock
 				.Setup(r => r.Count(It.IsAny<FilterElement<Team>>()))
 				.Returns(exists ? 1 : 0);
+            teamsRepositoryMock
+                .Setup(r => r.Read(It.IsAny<FilterElement<Team>>()))
+                .Returns((FilterElement<Team> filter) => exists
+                    ? GetRequestedIds(filter).Select(id => new Team(id)).ToArray()
+                    : Array.Empty<Team>());
 
 			var peopleApiMock = new Mock<IPeopleAndOrganizationsApi>();
 			peopleApiMock.Setup(a => a.People).Returns(peopleRepositoryMock.Object);
 			peopleApiMock.Setup(a => a.Teams).Returns(teamsRepositoryMock.Object);
 
 			return peopleApiMock.Object;
+        }
+
+        private static IEnumerable<Guid> GetRequestedIds<T>(FilterElement<T> filter)
+        {
+            if (filter is ORFilterElement<T> or)
+            {
+                return or.subFilters.SelectMany(subFilter => GetRequestedIds(subFilter));
+            }
+
+            if (filter is ManagedFilterIdentifier managedFilter && managedFilter.getValue() is Guid id)
+            {
+                return new[] { id };
+            }
+
+            throw new NotSupportedException($"Unsupported People/Teams ID filter: {filter}");
         }
 
         private static IConnection CreateConnection(DomSLNetMessageHandler messageHandler)

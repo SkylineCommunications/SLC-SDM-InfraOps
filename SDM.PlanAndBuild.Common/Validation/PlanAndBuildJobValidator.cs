@@ -65,7 +65,15 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
             // ============================================================
             // PHASE 1: NO DATABASE ACCESS CHECKS (BUSINESS RULES)
             // ============================================================
-            return entities.Select(ValidateInfo).ToList();
+            var results = entities.Select(ValidateInfo).ToList();
+
+            for (int i = 0; i < entities.Count; i++)
+            {
+                results[i].AddFailuresFrom(ValidateJobTypeAndDates(entities[i]));
+                results[i].AddFailuresFrom(ValidateStateGatedChanges(entities[i]));
+            }
+
+            return results;
         }
 
         protected override List<ValidationResult> ValidateBulkNoDatabaseBatchConflicts(List<PlanAndBuildJob> entities)
@@ -124,8 +132,6 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
 
             for (int i = 0; i < jobs.Count; i++)
             {
-                results[i].AddFailuresFrom(ValidateJobTypeAndDates(jobs[i]));
-                results[i].AddFailuresFrom(ValidateStateGatedChanges(jobs[i]));
                 results[i].AddFailuresFrom(ValidateJobNameUniqueness(jobs[i], existingByJobName));
                 results[i].AddFailuresFrom(ValidatePeopleAndOrganizations(jobs[i], existingPersonIds, existingTeamIds));
                 results[i].AddFailuresFrom(ValidateJobTypeReference(jobs[i], existingJobTypeIds));

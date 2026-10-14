@@ -8,16 +8,16 @@ namespace Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations
     /// <summary>
     /// Convenience base class for validators that implement <see cref="IValidator{T}"/>.
     /// <para>
-    /// Provides two levels of abstraction:
+    /// Provides Create/Update phases and optional Delete rules:
     /// <list type="bullet">
     ///   <item><description>
-    ///     <b>Create/Update rules (most validators):</b> override <see cref="Validate(T)"/> and
-    ///     <see cref="ValidateBulk(List{T})"/>. The base class handles the
-    ///     <see cref="RepositoryAction"/> routing and the null-guard automatically.
+    ///     <b>Create/Update rules:</b> override <see cref="ValidateBulkNoDatabaseBusinessRules(List{T})"/>,
+    ///     <see cref="ValidateBulkNoDatabaseBatchConflicts(List{T})"/>, and
+    ///     <see cref="ValidateBulkWithDatabase(List{T})"/>. Single-entity validation uses the same phases.
     ///   </description></item>
     ///   <item><description>
     ///     <b>Delete rules (opt-in, e.g. orphan/in-use guards):</b> override
-    ///     <see cref="ValidateForDelete(T)"/> and/or <see cref="ValidateBulkForDelete(List{T})"/>.
+    ///     <see cref="ValidateBulkForDelete(List{T})"/>.
     ///     By default deletion is <b>not</b> validated (returns a passing result), because a delete
     ///     carries an already-persisted entity that need not satisfy create/update rules. Override
     ///     these hooks only to add delete-specific guards (e.g. "cannot delete while referenced").
@@ -31,7 +31,7 @@ namespace Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations
         /// <summary>
         /// Validates a single entity for the given action.
         /// Null-guards, then routes <see cref="RepositoryAction.Delete"/> to
-        /// <see cref="ValidateForDelete(T)"/> and every other action to <see cref="Validate(T)"/>.
+        /// <see cref="ValidateBulkForDelete(List{T})"/> and every other action to the Create/Update phases.
         /// </summary>
         public ValidationResult Validate(T entity, RepositoryAction action)
         {
@@ -57,7 +57,7 @@ namespace Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations
         }
 
         /// <summary>
-        /// Validates a single entity for Create/Update. throws <see cref="ValidationException"/> if invalid.
+        /// Validates a single entity for the given action and throws <see cref="ValidationException"/> if invalid.
         /// </summary>
         public void ValidateAndThrow(T entity, RepositoryAction action)
         {
