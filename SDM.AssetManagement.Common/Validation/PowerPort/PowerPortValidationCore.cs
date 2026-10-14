@@ -141,16 +141,17 @@
         /// All ports must belong to the specified asset.
         /// </summary>
         /// <exception cref="ArgumentException">Thrown when ports don't belong to the asset.</exception>
-        public Dictionary<string, ValidationResult> ValidatePowerPortsForAsset(
-            List<PowerPort> portsToValidate, Asset asset)
+        public Dictionary<string, ValidationResult> ValidatePowerPortsForAsset(List<PowerPort> powerPorts, List<PowerPort> portsToValidate, Asset asset)
         {
+            var powerPortIdentifier = powerPorts.Select(p => p.Identifier).ToHashSet();
+
             return PortBulkValidationHelper.ValidatePortsForAsset(
                 portsToValidate,
                 asset,
                 "PowerPorts",
                 p => p.Identifier,
                 p => p.Asset.Identifier,
-                a => _entityLoader.LoadPowerPorts(a),
+                a => _entityLoader.LoadPowerPorts(a).Where(p => !powerPortIdentifier.Contains(p.Identifier)),
                 ValidatePowerPortCollection);
         }
 

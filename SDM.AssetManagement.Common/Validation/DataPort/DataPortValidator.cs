@@ -125,7 +125,6 @@
         private void ValidateAssetContext(List<DataPort> dataPorts, List<ValidationResult> results, Dictionary<string, int> indexByIdentifier)
         {
             var distinctAssetIds = dataPorts
-                .Where(p => p.AssetField.Changed)
                 .Select(p => p.Asset.Identifier)
                 .Where(id => !string.IsNullOrWhiteSpace(id))
                 .Distinct()
@@ -135,29 +134,33 @@
                 .ToDictionary(a => a.Identifier);
 
             var portsByAsset = dataPorts
-                .Where(p => p.AssetField.Changed && !string.IsNullOrWhiteSpace(p.Asset.Identifier))
+                .Where(p => !string.IsNullOrWhiteSpace(p.Asset.Identifier))
                 .GroupBy(p => p.Asset.Identifier);
 
             foreach (var group in portsByAsset)
             {
+                ValidateAssetGroup(dataPorts, group, assetMap, results, indexByIdentifier);
+            }
+        }
 
-                if (!assetMap.TryGetValue(group.Key, out var asset))
+        private void ValidateAssetGroup(List<DataPort> dataPorts, IGrouping<string, DataPort> group, Dictionary<string, Asset> assetMap, List<ValidationResult> results, Dictionary<string, int> indexByIdentifier)
+        {
+            if (!assetMap.TryGetValue(group.Key, out var asset))
+            {
+                foreach (var port in group)
                 {
-                    foreach (var port in group)
-                    {
-                        results[indexByIdentifier[port.Identifier]].AddFailReason(
-                            DataPortValidationField.Asset,
-                            $"Referenced Asset '{group.Key}' does not exist.");
-                    }
-
-                    return;
+                    results[indexByIdentifier[port.Identifier]].AddFailReason(
+                        DataPortValidationField.Asset,
+                        $"Referenced Asset '{group.Key}' does not exist.");
                 }
 
-                var groupResults = _validationCore.ValidateDataPortsForAsset(group.ToList(), asset);
-                foreach (var kvp in groupResults)
-                {
-                    results[indexByIdentifier[kvp.Key]].AddFailuresFrom(kvp.Value);
-                }
+                return;
+            }
+
+            var groupResults = _validationCore.ValidateDataPortsForAsset(dataPorts, group.ToList(), asset);
+            foreach (var kvp in groupResults)
+            {
+                results[indexByIdentifier[kvp.Key]].AddFailuresFrom(kvp.Value);
             }
         }
 

@@ -140,11 +140,11 @@
 
             foreach (var group in portsByAsset)
             {
-                ValidateAssetGroup(group, assetMap, results, indexByIdentifier);
+                ValidateAssetGroup(powerPorts, group, assetMap, results, indexByIdentifier);
             }
         }
 
-        private void ValidateAssetGroup(IGrouping<string, PowerPort> group, Dictionary<string, Asset> assetMap, List<ValidationResult> results, Dictionary<string, int> indexByIdentifier)
+        private void ValidateAssetGroup(List<PowerPort> powerPorts, IGrouping<string, PowerPort> group, Dictionary<string, Asset> assetMap, List<ValidationResult> results, Dictionary<string, int> indexByIdentifier)
         {
             if (!assetMap.TryGetValue(group.Key, out var asset))
             {
@@ -158,7 +158,7 @@
                 return;
             }
 
-            var groupResults = _validationCore.ValidatePowerPortsForAsset(group.ToList(), asset);
+            var groupResults = _validationCore.ValidatePowerPortsForAsset(powerPorts, group.ToList(), asset);
             foreach (var kvp in groupResults)
             {
                 results[indexByIdentifier[kvp.Key]].AddFailuresFrom(kvp.Value);

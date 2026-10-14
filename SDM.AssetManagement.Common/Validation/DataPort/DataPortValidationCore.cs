@@ -172,16 +172,17 @@
         /// All ports must belong to the specified asset.
         /// </summary>
         /// <exception cref="ArgumentException">Thrown when ports don't belong to the asset.</exception>
-        public Dictionary<string, ValidationResult> ValidateDataPortsForAsset(
-            List<DataPort> portsToValidate, Asset asset)
+        public Dictionary<string, ValidationResult> ValidateDataPortsForAsset(List<DataPort> dataPorts, List<DataPort> portsToValidate, Asset asset)
         {
+            var dataPortIdentifiers = dataPorts.Select(p => p.Identifier).ToHashSet();
+
             return PortBulkValidationHelper.ValidatePortsForAsset(
                 portsToValidate,
                 asset,
                 "DataPorts",
                 p => p.Identifier,
                 p => p.Asset.Identifier,
-                a => _entityLoader.LoadDataPorts(a),
+                a => _entityLoader.LoadDataPorts(a).Where(p => !dataPortIdentifiers.Contains(p.Identifier)),
                 ValidateDataPortCollection);
         }
 
