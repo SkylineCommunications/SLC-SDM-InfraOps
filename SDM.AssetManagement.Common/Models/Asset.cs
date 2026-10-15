@@ -426,10 +426,10 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     OldValue = kvp.Value.prevVal,
                     NewValue = kvp.Value.newVal,
                 })
-                .Concat(Location?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>())
-                .Concat(DestinationLocation?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>())
-                .Concat(Ownership?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>())
-                .Concat(Custody?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>());
+                .Concat(_location.GetSectionChanges(nameof(Location)))
+                .Concat(_destinationLocation.GetSectionChanges(nameof(DestinationLocation)))
+                .Concat(Ownership.GetSectionChanges(nameof(Ownership)))
+                .Concat(Custody.GetSectionChanges(nameof(Custody)));
         }
 
         public void ResetChangeTracking()

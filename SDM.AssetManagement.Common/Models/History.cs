@@ -51,7 +51,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
         public IEnumerable<TrackingFieldValueDifference> GetChanges()
         {
-            return _historyInfo?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>();
+            return _historyInfo.GetSectionChanges("HistoryInfo");
         }
 
         public void ResetChangeTracking()

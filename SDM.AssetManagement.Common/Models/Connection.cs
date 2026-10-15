@@ -144,8 +144,8 @@
                     OldValue = kvp.Value.prevVal,
                     NewValue = kvp.Value.newVal,
                 })
-                .Concat(_source?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>())
-                .Concat(_destination?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>());
+                .Concat(_source.GetSectionChanges("Source"))
+                .Concat(_destination.GetSectionChanges("Destination"));
         }
 
         public void ResetChangeTracking()

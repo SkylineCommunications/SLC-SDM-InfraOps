@@ -125,8 +125,8 @@
 
         public IEnumerable<TrackingFieldValueDifference> GetChanges()
         {
-            return (_powerPortInfo?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>())
-                .Concat(_assetFk?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>());
+            return _powerPortInfo.GetSectionChanges("PowerPortInfo")
+                .Concat(_assetFk.GetSectionChanges("AssetFk"));
         }
 
         /// <summary>

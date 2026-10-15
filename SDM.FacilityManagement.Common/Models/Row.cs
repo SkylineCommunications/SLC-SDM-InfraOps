@@ -155,8 +155,8 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     OldValue = kvp.Value.prevVal,
                     NewValue = kvp.Value.newVal,
                 })
-                .Concat(_roomFk?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>())
-                .Concat(_resource?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>());
+                .Concat(_roomFk.GetSectionChanges("RoomFk"))
+                .Concat(_resource.GetSectionChanges("Resource"));
         }
 
         public void ResetChangeTracking()

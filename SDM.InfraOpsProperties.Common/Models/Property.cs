@@ -199,7 +199,7 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
                     OldValue = kvp.Value.prevVal,
                     NewValue = kvp.Value.newVal,
                 })
-                .Concat(Layout?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>());
+                .Concat(Layout.GetSectionChanges(nameof(Layout)));
         }
 
         public void ResetChangeTracking()

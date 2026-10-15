@@ -109,8 +109,8 @@
                     OldValue = kvp.Value.prevVal,
                     NewValue = kvp.Value.newVal,
                 })
-                .Concat(_tagsInfo?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>())
-                .Concat(_hierarchyInfo?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>());
+                .Concat(_tagsInfo.GetSectionChanges("TagsInfo"))
+                .Concat(_hierarchyInfo.GetSectionChanges("HierarchyInfo"));
         }
 
         public void ResetChangeTracking()

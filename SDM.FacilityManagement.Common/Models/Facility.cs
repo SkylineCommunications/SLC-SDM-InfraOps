@@ -190,7 +190,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     OldValue = kvp.Value.prevVal,
                     NewValue = kvp.Value.newVal,
                 })
-                .Concat(_siteFk?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>());
+                .Concat(_siteFk.GetSectionChanges("SiteFk"));
         }
 
         public void ResetChangeTracking()

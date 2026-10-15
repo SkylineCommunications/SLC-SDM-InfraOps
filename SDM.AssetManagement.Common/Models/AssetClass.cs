@@ -367,8 +367,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     OldValue = kvp.Value.prevVal,
                     NewValue = kvp.Value.newVal,
                 })
-                .Concat(_lifecycle?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>())
-                .Concat(_protocolLink?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>());
+                .Concat(_lifecycle.GetSectionChanges("Lifecycle"))
+                .Concat(_protocolLink.GetSectionChanges("ProtocolLink"));
         }
 
         public void ResetChangeTracking()
