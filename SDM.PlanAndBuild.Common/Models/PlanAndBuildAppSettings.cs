@@ -209,5 +209,16 @@
                 return hash;
             }
         }
+
+        public static PlanAndBuildAppSettings Default()
+        {
+            return new PlanAndBuildAppSettings
+            {
+                JobIDPrefix = "PB-",
+                JobIDIncrement = 3,
+                JobIDStartingSeed = 7,
+                JobIDMinimumDigits = 4,
+            };
+        }
     }
 }
