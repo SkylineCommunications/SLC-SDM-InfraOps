@@ -863,24 +863,14 @@
         /// </summary>
         public static ValidationResult ValidateDestinationLocation(Asset asset)
         {
+            var result = new ValidationResult();
+
             if (asset == null)
             {
-                var nullResult = new ValidationResult();
-                nullResult.AddFailReason(AssetValidationField.Asset, "Asset cannot be null.");
-                return nullResult;
+                result.AddFailReason(AssetValidationField.Asset, "Asset cannot be null.");
+                return result;
             }
 
-            return ValidateDestinationLocation(asset, asset.State);
-        }
-
-        /// <summary>
-        /// Validates Destination Location against an explicitly supplied state.
-        /// </summary>
-        public static ValidationResult ValidateDestinationLocation(
-            Asset asset,
-            SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum stateToEvaluate)
-        {
-            var result = new ValidationResult();
 
             if (asset == null)
             {
@@ -891,7 +881,7 @@
             var hasDestinationLocation = HasDestinationLocation(asset);
 
             // Check if in "In Transit" state
-            bool isInTransit = stateToEvaluate == SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit;
+            bool isInTransit = asset.State == SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit;
 
             if (isInTransit)
             {
@@ -908,7 +898,7 @@
                 if (hasDestinationLocation)
                 {
                     result.AddWarning(AssetValidationField.DestinationLocation,
-                        $"Destination Location is only applicable when Asset is in 'In Transit' state. Current state: '{stateToEvaluate}'. The Destination Location will be ignored.");
+                        $"Destination Location is only applicable when Asset is in 'In Transit' state. Current state: '{asset.State}'. The Destination Location will be ignored.");
                 }
             }
 

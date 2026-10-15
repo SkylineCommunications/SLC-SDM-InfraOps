@@ -1,11 +1,68 @@
 ﻿namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
     using System;
+    using System.Linq;
+
+    using SharedCommonLibrary.AssetManagement.State_Management;
+
     using SharedMappers.DomIds;
+
     using Skyline.DataMiner.SDM.AssetManagement.Common.Extensions;
+    using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
     public static partial class AssetDomRepositoryExtensions
     {
+        /// <summary>
+        /// Transitions asset to a new state.
+        /// Use this AFTER updating fields if the new state has different validation rules.
+        /// </summary>
+        /// <param name="repository">The asset repository.</param>
+        /// <param name="asset">The asset to transition.</param>
+        /// <param name="newState">The new state to transition the asset to.</param>
+        public static Asset TransitionTo(this IAssetRepository repository, Asset asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum newState)
+        {
+            if (asset == null) throw new ArgumentNullException(nameof(asset));
+
+            if (!StateMachine.IsTransitionAllowed(asset.State, newState))
+            {
+                throw new InvalidOperationException($"State transition from {asset.State} to {newState} is not allowed.");
+            }
+
+            asset.ValidateTransitionPath(newState);
+
+            //var initialState = asset.State;
+            var changes = SdmChangeTracking.RevertFieldChanges(asset);
+            ApplyChangesResult result;
+
+            try
+            {
+                asset = repository.TransitionToInternal(asset, newState);
+            }
+            finally
+            {
+
+                result = SdmChangeTracking.ApplyFieldChanges(asset, changes);
+            }
+
+            if (result?.Skipped.Any() ?? false)
+            {
+                var skippedFields = string.Join(Environment.NewLine, result.Skipped.Select(s => $"{s.Change.FieldName} - Reason: {s.Reason}"));
+                throw new InvalidOperationException($"Failed to apply changes to the asset after transitioning to {newState}.{Environment.NewLine}Skipped fields:{Environment.NewLine}{skippedFields}");
+            }
+
+            //TODO: ADD ASSERT OF destination location as location when move of extensions from solution is made
+            //if in transit save destination to location 
+            // logic to asset state transition from InTransit to another state, clear the location and set it to the destination location needs access to the facility manager
+            //if (initialState == SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit && newState != SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit)
+            //{
+            //    ClearLocation(asset.Location);
+            //    asset.Location = asset.DestinationLocation;
+            //    asset.Destination = null;
+            //}
+
+            return asset;
+        }
+
         /// <summary>
         /// Updates fields and transitions state in a single atomic operation.
         /// Order: Fields are updated first, then state transition occurs.
@@ -27,7 +84,7 @@
 
             var updated = repository.Update(asset);
 
-            return repository.TransitionTo(updated, newState);
+            return AssetDomRepositoryExtensions.TransitionTo(repository, updated, newState);
         }
 
         /// <summary>
@@ -49,11 +106,10 @@
                 throw new InvalidOperationException($"State transition from {asset.State} to {newState} is not allowed.");
             }
 
-            var transitioned = repository.TransitionTo(asset, newState);
-            asset.State = transitioned.State;
+            asset.ValidateTransitionPath(newState);
 
-            //TODO: apply changes to transision Asset and proceed. This is done to preserve external changes.
-            //transitioned.ApplyChanges(asset.GetChanges()); 
+            asset = AssetDomRepositoryExtensions.TransitionTo(repository, asset, newState);
+
             return repository.Update(asset);
         }
 
