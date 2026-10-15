@@ -30,7 +30,7 @@
 
             asset.ValidateTransitionPath(newState);
 
-            //var initialState = asset.State;
+            var initialState = asset.State;
             var changes = SdmChangeTracking.RevertFieldChanges(asset);
             ApplyChangesResult result;
 
@@ -43,6 +43,8 @@
 
                 result = SdmChangeTracking.ApplyFieldChanges(asset, changes);
             }
+
+            MarkStateChange(asset, initialState);
 
             if (result?.Skipped.Any() ?? false)
             {
@@ -61,6 +63,21 @@
             //}
 
             return asset;
+        }
+
+        // The transition returns a freshly loaded asset whose state is already the original value.
+        // Re-baseline the field on the previous state so GetChanges reports previous -> new.
+        private static void MarkStateChange(Asset asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum previousState)
+        {
+            var currentState = asset.State;
+            if (currentState == previousState || !(asset.StateField is IDomInstanceFieldApplyChanges stateField))
+            {
+                return;
+            }
+
+            asset.State = previousState;
+            stateField.ApplyChanges();
+            asset.State = currentState;
         }
 
         /// <summary>

@@ -73,6 +73,93 @@
             return _helper.AssetManagement.Assets.Create(asset);
         }
 
+        [TestMethod]
+        public void TransitionTo_StatusOnly_ReportsStateChange()
+        {
+            var asset = CreateAsset(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available);
+            var result = _helper.AssetManagement.Assets.TransitionTo(
+                asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable);
+
+            var changes = result.GetChanges().ToList();
+
+            changes.Should().ContainSingle();
+            changes[0].FieldName.Should().Be("State");
+            changes[0].OldValue.Should().Be(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available);
+            changes[0].NewValue.Should().Be(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable);
+            result.Changed.Should().BeTrue();
+        }
+
+        [TestMethod]
+        public void TransitionTo_WithPendingEdit_ReportsStateAndEdit()
+        {
+            var asset = CreateAsset(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available);
+            var newName = "Renamed " + Guid.NewGuid();
+            asset.Name = newName;
+
+            var result = _helper.AssetManagement.Assets.TransitionTo(
+                asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable);
+
+            var names = result.GetChanges().Select(c => c.FieldName).ToList();
+            names.Should().BeEquivalentTo(new[] { "State", "Name" });
+            result.Name.Should().Be(newName);
+        }
+
+        [TestMethod]
+        public void TransitionTo_MultiStepPath_ReportsInitialToFinalState()
+        {
+            var asset = CreateAsset(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable);
+
+            var result = _helper.AssetManagement.Assets.TransitionTo(
+                asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.BuildPlanReady);
+
+            var change = result.GetChanges().Single(c => c.FieldName == "State");
+            change.OldValue.Should().Be(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable);
+            change.NewValue.Should().Be(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.BuildPlanReady);
+        }
+
+        [TestMethod]
+        public void TransitionTo_StateChange_IsClearedByResetChangeTracking()
+        {
+            var asset = CreateAsset(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available);
+            var result = _helper.AssetManagement.Assets.TransitionTo(
+                asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable);
+
+            result.ResetChangeTracking();
+
+            result.GetChanges().Should().BeEmpty();
+            result.State.Should().Be(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable);
+        }
+
+        [TestMethod]
+        public void TransitionTo_StateChange_IsNotPersistedAsPendingChange()
+        {
+            var asset = CreateAsset(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available);
+            var result = _helper.AssetManagement.Assets.TransitionTo(
+                asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable);
+
+            var reread = _helper.AssetManagement.Assets.Read(
+                AssetExposers.Identifier.Equal(result.Identifier)).Single();
+
+            reread.State.Should().Be(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable);
+            reread.GetChanges().Should().BeEmpty();
+        }
+
+        [TestMethod]
+        public void TransitionAndUpdate_PersistsStateAndEdit()
+        {
+            var asset = CreateAsset(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available);
+            var newName = "Renamed " + Guid.NewGuid();
+            asset.Name = newName;
+
+            _helper.AssetManagement.Assets.TransitionAndUpdate(
+                asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable);
+
+            var reread = _helper.AssetManagement.Assets.Read(
+                AssetExposers.Identifier.Equal(asset.Identifier)).Single();
+            reread.State.Should().Be(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable);
+            reread.Name.Should().Be(newName);
+        }
+
         [DataTestMethod]
         [DataRow(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available)]
         [DataRow(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.BuildPlanReady)]
