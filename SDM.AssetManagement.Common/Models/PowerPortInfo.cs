@@ -87,7 +87,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         [JsonIgnore]
         [SdmIgnore]
         internal IChangeTrackingField<SdmObjectReference<PortType>> PortTypeField => FieldHandler.GetOrCreateField(
-            nameof(Type),
+            nameof(PortType),
             () => new ChangeTrackingField<SdmObjectReference<PortType>>(default, reference => reference.Identifier));
 
         [JsonIgnore]
