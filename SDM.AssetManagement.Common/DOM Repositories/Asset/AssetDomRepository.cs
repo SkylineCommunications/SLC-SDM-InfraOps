@@ -1,6 +1,7 @@
 namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
     using System;
+    using System.ComponentModel;
     using SharedCommonLibrary.AssetManagement.State_Management;
     using SharedMappers.DomIds;
 
@@ -11,17 +12,16 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     public interface IAssetRepository : IBulkRepository<Asset>
     {
         /// <summary>
-        /// Transitions asset to a new state.
-        /// Use this AFTER updating fields if the new state has different validation rules.
+        /// Infrastructure hook used by <c>AssetDomRepositoryExtensions.TransitionTo</c>. Do not call directly:
+        /// it skips validation. Use the <c>TransitionTo</c> extension method instead.
         /// </summary>
-        /// <param name="asset">The asset to transition.</param>
-        /// <param name="newState">The new state to transition the asset to.</param>
-        Asset TransitionTo(Asset asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum newState);
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        Asset TransitionToInternal(Asset asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum newState);
     }
 
     internal partial class AssetDomRepository : IAssetRepository
     {
-        public Asset TransitionTo(Asset asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum newState)
+        public Asset TransitionToInternal(Asset asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum newState)
         {
             if (asset == null) throw new ArgumentNullException(nameof(asset));
 

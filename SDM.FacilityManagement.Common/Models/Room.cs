@@ -161,9 +161,9 @@
                     OldValue = kvp.Value.prevVal,
                     NewValue = kvp.Value.newVal,
                 })
-                .Concat(_ownership?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>())
-                .Concat(_resourceLink?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>())
-                .Concat(_floorFk?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>());
+                .Concat(_ownership.GetSectionChanges("Ownership"))
+                .Concat(_resourceLink.GetSectionChanges("ResourceLink"))
+                .Concat(_floorFk.GetSectionChanges("FloorFk"));
         }
 
         public void ResetChangeTracking()

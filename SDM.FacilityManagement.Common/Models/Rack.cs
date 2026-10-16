@@ -305,10 +305,10 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     OldValue = kvp.Value.prevVal,
                     NewValue = kvp.Value.newVal,
                 })
-                .Concat(Capacity?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>())
-                .Concat(RowFk?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>())
-                .Concat(ZoneFk?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>())
-                .Concat(Resource?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>());
+                .Concat(Capacity.GetSectionChanges(nameof(Capacity)))
+                .Concat(RowFk.GetSectionChanges(nameof(RowFk)))
+                .Concat(ZoneFk.GetSectionChanges(nameof(ZoneFk)))
+                .Concat(Resource.GetSectionChanges(nameof(Resource)));
         }
 
         // Reset change tracking after deserialization or save

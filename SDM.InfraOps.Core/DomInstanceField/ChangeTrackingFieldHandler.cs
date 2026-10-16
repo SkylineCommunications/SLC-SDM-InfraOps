@@ -46,6 +46,11 @@
 			throw new InvalidOperationException($"Field '{fieldName}' is not of type '{typeof(ChangeTrackingArrayField<T1>).FullName}', expected '{field.GetType().FullName}'.");
 		}
 
+		public IChangeTrackingField TryGetField(string fieldName)
+		{
+			return _fields.TryGetValue(fieldName, out var field) ? field : null;
+		}
+
 		public Dictionary<string, (object prevVal, object newVal)> GetChanges()
 		{
 			return _fields.Where(entry => entry.Value.Changed).ToDictionary(entry => entry.Key, entry => entry.Value.GetChanges());

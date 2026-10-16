@@ -49,7 +49,12 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
                     results[i].AddFailuresFrom(positionResult);
                 }
 
-                AddBusinessRuleFailures(entities[i], results[i], true);
+				if (entities[i].ShouldValidate(entities[i].ImageDetailsField) && !RackValidationHandler.AreRackImagesValid(entities[i], out var imageResult))
+				{
+					results[i].AddFailuresFrom(imageResult);
+				}
+
+				AddBusinessRuleFailures(entities[i], results[i], onlyChangedFields: true);
             }
 
             return results;

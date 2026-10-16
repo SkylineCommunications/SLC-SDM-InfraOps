@@ -110,8 +110,8 @@
                     OldValue = kvp.Value.prevVal,
                     NewValue = kvp.Value.newVal,
                 })
-                .Concat(_jobFk?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>())
-                .Concat(_rackFk?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>());
+                .Concat(_jobFk.GetSectionChanges("JobFk"))
+                .Concat(_rackFk.GetSectionChanges("RackFk"));
         }
 
         public void ResetChangeTracking()

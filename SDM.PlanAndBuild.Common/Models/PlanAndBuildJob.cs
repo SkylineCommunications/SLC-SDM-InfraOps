@@ -328,7 +328,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
                     OldValue = kvp.Value.prevVal,
                     NewValue = kvp.Value.newVal,
                 })
-                .Concat(Ownership?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>());
+                .Concat(Ownership.GetSectionChanges(nameof(Ownership)));
         }
 
         public void ResetChangeTracking()

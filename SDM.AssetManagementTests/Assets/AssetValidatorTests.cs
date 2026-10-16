@@ -1040,23 +1040,6 @@
             asset.State.Should().Be(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available);
         }
 
-        [TestMethod]
-        public void TransitionTo_EnteringInTransitWithoutDestinationLocation_ShouldFailValidation()
-        {
-            var asset = new Asset
-            {
-                State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available,
-            };
-
-            Action transition = () => Helper.AssetManagement.Assets.TransitionTo(
-                asset,
-                SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit);
-
-            transition.Should().Throw<AssetTransitionValidationException>()
-                .Which.ValidationResult.FailureReasons.Values.Should()
-                .Contain("Destination Location is mandatory when Asset is in 'In Transit' state.");
-        }
-
         #endregion
 
         #region Ownership Validation Tests

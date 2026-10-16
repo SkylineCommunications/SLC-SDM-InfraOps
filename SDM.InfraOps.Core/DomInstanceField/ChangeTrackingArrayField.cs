@@ -70,18 +70,19 @@
 
 				var (prevVal, newVal) = GetChanges();
 
-				bool changed;
-				if(prevVal is IEnumerable<object> prevValList)
-				{
-					changed = Enumerable.SequenceEqual(prevValList, newVal as IEnumerable<object>);
-				}
-				else
-				{
-					changed = Equals(prevVal, newVal);
-				}
-
-				return !changed;
+				return !AreEqual(prevVal, newVal);
 			}
+		}
+
+		// The non-generic IEnumerable is needed: List<valueType> is not an IEnumerable<object>.
+		private static bool AreEqual(object prevVal, object newVal)
+		{
+			if (prevVal is IEnumerable prevItems && !(prevVal is string) && newVal is IEnumerable newItems && !(newVal is string))
+			{
+				return prevItems.Cast<object>().SequenceEqual(newItems.Cast<object>());
+			}
+
+			return Equals(prevVal, newVal);
 		}
 
 		public int Count => Value.Count;

@@ -104,7 +104,7 @@
                     OldValue = kvp.Value.prevVal,
                     NewValue = kvp.Value.newVal,
                 })
-                .Concat(_categoryLinks?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>());
+                .Concat(_categoryLinks.GetSectionChanges("CategoryLinks"));
         }
 
         public void ResetChangeTracking()

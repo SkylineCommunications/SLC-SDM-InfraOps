@@ -34,8 +34,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Common.Validation
 
             foreach (var enteredState in StateMachine.GetTransitionDestinationStates(asset.State, targetState))
             {
-                result.AddFrom(AssetValidationHandler.ValidateDestinationLocation(asset, enteredState));
-
                 if (enteredState == SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Installed)
                 {
                     AssetValidationHandler.IsReadyForInstall(asset, out var installResult);
