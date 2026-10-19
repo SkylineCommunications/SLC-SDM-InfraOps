@@ -18,7 +18,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
     public class AssetValidator : ValidatorBase<Asset>
     {
         private readonly SdmEntityLoader _entityLoader;
-        private readonly Validator<Asset> _validationPipeline;
         private readonly AssetValidationCore _validationCore;
 
         /// <summary>
@@ -29,36 +28,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
         {
             _entityLoader = entityLoader ?? throw new ArgumentNullException(nameof(entityLoader));
             _validationCore = new AssetValidationCore(_entityLoader);
-            _validationPipeline = BuildValidationPipeline();
         }
 
-        #region Public API
-
-        /// <summary>
-        /// Validates an Asset and returns ValidationResult.
-        /// Collects all errors without throwing exceptions.
-        /// </summary>
-        protected override ValidationResult Validate(Asset asset)
-        {
-            return _validationPipeline.Validate(asset);
-        }
-
-        /// <summary>
-        /// Validates an Asset and throws ValidationException if invalid.
-        /// Use this when you want fail-fast behavior.
-        /// </summary>
-        public void ValidateAndThrow(Asset asset)
-        {
-            _validationPipeline.ValidateAndThrow(asset);
-        }
-
-        /// <summary>
-        /// Validates with custom error handling callback.
-        /// </summary>
-        public ValidationResult ValidateWithHandler(Asset asset, Action<ValidationResult> onError)
-        {
-            return _validationPipeline.ValidateWithHandler(asset, onError);
-        }
 
         /// <summary>
         /// Validates name uniqueness - used for real-time UI validation.
@@ -101,58 +72,39 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             return _validationCore.ValidatePowerPorts(asset);
         }
 
-        /// <summary>
-        /// Validates multiple assets in bulk with optimized performance.
-        /// Returns validation results in the same order as the input assets.
-        /// Result at index i corresponds to asset at index i.
-        /// </summary>
-        protected override List<ValidationResult> ValidateBulk(List<Asset> assets)
+
+        protected override List<ValidationResult> ValidateBulkNoDatabaseBusinessRules(List<Asset> entities)
         {
-            if (assets == null || !assets.Any())
-            {
-                return new List<ValidationResult>();
-            }
-
-            // Initialize results - same order as input
-            var results = assets.Select(a => new ValidationResult()).ToList();
-
             // ============================================================
             // PHASE 1: NO DATABASE ACCESS CHECKS (BUSINESS RULES)
             // ============================================================
-            for (int i = 0; i < assets.Count; i++)
-            {
-                results[i].AddFailuresFrom(
-                    _validationCore.ValidateWithoutDatabaseAccess(assets[i]));
-            }
+            return entities.Select(_validationCore.ValidateWithoutDatabaseAccess).ToList();
+        }
 
-            // Fast-fail if business rules fail
-            if (results.AnyInvalid())
-            {
-                return results;
-            }
-
+        protected override List<ValidationResult> ValidateBulkNoDatabaseBatchConflicts(List<Asset> entities)
+        {
             // ============================================================
             // PHASE 2: IN-MEMORY BATCH CONFLICT DETECTION (NO DATABASE)
             // ============================================================
-            var batchConflicts = _validationCore.ValidateBatchConflicts(assets);
-            results.MergeFrom(batchConflicts);
+            return _validationCore.ValidateBatchConflicts(entities);
+        }
 
-            // Fast-fail if batch conflicts exist
-            if (results.AnyInvalid())
-            {
-                return results;
-            }
+        protected override List<ValidationResult> ValidateBulkWithDatabase(List<Asset> entities)
+        {
+            // Initialize results - same order as input
+            var results = entities.Select(a => new ValidationResult()).ToList();
 
             // ============================================================
             // PHASE 2.5: BULK UNIQUENESS CHECKS AGAINST DATABASE
             // One OR query per field via Tools.RetrieveBigOrFilter.
             // All three fields checked; results merged before fast-fail.
             // ============================================================
-            results.MergeFrom(_validationCore.ValidateBulkNameUniquenessAgainstDatabase(assets));
-            results.MergeFrom(_validationCore.ValidateBulkAssetIdUniquenessAgainstDatabase(assets));
-            results.MergeFrom(_validationCore.ValidateBulkSerialNumberUniquenessAgainstDatabase(assets));
-            results.MergeFrom(_validationCore.ValidateBulkReferencesAgainstDatabase(assets));
+            results.MergeFrom(_validationCore.ValidateBulkNameUniquenessAgainstDatabase(entities));
+            results.MergeFrom(_validationCore.ValidateBulkAssetIdUniquenessAgainstDatabase(entities));
+            results.MergeFrom(_validationCore.ValidateBulkSerialNumberUniquenessAgainstDatabase(entities));
+            results.MergeFrom(_validationCore.ValidateBulkReferencesAgainstDatabase(entities));
 
+            // Fast-fail if batch conflicts exist
             if (results.AnyInvalid())
             {
                 return results;
@@ -162,20 +114,10 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             // PHASE 4: BULK PLACEMENT VALIDATION (OPTIMIZED)
             // ============================================================
             var placementValidator = new PlacementValidator(_entityLoader);
-            var placementResults = placementValidator.ValidateBulkPlacements(assets);
+            var placementResults = placementValidator.ValidateBulkPlacements(entities);
             results.MergeFrom(placementResults);
 
             return results;
-        }
-
-        protected override ValidationResult ValidateForDelete(Asset asset)
-        {
-            if (asset == null)
-            {
-                throw new ArgumentNullException(nameof(asset));
-            }
-
-            return ValidateCanDelete(new List<Asset> { asset })[0];
         }
 
         protected override List<ValidationResult> ValidateBulkForDelete(List<Asset> assets)
@@ -192,13 +134,13 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
         {
             var results = assets.Select(_ => new ValidationResult()).ToList();
 
-            for (int i = 0; i < assets.Count; i++)
+            for (int idx = 0; idx < assets.Count; idx++)
             {
-                var state = assets[i].State;
+                var state = assets[idx].State;
                 if (state != SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable
                     && state != SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Disposed)
                 {
-                    results[i].AddFailReason(
+                    results[idx].AddFailReason(
                         AssetValidationHandler.AssetValidationField.Asset,
                         "Asset must be in 'Not Available' or 'Disposed' State to Delete");
                 }
@@ -207,24 +149,5 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             return results;
         }
 
-        #endregion
-
-        #region Pipeline Construction (Single Validation)
-
-        private Validator<Asset> BuildValidationPipeline()
-        {
-            // Phase 1: No database access checks (fail fast on business rules)
-            var noDatabaseChecks = Validator<Asset>
-                .Create(a => _validationCore.ValidateWithoutDatabaseAccess(a))
-                .StopOnFailure();
-
-            // Phase 2: Database access checks (uniqueness, placement)
-            var databaseChecks = Validator<Asset>
-                .Create(a => _validationCore.ValidateWithDatabaseAccess(a));
-
-            return noDatabaseChecks.AndThen(databaseChecks);
-        }
-
-        #endregion
     }
 }

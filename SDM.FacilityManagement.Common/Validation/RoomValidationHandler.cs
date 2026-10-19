@@ -72,30 +72,5 @@
 
             return NumericValidators.ValidateNonNegative(entity.Depth.Value, RoomValidationField.Depth, out result);
         }
-
-        /// <summary>
-        /// Validates the Room name together with its dimensions.
-        /// </summary>
-        internal static bool IsRoomNameAndDimensionsValid(Room entity, out ValidationResult result)
-        {
-            result = new ValidationResult();
-
-            if (!IsRoomNameValid(entity, out var nameResult))
-            {
-                result.AddFailuresFrom(nameResult);
-            }
-
-            if (!IsRoomWidthValid(entity, out var widthResult))
-            {
-                result.AddFailuresFrom(widthResult);
-            }
-
-            if (!IsRoomDepthValid(entity, out var depthResult))
-            {
-                result.AddFailuresFrom(depthResult);
-            }
-
-            return result.IsValid;
-        }
     }
 }

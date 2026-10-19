@@ -49,7 +49,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
         {
             // Asset Class is critical - stop if invalid
             var assetClassValidation = Validator<Asset>
-                .Create(ValidateAssetClass)
+                .Create(ValidateNonDbCriticalFields)
+                .AndThen(ValidateAssetClass)
                 .StopOnFailure();
 
             // Business rules - collect all errors
@@ -70,8 +71,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
         {
             var result = new ValidationResult();
 
-            if (asset.ShouldValidate(asset.AssetClassIdField)
-                && !AssetValidationHandler.IsAssetClassValid(asset, out var assetClassResult))
+            if (asset.ShouldValidate(asset.AssetClassIdField) && !AssetValidationHandler.IsAssetClassValid(asset, out var assetClassResult))
             {
                 result.AddFailuresFrom(assetClassResult);
             }
@@ -283,77 +283,26 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
         #region Database Access Validation
 
         /// <summary>
-        /// Validates asset with database access (uniqueness checks, placement, ports).
-        /// Only called after no-database checks pass.
-        /// Uses a pipeline pattern organized by validation concern.
+        /// Validates non-database critical fields (Name, Asset ID).
         /// </summary>
-        public ValidationResult ValidateWithDatabaseAccess(Asset asset)
-        {
-            var validations = new List<ValidationResult>
-            {
-                ValidateUniquenessChecks(asset),
-                ValidateAssetClassState(asset),
-                ValidateReferencesAgainstDatabase(asset),
-                ValidateLocationPlacement(asset),
-            };
-
-            return validations.MergeAll();
-        }
-
-        private ValidationResult ValidateAssetClassState(Asset asset)
-        {
-            var result = new ValidationResult();
-
-            if (!asset.ShouldValidate(asset.AssetClassIdField) || !asset.AssetClassId.HasValue())
-            {
-                return result;
-            }
-
-            var assetClass = _entityLoader.LoadAssetClass(asset.AssetClassId);
-            if (assetClass == null)
-            {
-                result.AddFailReason(AssetValidationField.AssetClass,
-                    $"Referenced Asset Class '{asset.AssetClassId.Identifier}' does not exist.");
-                return result;
-            }
-
-            if (assetClass.State != SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Active)
-            {
-                result.AddFailReason(AssetValidationField.AssetClass, "Asset Class must be Active.");
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// Validates uniqueness constraints (Name, Asset ID, Serial Number).
-        /// Queries database to ensure values are not already in use.
-        /// </summary>
-        private ValidationResult ValidateUniquenessChecks(Asset asset)
+        private ValidationResult ValidateNonDbCriticalFields(Asset asset)
         {
             var validations = new List<ValidationResult>();
 
-            // Name uniqueness
+            // Name
             if (asset.ShouldValidate(asset.NameField))
             {
-                validations.Add(ValidateNameUniqueness(asset.Name, asset.Identifier));
+                validations.Add(ValidateName(asset.Name));
             }
 
-            // Asset ID uniqueness
+            // Asset ID
             if (asset.ShouldValidate(asset.AssetIDField))
             {
-                validations.Add(ValidateAssetIdUniqueness(asset.AssetID, asset.Identifier));
-            }
-
-            // Serial number uniqueness
-            if (asset.ShouldValidate(asset.SerialNumberField))
-            {
-                validations.Add(ValidateSerialNumberUniqueness(asset.SerialNumber, asset.AssetClassId, asset.Identifier));
+                validations.Add(ValidateAssetId(asset.AssetID));
             }
 
             return validations.MergeAll();
         }
-
         public List<ValidationResult> ValidateBulkReferencesAgainstDatabase(List<Asset> assets)
         {
             var results = assets.Select(_ => new ValidationResult()).ToList();
@@ -364,7 +313,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
                 .Select(a => a.AssetClassId.Identifier)
                 .Distinct()
                 .ToList();
-            var existingAssetClassIds = _entityLoader.GetAssetClassesByDomIds(assetClassIds).Select(ac => ac.Identifier).ToHashSet();
+            var existingAssetClassIds = _entityLoader.GetAssetClassesByDomIds(assetClassIds).Distinct().ToDictionary(ac => ac.Identifier);
 
             var parentAssetIds = assets
                 .SelectMany(a => GetLocationReferences(a, includeDestination: true, l => l.ParentAsset))
@@ -400,85 +349,38 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             var locationLookups = new LocationReferenceLookups(
                 existingAssetIds, existingRackIds, existingFacilityIds, existingRoomIds, existingDeskIds);
 
-            for (int i = 0; i < assets.Count; i++)
+            for (int idx = 0; idx < assets.Count; idx++)
             {
-                var asset = assets[i];
-                AddReferenceFailure(asset.ShouldValidate(asset.AssetClassIdField), asset.AssetClassId, existingAssetClassIds, AssetValidationField.AssetClass, "Asset Class", results[i]);
+                var asset = assets[idx];
 
-                 if (asset.State == SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit)
+                if (asset.ShouldValidate(asset.AssetClassIdField))
                 {
-                    ValidateLocationReferences(asset.DestinationLocation, true, locationLookups, results[i]);
+                    if (!existingAssetClassIds.TryGetValue(asset.AssetClassId, out var assetClass))
+                    {
+                        results[idx].AddFailReason(AssetValidationField.AssetClass, $"Referenced Asset Class '{asset.AssetClassId.Identifier}' does not exist.");
+                    }
+                    else if (assetClass.State != SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Active)
+                    {
+                        results[idx].AddFailReason(AssetValidationField.AssetClass, "Asset Class must be Active.");
+                    }
+                }
+
+                if (asset.State == SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit)
+                {
+                    ValidateLocationReferences(asset.DestinationLocation, true, locationLookups, results[idx]);
                 }
                 else
                 {
-                    ValidateLocationReferences(asset.Location, false, locationLookups, results[i]);
+                    ValidateLocationReferences(asset.Location, false, locationLookups, results[idx]);
                 }
             }
 
             return results;
         }
 
-        private ValidationResult ValidateReferencesAgainstDatabase(Asset asset)
-        {
-            return ValidateBulkReferencesAgainstDatabase(new List<Asset> { asset })[0];
-        }
-
-        /// <summary>
-        /// Validates location placement (holder availability, rack space).
-        /// Requires database access to load parent assets and racks.
-        /// </summary>
-        private ValidationResult ValidateLocationPlacement(Asset asset)
-        {
-            var validations = new List<ValidationResult>();
-
-            if (asset.State == SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit
-                && asset.ShouldValidateAny(asset.DestinationLocation.RackIdField,
-                    asset.DestinationLocation.RackPositionField,
-                    asset.DestinationLocation.SideField)
-                && asset.AssetClassId.HasValue())
-            {
-                validations.Add(ValidateDestinationRackBounds(asset));
-            }
-
-            if (asset.Location.IsEmpty)
-            {
-                return validations.MergeAll();
-            }
-
-            // Parent asset holder availability
-            if (asset.ShouldValidateAny(asset.Location.ParentAssetField, asset.Location.HolderNumberField)
-                && asset.AssetClassId.HasValue())
-            {
-                var assetClass = _entityLoader.LoadAssetClass(asset.AssetClassId);
-                if (assetClass != null)
-                {
-                    validations.Add(ValidateParentAssetHolderAvailability(
-                        asset, assetClass));
-                }
-            }
-
-            // Rack space availability
-            if (asset.ShouldValidateAny(asset.Location.RackIdField,
-                 asset.Location.RackPositionField,
-                 asset.Location.SideField)
-                && asset.AssetClassId.HasValue())
-            {
-                validations.Add(ValidateRackSpaceAvailability(asset));
-            }
-
-            return validations.MergeAll();
-        }
-
         public ValidationResult ValidateNameUniqueness(string name, string exceptIdentifier = null)
         {
-            var result = new ValidationResult();
-
-            if (string.IsNullOrWhiteSpace(name))
-            {
-                result.AddFailReason(AssetValidationField.Name,
-                    "Asset Name cannot be empty or whitespace.");
-                return result;
-            }
+            var result = ValidateName(name);
 
             if (_entityLoader.CountAssetsByName(name, exceptIdentifier) > 0)
             {
@@ -489,16 +391,23 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             return result;
         }
 
-        public ValidationResult ValidateAssetIdUniqueness(string assetId, string exceptIdentifier = null)
+        private ValidationResult ValidateName(string name)
         {
             var result = new ValidationResult();
 
-            if (string.IsNullOrWhiteSpace(assetId))
+            if (string.IsNullOrWhiteSpace(name))
             {
-                result.AddFailReason(AssetValidationField.AssetId,
-                    "Asset ID cannot be empty or whitespace.");
+                result.AddFailReason(AssetValidationField.Name,
+                    "Asset Name cannot be empty or whitespace.");
                 return result;
             }
+
+            return result;
+        }
+
+        public ValidationResult ValidateAssetIdUniqueness(string assetId, string exceptIdentifier = null)
+        {
+            var result = ValidateAssetId(assetId);
 
             if (_entityLoader.CountAssetsByAssetId(assetId, exceptIdentifier) > 0)
             {
@@ -509,20 +418,15 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             return result;
         }
 
-        private ValidationResult ValidateSerialNumberUniqueness(string serialNumber,
-            SdmObjectReference<AssetClass> assetClassId, string exceptIdentifier = null)
+        private ValidationResult ValidateAssetId(string assetId)
         {
             var result = new ValidationResult();
 
-            if (string.IsNullOrWhiteSpace(serialNumber) || !assetClassId.HasValue())
+            if (string.IsNullOrWhiteSpace(assetId))
             {
+                result.AddFailReason(AssetValidationField.AssetId,
+                    "Asset ID cannot be empty or whitespace.");
                 return result;
-            }
-
-            if (_entityLoader.CountAssetsBySerialNumber(serialNumber, assetClassId, exceptIdentifier) > 0)
-            {
-                result.AddFailReason(AssetValidationField.SerialNumber,
-                    "Serial Number is already in use for this Asset Class.");
             }
 
             return result;
@@ -707,21 +611,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
                 && !asset.DestinationLocation.IsEmpty)
             {
                 yield return asset.DestinationLocation;
-            }
-        }
-
-        private static void AddReferenceFailure<T>(
-            bool shouldValidate,
-            SdmObjectReference<T> reference,
-            HashSet<string> existingIds,
-            AssetValidationField field,
-            string targetName,
-            ValidationResult result)
-            where T : SdmObject<T>
-        {
-            if (shouldValidate && reference != null && reference.HasValue() && !existingIds.Contains(reference.Identifier))
-            {
-                result.AddFailReason(field, $"Referenced {targetName} '{reference.Identifier}' does not exist.");
             }
         }
 
@@ -1401,13 +1290,5 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
         }
 
         #endregion
-
-
-       
-
-       
-        
-
-
     }
 }

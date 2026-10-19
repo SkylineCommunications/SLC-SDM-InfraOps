@@ -51,10 +51,7 @@
 
             var results = portsToValidate.ToDictionary(getIdentifier, p => new ValidationResult());
 
-            var validatedIds = portsToValidate.Select(getIdentifier).ToList();
-            var existingPorts = loadExistingPorts(asset)
-                .Where(p => !validatedIds.Contains(getIdentifier(p)))
-                .ToList();
+            var existingPorts = loadExistingPorts(asset).ToList();
 
             var allPorts = existingPorts.Concat(portsToValidate).ToList();
 

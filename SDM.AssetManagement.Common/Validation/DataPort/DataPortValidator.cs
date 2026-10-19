@@ -8,6 +8,7 @@
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.Common.Services;
     using Skyline.DataMiner.SDM.Extensions;
+    using Skyline.DataMiner.SDM.InfraOps.Common.Validation;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
     using static Skyline.DataMiner.SDM.AssetManagement.Common.Validation.DataPortValidationHandler;
@@ -20,90 +21,43 @@
     {
         private readonly DataPortValidationCore _validationCore;
         private readonly SdmEntityLoader _entityLoader;
-        private readonly Validator<DataPort> _validationPipeline;
 
         public DataPortValidator(SdmEntityLoader entityLoader)
         {
             _entityLoader = entityLoader ?? throw new ArgumentNullException(nameof(entityLoader));
             _validationCore = new DataPortValidationCore(entityLoader);
-            _validationPipeline = BuildValidationPipeline();
         }
 
-        #region Single DataPort Validation
-
-        /// <summary>
-        /// Validates a single DataPort and returns ValidationResult.
-        /// Collects all errors without throwing exceptions.
-        /// </summary>
-        protected override ValidationResult Validate(DataPort dataPort)
+        protected override List<ValidationResult> ValidateBulkNoDatabaseBusinessRules(List<DataPort> entities)
         {
-            if (dataPort == null)
-            {
-                throw new ArgumentNullException(nameof(dataPort));
-            }
+            var results = entities.Select(_ => new ValidationResult()).ToList();
 
-            return _validationPipeline.Validate(dataPort);
+            ValidateBusinessRules(entities, results);
+
+            return results;
         }
 
-        /// <summary>
-        /// Validates a DataPort and throws ValidationException if invalid.
-        /// Use this when you want fail-fast behavior.
-        /// </summary>
-        public void ValidateAndThrow(DataPort dataPort)
+        protected override List<ValidationResult> ValidateBulkNoDatabaseBatchConflicts(List<DataPort> entities)
         {
-            _validationPipeline.ValidateAndThrow(dataPort);
+            return entities.Select(_ => new ValidationResult()).ToList();
         }
 
-        /// <summary>
-        /// Validates with custom error handling callback.
-        /// </summary>
-        public ValidationResult ValidateWithHandler(DataPort dataPort, Action<ValidationResult> onError)
+        protected override List<ValidationResult> ValidateBulkWithDatabase(List<DataPort> entities)
         {
-            return _validationPipeline.ValidateWithHandler(dataPort, onError);
-        }
+            var results = entities.Select(_ => new ValidationResult()).ToList();
 
-        #endregion
-
-        #region Bulk DataPort Validation
-
-        /// <summary>
-        /// Validates multiple DataPorts in bulk with optimized performance.
-        /// Groups ports by parent Asset and loads each Asset's existing ports once,
-        /// reducing N DB reads to K (one per unique Asset in the batch).
-        /// Returns one result per input port, in the same order.
-        /// </summary>
-        protected override List<ValidationResult> ValidateBulk(List<DataPort> dataPorts)
-        {
-            if (dataPorts == null || !dataPorts.Any())
-            {
-                return new List<ValidationResult>();
-            }
-
-            var results = dataPorts.Select(_ => new ValidationResult()).ToList();
+            ValidatePortTypesInBulk(entities, results);
 
             // Map identifier -> positional index so DB-phase results (keyed by identifier)
             // can be written back to the correct slot.
             var indexByIdentifier = new Dictionary<string, int>();
-            for (int i = 0; i < dataPorts.Count; i++)
+            for (int i = 0; i < entities.Count; i++)
             {
-                indexByIdentifier[dataPorts[i].Identifier] = i;
+                indexByIdentifier[entities[i].Identifier] = i;
             }
 
-            ValidateBusinessRules(dataPorts, results);
-            if (results.AnyInvalid())
-            {
-                return results;
-            }
-
-            ValidatePortTypesInBulk(dataPorts, results);
-            if (results.AnyInvalid())
-            {
-                return results;
-            }
-
-            ValidateAssetContext(dataPorts, results, indexByIdentifier);
-            ValidateConnectionConflicts(dataPorts, results);
-
+            ValidateAssetContext(entities, results, indexByIdentifier);
+            ValidateConnectionConflicts(entities, results);
             return results;
         }
 
@@ -141,7 +95,7 @@
         private void ValidatePortTypesInBulk(List<DataPort> dataPorts, List<ValidationResult> results)
         {
             var distinctPortTypeIds = dataPorts
-                .Where(p => p.DataPortInfo.PortTypeField.Changed == true && p.DataPortInfo.PortType != null && p.DataPortInfo.PortType.HasValue())
+                .Where(p => p.ShouldValidate(p.DataPortInfo.PortTypeField) && p.DataPortInfo.PortType != null && p.DataPortInfo.PortType.HasValue())
                 .Select(p => p.DataPortInfo.PortType.Identifier)
                 .Distinct()
                 .ToList();
@@ -149,9 +103,14 @@
             var portTypeMap = _entityLoader.GetPortTypesByDomIds(distinctPortTypeIds)
                 .ToDictionary(pt => pt.Identifier);
 
-            for (int i = 0; i < dataPorts.Count; i++)
+            for (int idx = 0; idx < dataPorts.Count; idx++)
             {
-                var port = dataPorts[i];
+                var port = dataPorts[idx];
+
+                if (!port.ShouldValidate(port.DataPortInfo.PortTypeField))
+                {
+                    continue;
+                }
 
                 PortType loadedPortType = null;
                 if (port.DataPortInfo.PortType != null && port.DataPortInfo.PortType.HasValue())
@@ -159,14 +118,13 @@
                     portTypeMap.TryGetValue(port.DataPortInfo.PortType.Identifier, out loadedPortType);
                 }
 
-                results[i].AddFailuresFrom(_validationCore.ValidatePortTypeAgainst(port, loadedPortType));
+                results[idx].AddFailuresFrom(_validationCore.ValidatePortTypeAgainst(port, loadedPortType));
             }
         }
 
         private void ValidateAssetContext(List<DataPort> dataPorts, List<ValidationResult> results, Dictionary<string, int> indexByIdentifier)
         {
             var distinctAssetIds = dataPorts
-                .Where(p => p.AssetField.Changed)
                 .Select(p => p.Asset.Identifier)
                 .Where(id => !string.IsNullOrWhiteSpace(id))
                 .Distinct()
@@ -176,16 +134,16 @@
                 .ToDictionary(a => a.Identifier);
 
             var portsByAsset = dataPorts
-                .Where(p => p.AssetField.Changed && !string.IsNullOrWhiteSpace(p.Asset.Identifier))
+                .Where(p => !string.IsNullOrWhiteSpace(p.Asset.Identifier))
                 .GroupBy(p => p.Asset.Identifier);
 
             foreach (var group in portsByAsset)
             {
-                ValidateAssetGroup(group, assetMap, results, indexByIdentifier);
+                ValidateAssetGroup(dataPorts, group, assetMap, results, indexByIdentifier);
             }
         }
 
-        private void ValidateAssetGroup(IGrouping<string, DataPort> group, Dictionary<string, Asset> assetMap, List<ValidationResult> results, Dictionary<string, int> indexByIdentifier)
+        private void ValidateAssetGroup(List<DataPort> dataPorts, IGrouping<string, DataPort> group, Dictionary<string, Asset> assetMap, List<ValidationResult> results, Dictionary<string, int> indexByIdentifier)
         {
             if (!assetMap.TryGetValue(group.Key, out var asset))
             {
@@ -199,21 +157,11 @@
                 return;
             }
 
-            var groupResults = _validationCore.ValidateDataPortsForAsset(group.ToList(), asset);
+            var groupResults = _validationCore.ValidateDataPortsForAsset(dataPorts, group.ToList(), asset);
             foreach (var kvp in groupResults)
             {
                 results[indexByIdentifier[kvp.Key]].AddFailuresFrom(kvp.Value);
             }
-        }
-
-        protected override ValidationResult ValidateForDelete(DataPort dataPort)
-        {
-            if (dataPort == null)
-            {
-                throw new ArgumentNullException(nameof(dataPort));
-            }
-
-            return ValidateNotAssignedToConnections(new List<DataPort> { dataPort })[0];
         }
 
         protected override List<ValidationResult> ValidateBulkForDelete(List<DataPort> dataPorts)
@@ -252,42 +200,5 @@
 
             return results;
         }
-
-        #endregion
-
-        #region Pipeline Construction
-
-        private Validator<DataPort> BuildValidationPipeline()
-        {
-            // Critical validations (business rules) - stop on failure
-            var criticalValidations = Validator<DataPort>
-                .Create(ValidateCriticalFields)
-                .StopOnFailure();
-
-            // Database validations - collect all errors
-            var databaseValidations = Validator<DataPort>
-                .Create(ValidateDatabaseFields);
-
-            // Combine: critical first, then database
-            return criticalValidations.AndThen(databaseValidations);
-        }
-
-        #endregion
-
-        #region Validation Methods
-
-        private ValidationResult ValidateCriticalFields(DataPort dataPort)
-        {
-            // Phase 1: No-database validation (mandatory fields, business rules)
-            return _validationCore.ValidateWithoutDatabaseAccess(dataPort);
-        }
-
-        private ValidationResult ValidateDatabaseFields(DataPort dataPort)
-        {
-            // Phase 2: Database validation (Port Type, Asset context)
-            return _validationCore.ValidateWithDatabaseAccess(dataPort);
-        }
-
-        #endregion
     }
 }

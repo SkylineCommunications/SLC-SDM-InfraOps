@@ -54,81 +54,6 @@
         #region Database Access Validation
 
         /// <summary>
-        /// Validates PowerPort with database access (PortType, Asset context).
-        /// Only called after no-database checks pass.
-        /// </summary>
-        public ValidationResult ValidateWithDatabaseAccess(PowerPort powerPort)
-        {
-            var result = new ValidationResult();
-
-            // Port Type validation
-            result.AddFailuresFrom(ValidatePortType(powerPort));
-            if (!result.IsValid) return result;
-
-            // Asset context validation (port number uniqueness)
-            if (powerPort.Asset.HasValue())
-            {
-                result.AddFailuresFrom(ValidateAssetContext(powerPort));
-            }
-
-            result.AddFailuresFrom(ValidateConnectionConflicts(powerPort));
-
-            return result;
-        }
-
-        /// <summary>
-        /// Validates that a changed output type does not invalidate the port's existing connections.
-        /// Only reads the database when the output type of a saved port actually changed.
-        /// </summary>
-        private ValidationResult ValidateConnectionConflicts(PowerPort powerPort)
-        {
-            var result = new ValidationResult();
-
-            if (powerPort.IsNew || powerPort.PowerPortInfo.OutputTypeField.Changed != true)
-            {
-                return result;
-            }
-
-            try
-            {
-                var connections = _entityLoader.GetConnectionsByPortIds(new List<string> { powerPort.Identifier });
-                PowerPortValidationHandler.IsOutputTypeCompatibleWithConnections(powerPort, connections, out var conflictResult);
-                result.AddFailuresFrom(conflictResult);
-            }
-            catch (Exception ex)
-            {
-                result.AddFailReason(PowerPortValidationField.PowerPort,
-                    $"Error validating connections: {ex.Message}");
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// Validates Port Type (must exist and be a Power Port Type).
-        /// </summary>
-        private ValidationResult ValidatePortType(PowerPort powerPort)
-        {
-            if (!powerPort.PowerPortInfo.PortType.HasValue())
-            {
-                return PortTypeRequiredFailure();
-            }
-
-            try
-            {
-                var portType = _entityLoader.LoadPortType(powerPort.PowerPortInfo.PortType);
-                return ValidatePortTypeAgainst(powerPort, portType);
-            }
-            catch (Exception ex)
-            {
-                var result = new ValidationResult();
-                result.AddFailReason(PowerPortValidationField.PortType,
-                    $"Error validating Port Type: {ex.Message}");
-                return result;
-            }
-        }
-
-        /// <summary>
         /// Builds the required-field failure for a missing Port Type reference.
         /// Shared by the single-item and bulk validation paths so the message stays consistent.
         /// </summary>
@@ -166,42 +91,6 @@
                 result.AddFailReason(PowerPortValidationField.PortType,
                     "Port Type must be a Power Port Type.");
                 return result;
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// Validates PowerPort in context of its Asset.
-        /// </summary>
-        private ValidationResult ValidateAssetContext(PowerPort powerPort)
-        {
-            var result = new ValidationResult();
-
-            try
-            {
-                var asset = _entityLoader.LoadAsset(powerPort.Asset);
-                if (asset == null)
-                {
-                    result.AddFailReason(PowerPortValidationField.Asset,
-                        $"Referenced Asset '{powerPort.Asset.Identifier}' does not exist.");
-                    return result;
-                }
-
-                // Load all ports for asset
-                var allPorts = _entityLoader.LoadPowerPorts(asset)
-                    .Where(p => p.Identifier != powerPort.Identifier)
-                    .ToList();
-
-                allPorts.Add(powerPort);
-
-                // Validate collection (uniqueness)
-                result.AddFailuresFrom(ValidatePowerPortCollection(allPorts));
-            }
-            catch (Exception ex)
-            {
-                result.AddFailReason(PowerPortValidationField.Asset,
-                    $"Error validating Asset context: {ex.Message}");
             }
 
             return result;
@@ -252,16 +141,17 @@
         /// All ports must belong to the specified asset.
         /// </summary>
         /// <exception cref="ArgumentException">Thrown when ports don't belong to the asset.</exception>
-        public Dictionary<string, ValidationResult> ValidatePowerPortsForAsset(
-            List<PowerPort> portsToValidate, Asset asset)
+        public Dictionary<string, ValidationResult> ValidatePowerPortsForAsset(List<PowerPort> powerPorts, List<PowerPort> portsToValidate, Asset asset)
         {
+            var powerPortIdentifier = powerPorts.Select(p => p.Identifier).ToHashSet();
+
             return PortBulkValidationHelper.ValidatePortsForAsset(
                 portsToValidate,
                 asset,
                 "PowerPorts",
                 p => p.Identifier,
                 p => p.Asset.Identifier,
-                a => _entityLoader.LoadPowerPorts(a),
+                a => _entityLoader.LoadPowerPorts(a).Where(p => !powerPortIdentifier.Contains(p.Identifier)),
                 ValidatePowerPortCollection);
         }
 

@@ -16,7 +16,6 @@
     public class CableTypeValidator : ValidatorBase<CableType>
     {
         private readonly SdmEntityLoader _entityLoader;
-        private readonly Validator<CableType> _validationPipeline;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CableTypeValidator"/> class.
@@ -25,41 +24,6 @@
         public CableTypeValidator(SdmEntityLoader entityLoader)
         {
             _entityLoader = entityLoader ?? throw new ArgumentNullException(nameof(entityLoader));
-            _validationPipeline = BuildValidationPipeline();
-        }
-
-        /// <summary>
-        /// Validates a CableType and returns a ValidationResult.
-        /// Collects all errors without throwing exceptions.
-        /// <para><b>Not suitable for bulk scenarios</b>: issues one DB query per item. Use <see cref="ValidateBulk"/> instead.</para>
-        /// </summary>
-        protected override ValidationResult Validate(CableType cableType)
-        {
-            if (cableType == null)
-            {
-                throw new ArgumentNullException(nameof(cableType));
-            }
-
-            return _validationPipeline.Validate(cableType);
-        }
-
-        /// <summary>
-        /// Validates a CableType and throws a ValidationException if invalid.
-        /// Use this when you want fail-fast behavior.
-        /// <para><b>Not suitable for bulk scenarios</b>: issues one DB query per item. Use <see cref="ValidateBulk"/> instead.</para>
-        /// </summary>
-        public void ValidateAndThrow(CableType cableType)
-        {
-            _validationPipeline.ValidateAndThrow(cableType);
-        }
-
-        /// <summary>
-        /// Validates with a custom error handling callback.
-        /// <para><b>Not suitable for bulk scenarios</b>: issues one DB query per item. Use <see cref="ValidateBulk"/> instead.</para>
-        /// </summary>
-        public ValidationResult ValidateWithHandler(CableType cableType, Action<ValidationResult> onError)
-        {
-            return _validationPipeline.ValidateWithHandler(cableType, onError);
         }
 
         /// <summary>
@@ -96,120 +60,44 @@
             return IsCableTypeNameValid(cableType.Name, cableType.Identifier);
         }
 
-        #region Pipeline Construction
-
-        private Validator<CableType> BuildValidationPipeline()
+        protected override List<ValidationResult> ValidateBulkNoDatabaseBusinessRules(List<CableType> entities)
         {
-            // Critical validations - stop on failure
-            var criticalValidations = Validator<CableType>
-                .Create(ValidateCriticalFields)
-                .StopOnFailure();
-
-            // Standard validations - collect all errors
-            var standardValidations = Validator<CableType>
-                .Create(ValidateCategories);
-
-            return criticalValidations.AndThen(standardValidations);
-        }
-
-        #endregion
-
-        #region Validation Methods
-
-        private ValidationResult ValidateCriticalFields(CableType cableType)
-        {
-            return IsCableTypeNameValid(cableType);
-        }
-
-        private ValidationResult ValidateCategories(CableType cableType)
-        {
-            var result = new ValidationResult();
-
-            if (!CableTypeValidationHandler.IsCableTypeCategoriesValid(cableType, out var categoriesResult))
-            {
-                result.AddFailuresFrom(categoriesResult);
-            }
-
-            return result;
-        }
-
-        #endregion
-
-        #region Helper Methods
-
-        private bool IsNameInUse(string name, string exceptIdentifier = null)
-        {
-            return _entityLoader.CountCableTypesByName(name, exceptIdentifier) > 0;
-        }
-
-        #endregion
-
-        #region Bulk Validation
-
-        /// <summary>
-        /// Validates multiple CableTypes in bulk with optimized performance.
-        /// Returns validation results in the same order as the input cable types.
-        /// Result at index i corresponds to cable type at index i.
-        /// </summary>
-        protected override List<ValidationResult> ValidateBulk(List<CableType> cableTypes)
-        {
-            if (cableTypes == null || !cableTypes.Any())
-            {
-                return new List<ValidationResult>();
-            }
-
-            var results = cableTypes.Select(_ => new ValidationResult()).ToList();
-
             // ============================================================
             // PHASE 1: NO DATABASE ACCESS CHECKS (BUSINESS RULES)
             // Name format (not empty) + categories — no DB calls.
             // ============================================================
-            for (int i = 0; i < cableTypes.Count; i++)
+            var results = entities.Select(_ => new ValidationResult()).ToList();
+
+            for (int idx = 0; idx < entities.Count; idx++)
             {
-                if (string.IsNullOrWhiteSpace(cableTypes[i].Name))
+                if (string.IsNullOrWhiteSpace(entities[idx].Name))
                 {
-                    results[i].AddFailReason(
+                    results[idx].AddFailReason(
                         CableTypeValidationHandler.CableTypeValidationField.Name,
                         "Cable Type Name cannot be empty or whitespace.");
                 }
 
-                results[i].AddFailuresFrom(ValidateCategories(cableTypes[i]));
+                results[idx].AddFailuresFrom(ValidateCategories(entities[idx]));
             }
-
-            if (results.AnyInvalid())
-            {
-                return results;
-            }
-
-            // ============================================================
-            // PHASE 2: IN-MEMORY BATCH CONFLICT DETECTION
-            // ============================================================
-            var batchConflicts = ValidateNameDuplicatesInBatch(cableTypes);
-            results.MergeFrom(batchConflicts);
-
-            if (results.AnyInvalid())
-            {
-                return results;
-            }
-
-            // ============================================================
-            // PHASE 2.5: BULK NAME UNIQUENESS CHECK AGAINST DATABASE
-            // One OR-based query via Tools.RetrieveBigOrFilter — no large AND filter.
-            // ============================================================
-            var nameDbConflicts = ValidateBulkNamesAgainstDatabase(cableTypes);
-            results.MergeFrom(nameDbConflicts);
 
             return results;
         }
 
-        protected override ValidationResult ValidateForDelete(CableType cableType)
+        protected override List<ValidationResult> ValidateBulkNoDatabaseBatchConflicts(List<CableType> entities)
         {
-            if (cableType == null)
-            {
-                throw new ArgumentNullException(nameof(cableType));
-            }
+            // ============================================================
+            // PHASE 2: IN-MEMORY BATCH CONFLICT DETECTION
+            // ============================================================
+            return ValidateNameDuplicatesInBatch(entities);
+        }
 
-            return ValidateNotInUseWhenDeleted(new List<CableType> { cableType })[0];
+        protected override List<ValidationResult> ValidateBulkWithDatabase(List<CableType> entities)
+        {
+            // ============================================================
+            // PHASE 2.5: BULK NAME UNIQUENESS CHECK AGAINST DATABASE
+            // One OR-based query via Tools.RetrieveBigOrFilter — no large AND filter.
+            // ============================================================
+            return ValidateBulkNamesAgainstDatabase(entities);
         }
 
         protected override List<ValidationResult> ValidateBulkForDelete(List<CableType> cableTypes)
@@ -341,6 +229,36 @@
             return results;
         }
 
+
+        #region Validation Methods
+
+        private ValidationResult ValidateCriticalFields(CableType cableType)
+        {
+            return IsCableTypeNameValid(cableType);
+        }
+
+        private ValidationResult ValidateCategories(CableType cableType)
+        {
+            var result = new ValidationResult();
+
+            if (!CableTypeValidationHandler.IsCableTypeCategoriesValid(cableType, out var categoriesResult))
+            {
+                result.AddFailuresFrom(categoriesResult);
+            }
+
+            return result;
+        }
+
         #endregion
+
+        #region Helper Methods
+
+        private bool IsNameInUse(string name, string exceptIdentifier = null)
+        {
+            return _entityLoader.CountCableTypesByName(name, exceptIdentifier) > 0;
+        }
+
+        #endregion
+
     }
 }

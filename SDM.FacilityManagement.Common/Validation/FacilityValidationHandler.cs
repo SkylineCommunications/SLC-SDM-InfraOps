@@ -72,30 +72,5 @@
 
             return NumericValidators.ValidateRange(entity.Longitude.Value, -180d, 180d, FacilityValidationField.Longitude, out result);
         }
-
-        /// <summary>
-        /// Validates the Facility name together with its coordinates.
-        /// </summary>
-        internal static bool IsFacilityNameAndCoordinatesValid(Facility entity, out ValidationResult result)
-        {
-            result = new ValidationResult();
-
-            if (!IsFacilityNameValid(entity, out var nameResult))
-            {
-                result.AddFailuresFrom(nameResult);
-            }
-
-            if (!IsFacilityLatitudeValid(entity, out var latitudeResult))
-            {
-                result.AddFailuresFrom(latitudeResult);
-            }
-
-            if (!IsFacilityLongitudeValid(entity, out var longitudeResult))
-            {
-                result.AddFailuresFrom(longitudeResult);
-            }
-
-            return result.IsValid;
-        }
     }
 }

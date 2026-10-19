@@ -3,8 +3,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
     using System;
     using System.Collections.Generic;
     using System.Linq;
-
-    using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
     using Skyline.DataMiner.SDM.FacilityManagement.Services;
     using Skyline.DataMiner.SDM.InfraOps.Common.Validation;
@@ -23,55 +21,46 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
             _entityLoader = entityLoader ?? throw new ArgumentNullException(nameof(entityLoader));
         }
 
-        /// <summary>
-        /// Validates a single Facility.
-        /// <para><b>Not suitable for bulk scenarios</b>: issues one DB query per item. Use <see cref="ValidateBulk"/> instead.</para>
-        /// </summary>
-        protected override ValidationResult Validate(Facility entity)
+        protected override List<ValidationResult> ValidateBulkNoDatabaseBusinessRules(List<Facility> entities)
         {
-            var result = new ValidationResult();
+            var results = entities.Select(_ => new ValidationResult()).ToList();
 
-            if (entity.ShouldValidate(entity.FacilityIdField))
+            for (int i = 0; i < entities.Count; i++)
             {
-                if (!FacilityValidationHandler.IsFacilityIdValid(entity, out var idResult))
+                if (entities[i].ShouldValidate(entities[i].FacilityIdField) && !FacilityValidationHandler.IsFacilityIdValid(entities[i], out var idResult))
                 {
-                    result.AddFailuresFrom(idResult);
+                    results[i].AddFailuresFrom(idResult);
                 }
-                else if (IsIdInUse(entity.FacilityId, entity.Identifier))
+
+                if (entities[i].ShouldValidate(entities[i].NameField) && !FacilityValidationHandler.IsFacilityNameValid(entities[i], out var nameResult))
                 {
-                    result.AddFailReason(FacilityValidationHandler.FacilityValidationField.FacilityId,
-                        $"Facility Id '{entity.FacilityId}' is already in use.");
+                    results[i].AddFailuresFrom(nameResult);
+                }
+
+                if (entities[i].ShouldValidate(entities[i].LatitudeField) && !FacilityValidationHandler.IsFacilityLatitudeValid(entities[i], out var latitudeResult))
+                {
+                    results[i].AddFailuresFrom(latitudeResult);
+                }
+
+                if (entities[i].ShouldValidate(entities[i].LongitudeField) && !FacilityValidationHandler.IsFacilityLongitudeValid(entities[i], out var longitudeResult))
+                {
+                    results[i].AddFailuresFrom(longitudeResult);
                 }
             }
 
-            if (entity.ShouldValidate(entity.NameField) && !FacilityValidationHandler.IsFacilityNameValid(entity, out var nameResult))
-            {
-                result.AddFailuresFrom(nameResult);
-            }
-
-            if (entity.ShouldValidate(entity.LatitudeField) && !FacilityValidationHandler.IsFacilityLatitudeValid(entity, out var latitudeResult))
-            {
-                result.AddFailuresFrom(latitudeResult);
-            }
-
-            if (entity.ShouldValidate(entity.LongitudeField) && !FacilityValidationHandler.IsFacilityLongitudeValid(entity, out var longitudeResult))
-            {
-                result.AddFailuresFrom(longitudeResult);
-            }
-
-            result.AddFailuresFrom(ValidateReferencesAgainstDatabase(new List<Facility> { entity })[0]);
-
-            return result;
+            return results;
         }
 
-        protected override ValidationResult ValidateForDelete(Facility facility)
+        protected override List<ValidationResult> ValidateBulkNoDatabaseBatchConflicts(List<Facility> entities)
         {
-            if (facility == null)
-            {
-                throw new ArgumentNullException(nameof(facility));
-            }
+            return ValidateIdDuplicatesInBatch(entities);
+        }
 
-            return ValidateNotInUseWhenDeleted(new List<Facility> { facility })[0];
+        protected override List<ValidationResult> ValidateBulkWithDatabase(List<Facility> entities)
+        {
+            var results = ValidateBulkIdsAgainstDatabase(entities);
+            results.MergeFrom(ValidateReferencesAgainstDatabase(entities));
+            return results;
         }
 
         protected override List<ValidationResult> ValidateBulkForDelete(List<Facility> facilities)
@@ -106,24 +95,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
             }
 
             return result;
-        }
-
-        /// <summary>
-        /// Validates a batch of Facility entities in three phases:
-        /// 1. Non-database checks per item (id not empty).
-        /// 2. In-memory batch conflict detection (id uniqueness within batch).
-        /// 3. Database uniqueness check (id uniqueness vs DB).
-        /// Results are returned in the same order as the input list.
-        /// </summary>
-        protected override List<ValidationResult> ValidateBulk(List<Facility> entities)
-        {
-            return FacilityBulkValidationHelper.RunBulkValidation(
-                entities,
-                FacilityValidationHandler.IsFacilityIdValid,
-                FacilityValidationHandler.IsFacilityNameAndCoordinatesValid,
-                ValidateIdDuplicatesInBatch,
-                ValidateBulkIdsAgainstDatabase,
-                ValidateReferencesAgainstDatabase);
         }
 
         private bool IsIdInUse(string id, string exceptIdentifier = null)

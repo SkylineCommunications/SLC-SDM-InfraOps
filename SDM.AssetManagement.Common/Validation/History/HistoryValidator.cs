@@ -14,16 +14,19 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
     /// </summary>
     public class HistoryValidator : ValidatorBase<History>
     {
-        protected override ValidationResult Validate(History history)
+        protected override List<ValidationResult> ValidateBulkNoDatabaseBusinessRules(List<History> entities)
         {
-            return ValidateInfo(history);
+            return entities.Select(ValidateInfo).ToList();
         }
 
-        protected override List<ValidationResult> ValidateBulk(List<History> histories)
+        protected override List<ValidationResult> ValidateBulkNoDatabaseBatchConflicts(List<History> entities)
         {
-            return histories == null
-                ? new List<ValidationResult>()
-                : histories.Select(ValidateInfo).ToList();
+            return entities.Select(_ => new ValidationResult()).ToList();
+        }
+
+        protected override List<ValidationResult> ValidateBulkWithDatabase(List<History> entities)
+        {
+            return entities.Select(_ => new ValidationResult()).ToList();
         }
 
         private static ValidationResult ValidateInfo(History history)
