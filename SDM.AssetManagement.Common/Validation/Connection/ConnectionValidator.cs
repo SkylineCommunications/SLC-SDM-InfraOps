@@ -11,8 +11,11 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.Common.Services;
     using Skyline.DataMiner.SDM.Extensions;
+    using Skyline.DataMiner.SDM.InfraOps.Common.Validation;
     using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
+
+    using static Skyline.DataMiner.SDM.AssetManagement.Common.Validation.ConnectionValidationHandler;
 
     public class ConnectionValidator : ValidatorBase<Connection>
     {
@@ -62,6 +65,36 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
 
         private static void ValidateWithoutDatabaseAccess(Connection connection, ValidationResult result)
         {
+            if (connection.ShouldValidate(connection.ConnectionTypeField) && !connection.ConnectionType.HasValue)
+            {
+                result.AddFailReason(ConnectionValidationField.ConnectionType, "Connection type cannot be empty.");
+            }
+
+            if (connection.ShouldValidate(connection.CableTypeField) && !connection.CableType.HasValue())
+            {
+                result.AddFailReason(ConnectionValidationField.CableType, "Cable type cannot be empty.");
+            }
+
+            if (connection.ShouldValidate(connection.Source.PortField) && !connection.Source.Port.HasValue())
+            {
+                result.AddFailReason(ConnectionValidationField.SourcePort, "Source port cannot be empty.");
+            }
+
+            if (connection.ShouldValidate(connection.Source.PortTypeField) && !connection.Source.PortType.HasValue())
+            {
+                result.AddFailReason(ConnectionValidationField.SourcePortType, "Source port type cannot be empty.");
+            }
+
+            if (connection.ShouldValidate(connection.Destination.PortField) && !connection.Destination.Port.HasValue())
+            {
+                result.AddFailReason(ConnectionValidationField.DestinationPort, "Destination port cannot be empty.");
+            }
+
+            if (connection.ShouldValidate(connection.Destination.PortTypeField) && !connection.Destination.PortType.HasValue())
+            {
+                result.AddFailReason(ConnectionValidationField.DestinationPortType, "Destination port type cannot be empty.");
+            }
+
             if (!ConnectionValidationHandler.IsCableLengthValid(connection.CableLength, out var cableLengthResult))
             {
                 result.AddFailuresFrom(cableLengthResult);
@@ -73,7 +106,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             if (!ConnectionValidationHandler.IsNotSelfConnection(sourcePort, destinationPort, out var selfResult))
             {
                 result.AddFailuresFrom(selfResult);
-                return;
             }
         }
 
