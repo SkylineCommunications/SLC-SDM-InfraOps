@@ -11,14 +11,8 @@
     using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
-    public sealed class JobAsset : IEquatable<JobAsset>, ISectionTrackable, ISectionEmptyState
+    public sealed class JobAsset : ChangeTrackingBase, IEquatable<JobAsset>, ISectionTrackable, ISectionEmptyState
     {
-        [JsonIgnore]
-        private SlcPlan_And_Build.Enums.ActionforassetenumEnum _action;
-
-        [JsonIgnore]
-        private bool _actionIsSet;
-
         [JsonIgnore]
         [SdmIgnore]
         Guid? ISectionTrackable.SectionId { get; set; }
@@ -28,28 +22,70 @@
         public bool IsEmpty =>
             !AssetId.HasValue() &&
             Action == default &&
-            !_actionIsSet &&
+            !ActionField.IsSet &&
             AssetName == default &&
             AssetClassName == default &&
             IPAddress == default;
 
-        public SdmObjectReference<Asset> AssetId { get; set; }
+        public SdmObjectReference<Asset> AssetId
+        {
+            get => AssetIdField.Value;
+            set => AssetIdField.Value = value;
+        }
 
         public SlcPlan_And_Build.Enums.ActionforassetenumEnum Action
         {
-            get => _action;
-            set
-            {
-                _action = value;
-                _actionIsSet = true;
-            }
+            get => ActionField.Value;
+            set => ActionField.Value = value;
         }
 
-        public string AssetName { get; set; }
+        public string AssetName
+        {
+            get => AssetNameField.Value;
+            set => AssetNameField.Value = value;
+        }
 
-        public string AssetClassName { get; set; }
+        public string AssetClassName
+        {
+            get => AssetClassNameField.Value;
+            set => AssetClassNameField.Value = value;
+        }
 
-        public string IPAddress { get; set; }
+        public string IPAddress
+        {
+            get => IPAddressField.Value;
+            set => IPAddressField.Value = value;
+        }
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal IChangeTrackingField<SdmObjectReference<Asset>> AssetIdField => FieldHandler.GetOrCreateField(
+            nameof(AssetId),
+            () => new ChangeTrackingField<SdmObjectReference<Asset>>(default, reference => reference.Identifier));
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal IChangeTrackingField<SlcPlan_And_Build.Enums.ActionforassetenumEnum> ActionField => FieldHandler.GetOrCreateField(
+            nameof(Action),
+            () => new ChangeTrackingField<SlcPlan_And_Build.Enums.ActionforassetenumEnum>(default));
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal IChangeTrackingField<string> AssetNameField => FieldHandler.GetOrCreateField(
+            nameof(AssetName),
+            () => new ChangeTrackingStringField(null));
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal IChangeTrackingField<string> AssetClassNameField => FieldHandler.GetOrCreateField(
+            nameof(AssetClassName),
+            () => new ChangeTrackingStringField(null));
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal IChangeTrackingField<string> IPAddressField => FieldHandler.GetOrCreateField(
+            nameof(IPAddress),
+            () => new ChangeTrackingStringField(null));
 
         public static bool operator ==(JobAsset left, JobAsset right)
         {
