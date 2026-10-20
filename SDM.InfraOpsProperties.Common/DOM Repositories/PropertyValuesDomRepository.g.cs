@@ -596,7 +596,7 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
                 _propertyvaluesproperties.ID = new SectionID(obj.PropertyValuesPropertiesSectionId.Value);
             }
 
-            if (obj.LinkedObjectID != default)
+            if (obj.LinkedObjectID != Guid.Empty)
             {
                 _propertyvaluesproperties.AddOrUpdateValue<string>(InfraOpsProperties.Models.PropertyValuesDomMapper.PropertyValuesProperties.LinkedObjectID, Convert.ToString(obj.LinkedObjectID));
             }

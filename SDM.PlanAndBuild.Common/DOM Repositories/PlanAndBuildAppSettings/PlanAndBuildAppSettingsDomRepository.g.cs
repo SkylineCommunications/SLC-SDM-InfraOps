@@ -588,25 +588,10 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
                 _planandbuildappsettingsproperties.AddOrUpdateValue<string>(PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDPrefix, Convert.ToString(obj.JobIDPrefix));
             }
 
-            if (obj.JobIDNextSequence != default)
-            {
-                _planandbuildappsettingsproperties.AddOrUpdateValue<long>(PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDNextSequence, (long)obj.JobIDNextSequence);
-            }
-
-            if (obj.JobIDIncrement != default)
-            {
-                _planandbuildappsettingsproperties.AddOrUpdateValue<long>(PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDIncrement, (long)obj.JobIDIncrement);
-            }
-
-            if (obj.JobIDStartingSeed != default)
-            {
-                _planandbuildappsettingsproperties.AddOrUpdateValue<long>(PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDStartingSeed, (long)obj.JobIDStartingSeed);
-            }
-
-            if (obj.JobIDMinimumDigits != default)
-            {
-                _planandbuildappsettingsproperties.AddOrUpdateValue<long>(PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDMinimumDigits, (long)obj.JobIDMinimumDigits);
-            }
+            _planandbuildappsettingsproperties.AddOrUpdateValue<long>(PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDNextSequence, (long)obj.JobIDNextSequence);
+            _planandbuildappsettingsproperties.AddOrUpdateValue<long>(PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDIncrement, (long)obj.JobIDIncrement);
+            _planandbuildappsettingsproperties.AddOrUpdateValue<long>(PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDStartingSeed, (long)obj.JobIDStartingSeed);
+            _planandbuildappsettingsproperties.AddOrUpdateValue<long>(PlanAndBuild.Models.PlanAndBuildAppSettingsDomMapper.PlanAndBuildAppSettingsProperties.JobIDMinimumDigits, (long)obj.JobIDMinimumDigits);
 
             instance.Sections.Add(_planandbuildappsettingsproperties);
             return instance;

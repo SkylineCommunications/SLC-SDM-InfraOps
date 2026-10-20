@@ -115,6 +115,28 @@ namespace SDM.FacilityManagement.Tests.Validation
         }
 
         [TestMethod]
+        public void RackValidationHandler_WithOnlyPowerCapacitySet_ShouldStillReportRackUnitsCannotBeEmpty()
+        {
+            var rack = new Rack();
+            rack.Capacity.MaximumPowerCapacity = 500;
+
+            RackValidationHandler.IsRackUnitCapacityValid(rack, out var result).Should().BeFalse();
+
+            result.GetFailReason(RackValidationHandler.RackValidationField.RackUnits).Should().Be("Rack Units cannot be empty.");
+        }
+
+        [TestMethod]
+        public void RackValidationHandler_WithRackUnitsExplicitlySetToZero_ShouldReportRangeError()
+        {
+            var rack = new Rack();
+            rack.Capacity.MaximumRackCapacity = 0;
+
+            RackValidationHandler.IsRackUnitCapacityValid(rack, out var result).Should().BeFalse();
+
+            result.GetFailReason(RackValidationHandler.RackValidationField.RackUnits).Should().Be("Rack Units must be between 1 and 70.");
+        }
+
+        [TestMethod]
         public void RackValidationHandler_WithInvalidRackUnits_ShouldReturnExactMessage()
         {
             var rack = new Rack();

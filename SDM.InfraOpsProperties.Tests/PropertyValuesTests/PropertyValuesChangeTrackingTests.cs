@@ -94,5 +94,29 @@
 
 			propertyValues.Changed.Should().BeTrue("adding an entry changes the list count, which is detected");
 		}
+
+		[TestMethod]
+		public void LinkedObjectIDField_WhenUnsetExistingEntityExplicitlySetToEmptyGuid_ShouldMarkChangedAndRevertOnReset()
+		{
+			var propertyValues = new PropertyValues
+			{
+				Identifier = Guid.NewGuid().ToString(),
+				Scope = "Asset",
+			};
+			propertyValues.ResetChangeTracking();
+			propertyValues.IsNewInternal = false;
+
+			propertyValues.LinkedObjectIDField.Changed.Should().BeFalse();
+
+			propertyValues.LinkedObjectID = Guid.Empty;
+
+			propertyValues.LinkedObjectIDField.Changed.Should().BeTrue();
+			propertyValues.Changed.Should().BeTrue();
+
+			Skyline.DataMiner.Utils.InfraOps.Common.Fields.SdmChangeTracking.RevertFieldChanges(propertyValues);
+
+			propertyValues.LinkedObjectIDField.Changed.Should().BeFalse();
+			propertyValues.Changed.Should().BeFalse();
+		}
 	}
 }

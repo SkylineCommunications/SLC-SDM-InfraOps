@@ -563,7 +563,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			if (_assetrelationSection != default)
 			{
 				obj.AssetRelationPropertiesSectionId = _assetrelationSection.ID.Id;
-				obj.Asset = new AssetManagement.Models.Asset();
 				var _asset = _assetrelationSection.GetValue<System.Guid>(AssetManagement.Models.PowerPortDomMapper.AssetRelationProperties.Asset);
 				if (_asset != null)
 				{
@@ -610,10 +609,16 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 					_powerportinfo.AddOrUpdateValue<string>(AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.Name, Convert.ToString(obj.PowerPortInfo.Name));
 				}
 
-				// Always save PortNumber, even if it's 0 (the default value for long)
-				_powerportinfo.AddOrUpdateValue<long>(AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.PortNumber, (long)obj.PowerPortInfo.PortNumber);
+				if (obj.PowerPortInfo.PortNumber != default)
+				{
+					_powerportinfo.AddOrUpdateValue<long>(AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.PortNumber, (long)obj.PowerPortInfo.PortNumber.Value);
+				}
 
-				_powerportinfo.AddOrUpdateValue<int>(AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.OutputType, (int)obj.PowerPortInfo.OutputType);
+				if (obj.PowerPortInfo.OutputType != default)
+				{
+					_powerportinfo.AddOrUpdateValue<int>(AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.OutputType, (int)obj.PowerPortInfo.OutputType.Value);
+				}
+
 				_powerportinfo.AddOrUpdateValue<string>(AssetManagement.Models.PowerPortDomMapper.PowerPortInfo.PortExposure, SharedMappers.DomIds.SlcAsset_Management.Enums.Portexposure.ToValue(obj.PowerPortInfo.PortExposure));
 
 				if (obj.PowerPortInfo.PortType.HasValue())

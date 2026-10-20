@@ -41,6 +41,7 @@ namespace SDM.PlanAndBuild.Tests
 		{
 			new JobAsset().Also(asset => asset.AssetId = new SdmObjectReference<Asset>(Guid.NewGuid().ToString())).IsEmpty.Should().BeFalse();
 			new JobAsset().Also(asset => asset.Action = SlcPlan_And_Build.Enums.ActionforassetenumEnum.Reinstalled).IsEmpty.Should().BeFalse();
+			new JobAsset().Also(asset => asset.Action = default).IsEmpty.Should().BeFalse();
 		}
 
 		[TestMethod]
@@ -72,6 +73,28 @@ namespace SDM.PlanAndBuild.Tests
 			new JobConnection().Also(connection => connection.Status = "Active").IsEmpty.Should().BeFalse();
 			new JobConnection().Also(connection => connection.CableType = new SdmObjectReference<CableType>(Guid.NewGuid().ToString())).IsEmpty.Should().BeFalse();
 			new JobConnection().Also(connection => connection.CableLength = 12.5).IsEmpty.Should().BeFalse();
+		}
+
+		[TestMethod]
+		public void PlanAndBuildAppSettings_ToInstance_WritesZeroValues()
+		{
+			var settings = new PlanAndBuildAppSettings
+			{
+				Identifier = Guid.NewGuid().ToString(),
+				JobIDNextSequence = 0,
+				JobIDIncrement = 0,
+				JobIDStartingSeed = 0,
+				JobIDMinimumDigits = 0,
+			};
+
+			var repo = System.Runtime.Serialization.FormatterServices.GetUninitializedObject(typeof(PlanAndBuildAppSettingsDomRepository));
+			var toInstance = typeof(PlanAndBuildAppSettingsDomRepository).GetMethod("ToInstance", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+			var fromInstance = typeof(PlanAndBuildAppSettingsDomRepository).GetMethod("FromInstance", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+			var roundTripped = (PlanAndBuildAppSettings)fromInstance.Invoke(repo, new[] { toInstance.Invoke(repo, new object[] { settings }) });
+			roundTripped.JobIDNextSequence.Should().Be(0);
+			roundTripped.JobIDIncrement.Should().Be(0);
+			roundTripped.JobIDStartingSeed.Should().Be(0);
+			roundTripped.JobIDMinimumDigits.Should().Be(0);
 		}
 	}
 

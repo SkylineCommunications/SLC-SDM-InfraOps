@@ -190,7 +190,7 @@
                 return result.IsValid;
             }
 
-            if (rack.Capacity.IsEmpty)
+            if (!rack.Capacity.RackUnitsField.IsSet)
             {
                 result.AddFailReason(RackValidationField.RackUnits, "Rack Units cannot be empty.");
                 return result.IsValid;

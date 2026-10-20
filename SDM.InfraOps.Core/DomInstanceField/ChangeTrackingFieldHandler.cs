@@ -63,5 +63,16 @@
 				field.ApplyChanges();
 			}
 		}
+
+		public ChangeTrackingFieldHandler Clone()
+		{
+			var clone = new ChangeTrackingFieldHandler();
+			foreach (var entry in _fields)
+			{
+				clone._fields[entry.Key] = entry.Value.Clone();
+			}
+
+			return clone;
+		}
 	}
 }

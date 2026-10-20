@@ -1243,15 +1243,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     _holdersSection.ID = new SectionID(_holdersSectionId.Value);
                 }
 
-                if (holders.SlotNumber != default)
-                {
-                    _holdersSection.AddOrUpdateValue<long>(AssetManagement.Models.AssetDomMapper.Holders.SlotNumber, (long)holders.SlotNumber);
-                }
-
-                if (holders.HierarchyRole != default)
-                {
-                    _holdersSection.AddOrUpdateValue<string>(AssetManagement.Models.AssetDomMapper.Holders.HierarchyRole, SharedMappers.DomIds.SlcAsset_Management.Enums.Hierarchyrole.ToValue(holders.HierarchyRole));
-                }
+                _holdersSection.AddOrUpdateValue<long>(AssetManagement.Models.AssetDomMapper.Holders.SlotNumber, (long)holders.SlotNumber);
+                _holdersSection.AddOrUpdateValue<string>(AssetManagement.Models.AssetDomMapper.Holders.HierarchyRole, SharedMappers.DomIds.SlcAsset_Management.Enums.Hierarchyrole.ToValue(holders.HierarchyRole));
 
                 if (holders.Label != default)
                 {
@@ -1276,10 +1269,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     _elementlinksSection.AddOrUpdateValue<string>(AssetManagement.Models.AssetDomMapper.ElementLinks.ElementID, Convert.ToString(elementlinks.ElementID));
                 }
 
-                if (elementlinks.IsPrimary != default)
-                {
-                    _elementlinksSection.AddOrUpdateValue<bool>(AssetManagement.Models.AssetDomMapper.ElementLinks.IsPrimary, (bool)elementlinks.IsPrimary);
-                }
+                _elementlinksSection.AddOrUpdateValue<bool>(AssetManagement.Models.AssetDomMapper.ElementLinks.IsPrimary, (bool)elementlinks.IsPrimary);
 
                 instance.Sections.Add(_elementlinksSection);
             }

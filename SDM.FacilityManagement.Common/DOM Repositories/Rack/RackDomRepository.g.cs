@@ -798,15 +798,8 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     _capacity.ID = new SectionID(_capacitySectionId.Value);
                 }
 
-                if (obj.Capacity.MaximumRackCapacity != default)
-                {
-                    _capacity.AddOrUpdateValue<double>(FacilityManagement.Models.RackDomMapper.Capacity.MaximumRackCapacity, (double)obj.Capacity.MaximumRackCapacity);
-                }
-
-                if (obj.Capacity.MaximumPowerCapacity != default)
-                {
-                    _capacity.AddOrUpdateValue<double>(FacilityManagement.Models.RackDomMapper.Capacity.MaximumPowerCapacity, (double)obj.Capacity.MaximumPowerCapacity);
-                }
+                _capacity.AddOrUpdateValue<double>(FacilityManagement.Models.RackDomMapper.Capacity.MaximumRackCapacity, (double)obj.Capacity.MaximumRackCapacity);
+                _capacity.AddOrUpdateValue<double>(FacilityManagement.Models.RackDomMapper.Capacity.MaximumPowerCapacity, (double)obj.Capacity.MaximumPowerCapacity);
 
                 instance.Sections.Add(_capacity);
             }
@@ -854,7 +847,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     _resource.ID = new SectionID(_resourceSectionId.Value);
                 }
 
-                if (obj.Resource.ResourceId != default)
+                if (obj.Resource.ResourceId != Guid.Empty)
                 {
                     _resource.AddOrUpdateValue<string>(FacilityManagement.Models.RackDomMapper.Resource.ResourceId, Convert.ToString(obj.Resource.ResourceId));
                 }

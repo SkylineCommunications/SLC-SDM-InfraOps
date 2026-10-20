@@ -1009,10 +1009,14 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
 				if (dataports.PortNumber != default)
 				{
-					_dataportsSection.AddOrUpdateValue<long>(AssetManagement.Models.AssetClassDomMapper.DataPorts.PortNumber, (long)dataports.PortNumber);
+					_dataportsSection.AddOrUpdateValue<long>(AssetManagement.Models.AssetClassDomMapper.DataPorts.PortNumber, (long)dataports.PortNumber.Value);
 				}
 
-				_dataportsSection.AddOrUpdateValue<int>(AssetManagement.Models.AssetClassDomMapper.DataPorts.OutputType, (int)dataports.OutputType);
+				if (dataports.OutputType != default)
+				{
+					_dataportsSection.AddOrUpdateValue<int>(AssetManagement.Models.AssetClassDomMapper.DataPorts.OutputType, (int)dataports.OutputType.Value);
+				}
+
 				_dataportsSection.AddOrUpdateValue<string>(AssetManagement.Models.AssetClassDomMapper.DataPorts.PortExposure, SharedMappers.DomIds.SlcAsset_Management.Enums.Portexposure.ToValue(dataports.PortExposure));
 				if (dataports.PortType.HasValue())
 				{
@@ -1043,10 +1047,14 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
 				if (powerports.PortNumber != default)
 				{
-					_powerportsSection.AddOrUpdateValue<long>(AssetManagement.Models.AssetClassDomMapper.PowerPorts.PortNumber, (long)powerports.PortNumber);
+					_powerportsSection.AddOrUpdateValue<long>(AssetManagement.Models.AssetClassDomMapper.PowerPorts.PortNumber, (long)powerports.PortNumber.Value);
 				}
 
-				_powerportsSection.AddOrUpdateValue<int>(AssetManagement.Models.AssetClassDomMapper.PowerPorts.OutputType, (int)powerports.OutputType);
+				if (powerports.OutputType != default)
+				{
+					_powerportsSection.AddOrUpdateValue<int>(AssetManagement.Models.AssetClassDomMapper.PowerPorts.OutputType, (int)powerports.OutputType.Value);
+				}
+
 				_powerportsSection.AddOrUpdateValue<string>(AssetManagement.Models.AssetClassDomMapper.PowerPorts.PortExposure, SharedMappers.DomIds.SlcAsset_Management.Enums.Portexposure.ToValue(powerports.PortExposure));
 				if (powerports.PortType.HasValue())
 				{
@@ -1070,10 +1078,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 					_holdersSection.ID = new SectionID(_holdersSectionId.Value);
 				}
 
-				if (holders.SlotNumber != default)
-				{
-					_holdersSection.AddOrUpdateValue<long>(AssetManagement.Models.AssetClassDomMapper.Holders.SlotNumber, (long)holders.SlotNumber);
-				}
+				_holdersSection.AddOrUpdateValue<long>(AssetManagement.Models.AssetClassDomMapper.Holders.SlotNumber, (long)holders.SlotNumber);
 
 				_holdersSection.AddOrUpdateValue<string>(AssetManagement.Models.AssetClassDomMapper.Holders.HierarchyRole, SlcAsset_Management.Enums.Hierarchyrole.ToValue(holders.HierarchyRole));
 

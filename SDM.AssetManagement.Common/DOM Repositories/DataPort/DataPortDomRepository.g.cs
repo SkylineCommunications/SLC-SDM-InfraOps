@@ -560,7 +560,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			if (_assetfkSection != default)
 			{
 				obj.AssetFkSectionId = _assetfkSection.ID.Id;
-				obj.Asset = new AssetManagement.Models.Asset();
 				var _assetfkasset = _assetfkSection.GetValue<System.Guid>(AssetManagement.Models.DataPortDomMapper.AssetFk.Asset);
 				if (_assetfkasset != null)
 				{
@@ -716,10 +715,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 					_addressinfo.AddOrUpdateValue<string>(AssetManagement.Models.DataPortDomMapper.AddressInfo.Hostname, Convert.ToString(obj.AddressInfo.Hostname));
 				}
 
-				if (obj.AddressInfo.DNS != default)
-				{
-					_addressinfo.AddOrUpdateValue<bool>(AssetManagement.Models.DataPortDomMapper.AddressInfo.DNS, (bool)obj.AddressInfo.DNS);
-				}
+				_addressinfo.AddOrUpdateValue<bool>(AssetManagement.Models.DataPortDomMapper.AddressInfo.DNS, (bool)obj.AddressInfo.DNS);
 
 				instance.Sections.Add(_addressinfo);
 			}
@@ -732,15 +728,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				{
 					_primaryportrelation.ID = new SectionID(_primaryportrelationSectionId.Value);
 				}
-				if (obj.PrimaryPortRelation.IsPrimaryIpv6 != default)
-				{
-					_primaryportrelation.AddOrUpdateValue<bool>(AssetManagement.Models.DataPortDomMapper.PrimaryPortRelation.IsPrimaryIpv6, (bool)obj.PrimaryPortRelation.IsPrimaryIpv6);
-				}
 
-				if (obj.PrimaryPortRelation.IsPrimaryIpv4 != default)
-				{
-					_primaryportrelation.AddOrUpdateValue<bool>(AssetManagement.Models.DataPortDomMapper.PrimaryPortRelation.IsPrimaryIpv4, (bool)obj.PrimaryPortRelation.IsPrimaryIpv4);
-				}
+				_primaryportrelation.AddOrUpdateValue<bool>(AssetManagement.Models.DataPortDomMapper.PrimaryPortRelation.IsPrimaryIpv6, (bool)obj.PrimaryPortRelation.IsPrimaryIpv6);
+				_primaryportrelation.AddOrUpdateValue<bool>(AssetManagement.Models.DataPortDomMapper.PrimaryPortRelation.IsPrimaryIpv4, (bool)obj.PrimaryPortRelation.IsPrimaryIpv4);
 
 				instance.Sections.Add(_primaryportrelation);
 			}

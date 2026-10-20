@@ -14,7 +14,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 		[JsonIgnore]
 		[SdmIgnore]
 		public bool IsEmpty => ElementID == default &&
-			IsPrimary == default;
+			IsPrimary == default &&
+			!IsPrimaryField.IsSet;
 
 		public string ElementID
 		{

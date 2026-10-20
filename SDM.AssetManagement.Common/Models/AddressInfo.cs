@@ -16,7 +16,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         public bool IsEmpty => Ipv4Address == default &&
             Ipv6Address == default &&
             Hostname == default &&
-            DNS == default;
+            DNS == default &&
+            !DNSField.IsSet;
 
         public string Ipv4Address
         {

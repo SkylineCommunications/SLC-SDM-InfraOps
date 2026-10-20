@@ -20,6 +20,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             PortNumber == default &&
             OutputType == default &&
             PortExposure == default &&
+            !PortExposureField.IsSet &&
             !PortType.HasValue() &&
             Label == default;
 

@@ -3,5 +3,7 @@
 	internal interface IDomInstanceFieldApplyChanges : IChangeTrackingField
 	{
 		void ApplyChanges();
+
+		IDomInstanceFieldApplyChanges Clone();
 	}
 }

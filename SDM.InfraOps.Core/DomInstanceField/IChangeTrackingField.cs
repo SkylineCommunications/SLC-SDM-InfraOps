@@ -4,6 +4,8 @@
     {
         bool Changed { get; }
 
+        bool IsSet { get; }
+
         (object prevVal, object newVal) GetChanges();
     }
 

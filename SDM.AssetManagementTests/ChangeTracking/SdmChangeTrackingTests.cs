@@ -243,6 +243,46 @@ namespace SDM.AssetManagement.Tests.ChangeTracking
         {
             SdmChangeTracking.RevertFieldChanges(CreateLoadedAsset()).Should().BeEmpty();
         }
+
+        [TestMethod]
+        public void RevertFieldChanges_WhenLoadedWithDefaultBool_PreservesIsSetAndIsNotEmpty()
+        {
+            var port = new DataPort
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                AddressInfo = { DNS = false },
+            };
+            port.ResetChangeTracking();
+
+            port.AddressInfo.DNS = true;
+            var reverted = SdmChangeTracking.RevertFieldChanges(port);
+
+            reverted.Should().ContainSingle(c => c.Section == nameof(DataPort.AddressInfo) && c.FieldName == nameof(AddressInfo.DNS));
+            port.AddressInfo.DNS.Should().BeFalse();
+            port.AddressInfo.IsEmpty.Should().BeFalse();
+            port.AddressInfo.Changed.Should().BeFalse();
+        }
+
+        [TestMethod]
+        public void RevertFieldChanges_WhenUnsetBoolExplicitlySetToFalse_RevertsToEmpty()
+        {
+            var port = new DataPort
+            {
+                Identifier = Guid.NewGuid().ToString(),
+            };
+            port.ResetChangeTracking();
+
+            port.AddressInfo.IsEmpty.Should().BeTrue();
+            port.AddressInfo.DNS = false;
+            port.AddressInfo.IsEmpty.Should().BeFalse();
+            port.AddressInfo.Changed.Should().BeTrue();
+
+            var reverted = SdmChangeTracking.RevertFieldChanges(port);
+
+            reverted.Should().ContainSingle(c => c.Section == nameof(DataPort.AddressInfo) && c.FieldName == nameof(AddressInfo.DNS));
+            port.AddressInfo.IsEmpty.Should().BeTrue();
+            port.AddressInfo.Changed.Should().BeFalse();
+        }
     }
 }
 

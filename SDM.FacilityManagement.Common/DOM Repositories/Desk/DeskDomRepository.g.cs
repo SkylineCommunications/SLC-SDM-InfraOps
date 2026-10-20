@@ -641,7 +641,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     _resource.ID = new SectionID(_resourceSectionId.Value);
                 }
 
-                if (obj.Resource.ResourceId != default)
+                if (obj.Resource.ResourceId != Guid.Empty)
                 {
                     _resource.AddOrUpdateValue<string>(FacilityManagement.Models.DeskDomMapper.Resource.ResourceId, Convert.ToString(obj.Resource.ResourceId));
                 }

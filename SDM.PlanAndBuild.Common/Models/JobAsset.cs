@@ -14,6 +14,12 @@
     public sealed class JobAsset : IEquatable<JobAsset>, ISectionTrackable, ISectionEmptyState
     {
         [JsonIgnore]
+        private SlcPlan_And_Build.Enums.ActionforassetenumEnum _action;
+
+        [JsonIgnore]
+        private bool _actionIsSet;
+
+        [JsonIgnore]
         [SdmIgnore]
         Guid? ISectionTrackable.SectionId { get; set; }
 
@@ -22,13 +28,22 @@
         public bool IsEmpty =>
             !AssetId.HasValue() &&
             Action == default &&
+            !_actionIsSet &&
             AssetName == default &&
             AssetClassName == default &&
             IPAddress == default;
 
         public SdmObjectReference<Asset> AssetId { get; set; }
 
-        public SlcPlan_And_Build.Enums.ActionforassetenumEnum Action { get; set; }
+        public SlcPlan_And_Build.Enums.ActionforassetenumEnum Action
+        {
+            get => _action;
+            set
+            {
+                _action = value;
+                _actionIsSet = true;
+            }
+        }
 
         public string AssetName { get; set; }
 

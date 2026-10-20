@@ -16,8 +16,10 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 		[JsonIgnore]
 		[SdmIgnore]
 		public bool IsEmpty => SlotNumber == default &&
+			!SlotNumberField.IsSet &&
 			Label == default &&
-			HierarchyRole == default;
+			HierarchyRole == default &&
+			!HierarchyRoleField.IsSet;
 
 		public long SlotNumber
 		{
