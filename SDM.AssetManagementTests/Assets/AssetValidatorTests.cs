@@ -1393,7 +1393,7 @@
 
             // Assert
             act.Should().Throw<Exception>()
-                .WithMessage($"*Must be within Rack*max {maxCapacity}*");
+                .WithMessage($"*Invalid Position*. Extends beyond rack boundaries (Rack has {maxCapacity} units)*");
         }
 
         [TestMethod]

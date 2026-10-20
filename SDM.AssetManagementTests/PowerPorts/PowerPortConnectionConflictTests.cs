@@ -84,6 +84,7 @@ namespace SDM.AssetManagement.Tests.PowerPorts
             {
                 Identifier = Guid.NewGuid().ToString(),
                 ConnectionType = SlcAsset_Management.Enums.ConnectionType.Power,
+                CableType = sourceType.CableFKs.CableTypeFks.First(),
                 Source =
                 {
                     Port = new ISdmObjectReference<IPort>(source.Identifier),

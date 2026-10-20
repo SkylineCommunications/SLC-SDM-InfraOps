@@ -110,6 +110,7 @@ namespace SDM.AssetManagement.Tests.DataPorts
             {
                 Identifier = Guid.NewGuid().ToString(),
                 ConnectionType = SlcAsset_Management.Enums.ConnectionType.Data,
+                CableType = sourceType1.CableFKs.CableTypeFks.First(),
                 Source =
                 {
                     Port = new ISdmObjectReference<IPort>(source.Identifier),

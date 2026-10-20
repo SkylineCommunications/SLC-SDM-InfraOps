@@ -8,6 +8,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
 
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Common.Validation;
+    using Skyline.DataMiner.SDM.AssetManagement.Extensions;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.Common.Services;
     using Skyline.DataMiner.SDM.Extensions;
@@ -114,7 +115,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             ValidateCableType(connection, lookups, result);
             ValidatePortTypeReferences(connection, lookups, result);
 
-            ResolveConnectionType(connection, lookups);
+            ValidateConnectionType(connection, lookups, result);
 
             ValidateEndpoint(connection, isSource: true, lookups, result);
             ValidateEndpoint(connection, isSource: false, lookups, result);
@@ -145,7 +146,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
 
         private void ValidatePortTypeReference(SdmObjectReference<PortType> portType, bool isSource, Lookups lookups, ValidationResult result)
         {
-            if (portType.HasValue() && !lookups.PortTypeIds.Contains(portType.Identifier))
+            if (portType.HasValue() && !lookups.PortTypes.ContainsKey(portType.Identifier))
             {
                 result.AddFailReason(
                     isSource ? ConnectionValidationHandler.ConnectionValidationField.SourcePortType : ConnectionValidationHandler.ConnectionValidationField.DestinationPortType,
@@ -158,10 +159,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             var endpointPort = isSource ? connection.Source.Port : connection.Destination.Port;
             var field = isSource ? ConnectionValidationHandler.ConnectionValidationField.SourcePort : ConnectionValidationHandler.ConnectionValidationField.DestinationPort;
 
-            // Connections may legitimately be patched on a single end. Because the Connection model does not
-            // track per-field changes (unlike the legacy application, which gated the "port must be selected"
-            // check on the port field being changed), an unset endpoint is treated as "not being connected"
-            // and skipped rather than rejected. Endpoints that are set are still fully validated.
             if (!endpointPort.HasValue())
             {
                 return;
@@ -210,29 +207,63 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             return usageCount >= MaxConnectionsPerPort;
         }
 
-        private static void ResolveConnectionType(Connection connection, Lookups lookups)
+        private static void ValidateConnectionType(Connection connection, Lookups lookups, ValidationResult result)
         {
-            if (connection.ConnectionType.HasValue)
+            if (!connection.ConnectionType.HasValue)
             {
                 return;
             }
 
-            var sourcePort = connection.Source.Port;
-            if (sourcePort.HasValue())
-            {
-                if (lookups.DataPorts.ContainsKey(sourcePort.Identifier))
-                {
-                    connection.ConnectionType = SlcAsset_Management.Enums.ConnectionType.Data;
-                }
+            ValidateEndpointConnectionType(connection, isSource: true, lookups, result);
+            ValidateEndpointConnectionType(connection, isSource: false, lookups, result);
+        }
 
-                if (lookups.PowerPorts.ContainsKey(sourcePort.Identifier))
+        private static void ValidateEndpointConnectionType(Connection connection, bool isSource, Lookups lookups, ValidationResult result)
+        {
+            var endpointLabel = isSource ? "Source" : "Destination";
+            var portField = isSource ? ConnectionValidationField.SourcePort : ConnectionValidationField.DestinationPort;
+            var portTypeField = isSource ? ConnectionValidationField.SourcePortType : ConnectionValidationField.DestinationPortType;
+            var endpointPort = isSource ? connection.Source.Port : connection.Destination.Port;
+            var endpointPortType = isSource ? connection.Source.PortType : connection.Destination.PortType;
+            var connectionType = connection.ConnectionType.Value;
+
+            if (endpointPortType.HasValue() && lookups.PortTypes.TryGetValue(endpointPortType.Identifier, out var loadedPortType))
+            {
+                if (connectionType == SlcAsset_Management.Enums.ConnectionType.Data && !loadedPortType.IsDataPortType())
                 {
-                    connection.ConnectionType = SlcAsset_Management.Enums.ConnectionType.Power;
+                    result.AddFailReason(portTypeField, $"{endpointLabel} Port Type must be a Data Port Type for a Data connection.");
+                }
+                else if (connectionType == SlcAsset_Management.Enums.ConnectionType.Power && !loadedPortType.IsPowerPortType())
+                {
+                    result.AddFailReason(portTypeField, $"{endpointLabel} Port Type must be a Power Port Type for a Power connection.");
                 }
             }
-            else
+
+            if (!endpointPort.HasValue())
             {
-                throw new InvalidOperationException($"ResolveConnectionType|Source port id is empty.");
+                return;
+            }
+
+            var resolved = ResolvePort(endpointPort, lookups);
+            if (!resolved.Found)
+            {
+                return;
+            }
+
+            if (connectionType == SlcAsset_Management.Enums.ConnectionType.Data && !resolved.IsDataPort)
+            {
+                result.AddFailReason(portField, $"{endpointLabel} port must be a Data Port for a Data connection.");
+            }
+            else if (connectionType == SlcAsset_Management.Enums.ConnectionType.Power && !resolved.IsPowerPort)
+            {
+                result.AddFailReason(portField, $"{endpointLabel} port must be a Power Port for a Power connection.");
+            }
+
+            if (endpointPortType.HasValue()
+                && resolved.PortType.HasValue()
+                && !string.Equals(endpointPortType.Identifier, resolved.PortType.Identifier, StringComparison.Ordinal))
+            {
+                result.AddFailReason(portTypeField, $"{endpointLabel} port type does not match the connected port's port type.");
             }
         }
 
@@ -245,7 +276,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
                 return new ResolvedPort
                 {
                     Found = true,
+                    IsDataPort = true,
                     Asset = dataPort.Asset,
+                    PortType = dataPort.DataPortInfo.PortType,
                     OutputType = dataPort.DataPortInfo.OutputType,
                     PortNumber = dataPort.DataPortInfo.PortNumber,
                 };
@@ -256,7 +289,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
                 return new ResolvedPort
                 {
                     Found = true,
+                    IsPowerPort = true,
                     Asset = powerPort.Asset,
+                    PortType = powerPort.PowerPortInfo.PortType,
                     OutputType = powerPort.PowerPortInfo.OutputType,
                     PortNumber = powerPort.PowerPortInfo.PortNumber,
                 };
@@ -304,7 +339,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
                 .Select(reference => reference.Identifier)
                 .Distinct()
                 .ToList();
-            lookups.PortTypeIds = _entityLoader.GetPortTypesByDomIds(portTypeIds).Select(pt => pt.Identifier).ToHashSet();
+            lookups.PortTypes = _entityLoader.GetPortTypesByDomIds(portTypeIds)
+                .GroupBy(pt => pt.Identifier)
+                .ToDictionary(g => g.Key, g => g.First());
 
             var portIds = connections
                 .SelectMany(c => new[] { c.Source.Port, c.Destination.Port })
@@ -400,7 +437,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
         {
             public HashSet<string> CableTypeIds { get; set; } = new HashSet<string>();
 
-            public HashSet<string> PortTypeIds { get; set; } = new HashSet<string>();
+            public Dictionary<string, PortType> PortTypes { get; set; } = new Dictionary<string, PortType>();
 
             public Dictionary<string, DataPort> DataPorts { get; set; } = new Dictionary<string, DataPort>();
 
@@ -419,7 +456,13 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
         {
             public bool Found { get; set; }
 
+            public bool IsDataPort { get; set; }
+
+            public bool IsPowerPort { get; set; }
+
             public SdmObjectReference<Asset> Asset { get; set; }
+
+            public SdmObjectReference<PortType> PortType { get; set; }
 
             public SlcAsset_Management.Enums.Outputtype? OutputType { get; set; }
 

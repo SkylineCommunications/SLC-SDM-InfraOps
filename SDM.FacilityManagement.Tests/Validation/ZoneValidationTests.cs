@@ -43,8 +43,8 @@ namespace SDM.FacilityManagement.Tests.Validation
         [TestMethod]
         public void Zone_CreateOrUpdate_WithDuplicateIdInBatch_ShouldThrow()
         {
-            var first = new Zone { Identifier = Guid.NewGuid().ToString(), Name = "Zone 1", ZoneId = "DUP-1" };
-            var second = new Zone { Identifier = Guid.NewGuid().ToString(), Name = "Zone 2", ZoneId = "DUP-1" };
+            var first = new Zone { Identifier = Guid.NewGuid().ToString(), Name = "Zone 1", ZoneId = "DUP-1", ZoneCapacity = { CoolingCapacity = 5.0 } };
+            var second = new Zone { Identifier = Guid.NewGuid().ToString(), Name = "Zone 2", ZoneId = "DUP-1", ZoneCapacity = { CoolingCapacity = 5.0 } };
 
             var action = () => Helper.Zones.CreateOrUpdate(new[] { first, second });
 

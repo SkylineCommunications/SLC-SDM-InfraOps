@@ -33,8 +33,8 @@
         [TestMethod]
         public void Floor_CreateOrUpdate_WithDuplicateIdInBatch_ShouldThrow()
         {
-            var first = new Floor { Identifier = Guid.NewGuid().ToString(), FloorId = "DUP-1" };
-            var second = new Floor { Identifier = Guid.NewGuid().ToString(), FloorId = "DUP-1" };
+            var first = new Floor { Identifier = Guid.NewGuid().ToString(), FloorId = "DUP-1", Name = "Floor EXIST-1" };
+            var second = new Floor { Identifier = Guid.NewGuid().ToString(), FloorId = "DUP-1", Name = "Floor EXIST-2" };
 
             var action = () => Helper.Floors.CreateOrUpdate(new[] { first, second });
 

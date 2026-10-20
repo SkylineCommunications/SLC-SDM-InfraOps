@@ -72,7 +72,7 @@ namespace SDM.AssetManagement.Tests.Connections
         }
 
         [TestMethod]
-        public void DataConnection_WithOnlySource_ShouldBeAllowed()
+        public void DataConnection_WithOnlySource_ShouldBeBlocked()
         {
             var sourcePort = CreateDataEndpoint("Source", SlcAsset_Management.Enums.Outputtype.IO);
 
@@ -80,6 +80,7 @@ namespace SDM.AssetManagement.Tests.Connections
             {
                 Identifier = Guid.NewGuid().ToString(),
                 ConnectionType = SlcAsset_Management.Enums.ConnectionType.Data,
+                CableType = sourcePort.PortType.CableFKs.CableTypeFks.First(),
                 Source =
                 {
                     Port = new ISdmObjectReference<IPort>(sourcePort.PortId),
@@ -90,7 +91,70 @@ namespace SDM.AssetManagement.Tests.Connections
 
             Action act = () => Helper.AssetManagement.Connections.Create(connection);
 
-            act.Should().NotThrow();
+            act.Should().Throw<ValidationException>()
+                .WithMessage("*Destination port cannot be empty*");
+        }
+
+        [TestMethod]
+        public void DataConnection_WithoutCableType_ShouldBeBlocked()
+        {
+            var sourcePort = CreateDataEndpoint("Source", SlcAsset_Management.Enums.Outputtype.IO);
+            var destinationPort = CreateDataEndpoint("Destination", SlcAsset_Management.Enums.Outputtype.IO);
+
+            var connection = BuildConnection(SlcAsset_Management.Enums.ConnectionType.Data, sourcePort, destinationPort);
+            connection.CableType = default;
+
+            Action act = () => Helper.AssetManagement.Connections.Create(connection);
+
+            act.Should().Throw<ValidationException>()
+                .WithMessage("*Cable type cannot be empty*");
+        }
+
+        [TestMethod]
+        public void DataConnection_WithoutConnectionType_ShouldBeBlocked()
+        {
+            var sourcePort = CreateDataEndpoint("Source", SlcAsset_Management.Enums.Outputtype.IO);
+            var destinationPort = CreateDataEndpoint("Destination", SlcAsset_Management.Enums.Outputtype.IO);
+
+            var connection = BuildConnection(SlcAsset_Management.Enums.ConnectionType.Data, sourcePort, destinationPort);
+            connection.ConnectionType = null;
+
+            Action act = () => Helper.AssetManagement.Connections.Create(connection);
+
+            act.Should().Throw<ValidationException>()
+                .WithMessage("*Connection type cannot be empty*");
+        }
+
+        [TestMethod]
+        public void ValidateConnection_WithMismatchedPortTypeCategory_ShouldReturnPortTypeFailure()
+        {
+            var source = CreateDataEndpoint("Source", SlcAsset_Management.Enums.Outputtype.IO);
+            var powerEndpoint = CreatePowerEndpoint("PowerDest", SlcAsset_Management.Enums.Outputtype.IO, isPowerProvider: true);
+
+            var connection = BuildConnection(SlcAsset_Management.Enums.ConnectionType.Data, source, powerEndpoint);
+
+            var result = ValidateConnection(connection);
+
+            result.IsValid.Should().BeFalse();
+            result.TryGetFailReason(ConnectionValidationField.DestinationPortType, out _).Should().BeTrue();
+            result.TryGetFailReason(ConnectionValidationField.DestinationPort, out _).Should().BeTrue();
+        }
+
+        [TestMethod]
+        public void ValidateConnection_WithEndpointPortTypeNotMatchingConnectedPort_ShouldReturnPortTypeFailure()
+        {
+            var source = CreateDataEndpoint("Source", SlcAsset_Management.Enums.Outputtype.IO);
+            var destination = CreateDataEndpoint("Destination", SlcAsset_Management.Enums.Outputtype.IO);
+            var otherDataPortType = CreatePortType("Other Data Port Type", SlcAsset_Management.Enums.CategoriesEnum.Data);
+
+            var connection = BuildConnection(SlcAsset_Management.Enums.ConnectionType.Data, source, destination);
+            connection.Source.PortType = new SdmObjectReference<PortType>(otherDataPortType.Identifier);
+
+            var result = ValidateConnection(connection);
+
+            result.IsValid.Should().BeFalse();
+            result.TryGetFailReason(ConnectionValidationField.SourcePortType, out var reason).Should().BeTrue();
+            reason.Should().Contain("does not match");
         }
 
         [TestMethod]
@@ -102,8 +166,17 @@ namespace SDM.AssetManagement.Tests.Connections
             {
                 Identifier = Guid.NewGuid().ToString(),
                 ConnectionType = SlcAsset_Management.Enums.ConnectionType.Data,
-                Source = { Port = new ISdmObjectReference<IPort>(sourcePort.PortId) },
-                Destination = { Port = new ISdmObjectReference<IPort>(sourcePort.PortId) },
+                CableType = sourcePort.PortType.CableFKs.CableTypeFks.First(),
+                Source =
+                {
+                    Port = new ISdmObjectReference<IPort>(sourcePort.PortId),
+                    PortType = new SdmObjectReference<PortType>(sourcePort.PortType.Identifier),
+                },
+                Destination =
+                {
+                    Port = new ISdmObjectReference<IPort>(sourcePort.PortId),
+                    PortType = new SdmObjectReference<PortType>(sourcePort.PortType.Identifier),
+                },
             };
 
             Action act = () => Helper.AssetManagement.Connections.Create(connection);
@@ -504,6 +577,7 @@ namespace SDM.AssetManagement.Tests.Connections
             {
                 Identifier = Guid.NewGuid().ToString(),
                 ConnectionType = type,
+                CableType = source.PortType.CableFKs.CableTypeFks.First(),
                 CableLength = cableLength,
                 Source =
                 {
@@ -565,6 +639,7 @@ namespace SDM.AssetManagement.Tests.Connections
             {
                 Identifier = Guid.NewGuid().ToString(),
                 ConnectionType = SlcAsset_Management.Enums.ConnectionType.Data,
+                CableType = source.PortType.CableFKs.CableTypeFks.First(),
                 CableLength = cableLength,
                 Source =
                 {
@@ -587,6 +662,7 @@ namespace SDM.AssetManagement.Tests.Connections
             {
                 Identifier = Guid.NewGuid().ToString(),
                 ConnectionType = SlcAsset_Management.Enums.ConnectionType.Power,
+                CableType = source.PortType.CableFKs.CableTypeFks.First(),
                 CableLength = cableLength,
                 Source =
                 {

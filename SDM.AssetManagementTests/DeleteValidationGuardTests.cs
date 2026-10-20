@@ -165,7 +165,7 @@
         {
             var asset = CreateAsset(CreateAssetClass("Power Port Class", SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Active, deviceTags: new List<SlcAsset_Management.Enums.TagOption> { SlcAsset_Management.Enums.TagOption.PowerProvider }, powerSupply: SlcAsset_Management.Enums.PowerSupplyEnum.AC), "POWER-PORT-ASSET");
             var powerPort = CreatePowerPort(asset, CreatePowerPortType("Power Port Connected Type"));
-            CreateConnection(powerPort.Identifier, powerPort.PowerPortInfo.PortType);
+            CreateConnection(powerPort.Identifier, powerPort.PowerPortInfo.PortType, connectionType: SlcAsset_Management.Enums.ConnectionType.Power);
 
             Action act = () => Helper.AssetManagement.PowerPorts.Delete(powerPort);
 
@@ -457,12 +457,48 @@
             return Helper.AssetManagement.PowerPorts.Create(powerPort);
         }
 
-        private void CreateConnection(string sourcePortId, SdmObjectReference<PortType> sourcePortType, CableType? cableType = null)
+        private void CreateConnection(
+            string sourcePortId,
+            SdmObjectReference<PortType> sourcePortType,
+            CableType? cableType = null,
+            SlcAsset_Management.Enums.ConnectionType connectionType = SlcAsset_Management.Enums.ConnectionType.Data)
         {
+            var resolvedCableType = cableType ?? CreateCableType($"Connection Cable {Guid.NewGuid()}");
+
+            ISdmObjectReference<IPort> destinationPortRef;
+            SdmObjectReference<PortType> destinationPortTypeRef;
+
+            if (connectionType == SlcAsset_Management.Enums.ConnectionType.Power)
+            {
+                var destinationAssetClass = CreateAssetClass(
+                    $"Dest Power Class {Guid.NewGuid()}",
+                    SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Active,
+                    deviceTags: new List<SlcAsset_Management.Enums.TagOption> { SlcAsset_Management.Enums.TagOption.PowerProvider },
+                    powerSupply: SlcAsset_Management.Enums.PowerSupplyEnum.AC);
+                var destinationAsset = CreateAsset(destinationAssetClass, $"DEST-PWR-{Guid.NewGuid()}");
+                var destinationPortType = CreatePowerPortType($"Dest Power Port Type {Guid.NewGuid()}");
+                var destinationPort = CreatePowerPort(destinationAsset, destinationPortType);
+                destinationPortRef = new ISdmObjectReference<IPort>(destinationPort.Identifier);
+                destinationPortTypeRef = destinationPort.PowerPortInfo.PortType;
+            }
+            else
+            {
+                var destinationAssetClass = CreateAssetClass(
+                    $"Dest Data Class {Guid.NewGuid()}",
+                    SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Active,
+                    deviceTags: new List<SlcAsset_Management.Enums.TagOption> { SlcAsset_Management.Enums.TagOption.AcceptsDataConnection });
+                var destinationAsset = CreateAsset(destinationAssetClass, $"DEST-DATA-{Guid.NewGuid()}");
+                var destinationPortType = CreateDataPortType($"Dest Data Port Type {Guid.NewGuid()}", resolvedCableType);
+                var destinationPort = CreateDataPort(destinationAsset, destinationPortType);
+                destinationPortRef = new ISdmObjectReference<IPort>(destinationPort.Identifier);
+                destinationPortTypeRef = destinationPort.DataPortInfo.PortType;
+            }
+
             var connection = new Connection
             {
                 Identifier = Guid.NewGuid().ToString(),
-                CableType = cableType == null ? null : new SdmObjectReference<CableType>(cableType.Identifier),
+                ConnectionType = connectionType,
+                CableType = new SdmObjectReference<CableType>(resolvedCableType.Identifier),
                 Source =
                 {
                     Port = new ISdmObjectReference<IPort>(Convert.ToString(Guid.Parse(sourcePortId))),
@@ -470,8 +506,8 @@
                 },
                 Destination =
                 {
-                    Port = new ISdmObjectReference<IPort>(Convert.ToString(Guid.Empty)),
-                    PortType = null,
+                    Port = destinationPortRef,
+                    PortType = destinationPortTypeRef,
                 },
             };
 

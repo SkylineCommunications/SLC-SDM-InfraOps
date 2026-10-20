@@ -294,6 +294,7 @@ namespace SDM.AssetManagement.Tests.AssetClasses
                 Manufacturer = PeopleApiMock.NewManufacturer(),
                 Name = "Unknown Manufacturer",
                 DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier),
+                HeightU = 1,
             };
 
             var result = validator.Validate(assetClass, RepositoryAction.Create);
