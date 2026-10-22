@@ -26,6 +26,11 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 throw new ArgumentNullException(nameof(assetClass));
             }
 
+            if (assetClass.State == newState)
+            {
+                return assetClass;
+            }
+
             if (!StateMachine.IsTransitionAllowed(assetClass.State, newState))
             {
                 throw new InvalidOperationException($"State transition from {assetClass.State} to {newState} is not allowed.");

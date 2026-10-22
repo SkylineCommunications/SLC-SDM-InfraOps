@@ -90,6 +90,11 @@
         {
             if (job == null) throw new ArgumentNullException(nameof(job));
 
+            if (job.State == newState)
+            {
+                return job;
+            }
+
             if (!StateMachine.IsTransitionAllowed(job.State, newState))
             {
                 throw new InvalidOperationException($"State transition from {job.State} to {newState} is not allowed.");
@@ -101,6 +106,13 @@
         public PlanAndBuildJob UpdateAndTransitionTo(PlanAndBuildJob job, SlcPlan_And_Build.Behaviors.Job_Behavior.StatusesEnum newState)
         {
             if (job == null) throw new ArgumentNullException(nameof(job));
+
+            if (job.State == newState)
+            {
+                Validator?.ValidateAndThrow(job, Utils.InfraOps.SharedCommonLibrary.Validations.RepositoryAction.Update);
+
+                return Update(job);
+            }
 
             if (!StateMachine.IsTransitionAllowed(job.State, newState))
             {
@@ -124,6 +136,13 @@
         public PlanAndBuildJob TransitionAndUpdate(PlanAndBuildJob job, SlcPlan_And_Build.Behaviors.Job_Behavior.StatusesEnum newState)
         {
             if (job == null) throw new ArgumentNullException(nameof(job));
+
+            if (job.State == newState)
+            {
+                Validator?.ValidateAndThrow(job, Utils.InfraOps.SharedCommonLibrary.Validations.RepositoryAction.Update);
+
+                return Update(job);
+            }
 
             if (!StateMachine.IsTransitionAllowed(job.State, newState))
             {

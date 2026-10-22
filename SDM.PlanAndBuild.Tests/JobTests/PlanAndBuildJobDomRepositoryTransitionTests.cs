@@ -126,13 +126,47 @@ namespace SDM.PlanAndBuild.Tests.JobTests
 		[DataRow(Statuses.Review)]
 		[DataRow(Statuses.Canceled)]
 		[DataRow(Statuses.Resolved)]
-		public void TransitionTo_SameFromAndToStatus_ShouldThrowInvalidOperationException(Statuses status)
+		public void TransitionTo_SameFromAndToStatus_ShouldBeNoOp(Statuses status)
 		{
 			var job = CreateJobAt(status);
 
-			Action act = () => _helper.Jobs.TransitionTo(job, status);
+			var result = _helper.Jobs.TransitionTo(job, status);
 
-			act.Should().Throw<InvalidOperationException>();
+			result.State.Should().Be(status);
+		}
+
+		[DataTestMethod]
+		[DataRow(Statuses.New)]
+		[DataRow(Statuses.Active)]
+		[DataRow(Statuses.Resolved)]
+		public void UpdateAndTransitionTo_SameFromAndToStatus_ShouldOnlyUpdate(Statuses status)
+		{
+			var job = CreateJobAt(status);
+			job.JobDescription = "Updated without transition";
+
+			var result = _helper.Jobs.UpdateAndTransitionTo(job, status);
+
+			result.State.Should().Be(status);
+			var reread = _helper.Jobs.Read(PlanAndBuildJobExposers.Identifier.Equal(job.Identifier)).Single();
+			reread.State.Should().Be(status);
+			reread.JobDescription.Should().Be("Updated without transition");
+		}
+
+		[DataTestMethod]
+		[DataRow(Statuses.New)]
+		[DataRow(Statuses.Active)]
+		[DataRow(Statuses.Resolved)]
+		public void TransitionAndUpdate_SameFromAndToStatus_ShouldOnlyUpdate(Statuses status)
+		{
+			var job = CreateJobAt(status);
+			job.JobDescription = "Updated without transition";
+
+			var result = _helper.Jobs.TransitionAndUpdate(job, status);
+
+			result.State.Should().Be(status);
+			var reread = _helper.Jobs.Read(PlanAndBuildJobExposers.Identifier.Equal(job.Identifier)).Single();
+			reread.State.Should().Be(status);
+			reread.JobDescription.Should().Be("Updated without transition");
 		}
 
 		#endregion

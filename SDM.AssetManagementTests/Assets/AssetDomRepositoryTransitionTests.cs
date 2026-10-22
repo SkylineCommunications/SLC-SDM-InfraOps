@@ -145,6 +145,29 @@
         }
 
         [TestMethod]
+        public void SameState_TransitionTo_IsNoOp_And_UpdateVariants_OnlyUpdate()
+        {
+            var state = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available;
+            var asset = CreateAsset(state);
+
+            _helper.AssetManagement.Assets.TransitionTo(asset, state).State.Should().Be(state);
+
+            var name1 = "Renamed " + Guid.NewGuid();
+            asset.Name = name1;
+            _helper.AssetManagement.Assets.UpdateAndTransitionTo(asset, state);
+            var reread = _helper.AssetManagement.Assets.Read(AssetExposers.Identifier.Equal(asset.Identifier)).Single();
+            reread.State.Should().Be(state);
+            reread.Name.Should().Be(name1);
+
+            var name2 = "Renamed " + Guid.NewGuid();
+            reread.Name = name2;
+            _helper.AssetManagement.Assets.TransitionAndUpdate(reread, state);
+            reread = _helper.AssetManagement.Assets.Read(AssetExposers.Identifier.Equal(asset.Identifier)).Single();
+            reread.State.Should().Be(state);
+            reread.Name.Should().Be(name2);
+        }
+
+        [TestMethod]
         public void TransitionAndUpdate_PersistsStateAndEdit()
         {
             var asset = CreateAsset(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available);
@@ -180,7 +203,6 @@
         [DataTestMethod]
         [DataRow(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Disposed, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available)]
         [DataRow(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Disposed, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable)]
-        [DataRow(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable)]
         public void TransitionTo_InvalidPath_ShouldThrow(
             SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum from,
             SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum to)

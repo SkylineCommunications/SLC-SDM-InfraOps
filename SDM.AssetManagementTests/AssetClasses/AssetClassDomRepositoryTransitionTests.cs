@@ -66,7 +66,6 @@
         [DataTestMethod]
         [DataRow(SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Active, SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Draft)]
         [DataRow(SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Deprecated, SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Active)]
-        [DataRow(SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Draft, SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Draft)]
         public void TransitionTo_InvalidPath_ShouldThrow(
             SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum from,
             SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum to)

@@ -24,6 +24,11 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
         {
             if (floor == null) throw new ArgumentNullException(nameof(floor));
 
+            if (floor.State == newState)
+            {
+                return floor;
+            }
+
             if (!FloorStateMachine.IsTransitionAllowed(floor.State, newState))
             {
                 throw new InvalidOperationException($"State transition from {floor.State} to {newState} is not allowed.");
@@ -35,6 +40,11 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
         public Floor UpdateAndTransitionTo(Floor floor, SlcFacility_Management.Behaviors.Floor_Behaviour.StatusesEnum newState)
         {
             if (floor == null) throw new ArgumentNullException(nameof(floor));
+
+            if (floor.State == newState)
+            {
+                return Update(floor);
+            }
 
             if (!FloorStateMachine.IsTransitionAllowed(floor.State, newState))
             {
@@ -49,6 +59,11 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
         public Floor TransitionAndUpdate(Floor floor, SlcFacility_Management.Behaviors.Floor_Behaviour.StatusesEnum newState)
         {
             if (floor == null) throw new ArgumentNullException(nameof(floor));
+
+            if (floor.State == newState)
+            {
+                return Update(floor);
+            }
 
             if (!FloorStateMachine.IsTransitionAllowed(floor.State, newState))
             {

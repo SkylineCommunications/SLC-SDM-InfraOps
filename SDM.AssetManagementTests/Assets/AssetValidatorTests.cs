@@ -967,7 +967,7 @@
         {
             var asset = new Asset
             {
-                State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available,
+                State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Disposed,
             };
 
             Action act = () => Helper.AssetManagement.Assets.TransitionTo(
@@ -975,7 +975,22 @@
                 SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available);
 
             act.Should().Throw<InvalidOperationException>()
-                .WithMessage("*State transition from Available to Available is not allowed*");
+                .WithMessage("*State transition from Disposed to Available is not allowed*");
+        }
+
+        [TestMethod]
+        public void TransitionTo_WithSameState_ShouldBeNoOp()
+        {
+            var asset = new Asset
+            {
+                State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available,
+            };
+
+            var result = Helper.AssetManagement.Assets.TransitionTo(
+                asset,
+                SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available);
+
+            result.Should().BeSameAs(asset);
         }
 
         [TestMethod]

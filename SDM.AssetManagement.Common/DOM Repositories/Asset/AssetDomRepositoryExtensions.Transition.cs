@@ -23,6 +23,11 @@
         {
             if (asset == null) throw new ArgumentNullException(nameof(asset));
 
+            if(asset.State == newState)
+            {
+                return asset;
+            }
+
             if (!StateMachine.IsTransitionAllowed(asset.State, newState))
             {
                 throw new InvalidOperationException($"State transition from {asset.State} to {newState} is not allowed.");
@@ -92,6 +97,11 @@
         {
             if (asset == null) throw new ArgumentNullException(nameof(asset));
 
+            if (asset.State == newState)
+            {
+                return repository.Update(asset);
+            }
+
             if (!asset.IsTransitionAllowed(newState))
             {
                 throw new InvalidOperationException($"State transition from {asset.State} to {newState} is not allowed.");
@@ -117,6 +127,11 @@
         public static Asset TransitionAndUpdate(this IAssetRepository repository, Asset asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum newState)
         {
             if (asset == null) throw new ArgumentNullException(nameof(asset));
+
+            if (asset.State == newState)
+            {
+                return repository.Update(asset);
+            }
 
             if (!asset.IsTransitionAllowed(newState))
             {
