@@ -3,8 +3,6 @@
     using System;
     using System.Linq;
 
-    using SharedCommonLibrary.AssetManagement.State_Management;
-
     using SharedMappers.DomIds;
 
     using Skyline.DataMiner.SDM.AssetManagement.Common.Extensions;
@@ -27,13 +25,6 @@
             {
                 return asset;
             }
-
-            if (!StateMachine.IsTransitionAllowed(asset.State, newState))
-            {
-                throw new InvalidOperationException($"State transition from {asset.State} to {newState} is not allowed.");
-            }
-
-            asset.ValidateTransitionPath(newState);
 
             var initialState = asset.State;
             var changes = SdmChangeTracking.RevertFieldChanges(asset);
@@ -86,8 +77,8 @@
         }
 
         /// <summary>
-        /// Updates fields and transitions state in a single atomic operation.
-        /// Order: Fields are updated first, then state transition occurs.
+        /// Updates fields first, then transitions state. If the transition fails, the field update remains persisted.
+        /// Prevalidates the transition against the proposed field values before updating.
         /// Use when you need to prepare the asset for the new state.
         /// </summary>
         /// <param name="repository">The asset repository.</param>
@@ -97,17 +88,15 @@
         {
             if (asset == null) throw new ArgumentNullException(nameof(asset));
 
-            if (asset.State == newState)
+            if (asset.State != newState)
             {
-                return repository.Update(asset);
-            }
+                if (!asset.IsTransitionAllowed(newState))
+                {
+                    throw new InvalidOperationException($"State transition from {asset.State} to {newState} is not allowed.");
+                }
 
-            if (!asset.IsTransitionAllowed(newState))
-            {
-                throw new InvalidOperationException($"State transition from {asset.State} to {newState} is not allowed.");
+                asset.ValidateTransitionPath(newState);
             }
-
-            asset.ValidateTransitionPath(newState);
 
             var updated = repository.Update(asset);
 
@@ -117,6 +106,7 @@
         /// <summary>
         /// Transitions state first, then updates fields.
         /// Order: State transition occurs, then fields are updated.
+        /// If the field update fails, the state transition remains persisted.
         /// Use when the new state enables certain field changes.
         /// 
         /// Example: Transitioning to Disposed before clearing Location.
@@ -127,18 +117,6 @@
         public static Asset TransitionAndUpdate(this IAssetRepository repository, Asset asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum newState)
         {
             if (asset == null) throw new ArgumentNullException(nameof(asset));
-
-            if (asset.State == newState)
-            {
-                return repository.Update(asset);
-            }
-
-            if (!asset.IsTransitionAllowed(newState))
-            {
-                throw new InvalidOperationException($"State transition from {asset.State} to {newState} is not allowed.");
-            }
-
-            asset.ValidateTransitionPath(newState);
 
             asset = AssetDomRepositoryExtensions.TransitionTo(repository, asset, newState);
 

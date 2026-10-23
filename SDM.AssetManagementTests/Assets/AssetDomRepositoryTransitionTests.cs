@@ -105,6 +105,37 @@
         }
 
         [TestMethod]
+        public void TransitionTo_ConsecutiveTransitions_PreservePendingEditAndReportLatestStateChange()
+        {
+            var asset = CreateAsset(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable);
+            var originalName = asset.Name;
+            var newName = "Renamed " + Guid.NewGuid();
+            asset.Name = newName;
+
+            asset = _helper.AssetManagement.Assets.TransitionTo(
+                asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available);
+            asset = _helper.AssetManagement.Assets.TransitionTo(
+                asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable);
+
+            asset.State.Should().Be(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable);
+            asset.Name.Should().Be(newName);
+            var changes = asset.GetChanges().ToList();
+            changes.Select(c => c.FieldName).Should().BeEquivalentTo(new[] { "State", "Name" });
+            var stateChange = changes.Single(c => c.FieldName == "State");
+            stateChange.OldValue.Should().Be(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available);
+            stateChange.NewValue.Should().Be(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable);
+            var nameChange = changes.Single(c => c.FieldName == "Name");
+            nameChange.OldValue.Should().Be(originalName);
+            nameChange.NewValue.Should().Be(newName);
+
+            var reread = _helper.AssetManagement.Assets.Read(
+                AssetExposers.Identifier.Equal(asset.Identifier)).Single();
+            reread.State.Should().Be(asset.State);
+            reread.Name.Should().Be(originalName);
+            reread.GetChanges().Should().BeEmpty();
+        }
+
+        [TestMethod]
         public void TransitionTo_MultiStepPath_ReportsInitialToFinalState()
         {
             var asset = CreateAsset(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable);
@@ -165,6 +196,69 @@
             reread = _helper.AssetManagement.Assets.Read(AssetExposers.Identifier.Equal(asset.Identifier)).Single();
             reread.State.Should().Be(state);
             reread.Name.Should().Be(name2);
+        }
+
+        [TestMethod]
+        public void UpdateAndTransitionTo_InvalidTransition_DoesNotPersistEdit()
+        {
+            var asset = CreateAsset(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Disposed);
+            var originalName = asset.Name;
+            var newName = "Renamed " + Guid.NewGuid();
+            asset.Name = newName;
+
+            Action act = () => _helper.AssetManagement.Assets.UpdateAndTransitionTo(
+                asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available);
+
+            act.Should().Throw<InvalidOperationException>()
+                .WithMessage("State transition from Disposed to Available is not allowed.");
+            var reread = _helper.AssetManagement.Assets.Read(
+                AssetExposers.Identifier.Equal(asset.Identifier)).Single();
+            reread.Name.Should().Be(originalName);
+            reread.State.Should().Be(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Disposed);
+            asset.Name.Should().Be(newName);
+            asset.GetChanges().Should().ContainSingle()
+                .Which.FieldName.Should().Be(nameof(Asset.Name));
+        }
+
+        [TestMethod]
+        public void UpdateAndTransitionTo_MissingInstallationRequirements_DoesNotPersistEdit()
+        {
+            var asset = CreateAsset(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available);
+            var originalName = asset.Name;
+            var newName = "Renamed " + Guid.NewGuid();
+            asset.Name = newName;
+
+            Action act = () => _helper.AssetManagement.Assets.UpdateAndTransitionTo(
+                asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Installed);
+
+            act.Should().Throw<Skyline.DataMiner.SDM.AssetManagement.Common.Exceptions.AssetTransitionValidationException>();
+            var reread = _helper.AssetManagement.Assets.Read(
+                AssetExposers.Identifier.Equal(asset.Identifier)).Single();
+            reread.Name.Should().Be(originalName);
+            reread.State.Should().Be(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available);
+            asset.Name.Should().Be(newName);
+        }
+
+        [TestMethod]
+        public void TransitionAndUpdate_TransitionFails_RestoresPendingEditWithoutPersistingIt()
+        {
+            var asset = CreateAsset(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Disposed);
+            var originalName = asset.Name;
+            var newName = "Renamed " + Guid.NewGuid();
+            asset.Name = newName;
+
+            Action act = () => _helper.AssetManagement.Assets.TransitionAndUpdate(
+                asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available);
+
+            act.Should().Throw<InvalidOperationException>()
+                .WithMessage("State transition from Disposed to Available is not allowed.");
+            asset.Name.Should().Be(newName);
+            asset.GetChanges().Should().ContainSingle()
+                .Which.FieldName.Should().Be(nameof(Asset.Name));
+            var reread = _helper.AssetManagement.Assets.Read(
+                AssetExposers.Identifier.Equal(asset.Identifier)).Single();
+            reread.Name.Should().Be(originalName);
+            reread.State.Should().Be(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Disposed);
         }
 
         [TestMethod]
