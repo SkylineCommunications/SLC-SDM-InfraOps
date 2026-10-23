@@ -89,9 +89,10 @@ namespace Skyline.DataMiner.Utils.InfraOps.Common.Fields
 
         /// <summary>
         /// Writes the changes to <paramref name="target"/> through its public setters, so they are tracked as normal edits.
+        /// Root State changes are skipped because state transitions must use the repository transition operation.
         /// </summary>
         /// <returns>The changes that were applied and the ones that were skipped, with the reason.</returns>
-        public static ApplyChangesResult ApplyFieldChanges<T>(T target, IEnumerable<FieldChange> changes)
+        internal static ApplyChangesResult ApplyFieldChanges<T>(T target, IEnumerable<FieldChange> changes)
             where T : class
         {
             var result = new ApplyChangesResult();
@@ -117,14 +118,15 @@ namespace Skyline.DataMiner.Utils.InfraOps.Common.Fields
         }
 
         /// <summary>
-        /// Reverts every pending change on <paramref name="obj"/> and its sections to the original value.
+        /// Reverts pending field changes on <paramref name="obj"/> and its sections to the original value.
+        /// Root State changes retain their current values and tracking for history reporting.
         /// Unlike <see cref="IChangeTracking.ResetChangeTracking"/>, this restores the values instead of accepting them.
         /// </summary>
         /// <returns>The changes that were reverted.</returns>
-        public static IReadOnlyList<FieldChange> RevertFieldChanges<T>(T obj)
+        internal static IReadOnlyList<FieldChange> RevertFieldChanges<T>(T obj)
             where T : class
         {
-            var reverted = GetFieldChanges(obj);
+            var reverted = GetFieldChanges(obj).Where(change => !IsStateChange(change)).ToList();
             foreach (var change in reverted)
             {
                 var owner = ResolveSection(obj, change.Section);
@@ -136,6 +138,11 @@ namespace Skyline.DataMiner.Utils.InfraOps.Common.Fields
             }
 
             return reverted;
+        }
+
+        private static bool IsStateChange(FieldChange change)
+        {
+            return string.IsNullOrEmpty(change.Section) && change.FieldName == "State";
         }
 
         private static void Collect(object owner, string path, List<FieldChange> result, HashSet<object> visited)
@@ -165,6 +172,11 @@ namespace Skyline.DataMiner.Utils.InfraOps.Common.Fields
 
         private static string TryApply(object target, FieldChange change)
         {
+            if (IsStateChange(change))
+            {
+                return "State changes require a repository transition operation.";
+            }
+
             if (target == null)
             {
                 return "Target is null.";

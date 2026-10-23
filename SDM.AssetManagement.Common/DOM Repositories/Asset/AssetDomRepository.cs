@@ -13,7 +13,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
     {
         /// <summary>
         /// Infrastructure hook used by <c>AssetDomRepositoryExtensions.TransitionTo</c>. Do not call directly:
-        /// it skips validation. Use the <c>TransitionTo</c> extension method instead.
+        /// it validates and executes the transition but does not preserve pending edits or prepare state history tracking.
+        /// Use the <c>TransitionTo</c> extension method instead.
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
         Asset TransitionToInternal(Asset asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum newState);

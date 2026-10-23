@@ -190,6 +190,51 @@ namespace SDM.AssetManagement.Tests.ChangeTracking
         }
 
         [TestMethod]
+        public void RevertFieldChanges_PreservesStateAndItsHistoryTracking()
+        {
+            var asset = CreateLoadedAsset();
+            asset.State = SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable;
+            asset.ResetChangeTracking();
+            asset.State = SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available;
+            asset.Name = "Changed";
+            asset.Location.RackPosition = 7;
+
+            var reverted = SdmChangeTracking.RevertFieldChanges(asset);
+
+            reverted.Select(c => c.FieldName).Should().BeEquivalentTo(new[] { "Name", "RackPosition" });
+            asset.State.Should().Be(SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available);
+            asset.Name.Should().Be("Original");
+            asset.Location.RackPosition.Should().BeNull();
+            SdmChangeTracking.GetFieldChanges(asset).Should().ContainSingle()
+                .Which.FieldName.Should().Be(nameof(Asset.State));
+
+            var target = CreateLoadedAsset();
+            SdmChangeTracking.ApplyFieldChanges(target, reverted).Skipped.Should().BeEmpty();
+            target.Name.Should().Be("Changed");
+            target.Location.RackPosition.Should().Be(7);
+        }
+
+        [TestMethod]
+        public void ApplyFieldChanges_SkipsStateButAppliesOtherChanges()
+        {
+            var asset = CreateLoadedAsset();
+            asset.State = SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable;
+            asset.ResetChangeTracking();
+
+            var result = SdmChangeTracking.ApplyFieldChanges(asset, new[]
+            {
+                new FieldChange(null, nameof(Asset.State), asset.State,
+                    SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available),
+                new FieldChange(null, nameof(Asset.Name), "Original", "Changed"),
+            });
+
+            asset.State.Should().Be(SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable);
+            asset.Name.Should().Be("Changed");
+            result.Applied.Should().ContainSingle().Which.FieldName.Should().Be(nameof(Asset.Name));
+            result.Skipped.Should().ContainSingle().Which.Change.FieldName.Should().Be(nameof(Asset.State));
+        }
+
+        [TestMethod]
         public void TeamOnOwnershipAndCustody_AreTrackedAppliedAndRevertedIndependently()
         {
             var ownerTeam = new PnoObjectReference<Team>(Guid.NewGuid());
@@ -285,4 +330,3 @@ namespace SDM.AssetManagement.Tests.ChangeTracking
         }
     }
 }
-
