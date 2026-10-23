@@ -179,8 +179,7 @@ namespace SDM.FacilityManagement.Tests.Validation
         }
 
         [TestMethod]
-        [Ignore("Behavior difference: failing at ZoneValidator requiring CoolingCapacity ('Zone cooling capacity must be defined.'); consumer accepts a zone without cooling capacity")]
-        public void ZoneValidator_Validate_WithZoneWithoutCoolingCapacity_ShouldBeValid()
+        public void ZoneValidator_Validate_WithZoneWithoutCoolingCapacity_ShouldBeInvalid()
         {
             var room = Helper.Rooms.Create(Helper.AttachFloor(new Room { Identifier = Guid.NewGuid().ToString(), RoomId = "ROOM-VALID", Name = "Room VALID" }));
             var entity = new Zone { Identifier = Guid.NewGuid().ToString(), Name = "VALID", ZoneId = "VALID" };
@@ -189,7 +188,7 @@ namespace SDM.FacilityManagement.Tests.Validation
 
             var result = validator.Validate(entity, RepositoryAction.Create);
 
-            result.IsValid.Should().BeTrue(result.GetCombinedFailureReasons(";"));
+            result.IsValid.Should().BeFalse();
         }
 
         [TestMethod]

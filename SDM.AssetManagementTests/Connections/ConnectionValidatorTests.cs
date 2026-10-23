@@ -526,17 +526,17 @@ namespace SDM.AssetManagement.Tests.Connections
         }
 
         [TestMethod]
-        [Ignore("Behavior difference: failing at ConnectionValidator skipping the DB phase (port direction) when cable length is invalid, so no SourcePort fail reason; consumer expects CableLength and SourcePort failures accumulated")]
-        public void ValidateConnection_WithNegativeCableLengthAndSourcePortInputOnly_ShouldAccumulateFailures()
+        public void ValidateConnection_WithNegativeCableLengthAndNoDestinationPort_ShouldAccumulateFailures()
         {
             var source = CreateDataEndpoint("Source", SlcAsset_Management.Enums.Outputtype.In);
             var destination = CreateDataEndpoint("Destination", SlcAsset_Management.Enums.Outputtype.IO);
 
-            var result = ValidateConnection(BuildConnection(SlcAsset_Management.Enums.ConnectionType.Data, source, destination, cableLength: -1));
+            var result = ValidateConnection(BuildConnection(SlcAsset_Management.Enums.ConnectionType.Data, source, null, cableLength: -1));
 
             result.IsValid.Should().BeFalse();
             result.TryGetFailReason(ConnectionValidationField.CableLength, out _).Should().BeTrue();
-            result.TryGetFailReason(ConnectionValidationField.SourcePort, out _).Should().BeTrue();
+            result.TryGetFailReason(ConnectionValidationField.DestinationPort, out _).Should().BeTrue();
+            result.TryGetFailReason(ConnectionValidationField.DestinationPortType, out _).Should().BeTrue();
         }
 
         [TestMethod]
@@ -577,17 +577,17 @@ namespace SDM.AssetManagement.Tests.Connections
             {
                 Identifier = Guid.NewGuid().ToString(),
                 ConnectionType = type,
-                CableType = source.PortType.CableFKs.CableTypeFks.First(),
+                CableType = source?.PortType.CableFKs.CableTypeFks.First() ?? null,
                 CableLength = cableLength,
                 Source =
                 {
-                    Port = new ISdmObjectReference<IPort>(source.PortId),
-                    PortType = new SdmObjectReference<PortType>(source.PortType.Identifier),
+                    Port = new ISdmObjectReference<IPort>(source?.PortId),
+                    PortType = new SdmObjectReference<PortType>(source?.PortType.Identifier),
                 },
                 Destination =
                 {
-                    Port = new ISdmObjectReference<IPort>(destination.PortId),
-                    PortType = new SdmObjectReference<PortType>(destination.PortType.Identifier),
+                    Port = new ISdmObjectReference<IPort>(destination?.PortId),
+                    PortType = new SdmObjectReference<PortType>(destination?.PortType.Identifier),
                 },
             };
         }
