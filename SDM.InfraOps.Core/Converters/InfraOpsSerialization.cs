@@ -1,4 +1,4 @@
-﻿namespace SharedCommonLibrary.Converters
+﻿namespace Skyline.DataMiner.SDM.InfraOps.Core.Converters
 {
     using Newtonsoft.Json;
 
