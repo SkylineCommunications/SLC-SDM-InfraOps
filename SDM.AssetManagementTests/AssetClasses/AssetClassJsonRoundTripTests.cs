@@ -53,14 +53,32 @@ namespace SDM.AssetManagement.Tests.AssetClasses
                 PortType = new SdmObjectReference<PortType>(Guid.NewGuid().ToString()),
                 Label = "D1",
             });
+            assetClass.DataPorts.Add(new DataPortInfo
+            {
+                Name = "Data2",
+                PortNumber = 11,
+                OutputType = SlcAsset_Management.Enums.Outputtype.In,
+                PortExposure = SlcAsset_Management.Enums.PortExposureEnum.Front,
+                PortType = new SdmObjectReference<PortType>(Guid.NewGuid().ToString()),
+                Label = "D2",
+            });
             assetClass.PowerPorts.Add(new PowerPortInfo
             {
                 Name = "Power1",
                 PortNumber = 2,
                 OutputType = SlcAsset_Management.Enums.Outputtype.In,
-                PortExposure = SlcAsset_Management.Enums.PortExposureEnum.Back,
+                PortExposure = SlcAsset_Management.Enums.PortExposureEnum.Front,
                 PortType = new SdmObjectReference<PortType>(Guid.NewGuid().ToString()),
                 Label = "P1",
+            });
+            assetClass.PowerPorts.Add(new PowerPortInfo
+            {
+                Name = "Power2",
+                PortNumber = 22,
+                OutputType = SlcAsset_Management.Enums.Outputtype.IO,
+                PortExposure = SlcAsset_Management.Enums.PortExposureEnum.Front,
+                PortType = new SdmObjectReference<PortType>(Guid.NewGuid().ToString()),
+                Label = "P2",
             });
             assetClass.Holders.Add(new AssetHolder
             {
@@ -68,12 +86,24 @@ namespace SDM.AssetManagement.Tests.AssetClasses
                 Label = "Slot",
                 HierarchyRole = SlcAsset_Management.Enums.HierarchyRoleEnum.Card,
             });
+            assetClass.Holders.Add(new AssetHolder
+            {
+                SlotNumber = 4,
+                Label = "Slot B",
+                HierarchyRole = SlcAsset_Management.Enums.HierarchyRoleEnum.Fan,
+            });
             assetClass.ProtocolLink.Protocol = "Protocol";
             assetClass.Attachments.Add(new Attachment
             {
                 FilePath = "file.pdf",
                 AttachedAt = new DateTime(2021, 2, 3, 0, 0, 0, DateTimeKind.Utc),
                 AttachedBy = "user",
+            });
+            assetClass.Attachments.Add(new Attachment
+            {
+                FilePath = "other.png",
+                AttachedAt = new DateTime(2022, 5, 6, 0, 0, 0, DateTimeKind.Utc),
+                AttachedBy = "user2",
             });
 
             string json = InfraOpsJsonConvert.SerializeObject(assetClass);
@@ -84,9 +114,43 @@ namespace SDM.AssetManagement.Tests.AssetClasses
             restored.Manufacturer.Should().Be(assetClass.Manufacturer);
             restored.PowerSupply.Should().Be(SlcAsset_Management.Enums.PowerSupplyEnum.DC);
             restored.Lifecycle.NominalLifetime.Should().Be(TimeSpan.FromDays(365));
-            restored.DataPorts.Should().ContainSingle().Which.PortType.Should().Be(assetClass.DataPorts[0].PortType);
-            restored.PowerPorts.Should().ContainSingle().Which.PortType.Should().Be(assetClass.PowerPorts[0].PortType);
+            restored.DataPorts.Should().HaveCount(2);
+            restored.DataPorts[0].PortType.Should().Be(assetClass.DataPorts[0].PortType);
+            restored.DataPorts[1].PortType.Should().Be(assetClass.DataPorts[1].PortType);
+            restored.PowerPorts.Should().HaveCount(2);
+            restored.PowerPorts[0].PortType.Should().Be(assetClass.PowerPorts[0].PortType);
+            restored.PowerPorts[1].PortType.Should().Be(assetClass.PowerPorts[1].PortType);
+            restored.Holders.Should().HaveCount(2);
+            restored.Attachments.Should().HaveCount(2);
             restored.Should().Be(assetClass);
+            InfraOpsJsonConvert.SerializeObject(restored).Should().Be(json);
+        }
+
+        [TestMethod]
+        public void AssetClass_AuditFields_ExportedButNotImported()
+        {
+            var createdAt = new DateTime(2020, 1, 2, 3, 4, 5, DateTimeKind.Utc);
+            var modifiedAt = new DateTime(2021, 6, 7, 8, 9, 10, DateTimeKind.Utc);
+            var assetClass = new AssetClass
+            {
+                CreatedAt = createdAt,
+                CreatedBy = "creator",
+                LastModified = modifiedAt,
+                LastModifiedBy = "modifier",
+                State = SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Active,
+            };
+
+            string json = InfraOpsJsonConvert.SerializeObject(assetClass);
+            var restored = InfraOpsJsonConvert.DeserializeObject<AssetClass>(json);
+
+            json.Should().Contain("\"CreatedBy\":\"creator\"");
+            json.Should().Contain("\"LastModifiedBy\":\"modifier\"");
+            json.Should().Contain("\"State\":\"Active\"");
+            restored.CreatedAt.Should().Be(default(DateTime));
+            restored.CreatedBy.Should().BeNull();
+            restored.LastModified.Should().Be(default(DateTime));
+            restored.LastModifiedBy.Should().BeNull();
+            restored.State.Should().Be(SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Draft);
         }
 
         [TestMethod]

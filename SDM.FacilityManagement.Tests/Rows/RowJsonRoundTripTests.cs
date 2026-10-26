@@ -6,6 +6,8 @@ namespace SDM.FacilityManagement.Tests.Rows
 
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+    using SharedMappers.DomIds;
+
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
     using Skyline.DataMiner.SDM.InfraOps.Core.Converters;
@@ -42,6 +44,34 @@ namespace SDM.FacilityManagement.Tests.Rows
             restored.RoomFk.Room.Should().Be(row.RoomFk.Room);
             restored.Resource.ResourceId.Should().Be(row.Resource.ResourceId);
             restored.Should().Be(row);
+            InfraOpsJsonConvert.SerializeObject(restored).Should().Be(json);
+        }
+
+        [TestMethod]
+        public void Row_AuditFields_ExportedButNotImported()
+        {
+            var row = new Row
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                Name = "Row",
+                CreatedAt = new DateTime(2023, 1, 2, 3, 4, 5, DateTimeKind.Utc),
+                CreatedBy = "creator",
+                LastModified = new DateTime(2024, 6, 7, 8, 9, 10, DateTimeKind.Utc),
+                LastModifiedBy = "modifier",
+                State = SlcFacility_Management.Behaviors.Row_Behaviour.StatusesEnum.Active,
+            };
+
+            string json = InfraOpsJsonConvert.SerializeObject(row);
+            var restored = InfraOpsJsonConvert.DeserializeObject<Row>(json);
+
+            json.Should().Contain("\"CreatedBy\":\"creator\"");
+            json.Should().Contain("\"LastModifiedBy\":\"modifier\"");
+            restored.Name.Should().Be("Row");
+            restored.CreatedAt.Should().Be(default(DateTime));
+            restored.CreatedBy.Should().BeNull();
+            restored.LastModified.Should().Be(default(DateTime));
+            restored.LastModifiedBy.Should().BeNull();
+            restored.State.Should().Be(default(SlcFacility_Management.Behaviors.Row_Behaviour.StatusesEnum));
         }
 
         [TestMethod]

@@ -38,6 +38,29 @@ namespace SDM.AssetManagement.Tests.Histories
             restored.HistoryInfo.ModifiedInstanceID.Should().Be(history.HistoryInfo.ModifiedInstanceID);
             restored.HistoryInfo.TypeOfHistory.Should().Be(SlcAsset_Management.Enums.TypeOfHistoryEnum.Modification);
             restored.Should().Be(history);
+            InfraOpsJsonConvert.SerializeObject(restored).Should().Be(json);
+        }
+
+        [TestMethod]
+        public void History_AuditFields_ExportedButNotImported()
+        {
+            var history = new History
+            {
+                CreatedAt = new DateTime(2020, 1, 2, 3, 4, 5, DateTimeKind.Utc),
+                CreatedBy = "creator",
+                LastModified = new DateTime(2021, 6, 7, 8, 9, 10, DateTimeKind.Utc),
+                LastModifiedBy = "modifier",
+            };
+
+            string json = InfraOpsJsonConvert.SerializeObject(history);
+            var restored = InfraOpsJsonConvert.DeserializeObject<History>(json);
+
+            json.Should().Contain("\"CreatedBy\":\"creator\"");
+            json.Should().Contain("\"LastModifiedBy\":\"modifier\"");
+            restored.CreatedAt.Should().Be(default(DateTime));
+            restored.CreatedBy.Should().BeNull();
+            restored.LastModified.Should().Be(default(DateTime));
+            restored.LastModifiedBy.Should().BeNull();
         }
 
         [TestMethod]

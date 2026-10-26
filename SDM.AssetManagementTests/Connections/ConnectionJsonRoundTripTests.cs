@@ -46,6 +46,29 @@ namespace SDM.AssetManagement.Tests.Connections
             restored.Destination.Port.Should().Be(connection.Destination.Port);
             restored.Destination.PortType.Should().Be(connection.Destination.PortType);
             restored.Should().Be(connection);
+            InfraOpsJsonConvert.SerializeObject(restored).Should().Be(json);
+        }
+
+        [TestMethod]
+        public void Connection_AuditFields_ExportedButNotImported()
+        {
+            var connection = new Connection
+            {
+                CreatedAt = new DateTime(2020, 1, 2, 3, 4, 5, DateTimeKind.Utc),
+                CreatedBy = "creator",
+                LastModified = new DateTime(2021, 6, 7, 8, 9, 10, DateTimeKind.Utc),
+                LastModifiedBy = "modifier",
+            };
+
+            string json = InfraOpsJsonConvert.SerializeObject(connection);
+            var restored = InfraOpsJsonConvert.DeserializeObject<Connection>(json);
+
+            json.Should().Contain("\"CreatedBy\":\"creator\"");
+            json.Should().Contain("\"LastModifiedBy\":\"modifier\"");
+            restored.CreatedAt.Should().Be(default(DateTime));
+            restored.CreatedBy.Should().BeNull();
+            restored.LastModified.Should().Be(default(DateTime));
+            restored.LastModifiedBy.Should().BeNull();
         }
 
         [TestMethod]

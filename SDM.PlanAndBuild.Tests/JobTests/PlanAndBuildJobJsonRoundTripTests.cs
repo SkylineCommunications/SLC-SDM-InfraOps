@@ -42,16 +42,30 @@ namespace SDM.PlanAndBuild.Tests.JobTests
 			job.AssetsUsed.Add(new JobAsset
 			{
 				AssetId = new SdmObjectReference<Asset>(Guid.NewGuid().ToString()),
-				Action = SlcPlan_And_Build.Enums.ActionforassetenumEnum.NewlyInstalled,
+				Action = SlcPlan_And_Build.Enums.ActionforassetenumEnum.Reinstalled,
 				AssetName = "Switch 1",
 				AssetClassName = "Switch",
 				IPAddress = "10.0.0.1",
+			});
+			job.AssetsUsed.Add(new JobAsset
+			{
+				AssetId = new SdmObjectReference<Asset>(Guid.NewGuid().ToString()),
+				Action = SlcPlan_And_Build.Enums.ActionforassetenumEnum.Provisioned,
+				AssetName = "Router 2",
+				AssetClassName = "Router",
+				IPAddress = "10.0.0.2",
 			});
 			job.Attachments.Add(new JobAttachment
 			{
 				FilePath = @"C:\attachments\plan.pdf",
 				AttachedAt = new DateTime(2026, 1, 9, 12, 0, 0, DateTimeKind.Utc),
 				AttachedBy = "operator",
+			});
+			job.Attachments.Add(new JobAttachment
+			{
+				FilePath = @"C:\attachments\layout.png",
+				AttachedAt = new DateTime(2026, 1, 11, 9, 15, 0, DateTimeKind.Utc),
+				AttachedBy = "supervisor",
 			});
 			job.ConnectionsOnJob.Add(new JobConnection
 			{
@@ -61,6 +75,15 @@ namespace SDM.PlanAndBuild.Tests.JobTests
 				Status = "Planned",
 				CableType = new SdmObjectReference<CableType>(Guid.NewGuid().ToString()),
 				CableLength = 12.5,
+			});
+			job.ConnectionsOnJob.Add(new JobConnection
+			{
+				ConnectionId = new SdmObjectReference<Connection>(Guid.NewGuid().ToString()),
+				Source = "Rack3/Port2",
+				Destination = "Rack4/Port9",
+				Status = "Installed",
+				CableType = new SdmObjectReference<CableType>(Guid.NewGuid().ToString()),
+				CableLength = 3.75,
 			});
 
 			string json = InfraOpsJsonConvert.SerializeObject(job);
@@ -79,27 +102,74 @@ namespace SDM.PlanAndBuild.Tests.JobTests
 			restored.Ownership.AssignedTo.Should().Be(job.Ownership.AssignedTo);
 			restored.Ownership.AssignmentGroup.Should().Be(job.Ownership.AssignmentGroup);
 
-			restored.AssetsUsed.Should().ContainSingle();
-			restored.AssetsUsed[0].AssetId.Should().Be(job.AssetsUsed[0].AssetId);
-			restored.AssetsUsed[0].Action.Should().Be(job.AssetsUsed[0].Action);
-			restored.AssetsUsed[0].AssetName.Should().Be("Switch 1");
-			restored.AssetsUsed[0].AssetClassName.Should().Be("Switch");
-			restored.AssetsUsed[0].IPAddress.Should().Be("10.0.0.1");
+			restored.AssetsUsed.Should().HaveCount(2);
+			for (int i = 0; i < 2; i++)
+			{
+				restored.AssetsUsed[i].AssetId.Should().Be(job.AssetsUsed[i].AssetId);
+				restored.AssetsUsed[i].Action.Should().Be(job.AssetsUsed[i].Action);
+				restored.AssetsUsed[i].AssetName.Should().Be(job.AssetsUsed[i].AssetName);
+				restored.AssetsUsed[i].AssetClassName.Should().Be(job.AssetsUsed[i].AssetClassName);
+				restored.AssetsUsed[i].IPAddress.Should().Be(job.AssetsUsed[i].IPAddress);
+			}
 
-			restored.Attachments.Should().ContainSingle();
-			restored.Attachments[0].FilePath.Should().Be(job.Attachments[0].FilePath);
-			restored.Attachments[0].AttachedAt.Should().Be(job.Attachments[0].AttachedAt);
-			restored.Attachments[0].AttachedBy.Should().Be("operator");
+			restored.Attachments.Should().HaveCount(2);
+			for (int i = 0; i < 2; i++)
+			{
+				restored.Attachments[i].FilePath.Should().Be(job.Attachments[i].FilePath);
+				restored.Attachments[i].AttachedAt.Should().Be(job.Attachments[i].AttachedAt);
+				restored.Attachments[i].AttachedBy.Should().Be(job.Attachments[i].AttachedBy);
+			}
 
-			restored.ConnectionsOnJob.Should().ContainSingle();
-			restored.ConnectionsOnJob[0].ConnectionId.Should().Be(job.ConnectionsOnJob[0].ConnectionId);
-			restored.ConnectionsOnJob[0].Source.Should().Be("Rack1/Port1");
-			restored.ConnectionsOnJob[0].Destination.Should().Be("Rack2/Port7");
-			restored.ConnectionsOnJob[0].Status.Should().Be("Planned");
-			restored.ConnectionsOnJob[0].CableType.Should().Be(job.ConnectionsOnJob[0].CableType);
-			restored.ConnectionsOnJob[0].CableLength.Should().Be(12.5);
+			restored.ConnectionsOnJob.Should().HaveCount(2);
+			for (int i = 0; i < 2; i++)
+			{
+				restored.ConnectionsOnJob[i].ConnectionId.Should().Be(job.ConnectionsOnJob[i].ConnectionId);
+				restored.ConnectionsOnJob[i].Source.Should().Be(job.ConnectionsOnJob[i].Source);
+				restored.ConnectionsOnJob[i].Destination.Should().Be(job.ConnectionsOnJob[i].Destination);
+				restored.ConnectionsOnJob[i].Status.Should().Be(job.ConnectionsOnJob[i].Status);
+				restored.ConnectionsOnJob[i].CableType.Should().Be(job.ConnectionsOnJob[i].CableType);
+				restored.ConnectionsOnJob[i].CableLength.Should().Be(job.ConnectionsOnJob[i].CableLength);
+			}
 
 			restored.Should().Be(job);
+			InfraOpsJsonConvert.SerializeObject(restored).Should().Be(json);
+		}
+
+		[TestMethod]
+		public void PlanAndBuildJob_AuditFields_ExportedButNotImported()
+		{
+			var createdAt = new DateTime(2025, 5, 1, 10, 0, 0, DateTimeKind.Utc);
+			var modifiedAt = new DateTime(2025, 6, 2, 11, 0, 0, DateTimeKind.Utc);
+			var job = new PlanAndBuildJob
+			{
+				CreatedAt = createdAt,
+				CreatedBy = "creator",
+				LastModified = modifiedAt,
+				LastModifiedBy = "modifier",
+				JobID = "PB-0042",
+				State = SlcPlan_And_Build.Behaviors.Job_Behavior.StatusesEnum.Assigned,
+			};
+#pragma warning disable CS0618 // Soft deleted field, internal setter
+			job.JobType = SlcPlan_And_Build.Enums.JobtypeEnum.Remove;
+#pragma warning restore CS0618
+
+			string json = InfraOpsJsonConvert.SerializeObject(job);
+			var restored = InfraOpsJsonConvert.DeserializeObject<PlanAndBuildJob>(json);
+
+			json.Should().Contain("\"CreatedBy\":\"creator\"");
+			json.Should().Contain("\"LastModifiedBy\":\"modifier\"");
+			json.Should().Contain("\"JobID\":\"PB-0042\"");
+			json.Should().Contain("\"State\":\"Assigned\"");
+
+			restored.CreatedAt.Should().Be(default(DateTime));
+			restored.CreatedBy.Should().BeNull();
+			restored.LastModified.Should().Be(default(DateTime));
+			restored.LastModifiedBy.Should().BeNull();
+			restored.JobID.Should().BeNull();
+			restored.State.Should().Be(SlcPlan_And_Build.Behaviors.Job_Behavior.StatusesEnum.New);
+#pragma warning disable CS0618
+			restored.JobType.Should().Be(SlcPlan_And_Build.Enums.JobtypeEnum.Add);
+#pragma warning restore CS0618
 		}
 
 		[TestMethod]

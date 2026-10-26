@@ -46,6 +46,29 @@ namespace SDM.AssetManagement.Tests.DataPorts
             restored.DataPortInfo.PortExposure.Should().Be(SlcAsset_Management.Enums.PortExposureEnum.Front);
             restored.AddressInfo.DNS.Should().BeTrue();
             restored.Should().Be(dataPort);
+            InfraOpsJsonConvert.SerializeObject(restored).Should().Be(json);
+        }
+
+        [TestMethod]
+        public void DataPort_AuditFields_ExportedButNotImported()
+        {
+            var dataPort = new DataPort
+            {
+                CreatedAt = new DateTime(2020, 1, 2, 3, 4, 5, DateTimeKind.Utc),
+                CreatedBy = "creator",
+                LastModified = new DateTime(2021, 6, 7, 8, 9, 10, DateTimeKind.Utc),
+                LastModifiedBy = "modifier",
+            };
+
+            string json = InfraOpsJsonConvert.SerializeObject(dataPort);
+            var restored = InfraOpsJsonConvert.DeserializeObject<DataPort>(json);
+
+            json.Should().Contain("\"CreatedBy\":\"creator\"");
+            json.Should().Contain("\"LastModifiedBy\":\"modifier\"");
+            restored.CreatedAt.Should().Be(default(DateTime));
+            restored.CreatedBy.Should().BeNull();
+            restored.LastModified.Should().Be(default(DateTime));
+            restored.LastModifiedBy.Should().BeNull();
         }
 
         [TestMethod]

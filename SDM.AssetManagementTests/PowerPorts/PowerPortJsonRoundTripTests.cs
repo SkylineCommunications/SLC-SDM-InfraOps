@@ -25,7 +25,7 @@ namespace SDM.AssetManagement.Tests.PowerPorts
             };
             powerPort.PowerPortInfo.Name = "PSU 1";
             powerPort.PowerPortInfo.PortNumber = 3;
-            powerPort.PowerPortInfo.OutputType = SlcAsset_Management.Enums.Outputtype.Out;
+            powerPort.PowerPortInfo.OutputType = SlcAsset_Management.Enums.Outputtype.IO;
             powerPort.PowerPortInfo.PortExposure = SlcAsset_Management.Enums.PortExposureEnum.Front;
             powerPort.PowerPortInfo.PortType = new SdmObjectReference<PortType>(Guid.NewGuid().ToString());
             powerPort.PowerPortInfo.Label = "Label";
@@ -36,9 +36,32 @@ namespace SDM.AssetManagement.Tests.PowerPorts
             restored.Identifier.Should().Be(powerPort.Identifier);
             restored.Asset.Should().Be(powerPort.Asset);
             restored.PowerPortInfo.PortType.Should().Be(powerPort.PowerPortInfo.PortType);
-            restored.PowerPortInfo.OutputType.Should().Be(SlcAsset_Management.Enums.Outputtype.Out);
+            restored.PowerPortInfo.OutputType.Should().Be(SlcAsset_Management.Enums.Outputtype.IO);
             restored.PowerPortInfo.PortExposure.Should().Be(SlcAsset_Management.Enums.PortExposureEnum.Front);
             restored.Should().Be(powerPort);
+            InfraOpsJsonConvert.SerializeObject(restored).Should().Be(json);
+        }
+
+        [TestMethod]
+        public void PowerPort_AuditFields_ExportedButNotImported()
+        {
+            var powerPort = new PowerPort
+            {
+                CreatedAt = new DateTime(2020, 1, 2, 3, 4, 5, DateTimeKind.Utc),
+                CreatedBy = "creator",
+                LastModified = new DateTime(2021, 6, 7, 8, 9, 10, DateTimeKind.Utc),
+                LastModifiedBy = "modifier",
+            };
+
+            string json = InfraOpsJsonConvert.SerializeObject(powerPort);
+            var restored = InfraOpsJsonConvert.DeserializeObject<PowerPort>(json);
+
+            json.Should().Contain("\"CreatedBy\":\"creator\"");
+            json.Should().Contain("\"LastModifiedBy\":\"modifier\"");
+            restored.CreatedAt.Should().Be(default(DateTime));
+            restored.CreatedBy.Should().BeNull();
+            restored.LastModified.Should().Be(default(DateTime));
+            restored.LastModifiedBy.Should().BeNull();
         }
 
         [TestMethod]

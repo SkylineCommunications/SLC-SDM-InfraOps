@@ -6,6 +6,8 @@ namespace SDM.FacilityManagement.Tests.Desks
 
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+    using SharedMappers.DomIds;
+
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
     using Skyline.DataMiner.SDM.InfraOps.Core.Converters;
@@ -38,6 +40,34 @@ namespace SDM.FacilityManagement.Tests.Desks
             restored.RoomFk.Room.Should().Be(desk.RoomFk.Room);
             restored.Resource.ResourceId.Should().Be(desk.Resource.ResourceId);
             restored.Should().Be(desk);
+            InfraOpsJsonConvert.SerializeObject(restored).Should().Be(json);
+        }
+
+        [TestMethod]
+        public void Desk_AuditFields_ExportedButNotImported()
+        {
+            var desk = new Desk
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                Name = "Desk",
+                CreatedAt = new DateTime(2023, 1, 2, 3, 4, 5, DateTimeKind.Utc),
+                CreatedBy = "creator",
+                LastModified = new DateTime(2024, 6, 7, 8, 9, 10, DateTimeKind.Utc),
+                LastModifiedBy = "modifier",
+                State = SlcFacility_Management.Behaviors.Desk_Behaviour.StatusesEnum.Active,
+            };
+
+            string json = InfraOpsJsonConvert.SerializeObject(desk);
+            var restored = InfraOpsJsonConvert.DeserializeObject<Desk>(json);
+
+            json.Should().Contain("\"CreatedBy\":\"creator\"");
+            json.Should().Contain("\"LastModifiedBy\":\"modifier\"");
+            restored.Name.Should().Be("Desk");
+            restored.CreatedAt.Should().Be(default(DateTime));
+            restored.CreatedBy.Should().BeNull();
+            restored.LastModified.Should().Be(default(DateTime));
+            restored.LastModifiedBy.Should().BeNull();
+            restored.State.Should().Be(default(SlcFacility_Management.Behaviors.Desk_Behaviour.StatusesEnum));
         }
 
         [TestMethod]

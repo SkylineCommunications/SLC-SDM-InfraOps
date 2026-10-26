@@ -6,6 +6,8 @@ namespace SDM.FacilityManagement.Tests.Floors
 
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+    using SharedMappers.DomIds;
+
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
     using Skyline.DataMiner.SDM.InfraOps.Core.Converters;
@@ -36,6 +38,34 @@ namespace SDM.FacilityManagement.Tests.Floors
             restored.Description.Should().Be("First floor");
             restored.FacilityFk.Facility.Should().Be(floor.FacilityFk.Facility);
             restored.Should().Be(floor);
+            InfraOpsJsonConvert.SerializeObject(restored).Should().Be(json);
+        }
+
+        [TestMethod]
+        public void Floor_AuditFields_ExportedButNotImported()
+        {
+            var floor = new Floor
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                Name = "Floor",
+                CreatedAt = new DateTime(2023, 1, 2, 3, 4, 5, DateTimeKind.Utc),
+                CreatedBy = "creator",
+                LastModified = new DateTime(2024, 6, 7, 8, 9, 10, DateTimeKind.Utc),
+                LastModifiedBy = "modifier",
+                State = SlcFacility_Management.Behaviors.Floor_Behaviour.StatusesEnum.Active,
+            };
+
+            string json = InfraOpsJsonConvert.SerializeObject(floor);
+            var restored = InfraOpsJsonConvert.DeserializeObject<Floor>(json);
+
+            json.Should().Contain("\"CreatedBy\":\"creator\"");
+            json.Should().Contain("\"LastModifiedBy\":\"modifier\"");
+            restored.Name.Should().Be("Floor");
+            restored.CreatedAt.Should().Be(default(DateTime));
+            restored.CreatedBy.Should().BeNull();
+            restored.LastModified.Should().Be(default(DateTime));
+            restored.LastModifiedBy.Should().BeNull();
+            restored.State.Should().Be(default(SlcFacility_Management.Behaviors.Floor_Behaviour.StatusesEnum));
         }
 
         [TestMethod]

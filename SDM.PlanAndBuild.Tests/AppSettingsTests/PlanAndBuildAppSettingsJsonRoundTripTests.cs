@@ -35,6 +35,29 @@ namespace SDM.PlanAndBuild.Tests.AppSettingsTests
 			restored.JobIDStartingSeed.Should().Be(7);
 			restored.JobIDMinimumDigits.Should().Be(4);
 			restored.Should().Be(settings);
+			InfraOpsJsonConvert.SerializeObject(restored).Should().Be(json);
+		}
+
+		[TestMethod]
+		public void PlanAndBuildAppSettings_AuditFields_ExportedButNotImported()
+		{
+			var settings = new PlanAndBuildAppSettings
+			{
+				CreatedAt = new DateTime(2025, 5, 1, 10, 0, 0, DateTimeKind.Utc),
+				CreatedBy = "creator",
+				LastModified = new DateTime(2025, 6, 2, 11, 0, 0, DateTimeKind.Utc),
+				LastModifiedBy = "modifier",
+			};
+
+			string json = InfraOpsJsonConvert.SerializeObject(settings);
+			var restored = InfraOpsJsonConvert.DeserializeObject<PlanAndBuildAppSettings>(json);
+
+			json.Should().Contain("\"CreatedBy\":\"creator\"");
+			json.Should().Contain("\"LastModifiedBy\":\"modifier\"");
+			restored.CreatedAt.Should().Be(default(DateTime));
+			restored.CreatedBy.Should().BeNull();
+			restored.LastModified.Should().Be(default(DateTime));
+			restored.LastModifiedBy.Should().BeNull();
 		}
 	}
 }

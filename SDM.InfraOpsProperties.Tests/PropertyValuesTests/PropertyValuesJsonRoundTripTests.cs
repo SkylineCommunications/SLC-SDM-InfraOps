@@ -47,6 +47,34 @@ namespace SDM.InfraOpsProperties.Tests.PropertyValuesTests
 			restored.Values[1].Value.Should().Be("EMEA");
 			restored.Values[1].PropertyId.Should().Be(propertyValues.Values[1].PropertyId);
 			restored.Should().Be(propertyValues);
+			InfraOpsJsonConvert.SerializeObject(restored).Should().Be(json);
+		}
+
+		[TestMethod]
+		public void PropertyValues_AuditFields_ExportedButNotImported()
+		{
+			var createdAt = new DateTime(2021, 3, 4, 5, 6, 7, DateTimeKind.Utc);
+			var modifiedAt = new DateTime(2022, 8, 9, 10, 11, 12, DateTimeKind.Utc);
+			var propertyValues = new PropertyValues
+			{
+				Identifier = Guid.NewGuid().ToString(),
+				LinkedObjectID = Guid.NewGuid(),
+				CreatedAt = createdAt,
+				CreatedBy = "creator",
+				LastModified = modifiedAt,
+				LastModifiedBy = "modifier",
+			};
+
+			string json = InfraOpsJsonConvert.SerializeObject(propertyValues);
+			var restored = InfraOpsJsonConvert.DeserializeObject<PropertyValues>(json);
+
+			json.Should().Contain("\"CreatedBy\":\"creator\"");
+			json.Should().Contain("\"LastModifiedBy\":\"modifier\"");
+			restored.Identifier.Should().Be(propertyValues.Identifier);
+			restored.CreatedAt.Should().NotBe(createdAt);
+			restored.CreatedBy.Should().NotBe("creator");
+			restored.LastModified.Should().NotBe(modifiedAt);
+			restored.LastModifiedBy.Should().NotBe("modifier");
 		}
 
 		[TestMethod]

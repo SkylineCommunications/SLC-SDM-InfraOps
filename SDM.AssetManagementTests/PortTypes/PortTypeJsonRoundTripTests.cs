@@ -27,8 +27,8 @@ namespace SDM.AssetManagement.Tests.PortTypes
             };
             portType.CategoryLinks.Categories = new List<SlcAsset_Management.Enums.CategoriesEnum>
             {
-                SlcAsset_Management.Enums.CategoriesEnum.Networking,
                 SlcAsset_Management.Enums.CategoriesEnum.Data,
+                SlcAsset_Management.Enums.CategoriesEnum.Broadcast,
             };
             portType.CableFKs.CableTypeFks = new List<SdmObjectReference<CableType>>
             {
@@ -43,6 +43,29 @@ namespace SDM.AssetManagement.Tests.PortTypes
             restored.CategoryLinks.Categories.Should().Equal(portType.CategoryLinks.Categories);
             restored.CableFKs.CableTypeFks.Should().Equal(portType.CableFKs.CableTypeFks);
             restored.Should().Be(portType);
+            InfraOpsJsonConvert.SerializeObject(restored).Should().Be(json);
+        }
+
+        [TestMethod]
+        public void PortType_AuditFields_ExportedButNotImported()
+        {
+            var portType = new PortType
+            {
+                CreatedAt = new DateTime(2020, 1, 2, 3, 4, 5, DateTimeKind.Utc),
+                CreatedBy = "creator",
+                LastModified = new DateTime(2021, 6, 7, 8, 9, 10, DateTimeKind.Utc),
+                LastModifiedBy = "modifier",
+            };
+
+            string json = InfraOpsJsonConvert.SerializeObject(portType);
+            var restored = InfraOpsJsonConvert.DeserializeObject<PortType>(json);
+
+            json.Should().Contain("\"CreatedBy\":\"creator\"");
+            json.Should().Contain("\"LastModifiedBy\":\"modifier\"");
+            restored.CreatedAt.Should().Be(default(DateTime));
+            restored.CreatedBy.Should().BeNull();
+            restored.LastModified.Should().Be(default(DateTime));
+            restored.LastModifiedBy.Should().BeNull();
         }
 
         [TestMethod]

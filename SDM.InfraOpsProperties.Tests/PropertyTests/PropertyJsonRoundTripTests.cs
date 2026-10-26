@@ -52,6 +52,34 @@ namespace SDM.InfraOpsProperties.Tests.Properties
 			restored.Discreets[0].Option.Should().Be("First");
 			restored.Discreets[1].Option.Should().Be("Second");
 			restored.Should().Be(property);
+			InfraOpsJsonConvert.SerializeObject(restored).Should().Be(json);
+		}
+
+		[TestMethod]
+		public void Property_AuditFields_ExportedButNotImported()
+		{
+			var createdAt = new DateTime(2021, 3, 4, 5, 6, 7, DateTimeKind.Utc);
+			var modifiedAt = new DateTime(2022, 8, 9, 10, 11, 12, DateTimeKind.Utc);
+			var property = new Property
+			{
+				Identifier = Guid.NewGuid().ToString(),
+				Name = "Audited",
+				CreatedAt = createdAt,
+				CreatedBy = "creator",
+				LastModified = modifiedAt,
+				LastModifiedBy = "modifier",
+			};
+
+			string json = InfraOpsJsonConvert.SerializeObject(property);
+			var restored = InfraOpsJsonConvert.DeserializeObject<Property>(json);
+
+			json.Should().Contain("\"CreatedBy\":\"creator\"");
+			json.Should().Contain("\"LastModifiedBy\":\"modifier\"");
+			restored.Identifier.Should().Be(property.Identifier);
+			restored.CreatedAt.Should().NotBe(createdAt);
+			restored.CreatedBy.Should().NotBe("creator");
+			restored.LastModified.Should().NotBe(modifiedAt);
+			restored.LastModifiedBy.Should().NotBe("modifier");
 		}
 
 		[TestMethod]

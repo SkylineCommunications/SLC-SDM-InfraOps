@@ -52,6 +52,34 @@ namespace SDM.FacilityManagement.Tests.Zones
             restored.RoomFk.Room.Should().Be(zone.RoomFk.Room);
             restored.Resource.ResourceId.Should().Be(zone.Resource.ResourceId);
             restored.Should().Be(zone);
+            InfraOpsJsonConvert.SerializeObject(restored).Should().Be(json);
+        }
+
+        [TestMethod]
+        public void Zone_AuditFields_ExportedButNotImported()
+        {
+            var zone = new Zone
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                Name = "Zone",
+                CreatedAt = new DateTime(2023, 1, 2, 3, 4, 5, DateTimeKind.Utc),
+                CreatedBy = "creator",
+                LastModified = new DateTime(2024, 6, 7, 8, 9, 10, DateTimeKind.Utc),
+                LastModifiedBy = "modifier",
+                State = SlcFacility_Management.Behaviors.Zone_Behaviour.StatusesEnum.Active,
+            };
+
+            string json = InfraOpsJsonConvert.SerializeObject(zone);
+            var restored = InfraOpsJsonConvert.DeserializeObject<Zone>(json);
+
+            json.Should().Contain("\"CreatedBy\":\"creator\"");
+            json.Should().Contain("\"LastModifiedBy\":\"modifier\"");
+            restored.Name.Should().Be("Zone");
+            restored.CreatedAt.Should().Be(default(DateTime));
+            restored.CreatedBy.Should().BeNull();
+            restored.LastModified.Should().Be(default(DateTime));
+            restored.LastModifiedBy.Should().BeNull();
+            restored.State.Should().Be(default(SlcFacility_Management.Behaviors.Zone_Behaviour.StatusesEnum));
         }
 
         [TestMethod]

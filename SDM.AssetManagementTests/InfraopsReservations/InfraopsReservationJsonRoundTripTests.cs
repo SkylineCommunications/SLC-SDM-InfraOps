@@ -37,6 +37,29 @@ namespace SDM.AssetManagement.Tests.InfraopsReservations
             restored.ReservedPositions.Should().HaveCount(2);
             restored.ReservedPositions[1].UpperBound.Should().Be(12);
             restored.Should().Be(reservation);
+            InfraOpsJsonConvert.SerializeObject(restored).Should().Be(json);
+        }
+
+        [TestMethod]
+        public void InfraopsReservation_AuditFields_ExportedButNotImported()
+        {
+            var reservation = new InfraopsReservation
+            {
+                CreatedAt = new DateTime(2020, 1, 2, 3, 4, 5, DateTimeKind.Utc),
+                CreatedBy = "creator",
+                LastModified = new DateTime(2021, 6, 7, 8, 9, 10, DateTimeKind.Utc),
+                LastModifiedBy = "modifier",
+            };
+
+            string json = InfraOpsJsonConvert.SerializeObject(reservation);
+            var restored = InfraOpsJsonConvert.DeserializeObject<InfraopsReservation>(json);
+
+            json.Should().Contain("\"CreatedBy\":\"creator\"");
+            json.Should().Contain("\"LastModifiedBy\":\"modifier\"");
+            restored.CreatedAt.Should().Be(default(DateTime));
+            restored.CreatedBy.Should().BeNull();
+            restored.LastModified.Should().Be(default(DateTime));
+            restored.LastModifiedBy.Should().BeNull();
         }
 
         [TestMethod]
