@@ -8,7 +8,7 @@
     {
         public override ISdmObjectReference<T> ReadJson(JsonReader reader, Type objectType, ISdmObjectReference<T> existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
-            return new ISdmObjectReference<T>((string)reader.Value);
+            return (ISdmObjectReference<T>)(string)reader.Value;
         }
 
         public override void WriteJson(JsonWriter writer, ISdmObjectReference<T> value, JsonSerializer serializer)
