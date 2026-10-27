@@ -11,6 +11,7 @@
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)asset_management")]
+    [PropertyScope("InfraopsReservation")]
     public sealed class InfraopsReservation : SdmObjectBase<InfraopsReservation>, IEquatable<InfraopsReservation>, IEntityTracking, IReadOnlyModuleIdReferencer
 	{
         [JsonIgnore]

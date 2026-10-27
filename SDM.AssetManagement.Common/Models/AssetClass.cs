@@ -16,6 +16,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)asset_management")]
+    [PropertyScope("AssetClass")]
     public sealed class AssetClass : SdmObjectBase<AssetClass>, IEquatable<AssetClass>, IEntityTracking, IReadOnlyModuleIdReferencer
 	{
         [JsonIgnore]

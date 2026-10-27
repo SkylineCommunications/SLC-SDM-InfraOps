@@ -13,6 +13,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
     // [GenerateExposers]
     //[SdmDomStorage("(slc)facility_management")]
+    [PropertyScope("Site")]
     public sealed class Site : SdmObjectBase<Site>, IEquatable<Site>, IEntityTracking, IReadOnlyModuleIdReferencer
 	{
         [JsonIgnore]

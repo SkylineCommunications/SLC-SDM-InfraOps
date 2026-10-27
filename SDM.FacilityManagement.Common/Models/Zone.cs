@@ -11,6 +11,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)facility_management")]
+    [PropertyScope("Zone")]
     public sealed class Zone : SdmObjectBase<Zone>, IEquatable<Zone>, IEntityTracking, IReadOnlyModuleIdReferencer
 	{
         [JsonIgnore]

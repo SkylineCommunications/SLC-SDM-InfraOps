@@ -13,6 +13,7 @@
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)plan_and_build")]
+    [PropertyScope("PlanAndBuildAppSettings")]
     public sealed class PlanAndBuildAppSettings : SdmObjectBase<PlanAndBuildAppSettings>, IEquatable<PlanAndBuildAppSettings>, IEntityTracking, IReadOnlyModuleIdReferencer
 	{
         [JsonIgnore]

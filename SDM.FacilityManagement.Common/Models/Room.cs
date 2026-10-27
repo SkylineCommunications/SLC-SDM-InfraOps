@@ -13,6 +13,7 @@
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)facility_management")]
+    [PropertyScope("Room")]
     public sealed class Room : SdmObjectBase<Room>, IEquatable<Room>, IEntityTracking, IReadOnlyModuleIdReferencer
 	{
         [JsonIgnore]

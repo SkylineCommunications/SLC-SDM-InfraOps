@@ -10,6 +10,7 @@
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)asset_management")]
+    [PropertyScope("Connection")]
     public sealed class Connection : SdmObjectBase<Connection>, IEquatable<Connection>, IEntityTracking, IReadOnlyModuleIdReferencer
 	{
         [JsonIgnore]

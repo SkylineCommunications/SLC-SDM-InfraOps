@@ -13,6 +13,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)facility_management")]
+    [PropertyScope("Desk")]
     public sealed class Desk : SdmObjectBase<Desk>, IEquatable<Desk>, IEntityTracking, IReadOnlyModuleIdReferencer
 	{
         [JsonIgnore]

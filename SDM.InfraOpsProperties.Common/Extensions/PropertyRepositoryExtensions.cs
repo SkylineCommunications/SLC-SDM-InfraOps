@@ -5,6 +5,8 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Extensions
     using System.Linq;
 
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
+    using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.InfraOps.Core.Models;
     using Skyline.DataMiner.SDM.InfraOpsProperties.Models;
 
     /// <summary>
@@ -30,6 +32,25 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Extensions
 
             var filter = PropertyExposers.Scope.Equal(scope);
             return repository.Read(filter);
+        }
+
+        /// <summary>
+        /// Gets all Properties defined within the scope declared on <typeparamref name="T"/> via <see cref="PropertyScopeAttribute"/>.
+        /// </summary>
+        /// <exception cref="InvalidOperationException"><typeparamref name="T"/> has no <see cref="PropertyScopeAttribute"/>.</exception>
+        public static IEnumerable<Property> GetProperties<T>(this IBulkRepository<Property> repository) where T : SdmObject<T>
+        {
+            return repository.GetByScope(PropertyScopeAttribute.GetScope<T>());
+        }
+
+        /// <summary>
+        /// Gets the single Property with the given name, defined within the scope declared on <typeparamref name="T"/>
+        /// via <see cref="PropertyScopeAttribute"/>.
+        /// </summary>
+        /// <exception cref="InvalidOperationException"><typeparamref name="T"/> has no <see cref="PropertyScopeAttribute"/>.</exception>
+        public static Property GetProperty<T>(this IBulkRepository<Property> repository, string propertyName) where T : SdmObject<T>
+        {
+            return repository.GetByScopeAndName(PropertyScopeAttribute.GetScope<T>(), propertyName);
         }
 
         /// <summary>

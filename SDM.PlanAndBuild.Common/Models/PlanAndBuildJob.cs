@@ -14,6 +14,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)plan_and_build")]
+    [PropertyScope("PlanAndBuildJob")]
     public sealed class PlanAndBuildJob : SdmObjectBase<PlanAndBuildJob>, IEquatable<PlanAndBuildJob>, IEntityTracking, IReadOnlyModuleIdReferencer
 	{
         [JsonIgnore]
