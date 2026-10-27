@@ -84,7 +84,7 @@ namespace SDM.InfraOpsProperties.Tests.Extensions
 		[TestMethod]
 		public void GetProperties_WithAssetScopedType_ShouldReturnOnlyAssetProperties()
 		{
-			var result = Helper.Properties.GetProperties<ScopedAssetTestObject>().ToList();
+			var result = Helper.Properties.GetByScope<ScopedAssetTestObject>().ToList();
 
 			using (new FluentAssertions.Execution.AssertionScope())
 			{
@@ -96,7 +96,7 @@ namespace SDM.InfraOpsProperties.Tests.Extensions
 		[TestMethod]
 		public void GetProperties_WithFacilityScopedType_ShouldReturnOnlyFacilityProperties()
 		{
-			var result = Helper.Properties.GetProperties<ScopedFacilityTestObject>().ToList();
+			var result = Helper.Properties.GetByScope<ScopedFacilityTestObject>().ToList();
 
 			result.Should().NotBeEmpty().And.OnlyContain(p => p.Scope == "Facility");
 		}
@@ -104,7 +104,7 @@ namespace SDM.InfraOpsProperties.Tests.Extensions
 		[TestMethod]
 		public void GetProperties_WithoutAttribute_ShouldThrowInvalidOperationException()
 		{
-			Action act = () => Helper.Properties.GetProperties<UnscopedTestObject>();
+			Action act = () => Helper.Properties.GetByScope<UnscopedTestObject>();
 
 			act.Should().Throw<InvalidOperationException>();
 		}
@@ -112,7 +112,7 @@ namespace SDM.InfraOpsProperties.Tests.Extensions
 		[TestMethod]
 		public void GetProperties_WithNullRepository_ShouldThrowArgumentNullException()
 		{
-			Action act = () => PropertyRepositoryExtensions.GetProperties<ScopedAssetTestObject>(null!);
+			Action act = () => PropertyRepositoryExtensions.GetByScope<ScopedAssetTestObject>(null!);
 
 			act.Should().Throw<ArgumentNullException>();
 		}
@@ -120,7 +120,7 @@ namespace SDM.InfraOpsProperties.Tests.Extensions
 		[TestMethod]
 		public void GetProperty_WithExistingName_ShouldReturnProperty()
 		{
-			var result = Helper.Properties.GetProperty<ScopedAssetTestObject>("Asset Owner");
+			var result = Helper.Properties.GetByScopeAndName<ScopedAssetTestObject>("Asset Owner");
 
 			using (new FluentAssertions.Execution.AssertionScope())
 			{
@@ -135,7 +135,7 @@ namespace SDM.InfraOpsProperties.Tests.Extensions
 		{
 			var facilityProperty = DemoData.Properties.First(p => p.Scope == "Facility");
 
-			var result = Helper.Properties.GetProperty<ScopedAssetTestObject>(facilityProperty.Name);
+			var result = Helper.Properties.GetByScopeAndName<ScopedAssetTestObject>(facilityProperty.Name);
 
 			result.Should().BeNull();
 		}
@@ -143,7 +143,7 @@ namespace SDM.InfraOpsProperties.Tests.Extensions
 		[TestMethod]
 		public void GetProperty_WithoutAttribute_ShouldThrowInvalidOperationException()
 		{
-			Action act = () => Helper.Properties.GetProperty<UnscopedTestObject>("Asset Owner");
+			Action act = () => Helper.Properties.GetByScopeAndName<UnscopedTestObject>("Asset Owner");
 
 			act.Should().Throw<InvalidOperationException>();
 		}
@@ -158,7 +158,7 @@ namespace SDM.InfraOpsProperties.Tests.Extensions
 			var expected = DemoData.PropertyValuesList[0];
 			var owner = new ScopedAssetTestObject { Identifier = expected.LinkedObjectID.ToString() };
 
-			var result = Helper.PropertyValues.GetPropertyValues(owner).ToList();
+			var result = Helper.PropertyValues.GetByLinkedObjectID(owner).ToList();
 
 			using (new FluentAssertions.Execution.AssertionScope())
 			{
@@ -173,7 +173,7 @@ namespace SDM.InfraOpsProperties.Tests.Extensions
 			var expected = DemoData.PropertyValuesList[0];
 			var owner = new ScopedFacilityTestObject { Identifier = expected.LinkedObjectID.ToString() };
 
-			var result = Helper.PropertyValues.GetPropertyValues(owner).ToList();
+			var result = Helper.PropertyValues.GetByLinkedObjectID(owner).ToList();
 
 			result.Should().BeEmpty("the linked object only has PropertyValues in the Asset scope");
 		}
@@ -188,9 +188,9 @@ namespace SDM.InfraOpsProperties.Tests.Extensions
 
 			using (new FluentAssertions.Execution.AssertionScope())
 			{
-				Helper.PropertyValues.GetPropertyValues(owner).Should().ContainSingle(x => x.SubID == null);
-				Helper.PropertyValues.GetPropertyValues(owner, "Port1").Should().ContainSingle(x => x.SubID == "Port1");
-				Helper.PropertyValues.GetPropertyValues(owner, "*").Should().HaveCount(2);
+				Helper.PropertyValues.GetByLinkedObjectID(owner).Should().ContainSingle(x => x.SubID == null);
+				Helper.PropertyValues.GetByLinkedObjectID(owner, "Port1").Should().ContainSingle(x => x.SubID == "Port1");
+				Helper.PropertyValues.GetByLinkedObjectID(owner, "*").Should().HaveCount(2);
 			}
 		}
 
@@ -199,7 +199,7 @@ namespace SDM.InfraOpsProperties.Tests.Extensions
 		{
 			var owner = new UnscopedTestObject { Identifier = Guid.NewGuid().ToString() };
 
-			Action act = () => Helper.PropertyValues.GetPropertyValues(owner);
+			Action act = () => Helper.PropertyValues.GetByLinkedObjectID(owner);
 
 			act.Should().Throw<InvalidOperationException>();
 		}
@@ -207,7 +207,7 @@ namespace SDM.InfraOpsProperties.Tests.Extensions
 		[TestMethod]
 		public void GetPropertyValues_WithNullObject_ShouldThrowArgumentNullException()
 		{
-			Action act = () => Helper.PropertyValues.GetPropertyValues<ScopedAssetTestObject>(null!);
+			Action act = () => Helper.PropertyValues.GetByLinkedObjectID<ScopedAssetTestObject>(null!);
 
 			act.Should().Throw<ArgumentNullException>();
 		}
@@ -217,7 +217,7 @@ namespace SDM.InfraOpsProperties.Tests.Extensions
 		{
 			var owner = new ScopedAssetTestObject { Identifier = Guid.NewGuid().ToString() };
 
-			Action act = () => PropertyValuesRepositoryExtensions.GetPropertyValues(null!, owner);
+			Action act = () => PropertyValuesRepositoryExtensions.GetByLinkedObjectID(null!, owner);
 
 			act.Should().Throw<ArgumentNullException>();
 		}
@@ -231,8 +231,8 @@ namespace SDM.InfraOpsProperties.Tests.Extensions
 
 			using (new FluentAssertions.Execution.AssertionScope())
 			{
-				Helper.PropertyValues.GetSinglePropertyValues(owner)!.Identifier.Should().Be(expected.Identifier);
-				Helper.PropertyValues.GetSinglePropertyValues(unknown).Should().BeNull();
+				Helper.PropertyValues.GetSingleOrDefaultByLinkedObjectID(owner)!.Identifier.Should().Be(expected.Identifier);
+				Helper.PropertyValues.GetSingleOrDefaultByLinkedObjectID(unknown).Should().BeNull();
 			}
 		}
 

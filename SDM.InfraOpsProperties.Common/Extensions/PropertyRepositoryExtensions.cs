@@ -38,19 +38,9 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Extensions
         /// Gets all Properties defined within the scope declared on <typeparamref name="T"/> via <see cref="PropertyScopeAttribute"/>.
         /// </summary>
         /// <exception cref="InvalidOperationException"><typeparamref name="T"/> has no <see cref="PropertyScopeAttribute"/>.</exception>
-        public static IEnumerable<Property> GetProperties<T>(this IBulkRepository<Property> repository) where T : SdmObject<T>
+        public static IEnumerable<Property> GetByScope<T>(this IBulkRepository<Property> repository) where T : SdmObject<T>
         {
             return repository.GetByScope(PropertyScopeAttribute.GetScope<T>());
-        }
-
-        /// <summary>
-        /// Gets the single Property with the given name, defined within the scope declared on <typeparamref name="T"/>
-        /// via <see cref="PropertyScopeAttribute"/>.
-        /// </summary>
-        /// <exception cref="InvalidOperationException"><typeparamref name="T"/> has no <see cref="PropertyScopeAttribute"/>.</exception>
-        public static Property GetProperty<T>(this IBulkRepository<Property> repository, string propertyName) where T : SdmObject<T>
-        {
-            return repository.GetByScopeAndName(PropertyScopeAttribute.GetScope<T>(), propertyName);
         }
 
         /// <summary>
@@ -82,6 +72,16 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Extensions
             }
 
             return matches.SingleOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the single Property with the given name, defined within the scope declared on <typeparamref name="T"/>
+        /// via <see cref="PropertyScopeAttribute"/>.
+        /// </summary>
+        /// <exception cref="InvalidOperationException"><typeparamref name="T"/> has no <see cref="PropertyScopeAttribute"/>.</exception>
+        public static Property GetByScopeAndName<T>(this IBulkRepository<Property> repository, string propertyName) where T : SdmObject<T>
+        {
+            return repository.GetByScopeAndName(PropertyScopeAttribute.GetScope<T>(), propertyName);
         }
     }
 }

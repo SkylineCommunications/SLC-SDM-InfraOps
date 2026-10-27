@@ -61,21 +61,12 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Extensions
         }
 
         /// <summary>
-        /// Gets the single PropertyValues linked to a given object, within a given scope, optionally scoped further
-        /// by SubID. See <see cref="GetByLinkedObjectID"/> for the SubID matching semantics.
-        /// </summary>
-        public static PropertyValues GetSingleOrDefaultByLinkedObjectID(this IBulkRepository<PropertyValues> repository, Guid linkedObjectId, string scope, string subId = null)
-        {
-            return repository.GetByLinkedObjectID(linkedObjectId, scope, subId).SingleOrDefault();
-        }
-
-        /// <summary>
         /// Gets the PropertyValues linked to <paramref name="sdmObject"/>, within the scope declared on <typeparamref name="T"/>
         /// via <see cref="PropertyScopeAttribute"/>. See <see cref="GetByLinkedObjectID"/> for the SubID matching semantics.
         /// </summary>
         /// <exception cref="ArgumentNullException"><paramref name="repository"/> or <paramref name="sdmObject"/> is <c>null</c>.</exception>
         /// <exception cref="InvalidOperationException"><typeparamref name="T"/> has no <see cref="PropertyScopeAttribute"/>, or the object's identifier is not a valid GUID.</exception>
-        public static IEnumerable<PropertyValues> GetPropertyValues<T>(this IBulkRepository<PropertyValues> repository, T sdmObject, string subId = null) where T : SdmObject<T>
+        public static IEnumerable<PropertyValues> GetByLinkedObjectID<T>(this IBulkRepository<PropertyValues> repository, T sdmObject, string subId = null) where T : SdmObject<T>
         {
             if (sdmObject == null)
             {
@@ -86,12 +77,21 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Extensions
         }
 
         /// <summary>
+        /// Gets the single PropertyValues linked to a given object, within a given scope, optionally scoped further
+        /// by SubID. See <see cref="GetByLinkedObjectID"/> for the SubID matching semantics.
+        /// </summary>
+        public static PropertyValues GetSingleOrDefaultByLinkedObjectID(this IBulkRepository<PropertyValues> repository, Guid linkedObjectId, string scope, string subId = null)
+        {
+            return repository.GetByLinkedObjectID(linkedObjectId, scope, subId).SingleOrDefault();
+        }
+
+        /// <summary>
         /// Gets the single PropertyValues linked to <paramref name="sdmObject"/>, within the scope declared on <typeparamref name="T"/>
         /// via <see cref="PropertyScopeAttribute"/>. See <see cref="GetByLinkedObjectID"/> for the SubID matching semantics.
         /// </summary>
-        public static PropertyValues GetSinglePropertyValues<T>(this IBulkRepository<PropertyValues> repository, T sdmObject, string subId = null) where T : SdmObject<T>
+        public static PropertyValues GetSingleOrDefaultByLinkedObjectID<T>(this IBulkRepository<PropertyValues> repository, T sdmObject, string subId = null) where T : SdmObject<T>
         {
-            return repository.GetPropertyValues(sdmObject, subId).SingleOrDefault();
+            return repository.GetByLinkedObjectID(sdmObject, subId).SingleOrDefault();
         }
 
         /// <summary>
@@ -115,25 +115,6 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Extensions
             var filter = PropertyValuesExposers.Values.PropertyId.Contains(reference);
 
             return repository.Read(filter);
-        }
-
-        /// <summary>
-        /// Copies the PropertyValues of <paramref name="source"/> to <paramref name="target"/> within the scope declared
-        /// on <typeparamref name="T"/> via <see cref="PropertyScopeAttribute"/>. See the non-generic overload for persistence semantics.
-        /// </summary>
-        public static PropertyValues CopyPropertyValues<T>(this IBulkRepository<PropertyValues> repository, T source, T target, string subIdSource = null, string subIdTarget = null) where T : SdmObject<T>
-        {
-            if (source == null)
-            {
-                throw new ArgumentNullException(nameof(source));
-            }
-
-            if (target == null)
-            {
-                throw new ArgumentNullException(nameof(target));
-            }
-
-            return repository.CopyPropertyValues(PropertyScopeAttribute.GetScope<T>(), source.GetIdentifierAsGuid(), target.GetIdentifierAsGuid(), subIdSource, subIdTarget);
         }
 
         /// <summary>
@@ -193,6 +174,25 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Extensions
             }
 
             return repository.Create(duplicate);
+        }
+
+        /// <summary>
+        /// Copies the PropertyValues of <paramref name="source"/> to <paramref name="target"/> within the scope declared
+        /// on <typeparamref name="T"/> via <see cref="PropertyScopeAttribute"/>. See the non-generic overload for persistence semantics.
+        /// </summary>
+        public static PropertyValues CopyPropertyValues<T>(this IBulkRepository<PropertyValues> repository, T source, T target, string subIdSource = null, string subIdTarget = null) where T : SdmObject<T>
+        {
+            if (source == null)
+            {
+                throw new ArgumentNullException(nameof(source));
+            }
+
+            if (target == null)
+            {
+                throw new ArgumentNullException(nameof(target));
+            }
+
+            return repository.CopyPropertyValues(PropertyScopeAttribute.GetScope<T>(), source.GetIdentifierAsGuid(), target.GetIdentifierAsGuid(), subIdSource, subIdTarget);
         }
     }
 }
