@@ -89,7 +89,7 @@
             unchecked
             {
                 int hash = 17;
-                hash = (hash * 23) + (ImageFilePath != null ? ImageFilePath.GetHashCode() : 0);
+                hash = (hash * 23) + (ImageFilePath != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(ImageFilePath) : 0);
                 hash = (hash * 23) + UploadTimestamp.GetHashCode();
                 return hash;
             }

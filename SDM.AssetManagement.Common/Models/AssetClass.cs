@@ -475,9 +475,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             unchecked
             {
                 int hash = 17;
-                hash = (hash * 23) + (Name?.GetHashCode() ?? 0);
+                hash = (hash * 23) + (Name != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(Name) : 0);
                 hash = (hash * 23) + (DeviceTypeId.Identifier?.GetHashCode() ?? 0);
-                hash = (hash * 23) + (Description?.GetHashCode() ?? 0);
+                hash = (hash * 23) + (Description != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(Description) : 0);
                 hash = (hash * 23) + Manufacturer.GetHashCode();
                 hash = (hash * 23) + IsBookable.GetHashCode();
                 hash = (hash * 23) + State.GetHashCode();

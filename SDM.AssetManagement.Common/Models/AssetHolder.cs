@@ -106,7 +106,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			{
 				int hash = 17;
 				hash = (hash * 23) + SlotNumber.GetHashCode();
-				hash = (hash * 23) + (Label != null ? Label.GetHashCode() : 0);
+				hash = (hash * 23) + (Label != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(Label) : 0);
 				hash = (hash * 23) + HierarchyRole.GetHashCode();
 				return hash;
 			}

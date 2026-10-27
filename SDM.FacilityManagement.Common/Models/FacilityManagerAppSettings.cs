@@ -145,7 +145,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             unchecked
             {
                 int hash = 17;
-                hash = (hash * 23) + (GoogleMapsAPIKey != null ? GoogleMapsAPIKey.GetHashCode() : 0);
+                hash = (hash * 23) + (GoogleMapsAPIKey != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(GoogleMapsAPIKey) : 0);
                 return hash;
             }
         }

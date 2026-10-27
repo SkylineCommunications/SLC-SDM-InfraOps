@@ -231,10 +231,10 @@
             unchecked
             {
                 int hash = 17;
-                hash = (hash * 23) + (Name != null ? Name.GetHashCode() : 0);
-                hash = (hash * 23) + (Plan != null ? Plan.GetHashCode() : 0);
-                hash = (hash * 23) + (Description != null ? Description.GetHashCode() : 0);
-                hash = (hash * 23) + (RoomId != null ? RoomId.GetHashCode() : 0);
+                hash = (hash * 23) + (Name != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(Name) : 0);
+                hash = (hash * 23) + (Plan != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(Plan) : 0);
+                hash = (hash * 23) + (Description != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(Description) : 0);
+                hash = (hash * 23) + (RoomId != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(RoomId) : 0);
                 hash = (hash * 23) + (Ownership != null ? Ownership.GetHashCode() : 0);
                 hash = (hash * 23) + (FloorFk != null ? FloorFk.GetHashCode() : 0);
                 hash = (hash * 23) + State.GetHashCode();

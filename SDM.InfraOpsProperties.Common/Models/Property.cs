@@ -272,10 +272,10 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
             unchecked
             {
                 int hash = 17;
-                hash = (hash * 23) + (Name != null ? Name.GetHashCode() : 0);
+                hash = (hash * 23) + (Name != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(Name) : 0);
                 hash = (hash * 23) + PropertyType.GetHashCode();
-                hash = (hash * 23) + (Scope != null ? Scope.GetHashCode() : 0);
-                hash = (hash * 23) + (Default != null ? Default.GetHashCode() : 0);
+                hash = (hash * 23) + (Scope != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(Scope) : 0);
+                hash = (hash * 23) + (Default != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(Default) : 0);
                 hash = (hash * 23) + IsMultiLineString.GetHashCode();
                 return hash;
             }
