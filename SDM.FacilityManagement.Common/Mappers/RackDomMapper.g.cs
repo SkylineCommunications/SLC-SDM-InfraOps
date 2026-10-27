@@ -64,13 +64,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             internal static FieldDescriptorID Zone = SlcFacility_Management.Sections.Zone.Zone_45922fd2;
         }
 
-        internal static class Resource
-        {
-            internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(SlcFacility_Management.Sections.Resource.Id.Id)
-            {ModuleId = ModuleId};
-            internal static FieldDescriptorID ResourceId = SlcFacility_Management.Sections.Resource.LinkedResource;
-        }
-
         internal static class ImageDetails
         {
             internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(SlcFacility_Management.Sections.ImageInfo.Id.Id)

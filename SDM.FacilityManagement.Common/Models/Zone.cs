@@ -48,8 +48,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
         public bool Changed =>
             FieldHandler.HasChanges ||
             _zoneCapacity?.Changed == true ||
-            _roomFk?.Changed == true ||
-            _resource?.Changed == true;
+            _roomFk?.Changed == true;
 
         [JsonIgnore]
         [SdmIgnore]
@@ -133,10 +132,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
         public RoomRelation RoomFk => _roomFk ?? (_roomFk = new RoomRelation());
 
-        private ResourceLink _resource;
-
-        public ResourceLink Resource => _resource ?? (_resource = new ResourceLink());
-
         [SdmIgnore]
         public SlcFacility_Management.Behaviors.Zone_Behaviour.StatusesEnum State { get; internal set; }
 
@@ -190,8 +185,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     NewValue = kvp.Value.newVal,
                 })
                 .Concat(_zoneCapacity.GetSectionChanges("ZoneCapacity"))
-                .Concat(_roomFk.GetSectionChanges("RoomFk"))
-                .Concat(_resource.GetSectionChanges("Resource"));
+                .Concat(_roomFk.GetSectionChanges("RoomFk"));
         }
 
         public void ResetChangeTracking()
@@ -199,7 +193,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             FieldHandler.ApplyChanges();
             _zoneCapacity?.ResetChangeTracking();
             _roomFk?.ResetChangeTracking();
-            _resource?.ResetChangeTracking();
         }
 
         #region Equality
@@ -253,7 +246,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 string.Equals(ZoneId, other.ZoneId, StringComparison.OrdinalIgnoreCase) &&
                 Equals(ZoneCapacity, other.ZoneCapacity) &&
                 Equals(RoomFk, other.RoomFk) &&
-                Equals(Resource, other.Resource) &&
                 State == other.State;
         }
 

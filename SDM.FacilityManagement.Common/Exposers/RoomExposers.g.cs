@@ -30,7 +30,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
         {
             RuntimeHelpers.RunClassConstructor(typeof(RoomProperties).TypeHandle);
             RuntimeHelpers.RunClassConstructor(typeof(Ownership).TypeHandle);
-            RuntimeHelpers.RunClassConstructor(typeof(ResourceLink).TypeHandle);
             RuntimeHelpers.RunClassConstructor(typeof(FloorFk).TypeHandle);
         }
 
@@ -48,11 +47,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
         {
             public static readonly Exposer<FacilityManagement.Models.Room, System.Guid> Team = new Exposer<FacilityManagement.Models.Room, System.Guid>((obj) => obj.Ownership.Team, "Ownership.Team");
             public static readonly Exposer<FacilityManagement.Models.Room, System.Guid> Owner = new Exposer<FacilityManagement.Models.Room, System.Guid>((obj) => obj.Ownership.Owner, "Ownership.Owner");
-        }
-
-        public static partial class ResourceLink
-        {
-            public static readonly Exposer<FacilityManagement.Models.Room, System.Guid> ResourceId = new Exposer<FacilityManagement.Models.Room, System.Guid>((obj) => obj.ResourceLink.ResourceId, "ResourceLink.ResourceId");
         }
 
         public static partial class FloorFk

@@ -650,17 +650,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 }
             }
 
-            var _resourceSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(FacilityManagement.Models.RackDomMapper.Resource.SectionDefinitionId));
-            if (_resourceSection != default)
-            {
-                ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Resource).SectionId = _resourceSection.ID.Id;
-                var _resourceresourceid = _resourceSection.GetValue<string>(FacilityManagement.Models.RackDomMapper.Resource.ResourceId);
-                if (_resourceresourceid != null)
-                {
-                    obj.Resource.ResourceId = System.Guid.Parse(Convert.ToString(_resourceresourceid.Value));
-                }
-            }
-
             var _imagedetailsList = new System.Collections.Generic.List<FacilityManagement.Models.ImageInfo>();
             foreach (var _imagedetailsSection in instance.Sections.Where(s => s.SectionDefinitionID.Equals(FacilityManagement.Models.RackDomMapper.ImageDetails.SectionDefinitionId)))
             {
@@ -838,23 +827,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 instance.Sections.Add(_zonefk);
             }
 
-            if (!obj.Resource.IsEmpty)
-            {
-                var _resource = new Section(FacilityManagement.Models.RackDomMapper.Resource.SectionDefinitionId);
-                var _resourceSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Resource).SectionId;
-                if (_resourceSectionId.HasValue)
-                {
-                    _resource.ID = new SectionID(_resourceSectionId.Value);
-                }
-
-                if (obj.Resource.ResourceId != Guid.Empty)
-                {
-                    _resource.AddOrUpdateValue<string>(FacilityManagement.Models.RackDomMapper.Resource.ResourceId, Convert.ToString(obj.Resource.ResourceId));
-                }
-
-                instance.Sections.Add(_resource);
-            }
-
             foreach (var imagedetails in obj.ImageDetails)
             {
                 var _imagedetailsSection = new Section(FacilityManagement.Models.RackDomMapper.ImageDetails.SectionDefinitionId);
@@ -973,9 +945,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 case "ZoneFk.Zone":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.ZoneFk.Zone), comparer, SdmObjectReference<Zone>.Convert(value).GetIdentifierAsGuid());
 
-                case "Resource.ResourceId":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.Resource.ResourceId), comparer, Convert.ToString((System.Guid)value));
-
                 case "ImageDetails.ImageFilePath":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.ImageDetails.ImageFilePath), comparer, (string)value);
 
@@ -1039,8 +1008,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.RowFk.Row), sortOrder, naturalSort);
                 case "ZoneFk.Zone":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.ZoneFk.Zone), sortOrder, naturalSort);
-                case "Resource.ResourceId":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.Resource.ResourceId), sortOrder, naturalSort);
                 case "ImageDetails.ImageFilePath":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.ImageDetails.ImageFilePath), sortOrder, naturalSort);
                 case "ImageDetails.UploadTimestamp":

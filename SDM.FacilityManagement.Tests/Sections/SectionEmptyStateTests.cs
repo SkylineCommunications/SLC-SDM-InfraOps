@@ -68,18 +68,6 @@
         }
 
         [TestMethod]
-        public void ResourceLink_DefaultState_IsEmpty()
-        {
-            new ResourceLink().IsEmpty.Should().BeTrue();
-        }
-
-        [TestMethod]
-        public void ResourceLink_ResourceIdSet_IsNotEmpty()
-        {
-            new ResourceLink().Also(x => x.ResourceId = Guid.NewGuid()).IsEmpty.Should().BeFalse();
-        }
-
-        [TestMethod]
         public void RoomOwnership_DefaultState_IsEmpty()
         {
             new RoomOwnership().IsEmpty.Should().BeTrue();

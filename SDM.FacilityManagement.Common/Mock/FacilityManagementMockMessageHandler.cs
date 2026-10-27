@@ -39,7 +39,6 @@
                 {SlcFacility_Management.Sections.ImageInfo.Id, GenerateSectionsDefinitions_ImageInfo() },
                 {SlcFacility_Management.Sections.RackCapacity.Id, GenerateSectionsDefinitions_RackCapacity() },
                 {SlcFacility_Management.Sections.RackInformation.Id, GenerateSectionsDefinitions_RackInformation() },
-                {SlcFacility_Management.Sections.Resource.Id, GenerateSectionsDefinitions_Resource() },
                 {SlcFacility_Management.Sections.Room.Id, GenerateSectionsDefinitions_Room() },
                 {SlcFacility_Management.Sections.RoomInformation.Id, GenerateSectionsDefinitions_RoomInformation() },
                 {SlcFacility_Management.Sections.RoomOwnership.Id, GenerateSectionsDefinitions_RoomOwnership() },
@@ -172,16 +171,6 @@
     };
 
             return BuildSectionDefinition(SlcFacility_Management.Sections.RackInformation.Id, "Rack Information", fields);
-        }
-
-        private static SectionDefinition GenerateSectionsDefinitions_Resource()
-        {
-            List<(FieldDescriptorID id, Type type, string name)> fields = new List<(FieldDescriptorID id, Type type, string name)>
-    {
-        (SlcFacility_Management.Sections.Resource.LinkedResource, typeof(Guid), "Linked Resource"),
-    };
-
-            return BuildSectionDefinition(SlcFacility_Management.Sections.Resource.Id, "Resource", fields);
         }
 
         private static SectionDefinition GenerateSectionsDefinitions_Room()
@@ -355,7 +344,6 @@
             {
                 new SectionDefinitionLink(SlcFacility_Management.Sections.DeskInformation.Id),
                 new SectionDefinitionLink(SlcFacility_Management.Sections.Room.Id),
-                new SectionDefinitionLink(SlcFacility_Management.Sections.Resource.Id),
             };
 
             foreach (var link in sectionLinks)
@@ -486,7 +474,6 @@
                 new SectionDefinitionLink(SlcFacility_Management.Sections.RackCapacity.Id),
                 new SectionDefinitionLink(SlcFacility_Management.Sections.Row.Id),
                 new SectionDefinitionLink(SlcFacility_Management.Sections.Zone.Id),
-                new SectionDefinitionLink(SlcFacility_Management.Sections.Resource.Id),
                 new SectionDefinitionLink(SlcFacility_Management.Sections.ImageInfo.Id) { AllowMultipleSections = true },
             };
 
@@ -524,7 +511,6 @@
                 new SectionDefinitionLink(SlcFacility_Management.Sections.RoomInformation.Id),
                 new SectionDefinitionLink(SlcFacility_Management.Sections.RoomOwnership.Id),
                 new SectionDefinitionLink(SlcFacility_Management.Sections.Floor.Id),
-                new SectionDefinitionLink(SlcFacility_Management.Sections.Resource.Id),
             };
 
             foreach (var link in sectionLinks)
@@ -560,7 +546,6 @@
             {
                 new SectionDefinitionLink(SlcFacility_Management.Sections.RowInformation.Id),
                 new SectionDefinitionLink(SlcFacility_Management.Sections.Room.Id),
-                new SectionDefinitionLink(SlcFacility_Management.Sections.Resource.Id),
             };
 
             foreach (var link in sectionLinks)
@@ -631,7 +616,6 @@
                 new SectionDefinitionLink(SlcFacility_Management.Sections.ZoneInformation.Id),
                 new SectionDefinitionLink(SlcFacility_Management.Sections.ZoneCapacity.Id),
                 new SectionDefinitionLink(SlcFacility_Management.Sections.Room.Id),
-                new SectionDefinitionLink(SlcFacility_Management.Sections.Resource.Id),
             };
 
             foreach (var link in sectionLinks)

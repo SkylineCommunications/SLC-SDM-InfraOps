@@ -23,7 +23,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             RuntimeHelpers.RunClassConstructor(typeof(ZoneProperties).TypeHandle);
             RuntimeHelpers.RunClassConstructor(typeof(ZoneCapacity).TypeHandle);
             RuntimeHelpers.RunClassConstructor(typeof(RoomFk).TypeHandle);
-            RuntimeHelpers.RunClassConstructor(typeof(Resource).TypeHandle);
         }
 
         public static partial class ZoneProperties
@@ -47,11 +46,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
         public static partial class RoomFk
         {
             public static readonly Exposer<FacilityManagement.Models.Zone, SdmObjectReference<FacilityManagement.Models.Room>> Room = new Exposer<FacilityManagement.Models.Zone, SdmObjectReference<FacilityManagement.Models.Room>>((obj) => obj.RoomFk.Room, "RoomFk.Room");
-        }
-
-        public static partial class Resource
-        {
-            public static readonly Exposer<FacilityManagement.Models.Zone, System.Guid> ResourceId = new Exposer<FacilityManagement.Models.Zone, System.Guid>((obj) => obj.Resource.ResourceId, "Resource.ResourceId");
         }
     }
 }

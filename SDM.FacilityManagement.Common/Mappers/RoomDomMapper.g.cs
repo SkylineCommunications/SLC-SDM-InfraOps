@@ -40,13 +40,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             internal static FieldDescriptorID Owner = SlcFacility_Management.Sections.RoomOwnership.Owner;
         }
 
-        internal static class ResourceLink
-        {
-            internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(SlcFacility_Management.Sections.Resource.Id.Id)
-            {ModuleId = ModuleId};
-            internal static FieldDescriptorID ResourceId = SlcFacility_Management.Sections.Resource.LinkedResource;
-        }
-
         internal static class FloorFk
         {
             internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(SlcFacility_Management.Sections.Floor.Id.Id)
