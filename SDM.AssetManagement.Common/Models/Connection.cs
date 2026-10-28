@@ -208,11 +208,11 @@
             unchecked
             {
                 int hash = 17;
-                hash = (hash * 23) + (Notes?.GetHashCode() ?? 0);
-                hash = (hash * 23) + (Description?.GetHashCode() ?? 0);
-                hash = (hash * 23) + ConnectionType?.GetHashCode() ?? 0;
+                hash = (hash * 23) + (Notes != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(Notes) : 0);
+                hash = (hash * 23) + (Description != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(Description) : 0);
+                hash = (hash * 23) + (ConnectionType?.GetHashCode() ?? 0);
                 hash = (hash * 23) + (CableType.Identifier?.GetHashCode() ?? 0);
-                hash = (hash * 23) + CableLength?.GetHashCode() ?? 0;
+                hash = (hash * 23) + (CableLength?.GetHashCode() ?? 0);
                 hash = (hash * 23) + (Source?.GetHashCode() ?? 0);
                 hash = (hash * 23) + (Destination?.GetHashCode() ?? 0);
                 return hash;

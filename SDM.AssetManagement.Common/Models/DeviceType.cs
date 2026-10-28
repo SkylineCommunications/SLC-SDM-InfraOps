@@ -170,8 +170,8 @@
             unchecked
             {
                 int hash = 17;
-                hash = (hash * 23) + (Name != null ? Name.GetHashCode() : 0);
-                hash = (hash * 23) + (Description != null ? Description.GetHashCode() : 0);
+                hash = (hash * 23) + (Name != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(Name) : 0);
+                hash = (hash * 23) + (Description != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(Description) : 0);
                 hash = (hash * 23) + (TagsInfo != null ? TagsInfo.GetHashCode() : 0);
                 hash = (hash * 23) + (HierarchyInfo != null ? HierarchyInfo.GetHashCode() : 0);
                 return hash;

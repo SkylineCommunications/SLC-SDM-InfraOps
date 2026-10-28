@@ -179,7 +179,7 @@
             unchecked
             {
                 int hash = 17;
-                hash = (hash * 23) + (Description != null ? Description.GetHashCode() : 0);
+                hash = (hash * 23) + (Description != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(Description) : 0);
                 hash = (hash * 23) + (JobFk != null ? JobFk.GetHashCode() : 0);
                 hash = (hash * 23) + (RackFk != null ? RackFk.GetHashCode() : 0);
                 return hash;

@@ -88,7 +88,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			unchecked
 			{
 				int hash = 17;
-				hash = (hash * 23) + (ElementID != null ? ElementID.GetHashCode() : 0);
+				hash = (hash * 23) + (ElementID != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(ElementID) : 0);
 				hash = (hash * 23) + IsPrimary.GetHashCode();
 				return hash;
 			}

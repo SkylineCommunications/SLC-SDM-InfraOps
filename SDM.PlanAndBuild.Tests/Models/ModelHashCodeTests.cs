@@ -32,6 +32,14 @@ namespace SDM.PlanAndBuild.Tests.Models
                 .ToList();
         }
 
+        public static IEnumerable<object[]> StringProperties()
+        {
+            return GetModelTypes()
+                .SelectMany(t => t.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                    .Where(p => p.CanRead && p.CanWrite && p.PropertyType == typeof(string) && p.GetIndexParameters().Length == 0)
+                    .Select(p => new object[] { t, p.Name }))
+                .ToList();
+        }
         [DataTestMethod]
         [DynamicData(nameof(ModelTypes))]
         public void GetHashCode_ShouldNotThrow_ForDefaultInstance(Type modelType)
@@ -80,6 +88,34 @@ namespace SDM.PlanAndBuild.Tests.Models
             }
 
             first.GetHashCode().Should().Be(second.GetHashCode(), $"{modelType.Name}: equal instances must produce equal hash codes");
+        }
+
+        [DataTestMethod]
+        [DynamicData(nameof(StringProperties))]
+        public void GetHashCode_ShouldIgnoreCase_WhenEqualsIgnoresCase_ForStringProperty(Type modelType, string propertyName)
+        {
+            PropertyInfo property = modelType.GetProperty(propertyName)!;
+            object lower = Activator.CreateInstance(modelType)!;
+            object upper = Activator.CreateInstance(modelType)!;
+
+            try
+            {
+                property.SetValue(lower, "abc");
+                property.SetValue(upper, "ABC");
+            }
+            catch (TargetInvocationException)
+            {
+                Assert.Inconclusive($"{modelType.Name}.{propertyName}: setter rejected the test value.");
+                return;
+            }
+
+            if (!lower.Equals(upper))
+            {
+                Assert.Inconclusive($"{modelType.Name}.{propertyName}: Equals is case-sensitive; nothing to verify.");
+                return;
+            }
+
+            lower.GetHashCode().Should().Be(upper.GetHashCode(), $"{modelType.Name}.{propertyName}: Equals ignores case, so GetHashCode must too");
         }
 
         [DataTestMethod]

@@ -116,9 +116,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             unchecked
             {
                 int hash = (2 << 12) - 1;
-                hash = (hash * 23) + (Ipv4Address != null ? Ipv4Address.GetHashCode() : 0);
-                hash = (hash * 23) + (Ipv6Address != null ? Ipv6Address.GetHashCode() : 0);
-                hash = (hash * 23) + (Hostname != null ? Hostname.GetHashCode() : 0);
+                hash = (hash * 23) + (Ipv4Address != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(Ipv4Address) : 0);
+                hash = (hash * 23) + (Ipv6Address != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(Ipv6Address) : 0);
+                hash = (hash * 23) + (Hostname != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(Hostname) : 0);
                 hash = (hash * 23) + DNS.GetHashCode();
                 return hash;
             }

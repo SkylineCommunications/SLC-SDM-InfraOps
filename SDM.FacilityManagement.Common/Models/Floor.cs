@@ -190,10 +190,10 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             unchecked
             {
                 int hash = 17;
-                hash = (hash * 23) + (Name != null ? Name.GetHashCode() : 0);
-                hash = (hash * 23) + (Plan != null ? Plan.GetHashCode() : 0);
-                hash = (hash * 23) + (Description != null ? Description.GetHashCode() : 0);
-                hash = (hash * 23) + (FloorId != null ? FloorId.GetHashCode() : 0);
+                hash = (hash * 23) + (Name != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(Name) : 0);
+                hash = (hash * 23) + (Plan != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(Plan) : 0);
+                hash = (hash * 23) + (Description != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(Description) : 0);
+                hash = (hash * 23) + (FloorId != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(FloorId) : 0);
                 hash = (hash * 23) + (FacilityFk != null ? FacilityFk.GetHashCode() : 0);
                 hash = (hash * 23) + State.GetHashCode();
                 return hash;

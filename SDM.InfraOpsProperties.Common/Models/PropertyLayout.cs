@@ -90,7 +90,7 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
             unchecked
             {
                 int hash = 17;
-                hash = (hash * 23) + (SectionName != null ? SectionName.GetHashCode() : 0);
+                hash = (hash * 23) + (SectionName != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(SectionName) : 0);
                 hash = (hash * 23) + Order.GetHashCode();
                 return hash;
             }

@@ -539,12 +539,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             unchecked
             {
                 int hash = 17;
-                hash = (hash * 23) + (Name?.GetHashCode() ?? 0);
-                hash = (hash * 23) + (AssetID?.GetHashCode() ?? 0);
+                hash = (hash * 23) + (Name != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(Name) : 0);
+                hash = (hash * 23) + (AssetID != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(AssetID) : 0);
                 hash = (hash * 23) + (AssetClassId.Identifier?.GetHashCode() ?? 0);
-                hash = (hash * 23) + (SerialNumber?.GetHashCode() ?? 0);
-                hash = (hash * 23) + (Description?.GetHashCode() ?? 0);
-                hash = (hash * 23) + (MacAddress?.GetHashCode() ?? 0);
+                hash = (hash * 23) + (SerialNumber != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(SerialNumber) : 0);
+                hash = (hash * 23) + (Description != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(Description) : 0);
+                hash = (hash * 23) + (MacAddress != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(MacAddress) : 0);
                 hash = (hash * 23) + State.GetHashCode();
                 return hash;
             }
