@@ -18,6 +18,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             CableTypeFks,
             AssetPorts,
             AssetClassPorts,
+            Name,
         }
 
         private readonly SdmEntityLoader _entityLoader;
@@ -33,6 +34,11 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
 
             for (int idx = 0; idx < entities.Count; idx++)
             {
+                if (string.IsNullOrWhiteSpace(entities[idx]?.Name))
+                {
+                    results[idx].AddFailReason(PortTypeValidationField.Name, "Port Type Name cannot be empty or whitespace.");
+                }
+
                 if (entities[idx]?.CategoryLinks.Categories.IsNullOrEmpty() ?? true)
                 {
                     results[idx].AddFailReason(PortTypeValidationField.Category, "Port Type must have at least one category.");
