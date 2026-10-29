@@ -30,7 +30,7 @@ Generated SDM mappers have shipped with CLR-type bugs (reference fields written 
 
 | ID | Title | Status |
 |---|---|---|
-| [ITM-001](../items/ITM-001-dom-mock-field-value-type-validation.md) | DOM mock: field-value-type validation on Create/Update/CreateOrUpdate | Draft |
+| [ITM-001](../items/ITM-001-dom-mock-field-value-type-validation.md) | DOM mock: field-value-type validation on Create/Update/CreateOrUpdate | Done |
 
 ## Candidate follow-ups (not yet items)
 

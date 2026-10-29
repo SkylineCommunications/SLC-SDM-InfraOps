@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Work-item | [ITM-001](../items/ITM-001-dom-mock-field-value-type-validation.md) |
-| Status | Draft |
+| Status | Implemented (2026-10-29). Deviation: section definitions are read via `DomHelper.SectionDefinitions.ReadAll()` on the inner handler instead of a hand-built `ManagerStoreReadRequest<SectionDefinition>`; same traffic, less code. |
 | Created | 2026-10-28 |
 
 ## Design

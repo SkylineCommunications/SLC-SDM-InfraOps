@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Draft |
+| Status | Done |
 | Parent track | [TRK-001](../tracks/TRK-001-sdm-unit-test-dom-mock-fidelity.md) |
 | Spec | [SPC-001](../specs/SPC-001-dom-mock-field-value-type-validation.md) |
 | Collaboration | [308202](https://collaboration.dataminer.services/myTasks/list/task/308202) |
@@ -33,6 +33,21 @@ A test-project-local decorator over `DomSLNetMessageHandler` that, for `ManagerS
 4. **Opt-in by definition.** Sections with no registered `SectionDefinition` and fields with no registered `FieldDescriptor` are not validated. Unset/null values are skipped.
 5. **No new dependencies, no Utils.DOM fork.** Only existing `Skyline.DataMiner.Utils.DOM` primitives are used.
 6. **Full suite.** `dotnet test SDM.AssetManagementTests` passes. The other test projects are untouched and still pass.
+
+## Result (2026-10-29)
+
+| Criterion | Evidence |
+|---|---|
+| 1 | `ConnectionDomStorageProvider_FieldTypeTests.Create_WithStringInGuidField_ShouldThrowTypeMismatch` passes; message asserts `Source Info`, `Source Port`, `System.Guid`, `System.String`. |
+| 2 | `dotnet test SDM.AssetManagementTests --filter FullyQualifiedName~Connections` → 99 passed, 0 failed. |
+| 3 | `Source.Port` write changed to `AddOrUpdateValue<string>(..., .ToString())` → 16/16 `ConnectionDomStorageProvider_CRUDTests` fail; `Create_WithValidConnection_ShouldPersistAndReadBack` throws `DomFieldValueTypeMismatchException: DomInstanceSectionInvalidFieldValueTypes: ... section 'Source Info' ... field 'Source Port' ... expects 'System.Guid' but got 'System.String'`. Mapper reverted via `git checkout --`. |
+| 4 | `Create_InSectionWithoutDefinition_ShouldNotValidate` and `Create_WithNullGuidField_ShouldNotThrow` pass. |
+| 5 | No `Directory.Packages.props` or csproj change. Decorator uses `DomHelper.SectionDefinitions.ReadAll()` against the inner mock. |
+| 6 | Solution `dotnet test`: AssetManagement 1068 passed / 3 skipped; FacilityManagement 584; PlanAndBuild 426 / 9 skipped; InfraOpsProperties 317 / 3 skipped; Packaging 4. 0 failures. |
+
+No seeded descriptor types disagreed with current mapper output; no seed edits were needed.
+
+Files: `Setup\FieldValueTypeValidatingMessageHandler.cs`, `Setup\DomFieldValueTypeMismatchException.cs`, `Connections\ConnectionDomStorageProvider_FieldTypeTests.cs` (new); `ConnectionHelper.cs` (wraps the handler, adds `CreateConnection(DomSLNetMessageHandler)` overload).
 
 ## Out of scope
 
