@@ -1,4 +1,27 @@
 <Solution>
+  <Folder Name="/Documentation/">
+    <File Path="docs/middleware-patterns.md" />
+  </Folder>
+  <Folder Name="/Documentation/1. Canonical Docs/">
+    <File Path="docs/canon/CAN-001-dom-structure.md" />
+  </Folder>
+  <Folder Name="/Documentation/2. Work Tracks/">
+    <File Path="docs/tracks/TRK-001-sdm-unit-test-dom-mock-fidelity.md" />
+    <File Path="docs/tracks/TRK-002-sdm-import-export-bulk-reads.md" />
+  </Folder>
+  <Folder Name="/Documentation/3. Work Items/">
+    <File Path="docs/items/ITM-001-dom-mock-field-value-type-validation.md" />
+    <File Path="docs/items/ITM-002-sdm-json-serialization-contract.md" />
+    <File Path="docs/items/ITM-003-property-scope-convention.md" />
+  </Folder>
+  <Folder Name="/Documentation/4. Work Specs/">
+    <File Path="docs/specs/SPC-001-dom-mock-field-value-type-validation.md" />
+    <File Path="docs/specs/SPC-002-sdm-json-serialization-contract.md" />
+    <File Path="docs/specs/SPC-003-property-scope-convention.md" />
+  </Folder>
+  <Folder Name="/Documentation/adr/">
+    <File Path="docs/adr/0001-infraops-package-boundaries-and-composition.md" />
+  </Folder>
   <Folder Name="/SDM.Tests/">
     <Project Path="SDM.AssetManagementTests/SDM.AssetManagement.Tests.csproj" />
     <Project Path="SDM.FacilityManagement.Tests/SDM.FacilityManagement.Tests.csproj" />
