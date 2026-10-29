@@ -249,7 +249,7 @@ Column legend for the tables below: **Link** = `SectionDefinitionLink` flags; **
 
 **Entity rules:**
 
-- `no-db` At most one of ParentAsset, Rack, Desk, Container, Room may be set in `Location`, and likewise in `DestinationLocation`.
+- `no-db` At most one of ParentAsset, Rack, Desk, Container or Room may be set in `Location`, and likewise in `DestinationLocation`.
 - `no-db` `Location` is editable only when the asset is new or State ∈ {Available, InPlanning, BuildPlanReady, InRepair, Disposed}.
 - `no-db` `DestinationLocation` is editable only when State = InTransit, and is mandatory when State = InTransit.
 - `no-db` Installation info (InstallationDate + InstallationUserId) is editable only when the asset is new or its original State ∉ {Installed, InService, Disposed}; both must be set before the transition to Installed.
