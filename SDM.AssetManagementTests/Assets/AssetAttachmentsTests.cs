@@ -18,7 +18,7 @@ namespace SDM.AssetManagement.Tests.Assets
 
     /// <summary>
     /// Unit tests for the <see cref="Attachment"/> convenience methods on <see cref="Asset"/>
-    /// (AddAttachment/RemoveItemFromAttachments/SetAttachments/ClearAttachments), plus a DOM
+    /// (AddAttachment/RemoveItemFromAttachments), plus a DOM
     /// round-trip test verifying attachments persist, mirroring the JobAttachment implementation.
     /// </summary>
     [TestClass]
@@ -90,7 +90,7 @@ namespace SDM.AssetManagement.Tests.Assets
         }
 
         [TestMethod]
-        public void SetAttachments_ShouldReplaceExistingList()
+        public void SettingAttachments_ShouldReplaceExistingList()
         {
             var asset = new Asset();
             asset.AddAttachment(new Attachment { FilePath = @"C:\file1.pdf" });
@@ -100,18 +100,18 @@ namespace SDM.AssetManagement.Tests.Assets
                 new Attachment { FilePath = @"C:\file2.pdf" },
                 new Attachment { FilePath = @"C:\file3.pdf" },
             };
-            asset.SetAttachments(replacement);
+            asset.Attachments = replacement;
 
             asset.Attachments.Should().BeEquivalentTo(replacement);
         }
 
         [TestMethod]
-        public void ClearAttachments_ShouldEmptyList()
+        public void ClearingAttachments_ShouldEmptyList()
         {
             var asset = new Asset();
             asset.AddAttachment(new Attachment { FilePath = @"C:\file1.pdf" });
 
-            asset.ClearAttachments();
+            asset.Attachments.Clear();
 
             asset.Attachments.Should().BeEmpty();
         }

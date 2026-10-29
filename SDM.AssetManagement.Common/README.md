@@ -14,6 +14,18 @@ Port types require a non-null, non-empty, non-whitespace name on create and upda
 
 The repository does not contain the external code generator's schema or templates, and its source-generator package reference is disabled. When regenerating the checked-in History repository, preserve this string storage mapping and run the History repository tests. The mock section definition already declares Instance ID as `typeof(string)`.
 
+### Asset class images and attachments
+
+Assign `assetClass.FrontImage` or `assetClass.BackImage` directly. A non-blank path automatically adds an attachment if that exact path is not already present. Existing attachment metadata is preserved, and front/back images can share an attachment. Null, empty, and whitespace paths do not add attachments. Changing or clearing an image retains its previous attachment.
+
+When deserializing JSON, an explicit `Attachments` property replaces the collection instead of appending to attachments created by the image setters, preventing duplicates and preserving supplied metadata.
+
+The `AddFrontImageAndAttachment` and `AddBackImageAndAttachment` extensions have been removed; replace calls with property assignments. The `SetAttachments` and `ClearAttachments` extensions for both `Asset` and `AssetClass` have also been removed; assign `Attachments` directly or use `Attachments.Clear()`. The equivalent job wrappers, `SetJobAttachments` and `ClearJobAttachments`, are also removed. These extension removals require callers to update their source.
+
+`AddAttachment` still rejects duplicate paths. `RemoveItemFromAttachments` removes by path and, for asset classes, rejects attachments used as front/back images. `RemoveAttachmentAndDependencies` explicitly clears any referencing images before removal. `IsImage` classifies attachment paths by file extension; it does not inspect or upload files.
+
+Attachments remain mutable. Replacing or clearing the collection, or changing an attachment path, can invalidate a selected image; validation continues to report missing image attachments. Automatic attachment creation only updates the in-memory model, not the underlying file or DOM/database until saved.
+
 ### About DataMiner
 
 DataMiner is a transformational platform that provides vendor-independent control and monitoring of devices and services. Out of the box and by design, it addresses key challenges such as security, complexity, multi-cloud, and much more. It has a pronounced open architecture and powerful capabilities enabling users to evolve easily and continuously.

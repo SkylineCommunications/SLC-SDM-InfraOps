@@ -114,16 +114,32 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             set => PlanField.Value = value;
         }
 
+        /// <summary>
+        /// Gets or sets the front image path, adding a missing attachment for a non-blank path.
+        /// Changing or clearing the image does not remove existing attachments.
+        /// </summary>
         public string FrontImage
         {
             get => FrontImageField.Value;
-            set => FrontImageField.Value = value;
+            set
+            {
+                EnsureImageAttachment(value);
+                FrontImageField.Value = value;
+            }
         }
 
+        /// <summary>
+        /// Gets or sets the back image path, adding a missing attachment for a non-blank path.
+        /// Changing or clearing the image does not remove existing attachments.
+        /// </summary>
         public string BackImage
         {
             get => BackImageField.Value;
-            set => BackImageField.Value = value;
+            set
+            {
+                EnsureImageAttachment(value);
+                BackImageField.Value = value;
+            }
         }
 
         public double? TypicalPowerConsumption
@@ -182,6 +198,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             set => _protocolLink = value ?? new ProtocolLink();
         }
 
+        [JsonProperty(ObjectCreationHandling = ObjectCreationHandling.Replace)]
         public List<Attachment> Attachments
         {
             get => AttachmentsField.Value ?? (AttachmentsField.Value = new List<Attachment>());
@@ -394,6 +411,15 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
 
             _protocolLink?.ResetChangeTracking();
+        }
+
+        private void EnsureImageAttachment(string imagePath)
+        {
+            if (!string.IsNullOrWhiteSpace(imagePath)
+                && !Attachments.Any(a => a?.FilePath == imagePath))
+            {
+                Attachments.Add(new Attachment { FilePath = imagePath });
+            }
         }
 
         #region Section Tracking
