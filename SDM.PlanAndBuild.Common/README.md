@@ -13,6 +13,9 @@ continue to require existing references; other validation, including Job state r
 as a string identifier, matching the installed Connections on Job section. Preserve this
 string mapping when regenerating the DOM repository; it is not a GUID-typed DOM field.
 
+## Job attachments
+
+`SetJobAttachments` and `ClearJobAttachments` have been removed. Assign `job.Attachments` directly to replace the collection, or call `job.Attachments.Clear()` to clear it in place. Assigning null produces an empty collection. `AddJobAttachment` remains useful for rejecting duplicate paths, and `RemoveItemFromJobAttachments` removes by path and reports missing attachments.
 
 ### About DataMiner
 

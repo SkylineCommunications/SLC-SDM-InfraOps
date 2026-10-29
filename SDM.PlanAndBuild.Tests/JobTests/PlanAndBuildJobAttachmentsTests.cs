@@ -12,7 +12,7 @@
 
 	/// <summary>
 	/// Unit tests for the JobAttachment convenience methods on <see cref="PlanAndBuildJob"/>
-	/// (AddJobAttachment/RemoveItemFromJobAttachments/SetJobAttachments/ClearJobAttachments),
+	/// (AddJobAttachment/RemoveItemFromJobAttachments),
 	/// mirroring InfraOpsShared's JobWrapper API.
 	/// </summary>
 	[TestClass]
@@ -84,7 +84,7 @@
 		}
 
 		[TestMethod]
-		public void SetJobAttachments_ShouldReplaceExistingList()
+		public void SettingAttachments_ShouldReplaceExistingList()
 		{
 			var job = new PlanAndBuildJob();
 			job.AddJobAttachment(new JobAttachment { FilePath = @"C:\file1.pdf" });
@@ -94,18 +94,18 @@
 				new JobAttachment { FilePath = @"C:\file2.pdf" },
 				new JobAttachment { FilePath = @"C:\file3.pdf" },
 			};
-			job.SetJobAttachments(replacement);
+			job.Attachments = replacement;
 
 			job.Attachments.Should().BeEquivalentTo(replacement);
 		}
 
 		[TestMethod]
-		public void ClearJobAttachments_ShouldEmptyList()
+		public void ClearingAttachments_ShouldEmptyList()
 		{
 			var job = new PlanAndBuildJob();
 			job.AddJobAttachment(new JobAttachment { FilePath = @"C:\file1.pdf" });
 
-			job.ClearJobAttachments();
+			job.Attachments.Clear();
 
 			job.Attachments.Should().BeEmpty();
 		}
