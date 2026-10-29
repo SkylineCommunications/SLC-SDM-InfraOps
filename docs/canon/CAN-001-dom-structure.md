@@ -14,7 +14,7 @@ title: DOM structure and field rules
 | Supersedes | — |
 | Related | [ADR-0001](../adr/0001-infraops-package-boundaries-and-composition.md), [TRK-001](../tracks/TRK-001-sdm-unit-test-dom-mock-fidelity.md), [TRK-002](../tracks/TRK-002-sdm-import-export-bulk-reads.md), [SPC-001](../specs/SPC-001-dom-mock-field-value-type-validation.md), [SPC-002](../specs/SPC-002-sdm-json-serialization-contract.md) |
 
-> **Derived from codebase.** Every GUID, field, type, status and transition below was extracted mechanically from this repository on 2026-10-28: the four `<Module>MockMessageHandler.cs` seeds (section definitions, field descriptors, definition links, behaviours), the four `<Module>DomIds.cs` files (GUIDs, enums, status ids), the 25 `<Entity>DomRepository.g.cs` files (model property per field, reference targets, read/write CLR types) and the `<Entity>DomMapper.g.cs` alias tables. Nothing was read from a live DataMiner system; see [§12](#12-facts-reviewers-must-know) for what that implies. Confidence is [Certain] for every table unless a cell says otherwise.
+> **Derived from codebase.** Every GUID, field, type, status and transition below was extracted from the SDM codebase on 2026-10-28: the in-memory seed definitions, the DomIds constants, the entity repositories (model property per field, reference targets, read/write CLR types) and the mappers. Nothing was read from a live DataMiner system; see [§12](#12-facts-reviewers-must-know) for what that implies. Confidence is [Certain] for every table unless a cell says otherwise. This document names classes and concepts, not file paths, so it stays valid when code moves.
 
 ## Table of contents
 
@@ -32,7 +32,6 @@ title: DOM structure and field rules
 12. [Facts reviewers must know](#12-facts-reviewers-must-know)
 13. [Known deviations](#13-known-deviations-flagged-not-fixed)
 14. [Rejected alternatives](#14-rejected-alternatives)
-15. [Source files reference](#15-source-files-reference)
 
 ## Terms
 
@@ -45,21 +44,28 @@ title: DOM structure and field rules
 | Repeating-section element | A `ChangeTrackingBase` subtype (for example `AssetHolder`) that is one entry of a `List<T>` on the entity; each element is one DOM `Section` of the same `SectionDefinition`. |
 | Link | `SectionDefinitionLink` from a definition to a section: **mandatory** (default), **optional** (`IsOptional`), **repeatable** (`AllowMultipleSections`). |
 | DomIds | `SharedMappers.DomIds.<Module>` — GUID constants for module, definitions, sections, fields, behaviours and DOM enums. |
-| Mapper | `<Entity>DomMapper.g.cs` — binds model-side section/field names to DomIds. |
-| Repository | `<Entity>DomRepository.g.cs` — `FromInstance` / `ToInstance` plus filter translation. |
-| Seed | `<Module>MockMessageHandler.cs` — in-memory definitions used by every test. |
+| Mapper | `<Entity>DomMapper` — binds model-side section/field names to DomIds. |
+| Repository | `<Entity>DomRepository` — `FromInstance` / `ToInstance` plus filter translation. |
+| Seed | `<Module>MockMessageHandler` — in-memory definitions used by every test. |
 | P&O | People & Organizations SDM (`Person`, `Organization`, `Team`, `Role`). External module; referenced, never defined here. |
 
 ## The chain every field goes through
 
 ```mermaid
 flowchart LR
-    M[Model property<br/>+ *Field tracker] --> MP[Mapper<br/>FieldDescriptorID binding]
-    MP --> R[Repository<br/>ToInstance / FromInstance]
-    R --> D[(DOM instance)]
-    S[Seed SectionDefinition<br/>FieldDescriptor type] -. must match .-> R
-    I[DomIds constants] --> MP
-    I --> S
+    ID["<b>DomIds</b><br/>constant"]
+    SEED["<b>Seed</b><br/>SectionDefinition +<br/>FieldDescriptor"]
+    MAP["<b>Mapper</b><br/>FieldDescriptorID<br/>binding"]
+    REPO["<b>Repository</b><br/>ToInstance /<br/>FromInstance"]
+    MODEL["<b>Model</b><br/>property + *Field<br/>tracker"]
+    DOM[("DOM instance")]
+
+    ID --> SEED
+    ID --> MAP
+    MODEL --> MAP
+    MAP --> REPO
+    REPO --> DOM
+    SEED -. "descriptor type<br/>must match" .-> REPO
 ```
 
 A field exists only when all five places agree: DomIds constant, seed descriptor, mapper binding, repository read **and** write, model property with its tracker. A missing link is a defect, not a partial feature. [§13](#13-known-deviations-flagged-not-fixed) lists the fields where a link is missing today.
@@ -76,7 +82,7 @@ A field exists only when all five places agree: DomIds constant, seed descriptor
 | InfraOps Properties | `(infraops)properties` | `SDM.InfraOpsProperties.Common` | 2 | 0 | 5 | 15 |
 | **Total** | | | **25** | **11** | **67** | **259** |
 
-"Field descriptors" counts descriptors per section definition, so a section shared by two definitions (Asset Manager `Holders`, `Attachment`, `CategoryLink`, `DataPortInfo`, `PowerPortInfo`, `Asset`, `PrimaryPortRelation`; Facility Manager `Room`, `Resource`) is counted once.
+"Field descriptors" counts descriptors per section definition, so a section shared by two definitions (Asset Manager `Holders`, `Attachment`, `CategoryLink`, `DataPortInfo`, `PowerPortInfo`, `Asset`, `PrimaryPortRelation`; Facility Manager `Room`, `Resource`) is counted once. **All counts in this document are a snapshot of 2026-10-28 and live only in this section**; they change whenever a field is added, so re-derive them rather than trusting them.
 
 Field-descriptor CLR types in use across all 259 descriptors:
 
@@ -115,63 +121,44 @@ A relationship is a `Guid` (or `List<Guid>`) field whose repository `FromInstanc
 | `PnoObjectReference<T>` | P&O `Person`, `Organization`, `Team`, `Role` | GUID; implicit conversion | solid arrow to **P&O** |
 | `ISdmObjectReference<ISdmObject>` / `ISdmObjectReference<IPort>` | untyped; resolved by the caller | identifier string | dotted arrow |
 
-```mermaid
-flowchart LR
-    subgraph AM["Asset Manager · (slc)asset_management"]
-        Asset
-        AssetClass[Asset Class]
-        DataPort[Data Port]
-        PowerPort[Power Port]
-        PortType[Port Type]
-        CableType[Cable Type]
-        DeviceType[Device Type]
-        Connection[Connections]
-        Reservation[Reservations]
-        History
-        AMSettings[App Settings]
-    end
-    subgraph FM["Facility Manager · (slc)facility_management"]
-        Site --> Facility --> Floor --> Room
-        Room --> Row --> Rack
-        Room --> Zone --> Rack
-        Room --> Desk
-        FMSettings[App Settings]
-    end
-    subgraph PB["Plan & Build · (slc)plan_and_build"]
-        Job --> JobType[Job Type]
-        PBSettings[App Settings]
-    end
-    subgraph PR["InfraOps Properties · (infraops)properties"]
-        PropertyValues[Property Values] --> Property
-    end
-    PNO[("People & Organizations<br/>Person · Organization · Team · Role")]
+The diagram shows module-to-module traffic only; solid arrows are typed references, dotted arrows are untyped. Arrow direction is "holds a reference to". Each module's own definitions are drawn in §3–§6.
 
-    Asset --> AssetClass
-    Asset -- ParentAsset --> Asset
-    Asset -- "Rack · Desk · Container · Room<br/>(×2: Location, DestinationLocation)" --> FM
-    AssetClass --> DeviceType
-    AssetClass -- Manufacturer --> PNO
-    AssetClass -- "DataPortInfo / PowerPortInfo .PortType" --> PortType
-    DataPort --> Asset
-    DataPort --> PortType
-    PowerPort --> Asset
-    PowerPort --> PortType
-    PortType -- CableTypes --> CableType
-    Connection --> CableType
-    Connection -- "Source / Destination .PortType" --> PortType
-    Connection -. "Source / Destination .Port<br/>ISdmObjectReference IPort" .-> DataPort
-    Reservation --> Rack
-    Reservation -. "LinkedJob.Job<br/>ISdmObjectReference" .-> Job
-    History -. "Job · InstanceID<br/>ISdmObjectReference" .-> Job
-    Asset -- "Ownership · Custody · Lifecycle users" --> PNO
-    Room -- "Ownership .Team / .Owner" --> PNO
-    Job -- "AssignedTo · AssignmentGroup" --> PNO
-    Job -- AssetsUsed.AssetID --> Asset
-    Job -- ConnectionsOnJob.ConnectionID --> Connection
-    Job -- ConnectionsOnJob.Cabletype --> CableType
+```mermaid
+flowchart TB
+    AM["<b>Asset Manager</b>"]
+    FM["<b>Facility Manager</b>"]
+    PB["<b>Plan and Build</b>"]
+    PR["<b>InfraOps Properties</b>"]
+    PNO[("<b>People and Organizations</b><br/>external module")]
+    ANY(["any SDM object"])
+
+    AM -- "Asset location, Reservations" --> FM
+    PB -- "AssetsUsed, ConnectionsOnJob" --> AM
+    AM -. "Reservations, History<br/>(untyped Job reference)" .-> PB
+    AM -- "Ownership, Custody,<br/>Lifecycle, Manufacturer" --> PNO
+    FM -- "Room ownership" --> PNO
+    PB -- "AssignedTo,<br/>AssignmentGroup" --> PNO
+    PR -. "LinkedObjectID + Scope<br/>(string, untyped)" .-> ANY
 ```
 
-Arrow direction is "holds a reference to". The Facility tree is the only strict hierarchy; `Rack` has two parents (`Row` **and** `Zone`, both mandatory sections). Asset location points at four Facility definitions at once (`Rack`, `Desk`, `Container`→`Facility`, `Room`) and the same four again in `AssetLocationDestination`.
+Every reference that crosses a module boundary:
+
+| From (module · definition) | Field | To | Kind |
+|---|---|---|---|
+| Asset Manager · Asset | `Location.*` and `DestinationLocation.*`: Rack, Desk, Container, Room | Facility Manager · Rack, Desk, Facility (Container), Room | typed |
+| Asset Manager · Asset | Lifecycle users, Ownership, Custody | P&O | `PnoObjectReference` |
+| Asset Manager · Asset Class | `AssetClassInfo.Manufacturer` | P&O | `PnoObjectReference` |
+| Asset Manager · Reservations | `ReservationRack.Rack` | Facility Manager · Rack | typed |
+| Asset Manager · Reservations | `LinkedJob.Job` | Plan & Build · Job | untyped |
+| Asset Manager · History | `HistoryInfo.Job` | Plan & Build · Job | untyped |
+| Facility Manager · Room | `RoomOwnership.Team` / `.Owner` | P&O | `PnoObjectReference` |
+| Plan & Build · Job | `JobOwnership.AssignedTo` / `.AssignmentGroup` | P&O | `PnoObjectReference` |
+| Plan & Build · Job | `AssetsUsed[].AssetID` | Asset Manager · Asset | typed |
+| Plan & Build · Job | `ConnectionsOnJob[].ConnectionID` | Asset Manager · Connections | typed |
+| Plan & Build · Job | `ConnectionsOnJob[].Cabletype` | Asset Manager · Cable Type | typed (stored as `string`, see §13) |
+| InfraOps Properties · Property Values | `PropertyValueInfo.LinkedObjectID` + `Scope` | any SDM object | `string`, untyped |
+
+The Facility tree is the only strict hierarchy; `Rack` has two parents (`Row` **and** `Zone`, both mandatory sections). Asset location points at four Facility definitions at once (`Rack`, `Desk`, `Container`→`Facility`, `Room`) and the same four again in `AssetLocationDestination`.
 
 Cross-package dependencies implied by the references: `PlanAndBuild → AssetManagement` (Asset, Connection, Cable Type), `AssetManagement → FacilityManagement` (Rack, Desk, Facility, Room), all three → People & Organizations. `InfraopsProperties` links to any object only through the untyped `PropertyValueInfo.LinkedObjectID` (`string`) + `Scope` pair, never through a typed reference.
 
@@ -181,87 +168,73 @@ Cross-package dependencies implied by the references: `PlanAndBuild → AssetMan
 
 ## 3. Asset Manager — `SlcAsset_Management`
 
-`ModuleId` `(slc)asset_management` · 11 definitions · 2 behaviours (`Asset_Behavior`, `Asset_Class_Behavior`) · 35 sections · 131 field descriptors.
+`ModuleId` `(slc)asset_management` · behaviours `Asset_Behavior`, `Asset_Class_Behavior`.
+
+Fields per definition are in the tables below; the diagrams show how the definitions relate. References are drawn as `Section.Field`; dotted arrows are untyped.
+
+**Classes, devices and ownership**
 
 ```mermaid
-erDiagram
-    ASSET ||--o| ASSET_CLASS : "AssetInformation.AssetClass"
-    ASSET |o--o| ASSET : "AssetLocation.ParentAsset"
-    ASSET_CLASS ||--o| DEVICE_TYPE : "AssetClassInfo.DeviceType"
-    ASSET_CLASS }o--o{ PORT_TYPE : "DataPortInfo / PowerPortInfo .PortType"
-    DATA_PORT ||--|| ASSET : "Asset.AssetID"
-    DATA_PORT }o--o| PORT_TYPE : "DataPortInfo.PortType"
-    POWER_PORT ||--|| ASSET : "Asset.AssetID"
-    POWER_PORT }o--o| PORT_TYPE : "PowerPortInfo.PortType"
-    PORT_TYPE }o--o{ CABLE_TYPE : "CableCompatibility.CableTypes"
-    CONNECTIONS }o--o| CABLE_TYPE : "CableInformation.CableType"
-    CONNECTIONS }o--o| PORT_TYPE : "SourceInfo / DestinationInfo .PortType"
-    CONNECTIONS }o..o| DATA_PORT : "SourcePort / DestinationPort (IPort, untyped)"
-    RESERVATIONS }o--|| RACK_FM : "ReservationRack.Rack (Facility Manager)"
-    RESERVATIONS }o..o| JOB_PB : "LinkedJob.Job (untyped)"
-    HISTORY }o..o| JOB_PB : "HistoryInfo.Job (untyped)"
-    ASSET }o--o| PNO : "Lifecycle users · Ownership · Custody"
-    ASSET_CLASS }o--o| PNO : "AssetClassInfo.Manufacturer"
-    ASSET {
-        string Identifier PK
-        string AssetName
-        string SerialNumber
-        guid AssetClass FK
-        string AssetID
-        list_int OperationalFlags
-    }
-    ASSET_CLASS {
-        string Identifier PK
-        string Name
-        guid DeviceType FK
-        guid Manufacturer FK
-        double HeightU
-    }
-    DATA_PORT {
-        string Identifier PK
-        long PortNumber
-        guid PortType FK
-        guid AssetID FK
-    }
-    POWER_PORT {
-        string Identifier PK
-        long PortNumber
-        guid PortType FK
-        guid AssetID FK
-    }
-    CONNECTIONS {
-        string Identifier PK
-        int ConnectionType
-        guid CableType FK
-        guid SourcePort FK
-        guid DestinationPort FK
-    }
-    RESERVATIONS {
-        string Identifier PK
-        guid Rack FK
-        guid Job FK
-    }
-    HISTORY {
-        string Identifier PK
-        string TypeOfHistory
-        guid Job FK
-        string InstanceID
-    }
-    PORT_TYPE {
-        string Identifier PK
-        string Name
-        list_guid CableTypes FK
-    }
-    CABLE_TYPE {
-        string Identifier PK
-        string Name
-    }
-    DEVICE_TYPE {
-        string Identifier PK
-        string Name
-        list_int Tags
-    }
+flowchart TB
+    Asset["<b>Asset</b>"]
+    AssetClass["<b>Asset Class</b>"]
+    DeviceType["<b>Device Type</b>"]
+    PortType["<b>Port Type</b>"]
+    PNO[("People and Organizations")]
+
+    Asset -- "AssetInformation.AssetClass" --> AssetClass
+    Asset -- "AssetLocation.ParentAsset" --> Asset
+    AssetClass -- "AssetClassInfo.DeviceType" --> DeviceType
+    AssetClass -- "DataPortInfo / PowerPortInfo<br/>.PortType (port templates)" --> PortType
+    AssetClass -- "AssetClassInfo.Manufacturer" --> PNO
+    Asset -- "Lifecycle users,<br/>Ownership, Custody" --> PNO
 ```
+
+**Ports and cabling**
+
+```mermaid
+flowchart TB
+    Asset["<b>Asset</b>"]
+    DataPort["<b>Data Port</b>"]
+    PowerPort["<b>Power Port</b>"]
+    PortType["<b>Port Type</b>"]
+    CableType["<b>Cable Type</b>"]
+    Connections["<b>Connections</b>"]
+
+    DataPort -- "Asset.AssetID" --> Asset
+    PowerPort -- "Asset.AssetID" --> Asset
+    DataPort -- "DataPortInfo.PortType" --> PortType
+    PowerPort -- "PowerPortInfo.PortType" --> PortType
+    PortType -- "CableCompatibility.CableTypes" --> CableType
+    Connections -- "CableInformation.CableType" --> CableType
+    Connections -- "Source / Destination .PortType" --> PortType
+    Connections -. "Source / Destination .Port<br/>(untyped IPort)" .-> DataPort
+```
+
+**References leaving the module** (Asset location, Reservations, History)
+
+```mermaid
+flowchart LR
+    Asset["<b>Asset</b>"]
+    Reservations["<b>Reservations</b>"]
+    History["<b>History</b>"]
+    subgraph FM["Facility Manager"]
+        Rack
+        Desk
+        Facility["Facility<br/>(Container)"]
+        Room
+    end
+    subgraph PB["Plan and Build"]
+        Job
+    end
+
+    Asset -- "Location /<br/>DestinationLocation" --> FM["Facility Manager"]
+    Reservations -- "ReservationRack.Rack" --> Rack
+    Reservations -. "LinkedJob.Job<br/>(untyped)" .-> Job
+    History -. "HistoryInfo.Job<br/>(untyped)" .-> Job
+```
+
+App Settings has no relations and is not drawn. Cross-module references are summarised in [§2](#2-cross-module-relationship-graph).
 
 Shared sections inside this module: `Holders` and `Attachment` are linked by both **Asset** and **Asset Class**; `DataPortInfo` / `PowerPortInfo` are the single mandatory section of **Data Port** / **Power Port** *and* a repeatable, optional section of **Asset Class** (the class declares its port template; the port definitions instantiate it). `Asset` and `PrimaryPortRelation` are shared by both port definitions. `CategoryLink` is shared by **Port Type** and **Cable Type**.
 
@@ -272,7 +245,7 @@ Column legend for the tables below: **Link** = `SectionDefinitionLink` flags; **
 **Definition ID:** `9035d110-47f3-412d-ac8a-fde31bd4b00f`  
 **Model:** `Asset`  
 **Behavior:** `Asset_Behavior`  
-**Validator:** `AssetValidator`, `AssetValidationHandler`, `AssetValidationCore`, `PlacementValidator`, `RackPlacementValidation`, `AssetTransitionValidator` (`SDM.AssetManagement.Common\Validation\Asset\`)  
+**Validator:** `AssetValidator`, `AssetValidationHandler`, `AssetValidationCore`, `PlacementValidator`, `RackPlacementValidation`, `AssetTransitionValidator`  
 
 **Entity rules:**
 
@@ -345,7 +318,7 @@ Column legend for the tables below: **Link** = `SectionDefinitionLink` flags; **
 **Definition ID:** `d6f9c4c8-9f8d-4e8c-a7e0-1e1500563416`  
 **Model:** `AssetClass`  
 **Behavior:** `Asset_Class_Behavior`  
-**Validator:** `AssetClassValidator`, `AssetClassValidationHandler`, `PortNumberValidator` (`SDM.AssetManagement.Common\Validation\AssetClass\`, `Generic\`)  
+**Validator:** `AssetClassValidator`, `AssetClassValidationHandler`, `PortNumberValidator`  
 
 **Entity rules:**
 
@@ -433,7 +406,7 @@ Column legend for the tables below: **Link** = `SectionDefinitionLink` flags; **
 **Definition ID:** `a7844a51-8221-48da-9a0e-7cfa20262715`  
 **Model:** `Connection`  
 **Behavior:** none  
-**Validator:** `ConnectionValidator`, `ConnectionValidationHandler`, `ConnectionValidationExtensions` (`SDM.AssetManagement.Common\Validation\Connection\`)  
+**Validator:** `ConnectionValidator`, `ConnectionValidationHandler`, `ConnectionValidationExtensions`  
 
 **Entity rules:**
 
@@ -461,7 +434,7 @@ Column legend for the tables below: **Link** = `SectionDefinitionLink` flags; **
 **Definition ID:** `280b26f8-7245-4b67-85c1-d42bcf3e9c41`  
 **Model:** `DataPort`  
 **Behavior:** none  
-**Validator:** `DataPortValidator`, `DataPortValidationCore`, `DataPortValidationHandler` (`SDM.AssetManagement.Common\Validation\DataPort\`)  
+**Validator:** `DataPortValidator`, `DataPortValidationCore`, `DataPortValidationHandler`  
 
 **Entity rules:**
 
@@ -528,7 +501,7 @@ Column legend for the tables below: **Link** = `SectionDefinitionLink` flags; **
 **Definition ID:** `ff930185-a380-46bf-8bfb-8c70f6933c67`  
 **Model:** `PortType`  
 **Behavior:** none  
-**Validator:** `PortTypeValidator` (`SDM.AssetManagement.Common\Validation\PortType\`)  
+**Validator:** `PortTypeValidator`  
 
 **Entity rules:**
 
@@ -546,7 +519,7 @@ Column legend for the tables below: **Link** = `SectionDefinitionLink` flags; **
 **Definition ID:** `edfd08fd-ecae-44db-949a-8ca5d17ee22d`  
 **Model:** `PowerPort`  
 **Behavior:** none  
-**Validator:** `PowerPortValidator`, `PowerPortValidationCore`, `PowerPortValidationHandler` (`SDM.AssetManagement.Common\Validation\PowerPort\`)  
+**Validator:** `PowerPortValidator`, `PowerPortValidationCore`, `PowerPortValidationHandler`  
 
 **Entity rules:**
 
@@ -570,7 +543,7 @@ Column legend for the tables below: **Link** = `SectionDefinitionLink` flags; **
 **Definition ID:** `203aacf0-ad18-4d52-b243-9547fa8b2553`  
 **Model:** `InfraopsReservation`  
 **Behavior:** none  
-**Validator:** `InfraopsReservationValidator` (`SDM.AssetManagement.Common\Validation\Reservations\`), `RackPlacementValidation` (`Validation\Asset\`)  
+**Validator:** `InfraopsReservationValidator`, `RackPlacementValidation`  
 
 **Entity rules:**
 
@@ -589,84 +562,32 @@ Column legend for the tables below: **Link** = `SectionDefinitionLink` flags; **
 
 ## 4. Facility Manager — `SlcFacility_Management`
 
-`ModuleId` `(slc)facility_management` · 9 definitions · 8 behaviours (one per physical entity, all identical Draft → Active → Deprecated) · 20 sections · 78 field descriptors.
+`ModuleId` `(slc)facility_management` · one behaviour per physical entity, all identical Draft → Active → Deprecated.
 
 ```mermaid
-erDiagram
-    SITE ||--o{ FACILITY : "Site.Site_f08b42c7"
-    FACILITY ||--o{ FLOOR : "Facility.Facility_fc282509"
-    FLOOR ||--o{ ROOM : "Floor.Floor_6a3f0eeb"
-    ROOM ||--o{ ROW : "Room.Room_8d904f8d"
-    ROOM ||--o{ ZONE : "Room.Room_8d904f8d"
-    ROOM ||--o{ DESK : "Room.Room_8d904f8d"
-    ROW ||--o{ RACK : "Row.Row_5d2f9bb3"
-    ZONE ||--o{ RACK : "Zone.Zone_45922fd2"
-    ROOM }o--o| PNO : "RoomOwnership.Team / .Owner"
-    SITE {
-        string Identifier PK
-        string Name
-        string SiteID
-        double Latitude
-        double Longitude
-    }
-    FACILITY {
-        string Identifier PK
-        string Name
-        string FacilityType
-        string FacilityID
-        guid Site FK
-    }
-    FLOOR {
-        string Identifier PK
-        string Name
-        string FloorID
-        guid Facility FK
-    }
-    ROOM {
-        string Identifier PK
-        string Name
-        string RoomID
-        long Width
-        long Depth
-        guid Floor FK
-        guid LinkedResource
-    }
-    ROW {
-        string Identifier PK
-        string Name
-        string RowID
-        double Y
-        guid Room FK
-        guid LinkedResource
-    }
-    ZONE {
-        string Identifier PK
-        string Name
-        string ZoneID
-        int ThermalType
-        double CoolingCapacity
-        guid Room FK
-        guid LinkedResource
-    }
-    RACK {
-        string Identifier PK
-        string Name
-        string RackID
-        double MaximumRackCapacity
-        double MaximumPowerCapacity
-        int PlacementOrientation
-        guid Row FK
-        guid Zone FK
-        guid LinkedResource
-    }
-    DESK {
-        string Identifier PK
-        string Name
-        string DeskID
-        guid Room FK
-        guid LinkedResource
-    }
+flowchart TB
+    Site["<b>Site</b>"]
+    Facility["<b>Facility</b>"]
+    Floor["<b>Floor</b>"]
+    Room["<b>Room</b>"]
+    Row["<b>Row</b>"]
+    Zone["<b>Zone</b>"]
+    Desk["<b>Desk</b>"]
+    Rack["<b>Rack</b>"]
+    PNO[("People and Organizations")]
+
+    Site -- "1 : n" --> Facility
+    Facility -- "1 : n" --> Floor
+    Floor -- "1 : n" --> Room
+    Room -- "1 : n" --> Row
+    Room -- "1 : n" --> Zone
+    Room -- "1 : n" --> Desk
+    Row -- "1 : n" --> Rack
+    Zone -- "1 : n" --> Rack
+    Room -. "RoomOwnership<br/>Team / Owner" .-> PNO
 ```
+
+The tree is a strict hierarchy except **Rack**, which has two mandatory parents (**Row** and **Zone**). Every arrow is a 1 : n parent link.
 
 Two sections are shared across definitions: `Room` (`3ee83337-…`) is the parent link of **Row**, **Zone** and **Desk**; `Resource` (`2f8f34af-…`) carries the DataMiner booking-resource id on **Rack**, **Zone**, **Row**, **Desk** and **Room**. The parent-link field names are generator-suffixed (`Site_f08b42c7`, `Facility_fc282509`, `Floor_6a3f0eeb`, `Room_8d904f8d`, `Row_5d2f9bb3`, `Zone_45922fd2`); the mapper aliases them to `<Parent>Fk.<Parent>` (rule D8).
 
@@ -677,7 +598,7 @@ Two sections are shared across definitions: `Room` (`3ee83337-…`) is the paren
 **Definition ID:** `9af0e791-b171-4b92-86e7-79dbb8282f66`  
 **Model:** `Desk`  
 **Behavior:** `Desk_Behaviour`  
-**Validator:** `DeskValidator`, `DeskValidationHandler` (`SDM.FacilityManagement.Common\Validation\`)  
+**Validator:** `DeskValidator`, `DeskValidationHandler`  
 
 | Section | Section ID | Link | Field | DOM type | Model property | Notes | Rules |
 |---|---|---|---|---|---|---|---|
@@ -877,41 +798,27 @@ Two sections are shared across definitions: `Room` (`3ee83337-…`) is the paren
 
 ## 5. Plan & Build — `SlcPlan_And_Build`
 
-`ModuleId` `(slc)plan_and_build` · 3 definitions · 1 behaviour (`Job_Behavior`) · 7 sections · 35 field descriptors.
+`ModuleId` `(slc)plan_and_build` · behaviour `Job_Behavior`.
 
 ```mermaid
-erDiagram
-    JOB }o--o| JOB_TYPE : "JobInformation.Type"
-    JOB }o--o| PNO : "JobOwnership.AssignedTo / .AssignmentGroup"
-    JOB }o--o{ ASSET_AM : "AssetsUsed[].AssetID (Asset Manager)"
-    JOB }o--o{ CONNECTION_AM : "ConnectionsOnJob[].ConnectionID (Asset Manager)"
-    JOB }o--o{ CABLE_TYPE_AM : "ConnectionsOnJob[].Cabletype (Asset Manager)"
-    JOB {
-        string Identifier PK
-        string JobID
-        string JobName
-        string JobType
-        guid Type FK
-        string Priority
-        string SubState
-        list_guid Locations
-        datetime Start
-        datetime End
-    }
-    JOB_TYPE {
-        string Identifier PK
-        string Name
-        string Icon
-    }
-    APP_SETTINGS {
-        string Identifier PK
-        string JobIDPrefix
-        long JobIDNextSequence
-        long JobIDIncrement
-        long JobIDStartingSeed
-        long JobIDMinimumDigits
-    }
+flowchart LR
+    Job["<b>Job</b>"]
+    JobType["<b>Job Type</b>"]
+    PNO[("People and Organizations")]
+    subgraph AM["Asset Manager"]
+        Asset
+        Connections
+        CableType["Cable Type"]
+    end
+
+    Job -- "JobInformation.Type" --> JobType
+    Job -- "JobOwnership.AssignedTo /<br/>AssignmentGroup" --> PNO
+    Job -- "AssetsUsed[].AssetID" --> Asset
+    Job -- "ConnectionsOnJob[].ConnectionID" --> Connections
+    Job -- "ConnectionsOnJob[].Cabletype" --> CableType
 ```
+
+App Settings has no relations and is not drawn.
 
 **Job** carries two type notions side by side: `JobInformation.JobType` (`string`, DOM enum `Jobtype` = Add / Update / Remove) and `JobInformation.Type` (`Guid` → **Job Type** definition). Both are mapped and persisted. `JobInformation.Locations` is a plain `List<Guid>`; the repository does not wrap it in references, so the target definition is not asserted anywhere in code. `ConnectionsOnJob[].Cabletype` is declared `string` in DOM yet the repository wraps it in `SdmObjectReference<CableType>` and writes `.Identifier` — the only reference in the repo stored as `string` rather than `Guid` (see [§13](#13-known-deviations-flagged-not-fixed)).
 
@@ -940,7 +847,7 @@ erDiagram
 **Definition ID:** `01bfa461-bdcb-442a-b624-93658d570c9a`  
 **Model:** `PlanAndBuildJob`  
 **Behavior:** `Job_Behavior`  
-**Validator:** `PlanAndBuildJobValidator`, `PlanAndBuildJobValidationHandler`, `PlanAndBuildExternalReferenceChecker` (`SDM.PlanAndBuild.Common\Validation\`)  
+**Validator:** `PlanAndBuildJobValidator`, `PlanAndBuildJobValidationHandler`, `PlanAndBuildExternalReferenceChecker`  
 
 **Entity rules:**
 
@@ -997,27 +904,16 @@ erDiagram
 
 ## 6. InfraOps Properties — `InfraopsProperties`
 
-`ModuleId` `(infraops)properties` · 2 definitions · 0 behaviours · 5 sections · 15 field descriptors.
+`ModuleId` `(infraops)properties` · no behaviours.
 
 ```mermaid
-erDiagram
-    PROPERTY_VALUES }o--o{ PROPERTY : "PropertyValue[].PropertyID"
-    PROPERTY_VALUES }o..o| ANY_SDM_OBJECT : "PropertyValueInfo.LinkedObjectID + Scope (string, untyped)"
-    PROPERTY {
-        string Identifier PK
-        string Name
-        string PropertyType
-        string Scope
-        string Default
-        long StringSizeLimit
-        bool IsMultiLineString
-    }
-    PROPERTY_VALUES {
-        string Identifier PK
-        string LinkedObjectID
-        string Scope
-        string SubID
-    }
+flowchart LR
+    PV["<b>Property Values</b>"]
+    P["<b>Property</b>"]
+    ANY(["any SDM object"])
+
+    PV -- "PropertyValue[].PropertyID<br/>(1 per property)" --> P
+    PV -. "LinkedObjectID + Scope<br/>(string, untyped)" .-> ANY
 ```
 
 **Property** is the schema (name, `PropertyType` = string / discrete / boolean, `Scope`, default, optional discrete options and layout). **Property Values** is one instance per *(object, scope)* pair holding a repeatable `PropertyValue` section per property. The link to the owning object is a plain `string` identifier plus the `Scope` string; no typed reference exists, so this module has no compile-time dependency on any other SDM package. `Scope` values are the generic `PropertyScope` contract (see the PropertyScope tests in `SDM.InfraOpsProperties.Common.Tests`), not a DOM enum.
@@ -1027,7 +923,7 @@ erDiagram
 **Definition ID:** `d7e4ecb9-dc79-496e-90c7-310b340a248b`  
 **Model:** `Property`  
 **Behavior:** none  
-**Validator:** `PropertyValidator`, `PropertyValidationHandler` (`SDM.InfraOpsProperties.Common\Validation\`)  
+**Validator:** `PropertyValidator`, `PropertyValidationHandler`  
 
 | Section | Section ID | Link | Field | DOM type | Model property | Notes | Rules |
 |---|---|---|---|---|---|---|---|
@@ -1065,7 +961,7 @@ erDiagram
 
 ## 7. State machines
 
-A behaviour definition owns the status list, the initial status and the allowed transitions. The model exposes the status as `State` (rule A2); transitions are performed only through the hand-written repository partial (`TransitionTo` / `UpdateAndTransitionTo` / `TransitionAndUpdate`), each guarded by a `State Management\*StateMachine.cs` — Asset alone uses `AssetDomRepositoryExtensions.Transition.cs`. Status and transition ids live in `DomIds.Behaviors.<Behaviour>.Statuses` / `.Transitions`; the seed re-declares them with display names so tests see the same ids as DomIds.
+A behaviour definition owns the status list, the initial status and the allowed transitions. The model exposes the status as `State` (rule A2); transitions are performed only through the hand-written repository partial (`TransitionTo` / `UpdateAndTransitionTo` / `TransitionAndUpdate`), each guarded by that entity's `*StateMachine` — Asset alone adds its own `AssetDomRepositoryExtensions` transition partial. Status and transition ids live in `DomIds.Behaviors.<Behaviour>.Statuses` / `.Transitions`; the seed re-declares them with display names so tests see the same ids as DomIds.
 
 ### 7.1 `Asset_Behavior` (Asset)
 
@@ -1084,51 +980,29 @@ Behaviour ID `a3301105-8724-4a36-af03-aa196a6d83df` · 9 statuses · 41 transiti
 | `Disposed` | Disposed |
 
 ```mermaid
-stateDiagram-v2
-    [*] --> NotAvailable
-    NotAvailable --> Available
-    NotAvailable --> Disposed
-    NotAvailable --> InTransit
-    NotAvailable --> InRepair
-    Available --> NotAvailable
-    Available --> InPlanning
-    Available --> InTransit
-    Available --> InRepair
-    InPlanning --> Available
-    InPlanning --> BuildPlanReady
-    InPlanning --> InTransit
-    InPlanning --> InRepair
-    BuildPlanReady --> Installed
-    BuildPlanReady --> InPlanning
-    BuildPlanReady --> InTransit
-    BuildPlanReady --> InRepair
-    Installed --> InService
-    Installed --> InPlanning
-    Installed --> InTransit
-    Installed --> InRepair
-    InService --> NotAvailable
-    InService --> Available
-    InService --> BuildPlanReady
-    InService --> Installed
-    InService --> InPlanning
-    InService --> InTransit
-    InService --> InRepair
-    InTransit --> NotAvailable
-    InTransit --> Available
-    InTransit --> BuildPlanReady
-    InTransit --> Installed
-    InTransit --> InPlanning
-    InTransit --> InRepair
-    InTransit --> Disposed
-    InRepair --> NotAvailable
-    InRepair --> Available
-    InRepair --> BuildPlanReady
-    InRepair --> Installed
-    InRepair --> InPlanning
-    InRepair --> InTransit
-    InRepair --> Disposed
-    Disposed --> [*]
+flowchart TB
+    subgraph Path["Lifecycle path"]
+        NA["NotAvailable"] <--> AV["Available"] <--> IP["InPlanning"] <--> BPR["BuildPlanReady"] --> IN["Installed"]
+        IN --> IP
+    end
+    IS["InService"]
+    TR["InTransit"]
+    RP["InRepair"]
+    DS(["Disposed"])
+
+    IN --> IS
+    IS -- "back" --> Path
+    Path <--> TR
+    Path <--> RP
+    IS --> TR
+    IS --> RP
+    TR <--> RP
+    NA --> DS
+    TR --> DS
+    RP --> DS
 ```
+
+The diagram groups statuses to stay readable; the matrix below lists every one of the 41 transitions. `<-->` means both directions exist. An arrow to or from the **Lifecycle path** box applies to each of its five statuses. `InService` is reached only from `Installed`, and never from `InTransit` or `InRepair`.
 
 Transition matrix (row = from, column = to; `●` = transition defined):
 
@@ -1226,7 +1100,7 @@ Strictly forward: no transition goes back, `Review` cannot be cancelled, and `Re
 
 Asset Manager: Data Port, Power Port, Connections, History, Reservations, Device Type, Port Type, Cable Type, App Settings. Facility Manager: App Settings. Plan & Build: Job Type, App Settings. InfraOps Properties: both. Their `State` is irrelevant and `DomInstance.StatusId` is never written.
 
-### 7.6 Status-id anomaly in `SlcAsset_ManagementDomIds.cs`
+### 7.6 Status-id anomaly in the Asset Manager DomIds
 
 [Certain, in-repo] The status constants of both Asset Manager behaviours are not all GUIDs:
 
@@ -1251,31 +1125,31 @@ Facility Manager and Plan & Build status ids are all plain GUIDs. The strings ar
 
 ## 8. Validation rules
 
-Every write goes through one `ValidationMiddleware<T>` wired to one `<Entity>Validator : ValidatorBase<T>` (`SDM.InfraOps.Core\Validation\ValidatorBase.cs`). Rules are split by where they can run:
+Every write goes through one `ValidationMiddleware<T>` wired to one `<Entity>Validator : ValidatorBase<T>`. Rules are split by where they can run:
 
 ```mermaid
-flowchart LR
-    A[Create / Update] --> P1["Phase 1 · no-db<br/>business rules<br/>(static *ValidationHandler)"]
-    P1 -- any failure --> X1([fail fast])
-    P1 --> P2["Phase 2 · batch<br/>duplicates inside the batch"]
-    P2 -- any failure --> X2([fail fast])
-    P2 --> P3["Phase 3 · db<br/>uniqueness, references, placement<br/>(loader-backed *Validator)"]
-    D[Delete] --> P4["delete<br/>in-use guards only"]
+flowchart TB
+    A(["Create / Update"]) --> P1["<b>Phase 1 · no-db</b><br/>business rules<br/>static *ValidationHandler"]
+    P1 -- "any failure: stop" --> X(["fail fast"])
+    P1 --> P2["<b>Phase 2 · batch</b><br/>duplicates inside the batch"]
+    P2 -- "any failure: stop" --> X
+    P2 --> P3["<b>Phase 3 · db</b><br/>uniqueness, references, placement<br/>loader-backed *Validator"]
+    D(["Delete"]) --> P4["<b>delete</b><br/>in-use guards only"]
 ```
 
 Conventions that hold for every module [Certain]:
 
-| # | Convention | Source |
+| # | Convention | Implemented by |
 |---|---|---|
-| V1 | `*ValidationHandler` is `static` and pure: it takes the entity (plus any already-loaded context) and never touches a repository. `*Validator` owns the entity loader / API and runs phases 2–3. | all `Validation\` folders |
-| V2 | A field rule runs only when `entity.ShouldValidate(<Field>Field)` is true, i.e. `IsNew \|\| field.Changed`. On update, unchanged fields are **not** re-validated; a stored value that violates a newer rule stays valid until touched. | `Core\Validation\ValidationExtensions.cs` |
-| V3 | Reference rules run when `ReferenceValidationHelper.ShouldValidateReferences` is true (`IsNew \|\| entity.Changed`). | `Core\Validation\ReferenceValidationHelper.cs` |
-| V4 | Failures are recorded as `AddFailReason(<Entity>ValidationField.<Field>, message)`; the field enum is the key the UI binds to. Several results are merged with `AddFailuresFrom` / `MergeFrom`. | `Core\Validation\ValidationResult*.cs` |
-| V5 | Numeric bounds use `NumericValidators.ValidateNonNegative / ValidatePositive / ValidateRange` with generated messages (`"The {field} cannot be negative."`, `"The {field} must be between {min} and {max}."`). Optional numerics are skipped when `HasValue` is false. | `Core\Validation\NumericValidator.cs` |
-| V6 | FK presence uses `ReferenceValidationHelper.AddRequiredReference` (`"{target} is required."`) and existence `AddMissingReference` (`"Referenced {target} '{id}' does not exist."`). | same |
-| V7 | Delete is not validated unless the validator overrides `ValidateBulkForDelete`; those overrides are in-use guards only. | `ValidatorBase.cs` |
-| V8 | Status transitions are validated separately by the state machine (§7), not by `*Validator`. Asset additionally runs `AssetTransitionValidator` for multi-hop paths. | `State Management\`, `Validation\Asset\AssetTransitionValidator.cs` |
-| V9 | Single-entity "is this id free" helpers (`IsRackIdValid(string)`, `IsAssetClassNameValid(string)` …) exist for real-time UI checks; they issue one query per call and are not used by the bulk path. | `*Validator.cs` |
+| V1 | `*ValidationHandler` is `static` and pure: it takes the entity (plus any already-loaded context) and never touches a repository. `*Validator` owns the entity loader / API and runs phases 2–3. | every `*ValidationHandler` / `*Validator` pair |
+| V2 | A field rule runs only when `entity.ShouldValidate(<Field>Field)` is true, i.e. `IsNew \|\| field.Changed`. On update, unchanged fields are **not** re-validated; a stored value that violates a newer rule stays valid until touched. | `ValidationExtensions` |
+| V3 | Reference rules run when `ReferenceValidationHelper.ShouldValidateReferences` is true (`IsNew \|\| entity.Changed`). | `ReferenceValidationHelper` |
+| V4 | Failures are recorded as `AddFailReason(<Entity>ValidationField.<Field>, message)`; the field enum is the key the UI binds to. Several results are merged with `AddFailuresFrom` / `MergeFrom`. | `ValidationResult` |
+| V5 | Numeric bounds use `NumericValidators.ValidateNonNegative / ValidatePositive / ValidateRange` with generated messages (`"The {field} cannot be negative."`, `"The {field} must be between {min} and {max}."`). Optional numerics are skipped when `HasValue` is false. | `NumericValidators` |
+| V6 | FK presence uses `ReferenceValidationHelper.AddRequiredReference` (`"{target} is required."`) and existence `AddMissingReference` (`"Referenced {target} '{id}' does not exist."`). | `ReferenceValidationHelper` |
+| V7 | Delete is not validated unless the validator overrides `ValidateBulkForDelete`; those overrides are in-use guards only. | `ValidatorBase<T>` |
+| V8 | Status transitions are validated separately by the state machine (§7), not by `*Validator`. Asset additionally runs `AssetTransitionValidator` for multi-hop paths. | state machine, `AssetTransitionValidator` |
+| V9 | Single-entity "is this id free" helpers (`IsRackIdValid(string)`, `IsAssetClassNameValid(string)` …) exist for real-time UI checks; they issue one query per call and are not used by the bulk path. | `*Validator` |
 
 Constants:
 
@@ -1346,7 +1220,7 @@ Confidence for this whole section: [Certain] unless tagged otherwise. "Enforced 
 | # | Rule | Enforced by |
 |---|---|---|
 | A1 | `Identifier` is the `DomInstance.ID.Id` GUID as a string. `ToInstance` parses it; when empty it mints `Guid.NewGuid()` and the object is treated as new (`IsNew \|\| IsNullOrWhiteSpace(Identifier)`). | repository `ToInstance` |
-| A2 | `State` (entity status) is the only model property that maps to `DomInstance.StatusId`, through `Behaviors.<X>_Behavior.Statuses.ToValue/ToEnum`. It is `[SdmIgnore]`, has an `internal` setter and is changed only through the hand-written repository partial (`TransitionTo` / `UpdateAndTransitionTo` / `TransitionAndUpdate`) guarded by the entity's `State Management\*StateMachine.cs`; Asset uses `AssetDomRepositoryExtensions.Transition.cs` instead. | model, `<Entity>DomRepository.cs`, `State Management\` |
+| A2 | `State` (entity status) is the only model property that maps to `DomInstance.StatusId`, through `Behaviors.<X>_Behavior.Statuses.ToValue/ToEnum`. It is `[SdmIgnore]`, has an `internal` setter and is changed only through the hand-written repository partial (`TransitionTo` / `UpdateAndTransitionTo` / `TransitionAndUpdate`) guarded by the entity's `*StateMachine`; Asset uses its own transition partial instead. | model, `<Entity>DomRepository`, state machines |
 | A3 | `CreatedAt`, `CreatedBy`, `LastModified`, `LastModifiedBy` are read from `ITrackBase` on the instance in `FromInstance` and never written. Setters are `internal` on `SdmObjectBase<T>`. | `SdmObjectBase<T>` |
 | A4 | Every `*Field` tracker, `IsNew`, `Changed`, `FieldHandler`, section-id holders and other bookkeeping members carry both `[JsonIgnore]` and `[SdmIgnore]`. Only domain data is visible to JSON and to SDM exposers. | convention; checked in review |
 
@@ -1370,7 +1244,7 @@ Confidence for this whole section: [Certain] unless tagged otherwise. "Enforced 
 | C3 | Mandatory inline sections (for example Asset `AssetProperties`, `NetworkDetails`, `Lifecycle`) are always added to the instance, even when no field is set. | repository |
 | C4 | A section may additionally be status-gated (Asset `DestinationLocation` is written only when `State == InTransit`). Such gates live in `ToInstance`, not in the model. | repository |
 | C5 | Repeating sections: `ToInstance` emits one `Section` per list item; `FromInstance` rebuilds the list from `instance.Sections.Where(sameDefinition)` and assigns it wholesale. Each element gets its `SectionId` set. | repository |
-| C6 | Every section definition and field descriptor GUID comes from DomIds. Mappers re-wrap `SectionDefinitionID` with `ModuleId` set; field ids are used as-is. No literal GUIDs outside `*DomIds.cs`. | mapper pattern |
+| C6 | Every section definition and field descriptor GUID comes from DomIds. Mappers re-wrap `SectionDefinitionID` with `ModuleId` set; field ids are used as-is. No literal GUIDs outside the `*DomIds` classes. | mapper pattern |
 | C7 | A section definition may be linked by more than one definition (§3, §4 list them). Its descriptor types are therefore shared: changing a field type on a shared section changes it for every definition that links it. | DOM |
 
 ### D. Field value types
@@ -1421,20 +1295,20 @@ The DOM-side type is the `FieldDescriptor` type in the seed, which mirrors the l
 | F1 | Every entity with a repository has one `<Entity>Validator : ValidatorBase<T>` wired through `<Entity>ValidationMiddleware`; the repository never saves an instance that did not pass it. Pure rules live in a `static <Entity>ValidationHandler`, loader-backed rules in the `Validator` (§8, V1). | middleware pipeline |
 | F2 | Phases are fixed and fail fast: business rules → batch conflicts → database. A rule that needs another instance (uniqueness, FK existence, placement) belongs in the db phase, never in the Handler. | `ValidatorBase.ValidateBulk` |
 | F3 | Field rules are **changed-only** on update (`ShouldValidate` = `IsNew \|\| Changed`). Adding a stricter rule does not invalidate stored data until the field is next touched; a one-off migration is a separate work-item. | `ValidationExtensions` |
-| F4 | A failure is keyed by a `<Entity>ValidationField` enum member. Adding a validated field means adding the enum member first; messages are free text but the enum is the API the UI binds to. | `*ValidationField.cs` |
-| F5 | Numeric bounds go through `NumericValidators`; FK presence/existence through `ReferenceValidationHelper`. Do not hand-roll `< 0` checks or "does not exist" messages. | `SDM.InfraOps.Core\Validation\` |
-| F6 | State-gated edits (which fields may change in which status) are Handler rules reading the entity's **original** state, not state-machine transitions. Transition legality stays in `State Management\` (§7). | `Can*` helpers in Handlers |
+| F4 | A failure is keyed by a `<Entity>ValidationField` enum member. Adding a validated field means adding the enum member first; messages are free text but the enum is the API the UI binds to. | `*ValidationField` enums |
+| F5 | Numeric bounds go through `NumericValidators`; FK presence/existence through `ReferenceValidationHelper`. Do not hand-roll `< 0` checks or "does not exist" messages. | core validation helpers |
+| F6 | State-gated edits (which fields may change in which status) are Handler rules reading the entity's **original** state, not state-machine transitions. Transition legality stays in the state machines (§7). | `Can*` helpers in Handlers |
 | F7 | Delete guards are the only rules in `ValidateBulkForDelete`; they check referencing instances (children, connections, ports, jobs) and nothing else. | validator overrides |
 
 ---
 
 ## 11. Adding or changing a DOM field — checklist
 
-1. Add the `FieldDescriptorID` to `<Module>DomIds.cs` (regenerate from the DOM module; do not hand-type GUIDs).
+1. Add the `FieldDescriptorID` to the module's `DomIds` class (regenerate from the DOM module; do not hand-type GUIDs).
 2. Add the descriptor to the matching `GenerateSectionsDefinitions_<Section>()` in the seed with the DOM type from the table in §10.D. If the section is shared (rule C7), every linking definition gets the field.
-3. Bind it in `<Entity>DomMapper.g.cs` under the right section class (alias per D8).
+3. Bind it in `<Entity>DomMapper` under the right section class (alias per D8).
 4. Add the property + `<Property>Field` tracker to the model (rules B1–B6); extend `Equals`/`GetHashCode` and, for section-details, `IsEmpty`.
-5. Add both the write (`ToInstance`, gated per D3) and the read (`FromInstance`) in `<Entity>DomRepository.g.cs`.
+5. Add both the write (`ToInstance`, gated per D3) and the read (`FromInstance`) in `<Entity>DomRepository`.
 6. If the field is filterable, add the exposer/filter translation in the same repository.
 7. If the field has a rule: add the `<Entity>ValidationField` member, the rule in `<Entity>ValidationHandler` (pure) or `<Entity>Validator` (needs other instances), gated by `ShouldValidate` (rules F1–F5), plus a unit test per failure path.
 8. Add or extend: a repository round-trip test, a JSON round-trip test (SPC-002) and, if a new section type, an `ISectionTrackable`/`ISectionEmptyState` test.
@@ -1446,8 +1320,8 @@ The DOM-side type is the `FieldDescriptor` type in the seed, which mirrors the l
 
 | Fact | Confidence |
 |---|---|
-| The `.g.cs` files are checked in and **hand-maintained**: `Skyline.DataMiner.SDM.SourceGenerator` is commented out in `SDM.AssetManagement.Common.csproj` and `[SdmDomMapper]`/`[GenerateExposers]`/`[SdmDomStorage]` are commented out on the types. The "auto-generated" header is historical. Edit them directly; there is no regeneration step. | [Certain] |
-| `SlcAsset_ManagementDomIds.cs` and siblings are generated by the Dom Editor automation script from the live module. They are the source of truth for GUIDs and enum encodings. | [Certain] |
+| The mapper and repository `.g` source files are checked in and **hand-maintained**: the `Skyline.DataMiner.SDM.SourceGenerator` package is disabled in the project and the generator attributes (`[SdmDomMapper]`, `[GenerateExposers]`, `[SdmDomStorage]`) are commented out on the types. The "auto-generated" header is historical. Edit them directly; there is no regeneration step. | [Certain] |
+| The `*DomIds` classes are generated by the Dom Editor automation script from the live module. They are the source of truth for GUIDs and enum encodings. | [Certain] |
 | The seed is not validated against the live DOM module by any test. Drift between seed and module is detected only on a real system. Everything in §1–§9 is therefore "what the repo believes the module looks like". | [Certain] |
 | Validation rules (§8) are enforced only by the repository pipeline in this codebase. The live DOM module may carry its own field constraints; none are read or mirrored here. | [Certain] |
 | The mock does not check field value CLR types (`Utils.DOM` 10.5.2.6). ITM-001 proposes a validating decorator in the test project. | [Certain] |
@@ -1457,11 +1331,13 @@ The DOM-side type is the `FieldDescriptor` type in the seed, which mirrors the l
 
 ## 13. Known deviations (flagged, not fixed)
 
+Snapshot as of 2026-10-28. Unlike the rest of this document, this section lists defects that are expected to be fixed or re-triaged; once an item is resolved, remove its row.
+
 | Where | Deviation from rule | Action |
 |---|---|---|
 | `Asset.Id` (`Guid`, `[JsonIgnore][SdmIgnore]`, public setter) | Unused second identity alongside `Identifier` (A1); no reader or writer in the repo. | Candidate work-item: remove. |
 | `AssetLocation.PowerSupplyRackPosition`, `AssetLocationDestination.PowerSupplyRackPosition` (`long`) | Seeded and mapped (`AssetDomMapper.Location/DestinationLocation.PowerSupplyRackPosition`) but never read or written by `AssetDomRepository`; no model property. Chain broken at step 4/5. | Decide: add to `AssetLocation` model or drop from mapper. |
-| `HistoryInfo.UserID` (`Guid`) | Mapped (`HistoryDomMapper.g.cs`) but never read or written; `History` has no user property. | Decide: wire to `PnoObjectReference<Person>` or drop. |
+| `HistoryInfo.UserID` (`Guid`) | Mapped (`HistoryDomMapper`) but never read or written; `History` has no user property. | Decide: wire to `PnoObjectReference<Person>` or drop. |
 | **Power Port** → `PrimaryPortRelation` (optional section, 2 × `bool`) | Linked by the definition and bound in `DataPortDomMapper`, but `PowerPortDomMapper`/`PowerPortDomRepository` neither bind nor read it. Data Port handles the same section fully. | Likely intentional (IP primacy is a data-port concern); either drop the link from the Power Port definition in the module or document it as reserved. |
 | `Resource.LinkedResource` (`Guid` in seed) | All five repositories (`Desk`, `Rack`, `Row`, `Zone`, `Room`) read and write it as `string` (`AddOrUpdateValue<string>(…, Convert.ToString(ResourceId))`). Violates D5; the untyped mock hides it. Room additionally `Guid.Parse`s on read, gated `!= Guid.Empty`. | Blocked on ITM-001 (type-checking mock) to confirm which side is wrong; then align seed or repositories. |
 | `ConnectionsOnJob.Cabletype` (`string` in seed) | Repository wraps it in `SdmObjectReference<CableType>` and writes `.Identifier` as a string. The only reference in the repo stored as `string`; D2/D7 filters on it would not work. | Treat as text until the module field is changed to `Guid` (data migration). |
@@ -1469,7 +1345,7 @@ The DOM-side type is the `FieldDescriptor` type in the seed, which mirrors the l
 | `Asset` entity-level section ids (`AssetPropertiesSectionId`, …) | Held as ad hoc `internal Guid?` properties instead of a shared abstraction; section-details use `ISectionTrackable` (C1). Two mechanisms for one concern. | Accept for now; document here. |
 | `Asset_Behavior` / `Asset_Class_Behavior` status ids | 8 of 12 status constants are a GUID with ` (duplicate)` suffixes (§7.6). Functionally distinct strings, but not GUIDs. | Verify against the live module before any change. |
 | `Rack.Row` and `Rack.Zone` both mandatory | DOM link says mandatory; repository writes each only when its reference `HasValue()`, and `RackValidator` requires only Row (§4.5). A rack with no Zone is accepted by code. | Accept; the module, not the repo, decides whether to enforce. |
-| `FloorValidator` missing-Facility failure | "Referenced Facility does not exist" is keyed to `FloorValidationField.FloorId` although a `FacilityId` member exists and is used for the "required" check (`FloorValidator.cs` ~L196). UI binds the message to the wrong input. | Candidate work-item: key it to `FacilityId`. |
+| `FloorValidator` missing-Facility failure | "Referenced Facility does not exist" is keyed to `FloorValidationField.FloorId` although a `FacilityId` member exists and is used for the "required" check (in `FloorValidator`). UI binds the message to the wrong input. | Candidate work-item: key it to `FacilityId`. |
 
 ---
 
@@ -1479,22 +1355,4 @@ The DOM-side type is the `FieldDescriptor` type in the seed, which mirrors the l
 - **Validate types with `validateAgainstDefinition: true` in `Utils.DOM` 10.6.x.** It checks presence, not CLR type (verified for SPC-001).
 - **Store references as string in DOM.** The live module declares these fields as `Guid`; changing the encoding is a data migration and breaks `KeyExists`/GUID filters (D7). `ConnectionsOnJob.Cabletype` shows the cost of the exception.
 - **One shared behaviour for all Facility entities.** The module ships eight identical behaviours with distinct ids; collapsing them would change `StatusId` on every instance. Keep as generated.
-- **Hand-counted inventory.** Counts in §1 and the per-definition tables are produced by a script over the seeds, DomIds, mappers and repositories; re-run it rather than editing numbers by hand.
-
----
-
-## 15. Source files reference
-
-| Artefact | Asset Manager | Facility Manager | Plan & Build | InfraOps Properties |
-|---|---|---|---|---|
-| DomIds (GUIDs, enums, statuses) | `SDM.AssetManagement.Common\SlcAsset_ManagementDomIds.cs` | `SDM.FacilityManagement.Common\SlcFacility_ManagementDomIds.cs` | `SDM.PlanAndBuild.Common\SlcPlan_And_BuildDomIds.cs` | `SDM.InfraOpsProperties.Common\InfraopsPropertiesDomIds.cs` |
-| Seed (sections, links, behaviours) | `SDM.AssetManagement.Common\Mock\AssetManagementMockMessageHandler.cs` | `SDM.FacilityManagement.Common\Mock\FacilityManagementMockMessageHandler.cs` | `SDM.PlanAndBuild.Common\Mock\PlanAndBuildMockMessageHandler.cs` | `SDM.InfraOpsProperties.Common\Mock\InfraOpsPropertiesMockMessageHandler.cs` |
-| Mappers | `SDM.AssetManagement.Common\Mappers\<Entity>DomMapper.g.cs` (11) | `SDM.FacilityManagement.Common\Mappers\<Entity>DomMapper.g.cs` (9) | `SDM.PlanAndBuild.Common\Mappers\<Entity>DomMapper.g.cs` (3) | `SDM.InfraOpsProperties.Common\Mappers\<Entity>DomMapper.g.cs` (2) |
-| Repositories | `SDM.AssetManagement.Common\DOM Repositories\<Entity>\<Entity>DomRepository.g.cs` | `SDM.FacilityManagement.Common\DOM Repositories\<Entity>\<Entity>DomRepository.g.cs` | `SDM.PlanAndBuild.Common\DOM Repositories\<Entity>\<Entity>DomRepository.g.cs` | `SDM.InfraOpsProperties.Common\DOM Repositories\<Entity>DomRepository.g.cs` |
-| Transition code | `DOM Repositories\Asset\AssetDomRepositoryExtensions.Transition.cs`, `Extensions\AssetExtensions.Transition.cs`, `Validation\Asset\AssetTransitionValidator.cs`; `DOM Repositories\AssetClass\AssetClassDomRepository.cs`; `State Management\StateMachine.cs` | `DOM Repositories\<Entity>\<Entity>DomRepository.cs`; `State Management\<Entity>StateMachine.cs` (8) | `DOM Repositories\PlanAndBuildJob\PlanAndBuildJobDomRepository.cs`; `State Management\StateMachine.cs` | — |
-| Models | `SDM.AssetManagement.Common\Models\` | `SDM.FacilityManagement.Common\Models\` | `SDM.PlanAndBuild.Common\Models\` | `SDM.InfraOpsProperties.Common\Models\` |
-| Validation (§8) | `SDM.AssetManagement.Common\Validation\<Entity>\*ValidationHandler.cs`, `*Validator.cs`, `*ValidationCore.cs`; `Middleware\<Entity>ValidationMiddleware.cs` | `SDM.FacilityManagement.Common\Validation\<Entity>ValidationHandler.cs`, `<Entity>Validator.cs`, `FacilityReferenceValidationHelper.cs` | `SDM.PlanAndBuild.Common\Validation\PlanAndBuildJob*.cs`, `JobType*.cs` | `SDM.InfraOpsProperties.Common\Validation\Property*.cs` |
-| Validation framework shared by all | `SDM.InfraOps.Core\Validation\` — `ValidatorBase<T>`, `ValidationMiddleware<T>`, `NumericValidator.cs`, `ReferenceValidationHelper.cs`, `ValidationExtensions.cs` (`ShouldValidate`) | | | |
-| Field primitives shared by all | `SDM.InfraOps.Core` — `ChangeTrackingField<T>`, `ChangeTrackingArrayField<T>`, `ChangeTrackingBase`, `ISectionTrackable`, `ISectionEmptyState`, `SdmObjectBase<T>` | | | |
-
-Exact file names for seeds are given as they exist today; mapper and repository counts match the definition counts in §1. The extraction script that produced §1–§7 and §9 lives outside the repository (session artefact `dom_tables.ps1`); §8 was extracted with a sibling script (`rules.ps1`) and verified by hand against each validator. If this document is regenerated, re-run them rather than editing tables by hand.
+- **Hand-counted inventory.** Counts in §1 are produced by a script over the seeds, DomIds, mappers and repositories; re-run it rather than editing numbers by hand.
