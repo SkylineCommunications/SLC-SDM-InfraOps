@@ -4,6 +4,10 @@
 
 Standard API for InfraOps
 
+### Port type name validation
+
+Port types require a non-null, non-empty, non-whitespace name on create and update, including bulk operations. `PortTypeValidator.Validate(portType, RepositoryAction.Create)` and the corresponding update validation report this rule under `PortTypeValidator.PortTypeValidationField.Name`. Map this typed field to the name input in an IAS validation widget map. Delete validation does not apply the required-name rule.
+
 ### History instance identifiers
 
 `HistoryInfo.ModifiedInstanceID` remains an `ISdmObjectReference<ISdmObject>`, but its identifier is read, written, and filtered as a string in DOM. History Info section `cec87feb-30d0-4270-8bf8-7e8282d0513c`, Instance ID field `4d913684-12ec-4666-98a2-5e4db7fb5acf`, is `System.String`; do not convert its value to a GUID. The History Job field remains GUID-backed.
