@@ -1,6 +1,7 @@
 namespace SDM.AssetManagement.Tests.AssetClasses
 {
     using System;
+    using System.Linq;
 
     using FluentAssertions;
 
@@ -121,7 +122,8 @@ namespace SDM.AssetManagement.Tests.AssetClasses
             restored.PowerPorts[0].PortType.Should().Be(assetClass.PowerPorts[0].PortType);
             restored.PowerPorts[1].PortType.Should().Be(assetClass.PowerPorts[1].PortType);
             restored.Holders.Should().HaveCount(2);
-            restored.Attachments.Should().HaveCount(2);
+            restored.Attachments.Select(a => a.FilePath).Should()
+                .BeEquivalentTo("front.png", "back.png", "file.pdf", "other.png");
             restored.Should().Be(assetClass);
             InfraOpsJsonConvert.SerializeObject(restored).Should().Be(json);
         }
