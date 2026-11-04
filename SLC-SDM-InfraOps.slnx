@@ -4,10 +4,13 @@
   </Folder>
   <Folder Name="/Documentation/1. Canonical Docs/">
     <File Path="docs/canon/CAN-001-dom-structure.md" />
+    <File Path="docs/canon/CAN-002-package-architecture.md" />
+    <File Path="docs/canon/CAN-003-repository-and-middleware-pipeline.md" />
+    <File Path="docs/canon/CAN-004-change-tracking.md" />
   </Folder>
   <Folder Name="/Documentation/2. Work Tracks/">
-    <File Path="docs/tracks/TRK-001-sdm-unit-test-dom-mock-fidelity.md" />
-    <File Path="docs/tracks/TRK-002-sdm-import-export-bulk-reads.md" />
+    <File Path="docs/tracks/TRK-001-sdm-unit-testing.md" />
+    <File Path="docs/tracks/TRK-002-sdm-import-export.md" />
   </Folder>
   <Folder Name="/Documentation/3. Work Items/">
     <File Path="docs/items/ITM-001-dom-mock-field-value-type-validation.md" />

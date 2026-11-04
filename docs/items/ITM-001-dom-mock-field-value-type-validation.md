@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Status | Done |
-| Parent track | [TRK-001](../tracks/TRK-001-sdm-unit-test-dom-mock-fidelity.md) |
+| Parent track | [TRK-001](../tracks/TRK-001-sdm-unit-testing.md) |
 | Spec | [SPC-001](../specs/SPC-001-dom-mock-field-value-type-validation.md) |
 | Collaboration | [308202](https://collaboration.dataminer.services/myTasks/list/task/308202) |
 | Assignee | Miguel Garrido |

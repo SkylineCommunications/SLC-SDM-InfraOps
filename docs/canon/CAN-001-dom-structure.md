@@ -12,7 +12,7 @@ title: DOM structure and field rules
 | Created | 2026-10-28 |
 | Applies to | `SDM.AssetManagement.Common`, `SDM.FacilityManagement.Common`, `SDM.PlanAndBuild.Common`, `SDM.InfraOpsProperties.Common` and their test projects |
 | Supersedes | — |
-| Related | [ADR-0001](../adr/0001-infraops-package-boundaries-and-composition.md), [TRK-001](../tracks/TRK-001-sdm-unit-test-dom-mock-fidelity.md), [TRK-002](../tracks/TRK-002-sdm-import-export-bulk-reads.md), [SPC-001](../specs/SPC-001-dom-mock-field-value-type-validation.md), [SPC-002](../specs/SPC-002-sdm-json-serialization-contract.md) |
+| Related | [ADR-0001](../adr/0001-infraops-package-boundaries-and-composition.md), [CAN-002](CAN-002-package-architecture.md), [CAN-003](CAN-003-repository-and-middleware-pipeline.md), [CAN-004](CAN-004-change-tracking.md), [TRK-001](../tracks/TRK-001-sdm-unit-testing.md), [TRK-002](../tracks/TRK-002-sdm-import-export.md), [SPC-001](../specs/SPC-001-dom-mock-field-value-type-validation.md), [SPC-002](../specs/SPC-002-sdm-json-serialization-contract.md) |
 
 > **Derived from codebase.** Every GUID, field, type, status and transition below was extracted from the SDM codebase on 2026-10-28: the in-memory seed definitions, the DomIds constants, the entity repositories (model property per field, reference targets, read/write CLR types) and the mappers. Nothing was read from a live DataMiner system; see [§12](#12-facts-reviewers-must-know) for what that implies. Confidence is [Certain] for every table unless a cell says otherwise. This document names classes and concepts, not file paths, so it stays valid when code moves.
 
@@ -2207,31 +2207,7 @@ Facility Manager and Plan & Build status ids are all plain GUIDs. The strings ar
 
 ## 8. Validation rules
 
-Every write goes through one `ValidationMiddleware<T>` wired to one `<Entity>Validator : ValidatorBase<T>`. Rules are split by where they can run:
-
-```mermaid
-flowchart TB
-    A(["Create / Update"]) --> P1["<b>Phase 1 · no-db</b><br/>business rules<br/>static *ValidationHandler"]
-    P1 -- "any failure: stop" --> X(["fail fast"])
-    P1 --> P2["<b>Phase 2 · batch</b><br/>duplicates inside the batch"]
-    P2 -- "any failure: stop" --> X
-    P2 --> P3["<b>Phase 3 · db</b><br/>uniqueness, references, placement<br/>loader-backed *Validator"]
-    D(["Delete"]) --> P4["<b>delete</b><br/>in-use guards only"]
-```
-
-Conventions that hold for every module [Certain]:
-
-| # | Convention | Implemented by |
-|---|---|---|
-| V1 | `*ValidationHandler` is `static` and pure: it takes the entity (plus any already-loaded context) and never touches a repository. `*Validator` owns the entity loader / API and runs phases 2–3. | every `*ValidationHandler` / `*Validator` pair |
-| V2 | A field rule runs only when `entity.ShouldValidate(<Field>Field)` is true, i.e. `IsNew \|\| field.Changed`. On update, unchanged fields are **not** re-validated; a stored value that violates a newer rule stays valid until touched. | `ValidationExtensions` |
-| V3 | Reference rules run when `ReferenceValidationHelper.ShouldValidateReferences` is true (`IsNew \|\| entity.Changed`). | `ReferenceValidationHelper` |
-| V4 | Failures are recorded as `AddFailReason(<Entity>ValidationField.<Field>, message)`; the field enum is the key the UI binds to. Several results are merged with `AddFailuresFrom` / `MergeFrom`. | `ValidationResult` |
-| V5 | Numeric bounds use `NumericValidators.ValidateNonNegative / ValidatePositive / ValidateRange` with generated messages (`"The {field} cannot be negative."`, `"The {field} must be between {min} and {max}."`). Optional numerics are skipped when `HasValue` is false. | `NumericValidators` |
-| V6 | FK presence uses `ReferenceValidationHelper.AddRequiredReference` (`"{target} is required."`) and existence `AddMissingReference` (`"Referenced {target} '{id}' does not exist."`). | `ReferenceValidationHelper` |
-| V7 | Delete is not validated unless the validator overrides `ValidateBulkForDelete`; those overrides are in-use guards only. | `ValidatorBase<T>` |
-| V8 | Status transitions are validated separately by the state machine (§7), not by `*Validator`. Asset additionally runs `AssetTransitionValidator` for multi-hop paths. | state machine, `AssetTransitionValidator` |
-| V9 | Single-entity "is this id free" helpers (`IsRackIdValid(string)`, `IsAssetClassNameValid(string)` …) exist for real-time UI checks; they issue one query per call and are not used by the bulk path. | `*Validator` |
+This section lists the **data** side of validation: the rules per field and the limits they use. How validation runs (phases, conventions V1–V9, rules F1–F7, failure shapes) is in [CAN-003 §5](CAN-003-repository-and-middleware-pipeline.md#5-validation).
 
 Constants:
 
@@ -2361,26 +2337,13 @@ The DOM-side type is the `FieldDescriptor` type in the seed, which mirrors the l
 | D7 | Filter translation for a reference field: `Equals`/`NotEquals` against an empty reference becomes `FieldValues.KeyExists(fieldId).Equal(comparer == NotEquals)`; any other value becomes a `DomInstanceField` filter on the GUID. Filtering on "no value" never compares against `Guid.Empty`. | repository `CreateFilter` |
 | D8 | Mapper member names follow the **model** (`CableFKs.CableTypeFks`, `RoomFk.Room`), DomIds names follow the **DOM module** (`CableCompatibility.CableTypes`, `Room.Room_8d904f8d`). Aliasing happens only in the mapper; never rename a DomIds constant to match a model. | mapper pattern |
 
-### E. Change tracking semantics every field inherits
+### E. Change tracking
 
-| # | Rule |
-|---|---|
-| E1 | `Changed` for a scalar compares converted values; for strings, `null` and whitespace are equal to each other; for primitives/enums/`Guid` an `IsSet` flip also counts as a change. |
-| E2 | `ChangeTrackingArrayField<T>` is changed when count differs, any element implementing `IChangeTracking` is changed, or converted sequences differ. It clones `ChangeTrackingBase` elements on snapshot. |
-| E3 | `FromInstance` ends with `obj.ResetChangeTracking()`; a freshly read object reports `Changed == false`. |
-| E4 | `ResetChangeTracking()` on the entity must cascade to section-details and to list elements implementing `IChangeTracking`. |
+How tracked fields behave (`Changed` semantics, list trackers, reset cascade, lifecycle) is in [CAN-004](CAN-004-change-tracking.md), rules T1–T9.
 
 ### F. Validation
 
-| # | Rule | Enforced by |
-|---|---|---|
-| F1 | Every entity with a repository has one `<Entity>Validator : ValidatorBase<T>` wired through `<Entity>ValidationMiddleware`; the repository never saves an instance that did not pass it. Pure rules live in a `static <Entity>ValidationHandler`, loader-backed rules in the `Validator` (§8, V1). | middleware pipeline |
-| F2 | Phases are fixed and fail fast: business rules → batch conflicts → database. A rule that needs another instance (uniqueness, FK existence, placement) belongs in the db phase, never in the Handler. | `ValidatorBase.ValidateBulk` |
-| F3 | Field rules are **changed-only** on update (`ShouldValidate` = `IsNew \|\| Changed`). Adding a stricter rule does not invalidate stored data until the field is next touched; a one-off migration is a separate work-item. | `ValidationExtensions` |
-| F4 | A failure is keyed by a `<Entity>ValidationField` enum member. Adding a validated field means adding the enum member first; messages are free text but the enum is the API the UI binds to. | `*ValidationField` enums |
-| F5 | Numeric bounds go through `NumericValidators`; FK presence/existence through `ReferenceValidationHelper`. Do not hand-roll `< 0` checks or "does not exist" messages. | core validation helpers |
-| F6 | State-gated edits (which fields may change in which status) are Handler rules reading the entity's **original** state, not state-machine transitions. Transition legality stays in the state machines (§7). | `Can*` helpers in Handlers |
-| F7 | Delete guards are the only rules in `ValidateBulkForDelete`; they check referencing instances (children, connections, ports, jobs) and nothing else. | validator overrides |
+How validation runs, and the rules every validator follows, is in [CAN-003 §5](CAN-003-repository-and-middleware-pipeline.md#5-validation), rules F1–F7.
 
 ---
 
@@ -2392,7 +2355,7 @@ The DOM-side type is the `FieldDescriptor` type in the seed, which mirrors the l
 4. Add the property + `<Property>Field` tracker to the model (rules B1–B6); extend `Equals`/`GetHashCode` and, for section-details, `IsEmpty`.
 5. Add both the write (`ToInstance`, gated per D3) and the read (`FromInstance`) in `<Entity>DomRepository`.
 6. If the field is filterable, add the exposer/filter translation in the same repository.
-7. If the field has a rule: add the `<Entity>ValidationField` member, the rule in `<Entity>ValidationHandler` (pure) or `<Entity>Validator` (needs other instances), gated by `ShouldValidate` (rules F1–F5), plus a unit test per failure path.
+7. If the field has a rule: add the `<Entity>ValidationField` member, the rule in `<Entity>ValidationHandler` (pure) or `<Entity>Validator` (needs other instances), gated by `ShouldValidate` ([CAN-003 §5](CAN-003-repository-and-middleware-pipeline.md#5-validation), rules F1–F5), plus a unit test per failure path.
 8. Add or extend: a repository round-trip test, a JSON round-trip test (SPC-002) and, if a new section type, an `ISectionTrackable`/`ISectionEmptyState` test.
 9. Update the matching Section table (and the definition's diagram) in §3–§6 of this document (field, type, model property, reference target, **Rules** cell and Entity rules if a rule was added) and §9 if an enum changed.
 
@@ -2405,7 +2368,7 @@ The DOM-side type is the `FieldDescriptor` type in the seed, which mirrors the l
 | The mapper and repository `.g` source files are checked in and **hand-maintained**: the `Skyline.DataMiner.SDM.SourceGenerator` package is disabled in the project and the generator attributes (`[SdmDomMapper]`, `[GenerateExposers]`, `[SdmDomStorage]`) are commented out on the types. The "auto-generated" header is historical. Edit them directly; there is no regeneration step. | [Certain] |
 | The `*DomIds` classes are generated by the Dom Editor automation script from the live module. They are the source of truth for GUIDs and enum encodings. | [Certain] |
 | The seed is not validated against the live DOM module by any test. Drift between seed and module is detected only on a real system. Everything in §1–§9 is therefore "what the repo believes the module looks like". | [Certain] |
-| Validation rules (§8) are enforced only by the repository pipeline in this codebase. The live DOM module may carry its own field constraints; none are read or mirrored here. | [Certain] |
+| Validation rules (§3–§6, mechanism in [CAN-003](CAN-003-repository-and-middleware-pipeline.md#5-validation)) are enforced only by the repository pipeline in this codebase. The live DOM module may carry its own field constraints; none are read or mirrored here. | [Certain] |
 | The mock does not check field value CLR types (`Utils.DOM` 10.5.2.6). ITM-001 proposes a validating decorator in the test project. | [Certain] |
 | Section and field GUIDs are stable identifiers; display labels in the seed (`"Asset Information"`, `"Rack Capacity"`, …) are not used by any code path and may differ from the live module without effect. | [Certain] |
 

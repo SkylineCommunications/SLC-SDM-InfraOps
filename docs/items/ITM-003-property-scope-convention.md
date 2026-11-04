@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Status | In review |
-| Parent track | [TRK-002](../tracks/TRK-002-sdm-import-export-bulk-reads.md) |
+| Parent track | [TRK-002](../tracks/TRK-002-sdm-import-export.md) |
 | Spec | [SPC-003](../specs/SPC-003-property-scope-convention.md) |
 | Collaboration | [308489](https://collaboration.dataminer.services/myTasks/list/task/308489) |
 | Assignee | Miguel Garrido |

@@ -1,20 +1,18 @@
-# TRK-002: SDM import/export bulk reads
+# TRK-002: SDM import/export
 
 | Field | Value |
 |---|---|
 | Status | Active |
 | Owner | Miguel Garrido |
-| Collaboration | [308489](https://collaboration.dataminer.services/myTasks/list/task/308489) |
-| Branch | `SDM_Bulk_ImportExport_DCP_308489` |
 | Created | 2026-10-28 |
 
 ## Goal
 
-Give the InfraOps import/export flow everything it needs from the SDM packages to work on whole collections instead of one instance at a time: a stable JSON contract for every SDM model, and scope-based Property/PropertyValues lookups that can be resolved from the model type alone.
+The InfraOps import/export flow works on whole collections of SDM objects instead of one instance at a time, and the SDM packages supply everything it needs for that.
 
 ## Why
 
-The task description asks for the import/export logic to stop doing per-item single SDM reads. Before that can happen the SDM packages have to offer:
+The import/export logic performs per-item single SDM reads. Before that can change, the SDM packages have to offer:
 
 1. A serialization contract that round-trips every model, including `SdmObjectReference<T>`, `PnoObjectReference<T>` and `ISdmObjectReference<T>` fields, through `Newtonsoft.Json` with secure deserialization settings. The previous converters lived under the `SharedCommonLibrary.Converters` namespace and only handled `SdmObjectReference<T>`; the review comment on the task ("missing json") refers to this gap.
 2. A way to find the Properties scope of an SDM object from its type, so a bulk importer/exporter can fetch Properties and PropertyValues per model type with a single filtered read rather than hard-coding scope strings per call site.
@@ -29,7 +27,7 @@ The task description asks for the import/export logic to stop doing per-item sin
 ## Out of scope
 
 - The import/export scripts themselves (not in this repository). This track supplies the contract they consume.
-- Changes merged from `UnitTestFromStoSDM` (validators, change tracking, mock fidelity). See TRK-001 for the mock side.
+- Changes merged from `UnitTestFromStoSDM` (validators, change tracking, mock fidelity). See TRK-001 for the test-double side.
 - A `System.Text.Json` contract.
 
 ## Scope note (flagged, not fixed)
@@ -38,12 +36,14 @@ The Collaboration task's acceptance criteria describe the consumer-side change (
 
 ## Work-items
 
-| ID | Title | Status |
-|---|---|---|
-| [ITM-002](../items/ITM-002-sdm-json-serialization-contract.md) | JSON serialization contract for SDM models | In review |
-| [ITM-003](../items/ITM-003-property-scope-convention.md) | PropertyScope convention and generic Properties lookups | In review |
+| ID | Title | Status | Collaboration |
+|---|---|---|---|
+| [ITM-002](../items/ITM-002-sdm-json-serialization-contract.md) | JSON serialization contract for SDM models | In review | [308489](https://collaboration.dataminer.services/myTasks/list/task/308489) |
+| [ITM-003](../items/ITM-003-property-scope-convention.md) | PropertyScope convention and generic Properties lookups | In review | [308489](https://collaboration.dataminer.services/myTasks/list/task/308489) |
 
-## Candidate follow-ups (not yet items)
+Both items were delivered on branch `SDM_Bulk_ImportExport_DCP_308489`.
+
+## Candidate items (not yet created)
 
 - Freeze `InfraOpsSerialization.DefaultSettings` (public mutable static; `DeserializeObject(string, Type)` mutates it). Raised in ITM-002.
 - Align `Skyline.DataMiner.Utils.SecureCoding.Analyzers` with the `SecureCoding` 2.2.3 bump.
