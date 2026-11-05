@@ -411,6 +411,24 @@ namespace Skyline.DataMiner.SDM.Common.Services
         }
 
         /// <summary>
+        /// Retrieves all Assets whose network MAC Address matches any of the provided MAC addresses.
+        /// Uses <see cref="Tools.RetrieveBigOrFilter"/> to safely handle large sets without
+        /// creating an oversized OR filter in a single call.
+        /// </summary>
+        public List<Asset> GetAssetsByMacAddresses(List<string> macAddresses)
+        {
+            if (assetManagerApiHelper?.Assets == null || macAddresses == null || !macAddresses.Any())
+            {
+                return new List<Asset>();
+            }
+
+            return Tools.RetrieveBigOrFilter(
+                macAddresses,
+                mac => AssetExposers.NetworkDetails.MACAddress.Equal(mac),
+                filter => assetManagerApiHelper.Assets.Read(filter).ToList());
+        }
+
+        /// <summary>
         /// Retrieves all Assets whose SerialNumber matches any of the provided serial numbers,
         /// scoped to the given AssetClass.
         /// Uses <see cref="Tools.RetrieveBigOrFilter"/> to safely handle large sets without

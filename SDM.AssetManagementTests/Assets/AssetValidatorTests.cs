@@ -287,6 +287,100 @@
 
         #endregion
 
+        #region MAC Address Uniqueness Validation Tests
+
+        [TestMethod]
+        public void Create_WithDuplicateMacAddress_ShouldFail()
+        {
+            // Arrange
+            Helper.AssetManagement.Assets.Create(NewMacAsset("TEST-MAC-001", "02:00:00:00:00:01"));
+            var duplicateAsset = NewMacAsset("TEST-MAC-002", "02:00:00:00:00:01");
+
+            // Act
+            Action act = () => Helper.AssetManagement.Assets.Create(duplicateAsset);
+
+            // Assert
+            act.Should().Throw<Exception>()
+                .WithMessage("*There is already an asset with the same Mac Address.*");
+        }
+
+        [TestMethod]
+        public void Update_ChangingMacAddressToExistingOne_ShouldFail()
+        {
+            // Arrange
+            Helper.AssetManagement.Assets.Create(NewMacAsset("TEST-MAC-011", "02:00:00:00:01:01"));
+            var target = Helper.AssetManagement.Assets.Create(NewMacAsset("TEST-MAC-012", "02:00:00:00:01:02"));
+            var update = Helper.AssetManagement.Assets.Read(AssetExposers.Identifier.Equal(target.Identifier)).Single();
+            update.MacAddress = "02:00:00:00:01:01";
+
+            // Act
+            Action act = () => Helper.AssetManagement.Assets.CreateOrUpdate(new List<Asset> { update });
+
+            // Assert
+            act.Should().Throw<Exception>()
+                .WithMessage("*There is already an asset with the same Mac Address.*");
+        }
+
+        [TestMethod]
+        public void Update_KeepingOwnMacAddress_ShouldSucceed()
+        {
+            // Arrange
+            var created = Helper.AssetManagement.Assets.Create(NewMacAsset("TEST-MAC-021", "02:00:00:00:02:01"));
+            var update = Helper.AssetManagement.Assets.Read(AssetExposers.Identifier.Equal(created.Identifier)).Single();
+            update.MacAddress = "02:00:00:00:02:01";
+            update.Name = "Renamed MAC Asset";
+
+            // Act
+            Action act = () => Helper.AssetManagement.Assets.CreateOrUpdate(new List<Asset> { update });
+
+            // Assert
+            act.Should().NotThrow();
+        }
+
+        [TestMethod]
+        public void Create_WithDifferentMacAddresses_ShouldSucceed()
+        {
+            // Arrange
+            Helper.AssetManagement.Assets.Create(NewMacAsset("TEST-MAC-031", "02:00:00:00:03:01"));
+
+            // Act
+            Action act = () => Helper.AssetManagement.Assets.Create(NewMacAsset("TEST-MAC-032", "02:00:00:00:03:02"));
+
+            // Assert
+            act.Should().NotThrow();
+        }
+
+        [TestMethod]
+        public void CreateOrUpdate_WithDuplicateMacAddressesInBatch_ShouldFail()
+        {
+            // Arrange
+            var assets = new List<Asset>
+            {
+                NewMacAsset("BATCH-MAC-001", "02:00:00:00:04:01"),
+                NewMacAsset("BATCH-MAC-002", "02:00:00:00:04:01"),
+            };
+
+            // Act
+            Action act = () => Helper.AssetManagement.Assets.CreateOrUpdate(assets);
+
+            // Assert
+            act.Should().Throw<Exception>()
+                .WithMessage("*Mac Address*duplicated within the validation batch*");
+        }
+
+        private Asset NewMacAsset(string assetId, string macAddress)
+        {
+            return new Asset
+            {
+                AssetID = assetId,
+                Name = $"Asset {assetId}",
+                AssetClassId = new SdmObjectReference<AssetClass>(testAssetClass.Identifier),
+                MacAddress = macAddress,
+            };
+        }
+
+        #endregion
+
         #region Location Validation Tests - Single Location Type
 
         [TestMethod]

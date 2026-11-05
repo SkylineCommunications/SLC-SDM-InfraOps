@@ -104,11 +104,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             // ============================================================
             // PHASE 2.5: BULK UNIQUENESS CHECKS AGAINST DATABASE
             // One OR query per field via Tools.RetrieveBigOrFilter.
-            // All three fields checked; results merged before fast-fail.
+            // All four fields checked; results merged before fast-fail.
             // ============================================================
             results.MergeFrom(_validationCore.ValidateBulkNameUniquenessAgainstDatabase(entities));
             results.MergeFrom(_validationCore.ValidateBulkAssetIdUniquenessAgainstDatabase(entities));
             results.MergeFrom(_validationCore.ValidateBulkSerialNumberUniquenessAgainstDatabase(entities));
+            results.MergeFrom(_validationCore.ValidateBulkMacAddressUniquenessAgainstDatabase(entities));
             results.MergeFrom(_validationCore.ValidateBulkReferencesAgainstDatabase(entities));
 
             // Fast-fail if batch conflicts exist

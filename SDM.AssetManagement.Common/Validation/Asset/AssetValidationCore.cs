@@ -517,6 +517,50 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
         }
 
         /// <summary>
+        /// Phase 2.5d: Bulk MAC Address uniqueness check against the database.
+        /// Only assets whose MAC Address is new or changed are checked, so pre-existing duplicates
+        /// do not block unrelated edits. Batch IDs excluded in memory.
+        /// </summary>
+        public List<ValidationResult> ValidateBulkMacAddressUniquenessAgainstDatabase(List<Asset> assets)
+        {
+            var results = assets.Select(_ => new ValidationResult()).ToList();
+
+            var batchIds = new HashSet<string>(
+                assets.Select(a => a.Identifier).Where(id => !string.IsNullOrWhiteSpace(id)));
+
+            var candidates = assets
+                .Select((asset, index) => new { asset, index })
+                .Where(x => x.asset.ShouldValidate(x.asset.MacAddressField) && !string.IsNullOrWhiteSpace(x.asset.MacAddress))
+                .ToList();
+
+            if (!candidates.Any())
+            {
+                return results;
+            }
+
+            var uniqueMacs = candidates
+                .Select(x => x.asset.MacAddress)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            var externalConflicts = _entityLoader.GetAssetsByMacAddresses(uniqueMacs)
+                .Where(a => !batchIds.Contains(a.Identifier))
+                .Select(a => a.MacAddress)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var item in candidates)
+            {
+                if (externalConflicts.Contains(item.asset.MacAddress))
+                {
+                    results[item.index].AddFailReason(AssetValidationField.MacAddress,
+                        "There is already an asset with the same Mac Address.");
+                }
+            }
+
+            return results;
+        }
+
+        /// <summary>
         /// Generic helper for bulk single-field string uniqueness checks.
         /// Extracts unique non-empty values, queries DB via OR filter, excludes batch IDs in memory.
         /// Covers Name and AssetId; SerialNumber uses its own implementation due to AssetClass scoping.
@@ -690,6 +734,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
 
             ValidateSerialNumberDuplicatesInBatch(assets, results);
 
+            ValidateMacAddressDuplicatesInBatch(assets, results);
+
             // Parent holder conflicts
             ValidateHolderConflictsInBatch(assets, results);
 
@@ -743,6 +789,24 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
                 {
                     results[item.index].AddFailReason(AssetValidationField.SerialNumber,
                         $"Serial Number '{item.asset.SerialNumber}' is duplicated within the validation batch for this Asset Class.");
+                }
+            }
+        }
+
+        private static void ValidateMacAddressDuplicatesInBatch(List<Asset> assets, List<ValidationResult> results)
+        {
+            var macGroups = assets
+                .Select((asset, index) => new { asset, index })
+                .Where(x => x.asset.ShouldValidate(x.asset.MacAddressField) && !string.IsNullOrWhiteSpace(x.asset.MacAddress))
+                .GroupBy(x => x.asset.MacAddress, StringComparer.OrdinalIgnoreCase)
+                .Where(g => g.Count() > 1);
+
+            foreach (var group in macGroups)
+            {
+                foreach (var item in group)
+                {
+                    results[item.index].AddFailReason(AssetValidationField.MacAddress,
+                        $"Mac Address '{item.asset.MacAddress}' is duplicated within the validation batch.");
                 }
             }
         }
