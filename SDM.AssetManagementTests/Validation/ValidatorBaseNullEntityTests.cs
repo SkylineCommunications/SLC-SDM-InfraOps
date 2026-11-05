@@ -187,6 +187,23 @@ namespace SDM.AssetManagement.Tests.Validation
             }
         }
 
+        [TestMethod]
+        public void Validate_WithNullEntityAndDefaultNullResult_ShouldReturnGenericFailure()
+        {
+            var validator = new DefaultNullResultValidator();
+
+            var result = validator.Validate(null!, RepositoryAction.Create);
+
+            using (new AssertionScope())
+            {
+                result.IsValid.Should().BeFalse();
+                result.FailureReasons.Should().ContainKey(nameof(TestEntity))
+                    .WhoseValue.Should().Be(NullMessage);
+                validator.Invoking(v => v.ValidateAndThrow(null!, RepositoryAction.Update))
+                    .Should().Throw<ValidationException>().WithMessage($"*{NullMessage}*");
+            }
+        }
+
         private enum TestField
         {
             Name,
@@ -201,6 +218,24 @@ namespace SDM.AssetManagement.Tests.Validation
             }
 
             public string Name { get; }
+        }
+
+        private sealed class DefaultNullResultValidator : ValidatorBase<TestEntity>
+        {
+            protected override List<ValidationResult> ValidateBulkNoDatabaseBusinessRules(List<TestEntity> entities)
+            {
+                return entities.Select(_ => new ValidationResult()).ToList();
+            }
+
+            protected override List<ValidationResult> ValidateBulkNoDatabaseBatchConflicts(List<TestEntity> entities)
+            {
+                return entities.Select(_ => new ValidationResult()).ToList();
+            }
+
+            protected override List<ValidationResult> ValidateBulkWithDatabase(List<TestEntity> entities)
+            {
+                return entities.Select(_ => new ValidationResult()).ToList();
+            }
         }
 
         private sealed class TestValidator : ValidatorBase<TestEntity>

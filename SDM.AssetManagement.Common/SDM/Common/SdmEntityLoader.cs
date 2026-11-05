@@ -786,6 +786,24 @@ namespace Skyline.DataMiner.SDM.Common.Services
                 filter => assetManagerApiHelper.CableTypes.Read(filter).ToList());
         }
 
+        /// <summary>
+        /// Retrieves all port types whose name matches one of <paramref name="names"/>.
+        /// Uses <see cref="Tools.RetrieveBigOrFilter"/> to safely handle large sets without
+        /// creating an oversized OR filter in a single call.
+        /// </summary>
+        public List<PortType> GetPortTypesByNames(List<string> names)
+        {
+            if (assetManagerApiHelper?.PortTypes == null || names == null || !names.Any())
+            {
+                return new List<PortType>();
+            }
+
+            return Tools.RetrieveBigOrFilter(
+                names,
+                name => PortTypeExposers.Name.Equal(name),
+                filter => assetManagerApiHelper.PortTypes.Read(filter).ToList());
+        }
+
         public List<AssetManagement.Models.Connection> GetConnectionsByCableTypeIds(List<string> cableTypeIds)
         {
             if (assetManagerApiHelper?.Connections == null || cableTypeIds == null || !cableTypeIds.Any())

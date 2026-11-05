@@ -216,10 +216,12 @@ using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 		}
 
 		[TestMethod]
-		public void ValidateNotInUseWhenDeleted_WithNullJobType_ShouldThrowArgumentNullException()
+		public void ValidateNotInUseWhenDeleted_WithNullJobType_ShouldReturnNullFailure()
 		{
-			_validator.Invoking(v => v.ValidateNotInUseWhenDeleted(null!))
-				.Should().Throw<ArgumentNullException>();
+			var result = _validator.ValidateNotInUseWhenDeleted(null!);
+
+			result.IsValid.Should().BeFalse();
+			result.GetFailReason(JobTypeValidationHandler.JobTypeValidationField.JobType).Should().Be("Job Type cannot be null.");
 		}
 
 		#endregion

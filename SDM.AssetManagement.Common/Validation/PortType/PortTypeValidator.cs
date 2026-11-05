@@ -73,12 +73,30 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
 
         protected override List<ValidationResult> ValidateBulkNoDatabaseBatchConflicts(List<PortType> entities)
         {
-            return entities.Select(_ => new ValidationResult()).ToList();
+            var results = entities.Select(_ => new ValidationResult()).ToList();
+
+            var duplicateNames = entities
+                .Select((pt, idx) => new { pt.Name, Index = idx })
+                .Where(x => !string.IsNullOrWhiteSpace(x.Name))
+                .GroupBy(x => x.Name, StringComparer.OrdinalIgnoreCase)
+                .Where(g => g.Count() > 1);
+
+            foreach (var group in duplicateNames)
+            {
+                foreach (var item in group)
+                {
+                    results[item.Index].AddFailReason(PortTypeValidationField.Name, $"Port Type Name '{item.Name}' is duplicated within the batch.");
+                }
+            }
+
+            return results;
         }
 
         protected override List<ValidationResult> ValidateBulkWithDatabase(List<PortType> entities)
         {
             var results = entities.Select(_ => new ValidationResult()).ToList();
+
+            AddNameInUseFailures(entities, results);
 
             var cableTypeIds = entities
                 .SelectMany(pt => pt?.CableFKs.CableTypeFks ?? new List<SdmObjectReference<CableType>>())
@@ -113,6 +131,36 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             }
 
             return ValidateNotInUseWhenDeleted(portTypes);
+        }
+
+        private void AddNameInUseFailures(List<PortType> portTypes, List<ValidationResult> results)
+        {
+            var uniqueNames = portTypes
+                .Select(pt => pt.Name)
+                .Where(name => !string.IsNullOrWhiteSpace(name))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            if (!uniqueNames.Any())
+            {
+                return;
+            }
+
+            var batchIds = new HashSet<string>(portTypes.Select(pt => pt.Identifier).Where(id => !string.IsNullOrWhiteSpace(id)));
+
+            var namesInUse = _entityLoader.GetPortTypesByNames(uniqueNames)
+                .Where(existing => !batchIds.Contains(existing.Identifier))
+                .Select(existing => existing.Name)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            for (int i = 0; i < portTypes.Count; i++)
+            {
+                var name = portTypes[i].Name;
+                if (!string.IsNullOrWhiteSpace(name) && namesInUse.Contains(name))
+                {
+                    results[i].AddFailReason(PortTypeValidationField.Name, $"Port Type Name '{name}' is already in use.");
+                }
+            }
         }
 
         private List<ValidationResult> ValidateNotInUseWhenDeleted(List<PortType> portTypes)

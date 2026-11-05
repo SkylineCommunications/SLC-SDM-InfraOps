@@ -162,12 +162,18 @@ namespace Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations
 
         /// <summary>
         /// Creates the failed result returned for a <c>null</c> entity.
-        /// Implementations add a fail reason keyed by the validator's entity-level field
+        /// The default keys the failure by the entity type name with the message <c>"Entity cannot be null."</c>.
+        /// Overrides add a fail reason keyed by the validator's entity-level field
         /// (e.g. <c>RackValidationField.Rack</c>) with the message <c>"&lt;Entity&gt; cannot be null."</c>
         /// (e.g. <c>"Rack cannot be null."</c>). A new instance must be returned on every call.
         /// </summary>
         /// <returns>A failed <see cref="ValidationResult"/> describing the <c>null</c> entity.</returns>
-        protected abstract ValidationResult CreateNullEntityResult();
+        protected virtual ValidationResult CreateNullEntityResult()
+        {
+            var result = new ValidationResult();
+            result.AddFailReason(typeof(T).Name, typeof(T).Name, "Entity cannot be null.");
+            return result;
+        }
 
         /// <summary>
         /// Validates a batch of entities for Create/Update.
