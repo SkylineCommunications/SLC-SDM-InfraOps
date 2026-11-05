@@ -24,6 +24,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Common.Validation.Reservations
         {
             Rack,
             ReservedPositions,
+            Description,
         }
 
         private readonly SdmEntityLoader _entityLoader;
@@ -112,6 +113,11 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Common.Validation.Reservations
             if (reservation.RackFk.IsEmpty)
             {
                 result.AddFailReason(InfraopsReservationValidationField.Rack, "Reservation must have a Rack specified.");
+            }
+
+            if (reservation.JobFk.IsEmpty && string.IsNullOrWhiteSpace(reservation.Description))
+            {
+                result.AddFailReason(InfraopsReservationValidationField.Description, "Reservation without a linked Job must have a description.");
             }
 
             if (reservation.ReservedPositions == null || !reservation.ReservedPositions.Any())

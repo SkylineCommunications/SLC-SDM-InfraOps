@@ -135,6 +135,17 @@ namespace SDM.AssetManagement.Tests.Assets
         }
 
         [TestMethod]
+        public void ReservationPlacement_WithoutJobAndDescription_ShouldFailOnDescription()
+        {
+            var validator = new InfraopsReservationValidator(new SdmEntityLoader());
+
+            var result = validator.Validate(new InfraopsReservation { Description = " " }, RepositoryAction.Create);
+
+            result.IsValid.Should().BeFalse();
+            result.FailureReasons.Should().Contain(reason => reason.ToString().Contains("Reservation without a linked Job must have a description."));
+        }
+
+        [TestMethod]
         public void ReservationPlacement_WithNoPositionRanges_ShouldFail()
         {
             var validator = new InfraopsReservationValidator(new SdmEntityLoader());
@@ -160,6 +171,7 @@ namespace SDM.AssetManagement.Tests.Assets
             var rackfK = Guid.NewGuid().ToString();
             var reservation = new InfraopsReservation
             {
+                Description = "Reservation description",
                 RackFk =
                 {
                     Rack = new SdmObjectReference<Rack>(rackfK),
