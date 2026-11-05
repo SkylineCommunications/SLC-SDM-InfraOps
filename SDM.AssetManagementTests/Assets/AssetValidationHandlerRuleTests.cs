@@ -115,12 +115,15 @@ namespace SDM.AssetManagement.Tests.Assets
         }
 
         [TestMethod]
-        public void ReservationPlacement_WithNullReservation_ShouldThrowArgumentNullException()
+        public void ReservationPlacement_WithNullReservation_ShouldReturnNullFailure()
         {
             var validator = new InfraopsReservationValidator(new SdmEntityLoader());
 
-            validator.Invoking(v => v.Validate(null, RepositoryAction.Create))
-                .Should().Throw<ArgumentNullException>();
+            var result = validator.Validate(null!, RepositoryAction.Create);
+
+            result.IsValid.Should().BeFalse();
+            result.GetFailReason(InfraopsReservationValidator.InfraopsReservationValidationField.Reservation)
+                .Should().Be("Reservation cannot be null.");
         }
 
         [TestMethod]

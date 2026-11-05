@@ -32,6 +32,13 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
             _helper = helper ?? throw new ArgumentNullException(nameof(helper));
         }
 
+        protected override ValidationResult CreateNullEntityResult()
+        {
+            var result = new ValidationResult();
+            result.AddFailReason(JobTypeValidationField.JobType, "Job Type cannot be null.");
+            return result;
+        }
+
         protected override List<ValidationResult> ValidateBulkNoDatabaseBusinessRules(List<JobType> entities)
         {
             // ============================================================

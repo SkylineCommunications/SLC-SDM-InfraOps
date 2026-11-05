@@ -73,6 +73,13 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
         }
 
 
+        protected override ValidationResult CreateNullEntityResult()
+        {
+            var result = new ValidationResult();
+            result.AddFailReason(AssetValidationHandler.AssetValidationField.Asset, "Asset cannot be null.");
+            return result;
+        }
+
         protected override List<ValidationResult> ValidateBulkNoDatabaseBusinessRules(List<Asset> entities)
         {
             // ============================================================

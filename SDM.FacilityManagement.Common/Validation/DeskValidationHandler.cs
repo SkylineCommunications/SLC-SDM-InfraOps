@@ -14,6 +14,7 @@
             DeskId,
             Name,
             RoomId,
+            Desk,
         }
 
         /// <summary>

@@ -28,6 +28,13 @@
             _validationCore = new PowerPortValidationCore(entityLoader);
         }
 
+        protected override ValidationResult CreateNullEntityResult()
+        {
+            var result = new ValidationResult();
+            result.AddFailReason(PowerPortValidationField.PowerPort, "PowerPort cannot be null.");
+            return result;
+        }
+
         protected override List<ValidationResult> ValidateBulkNoDatabaseBusinessRules(List<PowerPort> entities)
         {
             var results = entities.Select(_ => new ValidationResult()).ToList();

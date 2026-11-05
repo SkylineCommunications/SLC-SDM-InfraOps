@@ -35,6 +35,13 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Validation
 
         #region PropertyValues Validation
 
+        protected override ValidationResult CreateNullEntityResult()
+        {
+            var result = new ValidationResult();
+            result.AddFailReason(PropertyValuesValidationHandler.PropertyValuesValidationField.PropertyValues, "PropertyValues cannot be null.");
+            return result;
+        }
+
         protected override List<ValidationResult> ValidateBulkNoDatabaseBusinessRules(List<PropertyValues> entities)
         {
             // ============================================================

@@ -24,6 +24,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Common.Validation
             DestinationPortType,
             DestinationAsset,
             ConnectionType,
+            Connection,
         }
 
         /// <summary>

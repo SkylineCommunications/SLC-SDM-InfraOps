@@ -60,6 +60,13 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
         /// </summary>
         internal bool HasExternalReferenceChecker => _externalReferenceChecker != null;
 
+        protected override ValidationResult CreateNullEntityResult()
+        {
+            var result = new ValidationResult();
+            result.AddFailReason(PlanAndBuildJobValidationField.Job, "Job cannot be null.");
+            return result;
+        }
+
         protected override List<ValidationResult> ValidateBulkNoDatabaseBusinessRules(List<PlanAndBuildJob> entities)
         {
             // ============================================================

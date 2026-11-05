@@ -47,10 +47,39 @@ using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 		}
 
 		[TestMethod]
-		public void Validate_WithNullJobType_ShouldThrowArgumentNullException()
+		public void Validate_WithNullJobType_ShouldReturnNullFailure()
 		{
-			_validator.Invoking(v => v.Validate(null!, RepositoryAction.Create))
-				.Should().Throw<ArgumentNullException>();
+			var result = _validator.Validate(null!, RepositoryAction.Create);
+
+			using (new AssertionScope())
+			{
+				result.IsValid.Should().BeFalse();
+				result.GetFailReason(JobTypeValidationHandler.JobTypeValidationField.JobType).Should().Be("Job Type cannot be null.");
+			}
+		}
+
+		[TestMethod]
+		public void ValidateAndThrow_WithNullJobType_ShouldThrowValidationException()
+		{
+			_validator.Invoking(v => v.ValidateAndThrow(null!, RepositoryAction.Create))
+				.Should().Throw<Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Exceptions.ValidationException>()
+				.WithMessage("*Job Type cannot be null.*");
+		}
+
+		[TestMethod]
+		public void ValidateBulk_WithValidAndNullJobType_ShouldReturnResultsInOrder()
+		{
+			var jobType = new JobType { Name = "Installation" };
+
+			var results = _validator.ValidateBulk(new System.Collections.Generic.List<JobType> { jobType, null! }, RepositoryAction.Create);
+
+			using (new AssertionScope())
+			{
+				results.Should().HaveCount(2);
+				results[0].IsValid.Should().BeTrue(results[0].GetCombinedFailureReasons(";"));
+				results[1].IsValid.Should().BeFalse();
+				results[1].GetFailReason(JobTypeValidationHandler.JobTypeValidationField.JobType).Should().Be("Job Type cannot be null.");
+			}
 		}
 
 		#endregion

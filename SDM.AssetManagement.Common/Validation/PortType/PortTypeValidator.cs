@@ -19,6 +19,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             AssetPorts,
             AssetClassPorts,
             Name,
+            PortType,
         }
 
         private readonly SdmEntityLoader _entityLoader;
@@ -26,6 +27,13 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
         public PortTypeValidator(SdmEntityLoader entityLoader)
         {
             _entityLoader = entityLoader ?? throw new ArgumentNullException(nameof(entityLoader));
+        }
+
+        protected override ValidationResult CreateNullEntityResult()
+        {
+            var result = new ValidationResult();
+            result.AddFailReason(PortTypeValidationField.PortType, "Port Type cannot be null.");
+            return result;
         }
 
         protected override List<ValidationResult> ValidateBulkNoDatabaseBusinessRules(List<PortType> entities)

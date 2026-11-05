@@ -24,20 +24,29 @@ namespace Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations
     ///   </description></item>
     /// </list>
     /// </para>
+    /// <para>
+    /// <b>Null entities:</b> validators never throw on a <c>null</c> entity. A <c>null</c> entity
+    /// (single or as an item of a bulk list) yields a failed <see cref="ValidationResult"/> created by
+    /// <see cref="CreateNullEntityResult"/>, keyed by the validator's entity-level field with the
+    /// message <c>"&lt;Entity&gt; cannot be null."</c>. <see cref="ValidateAndThrow(T, RepositoryAction)"/>
+    /// throws that failure as a <see cref="ValidationException"/>. Bulk validation returns one result
+    /// per input item, in the original order; only non-null items reach the validation phases.
+    /// </para>
     /// </summary>
     public abstract class ValidatorBase<T> : IValidator<T>
         where T : class
     {
         /// <summary>
         /// Validates a single entity for the given action.
-        /// Null-guards, then routes <see cref="RepositoryAction.Delete"/> to
+        /// Routes <see cref="RepositoryAction.Delete"/> to
         /// <see cref="ValidateBulkForDelete(List{T})"/> and every other action to the Create/Update phases.
+        /// A <c>null</c> entity does not throw; it returns the failed result of <see cref="CreateNullEntityResult"/>.
         /// </summary>
         public ValidationResult Validate(T entity, RepositoryAction action)
         {
             if (entity == null)
             {
-                throw new ArgumentNullException(nameof(entity));
+                return CreateNullEntityResult();
             }
 
             return ValidateBulk(new List<T> { entity }, action).Single();
@@ -45,12 +54,13 @@ namespace Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations
 
         /// <summary>
         /// Validates a single entity for Create/Update.
+        /// A <c>null</c> entity does not throw; it returns the failed result of <see cref="CreateNullEntityResult"/>.
         /// </summary>
         protected ValidationResult Validate(T entity)
         {
             if (entity == null)
             {
-                throw new ArgumentNullException(nameof(entity));
+                return CreateNullEntityResult();
             }
 
             return ValidateBulk(new List<T> { entity }).Single();
@@ -58,12 +68,15 @@ namespace Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations
 
         /// <summary>
         /// Validates a single entity for the given action and throws <see cref="ValidationException"/> if invalid.
+        /// A <c>null</c> entity throws the <see cref="ValidationException"/> of <see cref="CreateNullEntityResult"/>
+        /// (never <see cref="ArgumentNullException"/>).
         /// </summary>
+        /// <exception cref="ValidationException">Thrown if the entity is <c>null</c> or invalid.</exception>
         public void ValidateAndThrow(T entity, RepositoryAction action)
         {
             if (entity == null)
             {
-                throw new ArgumentNullException(nameof(entity));
+                throw CreateNullEntityResult().ToException();
             }
 
             try
@@ -89,12 +102,32 @@ namespace Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations
         /// Validates a batch of entities for the given action.
         /// Routes <see cref="RepositoryAction.Delete"/> to <see cref="ValidateBulkForDelete(List{T})"/>
         /// and every other action to <see cref="ValidateBulk(List{T})"/>.
+        /// <para>
+        /// Returns one result per input item, in the original order. <c>null</c> items get the failed
+        /// result of <see cref="CreateNullEntityResult"/>; only the non-null items are passed to the
+        /// validation phases. A <c>null</c> or empty list returns an empty list.
+        /// </para>
         /// </summary>
         public List<ValidationResult> ValidateBulk(List<T> entities, RepositoryAction action)
         {
-            return action == RepositoryAction.Delete
-                ? ValidateBulkForDelete(entities)
-                : ValidateBulk(entities);
+            if (entities == null || !entities.Any(e => e == null))
+            {
+                return ValidateBulkForAction(entities, action);
+            }
+
+            var nonNullEntities = entities.Where(e => e != null).ToList();
+            var nonNullResults = nonNullEntities.Any()
+                ? ValidateBulkForAction(nonNullEntities, action)
+                : new List<ValidationResult>();
+
+            var results = new List<ValidationResult>(entities.Count);
+            int nonNullIndex = 0;
+            foreach (var entity in entities)
+            {
+                results.Add(entity == null ? CreateNullEntityResult() : nonNullResults[nonNullIndex++]);
+            }
+
+            return results;
         }
 
         /// <summary>
@@ -128,7 +161,18 @@ namespace Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations
         }
 
         /// <summary>
+        /// Creates the failed result returned for a <c>null</c> entity.
+        /// Implementations add a fail reason keyed by the validator's entity-level field
+        /// (e.g. <c>RackValidationField.Rack</c>) with the message <c>"&lt;Entity&gt; cannot be null."</c>
+        /// (e.g. <c>"Rack cannot be null."</c>). A new instance must be returned on every call.
+        /// </summary>
+        /// <returns>A failed <see cref="ValidationResult"/> describing the <c>null</c> entity.</returns>
+        protected abstract ValidationResult CreateNullEntityResult();
+
+        /// <summary>
         /// Validates a batch of entities for Create/Update.
+        /// The list is expected to contain no <c>null</c> items; the public
+        /// <see cref="ValidateBulk(List{T}, RepositoryAction)"/> filters them out before calling this.
         /// </summary>
         protected List<ValidationResult> ValidateBulk(List<T> entities)
         {
@@ -150,6 +194,13 @@ namespace Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations
             results.MergeFrom(databaseResults);
 
             return results;
+        }
+
+        private List<ValidationResult> ValidateBulkForAction(List<T> entities, RepositoryAction action)
+        {
+            return action == RepositoryAction.Delete
+                ? ValidateBulkForDelete(entities)
+                : ValidateBulk(entities);
         }
 
         private List<ValidationResult> ValidateBulkNoDatabase(List<T> entities)
@@ -195,12 +246,13 @@ namespace Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations
         /// Validates a single entity for <see cref="RepositoryAction.Delete"/>.
         /// Default: no validation (returns a passing result). Override to add delete-specific
         /// guards, e.g. preventing deletion of an entity still referenced by children.
+        /// A <c>null</c> entity does not throw; it returns the failed result of <see cref="CreateNullEntityResult"/>.
         /// </summary>
         protected ValidationResult ValidateForDelete(T entity)
         {
             if (entity == null)
             {
-                throw new ArgumentNullException(nameof(entity));
+                return CreateNullEntityResult();
             }
             return ValidateBulkForDelete(new List<T> { entity}).Single();
         }

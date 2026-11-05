@@ -25,6 +25,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Common.Validation.Reservations
             Rack,
             ReservedPositions,
             Description,
+            Reservation,
         }
 
         private readonly SdmEntityLoader _entityLoader;
@@ -40,6 +41,13 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Common.Validation.Reservations
             _validationCore = new AssetValidationCore(_entityLoader);
         }
 
+
+        protected override ValidationResult CreateNullEntityResult()
+        {
+            var result = new ValidationResult();
+            result.AddFailReason(InfraopsReservationValidationField.Reservation, "Reservation cannot be null.");
+            return result;
+        }
 
         protected override List<ValidationResult> ValidateBulkNoDatabaseBusinessRules(List<InfraopsReservation> entities)
         {
