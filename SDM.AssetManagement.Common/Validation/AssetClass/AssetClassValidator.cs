@@ -70,6 +70,13 @@
             return IsAssetClassNameValid(assetClass.Name, assetClass.Identifier);
         }
 
+        protected override ValidationResult CreateNullEntityResult()
+        {
+            var result = new ValidationResult();
+            result.AddFailReason(AssetClassValidationHandler.AssetClassValidationField.AssetClass, "Asset Class cannot be null.");
+            return result;
+        }
+
         protected override List<ValidationResult> ValidateBulkNoDatabaseBusinessRules(List<AssetClass> entities)
         {
             // ============================================================

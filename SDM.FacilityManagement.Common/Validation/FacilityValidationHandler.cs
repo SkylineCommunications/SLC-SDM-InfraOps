@@ -16,6 +16,7 @@
             SiteId,
             Latitude,
             Longitude,
+            Facility,
         }
 
         /// <summary>

@@ -115,12 +115,15 @@ namespace SDM.AssetManagement.Tests.Assets
         }
 
         [TestMethod]
-        public void ReservationPlacement_WithNullReservation_ShouldThrowArgumentNullException()
+        public void ReservationPlacement_WithNullReservation_ShouldReturnNullFailure()
         {
             var validator = new InfraopsReservationValidator(new SdmEntityLoader());
 
-            validator.Invoking(v => v.Validate(null, RepositoryAction.Create))
-                .Should().Throw<ArgumentNullException>();
+            var result = validator.Validate(null!, RepositoryAction.Create);
+
+            result.IsValid.Should().BeFalse();
+            result.GetFailReason(InfraopsReservationValidator.InfraopsReservationValidationField.Reservation)
+                .Should().Be("Reservation cannot be null.");
         }
 
         [TestMethod]
@@ -132,6 +135,17 @@ namespace SDM.AssetManagement.Tests.Assets
 
             result.IsValid.Should().BeFalse();
             result.FailureReasons.Should().Contain(reason => reason.ToString().Contains("Reservation must have a Rack specified."));
+        }
+
+        [TestMethod]
+        public void ReservationPlacement_WithoutJobAndDescription_ShouldFailOnDescription()
+        {
+            var validator = new InfraopsReservationValidator(new SdmEntityLoader());
+
+            var result = validator.Validate(new InfraopsReservation { Description = " " }, RepositoryAction.Create);
+
+            result.IsValid.Should().BeFalse();
+            result.FailureReasons.Should().Contain(reason => reason.ToString().Contains("Reservation without a linked Job must have a description."));
         }
 
         [TestMethod]
@@ -160,6 +174,7 @@ namespace SDM.AssetManagement.Tests.Assets
             var rackfK = Guid.NewGuid().ToString();
             var reservation = new InfraopsReservation
             {
+                Description = "Reservation description",
                 RackFk =
                 {
                     Rack = new SdmObjectReference<Rack>(rackfK),

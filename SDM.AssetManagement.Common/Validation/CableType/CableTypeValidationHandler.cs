@@ -17,6 +17,7 @@
             Category,
             Connection,
             PortType,
+            CableType,
         }
 
         #region Name Validation

@@ -60,6 +60,13 @@
             return IsCableTypeNameValid(cableType.Name, cableType.Identifier);
         }
 
+        protected override ValidationResult CreateNullEntityResult()
+        {
+            var result = new ValidationResult();
+            result.AddFailReason(CableTypeValidationHandler.CableTypeValidationField.CableType, "Cable Type cannot be null.");
+            return result;
+        }
+
         protected override List<ValidationResult> ValidateBulkNoDatabaseBusinessRules(List<CableType> entities)
         {
             // ============================================================

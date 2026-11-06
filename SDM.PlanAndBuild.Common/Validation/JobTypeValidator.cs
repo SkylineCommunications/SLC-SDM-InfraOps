@@ -32,6 +32,13 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
             _helper = helper ?? throw new ArgumentNullException(nameof(helper));
         }
 
+        protected override ValidationResult CreateNullEntityResult()
+        {
+            var result = new ValidationResult();
+            result.AddFailReason(JobTypeValidationField.JobType, "Job Type cannot be null.");
+            return result;
+        }
+
         protected override List<ValidationResult> ValidateBulkNoDatabaseBusinessRules(List<JobType> entities)
         {
             // ============================================================
@@ -108,12 +115,13 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
 
         /// <summary>
         /// Checks whether a JobType is in use by existing Jobs. Deletion is blocked while referenced.
+        /// A <c>null</c> JobType returns the failed result of <see cref="CreateNullEntityResult"/>.
         /// </summary>
         public ValidationResult ValidateNotInUseWhenDeleted(JobType jobType)
         {
             if (jobType == null)
             {
-                throw new ArgumentNullException(nameof(jobType));
+                return CreateNullEntityResult();
             }
 
             return ValidateNotInUseWhenDeleted(new List<JobType> { jobType }).Single();
