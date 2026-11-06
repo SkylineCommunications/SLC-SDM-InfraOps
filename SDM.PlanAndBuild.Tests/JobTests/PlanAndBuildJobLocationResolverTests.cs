@@ -11,6 +11,7 @@ namespace SDM.PlanAndBuild.Tests.JobTests
 
 	using SDM.PlanAndBuild.Tests.Setup;
 
+	using Skyline.DataMiner.SDM;
 	using Skyline.DataMiner.SDM.FacilityManagement.Helpers;
 	using Skyline.DataMiner.SDM.FacilityManagement.Models;
 	using Skyline.DataMiner.SDM.PlanAndBuild.Extensions;
@@ -39,15 +40,31 @@ namespace SDM.PlanAndBuild.Tests.JobTests
 		{
 			facilityHelper = Helper.Connection.GetMockedFacilityManagementHelper();
 
-			facility = facilityHelper.Facilities.Create(new Facility { Identifier = Guid.NewGuid().ToString(), Name = "Facility 1", FacilityId = "FAC-1" });
-			floor = facilityHelper.Floors.Create(new Floor { Identifier = Guid.NewGuid().ToString(), Name = "Floor 1", FloorId = "FLR-1" });
-			room = facilityHelper.Rooms.Create(new Room { Identifier = Guid.NewGuid().ToString(), Name = "Room 1", RoomId = "ROM-1" });
-            var zoneToCreate = new Zone { Identifier = Guid.NewGuid().ToString(), Name = "Zone 1", ZoneId = "ZON-1" };
-            zoneToCreate.ZoneCapacity.CoolingCapacity = 1;
-            zone = facilityHelper.Zones.Create(zoneToCreate);
-			row = facilityHelper.Rows.Create(new Row { Identifier = Guid.NewGuid().ToString(), Name = "Row 1", RowId = "ROW-1" });
-			desk = facilityHelper.Desks.Create(new Desk { Identifier = Guid.NewGuid().ToString(), Name = "Desk 1", DeskID = "DSK-1" });
+facility = facilityHelper.Facilities.Create(new Facility { Identifier = Guid.NewGuid().ToString(), Name = "Facility 1", FacilityId = "FAC-1" });
+
+			var floorToCreate = new Floor { Identifier = Guid.NewGuid().ToString(), Name = "Floor 1", FloorId = "FLR-1" };
+			floorToCreate.FacilityFk.Facility = new SdmObjectReference<Facility>(facility.Identifier);
+			floor = facilityHelper.Floors.Create(floorToCreate);
+
+			var roomToCreate = new Room { Identifier = Guid.NewGuid().ToString(), Name = "Room 1", RoomId = "ROM-1" };
+			roomToCreate.FloorFk.Floor = new SdmObjectReference<Floor>(floor.Identifier);
+			room = facilityHelper.Rooms.Create(roomToCreate);
+
+			var zoneToCreate = new Zone { Identifier = Guid.NewGuid().ToString(), Name = "Zone 1", ZoneId = "ZON-1" };
+			zoneToCreate.RoomFk.Room = new SdmObjectReference<Room>(room.Identifier);
+			zoneToCreate.ZoneCapacity.CoolingCapacity = 1;
+			zone = facilityHelper.Zones.Create(zoneToCreate);
+
+			var rowToCreate = new Row { Identifier = Guid.NewGuid().ToString(), Name = "Row 1", RowId = "ROW-1" };
+			rowToCreate.RoomFk.Room = new SdmObjectReference<Room>(room.Identifier);
+			row = facilityHelper.Rows.Create(rowToCreate);
+
+			var deskToCreate = new Desk { Identifier = Guid.NewGuid().ToString(), Name = "Desk 1", DeskID = "DSK-1" };
+			deskToCreate.RoomFk.Room = new SdmObjectReference<Room>(room.Identifier);
+			desk = facilityHelper.Desks.Create(deskToCreate);
+
 			var rackToCreate = new Rack { Identifier = Guid.NewGuid().ToString(), Name = "Rack 1", RackId = "RCK-1", Position = SharedMappers.DomIds.SlcFacility_Management.Enums.RackpositionenumEnum.Bottom };
+			rackToCreate.RowFk.Row = new SdmObjectReference<Row>(row.Identifier);
 			rackToCreate.Capacity.MaximumRackCapacity = 42;
 			rack = facilityHelper.Racks.Create(rackToCreate);
 		}

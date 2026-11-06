@@ -1,7 +1,6 @@
 namespace Skyline.DataMiner.SDM.AssetManagement.Extensions
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
 
     using Skyline.DataMiner.SDM.AssetManagement.Models;
@@ -72,37 +71,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Extensions
 
             list.Remove(found);
             asset.Attachments = list;
-        }
-
-        /// <summary>
-        /// Replaces <see cref="Asset.Attachments"/> with <paramref name="attachments"/>.
-        /// </summary>
-        public static void SetAttachments(this Asset asset, List<Attachment> attachments)
-        {
-            if (asset == null)
-            {
-                throw new ArgumentNullException(nameof(asset));
-            }
-
-            asset.Attachments = attachments ?? new List<Attachment>();
-        }
-
-        /// <summary>
-        /// Clears all entries from <see cref="Asset.Attachments"/>.
-        /// </summary>
-        public static void ClearAttachments(this Asset asset)
-        {
-            if (asset == null)
-            {
-                throw new ArgumentNullException(nameof(asset));
-            }
-
-            if (asset.Attachments.Count == 0)
-            {
-                return;
-            }
-
-            asset.Attachments = new List<Attachment>();
         }
     }
 }

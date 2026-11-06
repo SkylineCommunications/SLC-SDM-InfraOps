@@ -3,13 +3,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
     using System;
     using System.Collections.Generic;
     using System.Linq;
-
+    using Skyline.DataMiner.Net.Helper;
+    using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.Common.Services;
     using Skyline.DataMiner.SDM.Extensions;
-    using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
-    using Skyline.DataMiner.Net.Helper;
 
     public class PortTypeValidator : ValidatorBase<PortType>
     {
@@ -19,6 +18,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             CableTypeFks,
             AssetPorts,
             AssetClassPorts,
+            Name,
+            PortType,
         }
 
         private readonly SdmEntityLoader _entityLoader;
@@ -28,46 +29,41 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             _entityLoader = entityLoader ?? throw new ArgumentNullException(nameof(entityLoader));
         }
 
-        protected override ValidationResult Validate(PortType entity)
+        protected override ValidationResult CreateNullEntityResult()
         {
-            return entity == null
-                ? new ValidationResult()
-                : ValidateBulk(new List<PortType> { entity })[0];
+            var result = new ValidationResult();
+            result.AddFailReason(PortTypeValidationField.PortType, "Port Type cannot be null.");
+            return result;
         }
 
-        protected override List<ValidationResult> ValidateBulk(List<PortType> entities)
+        protected override List<ValidationResult> ValidateBulkNoDatabaseBusinessRules(List<PortType> entities)
         {
-            if (entities == null || !entities.Any())
-            {
-                return new List<ValidationResult>();
-            }
-
             var results = entities.Select(_ => new ValidationResult()).ToList();
-            var cableTypeIds = entities
-                .SelectMany(pt => pt?.CableFKs.CableTypeFks ?? new List<SdmObjectReference<CableType>>())
-                .Where(reference => reference.HasValue())
-                .Select(reference => reference.Identifier)
-                .Distinct()
-                .ToList();
-            var existingCableTypeIds = _entityLoader.GetCableTypesByDomIds(cableTypeIds).Select(ct => ct.Identifier).ToHashSet();
 
-            for (int i = 0; i < entities.Count; i++)
+            for (int idx = 0; idx < entities.Count; idx++)
             {
-                if (entities[i]?.CategoryLinks.Categories.IsNullOrEmpty() ?? true)
+                if (string.IsNullOrWhiteSpace(entities[idx]?.Name))
                 {
-                    results[i].AddFailReason(PortTypeValidationField.Category, "Port Type must have at least one category.");
+                    results[idx].AddFailReason(PortTypeValidationField.Name, "Port Type Name cannot be empty or whitespace.");
                 }
 
-                if (entities[i]?.CableFKs.CableTypeFks.IsNullOrEmpty() ?? true)
+                if (entities[idx]?.CategoryLinks.Categories.IsNullOrEmpty() ?? true)
                 {
-                    results[i].AddFailReason(PortTypeValidationField.CableTypeFks, "Port Type must have at least one cable type.");
+                    results[idx].AddFailReason(PortTypeValidationField.Category, "Port Type must have at least one category.");
                 }
 
-                foreach (var reference in entities[i]?.CableFKs.CableTypeFks ?? new List<SdmObjectReference<CableType>>())
+                if (entities[idx]?.CableFKs.CableTypeFks.IsNullOrEmpty() ?? true)
                 {
-                    if (!reference.HasValue() || !existingCableTypeIds.Contains(reference.Identifier))
+                    results[idx].AddFailReason(PortTypeValidationField.CableTypeFks, "Port Type must have at least one cable type.");
+                }
+
+                var cableTypes = entities[idx]?.CableFKs.CableTypeFks ?? new List<SdmObjectReference<CableType>>();
+
+                foreach (var reference in cableTypes)
+                {
+                    if (!reference.HasValue())
                     {
-                        results[i].AddFailReason(PortTypeValidationField.CableTypeFks, $"Referenced Cable Type '{reference.Identifier}' does not exist.");
+                        results[idx].AddFailReason(PortTypeValidationField.CableTypeFks, $"Referenced Cable Type cannot be empty.");
                     }
                 }
             }
@@ -75,14 +71,56 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             return results;
         }
 
-        protected override ValidationResult ValidateForDelete(PortType portType)
+        protected override List<ValidationResult> ValidateBulkNoDatabaseBatchConflicts(List<PortType> entities)
         {
-            if (portType == null)
+            var results = entities.Select(_ => new ValidationResult()).ToList();
+
+            var duplicateNames = entities
+                .Select((pt, idx) => new { pt.Name, Index = idx })
+                .Where(x => !string.IsNullOrWhiteSpace(x.Name))
+                .GroupBy(x => x.Name, StringComparer.OrdinalIgnoreCase)
+                .Where(g => g.Count() > 1);
+
+            foreach (var group in duplicateNames)
             {
-                throw new ArgumentNullException(nameof(portType));
+                foreach (var item in group)
+                {
+                    results[item.Index].AddFailReason(PortTypeValidationField.Name, $"Port Type Name '{item.Name}' is duplicated within the batch.");
+                }
             }
 
-            return ValidateNotInUseWhenDeleted(new List<PortType> { portType })[0];
+            return results;
+        }
+
+        protected override List<ValidationResult> ValidateBulkWithDatabase(List<PortType> entities)
+        {
+            var results = entities.Select(_ => new ValidationResult()).ToList();
+
+            AddNameInUseFailures(entities, results);
+
+            var cableTypeIds = entities
+                .SelectMany(pt => pt?.CableFKs.CableTypeFks ?? new List<SdmObjectReference<CableType>>())
+                .Where(reference => reference.HasValue())
+                .Select(reference => reference.Identifier)
+                .Distinct()
+                .ToList();
+
+            var existingCableTypeIds = _entityLoader.GetCableTypesByDomIds(cableTypeIds).Select(ct => ct.Identifier).ToHashSet();
+
+            for (int idx = 0; idx < entities.Count; idx++)
+            {
+                var cableTypes = entities[idx]?.CableFKs.CableTypeFks ?? new List<SdmObjectReference<CableType>>();
+
+                foreach (var reference in cableTypes)
+                {
+                    if (!existingCableTypeIds.Contains(reference.Identifier))
+                    {
+                        results[idx].AddFailReason(PortTypeValidationField.CableTypeFks, $"Referenced Cable Type '{reference.Identifier}' does not exist.");
+                    }
+                }
+            }
+
+            return results;
         }
 
         protected override List<ValidationResult> ValidateBulkForDelete(List<PortType> portTypes)
@@ -93,6 +131,36 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             }
 
             return ValidateNotInUseWhenDeleted(portTypes);
+        }
+
+        private void AddNameInUseFailures(List<PortType> portTypes, List<ValidationResult> results)
+        {
+            var uniqueNames = portTypes
+                .Select(pt => pt.Name)
+                .Where(name => !string.IsNullOrWhiteSpace(name))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            if (!uniqueNames.Any())
+            {
+                return;
+            }
+
+            var batchIds = new HashSet<string>(portTypes.Select(pt => pt.Identifier).Where(id => !string.IsNullOrWhiteSpace(id)));
+
+            var namesInUse = _entityLoader.GetPortTypesByNames(uniqueNames)
+                .Where(existing => !batchIds.Contains(existing.Identifier))
+                .Select(existing => existing.Name)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            for (int i = 0; i < portTypes.Count; i++)
+            {
+                var name = portTypes[i].Name;
+                if (!string.IsNullOrWhiteSpace(name) && namesInUse.Contains(name))
+                {
+                    results[i].AddFailReason(PortTypeValidationField.Name, $"Port Type Name '{name}' is already in use.");
+                }
+            }
         }
 
         private List<ValidationResult> ValidateNotInUseWhenDeleted(List<PortType> portTypes)

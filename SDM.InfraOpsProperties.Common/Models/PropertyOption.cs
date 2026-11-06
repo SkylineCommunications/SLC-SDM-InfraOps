@@ -6,9 +6,19 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
 
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
-    public sealed class PropertyOption : IEquatable<PropertyOption>, ISectionTrackable, ISectionEmptyState
+    public sealed class PropertyOption : ChangeTrackingBase, IEquatable<PropertyOption>, ISectionTrackable, ISectionEmptyState
     {
-        public string Option { get; set; }
+        public string Option
+        {
+            get => OptionField.Value;
+            set => OptionField.Value = value;
+        }
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal IChangeTrackingField<string> OptionField => FieldHandler.GetOrCreateField(
+            nameof(Option),
+            () => new ChangeTrackingStringField(null));
 
         /// <summary>
         /// Gets or sets the DOM Section ID this element was read from, so it can be reused on update.

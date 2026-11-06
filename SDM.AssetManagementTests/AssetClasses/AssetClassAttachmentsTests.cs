@@ -22,7 +22,7 @@ namespace SDM.AssetManagement.Tests.AssetClasses
 
     /// <summary>
     /// Unit tests for the <see cref="Attachment"/> convenience methods on <see cref="AssetClass"/>
-    /// (AddAttachment/RemoveItemFromAttachments/SetAttachments/ClearAttachments), plus a DOM
+    /// (AddAttachment/RemoveItemFromAttachments/RemoveAttachmentAndDependencies), plus a DOM
     /// round-trip test verifying attachments persist, mirroring the JobAttachment implementation.
     /// </summary>
     [TestClass]
@@ -94,7 +94,7 @@ namespace SDM.AssetManagement.Tests.AssetClasses
         }
 
         [TestMethod]
-        public void SetAttachments_ShouldReplaceExistingList()
+        public void SettingAttachments_ShouldReplaceExistingList()
         {
             var assetClass = new AssetClass();
             assetClass.AddAttachment(new Attachment { FilePath = @"C:\file1.pdf" });
@@ -104,38 +104,28 @@ namespace SDM.AssetManagement.Tests.AssetClasses
                 new Attachment { FilePath = @"C:\file2.pdf" },
                 new Attachment { FilePath = @"C:\file3.pdf" },
             };
-            assetClass.SetAttachments(replacement);
+            assetClass.Attachments = replacement;
 
             assetClass.Attachments.Should().BeEquivalentTo(replacement);
         }
 
         [TestMethod]
-        public void ClearAttachments_ShouldEmptyList()
+        public void ClearingAttachments_ShouldEmptyList()
         {
             var assetClass = new AssetClass();
             assetClass.AddAttachment(new Attachment { FilePath = @"C:\file1.pdf" });
 
-            assetClass.ClearAttachments();
+            assetClass.Attachments.Clear();
 
             assetClass.Attachments.Should().BeEmpty();
         }
 
         [TestMethod]
-        public void SettingFrontImage_ShouldNotAutomaticallyAddToAttachments()
+        public void SettingFrontImage_ShouldAddAttachmentAndSetFrontImage()
         {
             var assetClass = new AssetClass();
 
             assetClass.FrontImage = @"C:\images\front.png";
-
-            assetClass.Attachments.Should().BeEmpty();
-        }
-
-        [TestMethod]
-        public void AddFrontImageAndAttachment_ShouldAddAttachmentAndSetFrontImage()
-        {
-            var assetClass = new AssetClass();
-
-            assetClass.AddFrontImageAndAttachment(@"C:\images\front.png");
 
             assetClass.FrontImage.Should().Be(@"C:\images\front.png");
             assetClass.Attachments.Should().ContainSingle()
@@ -143,19 +133,21 @@ namespace SDM.AssetManagement.Tests.AssetClasses
         }
 
         [TestMethod]
-        public void AddBackImageAndAttachment_ShouldAddAttachmentAndSetBackImage()
+        public void SettingBackImage_ShouldAddAttachmentAndSetBackImage()
         {
             var assetClass = new AssetClass();
 
-            assetClass.AddBackImageAndAttachment(@"C:\images\back.png");
+            assetClass.BackImage = @"C:\images\back.png";
 
             assetClass.BackImage.Should().Be(@"C:\images\back.png");
             assetClass.Attachments.Should().ContainSingle()
                 .Which.FilePath.Should().Be(@"C:\images\back.png");
         }
 
-        [TestMethod]
-        public void AddFrontImageAndAttachment_WhenAlreadyInAttachments_ShouldNotDuplicate()
+        [DataTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public void SettingImage_WhenAlreadyInAttachments_ShouldPreserveAttachment(bool front)
         {
             var attachedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc);
             var attachedBy = Convert.ToString(Guid.NewGuid());
@@ -168,31 +160,136 @@ namespace SDM.AssetManagement.Tests.AssetClasses
                 AttachedBy = attachedBy,
             });
 
-            assetClass.AddFrontImageAndAttachment(@"C:\images\front.png");
+            if (front)
+            {
+                assetClass.FrontImage = @"C:\images\front.png";
+            }
+            else
+            {
+                assetClass.BackImage = @"C:\images\front.png";
+            }
 
-            assetClass.FrontImage.Should().Be(@"C:\images\front.png");
+            (front ? assetClass.FrontImage : assetClass.BackImage).Should().Be(@"C:\images\front.png");
             var attachment = assetClass.Attachments.Should().ContainSingle().Subject;
             attachment.AttachedAt.Should().Be(attachedAt);
             attachment.AttachedBy.Should().Be(attachedBy);
         }
 
-        [TestMethod]
-        public void AddFrontImageAndAttachment_NullOrWhitespace_ShouldThrow()
+        [DataTestMethod]
+        [DataRow(null)]
+        [DataRow("")]
+        [DataRow("   ")]
+        public void SettingEmptyImages_ShouldNotAddAttachments(string imagePath)
         {
             var assetClass = new AssetClass();
 
-            Action actNull = () => assetClass.AddFrontImageAndAttachment(null);
-            Action actWhitespace = () => assetClass.AddFrontImageAndAttachment("   ");
+            assetClass.FrontImage = imagePath;
+            assetClass.BackImage = imagePath;
 
-            actNull.Should().Throw<ArgumentException>();
-            actWhitespace.Should().Throw<ArgumentException>();
+            assetClass.FrontImage.Should().Be(imagePath);
+            assetClass.BackImage.Should().Be(imagePath);
+            assetClass.Attachments.Should().BeEmpty();
+        }
+
+        [TestMethod]
+        public void SettingImagesToSamePathRepeatedly_ShouldShareOneAttachment()
+        {
+            var assetClass = new AssetClass();
+
+            assetClass.FrontImage = "shared.png";
+            assetClass.BackImage = "shared.png";
+            assetClass.FrontImage = "shared.png";
+            assetClass.BackImage = "shared.png";
+
+            assetClass.Attachments.Should().ContainSingle()
+                .Which.FilePath.Should().Be("shared.png");
+        }
+
+        [DataTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public void ReassigningImage_AfterAttachmentRemoval_ShouldRestoreAttachment(bool front)
+        {
+            var assetClass = new AssetClass();
+            if (front)
+            {
+                assetClass.FrontImage = "image.png";
+            }
+            else
+            {
+                assetClass.BackImage = "image.png";
+            }
+            assetClass.Attachments.Clear();
+
+            if (front)
+            {
+                assetClass.FrontImage = "image.png";
+            }
+            else
+            {
+                assetClass.BackImage = "image.png";
+            }
+
+            assetClass.Attachments.Should().ContainSingle()
+                .Which.FilePath.Should().Be("image.png");
+        }
+
+        [DataTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public void ChangingAndClearingImage_ShouldRetainExistingAttachments(bool front)
+        {
+            var assetClass = new AssetClass();
+            if (front)
+            {
+                assetClass.FrontImage = "old.png";
+                assetClass.FrontImage = "new.png";
+                assetClass.FrontImage = null;
+            }
+            else
+            {
+                assetClass.BackImage = "old.png";
+                assetClass.BackImage = "new.png";
+                assetClass.BackImage = null;
+            }
+
+            (front ? assetClass.FrontImage : assetClass.BackImage).Should().BeNull();
+            assetClass.Attachments.Select(a => a.FilePath).Should()
+                .BeEquivalentTo("old.png", "new.png");
+        }
+
+        [DataTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public void SettingImage_ShouldTrackImageAndAttachmentChanges(bool front)
+        {
+            var assetClass = new AssetClass();
+            assetClass.ResetChangeTracking();
+
+            if (front)
+            {
+                assetClass.FrontImage = "image.png";
+            }
+            else
+            {
+                assetClass.BackImage = "image.png";
+            }
+
+            assetClass.Changed.Should().BeTrue();
+            assetClass.GetChanges().Select(c => c.FieldName).Should()
+                .BeEquivalentTo(front ? nameof(AssetClass.FrontImage) : nameof(AssetClass.BackImage),
+                    nameof(AssetClass.Attachments));
+
+            assetClass.ResetChangeTracking();
+            assetClass.Changed.Should().BeFalse();
+            assetClass.GetChanges().Should().BeEmpty();
         }
 
         [TestMethod]
         public void RemoveItemFromAttachments_WhenFrontImage_ShouldThrow()
         {
             var assetClass = new AssetClass();
-            assetClass.AddFrontImageAndAttachment(@"C:\images\front.png");
+            assetClass.FrontImage = @"C:\images\front.png";
             var attachment = assetClass.Attachments.Single();
 
             Action act = () => assetClass.RemoveItemFromAttachments(attachment);
@@ -205,7 +302,7 @@ namespace SDM.AssetManagement.Tests.AssetClasses
         public void RemoveItemFromAttachments_WhenBackImage_ShouldThrow()
         {
             var assetClass = new AssetClass();
-            assetClass.AddBackImageAndAttachment(@"C:\images\back.png");
+            assetClass.BackImage = @"C:\images\back.png";
             var attachment = assetClass.Attachments.Single();
 
             Action act = () => assetClass.RemoveItemFromAttachments(attachment);
@@ -218,7 +315,7 @@ namespace SDM.AssetManagement.Tests.AssetClasses
         public void RemoveAttachmentAndDependencies_WhenFrontImage_ShouldClearImageAndRemove()
         {
             var assetClass = new AssetClass();
-            assetClass.AddFrontImageAndAttachment(@"C:\images\front.png");
+            assetClass.FrontImage = @"C:\images\front.png";
             var attachment = assetClass.Attachments.Single();
 
             assetClass.RemoveAttachmentAndDependencies(attachment);
@@ -231,7 +328,7 @@ namespace SDM.AssetManagement.Tests.AssetClasses
         public void RemoveAttachmentAndDependencies_WhenBackImage_ShouldClearImageAndRemove()
         {
             var assetClass = new AssetClass();
-            assetClass.AddBackImageAndAttachment(@"C:\images\back.png");
+            assetClass.BackImage = @"C:\images\back.png";
             var attachment = assetClass.Attachments.Single();
 
             assetClass.RemoveAttachmentAndDependencies(attachment);
@@ -244,7 +341,7 @@ namespace SDM.AssetManagement.Tests.AssetClasses
         public void RemoveAttachmentAndDependencies_NonImageAttachment_ShouldRemoveAndKeepImages()
         {
             var assetClass = new AssetClass();
-            assetClass.AddFrontImageAndAttachment(@"C:\images\front.png");
+            assetClass.FrontImage = @"C:\images\front.png";
             assetClass.AddAttachment(new Attachment { FilePath = @"C:\docs\manual.pdf" });
             var manual = assetClass.Attachments.Single(a => a.FilePath == @"C:\docs\manual.pdf");
 
@@ -255,8 +352,10 @@ namespace SDM.AssetManagement.Tests.AssetClasses
                 .BeEquivalentTo(new[] { @"C:\images\front.png" });
         }
 
-        [TestMethod]
-        public void Create_WithFrontImageNotInAttachments_ShouldFailValidation()
+        [DataTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public void Create_WithImageAttachmentRemoved_ShouldFailValidation(bool front)
         {
             // Arrange
             Helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
@@ -270,19 +369,29 @@ namespace SDM.AssetManagement.Tests.AssetClasses
                 Manufacturer = new PnoObjectReference<Organization>(Guid.NewGuid()),
                 HeightU = 1.0,
                 PowerSupply = SlcAsset_Management.Enums.PowerSupplyEnum.AC,
-                FrontImage = @"C:\images\front.png",
             };
+            if (front)
+            {
+                assetClass.FrontImage = "image.png";
+            }
+            else
+            {
+                assetClass.BackImage = "image.png";
+            }
+            assetClass.Attachments.Clear();
 
             // Act
             Action act = () => Helper.AssetManagement.AssetClasses.Create(assetClass);
 
             // Assert
             act.Should().Throw<Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Exceptions.ValidationException>()
-                .WithMessage("*Front Image must be part of the Attachments*");
+                .WithMessage(front
+                    ? "*Front Image must be part of the Attachments*"
+                    : "*Back Image must be part of the Attachments*");
         }
 
         [TestMethod]
-        public void Create_WithImagesAddedViaHelper_ShouldPersistImagesAsAttachments()
+        public void Create_WithImagesAssignedDirectly_ShouldPersistImagesAsAttachments()
         {
             // Arrange
             Helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
@@ -297,8 +406,8 @@ namespace SDM.AssetManagement.Tests.AssetClasses
                 HeightU = 1.0,
                 PowerSupply = SlcAsset_Management.Enums.PowerSupplyEnum.AC,
             };
-            assetClass.AddFrontImageAndAttachment(@"C:\images\front.png");
-            assetClass.AddBackImageAndAttachment(@"C:\images\back.png");
+            assetClass.FrontImage = @"C:\images\front.png";
+            assetClass.BackImage = @"C:\images\back.png";
 
             // Act
             Helper.AssetManagement.AssetClasses.Create(assetClass);
@@ -311,7 +420,69 @@ namespace SDM.AssetManagement.Tests.AssetClasses
                 created.BackImage.Should().Be(@"C:\images\back.png");
                 created.Attachments.Select(a => a.FilePath).Should()
                     .BeEquivalentTo(new[] { @"C:\images\front.png", @"C:\images\back.png" });
+                created.Changed.Should().BeFalse();
             }
+
+            created.FrontImage = "updated-front.png";
+            created.BackImage = "updated-back.png";
+            Helper.AssetManagement.AssetClasses.Update(created);
+            var updated = Helper.AssetManagement.AssetClasses.Read(new TRUEFilterElement<AssetClass>()).Single();
+
+            using (new AssertionScope())
+            {
+                updated.FrontImage.Should().Be("updated-front.png");
+                updated.BackImage.Should().Be("updated-back.png");
+                updated.Attachments.Select(a => a.FilePath).Should()
+                    .BeEquivalentTo(@"C:\images\front.png", @"C:\images\back.png",
+                        "updated-front.png", "updated-back.png");
+                updated.Changed.Should().BeFalse();
+            }
+        }
+
+        [DataTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public void Deserialize_WithImagesAndAttachments_ShouldPreserveMetadataWithoutDuplicates(bool imagesFirst)
+        {
+            const string images = @"""FrontImage"":""image.png"",""BackImage"":""image.png""";
+            const string attachments = @"""Attachments"":[{""FilePath"":""image.png"",""AttachedBy"":""user""}]";
+            var json = imagesFirst
+                ? "{" + images + "," + attachments + "}"
+                : "{" + attachments + "," + images + "}";
+
+            var assetClass = Newtonsoft.Json.JsonConvert.DeserializeObject<AssetClass>(json);
+
+            assetClass.FrontImage.Should().Be("image.png");
+            assetClass.BackImage.Should().Be("image.png");
+            var attachment = assetClass.Attachments.Should().ContainSingle().Subject;
+            attachment.FilePath.Should().Be("image.png");
+            attachment.AttachedBy.Should().Be("user");
+        }
+
+        [TestMethod]
+        public void Deserialize_WithImagesOnly_ShouldAddAttachments()
+        {
+            var assetClass = Newtonsoft.Json.JsonConvert.DeserializeObject<AssetClass>(
+                @"{""FrontImage"":""front.png"",""BackImage"":""back.png""}");
+
+            assetClass.Attachments.Select(a => a.FilePath).Should()
+                .BeEquivalentTo("front.png", "back.png");
+        }
+
+        [TestMethod]
+        public void RemoveAttachmentAndDependencies_WhenSharedImage_ShouldClearBothImages()
+        {
+            var assetClass = new AssetClass
+            {
+                FrontImage = "shared.png",
+                BackImage = "shared.png",
+            };
+
+            assetClass.RemoveAttachmentAndDependencies(assetClass.Attachments.Single());
+
+            assetClass.FrontImage.Should().BeNull();
+            assetClass.BackImage.Should().BeNull();
+            assetClass.Attachments.Should().BeEmpty();
         }
 
         [TestMethod]

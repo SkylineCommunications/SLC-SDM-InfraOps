@@ -639,10 +639,7 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
 				_propertyproperties.AddOrUpdateValue<long>(InfraOpsProperties.Models.PropertyDomMapper.PropertyProperties.StringSizeLimit, (long)(obj.StringSizeLimit).Value);
 			}
 
-			if (obj.IsMultiLineString != default)
-			{
-				_propertyproperties.AddOrUpdateValue<bool>(InfraOpsProperties.Models.PropertyDomMapper.PropertyProperties.IsMultiLineString, (bool)obj.IsMultiLineString);
-			}
+			_propertyproperties.AddOrUpdateValue<bool>(InfraOpsProperties.Models.PropertyDomMapper.PropertyProperties.IsMultiLineString, (bool)obj.IsMultiLineString);
 
 			instance.Sections.Add(_propertyproperties);
 			if (!obj.Layout.IsEmpty)

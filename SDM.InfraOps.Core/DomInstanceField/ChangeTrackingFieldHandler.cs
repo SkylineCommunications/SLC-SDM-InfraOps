@@ -43,12 +43,17 @@
 				return typedField;
 			}
 
-			throw new InvalidOperationException($"Field '{fieldName}' is not of type '{typeof(ChangeTrackingField<T1>).FullName}', expected '{field.GetType().FullName}'.");
+			throw new InvalidOperationException($"Field '{fieldName}' is not of type '{typeof(ChangeTrackingArrayField<T1>).FullName}', expected '{field.GetType().FullName}'.");
+		}
+
+		public IChangeTrackingField TryGetField(string fieldName)
+		{
+			return _fields.TryGetValue(fieldName, out var field) ? field : null;
 		}
 
 		public Dictionary<string, (object prevVal, object newVal)> GetChanges()
 		{
-			return _fields.ToDictionary(entry => entry.Key, entry => entry.Value.GetChanges());
+			return _fields.Where(entry => entry.Value.Changed).ToDictionary(entry => entry.Key, entry => entry.Value.GetChanges());
 		}
 
 		public void ApplyChanges()
@@ -57,6 +62,17 @@
 			{
 				field.ApplyChanges();
 			}
+		}
+
+		public ChangeTrackingFieldHandler Clone()
+		{
+			var clone = new ChangeTrackingFieldHandler();
+			foreach (var entry in _fields)
+			{
+				clone._fields[entry.Key] = entry.Value.Clone();
+			}
+
+			return clone;
 		}
 	}
 }

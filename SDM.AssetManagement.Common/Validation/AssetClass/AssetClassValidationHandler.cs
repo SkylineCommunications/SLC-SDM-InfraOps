@@ -58,6 +58,20 @@
             return result.IsValid;
         }
 
+        public static bool IsAssetClassNameValid(AssetClass assetClass, out ValidationResult result)
+        {
+            result = new ValidationResult();
+
+            if (string.IsNullOrWhiteSpace(assetClass.Name))
+            {
+                result.AddFailReason(AssetClassValidationField.Name,
+                    "Asset Class Name cannot be empty or whitespace.");
+                return result.IsValid;
+            }
+
+            return result.IsValid;
+        }
+
         public static bool IsManufacturerSet(AssetClass assetClass, out ValidationResult result)
         {
             result = new ValidationResult();

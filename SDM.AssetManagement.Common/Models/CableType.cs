@@ -10,6 +10,7 @@
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)asset_management")]
+    [PropertyScope("CableType")]
     public sealed class CableType : SdmObjectBase<CableType>, IEquatable<CableType>, IEntityTracking, IReadOnlyModuleIdReferencer
 	{
         [JsonIgnore]
@@ -104,7 +105,7 @@
                     OldValue = kvp.Value.prevVal,
                     NewValue = kvp.Value.newVal,
                 })
-                .Concat(_categoryLinks?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>());
+                .Concat(_categoryLinks.GetSectionChanges("CategoryLinks"));
         }
 
         public void ResetChangeTracking()
@@ -161,8 +162,8 @@
             unchecked
             {
                 int hash = 17;
-                hash = (hash * 23) + (Name != null ? Name.GetHashCode() : 0);
-                hash = (hash * 23) + (Description != null ? Description.GetHashCode() : 0);
+                hash = (hash * 23) + (Name != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(Name) : 0);
+                hash = (hash * 23) + (Description != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(Description) : 0);
                 hash = (hash * 23) + (CategoryLinks != null ? CategoryLinks.GetHashCode() : 0);
                 return hash;
             }

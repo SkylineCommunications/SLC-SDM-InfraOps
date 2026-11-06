@@ -16,6 +16,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)asset_management")]
+    [PropertyScope("Asset")]
     public sealed class Asset : SdmObjectBase<Asset>, IEquatable<Asset>, IEntityTracking, IReadOnlyModuleIdReferencer
 	{
         [JsonIgnore]
@@ -426,10 +427,10 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     OldValue = kvp.Value.prevVal,
                     NewValue = kvp.Value.newVal,
                 })
-                .Concat(Location?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>())
-                .Concat(DestinationLocation?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>())
-                .Concat(Ownership?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>())
-                .Concat(Custody?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>());
+                .Concat(_location.GetSectionChanges(nameof(Location)))
+                .Concat(_destinationLocation.GetSectionChanges(nameof(DestinationLocation)))
+                .Concat(Ownership.GetSectionChanges(nameof(Ownership)))
+                .Concat(Custody.GetSectionChanges(nameof(Custody)));
         }
 
         public void ResetChangeTracking()
@@ -538,12 +539,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             unchecked
             {
                 int hash = 17;
-                hash = (hash * 23) + (Name?.GetHashCode() ?? 0);
-                hash = (hash * 23) + (AssetID?.GetHashCode() ?? 0);
+                hash = (hash * 23) + (Name != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(Name) : 0);
+                hash = (hash * 23) + (AssetID != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(AssetID) : 0);
                 hash = (hash * 23) + (AssetClassId.Identifier?.GetHashCode() ?? 0);
-                hash = (hash * 23) + (SerialNumber?.GetHashCode() ?? 0);
-                hash = (hash * 23) + (Description?.GetHashCode() ?? 0);
-                hash = (hash * 23) + (MacAddress?.GetHashCode() ?? 0);
+                hash = (hash * 23) + (SerialNumber != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(SerialNumber) : 0);
+                hash = (hash * 23) + (Description != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(Description) : 0);
+                hash = (hash * 23) + (MacAddress != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(MacAddress) : 0);
                 hash = (hash * 23) + State.GetHashCode();
                 return hash;
             }

@@ -16,7 +16,9 @@
         [SdmIgnore]
         public bool IsEmpty =>
             MaximumRackCapacity == default &&
-            MaximumPowerCapacity == default;
+            MaximumPowerCapacity == default &&
+            !RackUnitsField.IsSet &&
+            !PowerCapacityField.IsSet;
 
         public double MaximumRackCapacity
         {

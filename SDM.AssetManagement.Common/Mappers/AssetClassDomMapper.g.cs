@@ -44,7 +44,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
         internal static class Lifecycle
         {
-            internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(SharedMappers.DomIds.SlcAsset_Management.Sections.AssetLifecycle.Id.Id)
+            internal static SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(SharedMappers.DomIds.SlcAsset_Management.Sections.AssetClassLifecycleInformation.Id.Id)
             { ModuleId = ModuleId };
 
             internal static FieldDescriptorID EndOfLife = SharedMappers.DomIds.SlcAsset_Management.Sections.AssetClassLifecycleInformation.EOLDate;

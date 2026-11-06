@@ -10,6 +10,7 @@
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)asset_management")]
+    [PropertyScope("Connection")]
     public sealed class Connection : SdmObjectBase<Connection>, IEquatable<Connection>, IEntityTracking, IReadOnlyModuleIdReferencer
 	{
         [JsonIgnore]
@@ -144,8 +145,8 @@
                     OldValue = kvp.Value.prevVal,
                     NewValue = kvp.Value.newVal,
                 })
-                .Concat(_source?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>())
-                .Concat(_destination?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>());
+                .Concat(_source.GetSectionChanges("Source"))
+                .Concat(_destination.GetSectionChanges("Destination"));
         }
 
         public void ResetChangeTracking()
@@ -207,11 +208,11 @@
             unchecked
             {
                 int hash = 17;
-                hash = (hash * 23) + (Notes?.GetHashCode() ?? 0);
-                hash = (hash * 23) + (Description?.GetHashCode() ?? 0);
-                hash = (hash * 23) + ConnectionType?.GetHashCode() ?? 0;
+                hash = (hash * 23) + (Notes != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(Notes) : 0);
+                hash = (hash * 23) + (Description != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(Description) : 0);
+                hash = (hash * 23) + (ConnectionType?.GetHashCode() ?? 0);
                 hash = (hash * 23) + (CableType.Identifier?.GetHashCode() ?? 0);
-                hash = (hash * 23) + CableLength?.GetHashCode() ?? 0;
+                hash = (hash * 23) + (CableLength?.GetHashCode() ?? 0);
                 hash = (hash * 23) + (Source?.GetHashCode() ?? 0);
                 hash = (hash * 23) + (Destination?.GetHashCode() ?? 0);
                 return hash;

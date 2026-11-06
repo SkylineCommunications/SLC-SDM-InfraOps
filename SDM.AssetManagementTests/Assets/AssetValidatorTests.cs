@@ -8,6 +8,7 @@
     using SDM.AssetManagement.Tests.Setup;
     using SharedCommonLibrary.AssetManagement.State_Management;
     using SharedMappers.DomIds;
+    using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Common.Exceptions;
     using Skyline.DataMiner.SDM.AssetManagement.Common.Validation;
@@ -282,6 +283,100 @@
             // Assert
             act.Should().Throw<Exception>()
                 .WithMessage("*Serial Number is already in use for this Asset Class*");
+        }
+
+        #endregion
+
+        #region MAC Address Uniqueness Validation Tests
+
+        [TestMethod]
+        public void Create_WithDuplicateMacAddress_ShouldFail()
+        {
+            // Arrange
+            Helper.AssetManagement.Assets.Create(NewMacAsset("TEST-MAC-001", "02:00:00:00:00:01"));
+            var duplicateAsset = NewMacAsset("TEST-MAC-002", "02:00:00:00:00:01");
+
+            // Act
+            Action act = () => Helper.AssetManagement.Assets.Create(duplicateAsset);
+
+            // Assert
+            act.Should().Throw<Exception>()
+                .WithMessage("*There is already an asset with the same Mac Address.*");
+        }
+
+        [TestMethod]
+        public void Update_ChangingMacAddressToExistingOne_ShouldFail()
+        {
+            // Arrange
+            Helper.AssetManagement.Assets.Create(NewMacAsset("TEST-MAC-011", "02:00:00:00:01:01"));
+            var target = Helper.AssetManagement.Assets.Create(NewMacAsset("TEST-MAC-012", "02:00:00:00:01:02"));
+            var update = Helper.AssetManagement.Assets.Read(AssetExposers.Identifier.Equal(target.Identifier)).Single();
+            update.MacAddress = "02:00:00:00:01:01";
+
+            // Act
+            Action act = () => Helper.AssetManagement.Assets.CreateOrUpdate(new List<Asset> { update });
+
+            // Assert
+            act.Should().Throw<Exception>()
+                .WithMessage("*There is already an asset with the same Mac Address.*");
+        }
+
+        [TestMethod]
+        public void Update_KeepingOwnMacAddress_ShouldSucceed()
+        {
+            // Arrange
+            var created = Helper.AssetManagement.Assets.Create(NewMacAsset("TEST-MAC-021", "02:00:00:00:02:01"));
+            var update = Helper.AssetManagement.Assets.Read(AssetExposers.Identifier.Equal(created.Identifier)).Single();
+            update.MacAddress = "02:00:00:00:02:01";
+            update.Name = "Renamed MAC Asset";
+
+            // Act
+            Action act = () => Helper.AssetManagement.Assets.CreateOrUpdate(new List<Asset> { update });
+
+            // Assert
+            act.Should().NotThrow();
+        }
+
+        [TestMethod]
+        public void Create_WithDifferentMacAddresses_ShouldSucceed()
+        {
+            // Arrange
+            Helper.AssetManagement.Assets.Create(NewMacAsset("TEST-MAC-031", "02:00:00:00:03:01"));
+
+            // Act
+            Action act = () => Helper.AssetManagement.Assets.Create(NewMacAsset("TEST-MAC-032", "02:00:00:00:03:02"));
+
+            // Assert
+            act.Should().NotThrow();
+        }
+
+        [TestMethod]
+        public void CreateOrUpdate_WithDuplicateMacAddressesInBatch_ShouldFail()
+        {
+            // Arrange
+            var assets = new List<Asset>
+            {
+                NewMacAsset("BATCH-MAC-001", "02:00:00:00:04:01"),
+                NewMacAsset("BATCH-MAC-002", "02:00:00:00:04:01"),
+            };
+
+            // Act
+            Action act = () => Helper.AssetManagement.Assets.CreateOrUpdate(assets);
+
+            // Assert
+            act.Should().Throw<Exception>()
+                .WithMessage("*Mac Address*duplicated within the validation batch*");
+        }
+
+        private Asset NewMacAsset(string assetId, string macAddress)
+        {
+            return new Asset
+            {
+                AssetID = assetId,
+                Name = $"Asset {assetId}",
+                AssetClassId = new SdmObjectReference<AssetClass>(testAssetClass.Identifier),
+                MacAddress = macAddress,
+            };
         }
 
         #endregion
@@ -966,7 +1061,7 @@
         {
             var asset = new Asset
             {
-                State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available,
+                State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Disposed,
             };
 
             Action act = () => Helper.AssetManagement.Assets.TransitionTo(
@@ -974,7 +1069,22 @@
                 SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available);
 
             act.Should().Throw<InvalidOperationException>()
-                .WithMessage("*State transition from Available to Available is not allowed*");
+                .WithMessage("*State transition from Disposed to Available is not allowed*");
+        }
+
+        [TestMethod]
+        public void TransitionTo_WithSameState_ShouldBeNoOp()
+        {
+            var asset = new Asset
+            {
+                State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available,
+            };
+
+            var result = Helper.AssetManagement.Assets.TransitionTo(
+                asset,
+                SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available);
+
+            result.Should().BeSameAs(asset);
         }
 
         [TestMethod]
@@ -1037,23 +1147,6 @@
 
             transition.Should().Throw<AssetTransitionValidationException>();
             asset.State.Should().Be(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available);
-        }
-
-        [TestMethod]
-        public void TransitionTo_EnteringInTransitWithoutDestinationLocation_ShouldFailValidation()
-        {
-            var asset = new Asset
-            {
-                State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available,
-            };
-
-            Action transition = () => Helper.AssetManagement.Assets.TransitionTo(
-                asset,
-                SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit);
-
-            transition.Should().Throw<AssetTransitionValidationException>()
-                .Which.ValidationResult.FailureReasons.Values.Should()
-                .Contain("Destination Location is mandatory when Asset is in 'In Transit' state.");
         }
 
         #endregion
@@ -1409,7 +1502,7 @@
 
             // Assert
             act.Should().Throw<Exception>()
-                .WithMessage($"*Must be within Rack*max {maxCapacity}*");
+                .WithMessage($"*Invalid Position*. Extends beyond rack boundaries (Rack has {maxCapacity} units)*");
         }
 
         [TestMethod]
@@ -1872,6 +1965,391 @@
             // Assert
             act.Should().Throw<Exception>()
                 .WithMessage("*already claimed by another asset in the validation batch*");
+        }
+
+        [TestMethod]
+        public void Create_WithSameHolderNumberButDifferentHierarchyRole_ShouldPass()
+        {
+            // Arrange
+            var parent = CreateParentWithHolders(
+                (1, SlcAsset_Management.Enums.HierarchyRoleEnum.Card),
+                (1, SlcAsset_Management.Enums.HierarchyRoleEnum.Fan));
+            var cardClass = CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum.Card);
+            var fanClass = CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum.Fan);
+
+            Helper.AssetManagement.Assets.Create(NewChildAsset("ROLE-CARD-1", cardClass, parent, 1));
+
+            // Act
+            Action act = () => Helper.AssetManagement.Assets.Create(NewChildAsset("ROLE-FAN-1", fanClass, parent, 1));
+
+            // Assert
+            act.Should().NotThrow();
+        }
+
+        [TestMethod]
+        public void Create_WithSameHolderNumberAndSameHierarchyRoleDifferentAssetClass_ShouldFail()
+        {
+            // Arrange
+            var parent = CreateParentWithHolders((1, SlcAsset_Management.Enums.HierarchyRoleEnum.Card));
+            var firstCardClass = CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum.Card);
+            var secondCardClass = CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum.Card);
+
+            Helper.AssetManagement.Assets.Create(NewChildAsset("SAME-ROLE-1", firstCardClass, parent, 1));
+
+            // Act
+            Action act = () => Helper.AssetManagement.Assets.Create(NewChildAsset("SAME-ROLE-2", secondCardClass, parent, 1));
+
+            // Assert
+            act.Should().Throw<Exception>()
+                .WithMessage("*Holder*already occupied*");
+        }
+
+        [TestMethod]
+        public void CreateOrUpdate_WithSameHolderNumberButDifferentHierarchyRoleInBatch_ShouldPass()
+        {
+            // Arrange
+            var parent = CreateParentWithHolders(
+                (1, SlcAsset_Management.Enums.HierarchyRoleEnum.Card),
+                (1, SlcAsset_Management.Enums.HierarchyRoleEnum.Fan));
+            var cardClass = CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum.Card);
+            var fanClass = CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum.Fan);
+
+            var assets = new List<Asset>
+            {
+                NewChildAsset("BATCH-ROLE-CARD", cardClass, parent, 1),
+                NewChildAsset("BATCH-ROLE-FAN", fanClass, parent, 1),
+            };
+
+            // Act
+            Action act = () => Helper.AssetManagement.Assets.CreateOrUpdate(assets);
+
+            // Assert
+            act.Should().NotThrow();
+        }
+
+        [TestMethod]
+        public void CreateOrUpdate_WithSameHolderNumberAndSameHierarchyRoleDifferentAssetClassInBatch_ShouldFail()
+        {
+            // Arrange
+            var parent = CreateParentWithHolders((1, SlcAsset_Management.Enums.HierarchyRoleEnum.Card));
+            var firstCardClass = CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum.Card);
+            var secondCardClass = CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum.Card);
+
+            var assets = new List<Asset>
+            {
+                NewChildAsset("BATCH-SAME-ROLE-1", firstCardClass, parent, 1),
+                NewChildAsset("BATCH-SAME-ROLE-2", secondCardClass, parent, 1),
+            };
+
+            // Act
+            Action act = () => Helper.AssetManagement.Assets.CreateOrUpdate(assets);
+
+            // Assert: the no-db batch check passes (different Asset Classes), the db check resolves the same role
+            act.Should().Throw<Exception>()
+                .WithMessage("*conflicts with another asset in the same batch*");
+        }
+
+        [TestMethod]
+        public void Create_WithDestinationHolderMatchingRole_ShouldPassEvenWhenSlotIsOccupied()
+        {
+            // Arrange
+            var parent = CreateParentWithHolders((1, SlcAsset_Management.Enums.HierarchyRoleEnum.Card));
+            var cardClass = CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum.Card);
+            Helper.AssetManagement.Assets.Create(NewChildAsset("DEST-OCCUPANT", cardClass, parent, 1));
+
+            var inTransit = NewInTransitAsset("DEST-HOLDER-OK", cardClass, parent, 1);
+
+            // Act
+            Action act = () => Helper.AssetManagement.Assets.Create(inTransit);
+
+            // Assert
+            act.Should().NotThrow();
+        }
+
+        [TestMethod]
+        public void Create_WithDestinationHolderSlotMissing_ShouldFail()
+        {
+            // Arrange
+            var parent = CreateParentWithHolders((1, SlcAsset_Management.Enums.HierarchyRoleEnum.Card));
+            var cardClass = CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum.Card);
+
+            var inTransit = NewInTransitAsset("DEST-HOLDER-NO-SLOT", cardClass, parent, 9);
+
+            // Act
+            Action act = () => Helper.AssetManagement.Assets.Create(inTransit);
+
+            // Assert
+            act.Should().Throw<Exception>()
+                .WithMessage("*Destination Parent Asset does not have a holder slot*");
+        }
+
+        [TestMethod]
+        public void Create_WithDestinationHolderOfDifferentRole_ShouldFail()
+        {
+            // Arrange
+            var parent = CreateParentWithHolders((1, SlcAsset_Management.Enums.HierarchyRoleEnum.Fan));
+            var cardClass = CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum.Card);
+
+            var inTransit = NewInTransitAsset("DEST-HOLDER-WRONG-ROLE", cardClass, parent, 1);
+
+            // Act
+            Action act = () => Helper.AssetManagement.Assets.Create(inTransit);
+
+            // Assert
+            act.Should().Throw<Exception>()
+                .WithMessage("*Destination Parent Asset does not have a holder slot*Hierarchy Role*");
+        }
+
+        [TestMethod]
+        public void Create_WithDestinationHolderAndAssetClassWithoutHierarchyRole_ShouldFail()
+        {
+            // Arrange
+            var parent = CreateParentWithHolders((1, SlcAsset_Management.Enums.HierarchyRoleEnum.Card));
+            var noRoleClass = CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum.None);
+
+            var inTransit = NewInTransitAsset("DEST-HOLDER-NO-ROLE", noRoleClass, parent, 1);
+
+            // Act
+            Action act = () => Helper.AssetManagement.Assets.Create(inTransit);
+
+            // Assert
+            act.Should().Throw<Exception>()
+                .WithMessage("*Device Type must have a Hierarchy Role*");
+        }
+
+        private Asset CreateParentWithHolders(params (long Slot, SlcAsset_Management.Enums.HierarchyRoleEnum Role)[] holders)
+        {
+            return Helper.AssetManagement.Assets.Create(new Asset
+            {
+                AssetID = $"HOLDER-PARENT-{Guid.NewGuid():N}",
+                Name = $"Holder Parent {Guid.NewGuid():N}",
+                AssetClassId = new SdmObjectReference<AssetClass>(testAssetClass.Identifier),
+                Holders = holders
+                    .Select(h => new AssetHolder { SlotNumber = h.Slot, HierarchyRole = h.Role })
+                    .ToList(),
+            });
+        }
+
+        private AssetClass CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum role)
+        {
+            var deviceType = Helper.TestData.DeviceTypes.First(dt => dt.HierarchyInfo.HierarchyRole == role);
+
+            return Helper.AssetManagement.AssetClasses.Create(new AssetClass
+            {
+                Manufacturer = SDM.AssetManagement.Tests.Setup.PeopleApiMock.NewManufacturer(),
+                Name = $"{role} asset class {Guid.NewGuid():N}",
+                DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier),
+                State = SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Active,
+                Height = 4.45,
+                Width = 10,
+                Depth = 1,
+                HeightU = 1,
+                Weight = 1,
+            });
+        }
+
+        private static Asset NewChildAsset(string suffix, AssetClass assetClass, Asset parent, long holderNumber)
+        {
+            return new Asset
+            {
+                AssetID = $"HOLDER-CHILD-{suffix}",
+                Name = $"Holder Child {suffix}",
+                AssetClassId = new SdmObjectReference<AssetClass>(assetClass.Identifier),
+                Location =
+                {
+                    ParentAsset = new SdmObjectReference<Asset>(parent.Identifier),
+                    HolderNumber = holderNumber,
+                },
+            };
+        }
+
+        private static Asset NewInTransitAsset(string suffix, AssetClass assetClass, Asset destinationParent, long holderNumber)
+        {
+            return new Asset
+            {
+                AssetID = $"HOLDER-TRANSIT-{suffix}",
+                Name = $"Holder In Transit {suffix}",
+                AssetClassId = new SdmObjectReference<AssetClass>(assetClass.Identifier),
+                State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit,
+                DestinationLocation =
+                {
+                    ParentAsset = new SdmObjectReference<Asset>(destinationParent.Identifier),
+                    HolderNumber = holderNumber,
+                },
+            };
+        }
+
+        #endregion
+
+        #region Ported From Shared Tests
+
+        [TestMethod]
+        public void IsAssetNameValid_WithWhitespaceName_ShouldReturnInvalid()
+        {
+            var validator = Helper.CreateAssetValidator();
+
+            var result = validator.IsAssetNameValid("   ");
+
+            result.IsValid.Should().BeFalse();
+            result.TryGetFailReason(AssetValidationHandler.AssetValidationField.Name, out var reason).Should().BeTrue();
+            reason.Should().Contain("cannot be empty or whitespace");
+        }
+
+        [TestMethod]
+        public void IsAssetNameValid_WithNameNotInRepository_ShouldReturnValid()
+        {
+            Helper.AssetManagement.Assets.Create(baseValidAsset);
+            var validator = Helper.CreateAssetValidator();
+
+            var result = validator.IsAssetNameValid("Name Not In Repository");
+
+            result.IsValid.Should().BeTrue();
+            result.FailureReasons.Should().BeEmpty();
+        }
+
+        [TestMethod]
+        public void IsAssetNameValid_WithExistingNameExcludingOwnIdentifier_ShouldReturnValid()
+        {
+            var created = Helper.AssetManagement.Assets.Create(baseValidAsset);
+            var validator = Helper.CreateAssetValidator();
+
+            var withoutExclusion = validator.IsAssetNameValid(created.Name);
+            var withExclusion = validator.IsAssetNameValid(created.Name, created.Identifier);
+
+            withoutExclusion.IsValid.Should().BeFalse("name is already in use by the created asset");
+            withExclusion.IsValid.Should().BeTrue("the asset owning the name is excluded");
+        }
+
+        [TestMethod]
+        public void IsAssetIdValid_WithWhitespaceId_ShouldReturnInvalid()
+        {
+            var validator = Helper.CreateAssetValidator();
+
+            var result = validator.IsAssetIdValid("   ");
+
+            result.IsValid.Should().BeFalse();
+            result.TryGetFailReason(AssetValidationHandler.AssetValidationField.AssetId, out var reason).Should().BeTrue();
+            reason.Should().Contain("cannot be empty or whitespace");
+        }
+
+        [TestMethod]
+        public void IsAssetIdValid_WithIdNotInRepository_ShouldReturnValid()
+        {
+            Helper.AssetManagement.Assets.Create(baseValidAsset);
+            var validator = Helper.CreateAssetValidator();
+
+            var result = validator.IsAssetIdValid("ID-NOT-IN-REPOSITORY");
+
+            result.IsValid.Should().BeTrue();
+            result.FailureReasons.Should().BeEmpty();
+        }
+
+        [TestMethod]
+        public void IsAssetIdValid_WithExistingIdExcludingOwnIdentifier_ShouldReturnValid()
+        {
+            var created = Helper.AssetManagement.Assets.Create(baseValidAsset);
+            var validator = Helper.CreateAssetValidator();
+
+            var withoutExclusion = validator.IsAssetIdValid(created.AssetID);
+            var withExclusion = validator.IsAssetIdValid(created.AssetID, created.Identifier);
+
+            withoutExclusion.IsValid.Should().BeFalse("asset ID is already in use by the created asset");
+            withExclusion.IsValid.Should().BeTrue("the asset owning the ID is excluded");
+        }
+
+        [TestMethod]
+        public void Create_WithEmptySerialNumberOnTwoAssetsSameClass_ShouldSucceed()
+        {
+            Helper.AssetManagement.Assets.Create(new Asset
+            {
+                AssetID = "TEST-EMPTY-SN-001",
+                Name = "First Asset Without Serial",
+                AssetClassId = new SdmObjectReference<AssetClass>(testAssetClass.Identifier),
+                SerialNumber = string.Empty,
+            });
+
+            Action act = () => Helper.AssetManagement.Assets.Create(new Asset
+            {
+                AssetID = "TEST-EMPTY-SN-002",
+                Name = "Second Asset Without Serial",
+                AssetClassId = new SdmObjectReference<AssetClass>(testAssetClass.Identifier),
+                SerialNumber = string.Empty,
+            });
+
+            act.Should().NotThrow();
+        }
+
+        [TestMethod]
+        public void Create_WithUniqueSerialNumber_ShouldPersistSerialNumber()
+        {
+            baseValidAsset.SerialNumber = "UNIQUE-SN-0001";
+
+            var created = Helper.AssetManagement.Assets.Create(baseValidAsset);
+            var reloaded = Helper.AssetManagement.Assets.Read(AssetExposers.AssetName.Equal(baseValidAsset.Name)).Single();
+
+            created.SerialNumber.Should().Be("UNIQUE-SN-0001");
+            reloaded.SerialNumber.Should().Be("UNIQUE-SN-0001");
+        }
+
+        [TestMethod]
+        public void Create_WithDuplicateSerialNumberDifferentClass_ShouldSucceed()
+        {
+            var otherAssetClass = Helper.TestData.AssetClasses.First(ac => ac.Identifier != testAssetClass.Identifier);
+            Helper.AssetManagement.Assets.Create(new Asset
+            {
+                AssetID = "TEST-SN-CLASS-001",
+                Name = "Serial In First Class",
+                AssetClassId = new SdmObjectReference<AssetClass>(testAssetClass.Identifier),
+                SerialNumber = "SN-SHARED-ACROSS-CLASSES",
+            });
+
+            Action act = () => Helper.AssetManagement.Assets.Create(new Asset
+            {
+                AssetID = "TEST-SN-CLASS-002",
+                Name = "Serial In Other Class",
+                AssetClassId = new SdmObjectReference<AssetClass>(otherAssetClass.Identifier),
+                SerialNumber = "SN-SHARED-ACROSS-CLASSES",
+            });
+
+            act.Should().NotThrow();
+        }
+
+        [TestMethod]
+        public void Validate_WithBasicValidAsset_ShouldReturnValid()
+        {
+            var validator = Helper.CreateAssetValidator();
+
+            var result = validator.Validate(baseValidAsset, RepositoryAction.Create);
+
+            result.IsValid.Should().BeTrue();
+            result.FailureReasons.Should().BeEmpty();
+        }
+
+        [TestMethod]
+        public void Validate_WithMultipleIndependentFailures_ShouldAccumulateAllFailures()
+        {
+            var validator = Helper.CreateAssetValidator();
+            baseValidAsset.InstallationUserId = new PnoObjectReference<Person>(Guid.NewGuid());
+            baseValidAsset.Ownership.ContactPerson = new PnoObjectReference<Person>(Guid.NewGuid());
+
+            var result = validator.Validate(baseValidAsset, RepositoryAction.Create);
+
+            result.IsValid.Should().BeFalse();
+            result.TryGetFailReason(AssetValidationHandler.AssetValidationField.InstallationDate, out _).Should().BeTrue();
+            result.TryGetFailReason(AssetValidationHandler.AssetValidationField.OwnerContactPersonRole, out _).Should().BeTrue();
+        }
+
+        [TestMethod]
+        public void Validate_WithInstallationUserWithoutDate_ShouldFailOnInstallationDateOnly()
+        {
+            var validator = Helper.CreateAssetValidator();
+            baseValidAsset.InstallationUserId = new PnoObjectReference<Person>(Guid.NewGuid());
+
+            var result = validator.Validate(baseValidAsset, RepositoryAction.Create);
+
+            result.IsValid.Should().BeFalse();
+            result.TryGetFailReason(AssetValidationHandler.AssetValidationField.InstallationDate, out _).Should().BeTrue();
+            result.TryGetFailReason(AssetValidationHandler.AssetValidationField.InstallationUserId, out _).Should().BeFalse();
         }
 
         #endregion

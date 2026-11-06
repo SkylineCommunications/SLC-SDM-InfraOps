@@ -10,6 +10,7 @@
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)asset_management")]
+    [PropertyScope("DataPort")]
     public sealed class DataPort : SdmObjectBase<DataPort>, IEquatable<DataPort>, IEntityTracking, IPort, IReadOnlyModuleIdReferencer
 	{
         [JsonIgnore]
@@ -138,10 +139,10 @@
 
         public IEnumerable<TrackingFieldValueDifference> GetChanges()
         {
-            return (_dataPortInfo?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>())
-                .Concat(_assetFk?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>())
-                .Concat(_addressInfo?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>())
-                .Concat(_primaryPortRelation?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>());
+            return _dataPortInfo.GetSectionChanges("DataPortInfo")
+                .Concat(_assetFk.GetSectionChanges("AssetFk"))
+                .Concat(_addressInfo.GetSectionChanges("AddressInfo"))
+                .Concat(_primaryPortRelation.GetSectionChanges("PrimaryPortRelation"));
         }
 
         /// <summary>

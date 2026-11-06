@@ -33,7 +33,7 @@ namespace SDM.FacilityManagement.Tests.Desks
         [TestMethod]
         public void DeskDomRepository_EmptyDOM_Create()
         {
-            Helper.Desks.Create(referenceDesk);
+            Helper.Desks.Create(Helper.AttachRoom(referenceDesk));
 
             AssertCreated();
         }
@@ -41,7 +41,7 @@ namespace SDM.FacilityManagement.Tests.Desks
         [TestMethod]
         public void DeskDomRepository_EmptyDOM_CreateOrUpdate_Create()
         {
-            Helper.Desks.CreateOrUpdate([referenceDesk]);
+            Helper.Desks.CreateOrUpdate([Helper.AttachRoom(referenceDesk)]);
 
             AssertCreated();
         }
@@ -49,7 +49,7 @@ namespace SDM.FacilityManagement.Tests.Desks
         [TestMethod]
         public void DeskDomRepository_EmptyDOM_CreateOrUpdate_Update()
         {
-            Helper.Desks.Create(referenceDesk);
+            Helper.Desks.Create(Helper.AttachRoom(referenceDesk));
 
             var updatedDesk = new Desk
             {
@@ -60,7 +60,7 @@ namespace SDM.FacilityManagement.Tests.Desks
                 Plan = "Level-T-T99",
             };
 
-            Helper.Desks.CreateOrUpdate([updatedDesk]);
+            Helper.Desks.CreateOrUpdate([Helper.AttachRoom(updatedDesk)]);
 
             var persistedDesk = Helper.Desks.Read(DeskExposers.Identifier.Equal(referenceDesk.Identifier)).Single();
             AssertDeskUpdateDifferences(referenceDesk, persistedDesk);
@@ -117,6 +117,26 @@ namespace SDM.FacilityManagement.Tests.Desks
             {
                 Helper.Desks.Count(new TRUEFilterElement<Desk>()).Should().Be(DemoData.Desks.Count - 1);
                 Helper.Desks.Count(DeskExposers.Identifier.Equal(deskToDelete.Identifier)).Should().Be(0);
+            }
+        }
+
+        [TestMethod]
+        public void DeskDomRepository_CreateWithRoomReference_ReadBack_PersistsDeskIdAndRoom()
+        {
+            var room = Helper.Rooms.Create(Helper.AttachFloor(new Room { Identifier = Guid.NewGuid().ToString(), RoomId = "RM-DESK", Name = "Room DESK" }));
+            var desk = new Desk { Identifier = Guid.NewGuid().ToString(), Name = "Desk 1", DeskID = "DK-1" };
+            desk.RoomFk.Room = new SdmObjectReference<Room>(room.Identifier);
+
+            Helper.Desks.Create(Helper.AttachRoom(desk));
+
+            var reloaded = Helper.Desks.Read(DeskExposers.Identifier.Equal(desk.Identifier)).SingleOrDefault();
+
+            using (new AssertionScope())
+            {
+                reloaded.Should().NotBeNull();
+                reloaded!.DeskID.Should().Be("DK-1");
+                reloaded.RoomFk.Room.Should().NotBeNull();
+                reloaded.RoomFk.Room.Identifier.Should().Be(room.Identifier);
             }
         }
 

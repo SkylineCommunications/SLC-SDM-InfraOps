@@ -10,6 +10,7 @@
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)asset_management")]
+    [PropertyScope("PortType")]
     public sealed class PortType : SdmObjectBase<PortType>, IEquatable<PortType>, IEntityTracking, IReadOnlyModuleIdReferencer
 	{
         [JsonIgnore]
@@ -105,8 +106,8 @@
                     OldValue = kvp.Value.prevVal,
                     NewValue = kvp.Value.newVal,
                 })
-                .Concat(_categoryLinks?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>())
-                .Concat(_cableFKs?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>());
+                .Concat(_categoryLinks.GetSectionChanges("CategoryLinks"))
+                .Concat(_cableFKs.GetSectionChanges("CableFKs"));
         }
 
         public void ResetChangeTracking()
@@ -165,8 +166,8 @@
             unchecked
             {
                 int hash = 17;
-                hash = (hash * 23) + (Name != null ? Name.GetHashCode() : 0);
-                hash = (hash * 23) + (Description != null ? Description.GetHashCode() : 0);
+                hash = (hash * 23) + (Name != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(Name) : 0);
+                hash = (hash * 23) + (Description != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(Description) : 0);
                 hash = (hash * 23) + (CategoryLinks != null ? CategoryLinks.GetHashCode() : 0);
                 hash = (hash * 23) + (CableFKs != null ? CableFKs.GetHashCode() : 0);
                 return hash;

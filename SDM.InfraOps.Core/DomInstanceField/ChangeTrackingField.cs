@@ -13,6 +13,7 @@
         private T1 _originalValue;
         private object _originalValueChanges;
         private T1 _currentValue;
+        private bool _originalIsSet;
 
         public ChangeTrackingField(T1 value, Func<T1, object> getChangesConverter = null)
         {
@@ -52,6 +53,7 @@
 
             set
             {
+                IsSet = true;
                 if (_fieldSetter == null)
                 {
                     _currentValue = value;
@@ -62,6 +64,8 @@
                 }
             }
         }
+
+        public bool IsSet { get; private set; }
 
         public bool Changed
         {
@@ -78,6 +82,11 @@
                 if (currentIsNull)
                 {
                     return !originalIsNull;
+                }
+
+                if ((typeof(T1).IsPrimitive || typeof(T1).IsEnum || typeof(T1) == typeof(Guid)) && _originalIsSet != IsSet)
+                {
+                    return true;
                 }
 
                 var (prevVal, newVal) = GetChanges();
@@ -104,12 +113,19 @@
         public void Reset()
         {
             Value = _originalValue;
+            IsSet = _originalIsSet;
         }
 
         public void ApplyChanges()
         {
             _originalValue = _currentValue;
             _originalValueChanges = _getChangesConverter?.Invoke(_originalValue) ?? _originalValue;
+            _originalIsSet = IsSet;
+        }
+
+        public IDomInstanceFieldApplyChanges Clone()
+        {
+            return (IDomInstanceFieldApplyChanges)MemberwiseClone();
         }
 
         #region Equatable

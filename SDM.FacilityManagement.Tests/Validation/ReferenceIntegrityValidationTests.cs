@@ -46,7 +46,7 @@ namespace SDM.FacilityManagement.Tests.Validation
 			var floor = NewFloor("FLR-1");
 			floor.FacilityFk.Facility = new SdmObjectReference<Facility>(missingFacilityId);
 
-			var action = () => Helper.Floors.Create(floor);
+			var action = () => Helper.Floors.Create(Helper.AttachFacility(floor));
 
 			action.Should().Throw<Exception>().WithMessage($"*Referenced Facility '{missingFacilityId}' does not exist.*");
 		}
@@ -58,7 +58,7 @@ namespace SDM.FacilityManagement.Tests.Validation
 			var floor = NewFloor("FLR-1");
 			floor.FacilityFk.Facility = new SdmObjectReference<Facility>(facility.Identifier);
 
-			Action action = () => Helper.Floors.Create(floor);
+			Action action = () => Helper.Floors.Create(Helper.AttachFacility(floor));
 
 			action.Should().NotThrow();
 		}
@@ -70,7 +70,7 @@ namespace SDM.FacilityManagement.Tests.Validation
 			var room = NewRoom("ROOM-1");
 			room.FloorFk.Floor = new SdmObjectReference<Floor>(missingFloorId);
 
-			var action = () => Helper.Rooms.Create(room);
+			var action = () => Helper.Rooms.Create(Helper.AttachFloor(room));
 
 			action.Should().Throw<Exception>().WithMessage($"*Referenced Floor '{missingFloorId}' does not exist.*");
 		}
@@ -78,11 +78,11 @@ namespace SDM.FacilityManagement.Tests.Validation
 		[TestMethod]
 		public void Room_Create_WithExistingFloorReference_ShouldSucceed()
 		{
-			var floor = Helper.Floors.Create(NewFloor("FLR-1"));
+			var floor = Helper.Floors.Create(Helper.AttachFacility(NewFloor("FLR-1")));
 			var room = NewRoom("ROOM-1");
 			room.FloorFk.Floor = new SdmObjectReference<Floor>(floor.Identifier);
 
-			Action action = () => Helper.Rooms.Create(room);
+			Action action = () => Helper.Rooms.Create(Helper.AttachFloor(room));
 
 			action.Should().NotThrow();
 		}
@@ -95,7 +95,7 @@ namespace SDM.FacilityManagement.Tests.Validation
 			room.Ownership.Team = new PnoObjectReference<Skyline.DataMiner.Solutions.PeopleAndOrganizations.API.Team>(Guid.NewGuid());
 			room.ResourceLink.ResourceId = Guid.NewGuid();
 
-			Action action = () => Helper.Rooms.Create(room);
+			Action action = () => Helper.Rooms.Create(Helper.AttachFloor(room));
 
 			action.Should().NotThrow();
 		}
@@ -107,7 +107,7 @@ namespace SDM.FacilityManagement.Tests.Validation
 			var row = NewRow("ROW-1");
 			row.RoomFk.Room = new SdmObjectReference<Room>(missingRoomId);
 
-			var action = () => Helper.Rows.Create(row);
+			var action = () => Helper.Rows.Create(Helper.AttachRoom(row));
 
 			action.Should().Throw<Exception>().WithMessage($"*Referenced Room '{missingRoomId}' does not exist.*");
 		}
@@ -115,11 +115,11 @@ namespace SDM.FacilityManagement.Tests.Validation
 		[TestMethod]
 		public void Row_Create_WithExistingRoomReference_ShouldSucceed()
 		{
-			var room = Helper.Rooms.Create(NewRoom("ROOM-1"));
+			var room = Helper.Rooms.Create(Helper.AttachFloor(NewRoom("ROOM-1")));
 			var row = NewRow("ROW-1");
 			row.RoomFk.Room = new SdmObjectReference<Room>(room.Identifier);
 
-			Action action = () => Helper.Rows.Create(row);
+			Action action = () => Helper.Rows.Create(Helper.AttachRoom(row));
 
 			action.Should().NotThrow();
 		}
@@ -131,7 +131,7 @@ namespace SDM.FacilityManagement.Tests.Validation
 			var zone = NewZone("ZONE-1");
 			zone.RoomFk.Room = new SdmObjectReference<Room>(missingRoomId);
 
-			var action = () => Helper.Zones.Create(zone);
+			var action = () => Helper.Zones.Create(Helper.AttachRoom(zone));
 
 			action.Should().Throw<Exception>().WithMessage($"*Referenced Room '{missingRoomId}' does not exist.*");
 		}
@@ -139,11 +139,11 @@ namespace SDM.FacilityManagement.Tests.Validation
 		[TestMethod]
 		public void Zone_Create_WithExistingRoomReference_ShouldSucceed()
 		{
-			var room = Helper.Rooms.Create(NewRoom("ROOM-1"));
+			var room = Helper.Rooms.Create(Helper.AttachFloor(NewRoom("ROOM-1")));
 			var zone = NewZone("ZONE-1");
 			zone.RoomFk.Room = new SdmObjectReference<Room>(room.Identifier);
 
-			Action action = () => Helper.Zones.Create(zone);
+			Action action = () => Helper.Zones.Create(Helper.AttachRoom(zone));
 
 			action.Should().NotThrow();
 		}
@@ -155,7 +155,7 @@ namespace SDM.FacilityManagement.Tests.Validation
 			var desk = NewDesk("DSK-1");
 			desk.RoomFk.Room = new SdmObjectReference<Room>(missingRoomId);
 
-			var action = () => Helper.Desks.Create(desk);
+			var action = () => Helper.Desks.Create(Helper.AttachRoom(desk));
 
 			action.Should().Throw<Exception>().WithMessage($"*Referenced Room '{missingRoomId}' does not exist.*");
 		}
@@ -163,11 +163,11 @@ namespace SDM.FacilityManagement.Tests.Validation
 		[TestMethod]
 		public void Desk_Create_WithExistingRoomReference_ShouldSucceed()
 		{
-			var room = Helper.Rooms.Create(NewRoom("ROOM-1"));
+			var room = Helper.Rooms.Create(Helper.AttachFloor(NewRoom("ROOM-1")));
 			var desk = NewDesk("DSK-1");
 			desk.RoomFk.Room = new SdmObjectReference<Room>(room.Identifier);
 
-			Action action = () => Helper.Desks.Create(desk);
+			Action action = () => Helper.Desks.Create(Helper.AttachRoom(desk));
 
 			action.Should().NotThrow();
 		}
@@ -179,7 +179,7 @@ namespace SDM.FacilityManagement.Tests.Validation
 			var rack = NewRack("RACK-1");
 			rack.RowFk.Row = new SdmObjectReference<Row>(missingRowId);
 
-			var action = () => Helper.Racks.Create(rack);
+			var action = () => Helper.Racks.Create(Helper.AttachRow(rack));
 
 			action.Should().Throw<Exception>().WithMessage($"*Referenced Row '{missingRowId}' does not exist.*");
 		}
@@ -187,11 +187,11 @@ namespace SDM.FacilityManagement.Tests.Validation
 		[TestMethod]
 		public void Rack_Create_WithExistingRowReference_ShouldSucceed()
 		{
-			var row = Helper.Rows.Create(NewRow("ROW-1"));
+			var row = Helper.Rows.Create(Helper.AttachRoom(NewRow("ROW-1")));
 			var rack = NewRack("RACK-1");
 			rack.RowFk.Row = new SdmObjectReference<Row>(row.Identifier);
 
-			Action action = () => Helper.Racks.Create(rack);
+			Action action = () => Helper.Racks.Create(Helper.AttachRow(rack));
 
 			action.Should().NotThrow();
 		}
@@ -203,7 +203,7 @@ namespace SDM.FacilityManagement.Tests.Validation
 			var rack = NewRack("RACK-1");
 			rack.ZoneFk.Zone = new SdmObjectReference<Zone>(missingZoneId);
 
-			var action = () => Helper.Racks.Create(rack);
+			var action = () => Helper.Racks.Create(Helper.AttachRow(rack));
 
 			action.Should().Throw<Exception>().WithMessage($"*Referenced Zone '{missingZoneId}' does not exist.*");
 		}
@@ -211,11 +211,11 @@ namespace SDM.FacilityManagement.Tests.Validation
 		[TestMethod]
 		public void Rack_Create_WithExistingZoneReference_ShouldSucceed()
 		{
-			var zone = Helper.Zones.Create(NewZone("ZONE-1"));
+			var zone = Helper.Zones.Create(Helper.AttachRoom(NewZone("ZONE-1")));
 			var rack = NewRack("RACK-1");
 			rack.ZoneFk.Zone = new SdmObjectReference<Zone>(zone.Identifier);
 
-			Action action = () => Helper.Racks.Create(rack);
+			Action action = () => Helper.Racks.Create(Helper.AttachRow(rack));
 
 			action.Should().NotThrow();
 		}

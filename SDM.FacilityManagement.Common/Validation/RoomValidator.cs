@@ -3,8 +3,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
     using System;
     using System.Collections.Generic;
     using System.Linq;
-
-    using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
     using Skyline.DataMiner.SDM.FacilityManagement.Services;
     using Skyline.DataMiner.SDM.InfraOps.Common.Validation;
@@ -23,48 +21,54 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
             _entityLoader = entityLoader ?? throw new ArgumentNullException(nameof(entityLoader));
         }
 
-        /// <summary>
-        /// Validates a single Room.
-        /// <para><b>Not suitable for bulk scenarios</b>: issues one DB query per item. Use <see cref="ValidateBulk"/> instead.</para>
-        /// </summary>
-        protected override ValidationResult Validate(Room entity)
+        protected override ValidationResult CreateNullEntityResult()
         {
             var result = new ValidationResult();
-
-            if (entity.ShouldValidate(entity.RoomIdField))
-            {
-                if (!RoomValidationHandler.IsRoomIdValid(entity, out var idResult))
-                {
-                    result.AddFailuresFrom(idResult);
-                    return result;
-                }
-
-                if (!RoomValidationHandler.IsRoomNameValid(entity, out var nameResult))
-                {
-                    result.AddFailuresFrom(nameResult);
-                    return result;
-                }
-
-                if (IsIdInUse(entity.RoomId, entity.Identifier))
-                {
-                    result.AddFailReason(RoomValidationHandler.RoomValidationField.RoomId,
-                        $"Room Id '{entity.RoomId}' is already in use.");
-                }
-            }
-
-            result.AddFailuresFrom(ValidateReferencesAgainstDatabase(new List<Room> { entity })[0]);
-
+            result.AddFailReason(RoomValidationHandler.RoomValidationField.Room, "Room cannot be null.");
             return result;
         }
 
-        protected override ValidationResult ValidateForDelete(Room room)
+        protected override List<ValidationResult> ValidateBulkNoDatabaseBusinessRules(List<Room> entities)
         {
-            if (room == null)
+            var results = entities.Select(_ => new ValidationResult()).ToList();
+
+            for (int idx = 0; idx < entities.Count; idx++)
             {
-                throw new ArgumentNullException(nameof(room));
+                if (entities[idx].ShouldValidate(entities[idx].RoomIdField) && !RoomValidationHandler.IsRoomIdValid(entities[idx], out var idResult))
+                {
+                    results[idx].AddFailuresFrom(idResult);
+                }
+
+                if (entities[idx].ShouldValidate(entities[idx].NameField) && !RoomValidationHandler.IsRoomNameValid(entities[idx], out var nameResult))
+                {
+                    results[idx].AddFailuresFrom(nameResult);
+                }
+
+                if (entities[idx].ShouldValidate(entities[idx].WidthField) && !RoomValidationHandler.IsRoomWidthValid(entities[idx], out var widthResult))
+                {
+                    results[idx].AddFailuresFrom(widthResult);
+                }
+
+                if (entities[idx].ShouldValidate(entities[idx].DepthField) && !RoomValidationHandler.IsRoomDepthValid(entities[idx], out var depthResult))
+                {
+                    results[idx].AddFailuresFrom(depthResult);
+                }
             }
 
-            return ValidateNotInUseWhenDeleted(new List<Room> { room })[0];
+            return results;
+        }
+
+        protected override List<ValidationResult> ValidateBulkNoDatabaseBatchConflicts(List<Room> entities)
+        {
+            return ValidateIdDuplicatesInBatch(entities);
+        }
+
+        protected override List<ValidationResult> ValidateBulkWithDatabase(List<Room> entities)
+        {
+            var results = ValidateBulkIdsAgainstDatabase(entities);
+            results.MergeFrom(ValidateReferencesAgainstDatabase(entities));
+
+            return results;
         }
 
         protected override List<ValidationResult> ValidateBulkForDelete(List<Room> rooms)
@@ -99,24 +103,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
             }
 
             return result;
-        }
-
-        /// <summary>
-        /// Validates a batch of Room entities in three phases:
-        /// 1. Non-database checks per item (id not empty).
-        /// 2. In-memory batch conflict detection (id uniqueness within batch).
-        /// 3. Database uniqueness check (id uniqueness vs DB).
-        /// Results are returned in the same order as the input list.
-        /// </summary>
-        protected override List<ValidationResult> ValidateBulk(List<Room> entities)
-        {
-            return FacilityBulkValidationHelper.RunBulkValidation(
-                entities,
-                RoomValidationHandler.IsRoomIdValid,
-                RoomValidationHandler.IsRoomNameValid,
-                ValidateIdDuplicatesInBatch,
-                ValidateBulkIdsAgainstDatabase,
-                ValidateReferencesAgainstDatabase);
         }
 
         private bool IsIdInUse(string id, string exceptIdentifier = null)
@@ -210,6 +196,15 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
         private List<ValidationResult> ValidateReferencesAgainstDatabase(List<Room> entities)
         {
             var results = entities.Select(_ => new ValidationResult()).ToList();
+            for (int i = 0; i < entities.Count; i++)
+            {
+                if (ReferenceValidationHelper.ShouldValidateReferences(entities[i]) &&
+                    (entities[i].FloorFk.IsEmpty || !ReferenceValidationHelper.HasId(ReferenceValidationHelper.GetId(entities[i].FloorFk.Floor))))
+                {
+                    ReferenceValidationHelper.AddRequiredReference(results[i], RoomValidationHandler.RoomValidationField.FloorId, "Floor");
+                }
+            }
+
             var floorCandidates = entities
                 .Select((entity, index) => new
                 {

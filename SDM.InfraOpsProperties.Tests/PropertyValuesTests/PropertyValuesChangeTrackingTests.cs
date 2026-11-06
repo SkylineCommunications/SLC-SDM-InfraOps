@@ -11,20 +11,14 @@
 	using Skyline.DataMiner.SDM.InfraOpsProperties.Models;
 
 	/// <summary>
-	/// Corner-case tests documenting the change-tracking blind spot in
-	/// <see cref="PropertyValues.Values"/>: <c>ChangeTrackingArrayField&lt;T&gt;</c> snapshots the list
-	/// shallowly (same item references in both the original and current snapshot), so mutating an
-	/// existing <see cref="PropertyValue"/> instance's properties in place is invisible to
-	/// <c>ValuesField.Changed</c> / <see cref="PropertyValues.Changed"/>. Only replacing an entry with a
-	/// different object (or adding/removing entries) is detected.
-	/// If this ever changes (e.g. array field snapshotting becomes a deep clone), these tests should be
-	/// updated to expect <c>Changed == true</c> for in-place mutation.
+	/// Tests verifying change tracking in <see cref="PropertyValues.Values"/>, including in-place
+	/// item mutation, item replacement, item addition, and field reset.
 	/// </summary>
 	[TestClass]
 	public class PropertyValuesChangeTrackingTests
 	{
 		[TestMethod]
-		public void Changed_WhenExistingValueEntryMutatedInPlace_ShouldNotBeDetected_KnownGap()
+		public void Changed_WhenExistingValueEntryMutatedInPlace_ShouldBeDetectedAndRevertedOnReset()
 		{
 			var propertyValues = new PropertyValues
 			{
@@ -45,8 +39,18 @@
 
 			using (new AssertionScope())
 			{
-				propertyValues.Changed.Should().BeFalse("in-place mutation of a list entry is not tracked by ChangeTrackingArrayField");
-				propertyValues.Values[0].Value.Should().Be("Bob", "the underlying data is still mutated even though tracking misses it");
+				propertyValues.Changed.Should().BeTrue("in-place mutation of a ChangeTrackingBase list entry is tracked by ChangeTrackingArrayField");
+				var change = propertyValues.GetChanges().Should().ContainSingle(c => c.FieldName == nameof(PropertyValues.Values)).Subject;
+				((List<PropertyValue>)change.OldValue)[0].Value.Should().Be("Alice");
+				((List<PropertyValue>)change.NewValue)[0].Value.Should().Be("Bob");
+			}
+
+			Skyline.DataMiner.Utils.InfraOps.Common.Fields.SdmChangeTracking.RevertFieldChanges(propertyValues);
+
+			using (new AssertionScope())
+			{
+				propertyValues.Changed.Should().BeFalse();
+				propertyValues.Values[0].Value.Should().Be("Alice");
 			}
 		}
 
@@ -93,6 +97,30 @@
 			propertyValues.Values.Add(new PropertyValue { PropertyName = "Region", Value = "EMEA" });
 
 			propertyValues.Changed.Should().BeTrue("adding an entry changes the list count, which is detected");
+		}
+
+		[TestMethod]
+		public void LinkedObjectIDField_WhenUnsetExistingEntityExplicitlySetToEmptyGuid_ShouldMarkChangedAndRevertOnReset()
+		{
+			var propertyValues = new PropertyValues
+			{
+				Identifier = Guid.NewGuid().ToString(),
+				Scope = "Asset",
+			};
+			propertyValues.ResetChangeTracking();
+			propertyValues.IsNewInternal = false;
+
+			propertyValues.LinkedObjectIDField.Changed.Should().BeFalse();
+
+			propertyValues.LinkedObjectID = Guid.Empty;
+
+			propertyValues.LinkedObjectIDField.Changed.Should().BeTrue();
+			propertyValues.Changed.Should().BeTrue();
+
+			Skyline.DataMiner.Utils.InfraOps.Common.Fields.SdmChangeTracking.RevertFieldChanges(propertyValues);
+
+			propertyValues.LinkedObjectIDField.Changed.Should().BeFalse();
+			propertyValues.Changed.Should().BeFalse();
 		}
 	}
 }

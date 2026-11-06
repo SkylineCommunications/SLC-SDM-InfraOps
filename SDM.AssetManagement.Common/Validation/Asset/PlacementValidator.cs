@@ -3,6 +3,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using SharedMappers.DomIds;
     using Skyline.DataMiner.SDM.AssetManagement.Common.Validation;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.Common.Services;
@@ -10,6 +11,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
     using static Skyline.DataMiner.SDM.AssetManagement.Common.Validation.AssetValidationHandler;
+    using static Skyline.DataMiner.SDM.FacilityManagement.Validation.RackValidationHandler;
 
     /// <summary>
     /// Validates physical asset placement (both rack positions and parent asset holders).
@@ -56,7 +58,11 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
                     // Validate rack placement
                     results[i].AddFailuresFrom(ValidateRackPlacement(asset, context));
 
-                    // todo Validate destination parent holder placement
+                    // Validate destination rack placement
+                    results[i].AddFailuresFrom(ValidateDestinationRackPlacement(asset, context));
+
+                    // Validate destination parent holder placement
+                    results[i].AddFailuresFrom(ValidateDestinationParentHolderPlacement(asset, context));
                 }
             }
             catch (Exception ex)
@@ -88,27 +94,36 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
 
             var assetIds = assets.Where(a => !String.IsNullOrWhiteSpace(a.Identifier)).Select(a => a.Identifier).ToList();
 
-            // Collect all unique parent asset IDs
+            // Collect all unique parent asset IDs (current location and destination)
             var parentAssetIds = new HashSet<SdmObjectReference<Asset>>();
+            var destinationParentAssetIds = new HashSet<SdmObjectReference<Asset>>();
             foreach (var asset in assets)
             {
                 if (asset.Location.ParentAsset.HasValue())
                 {
                     parentAssetIds.Add(asset.Location.ParentAsset);
                 }
+
+                if (asset.DestinationLocation.ParentAsset.HasValue())
+                {
+                    destinationParentAssetIds.Add(asset.DestinationLocation.ParentAsset);
+                }
             }
 
             // Load all parent assets
-            foreach (var parentId in parentAssetIds)
+            foreach (var parentId in parentAssetIds.Union(destinationParentAssetIds))
             {
                 var parent = _entityLoader.LoadAsset(parentId);
                 if (parent != null)
                 {
                     context.LoadedParentAssets[parentId] = parent;
 
-                    // Load existing children (excluding batch)
-                    var children = _entityLoader.FindChildAssets(parentId, assetIds);
-                    context.ExistingChildrenInParents[parentId] = children;
+                    // Load existing children (excluding batch); the destination does not check occupancy
+                    if (parentAssetIds.Contains(parentId))
+                    {
+                        var children = _entityLoader.FindChildAssets(parentId, assetIds);
+                        context.ExistingChildrenInParents[parentId] = children;
+                    }
                 }
             }
 
@@ -119,6 +134,11 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
                 if (asset.Location.RackId.HasValue())
                 {
                     rackIds.Add(asset.Location.RackId.Identifier);
+                }
+
+                if (asset.DestinationLocation.RackId.HasValue())
+                {
+                    rackIds.Add(asset.DestinationLocation.RackId.Identifier);
                 }
             }
 
@@ -150,7 +170,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
         {
             var result = new ValidationResult();
 
-            if (!asset.Location.ParentAsset.HasValue())
+            if (!asset.Location.ParentAsset.HasValue() || asset.Location.HolderNumber == null)
             {
                 return result;
             }
@@ -166,17 +186,14 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             }
 
             // Get AssetClass and DeviceType
-            var assetClass = _entityLoader.LoadAssetClass(asset.AssetClassId);
-            var deviceType = _entityLoader.LoadDeviceType(assetClass.DeviceTypeId);
+            var hierarchyRole = ResolveHierarchyRole(asset, context);
 
-            if (deviceType?.HierarchyInfo.HierarchyRole == null)
+            if (hierarchyRole == null)
             {
                 result.AddFailReason(AssetValidationField.AssetClass,
                     "Asset Class Device Type must have a Hierarchy Role to be attached to a parent asset.");
                 return result;
             }
-
-            var hierarchyRole = deviceType.HierarchyInfo.HierarchyRole;
 
             // Check if holder slot exists
             var matchingHolder = parentAsset.Holders?
@@ -189,11 +206,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
                 return result;
             }
 
-            // Check existing children (from DB, excluding batch)
+            // Check existing children (from DB, excluding batch): same number AND same Hierarchy Role
             if (context.ExistingChildrenInParents.TryGetValue(parentId, out var existingChildren))
             {
                 var occupied = existingChildren
-                    .FirstOrDefault(c => c.Location.HolderNumber == holderNumber);
+                    .FirstOrDefault(c => c.Location.HolderNumber == holderNumber &&
+                                         ResolveHierarchyRole(c, context) == hierarchyRole);
 
                 if (occupied != null)
                 {
@@ -203,14 +221,16 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
                 }
             }
 
-            // Check for conflicts within the batch
+            // Check for conflicts within the batch: same number AND same Hierarchy Role
             for (int i = 0; i < context.AssetsBeingValidated.Count; i++)
             {
                 if (i == assetIndex) continue; // Skip self
 
                 var other = context.AssetsBeingValidated[i];
-                if (other.Location.ParentAsset.Identifier == parentId &&
-                    other.Location.HolderNumber == holderNumber)
+                if (other.Location.ParentAsset.HasValue() &&
+                    other.Location.ParentAsset.Identifier == parentId &&
+                    other.Location.HolderNumber == holderNumber &&
+                    ResolveHierarchyRole(other, context) == hierarchyRole)
                 {
                     result.AddFailReason(AssetValidationField.HolderNumber,
                         $"Holder Number '{holderNumber}' conflicts with another asset in the same batch.");
@@ -222,13 +242,84 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
         }
 
         /// <summary>
+        /// Validates that the destination parent asset exposes a holder for the destination HolderNumber and the
+        /// asset's Hierarchy Role. The destination is a future location, so occupancy is not evaluated.
+        /// </summary>
+        private ValidationResult ValidateDestinationParentHolderPlacement(Asset asset, PlacementValidationContext context)
+        {
+            var result = new ValidationResult();
+            var destination = asset.DestinationLocation;
+
+            if (destination.IsEmpty || !destination.ParentAsset.HasValue() || destination.HolderNumber == null)
+            {
+                return result;
+            }
+
+            if (!context.LoadedParentAssets.TryGetValue(destination.ParentAsset.Identifier, out var parentAsset))
+            {
+                result.AddFailReason(AssetValidationField.DestinationParentAsset, "Destination Parent Asset not found.");
+                return result;
+            }
+
+            var hierarchyRole = ResolveHierarchyRole(asset, context);
+            if (hierarchyRole == null)
+            {
+                result.AddFailReason(AssetValidationField.AssetClass,
+                    "Asset Class Device Type must have a Hierarchy Role to be attached to a parent asset.");
+                return result;
+            }
+
+            var holderNumber = destination.HolderNumber;
+            var holderExists = parentAsset.Holders?
+                .Any(h => h.SlotNumber == holderNumber && h.HierarchyRole == hierarchyRole) == true;
+
+            if (!holderExists)
+            {
+                result.AddFailReason(AssetValidationField.DestinationHolderNumber,
+                    $"Invalid Destination Holder Number: Destination Parent Asset does not have a holder slot '{holderNumber}' for Hierarchy Role '{hierarchyRole}'.");
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Resolves the Hierarchy Role of an asset through its Asset Class Device Type, cached per Asset Class.
+        /// </summary>
+        private SlcAsset_Management.Enums.HierarchyRoleEnum? ResolveHierarchyRole(Asset asset, PlacementValidationContext context)
+        {
+            if (!asset.AssetClassId.HasValue())
+            {
+                return null;
+            }
+
+            var assetClassId = asset.AssetClassId.Identifier;
+            if (!context.HierarchyRoleByAssetClass.TryGetValue(assetClassId, out var role))
+            {
+                var assetClass = _entityLoader.LoadAssetClass(asset.AssetClassId);
+                role = assetClass == null
+                    ? null
+                    : _entityLoader.LoadDeviceType(assetClass.DeviceTypeId)?.HierarchyInfo.HierarchyRole;
+
+                // "None" means the Device Type cannot occupy a holder, same as no role.
+                if (role == SlcAsset_Management.Enums.HierarchyRoleEnum.None)
+                {
+                    role = null;
+                }
+
+                context.HierarchyRoleByAssetClass[assetClassId] = role;
+            }
+
+            return role;
+        }
+
+        /// <summary>
         /// Validates rack placement using pre-loaded context.
         /// </summary>
         private ValidationResult ValidateRackPlacement(Asset asset, PlacementValidationContext context)
         {
             var result = new ValidationResult();
 
-            if (asset.Location.IsEmpty || !asset.Location.RackId.HasValue())
+            if (asset.Location.IsEmpty || !asset.Location.RackId.HasValue() || asset.Location.RackPosition == null)
             {
                 return result;
             }
@@ -242,13 +333,13 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
                 return result;
             }
 
-            // Build occupation list (existing assets + batch assets)
-            var occupiedAssets = BuildRackOccupationList(rackId, asset, context);
-
             // Validate using RackValidationHandler
             var assetClass = _entityLoader.LoadAssetClass(asset.AssetClassId);
-            if (assetClass != null && assetClass.HeightU > 0)
+            var deviceType = assetClass == null ? null : _entityLoader.LoadDeviceType(assetClass.DeviceTypeId);
+            if (assetClass != null && deviceType != null && deviceType.TagsInfo.Tags.Contains(SlcAsset_Management.Enums.TagOption.RackUnitConsumer))
             {
+                // Build occupation list (existing assets + batch assets)
+                var occupiedAssets = BuildRackOccupationList(rackId, asset, context);
                 var reservations = LoadReservationsForRack(rack);
 
                 if (!RackPlacementValidation.IsAssetPlacementValid(
@@ -262,6 +353,37 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
                 {
                     result.AddFailuresFrom(spaceResult);
                 }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Validates the destination rack position against the rack boundaries using pre-loaded context.
+        /// Only bounds are checked: the destination is a future location, so occupancy is not evaluated.
+        /// </summary>
+        private ValidationResult ValidateDestinationRackPlacement(Asset asset, PlacementValidationContext context)
+        {
+            var result = new ValidationResult();
+            var destination = asset.DestinationLocation;
+
+            if (destination.IsEmpty || !destination.RackId.HasValue() || destination.RackPosition == null)
+            {
+                return result;
+            }
+
+            if (!context.LoadedRacks.TryGetValue(destination.RackId.Identifier, out var rack))
+            {
+                result.AddFailReason(AssetValidationField.DestinationRackId, "Destination Rack not found.");
+                return result;
+            }
+
+            var assetClass = _entityLoader.LoadAssetClass(asset.AssetClassId);
+            var deviceType = assetClass == null ? null : _entityLoader.LoadDeviceType(assetClass.DeviceTypeId);
+            if (assetClass != null && deviceType != null && deviceType.TagsInfo.Tags.Contains(SlcAsset_Management.Enums.TagOption.RackUnitConsumer)
+                && !RackPlacementValidation.ValidatePositionAndBounds(rack, (int)destination.RackPosition, (int)assetClass.HeightU, out var boundsResult))
+            {
+                result.AddFailReason(AssetValidationField.DestinationRackPosition, boundsResult.GetFailReason(RackValidationField.RackSpacePosition));
             }
 
             return result;
@@ -303,7 +425,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
         {
             if (position == null) return;
             var ac = _entityLoader.LoadAssetClass(a.AssetClassId);
-            if (ac != null && ac.HeightU > 0)
+            var deviceType = ac == null ? null : _entityLoader.LoadDeviceType(ac.DeviceTypeId);
+            if (ac != null && deviceType != null && deviceType.TagsInfo.Tags.Contains(SlcAsset_Management.Enums.TagOption.RackUnitConsumer))
                 list.Add((a, (int)position.Value, (int)ac.HeightU));
         }
 
@@ -333,5 +456,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
         public Dictionary<string, List<Asset>> ExistingChildrenInParents { get; set; } = new Dictionary<string, List<Asset>>();
         public Dictionary<string, Rack> LoadedRacks { get; set; } = new Dictionary<string, Rack>();
         public Dictionary<string, List<Asset>> ExistingAssetsInRacks { get; set; } = new Dictionary<string, List<Asset>>();
+        public Dictionary<string, SlcAsset_Management.Enums.HierarchyRoleEnum?> HierarchyRoleByAssetClass { get; set; } = new Dictionary<string, SlcAsset_Management.Enums.HierarchyRoleEnum?>();
     }
 }

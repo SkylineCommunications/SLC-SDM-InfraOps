@@ -16,10 +16,10 @@
 
 		public ChangeTrackingArrayField(IEnumerable<T1> value, Func<List<T1>, object> getChangesConverter = null)
 		{
-			_originalValue = value.ToList();
-			_originalValueChanges = getChangesConverter?.Invoke(_originalValue) ?? _originalValue;
-			Value = value.ToList();
 			_getChangesConverter = getChangesConverter;
+			Value = value.ToList();
+			_originalValue = CloneList(Value);
+			_originalValueChanges = _getChangesConverter?.Invoke(_originalValue) ?? _originalValue;
 		}
 
 		public T1 this[int index]
@@ -46,6 +46,8 @@
 
 		public List<T1> Value { get; set; }
 
+		public bool IsSet => Changed || (Value != null && Value.Count > 0);
+
 		public bool Changed
 		{
 			get
@@ -68,20 +70,42 @@
 					return true;
 				}
 
-				var (prevVal, newVal) = GetChanges();
-
-				bool changed;
-				if(prevVal is IEnumerable<object> prevValList)
+				if (Value.OfType<IChangeTracking>().Any(item => item != null && item.Changed))
 				{
-					changed = Enumerable.SequenceEqual(prevValList, newVal as IEnumerable<object>);
-				}
-				else
-				{
-					changed = Equals(prevVal, newVal);
+					return true;
 				}
 
-				return !changed;
+				var prevVal = _originalValueChanges;
+				var newVal = _getChangesConverter?.Invoke(Value) ?? Value;
+
+				return !AreEqual(prevVal, newVal);
 			}
+		}
+
+		// The non-generic IEnumerable is needed: List<valueType> is not an IEnumerable<object>.
+		private static bool AreEqual(object prevVal, object newVal)
+		{
+			if (prevVal is IEnumerable prevItems && !(prevVal is string) && newVal is IEnumerable newItems && !(newVal is string))
+			{
+				return prevItems.Cast<object>().SequenceEqual(newItems.Cast<object>());
+			}
+
+			return Equals(prevVal, newVal);
+		}
+
+		private static T1 CloneItem(T1 item)
+		{
+			if (item is ChangeTrackingBase trackable)
+			{
+				return (T1)(object)trackable.Clone();
+			}
+
+			return item;
+		}
+
+		private static List<T1> CloneList(IEnumerable<T1> source)
+		{
+			return source?.Select(CloneItem).ToList();
 		}
 
 		public int Count => Value.Count;
@@ -90,18 +114,53 @@
 
 		public (object prevVal, object newVal) GetChanges()
 		{
-			return (_originalValueChanges, _getChangesConverter?.Invoke(Value) ?? Value);
+			var prevVal = _getChangesConverter != null
+				? (_originalValue != null ? _getChangesConverter.Invoke(_originalValue) : null)
+				: CloneList(_originalValue);
+			var newVal = _getChangesConverter != null
+				? (Value != null ? _getChangesConverter.Invoke(Value) : null)
+				: CloneList(Value);
+			return (prevVal, newVal);
 		}
 
 		public void ApplyChanges()
 		{
-			_originalValue = Value.ToList();
-			_originalValueChanges = _getChangesConverter?.Invoke(_originalValue) ?? _originalValue;
+			if (Value != null)
+			{
+				foreach (var item in Value.OfType<IChangeTracking>())
+				{
+					item?.ResetChangeTracking();
+				}
+			}
+
+			_originalValue = CloneList(Value);
+			_originalValueChanges = _getChangesConverter != null && _originalValue != null
+				? _getChangesConverter.Invoke(_originalValue)
+				: _originalValue;
 		}
 
 		public void Reset()
 		{
-			Value = _originalValue.ToList();
+			if (Value != null)
+			{
+				foreach (var item in Value.OfType<IChangeTracking>())
+				{
+					SdmChangeTracking.RevertFieldChanges(item);
+				}
+			}
+
+			Value = CloneList(_originalValue);
+		}
+
+		public IDomInstanceFieldApplyChanges Clone()
+		{
+			var clone = (ChangeTrackingArrayField<T1>)MemberwiseClone();
+			clone._originalValue = CloneList(_originalValue);
+			clone._originalValueChanges = _getChangesConverter != null && clone._originalValue != null
+				? _getChangesConverter.Invoke(clone._originalValue)
+				: clone._originalValue;
+			clone.Value = CloneList(Value);
+			return clone;
 		}
 
 		public void Add(T1 item)

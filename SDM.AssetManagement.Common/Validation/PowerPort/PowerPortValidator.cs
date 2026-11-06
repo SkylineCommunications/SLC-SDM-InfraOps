@@ -4,9 +4,11 @@
     using System.Collections.Generic;
     using System.Linq;
 
+    using Skyline.DataMiner.SDM.AssetManagement.Common.Validation;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.Common.Services;
     using Skyline.DataMiner.SDM.Extensions;
+    using Skyline.DataMiner.SDM.InfraOps.Common.Validation;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
     using static Skyline.DataMiner.SDM.AssetManagement.Common.Validation.PowerPortValidationHandler;
@@ -19,90 +21,75 @@
     {
         private readonly PowerPortValidationCore _validationCore;
         private readonly SdmEntityLoader _entityLoader;
-        private readonly Validator<PowerPort> _validationPipeline;
 
         public PowerPortValidator(SdmEntityLoader entityLoader)
         {
             _entityLoader = entityLoader ?? throw new ArgumentNullException(nameof(entityLoader));
             _validationCore = new PowerPortValidationCore(entityLoader);
-            _validationPipeline = BuildValidationPipeline();
         }
 
-        #region Single PowerPort Validation
-
-        /// <summary>
-        /// Validates a single PowerPort and returns ValidationResult.
-        /// Collects all errors without throwing exceptions.
-        /// </summary>
-        protected override ValidationResult Validate(PowerPort powerPort)
+        protected override ValidationResult CreateNullEntityResult()
         {
-            if (powerPort == null)
-            {
-                throw new ArgumentNullException(nameof(powerPort));
-            }
-
-            return _validationPipeline.Validate(powerPort);
+            var result = new ValidationResult();
+            result.AddFailReason(PowerPortValidationField.PowerPort, "PowerPort cannot be null.");
+            return result;
         }
 
-        /// <summary>
-        /// Validates a PowerPort and throws ValidationException if invalid.
-        /// Use this when you want fail-fast behavior.
-        /// </summary>
-        public void ValidateAndThrow(PowerPort powerPort)
+        protected override List<ValidationResult> ValidateBulkNoDatabaseBusinessRules(List<PowerPort> entities)
         {
-            _validationPipeline.ValidateAndThrow(powerPort);
+            var results = entities.Select(_ => new ValidationResult()).ToList();
+
+            ValidateBusinessRules(entities, results);
+
+            return results;
         }
 
-        /// <summary>
-        /// Validates with custom error handling callback.
-        /// </summary>
-        public ValidationResult ValidateWithHandler(PowerPort powerPort, Action<ValidationResult> onError)
+        protected override List<ValidationResult> ValidateBulkNoDatabaseBatchConflicts(List<PowerPort> entities)
         {
-            return _validationPipeline.ValidateWithHandler(powerPort, onError);
+            return entities.Select(_ => new ValidationResult()).ToList();
         }
 
-        #endregion
-
-        #region Bulk PowerPort Validation
-
-        /// <summary>
-        /// Validates multiple PowerPorts in bulk with optimized performance.
-        /// Groups ports by parent Asset and loads each Asset's existing ports once,
-        /// reducing N DB reads to K (one per unique Asset in the batch).
-        /// Returns one result per input port, in the same order.
-        /// </summary>
-        protected override List<ValidationResult> ValidateBulk(List<PowerPort> powerPorts)
+        protected override List<ValidationResult> ValidateBulkWithDatabase(List<PowerPort> entities)
         {
-            if (powerPorts == null || !powerPorts.Any())
-            {
-                return new List<ValidationResult>();
-            }
+            var results = entities.Select(_ => new ValidationResult()).ToList();
 
-            var results = powerPorts.Select(_ => new ValidationResult()).ToList();
+            ValidatePortTypesInBulk(entities, results);
 
             // Map identifier -> positional index so DB-phase results (keyed by identifier)
             // can be written back to the correct slot.
             var indexByIdentifier = new Dictionary<string, int>();
-            for (int i = 0; i < powerPorts.Count; i++)
+            for (int idx = 0; idx < entities.Count; idx++)
             {
-                indexByIdentifier[powerPorts[i].Identifier] = i;
+                indexByIdentifier[entities[idx].Identifier] = idx;
             }
 
-            ValidateBusinessRules(powerPorts, results);
-            if (results.AnyInvalid())
-            {
-                return results;
-            }
-
-            ValidatePortTypesInBulk(powerPorts, results);
-            if (results.AnyInvalid())
-            {
-                return results;
-            }
-
-            ValidateAssetContext(powerPorts, results, indexByIdentifier);
+            ValidateAssetContext(entities, results, indexByIdentifier);
+            ValidateConnectionConflicts(entities, results);
 
             return results;
+        }
+
+        private void ValidateConnectionConflicts(List<PowerPort> powerPorts, List<ValidationResult> results)
+        {
+            var changedIndexes = Enumerable.Range(0, powerPorts.Count)
+                .Where(i => !powerPorts[i].IsNew
+                    && powerPorts[i].PowerPortInfo.OutputTypeField.Changed
+                    && !string.IsNullOrWhiteSpace(powerPorts[i].Identifier))
+                .ToList();
+
+            if (!changedIndexes.Any())
+            {
+                return;
+            }
+
+            var portIds = changedIndexes.Select(i => powerPorts[i].Identifier).Distinct().ToList();
+            var connections = _entityLoader.GetConnectionsByPortIds(portIds);
+
+            foreach (var i in changedIndexes)
+            {
+                PowerPortValidationHandler.IsOutputTypeCompatibleWithConnections(powerPorts[i], connections, out var conflictResult);
+                results[i].AddFailuresFrom(conflictResult);
+            }
         }
 
         private void ValidateBusinessRules(List<PowerPort> powerPorts, List<ValidationResult> results)
@@ -116,7 +103,7 @@
         private void ValidatePortTypesInBulk(List<PowerPort> powerPorts, List<ValidationResult> results)
         {
             var distinctPortTypeIds = powerPorts
-                .Where(p => p.PowerPortInfo.PortType != null && p.PowerPortInfo.PortType.HasValue())
+                .Where(p => p.ShouldValidate(p.PowerPortInfo.PortTypeField) && p.PowerPortInfo.PortType != null && p.PowerPortInfo.PortType.HasValue())
                 .Select(p => p.PowerPortInfo.PortType.Identifier)
                 .Distinct()
                 .ToList();
@@ -124,9 +111,14 @@
             var portTypeMap = _entityLoader.GetPortTypesByDomIds(distinctPortTypeIds)
                 .ToDictionary(pt => pt.Identifier);
 
-            for (int i = 0; i < powerPorts.Count; i++)
+            for (int idx = 0; idx < powerPorts.Count; idx++)
             {
-                var port = powerPorts[i];
+                var port = powerPorts[idx];
+
+                if (!port.ShouldValidate(port.PowerPortInfo.PortTypeField))
+                {
+                    continue;
+                }
 
                 PortType loadedPortType = null;
                 if (port.PowerPortInfo.PortType != null && port.PowerPortInfo.PortType.HasValue())
@@ -134,7 +126,7 @@
                     portTypeMap.TryGetValue(port.PowerPortInfo.PortType.Identifier, out loadedPortType);
                 }
 
-                results[i].AddFailuresFrom(_validationCore.ValidatePortTypeAgainst(port, loadedPortType));
+                results[idx].AddFailuresFrom(_validationCore.ValidatePortTypeAgainst(port, loadedPortType));
             }
         }
 
@@ -155,11 +147,11 @@
 
             foreach (var group in portsByAsset)
             {
-                ValidateAssetGroup(group, assetMap, results, indexByIdentifier);
+                ValidateAssetGroup(powerPorts, group, assetMap, results, indexByIdentifier);
             }
         }
 
-        private void ValidateAssetGroup(IGrouping<string, PowerPort> group, Dictionary<string, Asset> assetMap, List<ValidationResult> results, Dictionary<string, int> indexByIdentifier)
+        private void ValidateAssetGroup(List<PowerPort> powerPorts, IGrouping<string, PowerPort> group, Dictionary<string, Asset> assetMap, List<ValidationResult> results, Dictionary<string, int> indexByIdentifier)
         {
             if (!assetMap.TryGetValue(group.Key, out var asset))
             {
@@ -173,21 +165,11 @@
                 return;
             }
 
-            var groupResults = _validationCore.ValidatePowerPortsForAsset(group.ToList(), asset);
+            var groupResults = _validationCore.ValidatePowerPortsForAsset(powerPorts, group.ToList(), asset);
             foreach (var kvp in groupResults)
             {
                 results[indexByIdentifier[kvp.Key]].AddFailuresFrom(kvp.Value);
             }
-        }
-
-        protected override ValidationResult ValidateForDelete(PowerPort powerPort)
-        {
-            if (powerPort == null)
-            {
-                throw new ArgumentNullException(nameof(powerPort));
-            }
-
-            return ValidateNotAssignedToConnections(new List<PowerPort> { powerPort })[0];
         }
 
         protected override List<ValidationResult> ValidateBulkForDelete(List<PowerPort> powerPorts)
@@ -226,42 +208,5 @@
 
             return results;
         }
-
-        #endregion
-
-        #region Pipeline Construction
-
-        private Validator<PowerPort> BuildValidationPipeline()
-        {
-            // Critical validations (business rules) - stop on failure
-            var criticalValidations = Validator<PowerPort>
-                .Create(ValidateCriticalFields)
-                .StopOnFailure();
-
-            // Database validations - collect all errors
-            var databaseValidations = Validator<PowerPort>
-                .Create(ValidateDatabaseFields);
-
-            // Combine: critical first, then database
-            return criticalValidations.AndThen(databaseValidations);
-        }
-
-        #endregion
-
-        #region Validation Methods
-
-        private ValidationResult ValidateCriticalFields(PowerPort powerPort)
-        {
-            // Phase 1: No-database validation (mandatory fields, business rules)
-            return _validationCore.ValidateWithoutDatabaseAccess(powerPort);
-        }
-
-        private ValidationResult ValidateDatabaseFields(PowerPort powerPort)
-        {
-            // Phase 2: Database validation (Port Type, Asset context)
-            return _validationCore.ValidateWithDatabaseAccess(powerPort);
-        }
-
-        #endregion
     }
 }

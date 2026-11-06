@@ -12,7 +12,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         [JsonIgnore]
         [SdmIgnore]
         public bool IsEmpty => IsPrimaryIpv6 == default &&
-            IsPrimaryIpv4 == default;
+            IsPrimaryIpv4 == default &&
+            !IsPrimaryIpv6Field.IsSet &&
+            !IsPrimaryIpv4Field.IsSet;
 
         public bool IsPrimaryIpv6
         {

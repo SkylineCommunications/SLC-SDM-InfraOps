@@ -9,6 +9,7 @@
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.Common.Services;
     using Skyline.DataMiner.SDM.Extensions;
+    using Skyline.DataMiner.SDM.InfraOps.Common.Validation;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
     using static Skyline.DataMiner.SDM.AssetManagement.Common.Validation.DataPortValidationHandler;
@@ -44,7 +45,7 @@
             }
 
             // Asset link
-            if (dataPort.AssetField.Changed
+            if ((dataPort.ShouldValidate(dataPort.AssetField))
                 && !DataPortValidationHandler.IsAssetLinkValid(dataPort, out var assetLinkResult))
                 result.AddFailuresFrom(assetLinkResult);
 
@@ -58,52 +59,6 @@
         #endregion
 
         #region Database Access Validation
-
-        /// <summary>
-        /// Validates DataPort with database access (PortType, Asset context).
-        /// Only called after no-database checks pass.
-        /// </summary>
-        public ValidationResult ValidateWithDatabaseAccess(DataPort dataPort)
-        {
-            var result = new ValidationResult();
-
-            // Port Type validation
-            result.AddFailuresFrom(ValidatePortType(dataPort));
-            if (!result.IsValid) return result;
-
-
-            // Asset context validation (port number uniqueness, primary ports)
-            if (dataPort.Asset.HasValue())
-            {
-                result.AddFailuresFrom(ValidateAssetContext(dataPort));
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// Validates Port Type (must exist and be DataPortType).
-        /// </summary>
-        private ValidationResult ValidatePortType(DataPort dataPort)
-        {
-            if (dataPort.DataPortInfo.PortType == null || !dataPort.DataPortInfo.PortType.HasValue())
-            {
-                return PortTypeRequiredFailure();
-            }
-
-            try
-            {
-                var portType = _entityLoader.LoadPortType(dataPort.DataPortInfo.PortType);
-                return ValidatePortTypeAgainst(dataPort, portType);
-            }
-            catch (Exception ex)
-            {
-                var result = new ValidationResult();
-                result.AddFailReason(DataPortValidationField.PortType,
-                    $"Error validating Port Type: {ex.Message}");
-                return result;
-            }
-        }
 
         /// <summary>
         /// Builds the required-field failure for a missing Port Type reference.
@@ -143,42 +98,6 @@
                 result.AddFailReason(DataPortValidationField.PortType,
                     "Port Type must be a Data Port Type.");
                 return result;
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// Validates DataPort in context of its Asset.
-        /// </summary>
-        private ValidationResult ValidateAssetContext(DataPort dataPort)
-        {
-            var result = new ValidationResult();
-
-            try
-            {
-                var asset = _entityLoader.LoadAsset(dataPort.Asset);
-                if (asset == null)
-                {
-                    result.AddFailReason(DataPortValidationField.Asset,
-                        $"Referenced Asset '{dataPort.Asset.Identifier}' does not exist.");
-                    return result;
-                }
-
-                // Load all ports for asset
-                var allPorts = _entityLoader.LoadDataPorts(asset)
-                    .Where(p => p.Identifier != dataPort.Identifier)
-                    .ToList();
-
-                allPorts.Add(dataPort);
-
-                // Validate collection (uniqueness + primary ports)
-                result.AddFailuresFrom(ValidateDataPortCollection(allPorts));
-            }
-            catch (Exception ex)
-            {
-                result.AddFailReason(DataPortValidationField.Asset,
-                    $"Error validating Asset context: {ex.Message}");
             }
 
             return result;
@@ -253,16 +172,17 @@
         /// All ports must belong to the specified asset.
         /// </summary>
         /// <exception cref="ArgumentException">Thrown when ports don't belong to the asset.</exception>
-        public Dictionary<string, ValidationResult> ValidateDataPortsForAsset(
-            List<DataPort> portsToValidate, Asset asset)
+        public Dictionary<string, ValidationResult> ValidateDataPortsForAsset(List<DataPort> dataPorts, List<DataPort> portsToValidate, Asset asset)
         {
+            var dataPortIdentifiers = dataPorts.Select(p => p.Identifier).ToHashSet();
+
             return PortBulkValidationHelper.ValidatePortsForAsset(
                 portsToValidate,
                 asset,
                 "DataPorts",
                 p => p.Identifier,
                 p => p.Asset.Identifier,
-                a => _entityLoader.LoadDataPorts(a),
+                a => _entityLoader.LoadDataPorts(a).Where(p => !dataPortIdentifiers.Contains(p.Identifier)),
                 ValidateDataPortCollection);
         }
 

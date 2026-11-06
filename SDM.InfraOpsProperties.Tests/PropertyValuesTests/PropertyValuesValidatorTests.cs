@@ -54,10 +54,15 @@ namespace SDM.InfraOpsProperties.Tests.PropertyValuesTests
 		}
 
 		[TestMethod]
-		public void Validate_WithNullPropertyValues_ShouldThrowArgumentNullException()
+		public void Validate_WithNullPropertyValues_ShouldReturnNullFailure()
 		{
-			_validator.Invoking(v => v.Validate(null!, RepositoryAction.Create))
-				.Should().Throw<ArgumentNullException>();
+			var result = _validator.Validate(null!, RepositoryAction.Create);
+
+			using (new AssertionScope())
+			{
+				result.IsValid.Should().BeFalse();
+				result.GetFailReason(PropertyValuesValidationHandler.PropertyValuesValidationField.PropertyValues).Should().Be("PropertyValues cannot be null.");
+			}
 		}
 
 		#endregion

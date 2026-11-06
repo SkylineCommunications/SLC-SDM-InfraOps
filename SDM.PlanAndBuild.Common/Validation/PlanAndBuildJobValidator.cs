@@ -25,7 +25,6 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
         private readonly IPlanAndBuildApiHelper _helper;
         private readonly IPeopleAndOrganizationsApi _peopleApi;
         private readonly IPlanAndBuildExternalReferenceChecker _externalReferenceChecker;
-        private readonly Validator<PlanAndBuildJob> _validationPipeline;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PlanAndBuildJobValidator"/> class.
@@ -53,7 +52,6 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
             _helper = helper ?? throw new ArgumentNullException(nameof(helper));
             _peopleApi = peopleApi ?? throw new ArgumentNullException(nameof(peopleApi));
             _externalReferenceChecker = externalReferenceChecker;
-            _validationPipeline = BuildValidationPipeline();
         }
 
         /// <summary>
@@ -62,85 +60,50 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
         /// </summary>
         internal bool HasExternalReferenceChecker => _externalReferenceChecker != null;
 
-        #region PlanAndBuildJob Validation
-
-        /// <summary>
-        /// Validates a PlanAndBuildJob and returns a ValidationResult.
-        /// Collects all errors without throwing exceptions.
-        /// </summary>
-        protected override ValidationResult Validate(PlanAndBuildJob job)
+        protected override ValidationResult CreateNullEntityResult()
         {
-            return _validationPipeline.Validate(job);
+            var result = new ValidationResult();
+            result.AddFailReason(PlanAndBuildJobValidationField.Job, "Job cannot be null.");
+            return result;
         }
 
-        /// <summary>
-        /// Validates a PlanAndBuildJob and throws a ValidationException if invalid.
-        /// Use this when you want fail-fast behavior.
-        /// </summary>
-        public void ValidateAndThrow(PlanAndBuildJob job)
+        protected override List<ValidationResult> ValidateBulkNoDatabaseBusinessRules(List<PlanAndBuildJob> entities)
         {
-            _validationPipeline.ValidateAndThrow(job);
-        }
-
-        /// <summary>
-        /// Validates with a custom error handling callback.
-        /// </summary>
-        public ValidationResult ValidateWithHandler(PlanAndBuildJob job, Action<ValidationResult> onError)
-        {
-            return _validationPipeline.ValidateWithHandler(job, onError);
-        }
-
-        /// <summary>
-        /// Validates multiple Jobs in bulk. Results are returned in the same order as the input jobs.
-        /// In addition to the per-job checks, this also detects JobName conflicts <em>within the batch itself</em>
-        /// (i.e. two jobs being saved together that share the same JobName), which a single-job DB uniqueness
-        /// query cannot catch since none of the batch's entries are persisted yet.
-        /// Mirrors InfraOpsShared.DOM_Classes.DOM.Applications.Plan_And_Build.Validation.JobValidationHandler's
-        /// OtherChangedEntries check.
-        /// </summary>
-        protected override List<ValidationResult> ValidateBulk(List<PlanAndBuildJob> jobs)
-        {
-            if (jobs == null || !jobs.Any())
-            {
-                return new List<ValidationResult>();
-            }
-
-            // Initialize results - same order as input
-            var results = jobs.Select(j => new ValidationResult()).ToList();
-
             // ============================================================
             // PHASE 1: NO DATABASE ACCESS CHECKS (BUSINESS RULES)
             // ============================================================
-            for (int i = 0; i < jobs.Count; i++)
+            var results = entities.Select(ValidateInfo).ToList();
+
+            for (int i = 0; i < entities.Count; i++)
             {
-                results[i].AddFailuresFrom(ValidateInfo(jobs[i]));
+                results[i].AddFailuresFrom(ValidateJobTypeAndDates(entities[i]));
+                results[i].AddFailuresFrom(ValidateStateGatedChanges(entities[i]));
             }
 
-            // Fast-fail if business rules fail
-            if (results.AnyInvalid())
-            {
-                return results;
-            }
+            return results;
+        }
 
+        protected override List<ValidationResult> ValidateBulkNoDatabaseBatchConflicts(List<PlanAndBuildJob> entities)
+        {
             // ============================================================
             // PHASE 2: IN-MEMORY BATCH CONFLICT DETECTION (NO DATABASE)
             // ============================================================
-            var batchConflicts = ValidateBatchConflicts(jobs);
-            results.MergeFrom(batchConflicts);
+            return ValidateBatchConflicts(entities);
+        }
 
-            // Fast-fail if batch conflicts exist
-            if (results.AnyInvalid())
-            {
-                return results;
-            }
+        protected override List<ValidationResult> ValidateBulkWithDatabase(List<PlanAndBuildJob> entities)
+        {
+            var results = entities.Select(j => new ValidationResult()).ToList();
 
             // ============================================================
             // PHASE 3: DATABASE ACCESS CHECKS (UNIQUENESS) + REMAINING RULES
             // ============================================================
-            ValidateAgainstDatabase(jobs, results);
+            ValidateAgainstDatabase(entities, results);
 
             return results;
         }
+
+        #region PlanAndBuildJob Validation
 
         /// <summary>
         /// Runs the database-backed validation phase. Batch-fetches every JobName that needs a uniqueness
@@ -176,8 +139,6 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
 
             for (int i = 0; i < jobs.Count; i++)
             {
-                results[i].AddFailuresFrom(ValidateJobTypeAndDates(jobs[i]));
-                results[i].AddFailuresFrom(ValidateStateGatedChanges(jobs[i]));
                 results[i].AddFailuresFrom(ValidateJobNameUniqueness(jobs[i], existingByJobName));
                 results[i].AddFailuresFrom(ValidatePeopleAndOrganizations(jobs[i], existingPersonIds, existingTeamIds));
                 results[i].AddFailuresFrom(ValidateJobTypeReference(jobs[i], existingJobTypeIds));
@@ -207,9 +168,17 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
             return jobs
                 .Where(j => j.ShouldValidateAny(j.AssetsUsedField) && j.AssetsUsed != null)
                 .SelectMany(j => j.AssetsUsed)
-                .Where(asset => asset != null && !IsRemovedAssetEntry(asset) && IsReferenceSet(asset.AssetId))
+                .Where(RequiresExistingAsset)
                 .Select(asset => asset.AssetId.Identifier)
                 .ToList();
+        }
+
+        // Assets flagged as removed are historical entries; the asset is expected to be gone.
+        private static bool RequiresExistingAsset(JobAsset asset)
+        {
+            return asset != null
+                && IsReferenceSet(asset.AssetId)
+                && asset.Action != SharedMappers.DomIds.SlcPlan_And_Build.Enums.ActionforassetenumEnum.Removed;
         }
 
         private static List<string> CollectReferencedConnectionIds(List<PlanAndBuildJob> jobs)
@@ -279,36 +248,6 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
             }
 
             return results;
-        }
-
-        #endregion
-
-        #region Pipeline Construction
-
-        private Validator<PlanAndBuildJob> BuildValidationPipeline()
-        {
-            // Critical validations - stop on failure. Uniqueness/other checks are meaningless without a name.
-            var criticalValidations = Validator<PlanAndBuildJob>
-                .Create(ValidateInfo)
-                .StopOnFailure();
-
-            // No database access checks - fail fast before hitting the database. ValidateStateGatedChanges
-            // self-gates on job.IsNew (it is a no-op for new jobs), so it is safe to include unconditionally
-            // for both create and update.
-            var noDatabaseChecks = Validator<PlanAndBuildJob>
-                .Create(ValidateJobTypeAndDates)
-                .AndThen(ValidateStateGatedChanges)
-                .StopOnFailure();
-
-            // Database access checks (uniqueness, People/Team existence)
-            var databaseChecks = Validator<PlanAndBuildJob>
-                .Create(ValidateJobNameUniqueness)
-                .AndThen(ValidatePeopleAndOrganizations)
-                .AndThen(ValidateJobTypeReference)
-                .AndThen(ValidateExternalReferences);
-
-            // Combine: critical first, then no-database checks, then database checks
-            return criticalValidations.AndThen(noDatabaseChecks.AndThen(databaseChecks));
         }
 
         #endregion
@@ -454,6 +393,8 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
         {
             var result = new ValidationResult();
 
+            ValidateAssignmentRequired(job, result);
+
             if (job.ShouldValidate(job.Ownership.AssignedToField) &&
                 job.Ownership.AssignedTo.HasValue() &&
                 !IsPersonValid(job.Ownership.AssignedTo))
@@ -492,6 +433,8 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
         private ValidationResult ValidatePeopleAndOrganizations(PlanAndBuildJob job, HashSet<Guid> existingPersonIds, HashSet<Guid> existingTeamIds)
         {
             var result = new ValidationResult();
+
+            ValidateAssignmentRequired(job, result);
 
             if (job.ShouldValidate(job.Ownership.AssignedToField) &&
                 job.Ownership.AssignedTo.HasValue() &&
@@ -576,7 +519,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
             }
 
             var existing = existingAssetIds.ToHashSet();
-            foreach (var assetId in job.AssetsUsed.Where(asset => asset != null && !IsRemovedAssetEntry(asset) && IsReferenceSet(asset.AssetId)).Select(asset => asset.AssetId.Identifier))
+            foreach (var assetId in job.AssetsUsed.Where(RequiresExistingAsset).Select(asset => asset.AssetId.Identifier))
             {
                 if (!existing.Contains(assetId))
                 {
@@ -662,6 +605,29 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
                 .ReadByBigOrFilter(keys, id => TeamExposers.Id.Equal(id))
                 .Select(t => t.Id)
                 .ToHashSet();
+        }
+
+        private static void ValidateAssignmentRequired(PlanAndBuildJob job, ValidationResult result)
+        {
+            var requiresAssignment = job.State == SharedMappers.DomIds.SlcPlan_And_Build.Behaviors.Job_Behavior.StatusesEnum.Active
+                || job.State == SharedMappers.DomIds.SlcPlan_And_Build.Behaviors.Job_Behavior.StatusesEnum.Assigned
+                || job.State == SharedMappers.DomIds.SlcPlan_And_Build.Behaviors.Job_Behavior.StatusesEnum.Review
+                || job.State == SharedMappers.DomIds.SlcPlan_And_Build.Behaviors.Job_Behavior.StatusesEnum.Resolved;
+
+            if (!requiresAssignment)
+            {
+                return;
+            }
+
+            if (job.ShouldValidateAny(job.StateField, job.Ownership.AssignedToField) && !job.Ownership.AssignedTo.HasValue())
+            {
+                ReferenceValidationHelper.AddRequiredReference(result, PlanAndBuildJobValidationField.AssignedTo, "Assigned To");
+            }
+
+            if (job.ShouldValidateAny(job.StateField, job.Ownership.AssignmentGroupField) && !job.Ownership.AssignmentGroup.HasValue())
+            {
+                ReferenceValidationHelper.AddRequiredReference(result, PlanAndBuildJobValidationField.AssignmentGroup, "Assignment Group");
+            }
         }
 
         private static bool IsReferenceSet<T>(SdmObjectReference<T> reference)

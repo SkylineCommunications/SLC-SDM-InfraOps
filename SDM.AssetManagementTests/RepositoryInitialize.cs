@@ -590,7 +590,7 @@ namespace SDM.AssetManagement.Tests
                 return helper;
             }
 
-            helper.FacilityManagement.Racks.Create(DemoData.Racks);
+            helper.FacilityManagement.Racks.Create(DemoData.Racks.Select(item => helper.FacilityManagement.AttachRow(item)).ToList());
 
             // Refresh cache from database to ensure consistency
             RefreshRacksCache(helper);

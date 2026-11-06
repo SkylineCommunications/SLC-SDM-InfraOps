@@ -130,6 +130,98 @@
 		}
 
 		[TestMethod]
+		public void PlanAndBuildJobDomRepository_Create_ShouldReturnPersistedJobWithNoPendingChanges()
+		{
+			referenceJobType = Helper.JobTypes.Create(referenceJobType);
+			referenceJob.Type = new SdmObjectReference<JobType>(referenceJobType.Identifier);
+
+			var created = Helper.Jobs.Create(referenceJob);
+
+			using (new AssertionScope())
+			{
+				created.IsNew.Should().BeFalse();
+				created.Changed.Should().BeFalse();
+				Helper.Jobs.Count(PlanAndBuildJobExposers.Identifier.Equal(referenceJob.Identifier)).Should().Be(1);
+			}
+		}
+
+		[TestMethod]
+		public void PlanAndBuildJobDomRepository_Create_ShouldLeaveSameInstanceWithoutChanges()
+		{
+			var jobType = Helper.JobTypes.Create(new JobType { Name = "Add", Description = "Adds" });
+			var job = new PlanAndBuildJob
+			{
+				Identifier = Guid.NewGuid().ToString(),
+				JobName = "test",
+				JobDescription = "dest",
+				Type = new SdmObjectReference<JobType>(jobType.Identifier),
+			};
+
+            job = Helper.Jobs.Create(job);
+
+			job.GetChanges().Should().BeEmpty();
+		}
+
+		[TestMethod]
+		public void PlanAndBuildJobDomRepository_CreateBulk_ShouldLeaveSameInstancesWithoutChanges()
+		{
+			var jobType = Helper.JobTypes.Create(new JobType { Name = "Add", Description = "Adds" });
+			var job1 = new PlanAndBuildJob
+			{
+				Identifier = Guid.NewGuid().ToString(),
+				JobName = "test1",
+				JobDescription = "dest1",
+				Type = new SdmObjectReference<JobType>(jobType.Identifier),
+			};
+			var job2 = new PlanAndBuildJob
+			{
+				Identifier = Guid.NewGuid().ToString(),
+				JobName = "test2",
+				JobDescription = "dest2",
+				Type = new SdmObjectReference<JobType>(jobType.Identifier),
+			};
+
+            var created = Helper.Jobs.Create(new[] { job1, job2 }).ToList();
+
+			using (new AssertionScope())
+			{
+				created[0].GetChanges().Should().BeEmpty();
+				created[1].GetChanges().Should().BeEmpty();
+			}
+		}
+
+		[TestMethod]
+		public void PlanAndBuildJobDomRepository_CreateBulk_ShouldPersistAllJobsWithNoPendingChanges()
+		{
+			referenceJobType = Helper.JobTypes.Create(referenceJobType);
+
+			var job1 = new PlanAndBuildJob
+			{
+				Identifier = Guid.NewGuid().ToString(),
+				JobName = "test1",
+				JobDescription = "dest1",
+				Type = new SdmObjectReference<JobType>(referenceJobType.Identifier),
+			};
+			var job2 = new PlanAndBuildJob
+			{
+				Identifier = Guid.NewGuid().ToString(),
+				JobName = "test2",
+				JobDescription = "dest2",
+				Type = new SdmObjectReference<JobType>(referenceJobType.Identifier),
+			};
+
+			var created = Helper.Jobs.Create(new[] { job1, job2 });
+
+			using (new AssertionScope())
+			{
+				created.Should().HaveCount(2);
+				created.Should().OnlyContain(j => !j.IsNew && !j.Changed);
+				Helper.Jobs.Count(PlanAndBuildJobExposers.Identifier.Equal(job1.Identifier)).Should().Be(1);
+				Helper.Jobs.Count(PlanAndBuildJobExposers.Identifier.Equal(job2.Identifier)).Should().Be(1);
+			}
+		}
+
+		[TestMethod]
 		public void PlanAndBuildJobDomRepository_Create_WithDuplicateJobName_ShouldThrow()
 		{
 			referenceJobType = Helper.JobTypes.Create(referenceJobType);

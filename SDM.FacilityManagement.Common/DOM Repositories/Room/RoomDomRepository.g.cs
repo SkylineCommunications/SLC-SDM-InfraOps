@@ -693,7 +693,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 					_resourcelink.ID = new SectionID(_resourcelinkSectionId.Value);
 				}
 
-				if (obj.ResourceLink.ResourceId != default)
+				if (obj.ResourceLink.ResourceId != Guid.Empty)
 				{
 					_resourcelink.AddOrUpdateValue<string>(FacilityManagement.Models.RoomDomMapper.ResourceLink.ResourceId, Convert.ToString(obj.ResourceLink.ResourceId));
 				}

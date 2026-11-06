@@ -11,6 +11,7 @@
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)asset_management")]
+    [PropertyScope("InfraopsReservation")]
     public sealed class InfraopsReservation : SdmObjectBase<InfraopsReservation>, IEquatable<InfraopsReservation>, IEntityTracking, IReadOnlyModuleIdReferencer
 	{
         [JsonIgnore]
@@ -110,8 +111,8 @@
                     OldValue = kvp.Value.prevVal,
                     NewValue = kvp.Value.newVal,
                 })
-                .Concat(_jobFk?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>())
-                .Concat(_rackFk?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>());
+                .Concat(_jobFk.GetSectionChanges("JobFk"))
+                .Concat(_rackFk.GetSectionChanges("RackFk"));
         }
 
         public void ResetChangeTracking()
@@ -178,7 +179,7 @@
             unchecked
             {
                 int hash = 17;
-                hash = (hash * 23) + (Description != null ? Description.GetHashCode() : 0);
+                hash = (hash * 23) + (Description != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(Description) : 0);
                 hash = (hash * 23) + (JobFk != null ? JobFk.GetHashCode() : 0);
                 hash = (hash * 23) + (RackFk != null ? RackFk.GetHashCode() : 0);
                 return hash;

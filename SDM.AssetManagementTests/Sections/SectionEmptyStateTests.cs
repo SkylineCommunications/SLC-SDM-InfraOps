@@ -31,6 +31,7 @@
             new AddressInfo().Also(x => x.Ipv6Address = "2001:db8::1").IsEmpty.Should().BeFalse();
             new AddressInfo().Also(x => x.Hostname = "asset.example.com").IsEmpty.Should().BeFalse();
             new AddressInfo().Also(x => x.DNS = true).IsEmpty.Should().BeFalse();
+            new AddressInfo().Also(x => x.DNS = false).IsEmpty.Should().BeFalse();
         }
 
         [TestMethod]
@@ -74,8 +75,10 @@
         public void AssetHolder_AnyFieldSet_IsNotEmpty()
         {
             new AssetHolder().Also(x => x.SlotNumber = 1).IsEmpty.Should().BeFalse();
+            new AssetHolder().Also(x => x.SlotNumber = 0).IsEmpty.Should().BeFalse();
             new AssetHolder().Also(x => x.Label = "slot").IsEmpty.Should().BeFalse();
             new AssetHolder().Also(x => x.HierarchyRole = SlcAsset_Management.Enums.HierarchyRoleEnum.Card).IsEmpty.Should().BeFalse();
+            new AssetHolder().Also(x => x.HierarchyRole = default).IsEmpty.Should().BeFalse();
         }
 
         [TestMethod]
@@ -147,8 +150,11 @@
         {
             new DataPortInfo().Also(x => x.Name = "data").IsEmpty.Should().BeFalse();
             new DataPortInfo().Also(x => x.PortNumber = 1).IsEmpty.Should().BeFalse();
+            new DataPortInfo().Also(x => x.PortNumber = 0).IsEmpty.Should().BeFalse();
             new DataPortInfo().Also(x => x.OutputType = SlcAsset_Management.Enums.Outputtype.In).IsEmpty.Should().BeFalse();
+            new DataPortInfo().Also(x => x.OutputType = default(SlcAsset_Management.Enums.Outputtype)).IsEmpty.Should().BeFalse();
             new DataPortInfo().Also(x => x.PortExposure = SlcAsset_Management.Enums.PortExposureEnum.Front).IsEmpty.Should().BeFalse();
+            new DataPortInfo().Also(x => x.PortExposure = default).IsEmpty.Should().BeFalse();
             new DataPortInfo().Also(x => x.PortType = Ref<PortType>()).IsEmpty.Should().BeFalse();
             new DataPortInfo().Also(x => x.Label = "label").IsEmpty.Should().BeFalse();
         }
@@ -178,6 +184,7 @@
         {
             new ElementLink().Also(x => x.ElementID = "1/2").IsEmpty.Should().BeFalse();
             new ElementLink().Also(x => x.IsPrimary = true).IsEmpty.Should().BeFalse();
+            new ElementLink().Also(x => x.IsPrimary = false).IsEmpty.Should().BeFalse();
         }
 
         [TestMethod]
@@ -228,8 +235,11 @@
         {
             new PowerPortInfo().Also(x => x.Name = "power").IsEmpty.Should().BeFalse();
             new PowerPortInfo().Also(x => x.PortNumber = 1).IsEmpty.Should().BeFalse();
+            new PowerPortInfo().Also(x => x.PortNumber = 0).IsEmpty.Should().BeFalse();
             new PowerPortInfo().Also(x => x.OutputType = SlcAsset_Management.Enums.Outputtype.In).IsEmpty.Should().BeFalse();
+            new PowerPortInfo().Also(x => x.OutputType = default(SlcAsset_Management.Enums.Outputtype)).IsEmpty.Should().BeFalse();
             new PowerPortInfo().Also(x => x.PortExposure = SlcAsset_Management.Enums.PortExposureEnum.Front).IsEmpty.Should().BeFalse();
+            new PowerPortInfo().Also(x => x.PortExposure = default).IsEmpty.Should().BeFalse();
             new PowerPortInfo().Also(x => x.PortType = Ref<PortType>()).IsEmpty.Should().BeFalse();
             new PowerPortInfo().Also(x => x.Label = "label").IsEmpty.Should().BeFalse();
         }
@@ -244,7 +254,9 @@
         public void PrimaryPortRelation_AnyFieldSet_IsNotEmpty()
         {
             new PrimaryPortRelation().Also(x => x.IsPrimaryIpv6 = true).IsEmpty.Should().BeFalse();
+            new PrimaryPortRelation().Also(x => x.IsPrimaryIpv6 = false).IsEmpty.Should().BeFalse();
             new PrimaryPortRelation().Also(x => x.IsPrimaryIpv4 = true).IsEmpty.Should().BeFalse();
+            new PrimaryPortRelation().Also(x => x.IsPrimaryIpv4 = false).IsEmpty.Should().BeFalse();
         }
 
         [TestMethod]
@@ -283,6 +295,126 @@
         public void TagsInfo_TagsSet_IsNotEmpty()
         {
             new TagsInfo().Also(x => x.Tags = new List<SlcAsset_Management.Enums.TagOption> { SlcAsset_Management.Enums.TagOption.AcceptsDataConnection }).IsEmpty.Should().BeFalse();
+        }
+
+        [TestMethod]
+        public void DataPort_RoundTrip_PreservesDefaultNonNullableValuesAndNullAsset()
+        {
+            var dataPort = new DataPort
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                DataPortInfo =
+                {
+                    PortExposure = default,
+                    PortNumber = null,
+                    OutputType = null,
+                },
+                AddressInfo =
+                {
+                    DNS = false,
+                },
+                PrimaryPortRelation =
+                {
+                    IsPrimaryIpv4 = false,
+                    IsPrimaryIpv6 = false,
+                },
+            };
+
+            var roundTripped = RoundTrip<DataPortDomRepository, DataPort>(dataPort);
+
+            roundTripped.Asset.Identifier.Should().BeNullOrEmpty();
+            roundTripped.Changed.Should().BeFalse();
+            roundTripped.DataPortInfo.IsEmpty.Should().BeFalse();
+            roundTripped.DataPortInfo.PortExposure.Should().Be(default);
+            roundTripped.DataPortInfo.PortNumber.Should().BeNull();
+            roundTripped.DataPortInfo.OutputType.Should().BeNull();
+            roundTripped.AddressInfo.IsEmpty.Should().BeFalse();
+            roundTripped.AddressInfo.DNS.Should().BeFalse();
+            roundTripped.PrimaryPortRelation.IsEmpty.Should().BeFalse();
+            roundTripped.PrimaryPortRelation.IsPrimaryIpv4.Should().BeFalse();
+            roundTripped.PrimaryPortRelation.IsPrimaryIpv6.Should().BeFalse();
+        }
+
+        [TestMethod]
+        public void PowerPort_RoundTrip_AllowsNullNullableFieldsAndNullAsset()
+        {
+            var powerPort = new PowerPort
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                PowerPortInfo =
+                {
+                    PortExposure = default,
+                    PortNumber = null,
+                    OutputType = null,
+                },
+            };
+
+            var roundTripped = RoundTrip<PowerPortDomRepository, PowerPort>(powerPort);
+
+            roundTripped.Asset.Identifier.Should().BeNullOrEmpty();
+            roundTripped.Changed.Should().BeFalse();
+            roundTripped.PowerPortInfo.IsEmpty.Should().BeFalse();
+            roundTripped.PowerPortInfo.PortExposure.Should().Be(default);
+            roundTripped.PowerPortInfo.PortNumber.Should().BeNull();
+            roundTripped.PowerPortInfo.OutputType.Should().BeNull();
+        }
+
+        [TestMethod]
+        public void Asset_And_AssetClass_RoundTrip_PreserveDefaultNonNullableAndNullNullableValues()
+        {
+            var asset = new Asset
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                Holders = new List<AssetHolder>
+                {
+                    new AssetHolder { SlotNumber = 0, HierarchyRole = default },
+                },
+                ElementLinks = new List<ElementLink>
+                {
+                    new ElementLink { IsPrimary = false },
+                },
+            };
+
+            var roundTrippedAsset = RoundTrip<AssetDomRepository, Asset>(asset);
+            roundTrippedAsset.Holders.Should().ContainSingle();
+            roundTrippedAsset.Holders[0].SlotNumber.Should().Be(0);
+            roundTrippedAsset.Holders[0].HierarchyRole.Should().Be(default);
+            roundTrippedAsset.ElementLinks.Should().ContainSingle();
+            roundTrippedAsset.ElementLinks[0].IsPrimary.Should().BeFalse();
+
+            var assetClass = new AssetClass
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                DataPorts = new List<DataPortInfo>
+                {
+                    new DataPortInfo { PortExposure = default, PortNumber = null, OutputType = null },
+                },
+                PowerPorts = new List<PowerPortInfo>
+                {
+                    new PowerPortInfo { PortExposure = default, PortNumber = null, OutputType = null },
+                },
+                Holders = new List<AssetHolder>
+                {
+                    new AssetHolder { SlotNumber = 0, HierarchyRole = default },
+                },
+            };
+
+            var roundTrippedClass = RoundTrip<AssetClassDomRepository, AssetClass>(assetClass);
+            roundTrippedClass.DataPorts.Should().ContainSingle();
+            roundTrippedClass.DataPorts[0].OutputType.Should().BeNull();
+            roundTrippedClass.PowerPorts.Should().ContainSingle();
+            roundTrippedClass.PowerPorts[0].OutputType.Should().BeNull();
+            roundTrippedClass.Holders.Should().ContainSingle();
+            roundTrippedClass.Holders[0].SlotNumber.Should().Be(0);
+        }
+
+        private static TModel RoundTrip<TRepo, TModel>(TModel model)
+        {
+            var repo = System.Runtime.Serialization.FormatterServices.GetUninitializedObject(typeof(TRepo));
+            var toInstance = typeof(TRepo).GetMethod("ToInstance", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            var fromInstance = typeof(TRepo).GetMethod("FromInstance", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            var instance = toInstance.Invoke(repo, new object[] { model });
+            return (TModel)fromInstance.Invoke(repo, new[] { instance });
         }
 
         private static SdmObjectReference<T> Ref<T>() where T : SdmObject<T>
