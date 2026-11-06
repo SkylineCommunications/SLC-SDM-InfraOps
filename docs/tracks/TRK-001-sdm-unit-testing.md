@@ -30,7 +30,7 @@ SDM mappers have shipped with CLR-type bugs (reference fields written as `string
 | ID | Title | Status | Collaboration |
 |---|---|---|---|
 | [ITM-001](../items/ITM-001-dom-mock-field-value-type-validation.md) | DOM mock: field-value-type validation on Create/Update/CreateOrUpdate | Done | [308202](https://collaboration.dataminer.services/myTasks/list/task/308202) |
-
+| [ITM-004](../items/ITM-004-asset-holder-hierarchy-role.md) | Asset HolderNumber validation must consider Hierarchy Role | Done | TBD |
 ## Candidate items (not yet created)
 
 - Enable `validateAgainstDefinition: true` on the mock in all test projects (requires fixing missing/optional descriptor seeding first).

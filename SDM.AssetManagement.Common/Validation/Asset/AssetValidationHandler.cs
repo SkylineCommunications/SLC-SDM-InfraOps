@@ -871,13 +871,6 @@
                 return result;
             }
 
-
-            if (asset == null)
-            {
-                result.AddFailReason(AssetValidationField.Asset, "Asset cannot be null.");
-                return result;
-            }
-
             var hasDestinationLocation = HasDestinationLocation(asset);
 
             // Check if in "In Transit" state

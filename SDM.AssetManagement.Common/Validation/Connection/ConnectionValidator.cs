@@ -234,17 +234,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             var endpointPortType = isSource ? connection.Source.PortType : connection.Destination.PortType;
             var connectionType = connection.ConnectionType.Value;
 
-            if (endpointPortType.HasValue() && lookups.PortTypes.TryGetValue(endpointPortType.Identifier, out var loadedPortType))
-            {
-                if (connectionType == SlcAsset_Management.Enums.ConnectionType.Data && !loadedPortType.IsDataPortType())
-                {
-                    result.AddFailReason(portTypeField, $"{endpointLabel} Port Type must be a Data Port Type for a Data connection.");
-                }
-                else if (connectionType == SlcAsset_Management.Enums.ConnectionType.Power && !loadedPortType.IsPowerPortType())
-                {
-                    result.AddFailReason(portTypeField, $"{endpointLabel} Port Type must be a Power Port Type for a Power connection.");
-                }
-            }
+            ValidateEndpointPortTypeCategory(endpointPortType, connectionType, endpointLabel, portTypeField, lookups, result);
 
             if (!endpointPort.HasValue())
             {
@@ -257,6 +247,40 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
                 return;
             }
 
+            ValidateEndpointPortCategory(resolved, connectionType, endpointLabel, portField, result);
+            ValidatePortTypeMatchesPort(endpointPortType, resolved, endpointLabel, portTypeField, result);
+        }
+
+        private static void ValidateEndpointPortTypeCategory(
+            SdmObjectReference<PortType> endpointPortType,
+            SlcAsset_Management.Enums.ConnectionType connectionType,
+            string endpointLabel,
+            ConnectionValidationField portTypeField,
+            Lookups lookups,
+            ValidationResult result)
+        {
+            if (!endpointPortType.HasValue() || !lookups.PortTypes.TryGetValue(endpointPortType.Identifier, out var loadedPortType))
+            {
+                return;
+            }
+
+            if (connectionType == SlcAsset_Management.Enums.ConnectionType.Data && !loadedPortType.IsDataPortType())
+            {
+                result.AddFailReason(portTypeField, $"{endpointLabel} Port Type must be a Data Port Type for a Data connection.");
+            }
+            else if (connectionType == SlcAsset_Management.Enums.ConnectionType.Power && !loadedPortType.IsPowerPortType())
+            {
+                result.AddFailReason(portTypeField, $"{endpointLabel} Port Type must be a Power Port Type for a Power connection.");
+            }
+        }
+
+        private static void ValidateEndpointPortCategory(
+            ResolvedPort resolved,
+            SlcAsset_Management.Enums.ConnectionType connectionType,
+            string endpointLabel,
+            ConnectionValidationField portField,
+            ValidationResult result)
+        {
             if (connectionType == SlcAsset_Management.Enums.ConnectionType.Data && !resolved.IsDataPort)
             {
                 result.AddFailReason(portField, $"{endpointLabel} port must be a Data Port for a Data connection.");
@@ -265,7 +289,15 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             {
                 result.AddFailReason(portField, $"{endpointLabel} port must be a Power Port for a Power connection.");
             }
+        }
 
+        private static void ValidatePortTypeMatchesPort(
+            SdmObjectReference<PortType> endpointPortType,
+            ResolvedPort resolved,
+            string endpointLabel,
+            ConnectionValidationField portTypeField,
+            ValidationResult result)
+        {
             if (endpointPortType.HasValue()
                 && resolved.PortType.HasValue()
                 && !string.Equals(endpointPortType.Identifier, resolved.PortType.Identifier, StringComparison.Ordinal))

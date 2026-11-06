@@ -1967,6 +1967,218 @@
                 .WithMessage("*already claimed by another asset in the validation batch*");
         }
 
+        [TestMethod]
+        public void Create_WithSameHolderNumberButDifferentHierarchyRole_ShouldPass()
+        {
+            // Arrange
+            var parent = CreateParentWithHolders(
+                (1, SlcAsset_Management.Enums.HierarchyRoleEnum.Card),
+                (1, SlcAsset_Management.Enums.HierarchyRoleEnum.Fan));
+            var cardClass = CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum.Card);
+            var fanClass = CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum.Fan);
+
+            Helper.AssetManagement.Assets.Create(NewChildAsset("ROLE-CARD-1", cardClass, parent, 1));
+
+            // Act
+            Action act = () => Helper.AssetManagement.Assets.Create(NewChildAsset("ROLE-FAN-1", fanClass, parent, 1));
+
+            // Assert
+            act.Should().NotThrow();
+        }
+
+        [TestMethod]
+        public void Create_WithSameHolderNumberAndSameHierarchyRoleDifferentAssetClass_ShouldFail()
+        {
+            // Arrange
+            var parent = CreateParentWithHolders((1, SlcAsset_Management.Enums.HierarchyRoleEnum.Card));
+            var firstCardClass = CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum.Card);
+            var secondCardClass = CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum.Card);
+
+            Helper.AssetManagement.Assets.Create(NewChildAsset("SAME-ROLE-1", firstCardClass, parent, 1));
+
+            // Act
+            Action act = () => Helper.AssetManagement.Assets.Create(NewChildAsset("SAME-ROLE-2", secondCardClass, parent, 1));
+
+            // Assert
+            act.Should().Throw<Exception>()
+                .WithMessage("*Holder*already occupied*");
+        }
+
+        [TestMethod]
+        public void CreateOrUpdate_WithSameHolderNumberButDifferentHierarchyRoleInBatch_ShouldPass()
+        {
+            // Arrange
+            var parent = CreateParentWithHolders(
+                (1, SlcAsset_Management.Enums.HierarchyRoleEnum.Card),
+                (1, SlcAsset_Management.Enums.HierarchyRoleEnum.Fan));
+            var cardClass = CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum.Card);
+            var fanClass = CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum.Fan);
+
+            var assets = new List<Asset>
+            {
+                NewChildAsset("BATCH-ROLE-CARD", cardClass, parent, 1),
+                NewChildAsset("BATCH-ROLE-FAN", fanClass, parent, 1),
+            };
+
+            // Act
+            Action act = () => Helper.AssetManagement.Assets.CreateOrUpdate(assets);
+
+            // Assert
+            act.Should().NotThrow();
+        }
+
+        [TestMethod]
+        public void CreateOrUpdate_WithSameHolderNumberAndSameHierarchyRoleDifferentAssetClassInBatch_ShouldFail()
+        {
+            // Arrange
+            var parent = CreateParentWithHolders((1, SlcAsset_Management.Enums.HierarchyRoleEnum.Card));
+            var firstCardClass = CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum.Card);
+            var secondCardClass = CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum.Card);
+
+            var assets = new List<Asset>
+            {
+                NewChildAsset("BATCH-SAME-ROLE-1", firstCardClass, parent, 1),
+                NewChildAsset("BATCH-SAME-ROLE-2", secondCardClass, parent, 1),
+            };
+
+            // Act
+            Action act = () => Helper.AssetManagement.Assets.CreateOrUpdate(assets);
+
+            // Assert: the no-db batch check passes (different Asset Classes), the db check resolves the same role
+            act.Should().Throw<Exception>()
+                .WithMessage("*conflicts with another asset in the same batch*");
+        }
+
+        [TestMethod]
+        public void Create_WithDestinationHolderMatchingRole_ShouldPassEvenWhenSlotIsOccupied()
+        {
+            // Arrange
+            var parent = CreateParentWithHolders((1, SlcAsset_Management.Enums.HierarchyRoleEnum.Card));
+            var cardClass = CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum.Card);
+            Helper.AssetManagement.Assets.Create(NewChildAsset("DEST-OCCUPANT", cardClass, parent, 1));
+
+            var inTransit = NewInTransitAsset("DEST-HOLDER-OK", cardClass, parent, 1);
+
+            // Act
+            Action act = () => Helper.AssetManagement.Assets.Create(inTransit);
+
+            // Assert
+            act.Should().NotThrow();
+        }
+
+        [TestMethod]
+        public void Create_WithDestinationHolderSlotMissing_ShouldFail()
+        {
+            // Arrange
+            var parent = CreateParentWithHolders((1, SlcAsset_Management.Enums.HierarchyRoleEnum.Card));
+            var cardClass = CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum.Card);
+
+            var inTransit = NewInTransitAsset("DEST-HOLDER-NO-SLOT", cardClass, parent, 9);
+
+            // Act
+            Action act = () => Helper.AssetManagement.Assets.Create(inTransit);
+
+            // Assert
+            act.Should().Throw<Exception>()
+                .WithMessage("*Destination Parent Asset does not have a holder slot*");
+        }
+
+        [TestMethod]
+        public void Create_WithDestinationHolderOfDifferentRole_ShouldFail()
+        {
+            // Arrange
+            var parent = CreateParentWithHolders((1, SlcAsset_Management.Enums.HierarchyRoleEnum.Fan));
+            var cardClass = CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum.Card);
+
+            var inTransit = NewInTransitAsset("DEST-HOLDER-WRONG-ROLE", cardClass, parent, 1);
+
+            // Act
+            Action act = () => Helper.AssetManagement.Assets.Create(inTransit);
+
+            // Assert
+            act.Should().Throw<Exception>()
+                .WithMessage("*Destination Parent Asset does not have a holder slot*Hierarchy Role*");
+        }
+
+        [TestMethod]
+        public void Create_WithDestinationHolderAndAssetClassWithoutHierarchyRole_ShouldFail()
+        {
+            // Arrange
+            var parent = CreateParentWithHolders((1, SlcAsset_Management.Enums.HierarchyRoleEnum.Card));
+            var noRoleClass = CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum.None);
+
+            var inTransit = NewInTransitAsset("DEST-HOLDER-NO-ROLE", noRoleClass, parent, 1);
+
+            // Act
+            Action act = () => Helper.AssetManagement.Assets.Create(inTransit);
+
+            // Assert
+            act.Should().Throw<Exception>()
+                .WithMessage("*Device Type must have a Hierarchy Role*");
+        }
+
+        private Asset CreateParentWithHolders(params (long Slot, SlcAsset_Management.Enums.HierarchyRoleEnum Role)[] holders)
+        {
+            return Helper.AssetManagement.Assets.Create(new Asset
+            {
+                AssetID = $"HOLDER-PARENT-{Guid.NewGuid():N}",
+                Name = $"Holder Parent {Guid.NewGuid():N}",
+                AssetClassId = new SdmObjectReference<AssetClass>(testAssetClass.Identifier),
+                Holders = holders
+                    .Select(h => new AssetHolder { SlotNumber = h.Slot, HierarchyRole = h.Role })
+                    .ToList(),
+            });
+        }
+
+        private AssetClass CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum role)
+        {
+            var deviceType = Helper.TestData.DeviceTypes.First(dt => dt.HierarchyInfo.HierarchyRole == role);
+
+            return Helper.AssetManagement.AssetClasses.Create(new AssetClass
+            {
+                Manufacturer = SDM.AssetManagement.Tests.Setup.PeopleApiMock.NewManufacturer(),
+                Name = $"{role} asset class {Guid.NewGuid():N}",
+                DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier),
+                State = SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Active,
+                Height = 4.45,
+                Width = 10,
+                Depth = 1,
+                HeightU = 1,
+                Weight = 1,
+            });
+        }
+
+        private static Asset NewChildAsset(string suffix, AssetClass assetClass, Asset parent, long holderNumber)
+        {
+            return new Asset
+            {
+                AssetID = $"HOLDER-CHILD-{suffix}",
+                Name = $"Holder Child {suffix}",
+                AssetClassId = new SdmObjectReference<AssetClass>(assetClass.Identifier),
+                Location =
+                {
+                    ParentAsset = new SdmObjectReference<Asset>(parent.Identifier),
+                    HolderNumber = holderNumber,
+                },
+            };
+        }
+
+        private static Asset NewInTransitAsset(string suffix, AssetClass assetClass, Asset destinationParent, long holderNumber)
+        {
+            return new Asset
+            {
+                AssetID = $"HOLDER-TRANSIT-{suffix}",
+                Name = $"Holder In Transit {suffix}",
+                AssetClassId = new SdmObjectReference<AssetClass>(assetClass.Identifier),
+                State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit,
+                DestinationLocation =
+                {
+                    ParentAsset = new SdmObjectReference<Asset>(destinationParent.Identifier),
+                    HolderNumber = holderNumber,
+                },
+            };
+        }
+
         #endregion
 
         #region Ported From Shared Tests

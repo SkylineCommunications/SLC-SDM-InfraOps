@@ -347,7 +347,7 @@ flowchart LR
 | Room | `Guid` | `Location.RoomId` | → Room | `db` Room must exist |
 | PowerSupplyRackPosition | `long` | — | **unused** — mapped, never read/written (§13) |  |
 | ParentAsset | `Guid` | `Location.ParentAsset` | → Asset | `db` Parent Asset must exist |
-| HolderNumber | `long` | `Location.HolderNumber` |  | `no-db` Set **iff** ParentAsset is set; ≥ 0<br>`db` Parent's Asset Class Device Type must have a Hierarchy Role; the slot must exist for that role and be free<br>`batch` Two assets in one batch may not claim the same slot |
+| HolderNumber | `long` | `Location.HolderNumber` |  | `no-db` Set **iff** ParentAsset is set; ≥ 0<br>`db` Slot identity is (ParentAsset, HierarchyRole, HolderNumber). The Hierarchy Role is resolved from the asset's own Asset Class Device Type and must be set; the parent must expose that (HolderNumber, role) slot and it must be free<br>`batch` Two assets in one batch may not share ParentAsset + HolderNumber + AssetClass (same Asset Class ⇒ same Device Type ⇒ same Hierarchy Role). The same HolderNumber is allowed when the Hierarchy Role differs. Closest no-DB approximation; the role-level check is done at `db` |
 
 #### 3.1.3 AssetLocationDestination
 
@@ -363,7 +363,7 @@ flowchart LR
 | Room | `Guid` | `DestinationLocation.RoomId` | → Room | `db` Room must exist |
 | PowerSupplyRackPosition | `long` | — | **unused** — mapped, never read/written (§13) |  |
 | ParentAsset | `Guid` | `DestinationLocation.ParentAsset` | → Asset | `db` Parent Asset must exist |
-| HolderNumber | `long` | `DestinationLocation.HolderNumber` |  | `no-db` Set **iff** ParentAsset is set; ≥ 0<br>`db` Same parent-slot checks as `Location.HolderNumber` |
+| HolderNumber | `long` | `DestinationLocation.HolderNumber` |  | `no-db` Set **iff** ParentAsset is set; ≥ 0<br>`db` The Holder must exist on the ParentAsset: a Holder with that SlotNumber and the Hierarchy Role of the asset's Asset Class Device Type. No occupancy check applies to the destination |
 
 #### 3.1.4 AssetLifecycle
 

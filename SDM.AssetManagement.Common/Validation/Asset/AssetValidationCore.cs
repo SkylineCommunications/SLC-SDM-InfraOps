@@ -760,7 +760,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             var holderGroups = assets
                             .Select((asset, index) => new { asset, index })
                             .Where(x => x.asset.Location.ParentAsset.HasValue() == true && x.asset.Location.HolderNumber != null)
-                            .GroupBy(x => new { ParentId = x.asset.Location.ParentAsset.Identifier, x.asset.Location.HolderNumber })
+                            .GroupBy(x => new { ParentId = x.asset.Location.ParentAsset.Identifier, x.asset.Location.HolderNumber, AssetClassId = x.asset.AssetClassId.Identifier })
                             .Where(g => g.Count() > 1);
 
             foreach (var group in holderGroups)
@@ -1020,101 +1020,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
         #endregion
 
         #region Helper Methods (Database Access)
-
-        private ValidationResult ValidateParentAssetHolderAvailability(
-            Asset asset, AssetClass assetClass)
-        {
-            var result = new ValidationResult();
-
-            if (!asset.Location.ParentAsset.HasValue() || asset.Location.HolderNumber == null)
-            {
-                return result;
-            }
-
-            try
-            {
-                var parentAsset = _entityLoader.LoadAsset(asset.Location.ParentAsset);
-                if (parentAsset == null)
-                {
-                    result.AddFailReason(AssetValidationField.ParentAsset, "Parent Asset not found.");
-                    return result;
-                }
-
-                var deviceType = _entityLoader.LoadDeviceType(assetClass.DeviceTypeId);
-                if (deviceType?.HierarchyInfo.HierarchyRole == null)
-                {
-                    result.AddFailReason(AssetValidationField.AssetClass,
-                        "Asset Class Device Type must have a Hierarchy Role to be attached to a parent asset.");
-                    return result;
-                }
-
-                var hierarchyRole = deviceType.HierarchyInfo.HierarchyRole;
-                var holderNumber = asset.Location.HolderNumber;
-
-                var matchingHolder = parentAsset.Holders?
-                    .FirstOrDefault(h => h.SlotNumber == holderNumber && h.HierarchyRole == hierarchyRole);
-
-                if (matchingHolder == null)
-                {
-                    result.AddFailReason(AssetValidationField.HolderNumber,
-                        $"Invalid Holder Number: Parent Asset does not have a holder slot '{holderNumber}' for Hierarchy Role '{hierarchyRole}'.");
-                    return result;
-                }
-
-                var exceptIds = new List<string> { asset.Identifier };
-                var childAssets = _entityLoader.FindChildAssets(parentAsset.Identifier, exceptIds);
-
-                var occupyingAssets = childAssets
-                    .Where(a => a.Location.ParentAsset != null &&
-                               a.Location.ParentAsset.Identifier == parentAsset.Identifier &&
-                               a.Location.HolderNumber == holderNumber)
-                    .ToList();
-
-                if (occupyingAssets.Any())
-                {
-                    result.AddFailReason(AssetValidationField.HolderNumber,
-                        $"Holder Number '{holderNumber}' is already occupied on the Parent Asset by another asset.");
-                }
-            }
-            catch (Exception ex)
-            {
-                result.AddFailReason(AssetValidationField.ParentAsset,
-                    $"Error validating parent asset holder availability: {ex.Message}");
-            }
-
-            return result;
-        }
-
-        private ValidationResult ValidateDestinationRackBounds(Asset asset)
-        {
-            var result = new ValidationResult();
-            var destination = asset.DestinationLocation;
-
-            if (!destination.RackId.HasValue() || destination.RackPosition == null)
-            {
-                return result;
-            }
-
-            var assetClass = _entityLoader.LoadAssetClass(asset.AssetClassId);
-            if (assetClass == null || assetClass.HeightU <= 0)
-            {
-                return result;
-            }
-
-            var rack = _entityLoader.LoadRack(destination.RackId);
-            if (rack == null)
-            {
-                result.AddFailReason(AssetValidationField.DestinationRackId, "Destination Rack not found.");
-                return result;
-            }
-
-            if (!RackPlacementValidation.ValidatePositionAndBounds(rack, (int)destination.RackPosition, (int)assetClass.HeightU, out var boundsResult))
-            {
-                result.AddFailReason(AssetValidationField.DestinationRackPosition, boundsResult.GetFailReason(RackValidationField.RackSpacePosition));
-            }
-
-            return result;
-        }
 
         private ValidationResult ValidateRackSpaceAvailability(Asset asset)
         {
