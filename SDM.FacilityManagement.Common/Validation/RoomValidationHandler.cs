@@ -14,6 +14,9 @@
             RoomId,
             Name,
             FloorId,
+            Width,
+            Depth,
+            Room,
         }
 
         /// <summary>
@@ -41,6 +44,34 @@
             }
 
             return result.IsValid;
+        }
+
+        /// <summary>
+        /// Validates that, when defined, the Room width is not negative.
+        /// </summary>
+        public static bool IsRoomWidthValid(Room entity, out ValidationResult result)
+        {
+            if (entity?.Width == null)
+            {
+                result = new ValidationResult();
+                return true;
+            }
+
+            return NumericValidators.ValidateNonNegative(entity.Width.Value, RoomValidationField.Width, out result);
+        }
+
+        /// <summary>
+        /// Validates that, when defined, the Room depth is not negative.
+        /// </summary>
+        public static bool IsRoomDepthValid(Room entity, out ValidationResult result)
+        {
+            if (entity?.Depth == null)
+            {
+                result = new ValidationResult();
+                return true;
+            }
+
+            return NumericValidators.ValidateNonNegative(entity.Depth.Value, RoomValidationField.Depth, out result);
         }
     }
 }

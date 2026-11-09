@@ -77,6 +77,7 @@ namespace SDM.AssetManagement.Tests.Connections
         [DataTestMethod]
         [DataRow(-0.01)]
         [DataRow(-100.0)]
+        [DataRow(-1.0)]
         public void IsCableLengthValid_WithNegativeLength_ShouldFail(double length)
         {
             var isValid = ConnectionValidationHandler.IsCableLengthValid(length, out var result);
@@ -88,6 +89,7 @@ namespace SDM.AssetManagement.Tests.Connections
         [DataTestMethod]
         [DataRow(0.0)]
         [DataRow(15.5)]
+        [DataRow(12.5)]
         public void IsCableLengthValid_WithNonNegativeLength_ShouldPass(double length)
         {
             var isValid = ConnectionValidationHandler.IsCableLengthValid(length, out var result);

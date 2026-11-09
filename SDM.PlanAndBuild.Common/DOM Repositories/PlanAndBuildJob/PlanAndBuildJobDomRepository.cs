@@ -90,6 +90,11 @@
         {
             if (job == null) throw new ArgumentNullException(nameof(job));
 
+            if (job.State == newState)
+            {
+                return job;
+            }
+
             if (!StateMachine.IsTransitionAllowed(job.State, newState))
             {
                 throw new InvalidOperationException($"State transition from {job.State} to {newState} is not allowed.");
@@ -102,6 +107,13 @@
         {
             if (job == null) throw new ArgumentNullException(nameof(job));
 
+            if (job.State == newState)
+            {
+                Validator?.ValidateAndThrow(job, Utils.InfraOps.SharedCommonLibrary.Validations.RepositoryAction.Update);
+
+                return Update(job);
+            }
+
             if (!StateMachine.IsTransitionAllowed(job.State, newState))
             {
                 throw new InvalidOperationException($"State transition from {job.State} to {newState} is not allowed.");
@@ -109,7 +121,7 @@
 
             // Validate before mutating anything, so an invalid job is rejected atomically: neither the field
             // update nor the transition is applied.
-            Validator?.ValidateAndThrow(job);
+            Validator?.ValidateAndThrow(job, Utils.InfraOps.SharedCommonLibrary.Validations.RepositoryAction.Update);
 
             var updated = Update(job);
 
@@ -125,6 +137,13 @@
         {
             if (job == null) throw new ArgumentNullException(nameof(job));
 
+            if (job.State == newState)
+            {
+                Validator?.ValidateAndThrow(job, Utils.InfraOps.SharedCommonLibrary.Validations.RepositoryAction.Update);
+
+                return Update(job);
+            }
+
             if (!StateMachine.IsTransitionAllowed(job.State, newState))
             {
                 throw new InvalidOperationException($"State transition from {job.State} to {newState} is not allowed.");
@@ -132,7 +151,7 @@
 
             // Validate before mutating anything, so an invalid job is rejected atomically: the transition is
             // never executed if the pending field values wouldn't pass validation.
-            Validator?.ValidateAndThrow(job);
+            Validator?.ValidateAndThrow(job, Utils.InfraOps.SharedCommonLibrary.Validations.RepositoryAction.Update);
 
             var transitioned = ExecuteStateTransition(job, newState);
 

@@ -72,7 +72,7 @@
 			unchecked
 			{
 				int hash = (2 << 12) - 1;
-				hash = (hash * 23) + (MACAddress != null ? MACAddress.GetHashCode() : 0);
+				hash = (hash * 23) + (MACAddress != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(MACAddress) : 0);
 				return hash;
 			}
 		}

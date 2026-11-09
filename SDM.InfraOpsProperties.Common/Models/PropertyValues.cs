@@ -222,8 +222,8 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Models
             {
                 int hash = 17;
                 hash = (hash * 23) + LinkedObjectID.GetHashCode();
-                hash = (hash * 23) + (Scope != null ? Scope.GetHashCode() : 0);
-                hash = (hash * 23) + (SubID != null ? SubID.GetHashCode() : 0);
+                hash = (hash * 23) + (Scope != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(Scope) : 0);
+                hash = (hash * 23) + (SubID != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(SubID) : 0);
                 return hash;
             }
         }

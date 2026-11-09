@@ -411,6 +411,24 @@ namespace Skyline.DataMiner.SDM.Common.Services
         }
 
         /// <summary>
+        /// Retrieves all Assets whose network MAC Address matches any of the provided MAC addresses.
+        /// Uses <see cref="Tools.RetrieveBigOrFilter"/> to safely handle large sets without
+        /// creating an oversized OR filter in a single call.
+        /// </summary>
+        public List<Asset> GetAssetsByMacAddresses(List<string> macAddresses)
+        {
+            if (assetManagerApiHelper?.Assets == null || macAddresses == null || !macAddresses.Any())
+            {
+                return new List<Asset>();
+            }
+
+            return Tools.RetrieveBigOrFilter(
+                macAddresses,
+                mac => AssetExposers.NetworkDetails.MACAddress.Equal(mac),
+                filter => assetManagerApiHelper.Assets.Read(filter).ToList());
+        }
+
+        /// <summary>
         /// Retrieves all Assets whose SerialNumber matches any of the provided serial numbers,
         /// scoped to the given AssetClass.
         /// Uses <see cref="Tools.RetrieveBigOrFilter"/> to safely handle large sets without
@@ -766,6 +784,24 @@ namespace Skyline.DataMiner.SDM.Common.Services
                 names,
                 name => CableTypeExposers.Name.Equal(name),
                 filter => assetManagerApiHelper.CableTypes.Read(filter).ToList());
+        }
+
+        /// <summary>
+        /// Retrieves all port types whose name matches one of <paramref name="names"/>.
+        /// Uses <see cref="Tools.RetrieveBigOrFilter"/> to safely handle large sets without
+        /// creating an oversized OR filter in a single call.
+        /// </summary>
+        public List<PortType> GetPortTypesByNames(List<string> names)
+        {
+            if (assetManagerApiHelper?.PortTypes == null || names == null || !names.Any())
+            {
+                return new List<PortType>();
+            }
+
+            return Tools.RetrieveBigOrFilter(
+                names,
+                name => PortTypeExposers.Name.Equal(name),
+                filter => assetManagerApiHelper.PortTypes.Read(filter).ToList());
         }
 
         public List<AssetManagement.Models.Connection> GetConnectionsByCableTypeIds(List<string> cableTypeIds)

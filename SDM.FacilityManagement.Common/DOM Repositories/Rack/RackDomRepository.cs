@@ -24,6 +24,11 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
         {
             if (rack == null) throw new ArgumentNullException(nameof(rack));
 
+            if (rack.State == newState)
+            {
+                return rack;
+            }
+
             if (!RackStateMachine.IsTransitionAllowed(rack.State, newState))
             {
                 throw new InvalidOperationException($"State transition from {rack.State} to {newState} is not allowed.");
@@ -35,6 +40,11 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
         public Rack UpdateAndTransitionTo(Rack rack, SlcFacility_Management.Behaviors.Rack_Behaviour.StatusesEnum newState)
         {
             if (rack == null) throw new ArgumentNullException(nameof(rack));
+
+            if (rack.State == newState)
+            {
+                return Update(rack);
+            }
 
             if (!RackStateMachine.IsTransitionAllowed(rack.State, newState))
             {
@@ -49,6 +59,11 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
         public Rack TransitionAndUpdate(Rack rack, SlcFacility_Management.Behaviors.Rack_Behaviour.StatusesEnum newState)
         {
             if (rack == null) throw new ArgumentNullException(nameof(rack));
+
+            if (rack.State == newState)
+            {
+                return Update(rack);
+            }
 
             if (!RackStateMachine.IsTransitionAllowed(rack.State, newState))
             {

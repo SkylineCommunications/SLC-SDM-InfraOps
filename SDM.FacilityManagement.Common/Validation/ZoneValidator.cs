@@ -21,53 +21,49 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
             _entityLoader = entityLoader ?? throw new ArgumentNullException(nameof(entityLoader));
         }
 
-        /// <summary>
-        /// Validates a single Zone.
-        /// <para><b>Not suitable for bulk scenarios</b>: issues one DB query per item. Use <see cref="ValidateBulk"/> instead.</para>
-        /// </summary>
-        protected override ValidationResult Validate(Zone entity)
+        protected override ValidationResult CreateNullEntityResult()
         {
             var result = new ValidationResult();
-
-            if (entity.ShouldValidate(entity.ZoneIdField))
-            {
-                if (!ZoneValidationHandler.IsZoneIdValid(entity, out var idResult))
-                {
-                    result.AddFailuresFrom(idResult);
-                    return result;
-                }
-
-                if (!ZoneValidationHandler.IsZoneNameValid(entity, out var nameResult))
-                {
-                    result.AddFailuresFrom(nameResult);
-                    return result;
-                }
-
-                if (IsIdInUse(entity.ZoneId, entity.Identifier))
-                {
-                    result.AddFailReason(ZoneValidationHandler.ZoneValidationField.ZoneId,
-                        $"Zone Id '{entity.ZoneId}' is already in use.");
-                }
-            }
-
-            if (!ZoneValidationHandler.IsCoolingCapacityValid(entity, out var capacityResult))
-            {
-                result.AddFrom(capacityResult);
-            }
-
-            result.AddFailuresFrom(ValidateReferencesAgainstDatabase(new List<Zone> { entity })[0]);
-
+            result.AddFailReason(ZoneValidationHandler.ZoneValidationField.Zone, "Zone cannot be null.");
             return result;
         }
 
-        protected override ValidationResult ValidateForDelete(Zone zone)
+        protected override List<ValidationResult> ValidateBulkNoDatabaseBusinessRules(List<Zone> entities)
         {
-            if (zone == null)
+            var results = entities.Select(_ => new ValidationResult()).ToList();
+
+            for (int idx = 0; idx < entities.Count; idx++)
             {
-                throw new ArgumentNullException(nameof(zone));
+                if (entities[idx].ShouldValidate(entities[idx].ZoneIdField) && !ZoneValidationHandler.IsZoneIdValid(entities[idx], out var idResult))
+                {
+                    results[idx].AddFailuresFrom(idResult);
+                }
+
+                if (entities[idx].ShouldValidate(entities[idx].NameField) && !ZoneValidationHandler.IsZoneNameValid(entities[idx], out var nameResult))
+                {
+                    results[idx].AddFailuresFrom(nameResult);
+                }
+
+                if (entities[idx].ShouldValidate(entities[idx].ZoneCapacity) && !ZoneValidationHandler.IsCoolingCapacityValid(entities[idx], out var capacityResult))
+                {
+                    results[idx].AddFrom(capacityResult);
+                }
             }
 
-            return ValidateNoRacksAssigned(new List<Zone> { zone })[0];
+            return results;
+        }
+
+        protected override List<ValidationResult> ValidateBulkNoDatabaseBatchConflicts(List<Zone> entities)
+        {
+            return ValidateIdDuplicatesInBatch(entities);
+        }
+
+        protected override List<ValidationResult> ValidateBulkWithDatabase(List<Zone> entities)
+        {
+            var results = ValidateBulkIdsAgainstDatabase(entities);
+            results.MergeFrom(ValidateReferencesAgainstDatabase(entities));
+
+            return results;
         }
 
         protected override List<ValidationResult> ValidateBulkForDelete(List<Zone> zones)
@@ -82,7 +78,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
 
         /// <summary>
         /// Validates id uniqueness for real-time UI validation.
-        /// <para><b>Not suitable for bulk scenarios</b>: issues one DB query per call. Use <see cref="ValidateBulk"/> instead.</para>
+        /// <para><b>Not suitable for bulk scenarios</b>: issues one DB query per call. Use <see cref="ValidatorBase{T}.ValidateBulk(List{T}, RepositoryAction)"/> instead.</para>
         /// </summary>
         public ValidationResult IsZoneIdValid(string id, string exceptIdentifier = null)
         {
@@ -102,39 +98,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
             }
 
             return result;
-        }
-
-        /// <summary>
-        /// Validates a batch of Zone entities in three phases:
-        /// 1. Non-database checks per item (id not empty, cooling capacity).
-        /// 2. In-memory batch conflict detection (id uniqueness within batch).
-        /// 3. Database uniqueness check (id uniqueness vs DB).
-        /// Results are returned in the same order as the input list.
-        /// </summary>
-        protected override List<ValidationResult> ValidateBulk(List<Zone> entities)
-        {
-            if (entities == null || !entities.Any())
-            {
-                return new List<ValidationResult>();
-            }
-
-            var results = FacilityBulkValidationHelper.RunBulkValidation(
-                entities,
-                ZoneValidationHandler.IsZoneIdValid,
-                ZoneValidationHandler.IsZoneNameValid,
-                ValidateIdDuplicatesInBatch,
-                ValidateBulkIdsAgainstDatabase,
-                ValidateReferencesAgainstDatabase);
-
-            for (int i = 0; i < entities.Count; i++)
-            {
-                if (!ZoneValidationHandler.IsCoolingCapacityValid(entities[i], out var capacityResult))
-                {
-                    results[i].AddFrom(capacityResult);
-                }
-            }
-
-            return results;
         }
 
         private bool IsIdInUse(string id, string exceptIdentifier = null)

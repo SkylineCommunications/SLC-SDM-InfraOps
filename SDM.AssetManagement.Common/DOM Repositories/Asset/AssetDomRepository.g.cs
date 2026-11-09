@@ -583,7 +583,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     obj.HardwareVersion = _hardwareversion.Value;
                 }
 
-                var _operationalflags = _assetpropertiesSection.GetListValue<long>(AssetManagement.Models.AssetDomMapper.AssetProperties.OperationalFlags);
+                var _operationalflags = _assetpropertiesSection.GetListValue<int>(AssetManagement.Models.AssetDomMapper.AssetProperties.OperationalFlags);
                 if (_operationalflags != null)
                 {
                     obj.OperationalFlags = _operationalflags.Values.Select(flag => (SlcAsset_Management.Enums.Operationalflagsenum)flag).ToList();
@@ -986,7 +986,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
             if (obj.OperationalFlags.IsNotNullOrEmpty())
             {
-                _assetproperties.AddOrUpdateValue<List<long>>(AssetManagement.Models.AssetDomMapper.AssetProperties.OperationalFlags, obj.OperationalFlags.Select(flag => (long)flag).ToList());
+                _assetproperties.AddOrUpdateListValue<int>(AssetManagement.Models.AssetDomMapper.AssetProperties.OperationalFlags, obj.OperationalFlags.Select(flag => (int)flag).ToList());
             }
 
             instance.Sections.Add(_assetproperties);
@@ -1243,15 +1243,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     _holdersSection.ID = new SectionID(_holdersSectionId.Value);
                 }
 
-                if (holders.SlotNumber != default)
-                {
-                    _holdersSection.AddOrUpdateValue<long>(AssetManagement.Models.AssetDomMapper.Holders.SlotNumber, (long)holders.SlotNumber);
-                }
-
-                if (holders.HierarchyRole != default)
-                {
-                    _holdersSection.AddOrUpdateValue<string>(AssetManagement.Models.AssetDomMapper.Holders.HierarchyRole, SharedMappers.DomIds.SlcAsset_Management.Enums.Hierarchyrole.ToValue(holders.HierarchyRole));
-                }
+                _holdersSection.AddOrUpdateValue<long>(AssetManagement.Models.AssetDomMapper.Holders.SlotNumber, (long)holders.SlotNumber);
+                _holdersSection.AddOrUpdateValue<string>(AssetManagement.Models.AssetDomMapper.Holders.HierarchyRole, SharedMappers.DomIds.SlcAsset_Management.Enums.Hierarchyrole.ToValue(holders.HierarchyRole));
 
                 if (holders.Label != default)
                 {
@@ -1276,10 +1269,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     _elementlinksSection.AddOrUpdateValue<string>(AssetManagement.Models.AssetDomMapper.ElementLinks.ElementID, Convert.ToString(elementlinks.ElementID));
                 }
 
-                if (elementlinks.IsPrimary != default)
-                {
-                    _elementlinksSection.AddOrUpdateValue<bool>(AssetManagement.Models.AssetDomMapper.ElementLinks.IsPrimary, (bool)elementlinks.IsPrimary);
-                }
+                _elementlinksSection.AddOrUpdateValue<bool>(AssetManagement.Models.AssetDomMapper.ElementLinks.IsPrimary, (bool)elementlinks.IsPrimary);
 
                 instance.Sections.Add(_elementlinksSection);
             }
@@ -1358,8 +1348,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 case "OperationalFlags" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
 					return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.AssetDomMapper.AssetProperties.OperationalFlags.Id.ToString()).Equal(comparer == Comparer.NotEquals);
 				case "OperationalFlags":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetDomMapper.AssetProperties.OperationalFlags), comparer, (long)(SlcAsset_Management.Enums.Operationalflagsenum)value);
-
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetDomMapper.AssetProperties.OperationalFlags), comparer, (int)(SlcAsset_Management.Enums.Operationalflagsenum)value);
+				
                 case "NetworkDetails.MacAddress":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetDomMapper.NetworkDetails.MACAddress), comparer, (string)value);
 

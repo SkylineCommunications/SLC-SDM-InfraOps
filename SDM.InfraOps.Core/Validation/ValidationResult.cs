@@ -260,7 +260,7 @@
         /// <summary>
         /// Converts validation failures to a ValidationException.
         /// </summary>
-        public Exception ToException()
+        public ValidationException ToException()
         {
             var exceptionMessage = GetCombinedFailureReasons(Environment.NewLine);
             return new ValidationException(exceptionMessage);

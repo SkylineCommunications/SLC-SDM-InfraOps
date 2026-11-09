@@ -1,7 +1,6 @@
 namespace Skyline.DataMiner.SDM.AssetManagement.Extensions
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
 
     using Skyline.DataMiner.SDM.AssetManagement.Models;
@@ -86,63 +85,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Extensions
         }
 
         /// <summary>
-        /// Replaces <see cref="AssetClass.Attachments"/> with <paramref name="attachments"/>.
-        /// </summary>
-        public static void SetAttachments(this AssetClass assetClass, List<Attachment> attachments)
-        {
-            if (assetClass == null)
-            {
-                throw new ArgumentNullException(nameof(assetClass));
-            }
-
-            assetClass.Attachments = attachments ?? new List<Attachment>();
-        }
-
-        /// <summary>
-        /// Clears all entries from <see cref="AssetClass.Attachments"/>.
-        /// </summary>
-        public static void ClearAttachments(this AssetClass assetClass)
-        {
-            if (assetClass == null)
-            {
-                throw new ArgumentNullException(nameof(assetClass));
-            }
-
-            if (assetClass.Attachments.Count == 0)
-            {
-                return;
-            }
-
-            assetClass.Attachments = new List<Attachment>();
-        }
-
-        /// <summary>
-        /// Sets <see cref="AssetClass.FrontImage"/> to <paramref name="imagePath"/>, first adding it to
-        /// <see cref="AssetClass.Attachments"/> when it is not already present. This guarantees the
-        /// image satisfies the "Front Image must be part of the Attachments" validation rule.
-        /// </summary>
-        /// <exception cref="ArgumentNullException"><paramref name="assetClass"/> is <c>null</c>.</exception>
-        /// <exception cref="ArgumentException"><paramref name="imagePath"/> is <c>null</c> or whitespace.</exception>
-        public static void AddFrontImageAndAttachment(this AssetClass assetClass, string imagePath)
-        {
-            EnsureImageAttachment(assetClass, imagePath);
-            assetClass.FrontImage = imagePath;
-        }
-
-        /// <summary>
-        /// Sets <see cref="AssetClass.BackImage"/> to <paramref name="imagePath"/>, first adding it to
-        /// <see cref="AssetClass.Attachments"/> when it is not already present. This guarantees the
-        /// image satisfies the "Back Image must be part of the Attachments" validation rule.
-        /// </summary>
-        /// <exception cref="ArgumentNullException"><paramref name="assetClass"/> is <c>null</c>.</exception>
-        /// <exception cref="ArgumentException"><paramref name="imagePath"/> is <c>null</c> or whitespace.</exception>
-        public static void AddBackImageAndAttachment(this AssetClass assetClass, string imagePath)
-        {
-            EnsureImageAttachment(assetClass, imagePath);
-            assetClass.BackImage = imagePath;
-        }
-
-        /// <summary>
         /// Removes <paramref name="attachment"/> from <see cref="AssetClass.Attachments"/>, first clearing
         /// <see cref="AssetClass.FrontImage"/> and/or <see cref="AssetClass.BackImage"/> if they reference it.
         /// This is the safe counterpart to <see cref="RemoveItemFromAttachments(AssetClass, Attachment)"/>,
@@ -176,24 +118,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Extensions
             }
 
             assetClass.RemoveItemFromAttachments(attachment);
-        }
-
-        private static void EnsureImageAttachment(AssetClass assetClass, string imagePath)
-        {
-            if (assetClass == null)
-            {
-                throw new ArgumentNullException(nameof(assetClass));
-            }
-
-            if (string.IsNullOrWhiteSpace(imagePath))
-            {
-                throw new ArgumentException("Image path must be provided.", nameof(imagePath));
-            }
-
-            if (!assetClass.Attachments.Any(a => a?.FilePath == imagePath))
-            {
-                assetClass.AddAttachment(new Attachment { FilePath = imagePath });
-            }
         }
     }
 }

@@ -1,6 +1,9 @@
 ﻿namespace Skyline.DataMiner.SDM.AssetManagement.Common.Validation
 {
+    using System.Collections.Generic;
+
     using Skyline.DataMiner.SDM.AssetManagement.Models;
+    using Skyline.DataMiner.SDM.AssetManagement.Validation;
     using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
@@ -18,7 +21,46 @@
             PortType,
             Asset,
             OutputType,
+            ConnectionConflict,
         }
+
+        #region Connection Validation
+
+        /// <summary>
+        /// Validates that a changed output type does not invalidate the existing connections of the port
+        /// (source ports cannot be Input-only, destination ports cannot be Output-only).
+        /// Failures use <see cref="PowerPortValidationField.ConnectionConflict"/> so callers can tell them
+        /// apart from invalid input and, for example, offer to delete the connections first.
+        /// </summary>
+        public static bool IsOutputTypeCompatibleWithConnections(PowerPort powerPort, IEnumerable<Connection> connections, out ValidationResult result)
+        {
+            result = new ValidationResult();
+
+            if (powerPort == null || powerPort.IsNew || powerPort.PowerPortInfo.OutputTypeField.Changed != true)
+            {
+                return true;
+            }
+
+            connections.CountDirectionConflicts(powerPort.Identifier, powerPort.PowerPortInfo.OutputType, out var asSource, out var asDestination);
+
+            if (asSource > 0)
+            {
+                result.AddFailReason(
+                    PowerPortValidationField.ConnectionConflict,
+                    $"The port is the source of {asSource} connection(s) and cannot be set to Input. Delete the connections first.");
+            }
+
+            if (asDestination > 0)
+            {
+                result.AddFailReason(
+                    PowerPortValidationField.ConnectionConflict,
+                    $"The port is the destination of {asDestination} connection(s) and cannot be set to Output. Delete the connections first.");
+            }
+
+            return result.IsValid;
+        }
+
+        #endregion
 
         #region Info Validation
 

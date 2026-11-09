@@ -13,6 +13,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
     // [GenerateExposers]
     //[SdmDomStorage("(slc)facility_management")]
+    [PropertyScope("Site")]
     public sealed class Site : SdmObjectBase<Site>, IEquatable<Site>, IEntityTracking, IReadOnlyModuleIdReferencer
 	{
         [JsonIgnore]
@@ -246,11 +247,11 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             unchecked
             {
                 int hash = 17;
-                hash = (hash * 23) + (Name != null ? Name.GetHashCode() : 0);
-                hash = (hash * 23) + (Description != null ? Description.GetHashCode() : 0);
-                hash = (hash * 23) + (Address != null ? Address.GetHashCode() : 0);
-                hash = (hash * 23) + (City != null ? City.GetHashCode() : 0);
-                hash = (hash * 23) + (SiteId != null ? SiteId.GetHashCode() : 0);
+                hash = (hash * 23) + (Name != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(Name) : 0);
+                hash = (hash * 23) + (Description != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(Description) : 0);
+                hash = (hash * 23) + (Address != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(Address) : 0);
+                hash = (hash * 23) + (City != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(City) : 0);
+                hash = (hash * 23) + (SiteId != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(SiteId) : 0);
                 hash = (hash * 23) + State.GetHashCode();
                 return hash;
             }

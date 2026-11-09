@@ -3,7 +3,6 @@ using Skyline.DataMiner.Net;
 using Skyline.DataMiner.SDM;
 using Skyline.DataMiner.SDM.AssetManagement.Common.Middleware;
 using Skyline.DataMiner.SDM.AssetManagement.Common.Validation.Reservations;
-using Skyline.DataMiner.SDM.AssetManagement.Deletion;
 using Skyline.DataMiner.SDM.AssetManagement.Helpers;
 using Skyline.DataMiner.SDM.AssetManagement.Models;
 using Skyline.DataMiner.SDM.AssetManagement.Validation;

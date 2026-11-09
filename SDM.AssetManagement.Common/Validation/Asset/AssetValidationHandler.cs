@@ -511,6 +511,30 @@
         }
 
         /// <summary>
+        /// Validates that an Installation User is set while the asset is in a state that requires it (Installed, In Service).
+        /// </summary>
+        public static bool IsInstallationUserSetForState(Asset asset, out ValidationResult result)
+        {
+            result = new ValidationResult();
+
+            if (asset == null)
+            {
+                result.AddFailReason(AssetValidationField.Asset, "Asset cannot be null.");
+                return result.IsValid;
+            }
+
+            var requiresInstallationUser = asset.State == SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Installed
+                || asset.State == SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InService;
+
+            if (requiresInstallationUser && asset.InstallationUserId == Guid.Empty)
+            {
+                ReferenceValidationHelper.AddRequiredReference(result, AssetValidationField.InstallationUserId, "Installation User");
+            }
+
+            return result.IsValid;
+        }
+
+        /// <summary>
         /// Validates if installation information can be edited based on asset state.
         /// </summary>
         public static bool IsInstallationInformationChangeAllowed(Asset asset, out ValidationResult result)
@@ -839,23 +863,6 @@
         /// </summary>
         public static ValidationResult ValidateDestinationLocation(Asset asset)
         {
-            if (asset == null)
-            {
-                var nullResult = new ValidationResult();
-                nullResult.AddFailReason(AssetValidationField.Asset, "Asset cannot be null.");
-                return nullResult;
-            }
-
-            return ValidateDestinationLocation(asset, asset.State);
-        }
-
-        /// <summary>
-        /// Validates Destination Location against an explicitly supplied state.
-        /// </summary>
-        public static ValidationResult ValidateDestinationLocation(
-            Asset asset,
-            SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum stateToEvaluate)
-        {
             var result = new ValidationResult();
 
             if (asset == null)
@@ -867,7 +874,7 @@
             var hasDestinationLocation = HasDestinationLocation(asset);
 
             // Check if in "In Transit" state
-            bool isInTransit = stateToEvaluate == SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit;
+            bool isInTransit = asset.State == SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit;
 
             if (isInTransit)
             {
@@ -884,7 +891,7 @@
                 if (hasDestinationLocation)
                 {
                     result.AddWarning(AssetValidationField.DestinationLocation,
-                        $"Destination Location is only applicable when Asset is in 'In Transit' state. Current state: '{stateToEvaluate}'. The Destination Location will be ignored.");
+                        $"Destination Location is only applicable when Asset is in 'In Transit' state. Current state: '{asset.State}'. The Destination Location will be ignored.");
                 }
             }
 

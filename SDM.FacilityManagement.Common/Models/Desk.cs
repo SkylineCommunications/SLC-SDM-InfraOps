@@ -13,6 +13,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)facility_management")]
+    [PropertyScope("Desk")]
     public sealed class Desk : SdmObjectBase<Desk>, IEquatable<Desk>, IEntityTracking, IReadOnlyModuleIdReferencer
 	{
         [JsonIgnore]
@@ -136,8 +137,8 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     OldValue = kvp.Value.prevVal,
                     NewValue = kvp.Value.newVal,
                 })
-                .Concat(_roomFk?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>())
-                .Concat(_resource?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>());
+                .Concat(_roomFk.GetSectionChanges("RoomFk"))
+                .Concat(_resource.GetSectionChanges("Resource"));
         }
 
         public void ResetChangeTracking()
@@ -201,10 +202,10 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             unchecked
             {
                 int hash = 17;
-                hash = (hash * 23) + (Name != null ? Name.GetHashCode() : 0);
-                hash = (hash * 23) + (Plan != null ? Plan.GetHashCode() : 0);
-                hash = (hash * 23) + (Description != null ? Description.GetHashCode() : 0);
-                hash = (hash * 23) + (DeskID != null ? DeskID.GetHashCode() : 0);
+                hash = (hash * 23) + (Name != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(Name) : 0);
+                hash = (hash * 23) + (Plan != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(Plan) : 0);
+                hash = (hash * 23) + (Description != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(Description) : 0);
+                hash = (hash * 23) + (DeskID != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(DeskID) : 0);
                 hash = (hash * 23) + (RoomFk != null ? RoomFk.GetHashCode() : 0);
                 hash = (hash * 23) + State.GetHashCode();
                 return hash;

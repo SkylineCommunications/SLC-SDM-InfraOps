@@ -13,6 +13,7 @@
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)plan_and_build")]
+    [PropertyScope("PlanAndBuildAppSettings")]
     public sealed class PlanAndBuildAppSettings : SdmObjectBase<PlanAndBuildAppSettings>, IEquatable<PlanAndBuildAppSettings>, IEntityTracking, IReadOnlyModuleIdReferencer
 	{
         [JsonIgnore]
@@ -201,13 +202,24 @@
             unchecked
             {
                 int hash = 17;
-                hash = (hash * 23) + (JobIDPrefix != null ? JobIDPrefix.GetHashCode() : 0);
+                hash = (hash * 23) + (JobIDPrefix != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(JobIDPrefix) : 0);
                 hash = (hash * 23) + JobIDNextSequence.GetHashCode();
                 hash = (hash * 23) + JobIDIncrement.GetHashCode();
                 hash = (hash * 23) + JobIDStartingSeed.GetHashCode();
                 hash = (hash * 23) + JobIDMinimumDigits.GetHashCode();
                 return hash;
             }
+        }
+
+        public static PlanAndBuildAppSettings Default()
+        {
+            return new PlanAndBuildAppSettings
+            {
+                JobIDPrefix = "PB-",
+                JobIDIncrement = 3,
+                JobIDStartingSeed = 7,
+                JobIDMinimumDigits = 4,
+            };
         }
     }
 }

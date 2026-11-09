@@ -17,6 +17,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             PortNumber == default &&
             OutputType == default &&
             PortExposure == default &&
+            !PortExposureField.IsSet &&
             !PortType.HasValue() &&
             Label == default;
 
@@ -87,7 +88,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         [JsonIgnore]
         [SdmIgnore]
         internal IChangeTrackingField<SdmObjectReference<PortType>> PortTypeField => FieldHandler.GetOrCreateField(
-            nameof(Type),
+            nameof(PortType),
             () => new ChangeTrackingField<SdmObjectReference<PortType>>(default, reference => reference.Identifier));
 
         [JsonIgnore]
@@ -146,12 +147,12 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			unchecked
 			{
 				int hash = (3 << 12) - 1;
-				hash = (hash * 23) + (Name?.GetHashCode() ?? 0);
+				hash = (hash * 23) + (Name != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(Name) : 0);
 				hash = (hash * 23) + (PortNumber?.GetHashCode() ?? 0);
 				hash = (hash * 23) + (OutputType?.GetHashCode() ?? 0);
 				hash = (hash * 23) + (PortExposure.GetHashCode());
 				hash = (hash * 23) + (PortType.Identifier?.GetHashCode() ?? 0);
-				hash = (hash * 23) + (Label?.GetHashCode() ?? 0);
+				hash = (hash * 23) + (Label != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(Label) : 0);
 				return hash;
 			}
 		}

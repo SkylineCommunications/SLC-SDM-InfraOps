@@ -3,8 +3,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
     using System;
     using System.Collections.Generic;
     using System.Linq;
-
-    using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
     using Skyline.DataMiner.SDM.FacilityManagement.Services;
     using Skyline.DataMiner.SDM.InfraOps.Common.Validation;
@@ -23,48 +21,43 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
             _entityLoader = entityLoader ?? throw new ArgumentNullException(nameof(entityLoader));
         }
 
-        /// <summary>
-        /// Validates a single Floor.
-        /// <para><b>Not suitable for bulk scenarios</b>: issues one DB query per item. Use <see cref="ValidateBulk"/> instead.</para>
-        /// </summary>
-        protected override ValidationResult Validate(Floor entity)
+        protected override ValidationResult CreateNullEntityResult()
         {
             var result = new ValidationResult();
-
-            if (entity.ShouldValidate(entity.FloorIdField))
-            {
-                if (!FloorValidationHandler.IsFloorIdValid(entity, out var idResult))
-                {
-                    result.AddFailuresFrom(idResult);
-                    return result;
-                }
-
-                if(!FloorValidationHandler.IsFloorNameValid(entity, out var nameResult))
-                {
-                    result.AddFailuresFrom(nameResult);
-                    return result;
-                }
-
-                if (IsIdInUse(entity.FloorId, entity.Identifier))
-                {
-                    result.AddFailReason(FloorValidationHandler.FloorValidationField.FloorId,
-                        $"Floor Id '{entity.FloorId}' is already in use.");
-                }
-            }
-
-            result.AddFailuresFrom(ValidateReferencesAgainstDatabase(new List<Floor> { entity })[0]);
-
+            result.AddFailReason(FloorValidationHandler.FloorValidationField.Floor, "Floor cannot be null.");
             return result;
         }
 
-        protected override ValidationResult ValidateForDelete(Floor floor)
+        protected override List<ValidationResult> ValidateBulkNoDatabaseBusinessRules(List<Floor> entities)
         {
-            if (floor == null)
+            var results = entities.Select(_ => new ValidationResult()).ToList();
+
+            for (int i = 0; i < entities.Count; i++)
             {
-                throw new ArgumentNullException(nameof(floor));
+                if (entities[i].ShouldValidate(entities[i].FloorIdField) && !FloorValidationHandler.IsFloorIdValid(entities[i], out var idResult))
+                {
+                    results[i].AddFailuresFrom(idResult);
+                }
+
+                if (entities[i].ShouldValidate(entities[i].NameField) && !FloorValidationHandler.IsFloorNameValid(entities[i], out var nameResult))
+                {
+                    results[i].AddFailuresFrom(nameResult);
+                }
             }
 
-            return ValidateNoRoomsAssigned(new List<Floor> { floor })[0];
+            return results;
+        }
+
+        protected override List<ValidationResult> ValidateBulkNoDatabaseBatchConflicts(List<Floor> entities)
+        {
+            return ValidateIdDuplicatesInBatch(entities);
+        }
+
+        protected override List<ValidationResult> ValidateBulkWithDatabase(List<Floor> entities)
+        {
+            var results = ValidateBulkIdsAgainstDatabase(entities);
+            results.MergeFrom(ValidateReferencesAgainstDatabase(entities));
+            return results;
         }
 
         protected override List<ValidationResult> ValidateBulkForDelete(List<Floor> floors)
@@ -79,7 +72,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
 
         /// <summary>
         /// Validates id uniqueness for real-time UI validation.
-        /// <para><b>Not suitable for bulk scenarios</b>: issues one DB query per call. Use <see cref="ValidateBulk"/> instead.</para>
+        /// <para><b>Not suitable for bulk scenarios</b>: issues one DB query per call. Use <see cref="ValidatorBase{T}.ValidateBulk(List{T}, RepositoryAction)"/> instead.</para>
         /// </summary>
         public ValidationResult IsFloorIdValid(string id, string exceptIdentifier = null)
         {
@@ -99,23 +92,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
             }
 
             return result;
-        }
-
-        /// <summary>
-        /// Validates a batch of Floor entities in three phases:
-        /// 1. Non-database checks per item (id not empty).
-        /// 2. In-memory batch conflict detection (id uniqueness within batch).
-        /// 3. Database uniqueness check (id uniqueness vs DB).
-        /// Results are returned in the same order as the input list.
-        /// </summary>
-        protected override List<ValidationResult> ValidateBulk(List<Floor> entities)
-        {
-            return FacilityBulkValidationHelper.RunBulkValidation(
-                entities,
-                FloorValidationHandler.IsFloorIdValid,
-                ValidateIdDuplicatesInBatch,
-                ValidateBulkIdsAgainstDatabase,
-                ValidateReferencesAgainstDatabase);
         }
 
         private bool IsIdInUse(string id, string exceptIdentifier = null)
@@ -192,6 +168,15 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
         private List<ValidationResult> ValidateReferencesAgainstDatabase(List<Floor> entities)
         {
             var results = entities.Select(_ => new ValidationResult()).ToList();
+            for (int i = 0; i < entities.Count; i++)
+            {
+                if (ReferenceValidationHelper.ShouldValidateReferences(entities[i]) &&
+                    (entities[i].FacilityFk.IsEmpty || !ReferenceValidationHelper.HasId(ReferenceValidationHelper.GetId(entities[i].FacilityFk.Facility))))
+                {
+                    ReferenceValidationHelper.AddRequiredReference(results[i], FloorValidationHandler.FloorValidationField.FacilityId, "Facility");
+                }
+            }
+
             var candidates = entities
                 .Select((entity, index) => new
                 {

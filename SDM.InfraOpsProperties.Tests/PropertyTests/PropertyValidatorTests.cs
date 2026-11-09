@@ -53,10 +53,45 @@ using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 		}
 
 		[TestMethod]
-		public void Validate_WithNullProperty_ShouldThrowArgumentNullException()
+		public void Validate_WithNullProperty_ShouldReturnNullFailure()
 		{
-			_validator.Invoking(v => v.Validate(null!, RepositoryAction.Create))
-				.Should().Throw<ArgumentNullException>();
+			var result = _validator.Validate(null!, RepositoryAction.Create);
+
+			using (new AssertionScope())
+			{
+				result.IsValid.Should().BeFalse();
+				result.GetFailReason(PropertyValidationHandler.PropertyValidationField.Property).Should().Be("Property cannot be null.");
+			}
+		}
+
+		[TestMethod]
+		public void ValidateAndThrow_WithNullProperty_ShouldThrowValidationException()
+		{
+			_validator.Invoking(v => v.ValidateAndThrow(null!, RepositoryAction.Create))
+				.Should().Throw<Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Exceptions.ValidationException>()
+				.WithMessage("*Property cannot be null.*");
+		}
+
+		[TestMethod]
+		public void ValidateBulk_WithValidAndNullProperty_ShouldReturnResultsInOrder()
+		{
+			var property = new Property
+			{
+				Name = "Serial Number",
+				Scope = "Asset",
+				PropertyType = InfraopsProperties.Enums.PropertyTypeEnum.String,
+				StringSizeLimit = 64,
+			};
+
+			var results = _validator.ValidateBulk(new List<Property> { property, null! }, RepositoryAction.Create);
+
+			using (new AssertionScope())
+			{
+				results.Should().HaveCount(2);
+				results[0].IsValid.Should().BeTrue(results[0].GetCombinedFailureReasons(";"));
+				results[1].IsValid.Should().BeFalse();
+				results[1].GetFailReason(PropertyValidationHandler.PropertyValidationField.Property).Should().Be("Property cannot be null.");
+			}
 		}
 
 		#endregion

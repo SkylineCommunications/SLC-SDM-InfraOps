@@ -14,6 +14,9 @@
             FacilityId,
             Name,
             SiteId,
+            Latitude,
+            Longitude,
+            Facility,
         }
 
         /// <summary>
@@ -41,6 +44,34 @@
             }
 
             return result.IsValid;
+        }
+
+        /// <summary>
+        /// Validates that, when defined, the Facility latitude is between -90 and 90.
+        /// </summary>
+        public static bool IsFacilityLatitudeValid(Facility entity, out ValidationResult result)
+        {
+            if (entity?.Latitude == null)
+            {
+                result = new ValidationResult();
+                return true;
+            }
+
+            return NumericValidators.ValidateRange(entity.Latitude.Value, -90d, 90d, FacilityValidationField.Latitude, out result);
+        }
+
+        /// <summary>
+        /// Validates that, when defined, the Facility longitude is between -180 and 180.
+        /// </summary>
+        public static bool IsFacilityLongitudeValid(Facility entity, out ValidationResult result)
+        {
+            if (entity?.Longitude == null)
+            {
+                result = new ValidationResult();
+                return true;
+            }
+
+            return NumericValidators.ValidateRange(entity.Longitude.Value, -180d, 180d, FacilityValidationField.Longitude, out result);
         }
     }
 }

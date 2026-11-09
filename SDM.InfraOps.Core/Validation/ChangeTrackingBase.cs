@@ -84,5 +84,12 @@
         {
             FieldHandler?.ApplyChanges();
         }
+
+        internal ChangeTrackingBase Clone()
+        {
+            var clone = (ChangeTrackingBase)MemberwiseClone();
+            clone._fieldHandler = _fieldHandler?.Clone();
+            return clone;
+        }
     }
 }

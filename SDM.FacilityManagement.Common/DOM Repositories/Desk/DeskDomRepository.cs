@@ -24,6 +24,11 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
         {
             if (desk == null) throw new ArgumentNullException(nameof(desk));
 
+            if (desk.State == newState)
+            {
+                return desk;
+            }
+
             if (!DeskStateMachine.IsTransitionAllowed(desk.State, newState))
             {
                 throw new InvalidOperationException($"State transition from {desk.State} to {newState} is not allowed.");
@@ -35,6 +40,11 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
         public Desk UpdateAndTransitionTo(Desk desk, SlcFacility_Management.Behaviors.Desk_Behaviour.StatusesEnum newState)
         {
             if (desk == null) throw new ArgumentNullException(nameof(desk));
+
+            if (desk.State == newState)
+            {
+                return Update(desk);
+            }
 
             if (!DeskStateMachine.IsTransitionAllowed(desk.State, newState))
             {
@@ -49,6 +59,11 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
         public Desk TransitionAndUpdate(Desk desk, SlcFacility_Management.Behaviors.Desk_Behaviour.StatusesEnum newState)
         {
             if (desk == null) throw new ArgumentNullException(nameof(desk));
+
+            if (desk.State == newState)
+            {
+                return Update(desk);
+            }
 
             if (!DeskStateMachine.IsTransitionAllowed(desk.State, newState))
             {

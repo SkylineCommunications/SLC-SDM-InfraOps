@@ -13,6 +13,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)plan_and_build")]
+    [PropertyScope("JobType")]
     public sealed class JobType : SdmObjectBase<JobType>, IEquatable<JobType>, IEntityTracking, IReadOnlyModuleIdReferencer
 	{
         [JsonIgnore]
@@ -175,9 +176,9 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Models
             unchecked
             {
                 int hash = 17;
-                hash = (hash * 23) + (Name != null ? Name.GetHashCode() : 0);
-                hash = (hash * 23) + (Description != null ? Description.GetHashCode() : 0);
-                hash = (hash * 23) + (Icon != null ? Icon.GetHashCode() : 0);
+                hash = (hash * 23) + (Name != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(Name) : 0);
+                hash = (hash * 23) + (Description != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(Description) : 0);
+                hash = (hash * 23) + (Icon != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(Icon) : 0);
                 return hash;
             }
         }

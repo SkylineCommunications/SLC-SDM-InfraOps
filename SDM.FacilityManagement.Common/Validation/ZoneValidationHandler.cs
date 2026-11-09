@@ -17,6 +17,7 @@
             Name,
             CoolingCapacity,
             RoomId,
+            Zone,
         }
 
         /// <summary>

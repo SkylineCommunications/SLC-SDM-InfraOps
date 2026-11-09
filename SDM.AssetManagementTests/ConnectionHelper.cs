@@ -1,6 +1,7 @@
 ﻿namespace SDM.AssetManagement.Tests
 {
     using Moq;
+    using SDM.AssetManagement.Tests.Setup;
     using Skyline.DataMiner.Net;
     using Skyline.DataMiner.Net.Messages;
     using Skyline.DataMiner.SDM.AssetManagement.Common.Mock;
@@ -14,10 +15,19 @@
 			var messageHandler = new DomSLNetMessageHandler();
 			messageHandler.AddAssetManagementModule();
 			messageHandler.AddFacilityManagementModule();
-			return CreateConnection(messageHandler);
+			return CreateConnection(new FieldValueTypeValidatingMessageHandler(messageHandler));
 		}
 
-		private static IConnection CreateConnection(DomSLNetMessageHandler messageHandler)
+		/// <summary>
+		/// Creates a mocked connection around an arbitrary <see cref="DomSLNetMessageHandler"/>, still guarded by
+		/// field-value-type validation. Used by tests that need a handler without the default module seeding.
+		/// </summary>
+		internal static IConnection CreateConnection(DomSLNetMessageHandler messageHandler)
+		{
+			return CreateConnection(new FieldValueTypeValidatingMessageHandler(messageHandler));
+		}
+
+		private static IConnection CreateConnection(FieldValueTypeValidatingMessageHandler messageHandler)
 		{
 			var connectionMock = new Mock<IConnection>();
 			connectionMock.Setup(c => c.HandleMessages(It.IsAny<DMSMessage[]>()))
@@ -33,7 +43,7 @@
 		}
 
 
-		private static DMSMessage[] HandleSLNetMessages(DomSLNetMessageHandler messageHandler, DMSMessage[] messages)
+		private static DMSMessage[] HandleSLNetMessages(FieldValueTypeValidatingMessageHandler messageHandler, DMSMessage[] messages)
 		{
 			if (messages is null)
 			{
@@ -43,7 +53,7 @@
 			return messages.Select(m => HandleSLNetMessage(messageHandler, m)).SelectMany(m => m).ToArray();
 		}
 
-		private static DMSMessage[] HandleSLNetMessage(DomSLNetMessageHandler messageHandler, DMSMessage message)
+		private static DMSMessage[] HandleSLNetMessage(FieldValueTypeValidatingMessageHandler messageHandler, DMSMessage message)
 		{
 			if (!TryHandleSLNetMessage(messageHandler, message, out var response))
 			{
@@ -53,7 +63,7 @@
 			return response;
 		}
 
-		private static bool TryHandleSLNetMessage(DomSLNetMessageHandler messageHandler, DMSMessage message, out DMSMessage[] responses)
+		private static bool TryHandleSLNetMessage(FieldValueTypeValidatingMessageHandler messageHandler, DMSMessage message, out DMSMessage[] responses)
 		{
 			responses = Array.Empty<DMSMessage>();
 			if (messageHandler.TryHandleMessage(message, out var domMessage))

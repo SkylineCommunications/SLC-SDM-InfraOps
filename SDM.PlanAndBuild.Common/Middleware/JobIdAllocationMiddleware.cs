@@ -7,7 +7,6 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Middleware
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM.PlanAndBuild.Helpers;
     using Skyline.DataMiner.SDM.PlanAndBuild.Models;
-    using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Middleware;
 
     using SLDataGateway.API.Types.Querying;
 

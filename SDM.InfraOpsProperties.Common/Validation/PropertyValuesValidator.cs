@@ -3,8 +3,6 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Validation
     using System;
     using System.Collections.Generic;
     using System.Linq;
-
-    using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.SDM.InfraOps.Common.Validation;
     using Skyline.DataMiner.SDM.InfraOpsProperties.Helpers;
@@ -18,7 +16,6 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Validation
     public class PropertyValuesValidator : ValidatorBase<PropertyValues>
     {
         private readonly IInfraOpsPropertiesApiHelper _helper;
-        private readonly Validator<PropertyValues> _validationPipeline;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PropertyValuesValidator"/> class.
@@ -27,71 +24,78 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Validation
         /// The InfraOps Properties API helper used to query existing PropertyValues for
         /// (LinkedObjectID, Scope, SubID) uniqueness checks.
         /// Note: this is captured by reference during <see cref="InfraOpsPropertiesApiHelper"/> construction, before
-        /// its repositories are wired up. Only <see cref="Validate"/>/<see cref="ValidateAndThrow"/> (called
-        /// after construction completes) access <paramref name="helper"/>'s repositories.
+        /// its repositories are wired up.
         /// </param>
         public PropertyValuesValidator(IInfraOpsPropertiesApiHelper helper)
         {
             _helper = helper ?? throw new ArgumentNullException(nameof(helper));
-            _validationPipeline = BuildValidationPipeline();
         }
 
         #region PropertyValues Validation
 
-        /// <summary>
-        /// Validates a PropertyValues and returns ValidationResult.
-        /// Collects all errors without throwing exceptions.
-        /// </summary>
-        protected override ValidationResult Validate(PropertyValues propertyValues)
+        protected override ValidationResult CreateNullEntityResult()
         {
-            return _validationPipeline.Validate(propertyValues);
+            var result = new ValidationResult();
+            result.AddFailReason(PropertyValuesValidationHandler.PropertyValuesValidationField.PropertyValues, "PropertyValues cannot be null.");
+            return result;
         }
 
-        /// <summary>
-        /// Validates a PropertyValues and throws ValidationException if invalid.
-        /// Use this when you want fail-fast behavior.
-        /// </summary>
-        public void ValidateAndThrow(PropertyValues propertyValues)
+        protected override List<ValidationResult> ValidateBulkNoDatabaseBusinessRules(List<PropertyValues> entities)
         {
-            _validationPipeline.ValidateAndThrow(propertyValues);
+            // ============================================================
+            // PHASE 1: NO DATABASE ACCESS CHECKS (BUSINESS RULES)
+            // ============================================================
+            var results = entities.Select(ValidateInfo).ToList();
+
+            for (int i = 0; i < entities.Count; i++)
+            {
+                results[i].AddFailuresFrom(ValidateValues(entities[i]));
+            }
+
+            return results;
         }
 
-        /// <summary>
-        /// Validates with custom error handling callback.
-        /// </summary>
-        public ValidationResult ValidateWithHandler(PropertyValues propertyValues, Action<ValidationResult> onError)
+        protected override List<ValidationResult> ValidateBulkNoDatabaseBatchConflicts(List<PropertyValues> entities)
         {
-            return _validationPipeline.ValidateWithHandler(propertyValues, onError);
+            // ============================================================
+            // PHASE 2: IN-MEMORY BATCH CONFLICT DETECTION (NO DATABASE)
+            // ============================================================
+            return ValidateBatchConflicts(entities);
         }
 
-        #endregion
-
-        #region Pipeline Construction
-
-        private Validator<PropertyValues> BuildValidationPipeline()
+        protected override List<ValidationResult> ValidateBulkWithDatabase(List<PropertyValues> entities)
         {
-            // Critical validations - stop on failure
-            var criticalValidations = Validator<PropertyValues>
-                .Create(ValidateInfo)
-                .StopOnFailure();
+            // Initialize results - same order as input
+            var results = entities.Select(pv => new ValidationResult()).ToList();
 
-            // No database access checks - fail fast before hitting the database
-            var noDatabaseChecks = Validator<PropertyValues>
-                .Create(ValidateValues)
-                .StopOnFailure();
+            // ============================================================
+            // PHASE 3: DATABASE ACCESS CHECKS (UNIQUENESS) + REMAINING RULES
+            // ============================================================
+            // Batch-fetch every (LinkedObjectID, Scope) combination that needs a uniqueness check in a single
+            // big-OR query, instead of issuing one Read() query per entry in the loop below.
+            var linkedObjectScopeKeys = entities
+                .Where(pv => pv.ShouldValidateAny(pv.LinkedObjectIDField, pv.ScopeField, pv.SubIDField) &&
+                             pv.LinkedObjectID != Guid.Empty &&
+                             !string.IsNullOrWhiteSpace(pv.Scope))
+                .Select(pv => (pv.LinkedObjectID, pv.Scope))
+                .Distinct()
+                .ToList();
 
-            // Database access checks (uniqueness)
-            var databaseChecks = Validator<PropertyValues>
-                .Create(ValidateUniqueness)
-                .AndThen(ValidatePropertyReferences);
+            var existingByLinkedObjectAndScope = _helper.PropertyValues
+                .GetByLinkedObjectIDsAndScopes(linkedObjectScopeKeys)
+                .GroupBy(pv => (pv.LinkedObjectID, pv.Scope))
+                .ToDictionary(g => g.Key, g => g.ToList());
 
-            // Combine: critical first, then no-database checks, then database checks
-            return criticalValidations.AndThen(noDatabaseChecks.AndThen(databaseChecks));
+            var existingPropertyIds = GetExistingPropertyIds(CollectReferencedPropertyIds(entities));
+
+            for (int i = 0; i < entities.Count; i++)
+            {
+                results[i].AddFailuresFrom(ValidateUniqueness(entities[i], existingByLinkedObjectAndScope));
+                results[i].AddFailuresFrom(ValidatePropertyReferences(entities[i], existingPropertyIds));
+            }
+
+            return results;
         }
-
-        #endregion
-
-        #region Validation Methods
 
         private ValidationResult ValidateInfo(PropertyValues propertyValues)
         {
@@ -123,51 +127,7 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Validation
         }
 
         /// <summary>
-        /// Validates that (LinkedObjectID, Scope, SubID) is unique across the persisted PropertyValues.
-        /// A missing/null SubID is treated as its own distinct bucket (i.e. not equal to any specific SubID value),
-        /// matching the legacy behavior where PropertyValues without a SubID were filtered separately from
-        /// PropertyValues carrying a specific SubID.
-        /// </summary>
-        private ValidationResult ValidateUniqueness(PropertyValues propertyValues)
-        {
-            var result = new ValidationResult();
-
-            if (!propertyValues.ShouldValidateAny(propertyValues.LinkedObjectIDField, propertyValues.ScopeField, propertyValues.SubIDField))
-            {
-                return result;
-            }
-
-            if (propertyValues.LinkedObjectID == Guid.Empty || string.IsNullOrWhiteSpace(propertyValues.Scope))
-            {
-                // Missing required key parts - already reported by ValidateInfo.
-                return result;
-            }
-
-            if (IsComboInUse(propertyValues.LinkedObjectID, propertyValues.Scope, propertyValues.SubID, propertyValues.Identifier))
-            {
-                result.AddFailReason(PropertyValuesValidationHandler.PropertyValuesValidationField.PropertyValues,
-                    $"PropertyValues for Linked Object '{propertyValues.LinkedObjectID}', Scope '{propertyValues.Scope}'" +
-                    (propertyValues.SubID == null ? " (no SubID)" : $", SubID '{propertyValues.SubID}'") +
-                    " already exist.");
-            }
-
-            return result;
-        }
-
-        private bool IsComboInUse(Guid linkedObjectId, string scope, string subId, string exceptIdentifier)
-        {
-            FilterElement<PropertyValues> filter = PropertyValuesExposers.LinkedObjectID.Equal(linkedObjectId)
-                .AND(PropertyValuesExposers.Scope.Equal(scope));
-
-            var candidates = _helper.PropertyValues.Read(filter);
-
-            return candidates.Any(pv =>
-                string.Equals(pv.SubID, subId, StringComparison.Ordinal) &&
-                (string.IsNullOrEmpty(exceptIdentifier) || !string.Equals(pv.Identifier, exceptIdentifier, StringComparison.Ordinal)));
-        }
-
-        /// <summary>
-        /// Batch variant of <see cref="ValidateUniqueness(PropertyValues)"/>, used by <see cref="ValidateBulk"/>.
+        /// Batch variant of <see cref="ValidateUniqueness(PropertyValues, Dictionary{ValueTuple{Guid, string}, List{PropertyValues}})"/>, used by <see cref="ValidatorBase{T}.ValidateBulk(List{T}, RepositoryAction)"/>.
         /// Checks the pre-fetched <paramref name="existingByLinkedObjectAndScope"/> lookup (built once for the
         /// whole batch via <see cref="IPropertyValuesRepository.GetByLinkedObjectIDsAndScopes"/>) instead of
         /// issuing its own DB query.
@@ -210,11 +170,6 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Validation
                 (string.IsNullOrEmpty(exceptIdentifier) || !string.Equals(pv.Identifier, exceptIdentifier, StringComparison.Ordinal)));
         }
 
-        private ValidationResult ValidatePropertyReferences(PropertyValues propertyValues)
-        {
-            return ValidatePropertyReferences(propertyValues, GetExistingPropertyIds(CollectReferencedPropertyIds(new List<PropertyValues> { propertyValues })));
-        }
-
         private ValidationResult ValidatePropertyReferences(PropertyValues propertyValues, HashSet<string> existingPropertyIds)
         {
             var result = new ValidationResult();
@@ -254,79 +209,6 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Validation
                 .Where(value => value != null && IsReferenceSet(value.PropertyId))
                 .Select(value => value.PropertyId.Identifier)
                 .ToList();
-        }
-
-        /// <summary>
-        /// Validates multiple PropertyValues in bulk. Results are returned in the same order as the input.
-        /// In addition to the per-entry checks, this also detects (LinkedObjectID, Scope, SubID) conflicts
-        /// <em>within the batch itself</em> (i.e. two PropertyValues being saved together that share the same
-        /// combo), which a single-entry DB uniqueness query cannot catch since none of the batch's entries are
-        /// persisted yet. Mirrors the same batch-conflict detection used for PlanAndBuildJob/JobType/Property.
-        /// </summary>
-        protected override List<ValidationResult> ValidateBulk(List<PropertyValues> propertyValuesList)
-        {
-            if (propertyValuesList == null || !propertyValuesList.Any())
-            {
-                return new List<ValidationResult>();
-            }
-
-            // Initialize results - same order as input
-            var results = propertyValuesList.Select(pv => new ValidationResult()).ToList();
-
-            // ============================================================
-            // PHASE 1: NO DATABASE ACCESS CHECKS (BUSINESS RULES)
-            // ============================================================
-            for (int i = 0; i < propertyValuesList.Count; i++)
-            {
-                results[i].AddFailuresFrom(ValidateInfo(propertyValuesList[i]));
-            }
-
-            // Fast-fail if business rules fail
-            if (results.AnyInvalid())
-            {
-                return results;
-            }
-
-            // ============================================================
-            // PHASE 2: IN-MEMORY BATCH CONFLICT DETECTION (NO DATABASE)
-            // ============================================================
-            var batchConflicts = ValidateBatchConflicts(propertyValuesList);
-            results.MergeFrom(batchConflicts);
-
-            // Fast-fail if batch conflicts exist
-            if (results.AnyInvalid())
-            {
-                return results;
-            }
-
-            // ============================================================
-            // PHASE 3: DATABASE ACCESS CHECKS (UNIQUENESS) + REMAINING RULES
-            // ============================================================
-            // Batch-fetch every (LinkedObjectID, Scope) combination that needs a uniqueness check in a single
-            // big-OR query, instead of issuing one Read() query per entry in the loop below.
-            var linkedObjectScopeKeys = propertyValuesList
-                .Where(pv => pv.ShouldValidateAny(pv.LinkedObjectIDField, pv.ScopeField, pv.SubIDField) &&
-                             pv.LinkedObjectID != Guid.Empty &&
-                             !string.IsNullOrWhiteSpace(pv.Scope))
-                .Select(pv => (pv.LinkedObjectID, pv.Scope))
-                .Distinct()
-                .ToList();
-
-            var existingByLinkedObjectAndScope = _helper.PropertyValues
-                .GetByLinkedObjectIDsAndScopes(linkedObjectScopeKeys)
-                .GroupBy(pv => (pv.LinkedObjectID, pv.Scope))
-                .ToDictionary(g => g.Key, g => g.ToList());
-
-            var existingPropertyIds = GetExistingPropertyIds(CollectReferencedPropertyIds(propertyValuesList));
-
-            for (int i = 0; i < propertyValuesList.Count; i++)
-            {
-                results[i].AddFailuresFrom(ValidateValues(propertyValuesList[i]));
-                results[i].AddFailuresFrom(ValidateUniqueness(propertyValuesList[i], existingByLinkedObjectAndScope));
-                results[i].AddFailuresFrom(ValidatePropertyReferences(propertyValuesList[i], existingPropertyIds));
-            }
-
-            return results;
         }
 
         /// <summary>

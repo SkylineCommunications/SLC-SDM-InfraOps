@@ -11,6 +11,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)facility_management")]
+    [PropertyScope("Zone")]
     public sealed class Zone : SdmObjectBase<Zone>, IEquatable<Zone>, IEntityTracking, IReadOnlyModuleIdReferencer
 	{
         [JsonIgnore]
@@ -189,9 +190,9 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     OldValue = kvp.Value.prevVal,
                     NewValue = kvp.Value.newVal,
                 })
-                .Concat(_zoneCapacity?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>())
-                .Concat(_roomFk?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>())
-                .Concat(_resource?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>());
+                .Concat(_zoneCapacity.GetSectionChanges("ZoneCapacity"))
+                .Concat(_roomFk.GetSectionChanges("RoomFk"))
+                .Concat(_resource.GetSectionChanges("Resource"));
         }
 
         public void ResetChangeTracking()
@@ -262,10 +263,10 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             unchecked
             {
                 int hash = 17;
-                hash = (hash * 23) + (Name != null ? Name.GetHashCode() : 0);
-                hash = (hash * 23) + (Plan != null ? Plan.GetHashCode() : 0);
-                hash = (hash * 23) + (Description != null ? Description.GetHashCode() : 0);
-                hash = (hash * 23) + (ZoneId != null ? ZoneId.GetHashCode() : 0);
+                hash = (hash * 23) + (Name != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(Name) : 0);
+                hash = (hash * 23) + (Plan != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(Plan) : 0);
+                hash = (hash * 23) + (Description != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(Description) : 0);
+                hash = (hash * 23) + (ZoneId != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(ZoneId) : 0);
                 hash = (hash * 23) + (ZoneCapacity != null ? ZoneCapacity.GetHashCode() : 0);
                 hash = (hash * 23) + (RoomFk != null ? RoomFk.GetHashCode() : 0);
                 hash = (hash * 23) + State.GetHashCode();

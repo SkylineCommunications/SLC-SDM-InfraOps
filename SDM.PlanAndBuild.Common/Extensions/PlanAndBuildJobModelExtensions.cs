@@ -294,37 +294,6 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Extensions
             job.Attachments = list;
         }
 
-        /// <summary>
-        /// Replaces <see cref="PlanAndBuildJob.Attachments"/> with <paramref name="jobAttachments"/>.
-        /// </summary>
-        /// <remarks>
-        /// This only updates the in-memory <see cref="PlanAndBuildJob"/> instance. It is not persisted
-        /// to the DOM/database until the job is saved (e.g. via <c>CreateOrUpdate</c>/<c>Update</c> on
-        /// the repository or helper).
-        /// </remarks>
-        public static void SetJobAttachments(this PlanAndBuildJob job, List<JobAttachment> jobAttachments)
-        {
-            job.Attachments = jobAttachments ?? new List<JobAttachment>();
-        }
-
-        /// <summary>
-        /// Clears all entries from <see cref="PlanAndBuildJob.Attachments"/>.
-        /// </summary>
-        /// <remarks>
-        /// This only updates the in-memory <see cref="PlanAndBuildJob"/> instance. It is not persisted
-        /// to the DOM/database until the job is saved (e.g. via <c>CreateOrUpdate</c>/<c>Update</c> on
-        /// the repository or helper).
-        /// </remarks>
-        public static void ClearJobAttachments(this PlanAndBuildJob job)
-        {
-            if (job.Attachments.Count == 0)
-            {
-                return;
-            }
-
-            job.Attachments = new List<JobAttachment>();
-        }
-
         #endregion
 
         #region Locations Convenience Methods

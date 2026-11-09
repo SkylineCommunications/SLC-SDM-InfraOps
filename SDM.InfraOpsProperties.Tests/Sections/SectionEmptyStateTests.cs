@@ -50,6 +50,22 @@ namespace SDM.InfraOpsProperties.Tests
 			new PropertyValue().Also(value => value.Value = "server-01").IsEmpty.Should().BeFalse();
 			new PropertyValue().Also(value => value.PropertyId = new SdmObjectReference<Property>(Guid.NewGuid().ToString())).IsEmpty.Should().BeFalse();
 		}
+
+		[TestMethod]
+		public void Property_RoundTrip_PreservesFalseIsMultiLineString()
+		{
+			var property = new Property
+			{
+				Identifier = Guid.NewGuid().ToString(),
+				IsMultiLineString = false,
+			};
+
+			var repo = System.Runtime.Serialization.FormatterServices.GetUninitializedObject(typeof(PropertyDomRepository));
+			var toInstance = typeof(PropertyDomRepository).GetMethod("ToInstance", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+			var fromInstance = typeof(PropertyDomRepository).GetMethod("FromInstance", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+			var roundTripped = (Property)fromInstance.Invoke(repo, new[] { toInstance.Invoke(repo, new object[] { property }) });
+			roundTripped.IsMultiLineString.Should().BeFalse();
+		}
 	}
 
 	internal static class ObjectExtensions

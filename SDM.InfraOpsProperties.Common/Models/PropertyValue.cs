@@ -8,13 +8,43 @@
     using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
-    public sealed class PropertyValue : IEquatable<PropertyValue>, ISectionTrackable, ISectionEmptyState
+    public sealed class PropertyValue : ChangeTrackingBase, IEquatable<PropertyValue>, ISectionTrackable, ISectionEmptyState
     {
-        public string PropertyName { get; set; }
+        public string PropertyName
+        {
+            get => PropertyNameField.Value;
+            set => PropertyNameField.Value = value;
+        }
 
-        public string Value { get; set; }
+        public string Value
+        {
+            get => ValueField.Value;
+            set => ValueField.Value = value;
+        }
 
-        public SdmObjectReference<Property> PropertyId { get; set; }
+        public SdmObjectReference<Property> PropertyId
+        {
+            get => PropertyIdField.Value;
+            set => PropertyIdField.Value = value;
+        }
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal IChangeTrackingField<string> PropertyNameField => FieldHandler.GetOrCreateField(
+            nameof(PropertyName),
+            () => new ChangeTrackingStringField(null));
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal IChangeTrackingField<string> ValueField => FieldHandler.GetOrCreateField(
+            nameof(Value),
+            () => new ChangeTrackingStringField(null));
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal IChangeTrackingField<SdmObjectReference<Property>> PropertyIdField => FieldHandler.GetOrCreateField(
+            nameof(PropertyId),
+            () => new ChangeTrackingField<SdmObjectReference<Property>>(default, reference => reference.Identifier));
 
         /// <summary>
         /// Gets or sets the DOM Section ID this element was read from, so it can be reused on update.

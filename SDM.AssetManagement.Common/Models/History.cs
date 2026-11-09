@@ -2,13 +2,13 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using Newtonsoft.Json;
 
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.InfraOps.Core.Models;
     using Skyline.DataMiner.Utils.InfraOps.Common.Fields;
 
+    [PropertyScope("History")]
     public sealed class History : SdmObjectBase<History>, IEquatable<History>, IEntityTracking
     {
         [JsonIgnore]
@@ -51,7 +51,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
         public IEnumerable<TrackingFieldValueDifference> GetChanges()
         {
-            return _historyInfo?.GetChanges() ?? Enumerable.Empty<TrackingFieldValueDifference>();
+            return _historyInfo.GetSectionChanges("HistoryInfo");
         }
 
         public void ResetChangeTracking()

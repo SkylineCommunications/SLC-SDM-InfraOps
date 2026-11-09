@@ -48,6 +48,34 @@ namespace SDM.AssetManagement.Tests.AssetManagerAppSettings
         }
 
         [TestMethod]
+        public void AssetManagerAppSettingsDomStorageProvider_SaveAndReload_PersistsCustomSettings()
+        {
+            var settings = new AssetManagerAppSettings
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                EnableAssetHistory = true,
+                EnableConnectionHistory = false,
+                PlanAndBuildJobPrompt = SharedMappers.DomIds.SlcAsset_Management.Enums.Planandbuildjobpromptenum.Disabled,
+                HistoryTTL = TimeSpan.FromDays(7),
+                HistoryLimit = 1234L,
+            };
+
+            Helper.AssetManagement.AppSettings.Create(settings);
+
+            var reloaded = Helper.AssetManagement.AppSettings.Read(AssetManagerAppSettingsExposers.Identifier.Equal(settings.Identifier)).SingleOrDefault();
+
+            using (new AssertionScope())
+            {
+                reloaded.Should().NotBeNull();
+                reloaded!.EnableAssetHistory.Should().BeTrue();
+                reloaded.EnableConnectionHistory.Should().BeFalse();
+                reloaded.PlanAndBuildJobPrompt.Should().Be(SharedMappers.DomIds.SlcAsset_Management.Enums.Planandbuildjobpromptenum.Disabled);
+                reloaded.HistoryTTL.Should().Be(TimeSpan.FromDays(7));
+                reloaded.HistoryLimit.Should().Be(1234L);
+            }
+        }
+
+        [TestMethod]
         public void AssetManagerAppSettingsDomStorageProvider_EmptyDOM_CreateOrUpdate_Update()
         {
             Helper.AssetManagement.AppSettings.Create(referenceSettings);
