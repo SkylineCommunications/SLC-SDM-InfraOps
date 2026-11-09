@@ -114,13 +114,27 @@
 
 		public (object prevVal, object newVal) GetChanges()
 		{
-			var prevVal = _getChangesConverter != null
-				? (_originalValue != null ? _getChangesConverter.Invoke(_originalValue) : null)
-				: CloneList(_originalValue);
-			var newVal = _getChangesConverter != null
-				? (Value != null ? _getChangesConverter.Invoke(Value) : null)
-				: CloneList(Value);
-			return (prevVal, newVal);
+            object prevVal;
+            if (_getChangesConverter != null)
+            {
+                prevVal = _originalValue != null ? _getChangesConverter.Invoke(_originalValue) : null;
+            }
+            else
+            {
+                prevVal = CloneList(_originalValue);
+            }
+
+            object newVal;
+            if (_getChangesConverter != null)
+            {
+                newVal = Value != null ? _getChangesConverter.Invoke(Value) : null;
+            }
+            else
+            {
+                newVal = CloneList(Value);
+            }
+
+            return (prevVal, newVal);
 		}
 
 		public void ApplyChanges()

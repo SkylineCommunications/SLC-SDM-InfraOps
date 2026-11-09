@@ -6,7 +6,6 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Helpers
     using Skyline.DataMiner.Net;
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM.AssetManagement.Deletion;
-    using Skyline.DataMiner.SDM.AssetManagement.Helpers;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.SDM.PlanAndBuild.Deletion;

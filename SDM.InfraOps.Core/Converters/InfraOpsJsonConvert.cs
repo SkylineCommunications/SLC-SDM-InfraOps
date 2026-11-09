@@ -29,7 +29,9 @@
 
             settings.SerializationBinder = null;
 
+#pragma warning disable SLC_SC0004 // Avoid deserializing json strings by using Newtonsoft directly. No alternative in SecureNewtonsoftDeserialization.
             return JsonConvert.DeserializeObject(json, type, settings);
+#pragma warning restore SLC_SC0004 // Avoid deserializing json strings by using Newtonsoft directly.
         }
 
         public static string SerializeObject<T>(T value)

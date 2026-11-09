@@ -9,7 +9,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
 
     using Skyline.DataMiner.SDM.AssetManagement.Common.Validation;
     using Skyline.DataMiner.SDM.Common.Services;
-    using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
     /// <summary>

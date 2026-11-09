@@ -36,7 +36,7 @@ namespace SDM.InfraOps.PackagingTests
         {
             var models = ModelAssemblies.SelectMany(GetSdmModels).ToList();
 
-            Assert.IsTrue(models.Count > 0, "No SDM models were found; the scan is broken.");
+            Assert.IsNotEmpty(models, "No SDM models were found; the scan is broken.");
 
             var violations = models
                 .Select(type => new { Type = type, Attribute = type.GetCustomAttribute<PropertyScopeAttribute>(inherit: false) })
@@ -46,7 +46,7 @@ namespace SDM.InfraOps.PackagingTests
                     : $"  {x.Type.FullName}: scope is '{x.Attribute.Scope}', expected '{x.Type.Name}'")
                 .ToList();
 
-            Assert.AreEqual(0, violations.Count, "SDM models violating the [PropertyScope] convention:\n" + string.Join("\n", violations));
+            Assert.IsEmpty(violations, "SDM models violating the [PropertyScope] convention:\n" + string.Join("\n", violations));
         }
 
         [TestMethod]
@@ -61,7 +61,7 @@ namespace SDM.InfraOps.PackagingTests
                 .Select(g => $"  '{g.Key}': {string.Join(", ", g.Select(x => x.Type.FullName))}")
                 .ToList();
 
-            Assert.AreEqual(0, duplicates.Count, "Duplicate Properties scopes:\n" + string.Join("\n", duplicates));
+            Assert.IsEmpty(duplicates, "Duplicate Properties scopes:\n" + string.Join("\n", duplicates));
         }
 
         private static System.Collections.Generic.IEnumerable<Type> GetSdmModels(Assembly assembly)

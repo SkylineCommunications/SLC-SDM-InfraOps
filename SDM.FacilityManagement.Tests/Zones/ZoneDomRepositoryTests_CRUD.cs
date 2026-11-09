@@ -8,7 +8,6 @@ namespace SDM.FacilityManagement.Tests.Zones
 
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
-    using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
 
     public partial class ZoneDomRepositoryTests

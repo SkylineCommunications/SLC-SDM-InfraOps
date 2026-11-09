@@ -410,6 +410,11 @@
 
         private static TModel RoundTrip<TRepo, TModel>(TModel model)
         {
+            if (model is null)
+            {
+                throw new ArgumentNullException(nameof(model));
+            }
+
             var repo = System.Runtime.Serialization.FormatterServices.GetUninitializedObject(typeof(TRepo));
             var toInstance = typeof(TRepo).GetMethod("ToInstance", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
             var fromInstance = typeof(TRepo).GetMethod("FromInstance", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);

@@ -3,8 +3,6 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Validation
     using System;
     using System.Collections.Generic;
     using System.Linq;
-
-    using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM.InfraOps.Common.Validation;
     using Skyline.DataMiner.SDM.InfraOpsProperties.Helpers;
     using Skyline.DataMiner.SDM.InfraOpsProperties.Models;
@@ -134,25 +132,8 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Validation
             return result;
         }
 
-        private ValidationResult ValidateNameUniqueness(Property property)
-        {
-            var result = new ValidationResult();
-
-            if (!property.ShouldValidateAny(property.NameField, property.ScopeField))
-            {
-                return result;
-            }
-
-            if (IsNameInUse(property.Scope, property.Name, property.Identifier))
-            {
-                result.AddFailReason(PropertyValidationHandler.PropertyValidationField.Name, $"Property Name '{property.Name}' is already in use within Scope '{property.Scope}'.");
-            }
-
-            return result;
-        }
-
         /// <summary>
-        /// Batch variant of <see cref="ValidateNameUniqueness(Property)"/>, used by <see cref="ValidateBulk"/>.
+        /// Batch variant of <see cref="ValidateNameUniqueness(Property, Dictionary{ValueTuple{string, string}, List{Property}})"/>, used by <see cref="ValidatorBase{T}.ValidateBulk(List{T}, RepositoryAction)"/>.
         /// Checks the pre-fetched <paramref name="existingByScopeAndName"/> lookup (built once for the whole
         /// batch via <see cref="IPropertyRepository.GetByScopeAndNames"/>) instead of issuing its own DB query.
         /// </summary>
@@ -171,18 +152,6 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Validation
             }
 
             return result;
-        }
-
-        private bool IsNameInUse(string scope, string name, string exceptIdentifier)
-        {
-            FilterElement<Property> filter = PropertyExposers.Scope.Equal(scope).AND(PropertyExposers.Name.Equal(name));
-
-            if (!string.IsNullOrEmpty(exceptIdentifier))
-            {
-                filter = filter.AND(PropertyExposers.Identifier.NotEqual(exceptIdentifier));
-            }
-
-            return _helper.Properties.Count(filter) > 0;
         }
 
         private static bool IsNameInUse(string scope, string name, string exceptIdentifier, Dictionary<(string Scope, string Name), List<Property>> existingByScopeAndName)

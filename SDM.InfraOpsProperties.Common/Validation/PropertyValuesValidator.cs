@@ -3,8 +3,6 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Validation
     using System;
     using System.Collections.Generic;
     using System.Linq;
-
-    using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.SDM.InfraOps.Common.Validation;
     using Skyline.DataMiner.SDM.InfraOpsProperties.Helpers;
@@ -129,51 +127,7 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Validation
         }
 
         /// <summary>
-        /// Validates that (LinkedObjectID, Scope, SubID) is unique across the persisted PropertyValues.
-        /// A missing/null SubID is treated as its own distinct bucket (i.e. not equal to any specific SubID value),
-        /// matching the legacy behavior where PropertyValues without a SubID were filtered separately from
-        /// PropertyValues carrying a specific SubID.
-        /// </summary>
-        private ValidationResult ValidateUniqueness(PropertyValues propertyValues)
-        {
-            var result = new ValidationResult();
-
-            if (!propertyValues.ShouldValidateAny(propertyValues.LinkedObjectIDField, propertyValues.ScopeField, propertyValues.SubIDField))
-            {
-                return result;
-            }
-
-            if (propertyValues.LinkedObjectID == Guid.Empty || string.IsNullOrWhiteSpace(propertyValues.Scope))
-            {
-                // Missing required key parts - already reported by ValidateInfo.
-                return result;
-            }
-
-            if (IsComboInUse(propertyValues.LinkedObjectID, propertyValues.Scope, propertyValues.SubID, propertyValues.Identifier))
-            {
-                result.AddFailReason(PropertyValuesValidationHandler.PropertyValuesValidationField.PropertyValues,
-                    $"PropertyValues for Linked Object '{propertyValues.LinkedObjectID}', Scope '{propertyValues.Scope}'" +
-                    (propertyValues.SubID == null ? " (no SubID)" : $", SubID '{propertyValues.SubID}'") +
-                    " already exist.");
-            }
-
-            return result;
-        }
-
-        private bool IsComboInUse(Guid linkedObjectId, string scope, string subId, string exceptIdentifier)
-        {
-            FilterElement<PropertyValues> filter = PropertyValuesExposers.LinkedObjectID.Equal(linkedObjectId)
-                .AND(PropertyValuesExposers.Scope.Equal(scope));
-
-            var candidates = _helper.PropertyValues.Read(filter);
-
-            return candidates.Any(pv =>
-                string.Equals(pv.SubID, subId, StringComparison.Ordinal) &&
-                (string.IsNullOrEmpty(exceptIdentifier) || !string.Equals(pv.Identifier, exceptIdentifier, StringComparison.Ordinal)));
-        }
-
-        /// <summary>
-        /// Batch variant of <see cref="ValidateUniqueness(PropertyValues)"/>, used by <see cref="ValidateBulk"/>.
+        /// Batch variant of <see cref="ValidateUniqueness(PropertyValues, Dictionary{ValueTuple{Guid, string}, List{PropertyValues}})"/>, used by <see cref="ValidatorBase{T}.ValidateBulk(List{T}, RepositoryAction)"/>.
         /// Checks the pre-fetched <paramref name="existingByLinkedObjectAndScope"/> lookup (built once for the
         /// whole batch via <see cref="IPropertyValuesRepository.GetByLinkedObjectIDsAndScopes"/>) instead of
         /// issuing its own DB query.
@@ -214,11 +168,6 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Validation
             return candidates.Any(pv =>
                 string.Equals(pv.SubID, subId, StringComparison.Ordinal) &&
                 (string.IsNullOrEmpty(exceptIdentifier) || !string.Equals(pv.Identifier, exceptIdentifier, StringComparison.Ordinal)));
-        }
-
-        private ValidationResult ValidatePropertyReferences(PropertyValues propertyValues)
-        {
-            return ValidatePropertyReferences(propertyValues, GetExistingPropertyIds(CollectReferencedPropertyIds(new List<PropertyValues> { propertyValues })));
         }
 
         private ValidationResult ValidatePropertyReferences(PropertyValues propertyValues, HashSet<string> existingPropertyIds)

@@ -24,8 +24,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
         /// <param name="helper">
         /// The Plan &amp; Build API helper used to query existing JobTypes (uniqueness) and Jobs (in-use checks).
         /// Note: this is captured by reference during <see cref="PlanAndBuildApiHelper"/> construction, before
-        /// its repositories are wired up. Only <see cref="Validate"/>/<see cref="ValidateAndThrow"/> (called
-        /// after construction completes) access <paramref name="helper"/>'s repositories.
+        /// its repositories are wired up.
         /// </param>
         public JobTypeValidator(IPlanAndBuildApiHelper helper)
         {

@@ -1,7 +1,6 @@
 namespace Skyline.DataMiner.Utils.InfraOps.Common.Fields
 {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
@@ -32,7 +31,7 @@ namespace Skyline.DataMiner.Utils.InfraOps.Common.Fields
     }
 
     /// <summary>
-    /// A change that <see cref="SdmChangeTracking.ApplyChanges{T}"/> could not apply.
+    /// A change that <see cref="SdmChangeTracking.ApplyFieldChanges{T}(T, IEnumerable{FieldChange})"/> could not apply.
     /// </summary>
     public sealed class SkippedFieldChange
     {
@@ -65,7 +64,9 @@ namespace Skyline.DataMiner.Utils.InfraOps.Common.Fields
     /// </remarks>
     public static class SdmChangeTracking
     {
+#pragma warning disable S3011
         private const BindingFlags AnyInstance = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+#pragma warning restore S3011
 
         private static readonly HashSet<string> IdentityFields = new HashSet<string>(StringComparer.Ordinal)
         {
@@ -212,13 +213,10 @@ namespace Skyline.DataMiner.Utils.InfraOps.Common.Fields
                     return "Null is not assignable to the field type.";
                 }
             }
-            else if (!property.PropertyType.IsInstanceOfType(value))
+            else if (!property.PropertyType.IsInstanceOfType(value) && !TryConvert(value, property.PropertyType, out value))
             {
                 // Captured values can be the field's stored form (for example a Guid for a reference field).
-                if (!TryConvert(value, property.PropertyType, out value))
-                {
-                    return $"Value of type {change.NewValue.GetType().Name} is not assignable to {property.PropertyType.Name}.";
-                }
+                return $"Value of type {change.NewValue.GetType().Name} is not assignable to {property.PropertyType.Name}.";
             }
 
             property.SetValue(owner, value, null);

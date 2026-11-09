@@ -2285,6 +2285,229 @@
             results[1].IsValid.Should().BeFalse();
         }
 
+        [TestMethod]
+        public void PlacementValidator_WithNullOrEmptyAssets_ShouldReturnEmptyResults()
+        {
+            var validator = new PlacementValidator(Helper.CreateEntityLoader());
+
+            validator.ValidateBulkPlacements(null).Should().BeEmpty();
+            validator.ValidateBulkPlacements(new List<Asset>()).Should().BeEmpty();
+        }
+
+        [TestMethod]
+        public void PlacementValidator_WithUnknownParentAsset_ShouldFailOnParentAsset()
+        {
+            // Arrange
+            var cardClass = CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum.Card);
+            var child = NewChildAsset("PLC-NOPARENT", cardClass, new Asset { Identifier = Guid.NewGuid().ToString() }, 1);
+
+            // Act
+            var results = new PlacementValidator(Helper.CreateEntityLoader()).ValidateBulkPlacements(new List<Asset> { child });
+
+            // Assert
+            results.Single().IsValid.Should().BeFalse();
+            results.Single().GetFailReason(AssetValidationHandler.AssetValidationField.ParentAsset)
+                .Should().Be("Parent Asset not found.");
+        }
+
+        [TestMethod]
+        public void PlacementValidator_WithUnknownDestinationParentAsset_ShouldFailOnDestinationParentAsset()
+        {
+            // Arrange
+            var cardClass = CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum.Card);
+            var inTransit = NewInTransitAsset("PLC-NODESTPARENT", cardClass, new Asset { Identifier = Guid.NewGuid().ToString() }, 1);
+
+            // Act
+            var results = new PlacementValidator(Helper.CreateEntityLoader()).ValidateBulkPlacements(new List<Asset> { inTransit });
+
+            // Assert
+            results.Single().GetFailReason(AssetValidationHandler.AssetValidationField.DestinationParentAsset)
+                .Should().Be("Destination Parent Asset not found.");
+        }
+
+        [TestMethod]
+        public void PlacementValidator_WithAssetClassWithoutHierarchyRole_ShouldFailOnAssetClass()
+        {
+            // Arrange
+            var parent = CreateParentWithHolders((1, SlcAsset_Management.Enums.HierarchyRoleEnum.Card));
+            var noRoleClass = CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum.None);
+            var child = NewChildAsset("PLC-NOROLE", noRoleClass, parent, 1);
+
+            // Act
+            var results = new PlacementValidator(Helper.CreateEntityLoader()).ValidateBulkPlacements(new List<Asset> { child });
+
+            // Assert
+            results.Single().GetFailReason(AssetValidationHandler.AssetValidationField.AssetClass)
+                .Should().Contain("must have a Hierarchy Role");
+        }
+
+        [TestMethod]
+        public void PlacementValidator_WithHolderSlotMissingOnParent_ShouldFailOnHolderNumber()
+        {
+            // Arrange
+            var parent = CreateParentWithHolders((1, SlcAsset_Management.Enums.HierarchyRoleEnum.Card));
+            var cardClass = CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum.Card);
+            var child = NewChildAsset("PLC-NOSLOT", cardClass, parent, 7);
+
+            // Act
+            var results = new PlacementValidator(Helper.CreateEntityLoader()).ValidateBulkPlacements(new List<Asset> { child });
+
+            // Assert
+            results.Single().GetFailReason(AssetValidationHandler.AssetValidationField.HolderNumber)
+                .Should().Contain("does not have a holder slot '7'");
+        }
+
+        [TestMethod]
+        public void PlacementValidator_WithHolderOccupiedByExistingAsset_ShouldFailOnHolderNumber()
+        {
+            // Arrange
+            var parent = CreateParentWithHolders((1, SlcAsset_Management.Enums.HierarchyRoleEnum.Card));
+            var cardClass = CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum.Card);
+            Helper.AssetManagement.Assets.Create(NewChildAsset("PLC-OCCUPANT", cardClass, parent, 1));
+            var incoming = NewChildAsset("PLC-INCOMING-OCCUPIED", cardClass, parent, 1);
+
+            // Act
+            var results = new PlacementValidator(Helper.CreateEntityLoader()).ValidateBulkPlacements(new List<Asset> { incoming });
+
+            // Assert
+            results.Single().GetFailReason(AssetValidationHandler.AssetValidationField.HolderNumber)
+                .Should().Contain("already occupied");
+        }
+
+        [TestMethod]
+        public void PlacementValidator_WithHolderOccupiedByExistingAssetOnOtherSlot_ShouldPass()
+        {
+            // Arrange
+            var parent = CreateParentWithHolders(
+                (1, SlcAsset_Management.Enums.HierarchyRoleEnum.Card),
+                (2, SlcAsset_Management.Enums.HierarchyRoleEnum.Card));
+            var cardClass = CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum.Card);
+            Helper.AssetManagement.Assets.Create(NewChildAsset("PLC-OCCUPANT-SLOT1", cardClass, parent, 1));
+            var incoming = NewChildAsset("PLC-INCOMING-SLOT2", cardClass, parent, 2);
+
+            // Act
+            var results = new PlacementValidator(Helper.CreateEntityLoader()).ValidateBulkPlacements(new List<Asset> { incoming });
+
+            // Assert
+            results.Single().IsValid.Should().BeTrue();
+        }
+
+        [TestMethod]
+        public void PlacementValidator_WithSameHolderInBatch_ShouldFailBothAssets()
+        {
+            // Arrange
+            var parent = CreateParentWithHolders((1, SlcAsset_Management.Enums.HierarchyRoleEnum.Card));
+            var cardClass = CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum.Card);
+            var first = NewChildAsset("PLC-BATCH-1", cardClass, parent, 1);
+            var second = NewChildAsset("PLC-BATCH-2", cardClass, parent, 1);
+
+            // Act
+            var results = new PlacementValidator(Helper.CreateEntityLoader()).ValidateBulkPlacements(new List<Asset> { first, second });
+
+            // Assert
+            results.Should().HaveCount(2);
+            results.Should().OnlyContain(r => r.GetFailReason(AssetValidationHandler.AssetValidationField.HolderNumber)
+                .Contains("conflicts with another asset in the same batch"));
+        }
+
+        [TestMethod]
+        public void PlacementValidator_WithSameHolderNumberOnDifferentParentsInBatch_ShouldPass()
+        {
+            // Arrange
+            var firstParent = CreateParentWithHolders((1, SlcAsset_Management.Enums.HierarchyRoleEnum.Card));
+            var secondParent = CreateParentWithHolders((1, SlcAsset_Management.Enums.HierarchyRoleEnum.Card));
+            var cardClass = CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum.Card);
+            var first = NewChildAsset("PLC-PARENT-A", cardClass, firstParent, 1);
+            var second = NewChildAsset("PLC-PARENT-B", cardClass, secondParent, 1);
+
+            // Act
+            var results = new PlacementValidator(Helper.CreateEntityLoader()).ValidateBulkPlacements(new List<Asset> { first, second });
+
+            // Assert
+            results.Should().OnlyContain(r => r.IsValid);
+        }
+
+        [TestMethod]
+        public void PlacementValidator_WithSameHolderNumberAndDifferentRoleInBatch_ShouldPass()
+        {
+            // Arrange
+            var parent = CreateParentWithHolders(
+                (1, SlcAsset_Management.Enums.HierarchyRoleEnum.Card),
+                (1, SlcAsset_Management.Enums.HierarchyRoleEnum.Fan));
+            var cardClass = CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum.Card);
+            var fanClass = CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum.Fan);
+            var card = NewChildAsset("PLC-ROLE-CARD", cardClass, parent, 1);
+            var fan = NewChildAsset("PLC-ROLE-FAN", fanClass, parent, 1);
+
+            // Act
+            var results = new PlacementValidator(Helper.CreateEntityLoader()).ValidateBulkPlacements(new List<Asset> { card, fan });
+
+            // Assert
+            results.Should().OnlyContain(r => r.IsValid);
+        }
+
+        [TestMethod]
+        public void PlacementValidator_WithSameParentAsCurrentAndDestination_ShouldNotCheckDestinationOccupancy()
+        {
+            // Arrange
+            var parent = CreateParentWithHolders((1, SlcAsset_Management.Enums.HierarchyRoleEnum.Card));
+            var cardClass = CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum.Card);
+            Helper.AssetManagement.Assets.Create(NewChildAsset("PLC-CURRENT-OCCUPANT", cardClass, parent, 1));
+            var inTransit = NewInTransitAsset("PLC-SAME-PARENT", cardClass, parent, 1);
+
+            // Act
+            var results = new PlacementValidator(Helper.CreateEntityLoader()).ValidateBulkPlacements(new List<Asset> { inTransit });
+
+            // Assert
+            results.Single().IsValid.Should().BeTrue();
+        }
+
+        [TestMethod]
+        public void PlacementValidator_WithUnknownRack_ShouldFailEveryAssetInTheBatch()
+        {
+            // Arrange
+            var rack = GetBottomRack();
+            var rackClass = CreateRackClass(tagged: true, heightU: 1);
+            var valid = NewRackAsset("PLC-VALID", rackClass, rack, position: 5);
+            var orphan = NewRackAsset("PLC-ORPHAN", rackClass, rack, position: 6);
+            orphan.Location.RackId = new SdmObjectReference<Rack>(Guid.NewGuid().ToString());
+
+            // Act
+            var results = new PlacementValidator(Helper.CreateEntityLoader()).ValidateBulkPlacements(new List<Asset> { valid, orphan });
+
+            // Assert
+            results.Should().HaveCount(2);
+            results.Should().OnlyContain(r => r.GetFailReason(AssetValidationHandler.AssetValidationField.Asset)
+                .Contains("not found during context building"));
+        }
+
+        [TestMethod]
+        public void PlacementValidator_WithUnknownDestinationRack_ShouldFailTheBatch()
+        {
+            // Arrange
+            var rackClass = CreateRackClass(tagged: true, heightU: 1);
+            var inTransit = new Asset
+            {
+                AssetID = "RACK-PLC-NODESTRACK",
+                Name = "Rack Asset PLC-NODESTRACK",
+                AssetClassId = new SdmObjectReference<AssetClass>(rackClass.Identifier),
+                State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit,
+                DestinationLocation =
+                {
+                    RackId = new SdmObjectReference<Rack>(Guid.NewGuid().ToString()),
+                    RackPosition = 5,
+                    Side = SlcAsset_Management.Enums.SideEnum.Front,
+                },
+            };
+
+            // Act
+            var results = new PlacementValidator(Helper.CreateEntityLoader()).ValidateBulkPlacements(new List<Asset> { inTransit });
+
+            // Assert
+            results.Single().GetFailReason(AssetValidationHandler.AssetValidationField.Asset)
+                .Should().Contain("not found during context building");
+        }
+
         private Rack GetBottomRack()
         {
             Helper.PopulateWithDemoData(DemoDataLayer.Racks);

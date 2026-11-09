@@ -72,7 +72,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
 
         /// <summary>
         /// Validates id uniqueness for real-time UI validation.
-        /// <para><b>Not suitable for bulk scenarios</b>: issues one DB query per call. Use <see cref="ValidateBulk"/> instead.</para>
+        /// <para><b>Not suitable for bulk scenarios</b>: issues one DB query per call. Use <see cref="ValidatorBase{T}.ValidateBulk(List{T}, RepositoryAction)"/> instead.</para>
         /// </summary>
         public ValidationResult IsFloorIdValid(string id, string exceptIdentifier = null)
         {

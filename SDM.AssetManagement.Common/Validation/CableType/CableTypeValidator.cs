@@ -28,7 +28,7 @@
 
         /// <summary>
         /// Validates name uniqueness — used for real-time UI validation.
-        /// <para><b>Not suitable for bulk scenarios</b>: issues one DB query per call. Use <see cref="ValidateBulk"/> instead.</para>
+        /// <para><b>Not suitable for bulk scenarios</b>: issues one DB query per call. Use <see cref="ValidatorBase{T}.ValidateBulk(List{T}, RepositoryAction)"/> instead.</para>
         /// </summary>
         public ValidationResult IsCableTypeNameValid(string name, string exceptIdentifier = null)
         {
@@ -53,7 +53,7 @@
         /// <summary>
         /// Validates name uniqueness for the specified <see cref="CableType"/> instance.
         /// Excludes the current cable type identifier from the uniqueness check.
-        /// <para><b>Not suitable for bulk scenarios</b>: issues one DB query per call. Use <see cref="ValidateBulk"/> instead.</para>
+        /// <para><b>Not suitable for bulk scenarios</b>: issues one DB query per call. Use <see cref="ValidatorBase{T}.ValidateBulk(List{T}, RepositoryAction)"/> instead.</para>
         /// </summary>
         public ValidationResult IsCableTypeNameValid(CableType cableType)
         {
@@ -238,11 +238,6 @@
 
 
         #region Validation Methods
-
-        private ValidationResult ValidateCriticalFields(CableType cableType)
-        {
-            return IsCableTypeNameValid(cableType);
-        }
 
         private ValidationResult ValidateCategories(CableType cableType)
         {

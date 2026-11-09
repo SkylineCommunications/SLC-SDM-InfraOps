@@ -452,6 +452,7 @@ namespace SDM.AssetManagement.Tests.AssetClasses
 
             var assetClass = Newtonsoft.Json.JsonConvert.DeserializeObject<AssetClass>(json);
 
+            assetClass.Should().NotBe(null);
             assetClass.FrontImage.Should().Be("image.png");
             assetClass.BackImage.Should().Be("image.png");
             var attachment = assetClass.Attachments.Should().ContainSingle().Subject;
@@ -465,6 +466,7 @@ namespace SDM.AssetManagement.Tests.AssetClasses
             var assetClass = Newtonsoft.Json.JsonConvert.DeserializeObject<AssetClass>(
                 @"{""FrontImage"":""front.png"",""BackImage"":""back.png""}");
 
+            assetClass.Should().NotBe(null);
             assetClass.Attachments.Select(a => a.FilePath).Should()
                 .BeEquivalentTo("front.png", "back.png");
         }

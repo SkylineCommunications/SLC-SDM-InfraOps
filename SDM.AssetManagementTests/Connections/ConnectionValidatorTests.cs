@@ -529,7 +529,6 @@ namespace SDM.AssetManagement.Tests.Connections
         public void ValidateConnection_WithNegativeCableLengthAndNoDestinationPort_ShouldAccumulateFailures()
         {
             var source = CreateDataEndpoint("Source", SlcAsset_Management.Enums.Outputtype.In);
-            var destination = CreateDataEndpoint("Destination", SlcAsset_Management.Enums.Outputtype.IO);
 
             var result = ValidateConnection(BuildConnection(SlcAsset_Management.Enums.ConnectionType.Data, source, null, cableLength: -1));
 
@@ -571,7 +570,7 @@ namespace SDM.AssetManagement.Tests.Connections
             return connection;
         }
 
-        private static Connection BuildConnection(SlcAsset_Management.Enums.ConnectionType type, Endpoint source, Endpoint destination, double? cableLength = null)
+        private static Connection BuildConnection(SlcAsset_Management.Enums.ConnectionType type, Endpoint? source, Endpoint? destination, double? cableLength = null)
         {
             return new Connection
             {

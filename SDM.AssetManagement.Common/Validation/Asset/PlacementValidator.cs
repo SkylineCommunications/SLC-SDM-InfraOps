@@ -124,9 +124,24 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
 
             var assetIds = assets.Where(a => !String.IsNullOrWhiteSpace(a.Identifier)).Select(a => a.Identifier).ToList();
 
-            // Collect all unique parent asset IDs (current location and destination)
-            var parentAssetIds = new HashSet<SdmObjectReference<Asset>>();
-            var destinationParentAssetIds = new HashSet<SdmObjectReference<Asset>>();
+            CollectParentAssetIds(assets, out var parentAssetIds, out var destinationParentAssetIds);
+            LoadParentAssets(context, parentAssetIds, destinationParentAssetIds, assetIds);
+            LoadRacks(context, CollectRackIds(assets), assetIds);
+
+            return context;
+        }
+
+        /// <summary>
+        /// Collects all unique parent asset IDs of the current location and of the destination.
+        /// </summary>
+        private static void CollectParentAssetIds(
+            List<Asset> assets,
+            out HashSet<SdmObjectReference<Asset>> parentAssetIds,
+            out HashSet<SdmObjectReference<Asset>> destinationParentAssetIds)
+        {
+            parentAssetIds = new HashSet<SdmObjectReference<Asset>>();
+            destinationParentAssetIds = new HashSet<SdmObjectReference<Asset>>();
+
             foreach (var asset in assets)
             {
                 if (asset.Location.ParentAsset.HasValue() && ShouldValidateHolder(asset))
@@ -139,26 +154,39 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
                     destinationParentAssetIds.Add(asset.DestinationLocation.ParentAsset);
                 }
             }
+        }
 
-            // Load all parent assets
+        private void LoadParentAssets(
+            PlacementValidationContext context,
+            HashSet<SdmObjectReference<Asset>> parentAssetIds,
+            HashSet<SdmObjectReference<Asset>> destinationParentAssetIds,
+            List<string> assetIds)
+        {
             foreach (var parentId in parentAssetIds.Union(destinationParentAssetIds))
             {
                 var parent = _entityLoader.LoadAsset(parentId);
-                if (parent != null)
+                if (parent == null)
                 {
-                    context.LoadedParentAssets[parentId] = parent;
+                    continue;
+                }
 
-                    // Load existing children (excluding batch); the destination does not check occupancy
-                    if (parentAssetIds.Contains(parentId))
-                    {
-                        var children = _entityLoader.FindChildAssets(parentId, assetIds);
-                        context.ExistingChildrenInParents[parentId] = children;
-                    }
+                context.LoadedParentAssets[parentId] = parent;
+
+                // Load existing children (excluding batch); the destination does not check occupancy
+                if (parentAssetIds.Contains(parentId))
+                {
+                    context.ExistingChildrenInParents[parentId] = _entityLoader.FindChildAssets(parentId, assetIds);
                 }
             }
+        }
 
-            // Collect all unique rack IDs
+        /// <summary>
+        /// Collects all unique rack IDs of the current location and of the destination.
+        /// </summary>
+        private static HashSet<string> CollectRackIds(List<Asset> assets)
+        {
             var rackIds = new HashSet<string>();
+
             foreach (var asset in assets)
             {
                 if (asset.Location.RackId.HasValue() && ShouldValidateRack(asset))
@@ -172,25 +200,24 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
                 }
             }
 
-            // Load all racks
+            return rackIds;
+        }
+
+        private void LoadRacks(PlacementValidationContext context, HashSet<string> rackIds, List<string> assetIds)
+        {
             foreach (var rackId in rackIds)
             {
                 var rack = _entityLoader.LoadRack(rackId);
-                if (rack != null)
-                {
-                    context.LoadedRacks[rackId] = rack;
-
-                    // Load existing assets in rack (excluding batch)
-                    var assetsInRack = _entityLoader.FindAssetsInRack(rackId, assetIds);
-                    context.ExistingAssetsInRacks[rackId] = assetsInRack;
-                }
-                else
+                if (rack == null)
                 {
                     throw new InvalidOperationException($"Rack with ID '{rackId}' not found during context building.");
                 }
-            }
 
-            return context;
+                context.LoadedRacks[rackId] = rack;
+
+                // Load existing assets in rack (excluding batch)
+                context.ExistingAssetsInRacks[rackId] = _entityLoader.FindAssetsInRack(rackId, assetIds);
+            }
         }
 
         /// <summary>
@@ -236,39 +263,56 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
                 return result;
             }
 
-            // Check existing children (from DB, excluding batch): same number AND same Hierarchy Role
-            if (context.ExistingChildrenInParents.TryGetValue(parentId, out var existingChildren))
+            if (IsHolderOccupiedByExistingChild(parentId, holderNumber, hierarchyRole, context))
             {
-                var occupied = existingChildren
-                    .FirstOrDefault(c => c.Location.HolderNumber == holderNumber &&
-                                         ResolveHierarchyRole(c, context) == hierarchyRole);
-
-                if (occupied != null)
-                {
-                    result.AddFailReason(AssetValidationField.HolderNumber,
-                        $"Holder Number '{holderNumber}' is already occupied on the Parent Asset by another asset.");
-                    return result;
-                }
+                result.AddFailReason(AssetValidationField.HolderNumber,
+                    $"Holder Number '{holderNumber}' is already occupied on the Parent Asset by another asset.");
+                return result;
             }
 
-            // Check for conflicts within the batch: same number AND same Hierarchy Role
-            for (int i = 0; i < context.AssetsBeingValidated.Count; i++)
+            if (HasBatchHolderConflict(assetIndex, parentId, holderNumber, hierarchyRole, context))
             {
-                if (i == assetIndex) continue; // Skip self
-
-                var other = context.AssetsBeingValidated[i];
-                if (other.Location.ParentAsset.HasValue() &&
-                    other.Location.ParentAsset.Identifier == parentId &&
-                    other.Location.HolderNumber == holderNumber &&
-                    ResolveHierarchyRole(other, context) == hierarchyRole)
-                {
-                    result.AddFailReason(AssetValidationField.HolderNumber,
-                        $"Holder Number '{holderNumber}' conflicts with another asset in the same batch.");
-                    break;
-                }
+                result.AddFailReason(AssetValidationField.HolderNumber,
+                    $"Holder Number '{holderNumber}' conflicts with another asset in the same batch.");
             }
 
             return result;
+        }
+
+        // Existing children (from DB, excluding batch): same number AND same Hierarchy Role
+        private bool IsHolderOccupiedByExistingChild(
+            string parentId,
+            long? holderNumber,
+            SlcAsset_Management.Enums.HierarchyRoleEnum? hierarchyRole,
+            PlacementValidationContext context)
+        {
+            return context.ExistingChildrenInParents.TryGetValue(parentId, out var existingChildren)
+                && existingChildren.Any(c => OccupiesHolder(c, holderNumber, hierarchyRole, context));
+        }
+
+        // Conflicts within the batch (excluding the asset itself): same parent, same number AND same Hierarchy Role
+        private bool HasBatchHolderConflict(
+            int assetIndex,
+            string parentId,
+            long? holderNumber,
+            SlcAsset_Management.Enums.HierarchyRoleEnum? hierarchyRole,
+            PlacementValidationContext context)
+        {
+            return context.AssetsBeingValidated
+                .Where((other, i) => i != assetIndex
+                    && other.Location.ParentAsset.HasValue()
+                    && other.Location.ParentAsset.Identifier == parentId)
+                .Any(other => OccupiesHolder(other, holderNumber, hierarchyRole, context));
+        }
+
+        private bool OccupiesHolder(
+            Asset asset,
+            long? holderNumber,
+            SlcAsset_Management.Enums.HierarchyRoleEnum? hierarchyRole,
+            PlacementValidationContext context)
+        {
+            return asset.Location.HolderNumber == holderNumber
+                && ResolveHierarchyRole(asset, context) == hierarchyRole;
         }
 
         /// <summary>
