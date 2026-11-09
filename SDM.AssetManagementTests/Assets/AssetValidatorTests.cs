@@ -13,6 +13,7 @@
     using Skyline.DataMiner.SDM.AssetManagement.Common.Exceptions;
     using Skyline.DataMiner.SDM.AssetManagement.Common.Validation;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
+    using Skyline.DataMiner.SDM.AssetManagement.Validation;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
     using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
     using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
@@ -2175,6 +2176,161 @@
                 {
                     ParentAsset = new SdmObjectReference<Asset>(destinationParent.Identifier),
                     HolderNumber = holderNumber,
+                },
+            };
+        }
+
+        #endregion
+
+        #region Placement Validator Direct Tests
+
+        [TestMethod]
+        public void PlacementValidator_WithRackButNoPosition_ShouldNotFailTheBatch()
+        {
+            // Arrange
+            var rack = GetBottomRack();
+            var rackClass = CreateRackClass(tagged: true, heightU: 1);
+            var asset = NewRackAsset("PLC-NOPOS", rackClass, rack, position: null);
+
+            // Act
+            var results = new PlacementValidator(Helper.CreateEntityLoader()).ValidateBulkPlacements(new List<Asset> { asset });
+
+            // Assert
+            results.Single().IsValid.Should().BeTrue();
+        }
+
+        [TestMethod]
+        public void PlacementValidator_WithParentButNoHolderNumber_ShouldNotFail()
+        {
+            // Arrange
+            var parent = CreateParentWithHolders((1, SlcAsset_Management.Enums.HierarchyRoleEnum.Card));
+            var cardClass = CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum.Card);
+            var child = NewChildAsset("PLC-NOHOLDER", cardClass, parent, 1);
+            child.Location.HolderNumber = null;
+
+            // Act
+            var results = new PlacementValidator(Helper.CreateEntityLoader()).ValidateBulkPlacements(new List<Asset> { child });
+
+            // Assert
+            results.Single().IsValid.Should().BeTrue();
+        }
+
+        [TestMethod]
+        public void PlacementValidator_WithAssetClassWithoutRackUnitConsumerTag_ShouldIgnoreHeightInRack()
+        {
+            // Arrange
+            var rack = GetBottomRack();
+            var untaggedClass = CreateRackClass(tagged: false, heightU: 3);
+            var asset = NewRackAsset("PLC-UNTAGGED", untaggedClass, rack, position: (long)rack.Capacity.MaximumRackCapacity);
+
+            // Act
+            var results = new PlacementValidator(Helper.CreateEntityLoader()).ValidateBulkPlacements(new List<Asset> { asset });
+
+            // Assert: a tagged class of the same height would extend beyond the rack
+            results.Single().IsValid.Should().BeTrue();
+        }
+
+        [TestMethod]
+        public void PlacementValidator_WithUntaggedNeighbourAtSamePosition_ShouldNotBlock()
+        {
+            // Arrange
+            var rack = GetBottomRack();
+            var untaggedClass = CreateRackClass(tagged: false, heightU: 2);
+            var taggedClass = CreateRackClass(tagged: true, heightU: 2);
+            Helper.AssetManagement.Assets.Create(NewRackAsset("PLC-NEIGHBOUR", untaggedClass, rack, position: 10));
+            var asset = NewRackAsset("PLC-TAGGED", taggedClass, rack, position: 10);
+
+            // Act
+            var results = new PlacementValidator(Helper.CreateEntityLoader()).ValidateBulkPlacements(new List<Asset> { asset });
+
+            // Assert
+            results.Single().IsValid.Should().BeTrue();
+        }
+
+        [TestMethod]
+        public void PlacementValidator_WithUnchangedRackLocation_ShouldNotRevalidateExistingAsset()
+        {
+            // Arrange
+            var rack = GetBottomRack();
+            var taggedClass = CreateRackClass(tagged: true, heightU: 2);
+            var created = Helper.AssetManagement.Assets.Create(NewRackAsset("PLC-UNCHANGED-RACK", taggedClass, rack, position: 10));
+            var existing = Helper.AssetManagement.Assets.Read(AssetExposers.Identifier.Equal(created.Identifier)).Single();
+            existing.Name = "Renamed Rack Asset";
+            var incoming = NewRackAsset("PLC-INCOMING-RACK", taggedClass, rack, position: 10);
+
+            // Act
+            var results = new PlacementValidator(Helper.CreateEntityLoader()).ValidateBulkPlacements(new List<Asset> { existing, incoming });
+
+            // Assert: only the asset whose location is being set is validated
+            results[0].IsValid.Should().BeTrue("the existing asset's rack location did not change");
+            results[1].IsValid.Should().BeFalse();
+        }
+
+        [TestMethod]
+        public void PlacementValidator_WithUnchangedHolderLocation_ShouldNotRevalidateExistingAsset()
+        {
+            // Arrange
+            var parent = CreateParentWithHolders((1, SlcAsset_Management.Enums.HierarchyRoleEnum.Card));
+            var cardClass = CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum.Card);
+            var created = Helper.AssetManagement.Assets.Create(NewChildAsset("PLC-UNCHANGED-HOLDER", cardClass, parent, 1));
+            var existing = Helper.AssetManagement.Assets.Read(AssetExposers.Identifier.Equal(created.Identifier)).Single();
+            existing.Name = "Renamed Holder Asset";
+            var incoming = NewChildAsset("PLC-INCOMING-HOLDER", cardClass, parent, 1);
+
+            // Act
+            var results = new PlacementValidator(Helper.CreateEntityLoader()).ValidateBulkPlacements(new List<Asset> { existing, incoming });
+
+            // Assert
+            results[0].IsValid.Should().BeTrue("the existing asset's holder location did not change");
+            results[1].IsValid.Should().BeFalse();
+        }
+
+        private Rack GetBottomRack()
+        {
+            Helper.PopulateWithDemoData(DemoDataLayer.Racks);
+            var rack = Helper.TestData.Racks.FirstOrDefault(r => r.Position == SlcFacility_Management.Enums.RackpositionenumEnum.Bottom);
+            if (rack == null)
+            {
+                Assert.Inconclusive("No bottom-to-top rack found in test data.");
+            }
+
+            return rack;
+        }
+
+        private AssetClass CreateRackClass(bool tagged, long heightU)
+        {
+            var deviceType = tagged
+                ? Helper.TestData.RackMountableDeviceType()
+                : Helper.TestData.DeviceTypes.First(d =>
+                    !d.TagsInfo.Tags.Contains(SlcAsset_Management.Enums.TagOption.RackUnitConsumer) &&
+                    !d.TagsInfo.Tags.Contains(SlcAsset_Management.Enums.TagOption.PowerProvider));
+
+            return Helper.AssetManagement.AssetClasses.Create(new AssetClass
+            {
+                Manufacturer = SDM.AssetManagement.Tests.Setup.PeopleApiMock.NewManufacturer(),
+                Name = $"Rack class {Guid.NewGuid():N}",
+                DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier),
+                State = SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Active,
+                Height = 4.45,
+                Width = 10,
+                Depth = 1,
+                HeightU = heightU,
+                Weight = 1,
+            });
+        }
+
+        private static Asset NewRackAsset(string suffix, AssetClass assetClass, Rack rack, long? position)
+        {
+            return new Asset
+            {
+                AssetID = $"RACK-{suffix}",
+                Name = $"Rack Asset {suffix}",
+                AssetClassId = new SdmObjectReference<AssetClass>(assetClass.Identifier),
+                Location =
+                {
+                    RackId = new SdmObjectReference<Rack>(rack.Identifier),
+                    RackPosition = position,
+                    Side = SlcAsset_Management.Enums.SideEnum.Front,
                 },
             };
         }

@@ -1019,61 +1019,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
 
         #endregion
 
-        #region Helper Methods (Database Access)
-
-        private ValidationResult ValidateRackSpaceAvailability(Asset asset)
-        {
-            var result = new ValidationResult();
-
-            if (!asset.Location.RackId.HasValue() || asset.Location.RackPosition == null)
-            {
-                return result;
-            }
-
-            try
-            {
-                var (assetClass, deviceType) = _entityLoader.LoadAssetClassAndDeviceType(asset);
-
-                if (!deviceType.TagsInfo.Tags.Contains(SlcAsset_Management.Enums.TagOption.RackUnitConsumer))
-                {
-                    return result;
-                }
-
-                if (assetClass.HeightU == default || assetClass.HeightU <= 0)
-                {
-                    return result;
-                }
-
-                var rack = _entityLoader.LoadRack(asset.Location.RackId);
-                if (rack == null)
-                {
-                    result.AddFailReason(AssetValidationField.RackId, "Rack not found.");
-                    return result;
-                }
-
-                if (asset.Location.RackPosition > rack.Capacity.MaximumRackCapacity)
-                {
-                    result.AddFailReason(AssetValidationField.RackPosition,
-                        $"Invalid Position: Must be within Rack (max {rack.Capacity.MaximumRackCapacity} units).");
-                    return result;
-                }
-
-                 result.AddFailuresFrom(ValidateAssetPlacement(
-                    asset,
-                    asset.Location.RackId.Identifier,
-                    (int)asset.Location.RackPosition));
-            }
-            catch (Exception ex)
-            {
-                result.AddFailReason(AssetValidationField.RackId,
-                    $"Error validating rack space: {ex.Message}");
-            }
-
-            return result;
-        }
-
-        #endregion
-
         /// <summary>
         /// Validates if an asset can be placed at a specific position in a rack.
         /// Automatically loads all necessary data (rack, other assets, reservations).
