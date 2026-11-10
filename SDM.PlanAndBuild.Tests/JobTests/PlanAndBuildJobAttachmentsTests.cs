@@ -51,6 +51,39 @@
 		}
 
 		[TestMethod]
+		public void AddJobAttachment_DuplicateFilePathDifferentCase_ShouldThrow()
+		{
+			var job = new PlanAndBuildJob();
+			job.AddJobAttachment(new JobAttachment { FilePath = @"C:\File1.pdf" });
+
+			Action act = () => job.AddJobAttachment(new JobAttachment { FilePath = @"c:\FILE1.PDF" });
+
+			act.Should().Throw<InvalidOperationException>();
+		}
+
+		[TestMethod]
+		public void JobAttachment_FilePathDifferingOnlyInCase_ShouldBeEqualWithSameHashCode()
+		{
+			var at = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+			var left = new JobAttachment { FilePath = @"C:\File1.pdf", AttachedAt = at, AttachedBy = "user" };
+			var right = new JobAttachment { FilePath = @"c:\FILE1.PDF", AttachedAt = at, AttachedBy = "user" };
+
+			left.Should().Be(right);
+			left.GetHashCode().Should().Be(right.GetHashCode());
+		}
+
+		[TestMethod]
+		public void RemoveItemFromJobAttachments_DifferentCase_ShouldBeRemoved()
+		{
+			var job = new PlanAndBuildJob();
+			job.AddJobAttachment(new JobAttachment { FilePath = @"C:\File1.pdf" });
+
+			job.RemoveItemFromJobAttachments(new JobAttachment { FilePath = @"c:\FILE1.PDF" });
+
+			job.Attachments.Should().BeEmpty();
+		}
+
+		[TestMethod]
 		public void RemoveItemFromJobAttachments_ExistingAttachment_ShouldBeRemoved()
 		{
 			var job = new PlanAndBuildJob();

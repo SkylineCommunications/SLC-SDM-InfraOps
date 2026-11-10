@@ -61,6 +61,72 @@ namespace SDM.AssetManagement.Tests.AssetClasses
         }
 
         [TestMethod]
+        public void AddAttachment_DuplicateFilePathDifferentCase_ShouldThrow()
+        {
+            var assetClass = new AssetClass();
+            assetClass.AddAttachment(new Attachment { FilePath = @"C:\file1.pdf" });
+
+            Action act = () => assetClass.AddAttachment(new Attachment { FilePath = @"C:\FILE1.PDF" });
+
+            act.Should().Throw<InvalidOperationException>();
+        }
+
+        [TestMethod]
+        public void Attachment_FilePathDifferingOnlyInCase_ShouldBeEqualWithSameHashCode()
+        {
+            var lower = new Attachment { FilePath = @"C:\images\front.png" };
+            var upper = new Attachment { FilePath = @"C:\IMAGES\FRONT.PNG" };
+
+            lower.Should().Be(upper);
+            lower.GetHashCode().Should().Be(upper.GetHashCode());
+        }
+
+        [TestMethod]
+        public void AssetClass_ImagePathsDifferingOnlyInCase_ShouldBeEqualWithSameHashCode()
+        {
+            var lower = new AssetClass { FrontImage = @"C:\images\front.png", BackImage = @"C:\images\back.png" };
+            var upper = new AssetClass { FrontImage = @"C:\IMAGES\FRONT.PNG", BackImage = @"C:\IMAGES\BACK.PNG" };
+
+            lower.Should().Be(upper);
+            lower.GetHashCode().Should().Be(upper.GetHashCode());
+        }
+
+        [TestMethod]
+        public void SettingImage_WhenAttachmentExistsWithDifferentCase_ShouldNotAddDuplicate()
+        {
+            var assetClass = new AssetClass();
+            assetClass.AddAttachment(new Attachment { FilePath = @"C:\images\front.png" });
+
+            assetClass.FrontImage = @"C:\IMAGES\FRONT.PNG";
+
+            assetClass.Attachments.Should().ContainSingle();
+        }
+
+        [TestMethod]
+        public void RemoveItemFromAttachments_WhenFrontImageDifferentCase_ShouldThrow()
+        {
+            var assetClass = new AssetClass();
+            assetClass.FrontImage = @"C:\images\front.png";
+
+            Action act = () => assetClass.RemoveItemFromAttachments(new Attachment { FilePath = @"C:\IMAGES\FRONT.PNG" });
+
+            act.Should().Throw<InvalidOperationException>();
+            assetClass.Attachments.Should().ContainSingle();
+        }
+
+        [TestMethod]
+        public void RemoveAttachmentAndDependencies_WhenFrontImageDifferentCase_ShouldClearImageAndRemove()
+        {
+            var assetClass = new AssetClass();
+            assetClass.FrontImage = @"C:\images\front.png";
+
+            assetClass.RemoveAttachmentAndDependencies(new Attachment { FilePath = @"C:\IMAGES\FRONT.PNG" });
+
+            assetClass.FrontImage.Should().BeNull();
+            assetClass.Attachments.Should().BeEmpty();
+        }
+
+        [TestMethod]
         public void RemoveItemFromAttachments_ExistingAttachment_ShouldBeRemoved()
         {
             var assetClass = new AssetClass();

@@ -1,4 +1,4 @@
-namespace Skyline.DataMiner.SDM.AssetManagement.Extensions
+﻿namespace Skyline.DataMiner.SDM.AssetManagement.Extensions
 {
     using System;
     using System.Linq;
@@ -15,7 +15,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Extensions
         /// Adds an <see cref="Attachment"/> to <see cref="Asset.Attachments"/>.
         /// </summary>
         /// <exception cref="ArgumentNullException"><paramref name="attachment"/> is <c>null</c>.</exception>
-        /// <exception cref="InvalidOperationException">An attachment with the same <see cref="Attachment.FilePath"/> already exists.</exception>
+        /// <exception cref="InvalidOperationException">An attachment with the same <see cref="Attachment.FilePath"/> (case-insensitive) already exists.</exception>
         /// <remarks>
         /// This only updates the in-memory <see cref="Asset"/> instance. It is not persisted
         /// to the DOM/database until the asset is saved.
@@ -34,7 +34,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Extensions
 
             var list = asset.Attachments;
 
-            if (list.Any(a => a.FilePath == attachment.FilePath))
+            if (list.Any(a => string.Equals(a.FilePath, attachment.FilePath, StringComparison.OrdinalIgnoreCase)))
             {
                 throw new InvalidOperationException("An Attachment with the same File Path already exists.");
             }
@@ -62,7 +62,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Extensions
             }
 
             var list = asset.Attachments;
-            var found = list.FirstOrDefault(a => a.FilePath == attachment.FilePath);
+            var found = list.FirstOrDefault(a => string.Equals(a.FilePath, attachment.FilePath, StringComparison.OrdinalIgnoreCase));
 
             if (found == null)
             {
