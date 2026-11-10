@@ -253,7 +253,7 @@
                 return true;
             }
 
-            if (!assetClass.Attachments.Any(a => a?.FilePath == imagePath))
+            if (!assetClass.Attachments.Any(a => a != null && string.Equals(a.FilePath, imagePath, StringComparison.OrdinalIgnoreCase)))
             {
                 result.AddFailReason(field,
                     $"Asset Class {imageName} must be part of the Attachments.");

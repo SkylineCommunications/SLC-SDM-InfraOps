@@ -240,7 +240,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Extensions
         /// Adds a <see cref="JobAttachment"/> to <see cref="PlanAndBuildJob.Attachments"/>.
         /// </summary>
         /// <exception cref="ArgumentNullException"><paramref name="jobAttachment"/> is <c>null</c>.</exception>
-        /// <exception cref="InvalidOperationException">An attachment with the same <see cref="JobAttachment.FilePath"/> already exists.</exception>
+        /// <exception cref="InvalidOperationException">An attachment with the same <see cref="JobAttachment.FilePath"/> (case-insensitive) already exists.</exception>
         /// <remarks>
         /// This only updates the in-memory <see cref="PlanAndBuildJob"/> instance. It is not persisted
         /// to the DOM/database until the job is saved (e.g. via <c>CreateOrUpdate</c>/<c>Update</c> on
@@ -255,7 +255,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Extensions
 
             var list = job.Attachments;
 
-            if (list.Any(attachment => attachment.FilePath == jobAttachment.FilePath))
+            if (list.Any(attachment => string.Equals(attachment.FilePath, jobAttachment.FilePath, StringComparison.OrdinalIgnoreCase)))
             {
                 throw new InvalidOperationException("An Attachment with the same File Path already exists.");
             }
@@ -266,7 +266,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Extensions
 
         /// <summary>
         /// Removes the <see cref="JobAttachment"/> matching <paramref name="jobAttachment"/>'s
-        /// <see cref="JobAttachment.FilePath"/> from <see cref="PlanAndBuildJob.Attachments"/>.
+        /// <see cref="JobAttachment.FilePath"/> (case-insensitive) from <see cref="PlanAndBuildJob.Attachments"/>.
         /// </summary>
         /// <exception cref="ArgumentNullException"><paramref name="jobAttachment"/> is <c>null</c>.</exception>
         /// <exception cref="ArgumentException">No matching attachment was found.</exception>
@@ -283,7 +283,7 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Extensions
             }
 
             var list = job.Attachments;
-            var found = list.FirstOrDefault(attachment => attachment.FilePath == jobAttachment.FilePath);
+            var found = list.FirstOrDefault(attachment => string.Equals(attachment.FilePath, jobAttachment.FilePath, StringComparison.OrdinalIgnoreCase));
 
             if (found == null)
             {

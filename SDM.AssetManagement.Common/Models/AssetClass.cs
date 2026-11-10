@@ -417,7 +417,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         private void EnsureImageAttachment(string imagePath)
         {
             if (!string.IsNullOrWhiteSpace(imagePath)
-                && !Attachments.Any(a => a?.FilePath == imagePath))
+                && !Attachments.Any(a => a != null && string.Equals(a.FilePath, imagePath, StringComparison.OrdinalIgnoreCase)))
             {
                 Attachments.Add(new Attachment { FilePath = imagePath });
             }

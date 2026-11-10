@@ -102,6 +102,7 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
             .WithMiddleware(new IdentifierMiddleware<PortType>());
         Connections = connectionDomRepository
             .WithMiddleware(new ConnectionValidationMiddleware(_connectionValidator))
+            .WithMiddleware(new ConnectionPortTypeMiddleware(entityLoader))
             .WithMiddleware(new IdentifierMiddleware<Connection>());
         CableTypes = cableTypeRepository
             .WithMiddleware(new CableTypeValidationMiddleware(_cableTypeValidator))
