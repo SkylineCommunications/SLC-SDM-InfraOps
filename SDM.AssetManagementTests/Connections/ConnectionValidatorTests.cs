@@ -84,7 +84,6 @@ namespace SDM.AssetManagement.Tests.Connections
                 Source =
                 {
                     Port = new ISdmObjectReference<IPort>(sourcePort.PortId),
-                    PortType = new SdmObjectReference<PortType>(sourcePort.PortType.Identifier),
                 },
                 Destination = { Port = default },
             };
@@ -126,7 +125,7 @@ namespace SDM.AssetManagement.Tests.Connections
         }
 
         [TestMethod]
-        public void ValidateConnection_WithMismatchedPortTypeCategory_ShouldReturnPortTypeFailure()
+        public void ValidateConnection_WithPowerPortOnDataConnection_ShouldReturnPortFailure()
         {
             var source = CreateDataEndpoint("Source", SlcAsset_Management.Enums.Outputtype.IO);
             var powerEndpoint = CreatePowerEndpoint("PowerDest", SlcAsset_Management.Enums.Outputtype.IO, isPowerProvider: true);
@@ -136,12 +135,24 @@ namespace SDM.AssetManagement.Tests.Connections
             var result = ValidateConnection(connection);
 
             result.IsValid.Should().BeFalse();
-            result.TryGetFailReason(ConnectionValidationField.DestinationPortType, out _).Should().BeTrue();
             result.TryGetFailReason(ConnectionValidationField.DestinationPort, out _).Should().BeTrue();
         }
 
         [TestMethod]
-        public void ValidateConnection_WithEndpointPortTypeNotMatchingConnectedPort_ShouldReturnPortTypeFailure()
+        public void Create_WithoutPortTypes_ShouldDerivePortTypesFromPorts()
+        {
+            var source = CreateDataEndpoint("Source", SlcAsset_Management.Enums.Outputtype.IO);
+            var destination = CreateDataEndpoint("Destination", SlcAsset_Management.Enums.Outputtype.IO);
+
+            Helper.AssetManagement.Connections.Create(BuildConnection(SlcAsset_Management.Enums.ConnectionType.Data, source, destination));
+
+            var persisted = Helper.AssetManagement.Connections.Read(new TRUEFilterElement<Connection>()).Single();
+            persisted.Source.PortType.Identifier.Should().Be(source.PortType.Identifier);
+            persisted.Destination.PortType.Identifier.Should().Be(destination.PortType.Identifier);
+        }
+
+        [TestMethod]
+        public void Create_WithPortTypeNotMatchingPort_ShouldOverwriteWithPortsPortType()
         {
             var source = CreateDataEndpoint("Source", SlcAsset_Management.Enums.Outputtype.IO);
             var destination = CreateDataEndpoint("Destination", SlcAsset_Management.Enums.Outputtype.IO);
@@ -150,11 +161,39 @@ namespace SDM.AssetManagement.Tests.Connections
             var connection = BuildConnection(SlcAsset_Management.Enums.ConnectionType.Data, source, destination);
             connection.Source.PortType = new SdmObjectReference<PortType>(otherDataPortType.Identifier);
 
-            var result = ValidateConnection(connection);
+            Helper.AssetManagement.Connections.Create(connection);
 
-            result.IsValid.Should().BeFalse();
-            result.TryGetFailReason(ConnectionValidationField.SourcePortType, out var reason).Should().BeTrue();
-            reason.Should().Contain("does not match");
+            var persisted = Helper.AssetManagement.Connections.Read(new TRUEFilterElement<Connection>()).Single();
+            persisted.Source.PortType.Identifier.Should().Be(source.PortType.Identifier);
+        }
+
+        [TestMethod]
+        public void Update_WithChangedDestinationPort_ShouldDeriveNewPortType()
+        {
+            var source = CreateDataEndpoint("Source", SlcAsset_Management.Enums.Outputtype.IO);
+            var destination = CreateDataEndpoint("Destination", SlcAsset_Management.Enums.Outputtype.IO);
+            var newDestination = CreateDataEndpoint("NewDestination", SlcAsset_Management.Enums.Outputtype.IO);
+
+            var connection = Helper.AssetManagement.Connections.Create(BuildConnection(SlcAsset_Management.Enums.ConnectionType.Data, source, destination));
+            connection.Destination.Port = new ISdmObjectReference<IPort>(newDestination.PortId);
+
+            Helper.AssetManagement.Connections.Update(connection);
+
+            var persisted = Helper.AssetManagement.Connections.Read(new TRUEFilterElement<Connection>()).Single();
+            persisted.Destination.PortType.Identifier.Should().Be(newDestination.PortType.Identifier);
+        }
+
+        [TestMethod]
+        public void CreateOrUpdate_WithoutPortTypes_ShouldDerivePortTypesFromPorts()
+        {
+            var source = CreateDataEndpoint("Source", SlcAsset_Management.Enums.Outputtype.IO);
+            var destination = CreateDataEndpoint("Destination", SlcAsset_Management.Enums.Outputtype.IO);
+
+            Helper.AssetManagement.Connections.CreateOrUpdate(new[] { BuildConnection(SlcAsset_Management.Enums.ConnectionType.Data, source, destination) });
+
+            var persisted = Helper.AssetManagement.Connections.Read(new TRUEFilterElement<Connection>()).Single();
+            persisted.Source.PortType.Identifier.Should().Be(source.PortType.Identifier);
+            persisted.Destination.PortType.Identifier.Should().Be(destination.PortType.Identifier);
         }
 
         [TestMethod]
@@ -170,12 +209,10 @@ namespace SDM.AssetManagement.Tests.Connections
                 Source =
                 {
                     Port = new ISdmObjectReference<IPort>(sourcePort.PortId),
-                    PortType = new SdmObjectReference<PortType>(sourcePort.PortType.Identifier),
                 },
                 Destination =
                 {
                     Port = new ISdmObjectReference<IPort>(sourcePort.PortId),
-                    PortType = new SdmObjectReference<PortType>(sourcePort.PortType.Identifier),
                 },
             };
 
@@ -535,7 +572,7 @@ namespace SDM.AssetManagement.Tests.Connections
             result.IsValid.Should().BeFalse();
             result.TryGetFailReason(ConnectionValidationField.CableLength, out _).Should().BeTrue();
             result.TryGetFailReason(ConnectionValidationField.DestinationPort, out _).Should().BeTrue();
-            result.TryGetFailReason(ConnectionValidationField.DestinationPortType, out _).Should().BeTrue();
+            result.TryGetFailReason(ConnectionValidationField.DestinationPortType, out _).Should().BeFalse();
         }
 
         [TestMethod]
@@ -581,12 +618,10 @@ namespace SDM.AssetManagement.Tests.Connections
                 Source =
                 {
                     Port = new ISdmObjectReference<IPort>(source?.PortId),
-                    PortType = new SdmObjectReference<PortType>(source?.PortType.Identifier),
                 },
                 Destination =
                 {
                     Port = new ISdmObjectReference<IPort>(destination?.PortId),
-                    PortType = new SdmObjectReference<PortType>(destination?.PortType.Identifier),
                 },
             };
         }
@@ -643,12 +678,10 @@ namespace SDM.AssetManagement.Tests.Connections
                 Source =
                 {
                     Port = new ISdmObjectReference<IPort>(source.PortId),
-                    PortType = new SdmObjectReference<PortType>(source.PortType.Identifier),
                 },
                 Destination =
                 {
                     Port = new ISdmObjectReference<IPort>(destination.PortId),
-                    PortType = new SdmObjectReference<PortType>(destination.PortType.Identifier),
                 },
             };
 
@@ -666,12 +699,10 @@ namespace SDM.AssetManagement.Tests.Connections
                 Source =
                 {
                     Port = new ISdmObjectReference<IPort>(source.PortId),
-                    PortType = new SdmObjectReference<PortType>(source.PortType.Identifier),
                 },
                 Destination =
                 {
                     Port = new ISdmObjectReference<IPort>(destination.PortId),
-                    PortType = new SdmObjectReference<PortType>(destination.PortType.Identifier),
                 },
             };
 
