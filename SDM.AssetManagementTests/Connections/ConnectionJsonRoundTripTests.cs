@@ -30,10 +30,8 @@ namespace SDM.AssetManagement.Tests.Connections
             };
             connection.Source.CableTag = "SRC";
             connection.Source.Port = new ISdmObjectReference<IPort>(Guid.NewGuid().ToString());
-            connection.Source.PortType = new SdmObjectReference<PortType>(Guid.NewGuid().ToString());
             connection.Destination.CableTag = "DST";
             connection.Destination.Port = new ISdmObjectReference<IPort>(Guid.NewGuid().ToString());
-            connection.Destination.PortType = new SdmObjectReference<PortType>(Guid.NewGuid().ToString());
 
             string json = InfraOpsJsonConvert.SerializeObject(connection);
             var restored = InfraOpsJsonConvert.DeserializeObject<Connection>(json);
@@ -42,11 +40,27 @@ namespace SDM.AssetManagement.Tests.Connections
             restored.CableType.Should().Be(connection.CableType);
             restored.ConnectionType.Should().Be(SlcAsset_Management.Enums.ConnectionType.Power);
             restored.Source.Port.Should().Be(connection.Source.Port);
-            restored.Source.PortType.Should().Be(connection.Source.PortType);
             restored.Destination.Port.Should().Be(connection.Destination.Port);
-            restored.Destination.PortType.Should().Be(connection.Destination.PortType);
             restored.Should().Be(connection);
             InfraOpsJsonConvert.SerializeObject(restored).Should().Be(json);
+        }
+
+        [TestMethod]
+        public void Connection_EndpointPortTypes_ExportedButNotImported()
+        {
+            var sourcePortTypeId = Guid.NewGuid().ToString();
+            var destinationPortTypeId = Guid.NewGuid().ToString();
+            var connection = new Connection();
+            connection.Source.PortType = new SdmObjectReference<PortType>(sourcePortTypeId);
+            connection.Destination.PortType = new SdmObjectReference<PortType>(destinationPortTypeId);
+
+            string json = InfraOpsJsonConvert.SerializeObject(connection);
+            var restored = InfraOpsJsonConvert.DeserializeObject<Connection>(json);
+
+            json.Should().Contain($"\"PortType\":\"{sourcePortTypeId}\"");
+            json.Should().Contain($"\"PortType\":\"{destinationPortTypeId}\"");
+            restored.Source.PortType.Identifier.Should().BeNullOrEmpty();
+            restored.Destination.PortType.Identifier.Should().BeNullOrEmpty();
         }
 
         [TestMethod]

@@ -92,7 +92,7 @@
             }
 
             return
-                FilePath == other.FilePath &&
+                string.Equals(FilePath, other.FilePath, StringComparison.OrdinalIgnoreCase) &&
                 AttachedAt == other.AttachedAt &&
                 AttachedBy == other.AttachedBy;
         }
@@ -102,7 +102,7 @@
             unchecked
             {
                 int hash = 17;
-                hash = (hash * 23) + (FilePath?.GetHashCode() ?? 0);
+                hash = (hash * 23) + (FilePath != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(FilePath) : 0);
                 hash = (hash * 23) + (AttachedAt?.GetHashCode() ?? 0);
                 hash = (hash * 23) + (AttachedBy?.GetHashCode() ?? 0);
                 return hash;
