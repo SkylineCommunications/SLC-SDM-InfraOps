@@ -88,16 +88,14 @@
 
             [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.BuildPlanReady, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum>
             {
-                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Buildplanready_To_Installed,
-                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Installed_To_Inservice,
-                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Inservice_To_Notavailable,
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Buildplanready_To_Inplanning,
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Inplanning_To_Available,
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Available_To_Notavailable,
             },
             [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.BuildPlanReady, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum>
             {
-                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Buildplanready_To_Installed,
-                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Installed_To_Inservice,
-                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Inservice_To_Notavailable,
-                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Notavailable_To_Available,
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Buildplanready_To_Inplanning,
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Inplanning_To_Available,
 
             },
             [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.BuildPlanReady, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Installed)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum> { SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Buildplanready_To_Installed },
@@ -108,16 +106,14 @@
             },
             [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.BuildPlanReady, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Disposed)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum>
             {
-                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Buildplanready_To_Installed,
-                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Installed_To_Inservice,
-                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Inservice_To_Notavailable,
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Buildplanready_To_Inplanning,
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Inplanning_To_Available,
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Available_To_Notavailable,
                 SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Notavailable_To_Disposed,
             },
             [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.BuildPlanReady, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InPlanning)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum>
             {
-                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Buildplanready_To_Installed,
-                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Installed_To_Inservice,
-                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Inservice_To_Inplanning,
+                SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Buildplanready_To_Inplanning,
             },
 
             [(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.BuildPlanReady, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit)] = new List<SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum> { SlcAsset_Management.Behaviors.Asset_Behavior.TransitionsEnum.Buildplanready_To_Intransit },
