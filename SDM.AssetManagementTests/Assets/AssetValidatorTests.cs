@@ -1120,6 +1120,36 @@
         }
 
         [TestMethod]
+        public void ValidatePath_WithUnreachableTarget_ShouldFail()
+        {
+            var asset = new Asset
+            {
+                State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Disposed,
+            };
+
+            var result = AssetTransitionValidator.ValidatePath(
+                asset,
+                SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available);
+
+            result.IsValid.Should().BeFalse();
+        }
+
+        [TestMethod]
+        public void ValidatePath_WithSameState_ShouldPass()
+        {
+            var asset = new Asset
+            {
+                State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available,
+            };
+
+            var result = AssetTransitionValidator.ValidatePath(
+                asset,
+                SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available);
+
+            result.IsValid.Should().BeTrue();
+        }
+
+        [TestMethod]
         public void GetTransitionDestinationStates_NotAvailableToInService_ShouldReturnOrderedEnteredStates()
         {
             var enteredStates = StateMachine.GetTransitionDestinationStates(
