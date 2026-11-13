@@ -1,10 +1,8 @@
 namespace Skyline.DataMiner.SDM.AssetManagement.Extensions
 {
-    using System.Collections.Generic;
-    using System.Linq;
-
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
+    using Skyline.DataMiner.SDM.Extensions;
 
     using CategoriesEnum = SharedMappers.DomIds.SlcAsset_Management.Enums.CategoriesEnum;
 
@@ -20,7 +18,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Extensions
         /// port types without categories, or without the <see cref="CategoriesEnum.Power"/> category.
         /// </summary>
         /// <remarks>
-        /// <see cref="WithoutCategories"/> is required because NotContains does not match port types whose category field is absent.
+        /// <see cref="WithoutCategories"/> is required because NotContains does not match port types without categories.
         /// </remarks>
         /// <returns>A filter selecting all Data Port Types.</returns>
         public static FilterElement<PortType> DataPortTypes()
@@ -42,16 +40,11 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Extensions
 
         /// <summary>
         /// Gets a filter matching port types without any category.
-        /// A <see langword="null"/> Equals value is translated by the repository into a "category field does not exist" check.
         /// </summary>
         /// <returns>A filter selecting port types without categories.</returns>
         public static FilterElement<PortType> WithoutCategories()
         {
-            return new ManagedFilter<PortType, IEnumerable<CategoriesEnum>>(
-                PortTypeExposers.CategoryLinks.Categories,
-                Comparer.Equals,
-                null,
-                portType => portType?.CategoryLinks?.Categories == null || !portType.CategoryLinks.Categories.Any());
+            return PortTypeExposers.CategoryLinks.Categories.HasNoValue();
         }
     }
 }

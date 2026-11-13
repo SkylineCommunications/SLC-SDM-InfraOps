@@ -1,6 +1,8 @@
 ﻿namespace Skyline.DataMiner.SDM.Extensions
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
 
@@ -171,6 +173,30 @@
         public static ManagedFilter<TFilter, IObjectReference<TField>> HasNoValue<TFilter, TField>(this Exposer<TFilter, IObjectReference<TField>> exposer) where TFilter : class
         {
             return new ManagedFilter<TFilter, IObjectReference<TField>>(exposer, Comparer.Equals, null, (TFilter obj) => !exposer.internalFunc(obj).HasValue());
+        }
+
+        /// <summary>
+        /// Creates a filter that checks if the exposed collection field has at least one value.
+        /// </summary>
+        /// <typeparam name="TFilter">The type of the filter.</typeparam>
+        /// <typeparam name="TField">The type of the collection items.</typeparam>
+        /// <param name="exposer">The exposer that identifies the collection field to filter on.</param>
+        /// <returns>A <see cref="ManagedFilter{TFilter, TField}"/> that matches when the collection is not null and not empty.</returns>
+        public static ManagedFilter<TFilter, IEnumerable<TField>> HasValue<TFilter, TField>(this Exposer<TFilter, IEnumerable<TField>> exposer) where TFilter : class
+        {
+            return new ManagedFilter<TFilter, IEnumerable<TField>>(exposer, Comparer.NotEquals, null, (TFilter obj) => exposer.internalFunc(obj)?.Any() == true);
+        }
+
+        /// <summary>
+        /// Creates a filter that checks if the exposed collection field has no values.
+        /// </summary>
+        /// <typeparam name="TFilter">The type of the filter.</typeparam>
+        /// <typeparam name="TField">The type of the collection items.</typeparam>
+        /// <param name="exposer">The exposer that identifies the collection field to filter on.</param>
+        /// <returns>A <see cref="ManagedFilter{TFilter, TField}"/> that matches when the collection is null or empty.</returns>
+        public static ManagedFilter<TFilter, IEnumerable<TField>> HasNoValue<TFilter, TField>(this Exposer<TFilter, IEnumerable<TField>> exposer) where TFilter : class
+        {
+            return new ManagedFilter<TFilter, IEnumerable<TField>>(exposer, Comparer.Equals, null, (TFilter obj) => exposer.internalFunc(obj)?.Any() != true);
         }
     }
 }
