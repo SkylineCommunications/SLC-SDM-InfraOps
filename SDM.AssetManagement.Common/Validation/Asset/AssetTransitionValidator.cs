@@ -13,6 +13,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Common.Validation
     {
         /// <summary>
         /// Validates the asset against every state entered on the path to the target state.
+        /// Fails when no path exists to the target state; a transition to the current state is a no-op and valid.
         /// </summary>
         public static ValidationResult ValidatePath(
             Asset asset,
@@ -26,9 +27,17 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Common.Validation
                 return result;
             }
 
+            if (asset.State == targetState)
+            {
+                return result;
+            }
+
             var transitions = StateMachine.GetTransitionPath(asset.State, targetState);
             if (transitions.Count == 0)
             {
+                result.AddFailReason(
+                    AssetValidationHandler.AssetValidationField.Asset,
+                    $"State transition from {asset.State} to {targetState} is not allowed.");
                 return result;
             }
 
