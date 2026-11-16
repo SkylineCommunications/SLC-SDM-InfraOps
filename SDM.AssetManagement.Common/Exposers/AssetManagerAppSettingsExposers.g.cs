@@ -31,5 +31,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         public static readonly Exposer<AssetManagement.Models.AssetManagerAppSettings, TimeSpan?> HistoryTTL = new Exposer<AssetManagement.Models.AssetManagerAppSettings, TimeSpan?>((obj) => obj.HistoryTTL, "HistoryTTL");
         public static readonly Exposer<AssetManagement.Models.AssetManagerAppSettings, long?> HistoryLimit = new Exposer<AssetManagement.Models.AssetManagerAppSettings, long?>((obj) => obj.HistoryLimit, "HistoryLimit");
         public static readonly Exposer<AssetManagement.Models.AssetManagerAppSettings, bool> EnableResourceLink = new Exposer<AssetManagement.Models.AssetManagerAppSettings, bool>((obj) => obj.EnableResourceLink, "EnableResourceLink");
-    }
+        public static readonly Exposer<AssetManagement.Models.AssetManagerAppSettings, bool> EnableAutoAssetId = new Exposer<AssetManagement.Models.AssetManagerAppSettings, bool>((obj) => obj.EnableAutoAssetId, "EnableAutoAssetId");
+        public static readonly Exposer<AssetManagement.Models.AssetManagerAppSettings, long> AssetIdNextSequence = new Exposer<AssetManagement.Models.AssetManagerAppSettings, long>((obj) => obj.AssetIdNextSequence, "AssetIdNextSequence");
+        public static readonly Exposer<AssetManagement.Models.AssetManagerAppSettings, long> AssetIdIncrement = new Exposer<AssetManagement.Models.AssetManagerAppSettings, long>((obj) => obj.AssetIdIncrement, "AssetIdIncrement");
+        public static readonly Exposer<AssetManagement.Models.AssetManagerAppSettings, long> AssetIdMinimumDigits = new Exposer<AssetManagement.Models.AssetManagerAppSettings, long>((obj) => obj.AssetIdMinimumDigits, "AssetIdMinimumDigits");    }
 }

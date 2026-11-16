@@ -91,6 +91,10 @@
                 (SlcAsset_Management.Sections.AppSettings.HistoryTTL, typeof(TimeSpan), "History TTL"),
                 (SlcAsset_Management.Sections.AppSettings.HistoryLimit, typeof(long), "History Limit"),
                 (SlcAsset_Management.Sections.AppSettings.EnableResourceLink, typeof(bool), "Enable Resource Link"),
+                (SlcAsset_Management.Sections.AppSettings.EnableAutoAssetId, typeof(bool), "Enable Auto Asset Id"),
+                (SlcAsset_Management.Sections.AppSettings.AssetIdNextSequence, typeof(long), "Asset Id Next Sequence"),
+                (SlcAsset_Management.Sections.AppSettings.AssetIdIncrement, typeof(long), "Asset Id Increment"),
+                (SlcAsset_Management.Sections.AppSettings.AssetIdMinimumDigits, typeof(long), "Asset Id Minimum Digits"),
             };
 
             return BuildSectionDefinition(SlcAsset_Management.Sections.AppSettings.Id, "App Settings", fields);
