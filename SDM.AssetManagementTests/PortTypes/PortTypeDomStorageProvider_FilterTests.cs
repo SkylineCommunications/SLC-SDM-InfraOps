@@ -8,8 +8,10 @@
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using SDM.AssetManagement.Tests.Setup;
     using SharedMappers.DomIds;
+    using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.AssetManagement.Extensions;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.Extensions;
 
@@ -305,6 +307,144 @@
                 results.Should().HaveCount(expected.Length);
                 results.Should().BeEquivalentTo(expected);
             }
+        }
+
+        #endregion
+
+        #region Data/Power Port Type Filters
+
+        [TestMethod]
+        public void PortTypeDomStorageProvider_ReadDataPortTypes_MatchesIsDataPortType()
+        {
+            // Arrange
+            var portTypes = CreateCategoryMatrixPortTypes();
+
+            // Act
+            var results = Helper.AssetManagement.PortTypes.ReadDataPortTypes().ToList();
+            var expected = Helper.AssetManagement.PortTypes.Read(new TRUEFilterElement<PortType>()).Where(pt => pt.IsDataPortType()).ToList();
+
+            // Assert
+            using (new AssertionScope())
+            {
+                results.Should().BeEquivalentTo(expected);
+                results.Select(pt => pt.Identifier).Should().BeEquivalentTo(new[]
+                {
+                    portTypes["Networking"].Identifier,
+                    portTypes["NoCategories"].Identifier,
+                    portTypes["Data"].Identifier,
+                });
+                results.Should().NotContain(pt => pt.Identifier == portTypes["Power"].Identifier, "Power-only port types are not data port types");
+                results.Should().NotContain(pt => pt.Identifier == portTypes["Power+Data"].Identifier, "port types with the Power category are not data port types");
+            }
+        }
+
+        [TestMethod]
+        public void PortTypeDomStorageProvider_ReadDataPortTypes_DemoData_MatchesIsDataPortType()
+        {
+            // Arrange
+            Helper.PopulateWithDemoData(upTo: DemoDataLayer.PortTypes);
+
+            // Act
+            var results = Helper.AssetManagement.PortTypes.ReadDataPortTypes().ToList();
+            var expected = Helper.AssetManagement.PortTypes.Read(new TRUEFilterElement<PortType>()).Where(pt => pt.IsDataPortType()).ToList();
+
+            // Assert
+            using (new AssertionScope())
+            {
+                results.Should().NotBeEmpty();
+                results.Should().BeEquivalentTo(expected);
+            }
+        }
+
+        [TestMethod]
+        public void PortTypeDomStorageProvider_ReadPowerPortTypes_MatchesIsPowerPortType()
+        {
+            // Arrange
+            var portTypes = CreateCategoryMatrixPortTypes();
+
+            // Act
+            var results = Helper.AssetManagement.PortTypes.ReadPowerPortTypes().ToList();
+            var expected = Helper.AssetManagement.PortTypes.Read(new TRUEFilterElement<PortType>()).Where(pt => pt.IsPowerPortType()).ToList();
+
+            // Assert
+            using (new AssertionScope())
+            {
+                results.Should().BeEquivalentTo(expected);
+                results.Select(pt => pt.Identifier).Should().BeEquivalentTo(new[]
+                {
+                    portTypes["Power"].Identifier,
+                    portTypes["Power+Data"].Identifier,
+                });
+            }
+        }
+
+        [TestMethod]
+        public void PortTypeDomStorageProvider_ReadFilter_WithoutCategories()
+        {
+            // Arrange
+            var portTypes = CreateCategoryMatrixPortTypes();
+
+            // Act
+            var results = Helper.AssetManagement.PortTypes.Read(PortTypeFilters.WithoutCategories()).ToList();
+
+            // Assert
+            results.Select(pt => pt.Identifier).Should().BeEquivalentTo(new[] { portTypes["NoCategories"].Identifier });
+        }
+
+        [TestMethod]
+        public void PortTypeDomStorageProvider_ReadFilter_DataPortTypes_CombinedWithOtherFilter()
+        {
+            // Arrange
+            var portTypes = CreateCategoryMatrixPortTypes();
+            var filter = PortTypeFilters.DataPortTypes().AND(PortTypeExposers.Name.Equal(portTypes["Networking"].Name));
+
+            // Act
+            var results = Helper.AssetManagement.PortTypes.Read(filter).ToList();
+
+            // Assert
+            results.Select(pt => pt.Identifier).Should().BeEquivalentTo(new[] { portTypes["Networking"].Identifier });
+        }
+
+        private Dictionary<string, PortType> CreateCategoryMatrixPortTypes()
+        {
+            var cableTypeFks = Helper.CreateCableTypeReferences("Category Matrix Cable Type");
+            var portTypes = new Dictionary<string, PortType>
+            {
+                ["Power"] = NewPortType("Category Matrix Power", cableTypeFks, SlcAsset_Management.Enums.CategoriesEnum.Power),
+                ["Power+Data"] = NewPortType("Category Matrix Power+Data", cableTypeFks, SlcAsset_Management.Enums.CategoriesEnum.Power, SlcAsset_Management.Enums.CategoriesEnum.Data),
+                ["Networking"] = NewPortType("Category Matrix Networking", cableTypeFks, SlcAsset_Management.Enums.CategoriesEnum.Networking),
+                ["NoCategories"] = NewPortType("Category Matrix No Categories", cableTypeFks, SlcAsset_Management.Enums.CategoriesEnum.Data),
+                ["Data"] = NewPortType("Category Matrix Data", cableTypeFks, SlcAsset_Management.Enums.CategoriesEnum.Data),
+            };
+
+            Helper.AssetManagement.PortTypes.Create(portTypes.Values);
+
+            // Validation requires at least one category, so legacy port types without categories are simulated by stripping the section in DOM.
+            RemoveCategoriesInDom(portTypes["NoCategories"].Identifier);
+
+            return portTypes;
+        }
+
+        private void RemoveCategoriesInDom(string portTypeId)
+        {
+            var dom = new DomHelper(((TestApiHelper)Helper).Connection.HandleMessages, SlcAsset_Management.ModuleId);
+            var instance = dom.DomInstances.Read(DomInstanceExposers.Id.Equal(Guid.Parse(portTypeId))).Single();
+            instance.Sections.RemoveAll(section => section.SectionDefinitionID.Equals(SlcAsset_Management.Sections.CategoryLink.Id));
+            dom.DomInstances.Update(instance);
+
+            Helper.AssetManagement.PortTypes.Read(PortTypeExposers.Identifier.Equal(portTypeId)).Single()
+                .CategoryLinks.Categories.Should().BeEmpty("the categories should have been removed directly in DOM");
+        }
+
+        private static PortType NewPortType(string name, List<SdmObjectReference<CableType>> cableTypeFks, params SlcAsset_Management.Enums.CategoriesEnum[] categories)
+        {
+            return new PortType
+            {
+                Identifier = Guid.NewGuid().ToString(),
+                Name = name,
+                CategoryLinks = { Categories = categories.ToList() },
+                CableFKs = { CableTypeFks = cableTypeFks.ToList() },
+            };
         }
 
         #endregion

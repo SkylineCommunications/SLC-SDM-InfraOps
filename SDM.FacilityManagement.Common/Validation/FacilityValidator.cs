@@ -21,6 +21,13 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
             _entityLoader = entityLoader ?? throw new ArgumentNullException(nameof(entityLoader));
         }
 
+        protected override ValidationResult CreateNullEntityResult()
+        {
+            var result = new ValidationResult();
+            result.AddFailReason(FacilityValidationHandler.FacilityValidationField.Facility, "Facility cannot be null.");
+            return result;
+        }
+
         protected override List<ValidationResult> ValidateBulkNoDatabaseBusinessRules(List<Facility> entities)
         {
             var results = entities.Select(_ => new ValidationResult()).ToList();
@@ -75,7 +82,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
 
         /// <summary>
         /// Validates id uniqueness for real-time UI validation.
-        /// <para><b>Not suitable for bulk scenarios</b>: issues one DB query per call. Use <see cref="ValidateBulk"/> instead.</para>
+        /// <para><b>Not suitable for bulk scenarios</b>: issues one DB query per call. Use <see cref="ValidatorBase{T}.ValidateBulk(List{T}, RepositoryAction)"/> instead.</para>
         /// </summary>
         public ValidationResult IsFacilityIdValid(string id, string exceptIdentifier = null)
         {

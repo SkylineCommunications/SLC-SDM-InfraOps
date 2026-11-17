@@ -14,6 +14,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
     // [GenerateExposers]
     //[SdmDomStorage("(slc)facility_management")]
+    [PropertyScope("Rack")]
     public sealed class Rack : SdmObjectBase<Rack>, IEquatable<Rack>, IEntityTracking, IReadOnlyModuleIdReferencer
 	{
         [JsonIgnore]

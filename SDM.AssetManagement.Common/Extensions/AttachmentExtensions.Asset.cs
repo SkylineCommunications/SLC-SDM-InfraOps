@@ -1,7 +1,6 @@
-namespace Skyline.DataMiner.SDM.AssetManagement.Extensions
+﻿namespace Skyline.DataMiner.SDM.AssetManagement.Extensions
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
 
     using Skyline.DataMiner.SDM.AssetManagement.Models;
@@ -16,7 +15,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Extensions
         /// Adds an <see cref="Attachment"/> to <see cref="Asset.Attachments"/>.
         /// </summary>
         /// <exception cref="ArgumentNullException"><paramref name="attachment"/> is <c>null</c>.</exception>
-        /// <exception cref="InvalidOperationException">An attachment with the same <see cref="Attachment.FilePath"/> already exists.</exception>
+        /// <exception cref="InvalidOperationException">An attachment with the same <see cref="Attachment.FilePath"/> (case-insensitive) already exists.</exception>
         /// <remarks>
         /// This only updates the in-memory <see cref="Asset"/> instance. It is not persisted
         /// to the DOM/database until the asset is saved.
@@ -35,7 +34,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Extensions
 
             var list = asset.Attachments;
 
-            if (list.Any(a => a.FilePath == attachment.FilePath))
+            if (list.Any(a => string.Equals(a.FilePath, attachment.FilePath, StringComparison.OrdinalIgnoreCase)))
             {
                 throw new InvalidOperationException("An Attachment with the same File Path already exists.");
             }
@@ -63,7 +62,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Extensions
             }
 
             var list = asset.Attachments;
-            var found = list.FirstOrDefault(a => a.FilePath == attachment.FilePath);
+            var found = list.FirstOrDefault(a => string.Equals(a.FilePath, attachment.FilePath, StringComparison.OrdinalIgnoreCase));
 
             if (found == null)
             {
@@ -72,37 +71,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Extensions
 
             list.Remove(found);
             asset.Attachments = list;
-        }
-
-        /// <summary>
-        /// Replaces <see cref="Asset.Attachments"/> with <paramref name="attachments"/>.
-        /// </summary>
-        public static void SetAttachments(this Asset asset, List<Attachment> attachments)
-        {
-            if (asset == null)
-            {
-                throw new ArgumentNullException(nameof(asset));
-            }
-
-            asset.Attachments = attachments ?? new List<Attachment>();
-        }
-
-        /// <summary>
-        /// Clears all entries from <see cref="Asset.Attachments"/>.
-        /// </summary>
-        public static void ClearAttachments(this Asset asset)
-        {
-            if (asset == null)
-            {
-                throw new ArgumentNullException(nameof(asset));
-            }
-
-            if (asset.Attachments.Count == 0)
-            {
-                return;
-            }
-
-            asset.Attachments = new List<Attachment>();
         }
     }
 }

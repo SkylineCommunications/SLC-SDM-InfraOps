@@ -19,6 +19,13 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             _entityLoader = entityLoader ?? throw new ArgumentNullException(nameof(entityLoader));
         }
 
+        protected override ValidationResult CreateNullEntityResult()
+        {
+            var result = new ValidationResult();
+            result.AddFailReason(DeviceTypeValidationHandler.DeviceTypeValidationField.DeviceType, "Device Type cannot be null.");
+            return result;
+        }
+
         protected override List<ValidationResult> ValidateBulkNoDatabaseBusinessRules(List<DeviceType> entities)
         {
             return entities.Select(ValidateInfo).ToList();

@@ -10,6 +10,7 @@
 
     // [GenerateExposers]
     // [SdmDomStorage("(slc)asset_management")]
+    [PropertyScope("PowerPort")]
     public sealed class PowerPort : SdmObjectBase<PowerPort>, IEquatable<PowerPort>, IEntityTracking, IReadOnlyModuleIdReferencer, IPort
 	{
         [JsonIgnore]

@@ -10,6 +10,7 @@
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)asset_management")]
+    [PropertyScope("DataPort")]
     public sealed class DataPort : SdmObjectBase<DataPort>, IEquatable<DataPort>, IEntityTracking, IPort, IReadOnlyModuleIdReferencer
 	{
         [JsonIgnore]

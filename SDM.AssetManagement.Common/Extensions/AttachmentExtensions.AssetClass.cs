@@ -1,7 +1,6 @@
-namespace Skyline.DataMiner.SDM.AssetManagement.Extensions
+﻿namespace Skyline.DataMiner.SDM.AssetManagement.Extensions
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
 
     using Skyline.DataMiner.SDM.AssetManagement.Models;
@@ -16,7 +15,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Extensions
         /// Adds an <see cref="Attachment"/> to <see cref="AssetClass.Attachments"/>.
         /// </summary>
         /// <exception cref="ArgumentNullException"><paramref name="attachment"/> is <c>null</c>.</exception>
-        /// <exception cref="InvalidOperationException">An attachment with the same <see cref="Attachment.FilePath"/> already exists.</exception>
+        /// <exception cref="InvalidOperationException">An attachment with the same <see cref="Attachment.FilePath"/> (case-insensitive) already exists.</exception>
         /// <remarks>
         /// This only updates the in-memory <see cref="AssetClass"/> instance. It is not persisted
         /// to the DOM/database until the asset class is saved.
@@ -35,7 +34,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Extensions
 
             var list = assetClass.Attachments;
 
-            if (list.Any(a => a.FilePath == attachment.FilePath))
+            if (list.Any(a => string.Equals(a.FilePath, attachment.FilePath, StringComparison.OrdinalIgnoreCase)))
             {
                 throw new InvalidOperationException("An Attachment with the same File Path already exists.");
             }
@@ -67,14 +66,14 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Extensions
             }
 
             if (!string.IsNullOrEmpty(attachment.FilePath)
-                && (attachment.FilePath == assetClass.FrontImage || attachment.FilePath == assetClass.BackImage))
+                && (string.Equals(attachment.FilePath, assetClass.FrontImage, StringComparison.OrdinalIgnoreCase) || string.Equals(attachment.FilePath, assetClass.BackImage, StringComparison.OrdinalIgnoreCase)))
             {
                 throw new InvalidOperationException(
                     "Cannot remove an Attachment that is used as the Front or Back Image of the Asset Class. Use RemoveAttachmentAndDependencies instead.");
             }
 
             var list = assetClass.Attachments;
-            var found = list.FirstOrDefault(a => a.FilePath == attachment.FilePath);
+            var found = list.FirstOrDefault(a => string.Equals(a.FilePath, attachment.FilePath, StringComparison.OrdinalIgnoreCase));
 
             if (found == null)
             {
@@ -83,63 +82,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Extensions
 
             list.Remove(found);
             assetClass.Attachments = list;
-        }
-
-        /// <summary>
-        /// Replaces <see cref="AssetClass.Attachments"/> with <paramref name="attachments"/>.
-        /// </summary>
-        public static void SetAttachments(this AssetClass assetClass, List<Attachment> attachments)
-        {
-            if (assetClass == null)
-            {
-                throw new ArgumentNullException(nameof(assetClass));
-            }
-
-            assetClass.Attachments = attachments ?? new List<Attachment>();
-        }
-
-        /// <summary>
-        /// Clears all entries from <see cref="AssetClass.Attachments"/>.
-        /// </summary>
-        public static void ClearAttachments(this AssetClass assetClass)
-        {
-            if (assetClass == null)
-            {
-                throw new ArgumentNullException(nameof(assetClass));
-            }
-
-            if (assetClass.Attachments.Count == 0)
-            {
-                return;
-            }
-
-            assetClass.Attachments = new List<Attachment>();
-        }
-
-        /// <summary>
-        /// Sets <see cref="AssetClass.FrontImage"/> to <paramref name="imagePath"/>, first adding it to
-        /// <see cref="AssetClass.Attachments"/> when it is not already present. This guarantees the
-        /// image satisfies the "Front Image must be part of the Attachments" validation rule.
-        /// </summary>
-        /// <exception cref="ArgumentNullException"><paramref name="assetClass"/> is <c>null</c>.</exception>
-        /// <exception cref="ArgumentException"><paramref name="imagePath"/> is <c>null</c> or whitespace.</exception>
-        public static void AddFrontImageAndAttachment(this AssetClass assetClass, string imagePath)
-        {
-            EnsureImageAttachment(assetClass, imagePath);
-            assetClass.FrontImage = imagePath;
-        }
-
-        /// <summary>
-        /// Sets <see cref="AssetClass.BackImage"/> to <paramref name="imagePath"/>, first adding it to
-        /// <see cref="AssetClass.Attachments"/> when it is not already present. This guarantees the
-        /// image satisfies the "Back Image must be part of the Attachments" validation rule.
-        /// </summary>
-        /// <exception cref="ArgumentNullException"><paramref name="assetClass"/> is <c>null</c>.</exception>
-        /// <exception cref="ArgumentException"><paramref name="imagePath"/> is <c>null</c> or whitespace.</exception>
-        public static void AddBackImageAndAttachment(this AssetClass assetClass, string imagePath)
-        {
-            EnsureImageAttachment(assetClass, imagePath);
-            assetClass.BackImage = imagePath;
         }
 
         /// <summary>
@@ -164,36 +106,18 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Extensions
 
             if (!string.IsNullOrEmpty(attachment.FilePath))
             {
-                if (assetClass.FrontImage == attachment.FilePath)
+                if (string.Equals(assetClass.FrontImage, attachment.FilePath, StringComparison.OrdinalIgnoreCase))
                 {
                     assetClass.FrontImage = null;
                 }
 
-                if (assetClass.BackImage == attachment.FilePath)
+                if (string.Equals(assetClass.BackImage, attachment.FilePath, StringComparison.OrdinalIgnoreCase))
                 {
                     assetClass.BackImage = null;
                 }
             }
 
             assetClass.RemoveItemFromAttachments(attachment);
-        }
-
-        private static void EnsureImageAttachment(AssetClass assetClass, string imagePath)
-        {
-            if (assetClass == null)
-            {
-                throw new ArgumentNullException(nameof(assetClass));
-            }
-
-            if (string.IsNullOrWhiteSpace(imagePath))
-            {
-                throw new ArgumentException("Image path must be provided.", nameof(imagePath));
-            }
-
-            if (!assetClass.Attachments.Any(a => a?.FilePath == imagePath))
-            {
-                assetClass.AddAttachment(new Attachment { FilePath = imagePath });
-            }
         }
     }
 }

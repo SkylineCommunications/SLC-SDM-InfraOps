@@ -62,10 +62,15 @@ namespace SDM.PlanAndBuild.Tests.JobTests
 		}
 
 		[TestMethod]
-		public void Validate_WithNullJob_ShouldThrowArgumentNullException()
+		public void Validate_WithNullJob_ShouldReturnNullFailure()
 		{
-			_validator.Invoking(v => v.Validate(null!, RepositoryAction.Create))
-				.Should().Throw<ArgumentNullException>();
+			var result = _validator.Validate(null!, RepositoryAction.Create);
+
+			using (new AssertionScope())
+			{
+				result.IsValid.Should().BeFalse();
+				result.GetFailReason(PlanAndBuildJobValidationHandler.PlanAndBuildJobValidationField.Job).Should().Be("Job cannot be null.");
+			}
 		}
 
 		#endregion

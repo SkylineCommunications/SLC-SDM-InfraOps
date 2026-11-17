@@ -14,6 +14,7 @@
             RowId,
             Name,
             RoomId,
+            Row,
         }
 
         /// <summary>

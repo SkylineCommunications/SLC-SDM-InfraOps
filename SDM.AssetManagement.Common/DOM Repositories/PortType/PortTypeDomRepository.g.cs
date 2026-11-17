@@ -660,6 +660,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 case "CableFKs.CableTypeFks":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.PortTypeDomMapper.CableFKs.CableTypeFks), comparer, SdmObjectReference<AssetManagement.Models.CableType>.Convert(value).GetIdentifierAsGuid());
 
+                case "CategoryLinks.Categories" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.PortTypeDomMapper.CategoryRelation.CategoryLinks.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "CategoryLinks.Categories":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.PortTypeDomMapper.CategoryRelation.CategoryLinks), comparer, Convert.ToString(value));
 

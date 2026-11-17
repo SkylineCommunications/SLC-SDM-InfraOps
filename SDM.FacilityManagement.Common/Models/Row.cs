@@ -11,6 +11,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)facility_management")]
+    [PropertyScope("Row")]
     public sealed class Row : SdmObjectBase<Row>, IEquatable<Row>, IEntityTracking, IReadOnlyModuleIdReferencer
 	{
         [JsonIgnore]

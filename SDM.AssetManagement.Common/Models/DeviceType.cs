@@ -11,6 +11,7 @@
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)asset_management")]
+    [PropertyScope("DeviceType")]
     public sealed class DeviceType : SdmObjectBase<DeviceType>, IEquatable<DeviceType>, IEntityTracking, IReadOnlyModuleIdReferencer
 	{
         [JsonIgnore]

@@ -28,6 +28,13 @@
             _validationCore = new DataPortValidationCore(entityLoader);
         }
 
+        protected override ValidationResult CreateNullEntityResult()
+        {
+            var result = new ValidationResult();
+            result.AddFailReason(DataPortValidationField.DataPort, "DataPort cannot be null.");
+            return result;
+        }
+
         protected override List<ValidationResult> ValidateBulkNoDatabaseBusinessRules(List<DataPort> entities)
         {
             var results = entities.Select(_ => new ValidationResult()).ToList();

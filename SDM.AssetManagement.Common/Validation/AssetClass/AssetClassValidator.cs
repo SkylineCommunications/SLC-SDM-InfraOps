@@ -36,7 +36,7 @@
 
         /// <summary>
         /// Validates name uniqueness — used for real-time UI validation.
-        /// <para><b>Not suitable for bulk scenarios</b>: issues one DB query per call. Use <see cref="ValidateBulk"/> instead.</para>
+        /// <para><b>Not suitable for bulk scenarios</b>: issues one DB query per call. Use <see cref="ValidatorBase{T}.ValidateBulk(List{T}, RepositoryAction)"/> instead.</para>
         /// </summary>
         public ValidationResult IsAssetClassNameValid(string name, string exceptIdentifier = null)
         {
@@ -61,13 +61,20 @@
         /// <summary>
         /// Validates the uniqueness of the AssetClass name for the specified <see cref="AssetClass"/> instance.
         /// Excludes the current asset class identifier from the uniqueness check.
-        /// <para><b>Not suitable for bulk scenarios</b>: issues one DB query per call. Use <see cref="ValidateBulk"/> instead.</para>
+        /// <para><b>Not suitable for bulk scenarios</b>: issues one DB query per call.         Use <see cref="ValidatorBase{T}.ValidateBulk(List{T}, RepositoryAction)"/> instead.</para>
         /// </summary>
         /// <param name="assetClass">The asset class to validate.</param>
         /// <returns>A <see cref="ValidationResult"/> indicating whether the asset class name is valid.</returns>
         public ValidationResult IsAssetClassNameValid(AssetClass assetClass)
         {
             return IsAssetClassNameValid(assetClass.Name, assetClass.Identifier);
+        }
+
+        protected override ValidationResult CreateNullEntityResult()
+        {
+            var result = new ValidationResult();
+            result.AddFailReason(AssetClassValidationHandler.AssetClassValidationField.AssetClass, "Asset Class cannot be null.");
+            return result;
         }
 
         protected override List<ValidationResult> ValidateBulkNoDatabaseBusinessRules(List<AssetClass> entities)
@@ -245,47 +252,6 @@
         {
             result.AddFailReason(AssetClassValidationHandler.AssetClassValidationField.Manufacturer,
                 $"Referenced Manufacturer '{manufacturerId}' does not exist.");
-        }
-
-        private ValidationResult ValidateWithDatabaseAccess(AssetClass assetClass, Dictionary<string, DeviceType> deviceTypeCache = null)
-        {
-            var validations = new List<ValidationResult>();
-
-            if (assetClass.ShouldValidate(assetClass.ManufacturerField)
-                && assetClass.Manufacturer != null
-                && assetClass.Manufacturer.HasValue()
-                && !ManufacturerExists(assetClass.Manufacturer.Identifier))
-            {
-                var manufacturerResult = new ValidationResult();
-                AddManufacturerNotFound(manufacturerResult, assetClass.Manufacturer.Identifier);
-                validations.Add(manufacturerResult);
-            }
-
-            if (assetClass.ShouldValidate(assetClass.NameField))
-            {
-                validations.Add(IsAssetClassNameValid(assetClass.Name, assetClass.Identifier));
-            }
-
-            // Device-type-dependent validation (Power Supply, HeightU for Rack Unit Consumer)
-            if ((assetClass.DeviceTypeIdField.Changed || assetClass.PowerSupplyField.Changed || assetClass.HeightUField.Changed)
-                && assetClass.DeviceTypeId.HasValue())
-            {
-                try
-                {
-                    validations.Add(ValidateAgainstDeviceType(assetClass, deviceTypeCache));
-                }
-                catch (Exception ex)
-                {
-                    var r = new ValidationResult();
-                    r.AddFailReason(AssetClassValidationHandler.AssetClassValidationField.DeviceTypeId,
-                        $"Error validating against device type: {ex.Message}");
-                    validations.Add(r);
-                }
-            }
-
-            validations.Add(ValidateReferencesAgainstDatabase(assetClass));
-
-            return validations.MergeAll();
         }
 
         private ValidationResult ValidateAgainstDeviceType(AssetClass assetClass, Dictionary<string, DeviceType> deviceTypeCache = null)

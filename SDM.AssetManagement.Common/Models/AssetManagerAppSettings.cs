@@ -10,6 +10,7 @@
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)asset_management")]
+    [PropertyScope("AssetManagerAppSettings")]
     public sealed class AssetManagerAppSettings : SdmObjectBase<AssetManagerAppSettings>, IEquatable<AssetManagerAppSettings>, IEntityTracking, IReadOnlyModuleIdReferencer
 	{
         [JsonIgnore]

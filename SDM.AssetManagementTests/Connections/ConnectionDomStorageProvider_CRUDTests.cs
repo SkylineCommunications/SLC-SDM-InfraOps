@@ -69,8 +69,8 @@
                 persisted.Description.Should().Be(connection.Description);
                 persisted.Source.Port.Should().Be(connection.Source.Port);
                 persisted.Destination.Port.Should().Be(connection.Destination.Port);
-                persisted.Source.PortType.Identifier.Should().Be(connection.Source.PortType.Identifier);
-                persisted.Destination.PortType.Identifier.Should().Be(connection.Destination.PortType.Identifier);
+                persisted.Source.PortType.Identifier.Should().Be(sourcePort.DataPortInfo.PortType.Identifier);
+                persisted.Destination.PortType.Identifier.Should().Be(destinationPort.DataPortInfo.PortType.Identifier);
                 persisted.Source.CableTag.Should().Be(connection.Source.CableTag);
                 persisted.Destination.CableTag.Should().Be(connection.Destination.CableTag);
                 persisted.CableType.Identifier.Should().Be(connection.CableType.Identifier);
@@ -486,13 +486,11 @@
                 Source =
                 {
                     Port = sourcePort,
-                    PortType = sourcePort.DataPortInfo.PortType,
                     CableTag = "Source cable",
                 },
                 Destination =
                 {
                     Port = destinationPort,
-                    PortType = destinationPort.DataPortInfo.PortType,
                     CableTag = "Destination cable",
                 },
             };

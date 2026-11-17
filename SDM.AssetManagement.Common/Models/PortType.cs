@@ -10,6 +10,7 @@
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)asset_management")]
+    [PropertyScope("PortType")]
     public sealed class PortType : SdmObjectBase<PortType>, IEquatable<PortType>, IEntityTracking, IReadOnlyModuleIdReferencer
 	{
         [JsonIgnore]

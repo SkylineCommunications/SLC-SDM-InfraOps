@@ -517,6 +517,50 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
         }
 
         /// <summary>
+        /// Phase 2.5d: Bulk MAC Address uniqueness check against the database.
+        /// Only assets whose MAC Address is new or changed are checked, so pre-existing duplicates
+        /// do not block unrelated edits. Batch IDs excluded in memory.
+        /// </summary>
+        public List<ValidationResult> ValidateBulkMacAddressUniquenessAgainstDatabase(List<Asset> assets)
+        {
+            var results = assets.Select(_ => new ValidationResult()).ToList();
+
+            var batchIds = new HashSet<string>(
+                assets.Select(a => a.Identifier).Where(id => !string.IsNullOrWhiteSpace(id)));
+
+            var candidates = assets
+                .Select((asset, index) => new { asset, index })
+                .Where(x => x.asset.ShouldValidate(x.asset.MacAddressField) && !string.IsNullOrWhiteSpace(x.asset.MacAddress))
+                .ToList();
+
+            if (!candidates.Any())
+            {
+                return results;
+            }
+
+            var uniqueMacs = candidates
+                .Select(x => x.asset.MacAddress)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            var externalConflicts = _entityLoader.GetAssetsByMacAddresses(uniqueMacs)
+                .Where(a => !batchIds.Contains(a.Identifier))
+                .Select(a => a.MacAddress)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var item in candidates)
+            {
+                if (externalConflicts.Contains(item.asset.MacAddress))
+                {
+                    results[item.index].AddFailReason(AssetValidationField.MacAddress,
+                        "There is already an asset with the same Mac Address.");
+                }
+            }
+
+            return results;
+        }
+
+        /// <summary>
         /// Generic helper for bulk single-field string uniqueness checks.
         /// Extracts unique non-empty values, queries DB via OR filter, excludes batch IDs in memory.
         /// Covers Name and AssetId; SerialNumber uses its own implementation due to AssetClass scoping.
@@ -690,6 +734,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
 
             ValidateSerialNumberDuplicatesInBatch(assets, results);
 
+            ValidateMacAddressDuplicatesInBatch(assets, results);
+
             // Parent holder conflicts
             ValidateHolderConflictsInBatch(assets, results);
 
@@ -714,7 +760,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             var holderGroups = assets
                             .Select((asset, index) => new { asset, index })
                             .Where(x => x.asset.Location.ParentAsset.HasValue() == true && x.asset.Location.HolderNumber != null)
-                            .GroupBy(x => new { ParentId = x.asset.Location.ParentAsset.Identifier, x.asset.Location.HolderNumber })
+                            .GroupBy(x => new { ParentId = x.asset.Location.ParentAsset.Identifier, x.asset.Location.HolderNumber, AssetClassId = x.asset.AssetClassId.Identifier })
                             .Where(g => g.Count() > 1);
 
             foreach (var group in holderGroups)
@@ -743,6 +789,24 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
                 {
                     results[item.index].AddFailReason(AssetValidationField.SerialNumber,
                         $"Serial Number '{item.asset.SerialNumber}' is duplicated within the validation batch for this Asset Class.");
+                }
+            }
+        }
+
+        private static void ValidateMacAddressDuplicatesInBatch(List<Asset> assets, List<ValidationResult> results)
+        {
+            var macGroups = assets
+                .Select((asset, index) => new { asset, index })
+                .Where(x => x.asset.ShouldValidate(x.asset.MacAddressField) && !string.IsNullOrWhiteSpace(x.asset.MacAddress))
+                .GroupBy(x => x.asset.MacAddress, StringComparer.OrdinalIgnoreCase)
+                .Where(g => g.Count() > 1);
+
+            foreach (var group in macGroups)
+            {
+                foreach (var item in group)
+                {
+                    results[item.index].AddFailReason(AssetValidationField.MacAddress,
+                        $"Mac Address '{item.asset.MacAddress}' is duplicated within the validation batch.");
                 }
             }
         }
@@ -948,156 +1012,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             {
                 result.AddFailReason(AssetValidationField.PowerPort,
                     $"Error validating loaded power ports: {ex.Message}");
-            }
-
-            return result;
-        }
-
-        #endregion
-
-        #region Helper Methods (Database Access)
-
-        private ValidationResult ValidateParentAssetHolderAvailability(
-            Asset asset, AssetClass assetClass)
-        {
-            var result = new ValidationResult();
-
-            if (!asset.Location.ParentAsset.HasValue() || asset.Location.HolderNumber == null)
-            {
-                return result;
-            }
-
-            try
-            {
-                var parentAsset = _entityLoader.LoadAsset(asset.Location.ParentAsset);
-                if (parentAsset == null)
-                {
-                    result.AddFailReason(AssetValidationField.ParentAsset, "Parent Asset not found.");
-                    return result;
-                }
-
-                var deviceType = _entityLoader.LoadDeviceType(assetClass.DeviceTypeId);
-                if (deviceType?.HierarchyInfo.HierarchyRole == null)
-                {
-                    result.AddFailReason(AssetValidationField.AssetClass,
-                        "Asset Class Device Type must have a Hierarchy Role to be attached to a parent asset.");
-                    return result;
-                }
-
-                var hierarchyRole = deviceType.HierarchyInfo.HierarchyRole;
-                var holderNumber = asset.Location.HolderNumber;
-
-                var matchingHolder = parentAsset.Holders?
-                    .FirstOrDefault(h => h.SlotNumber == holderNumber && h.HierarchyRole == hierarchyRole);
-
-                if (matchingHolder == null)
-                {
-                    result.AddFailReason(AssetValidationField.HolderNumber,
-                        $"Invalid Holder Number: Parent Asset does not have a holder slot '{holderNumber}' for Hierarchy Role '{hierarchyRole}'.");
-                    return result;
-                }
-
-                var exceptIds = new List<string> { asset.Identifier };
-                var childAssets = _entityLoader.FindChildAssets(parentAsset.Identifier, exceptIds);
-
-                var occupyingAssets = childAssets
-                    .Where(a => a.Location.ParentAsset != null &&
-                               a.Location.ParentAsset.Identifier == parentAsset.Identifier &&
-                               a.Location.HolderNumber == holderNumber)
-                    .ToList();
-
-                if (occupyingAssets.Any())
-                {
-                    result.AddFailReason(AssetValidationField.HolderNumber,
-                        $"Holder Number '{holderNumber}' is already occupied on the Parent Asset by another asset.");
-                }
-            }
-            catch (Exception ex)
-            {
-                result.AddFailReason(AssetValidationField.ParentAsset,
-                    $"Error validating parent asset holder availability: {ex.Message}");
-            }
-
-            return result;
-        }
-
-        private ValidationResult ValidateDestinationRackBounds(Asset asset)
-        {
-            var result = new ValidationResult();
-            var destination = asset.DestinationLocation;
-
-            if (!destination.RackId.HasValue() || destination.RackPosition == null)
-            {
-                return result;
-            }
-
-            var assetClass = _entityLoader.LoadAssetClass(asset.AssetClassId);
-            if (assetClass == null || assetClass.HeightU <= 0)
-            {
-                return result;
-            }
-
-            var rack = _entityLoader.LoadRack(destination.RackId);
-            if (rack == null)
-            {
-                result.AddFailReason(AssetValidationField.DestinationRackId, "Destination Rack not found.");
-                return result;
-            }
-
-            if (!RackPlacementValidation.ValidatePositionAndBounds(rack, (int)destination.RackPosition, (int)assetClass.HeightU, out var boundsResult))
-            {
-                result.AddFailReason(AssetValidationField.DestinationRackPosition, boundsResult.GetFailReason(RackValidationField.RackSpacePosition));
-            }
-
-            return result;
-        }
-
-        private ValidationResult ValidateRackSpaceAvailability(Asset asset)
-        {
-            var result = new ValidationResult();
-
-            if (!asset.Location.RackId.HasValue() || asset.Location.RackPosition == null)
-            {
-                return result;
-            }
-
-            try
-            {
-                var (assetClass, deviceType) = _entityLoader.LoadAssetClassAndDeviceType(asset);
-
-                if (!deviceType.TagsInfo.Tags.Contains(SlcAsset_Management.Enums.TagOption.RackUnitConsumer))
-                {
-                    return result;
-                }
-
-                if (assetClass.HeightU == default || assetClass.HeightU <= 0)
-                {
-                    return result;
-                }
-
-                var rack = _entityLoader.LoadRack(asset.Location.RackId);
-                if (rack == null)
-                {
-                    result.AddFailReason(AssetValidationField.RackId, "Rack not found.");
-                    return result;
-                }
-
-                if (asset.Location.RackPosition > rack.Capacity.MaximumRackCapacity)
-                {
-                    result.AddFailReason(AssetValidationField.RackPosition,
-                        $"Invalid Position: Must be within Rack (max {rack.Capacity.MaximumRackCapacity} units).");
-                    return result;
-                }
-
-                 result.AddFailuresFrom(ValidateAssetPlacement(
-                    asset,
-                    asset.Location.RackId.Identifier,
-                    (int)asset.Location.RackPosition));
-            }
-            catch (Exception ex)
-            {
-                result.AddFailReason(AssetValidationField.RackId,
-                    $"Error validating rack space: {ex.Message}");
             }
 
             return result;

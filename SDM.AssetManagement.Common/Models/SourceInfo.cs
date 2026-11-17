@@ -29,10 +29,13 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             set => PortField.Value = value;
         }
 
+        /// <summary>
+        /// Gets the port type of <see cref="Port"/>. Derived from the referenced port on create and update.
+        /// </summary>
         public SdmObjectReference<PortType> PortType
         {
             get => PortTypeField.Value;
-            set => PortTypeField.Value = value;
+            internal set => PortTypeField.Value = value;
         }
 
         [JsonIgnore]

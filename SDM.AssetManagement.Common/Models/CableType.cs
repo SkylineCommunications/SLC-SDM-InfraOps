@@ -10,6 +10,7 @@
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)asset_management")]
+    [PropertyScope("CableType")]
     public sealed class CableType : SdmObjectBase<CableType>, IEquatable<CableType>, IEntityTracking, IReadOnlyModuleIdReferencer
 	{
         [JsonIgnore]

@@ -796,6 +796,28 @@
         #region State Helper
 
         /// <summary>
+        /// The states in which the location of an existing asset can be edited.
+        /// Single source of truth for <see cref="CanEditLocation"/>; build query filters from it as an allow-list so new states stay excluded by default.
+        /// </summary>
+        public static IReadOnlyCollection<SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum> LocationEditableStates { get; } = Array.AsReadOnly(new[]
+        {
+            SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available,
+            SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InPlanning,
+            SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.BuildPlanReady,
+            SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InRepair,
+            SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Disposed,
+        });
+
+        /// <summary>
+        /// The states in which an existing asset can be assigned to a rack: the location-editable states, except Disposed (a disposed asset is not placed anywhere).
+        /// Build asset pickers from it as an allow-list so new states stay excluded by default.
+        /// </summary>
+        public static IReadOnlyCollection<SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum> RackAssignableStates { get; } = Array.AsReadOnly(
+            LocationEditableStates
+                .Where(state => state != SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Disposed)
+                .ToArray());
+
+        /// <summary>
         /// Checks if the asset is in a state where location can be edited.
         /// </summary>
         public static bool CanEditLocation(Asset asset)
@@ -810,11 +832,7 @@
                 return true;
             }
 
-            return asset.State == SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available
-                || asset.State == SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InPlanning
-                || asset.State == SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.BuildPlanReady
-                || asset.State == SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InRepair
-                || asset.State == SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Disposed;
+            return LocationEditableStates.Contains(asset.State);
         }
 
         /// <summary>
@@ -864,13 +882,6 @@
         public static ValidationResult ValidateDestinationLocation(Asset asset)
         {
             var result = new ValidationResult();
-
-            if (asset == null)
-            {
-                result.AddFailReason(AssetValidationField.Asset, "Asset cannot be null.");
-                return result;
-            }
-
 
             if (asset == null)
             {

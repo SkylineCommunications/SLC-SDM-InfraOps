@@ -16,6 +16,7 @@
             FloorId,
             Width,
             Depth,
+            Room,
         }
 
         /// <summary>

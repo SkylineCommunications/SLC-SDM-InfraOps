@@ -75,11 +75,26 @@ namespace SDM.AssetManagement.Tests.AssetClasses
         }
 
         [TestMethod]
-        public void Validate_WithNullAssetClass_ShouldThrowArgumentNullException()
+        public void Validate_WithNullAssetClass_ShouldReturnNullFailure()
         {
-            // Act & Assert
-            _validator.Invoking(v => v.Validate(null, RepositoryAction.Create))
-                .Should().Throw<ArgumentNullException>();
+            // Act
+            var result = _validator.Validate(null!, RepositoryAction.Create);
+
+            // Assert
+            using (new AssertionScope())
+            {
+                result.IsValid.Should().BeFalse();
+                result.GetFailReason(AssetClassValidationHandler.AssetClassValidationField.AssetClass)
+                    .Should().Be("Asset Class cannot be null.");
+            }
+        }
+
+        [TestMethod]
+        public void ValidateAndThrow_WithNullAssetClass_ShouldThrowValidationException()
+        {
+            _validator.Invoking(v => v.ValidateAndThrow(null!, RepositoryAction.Create))
+                .Should().Throw<Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Exceptions.ValidationException>()
+                .WithMessage("*Asset Class cannot be null.*");
         }
 
         #endregion

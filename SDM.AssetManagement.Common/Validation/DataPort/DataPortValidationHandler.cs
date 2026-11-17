@@ -41,7 +41,7 @@
         {
             result = new ValidationResult();
 
-            if (dataPort == null || dataPort.IsNew || dataPort.DataPortInfo.OutputTypeField.Changed != true)
+            if (dataPort == null || dataPort.IsNew || !dataPort.DataPortInfo.OutputTypeField.Changed)
             {
                 return true;
             }

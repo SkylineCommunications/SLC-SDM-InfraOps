@@ -15,6 +15,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Validation
             Name,
             Latitude,
             Longitude,
+            Site,
         }
 
         /// <summary>

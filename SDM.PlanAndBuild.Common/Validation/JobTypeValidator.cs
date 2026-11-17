@@ -24,12 +24,18 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
         /// <param name="helper">
         /// The Plan &amp; Build API helper used to query existing JobTypes (uniqueness) and Jobs (in-use checks).
         /// Note: this is captured by reference during <see cref="PlanAndBuildApiHelper"/> construction, before
-        /// its repositories are wired up. Only <see cref="Validate"/>/<see cref="ValidateAndThrow"/> (called
-        /// after construction completes) access <paramref name="helper"/>'s repositories.
+        /// its repositories are wired up.
         /// </param>
         public JobTypeValidator(IPlanAndBuildApiHelper helper)
         {
             _helper = helper ?? throw new ArgumentNullException(nameof(helper));
+        }
+
+        protected override ValidationResult CreateNullEntityResult()
+        {
+            var result = new ValidationResult();
+            result.AddFailReason(JobTypeValidationField.JobType, "Job Type cannot be null.");
+            return result;
         }
 
         protected override List<ValidationResult> ValidateBulkNoDatabaseBusinessRules(List<JobType> entities)
@@ -108,12 +114,13 @@ namespace Skyline.DataMiner.SDM.PlanAndBuild.Validation
 
         /// <summary>
         /// Checks whether a JobType is in use by existing Jobs. Deletion is blocked while referenced.
+        /// A <c>null</c> JobType returns the failed result of <see cref="CreateNullEntityResult"/>.
         /// </summary>
         public ValidationResult ValidateNotInUseWhenDeleted(JobType jobType)
         {
             if (jobType == null)
             {
-                throw new ArgumentNullException(nameof(jobType));
+                return CreateNullEntityResult();
             }
 
             return ValidateNotInUseWhenDeleted(new List<JobType> { jobType }).Single();

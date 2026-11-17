@@ -4,11 +4,27 @@
 
 Standard API for InfraOps
 
+### Port type name validation
+
+Port types require a non-null, non-empty, non-whitespace name on create and update, including bulk operations. `PortTypeValidator.Validate(portType, RepositoryAction.Create)` and the corresponding update validation report this rule under `PortTypeValidator.PortTypeValidationField.Name`. Map this typed field to the name input in an IAS validation widget map. Delete validation does not apply the required-name rule.
+
 ### History instance identifiers
 
 `HistoryInfo.ModifiedInstanceID` remains an `ISdmObjectReference<ISdmObject>`, but its identifier is read, written, and filtered as a string in DOM. History Info section `cec87feb-30d0-4270-8bf8-7e8282d0513c`, Instance ID field `4d913684-12ec-4666-98a2-5e4db7fb5acf`, is `System.String`; do not convert its value to a GUID. The History Job field remains GUID-backed.
 
 The repository does not contain the external code generator's schema or templates, and its source-generator package reference is disabled. When regenerating the checked-in History repository, preserve this string storage mapping and run the History repository tests. The mock section definition already declares Instance ID as `typeof(string)`.
+
+### Asset class images and attachments
+
+Assign `assetClass.FrontImage` or `assetClass.BackImage` directly. A non-blank path automatically adds an attachment if that exact path is not already present. Existing attachment metadata is preserved, and front/back images can share an attachment. Null, empty, and whitespace paths do not add attachments. Changing or clearing an image retains its previous attachment.
+
+When deserializing JSON, an explicit `Attachments` property replaces the collection instead of appending to attachments created by the image setters, preventing duplicates and preserving supplied metadata.
+
+The `AddFrontImageAndAttachment` and `AddBackImageAndAttachment` extensions have been removed; replace calls with property assignments. The `SetAttachments` and `ClearAttachments` extensions for both `Asset` and `AssetClass` have also been removed; assign `Attachments` directly or use `Attachments.Clear()`. The equivalent job wrappers, `SetJobAttachments` and `ClearJobAttachments`, are also removed. These extension removals require callers to update their source.
+
+`AddAttachment` still rejects duplicate paths. `RemoveItemFromAttachments` removes by path and, for asset classes, rejects attachments used as front/back images. `RemoveAttachmentAndDependencies` explicitly clears any referencing images before removal. `IsImage` classifies attachment paths by file extension; it does not inspect or upload files.
+
+Attachments remain mutable. Replacing or clearing the collection, or changing an attachment path, can invalidate a selected image; validation continues to report missing image attachments. Automatic attachment creation only updates the in-memory model, not the underlying file or DOM/database until saved.
 
 ### About DataMiner
 

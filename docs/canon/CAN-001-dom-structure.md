@@ -1,0 +1,2403 @@
+---
+id: CAN-001
+layer: canon
+title: DOM structure and field rules
+---
+
+# CAN-001: DOM structure and field rules
+
+| Field | Value |
+|---|---|
+| Owner | Miguel Garrido |
+| Created | 2026-10-28 |
+| Applies to | `SDM.AssetManagement.Common`, `SDM.FacilityManagement.Common`, `SDM.PlanAndBuild.Common`, `SDM.InfraOpsProperties.Common` and their test projects |
+| Supersedes | — |
+| Related | [ADR-0001](../adr/0001-infraops-package-boundaries-and-composition.md), [CAN-002](CAN-002-package-architecture.md), [CAN-003](CAN-003-repository-and-middleware-pipeline.md), [CAN-004](CAN-004-change-tracking.md), [TRK-001](../tracks/TRK-001-sdm-unit-testing.md), [TRK-002](../tracks/TRK-002-sdm-import-export.md), [SPC-001](../specs/SPC-001-dom-mock-field-value-type-validation.md), [SPC-002](../specs/SPC-002-sdm-json-serialization-contract.md) |
+
+> **Derived from codebase.** Every GUID, field, type, status and transition below was extracted from the SDM codebase on 2026-10-28: the in-memory seed definitions, the DomIds constants, the entity repositories (model property per field, reference targets, read/write CLR types) and the mappers. Nothing was read from a live DataMiner system; see [§12](#12-facts-reviewers-must-know) for what that implies. Confidence is [Certain] for every table unless a cell says otherwise. This document names classes and concepts, not file paths, so it stays valid when code moves.
+
+## Table of contents
+
+1. [Module overview](#1-module-overview)
+2. [Cross-module relationship graph](#2-cross-module-relationship-graph)
+3. [Asset Manager — `SlcAsset_Management`](#3-asset-manager--slcasset_management)
+4. [Facility Manager — `SlcFacility_Management`](#4-facility-manager--slcfacility_management)
+5. [Plan & Build — `SlcPlan_And_Build`](#5-plan--build--slcplan_and_build)
+6. [InfraOps Properties — `InfraopsProperties`](#6-infraops-properties--infraopsproperties)
+7. [State machines](#7-state-machines)
+8. [Validation rules](#8-validation-rules)
+9. [Enum reference](#9-enum-reference)
+10. [Field rules](#10-field-rules)
+11. [Adding or changing a DOM field — checklist](#11-adding-or-changing-a-dom-field--checklist)
+12. [Facts reviewers must know](#12-facts-reviewers-must-know)
+13. [Known deviations](#13-known-deviations-flagged-not-fixed)
+14. [Rejected alternatives](#14-rejected-alternatives)
+
+## Terms
+
+| Term | Meaning here |
+|---|---|
+| Module | One DOM module (`ModuleId`), one `*.Common` project, one DomIds file, one seed. |
+| Definition | A `DomDefinition`; one `DomInstance` per entity instance. |
+| Entity | A `public sealed class X : SdmObjectBase<X>` mapped to one definition. |
+| Section-detail | A `ChangeTrackingBase` subtype (for example `AssetLocation`) that owns the fields of exactly one single-occurrence DOM `Section`. |
+| Repeating-section element | A `ChangeTrackingBase` subtype (for example `AssetHolder`) that is one entry of a `List<T>` on the entity; each element is one DOM `Section` of the same `SectionDefinition`. |
+| Link | `SectionDefinitionLink` from a definition to a section: **mandatory** (default), **optional** (`IsOptional`), **repeatable** (`AllowMultipleSections`). |
+| DomIds | `SharedMappers.DomIds.<Module>` — GUID constants for module, definitions, sections, fields, behaviours and DOM enums. |
+| Mapper | `<Entity>DomMapper` — binds model-side section/field names to DomIds. |
+| Repository | `<Entity>DomRepository` — `FromInstance` / `ToInstance` plus filter translation. |
+| Seed | `<Module>MockMessageHandler` — in-memory definitions used by every test. |
+| P&O | People & Organizations SDM (`Person`, `Organization`, `Team`, `Role`). External module; referenced, never defined here. |
+
+## The chain every field goes through
+
+```mermaid
+flowchart LR
+    ID["<b>DomIds</b><br/>constant"]
+    SEED["<b>Seed</b><br/>SectionDefinition +<br/>FieldDescriptor"]
+    MAP["<b>Mapper</b><br/>FieldDescriptorID<br/>binding"]
+    REPO["<b>Repository</b><br/>ToInstance /<br/>FromInstance"]
+    MODEL["<b>Model</b><br/>property + *Field<br/>tracker"]
+    DOM[("DOM instance")]
+
+    ID --> SEED
+    ID --> MAP
+    MODEL --> MAP
+    MAP --> REPO
+    REPO --> DOM
+    SEED -. "descriptor type<br/>must match" .-> REPO
+```
+
+A field exists only when all five places agree: DomIds constant, seed descriptor, mapper binding, repository read **and** write, model property with its tracker. A missing link is a defect, not a partial feature. [§13](#13-known-deviations-flagged-not-fixed) lists the fields where a link is missing today.
+
+---
+
+## 1. Module overview
+
+| Module | `ModuleId` | Project | Definitions | Behaviours | Sections | Field descriptors |
+|---|---|---|---|---|---|---|
+| Asset Manager | `(slc)asset_management` | `SDM.AssetManagement.Common` | 11 | 2 | 35 | 131 |
+| Facility Manager | `(slc)facility_management` | `SDM.FacilityManagement.Common` | 9 | 8 | 20 | 78 |
+| Plan & Build | `(slc)plan_and_build` | `SDM.PlanAndBuild.Common` | 3 | 1 | 7 | 35 |
+| InfraOps Properties | `(infraops)properties` | `SDM.InfraOpsProperties.Common` | 2 | 0 | 5 | 15 |
+| **Total** | | | **25** | **11** | **67** | **259** |
+
+"Field descriptors" counts descriptors per section definition, so a section shared by two definitions (Asset Manager `Holders`, `Attachment`, `CategoryLink`, `DataPortInfo`, `PowerPortInfo`, `Asset`, `PrimaryPortRelation`; Facility Manager `Room`, `Resource`) is counted once. **All counts in this document are a snapshot of 2026-10-28 and live only in this section**; they change whenever a field is added, so re-derive them rather than trusting them.
+
+Field-descriptor CLR types in use across all 259 descriptors:
+
+| DOM type | Count | Used for |
+|---|---|---|
+| `string` | 150 | free text, string enums (`Enums.X` with `ToValue/ToEnum`), identifiers that are not GUIDs |
+| `Guid` | 48 | typed references (`SdmObjectReference<T>`, `PnoObjectReference<T>`) and untyped `ISdmObjectReference` |
+| `double` | 29 | dimensions, coordinates, capacities, cable length |
+| `DateTime` | 15 | lifecycle, custody, attachment timestamps |
+| `long` | 14 | counts, positions, sequences — never `int` |
+| `bool` | 10 | flags |
+| `int` | 6 | numeric enums only: `Planandbuildjobpromptenum`, `ConnectionType`, `Outputtype` (×2), `Placementorientationenum`, `ThermalType` |
+| `TimeSpan` | 2 | `AssetClassLifecycleInformation.NominalLifetime`, `AppSettings.HistoryTTL` |
+| `List<Guid>` | 2 | `CableCompatibility.CableTypes`, `JobInformation.Locations` |
+| `List<int>` | 2 | `AssetInformation.OperationalFlags`, `TagsInfo.Tags` (numeric enum lists) |
+| `List<string>` | 1 | `CategoryLink.Categories` |
+
+Definition size at a glance (fields = sum of descriptors over the definition's linked sections; a repeatable section counts once):
+
+| Module | Definition → fields |
+|---|---|
+| Asset Manager | Asset **53** · Asset Class **38** · Data Port **13** · Connections **11** · Power Port **9** · History **7** · App Settings **6** · Reservations **5** · Device Type **4** · Port Type **4** · Cable Type **3** |
+| Facility Manager | Rack **22** · Zone **12** · Facility **11** · Room **10** · Site **9** · Row **8** · Desk **6** · Floor **5** · App Settings **1** |
+| Plan & Build | Job **27** · App Settings **5** · Job Type **3** |
+| InfraOps Properties | Property **9** · Property Values **6** |
+
+---
+
+## 2. Cross-module relationship graph
+
+A relationship is a `Guid` (or `List<Guid>`) field whose repository `FromInstance` wraps the value in a reference struct. Three reference kinds exist:
+
+| Reference kind | Target | Resolution | Drawn as |
+|---|---|---|---|
+| `SdmObjectReference<T>` | another definition in this repo | identifier string → GUID; filterable via rule D7 | solid arrow |
+| `PnoObjectReference<T>` | P&O `Person`, `Organization`, `Team`, `Role` | GUID; implicit conversion | solid arrow to **P&O** |
+| `ISdmObjectReference<ISdmObject>` / `ISdmObjectReference<IPort>` | untyped; resolved by the caller | identifier string | dotted arrow |
+
+The diagram shows module-to-module traffic only; solid arrows are typed references, dotted arrows are untyped. Arrow direction is "holds a reference to". Each module's own definitions are drawn in §3–§6.
+
+```mermaid
+flowchart TB
+    AM["<b>Asset Manager</b>"]
+    FM["<b>Facility Manager</b>"]
+    PB["<b>Plan and Build</b>"]
+    PR["<b>InfraOps Properties</b>"]
+    PNO[("<b>People and Organizations</b><br/>external module")]
+    ANY(["any SDM object"])
+
+    AM -- "Asset location, Reservations" --> FM
+    PB -- "AssetsUsed, ConnectionsOnJob" --> AM
+    AM -. "Reservations, History<br/>(untyped Job reference)" .-> PB
+    AM -- "Ownership, Custody,<br/>Lifecycle, Manufacturer" --> PNO
+    FM -- "Room ownership" --> PNO
+    PB -- "AssignedTo,<br/>AssignmentGroup" --> PNO
+    PR -. "LinkedObjectID + Scope<br/>(string, untyped)" .-> ANY
+```
+
+Every reference that crosses a module boundary:
+
+| From (module · definition) | Field | To | Kind |
+|---|---|---|---|
+| Asset Manager · Asset | `Location.*` and `DestinationLocation.*`: Rack, Desk, Container, Room | Facility Manager · Rack, Desk, Facility (Container), Room | typed |
+| Asset Manager · Asset | Lifecycle users, Ownership, Custody | P&O | `PnoObjectReference` |
+| Asset Manager · Asset Class | `AssetClassInfo.Manufacturer` | P&O | `PnoObjectReference` |
+| Asset Manager · Reservations | `ReservationRack.Rack` | Facility Manager · Rack | typed |
+| Asset Manager · Reservations | `LinkedJob.Job` | Plan & Build · Job | untyped |
+| Asset Manager · History | `HistoryInfo.Job` | Plan & Build · Job | untyped |
+| Facility Manager · Room | `RoomOwnership.Team` / `.Owner` | P&O | `PnoObjectReference` |
+| Plan & Build · Job | `JobOwnership.AssignedTo` / `.AssignmentGroup` | P&O | `PnoObjectReference` |
+| Plan & Build · Job | `AssetsUsed[].AssetID` | Asset Manager · Asset | typed |
+| Plan & Build · Job | `ConnectionsOnJob[].ConnectionID` | Asset Manager · Connections | typed |
+| Plan & Build · Job | `ConnectionsOnJob[].Cabletype` | Asset Manager · Cable Type | typed (stored as `string`, see §13) |
+| InfraOps Properties · Property Values | `PropertyValueInfo.LinkedObjectID` + `Scope` | any SDM object | `string`, untyped |
+
+The Facility tree is the only strict hierarchy; `Rack` has two parents (`Row` **and** `Zone`, both mandatory sections). Asset location points at four Facility definitions at once (`Rack`, `Desk`, `Container`→`Facility`, `Room`) and the same four again in `AssetLocationDestination`.
+
+Cross-package dependencies implied by the references: `PlanAndBuild → AssetManagement` (Asset, Connection, Cable Type), `AssetManagement → FacilityManagement` (Rack, Desk, Facility, Room), all three → People & Organizations. `InfraopsProperties` links to any object only through the untyped `PropertyValueInfo.LinkedObjectID` (`string`) + `Scope` pair, never through a typed reference.
+
+`Guid` fields that are **not** wrapped in a reference: `JobInformation.Locations` (`List<Guid>`, kept as plain GUIDs), `Resource.LinkedResource` (DataMiner resource id; see [§13](#13-known-deviations-flagged-not-fixed)), `HistoryInfo.UserID` (mapped, not read or written).
+
+---
+
+## 3. Asset Manager — `SlcAsset_Management`
+
+`ModuleId` `(slc)asset_management` · behaviours `Asset_Behavior`, `Asset_Class_Behavior`.
+
+Each definition below has a **Sections and references** diagram, followed by one heading and one field table per Section. The module diagrams show how the definitions relate to each other.
+
+How to read the tables and diagrams (valid for §3–§6):
+
+- **Section heading line**: **Section ID**, and **Link** = `SectionDefinitionLink` flags (mandatory, optional, repeatable). **Shared with** lists the other definitions that link the same Section.
+- **Table columns**: **DOM type** is the field type; **Model property** is the path on the entity class (`Holders[]` means one element of the `Holders` list); **Notes** is the reference target (`→ X`; `(P&O)` for People & Organizations; `(untyped)` for `ISdmObjectReference`) or a flagged mismatch; **Rules** is described in [§8](#8-validation-rules).
+- **Sections and references diagram**: a solid arrow from the definition to a Section is mandatory unless labelled (`optional`, `repeatable`). An arrow from a Section to another definition is labelled with the referencing field. Dotted arrows are untyped references. Amber Sections are shared with another definition; grey boxes belong to another module or are external.
+
+**Classes, devices and ownership**
+
+```mermaid
+flowchart TB
+    Asset["<b>Asset</b>"]
+    AssetClass["<b>Asset Class</b>"]
+    DeviceType["<b>Device Type</b>"]
+    PortType["<b>Port Type</b>"]
+    PNO[("People and Organizations")]
+
+    Asset -- "AssetInformation.AssetClass" --> AssetClass
+    Asset -- "AssetLocation.ParentAsset" --> Asset
+    AssetClass -- "AssetClassInfo.DeviceType" --> DeviceType
+    AssetClass -- "DataPortInfo / PowerPortInfo<br/>.PortType (port templates)" --> PortType
+    AssetClass -- "AssetClassInfo.Manufacturer" --> PNO
+    Asset -- "Lifecycle users,<br/>Ownership, Custody" --> PNO
+```
+
+**Ports and cabling**
+
+```mermaid
+flowchart TB
+    Asset["<b>Asset</b>"]
+    DataPort["<b>Data Port</b>"]
+    PowerPort["<b>Power Port</b>"]
+    PortType["<b>Port Type</b>"]
+    CableType["<b>Cable Type</b>"]
+    Connections["<b>Connections</b>"]
+
+    DataPort -- "Asset.AssetID" --> Asset
+    PowerPort -- "Asset.AssetID" --> Asset
+    DataPort -- "DataPortInfo.PortType" --> PortType
+    PowerPort -- "PowerPortInfo.PortType" --> PortType
+    PortType -- "CableCompatibility.CableTypes" --> CableType
+    Connections -- "CableInformation.CableType" --> CableType
+    Connections -- "Source / Destination .PortType" --> PortType
+    Connections -. "Source / Destination .Port<br/>(untyped IPort)" .-> DataPort
+```
+
+**References leaving the module** (Asset location, Reservations, History)
+
+```mermaid
+flowchart LR
+    Asset["<b>Asset</b>"]
+    Reservations["<b>Reservations</b>"]
+    History["<b>History</b>"]
+    subgraph FM["Facility Manager"]
+        Rack
+        Desk
+        Facility["Facility<br/>(Container)"]
+        Room
+    end
+    subgraph PB["Plan and Build"]
+        Job
+    end
+
+    Asset -- "Location /<br/>DestinationLocation" --> Rack
+    Asset --> Desk
+    Asset --> Facility
+    Asset --> Room
+    Reservations -- "ReservationRack.Rack" --> Rack
+    Reservations -. "LinkedJob.Job<br/>(untyped)" .-> Job
+    History -. "HistoryInfo.Job<br/>(untyped)" .-> Job
+```
+
+App Settings has no relations and is not drawn. Cross-module references are summarised in [§2](#2-cross-module-relationship-graph).
+
+Shared sections inside this module: `Holders` and `Attachment` are linked by both **Asset** and **Asset Class**; `DataPortInfo` / `PowerPortInfo` are the single mandatory section of **Data Port** / **Power Port** *and* a repeatable, optional section of **Asset Class** (the class declares its port template; the port definitions instantiate it). `Asset` and `PrimaryPortRelation` are shared by both port definitions. `CategoryLink` is shared by **Port Type** and **Cable Type**.
+
+### 3.1 Asset
+
+**Definition ID:** `9035d110-47f3-412d-ac8a-fde31bd4b00f`  
+**Model:** `Asset`  
+**Behavior:** `Asset_Behavior`  
+**Validator:** `AssetValidator`, `AssetValidationHandler`, `AssetValidationCore`, `PlacementValidator`, `RackPlacementValidation`, `AssetTransitionValidator`  
+
+**Entity rules:**
+
+- `no-db` At most one of ParentAsset, Rack, Desk, Container, Room may be set in `Location`, and likewise in `DestinationLocation`.
+- `no-db` `Location` is editable only when the asset is new or State ∈ {Available, InPlanning, BuildPlanReady, InRepair, Disposed}.
+- `no-db` `DestinationLocation` is editable only when State = InTransit, and is mandatory when State = InTransit.
+- `no-db` Installation info (InstallationDate + InstallationUserId) is editable only when the asset is new or its original State ∉ {Installed, InService, Disposed}; both must be set before the transition to Installed.
+- `db` Linked Data Ports and Power Ports are validated with the Data Port / Power Port rules (§3.6, §3.10).
+- State transitions must follow a legal path in `StateMachine` (§7.1), checked by `AssetTransitionValidator`.
+- `delete` Allowed only when State ∈ {NotAvailable, Disposed}.
+
+**Sections and references**
+
+```mermaid
+flowchart LR
+    D["<b>Asset</b>"]
+    S1["AssetInformation"]
+    S2["AssetLocation"]
+    S3["AssetLocationDestination"]
+    S4["AssetLifecycle"]
+    S5["AssetOwnership"]
+    S6["AssetCustody"]
+    S7["Holders"]
+    S8["ElementLink"]
+    S9["AssetNetworkDetails"]
+    S10["Attachment"]
+    T_assetclass["Asset Class"]
+    T_rack["Rack"]
+    T_desk["Desk"]
+    T_facility["Facility"]
+    T_room["Room"]
+    PNO[("People and Organizations")]
+
+    D --> S1
+    S1 --> T_assetclass
+    D --> S2
+    S2 --> T_rack
+    S2 --> T_desk
+    S2 -- "Container" --> T_facility
+    S2 --> T_room
+    S2 -- "ParentAsset" --> D
+    D --> S3
+    S3 --> T_rack
+    S3 --> T_desk
+    S3 -- "Container" --> T_facility
+    S3 --> T_room
+    S3 -- "ParentAsset" --> D
+    D --> S4
+    S4 --> PNO
+    D --> S5
+    S5 --> PNO
+    D --> S6
+    S6 --> PNO
+    D -- "repeatable" --> S7
+    D -- "repeatable" --> S8
+    D --> S9
+    D -- "repeatable" --> S10
+    classDef def fill:#1d4ed8,stroke:#0b2a85,color:#ffffff,stroke-width:2px
+    classDef shared fill:#b45309,stroke:#6b2d05,color:#ffffff
+    classDef other fill:#4b5563,stroke:#1f2937,color:#ffffff
+    class D def
+    class S7,S10 shared
+    class T_rack,T_desk,T_facility,T_room,PNO other
+```
+
+#### 3.1.1 AssetInformation
+
+**Section ID:** `58c1a50e-d1c7-4467-8d19-54a29f985d83` · **Link:** mandatory
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| AssetName | `string` | `Name` |  | `no-db` Not empty / whitespace<br>`db` Unique across Assets<br>`batch` Unique within the batch |
+| SerialNumber | `string` | `SerialNumber` |  | `db` Unique **per Asset Class**<br>`batch` Unique per Asset Class within the batch |
+| AssetClass | `Guid` | `AssetClassId` | → AssetClass | `no-db` Required<br>`db` Must exist and be in state Active |
+| AssetDescription | `string` | `Description` |  |  |
+| FWOS | `string` | `FW_OS` |  |  |
+| AssetID | `string` | `AssetID` |  | `no-db` Not empty / whitespace<br>`db` Unique across Assets<br>`batch` Unique within the batch |
+| HardwareVersion | `string` | `HardwareVersion` |  |  |
+| OperationalFlags | `List<int>` | `OperationalFlags` |  |  |
+
+#### 3.1.2 AssetLocation
+
+**Section ID:** `7fd5d383-b925-4d93-ac32-85f7453c8f1d` · **Link:** mandatory
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| RackPosition | `long` | `Location.RackPosition` |  | `no-db` Set **iff** Rack is set; must be > 0<br>`db` Position + Asset Class HeightU must fit within `Capacity.MaximumRackCapacity`; must not overlap another Asset or a Reservation (skipped when HeightU ≤ 0)<br>`batch` Must not overlap another Asset in the batch |
+| Side | `string` | `Location.Side` |  | `no-db` Set **iff** Rack is set |
+| Rack | `Guid` | `Location.RackId` | → Rack | `db` Rack must exist |
+| Desk | `Guid` | `Location.DeskId` | → Desk | `db` Desk must exist |
+| Container | `Guid` | `Location.ContainerId` | → Facility | `db` Container (Facility) must exist |
+| Room | `Guid` | `Location.RoomId` | → Room | `db` Room must exist |
+| PowerSupplyRackPosition | `long` | — | **unused** — mapped, never read/written (§13) |  |
+| ParentAsset | `Guid` | `Location.ParentAsset` | → Asset | `db` Parent Asset must exist |
+| HolderNumber | `long` | `Location.HolderNumber` |  | `no-db` Set **iff** ParentAsset is set; ≥ 0<br>`db` Slot identity is (ParentAsset, HierarchyRole, HolderNumber). The Hierarchy Role is resolved from the asset's own Asset Class Device Type and must be set; the parent must expose that (HolderNumber, role) slot and it must be free<br>`batch` Two assets in one batch may not share ParentAsset + HolderNumber + AssetClass (same Asset Class ⇒ same Device Type ⇒ same Hierarchy Role). The same HolderNumber is allowed when the Hierarchy Role differs. Closest no-DB approximation; the role-level check is done at `db` |
+
+#### 3.1.3 AssetLocationDestination
+
+**Section ID:** `a4b292f2-f634-4e16-b218-783c7a2baa43` · **Link:** mandatory
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| RackPosition | `long` | `DestinationLocation.RackPosition` |  | `no-db` Set **iff** Rack is set; must be > 0; Asset Class HeightU must be > 0 to attach to a Rack<br>`db` Position + HeightU must fit within the Rack and not overlap another Asset or Reservation |
+| Side | `string` | `DestinationLocation.Side` |  | `no-db` Set **iff** Rack is set |
+| Rack | `Guid` | `DestinationLocation.RackId` | → Rack | `db` Rack must exist |
+| Desk | `Guid` | `DestinationLocation.DeskId` | → Desk | `db` Desk must exist |
+| Container | `Guid` | `DestinationLocation.ContainerId` | → Facility | `db` Container (Facility) must exist |
+| Room | `Guid` | `DestinationLocation.RoomId` | → Room | `db` Room must exist |
+| PowerSupplyRackPosition | `long` | — | **unused** — mapped, never read/written (§13) |  |
+| ParentAsset | `Guid` | `DestinationLocation.ParentAsset` | → Asset | `db` Parent Asset must exist |
+| HolderNumber | `long` | `DestinationLocation.HolderNumber` |  | `no-db` Set **iff** ParentAsset is set; ≥ 0<br>`db` The Holder must exist on the ParentAsset: a Holder with that SlotNumber and the Hierarchy Role of the asset's Asset Class Device Type. No occupancy check applies to the destination |
+
+#### 3.1.4 AssetLifecycle
+
+**Section ID:** `8f8353b9-5189-468f-881a-5841595548e8` · **Link:** mandatory
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| PurchaseDate | `DateTime` | `PurchaseDate` |  |  |
+| FirstUseDate | `DateTime` | `FirstUseDate` |  |  |
+| EndOfWarrantyDate | `DateTime` | `EndOfWarrantyDate` |  |  |
+| InstallationDate | `DateTime` | `InstallationDate` |  | `no-db` Set **iff** InstallationUserId is set |
+| InstallationUser | `Guid` | `InstallationUserId` | → Person (P&O) | `no-db` Set **iff** InstallationDate is set; required when State ∈ {Installed, InService} |
+| ModificationDate | `DateTime` | `ModificationDate` |  | `no-db` Set **iff** ModificationUserId is set |
+| ModificationUser | `Guid` | `ModificationUserId` | → Person (P&O) | `no-db` Set **iff** ModificationDate is set |
+| EndOfLife | `DateTime` | `EndOfLifeDate` |  |  |
+
+#### 3.1.5 AssetOwnership
+
+**Section ID:** `7fc5a856-18a4-46fd-8e34-2bbe4c642982` · **Link:** mandatory
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| Organization | `Guid` | `Ownership.Organization` | → Organization (P&O) |  |
+| ContactPerson | `Guid` | `Ownership.ContactPerson` | → Person (P&O) | `no-db` Set **iff** ContactPersonRole is set |
+| ContactPersonRole | `Guid` | `Ownership.ContactPersonRole` | → Role (P&O) | `no-db` Set **iff** ContactPerson is set |
+| Team | `Guid` | `Ownership.Team` | → Team (P&O) |  |
+
+#### 3.1.6 AssetCustody
+
+**Section ID:** `db82849f-e6da-478b-b295-dd75de94e0b6` · **Link:** mandatory
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| From | `DateTime` | `Custody.From` |  |  |
+| Till | `DateTime` | `Custody.Till` |  |  |
+| ContactPerson | `Guid` | `Custody.ContactPerson` | → Person (P&O) | `no-db` Set **iff** ContactPersonRole is set |
+| Team | `Guid` | `Custody.Team` | → Team (P&O) |  |
+| Organization | `Guid` | `Custody.Organization` | → Organization (P&O) |  |
+| ContactPersonRole | `Guid` | `Custody.ContactPersonRole` | → Role (P&O) | `no-db` Set **iff** ContactPerson is set |
+
+#### 3.1.7 Holders
+
+**Section ID:** `f2048e2c-8d4a-4d18-a808-f2bff352905f` · **Link:** repeatable · **Shared with:** [Asset Class](#32-asset-class)
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| SlotNumber | `long` | `Holders[].SlotNumber` |  | `no-db` Required; ≥ 0; (SlotNumber, HierarchyRole) pair unique |
+| HierarchyRole | `string` | `Holders[].HierarchyRole` |  | `no-db` (SlotNumber, HierarchyRole) pair unique |
+| Label | `string` | `Holders[].Label` |  |  |
+
+#### 3.1.8 ElementLink
+
+**Section ID:** `e711b95b-74ea-4e2a-b08a-4f05cb55a8a5` · **Link:** repeatable
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| ElementID | `string` | `ElementLinks[].ElementID` |  | `no-db` Unique within the asset |
+| IsPrimary | `bool` | `ElementLinks[].IsPrimary` |  | `no-db` At most one element link is primary |
+
+#### 3.1.9 AssetNetworkDetails
+
+**Section ID:** `67d996e7-d63e-4ab3-8f84-b937af51c1be` · **Link:** mandatory
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| MACAddress | `string` | `MacAddress` |  |  |
+
+#### 3.1.10 Attachment
+
+**Section ID:** `cdfaec69-e775-47f2-bbc0-7ca98d5bbe34` · **Link:** repeatable · **Shared with:** [Asset Class](#32-asset-class)
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| Path | `string` | `Attachments[].FilePath` |  |  |
+| AttachedAt | `DateTime` | `Attachments[].AttachedAt` |  |  |
+| AttachedBy | `string` | `Attachments[].AttachedBy` |  |  |
+
+### 3.2 Asset Class
+
+**Definition ID:** `d6f9c4c8-9f8d-4e8c-a7e0-1e1500563416`  
+**Model:** `AssetClass`  
+**Behavior:** `Asset_Class_Behavior`  
+**Validator:** `AssetClassValidator`, `AssetClassValidationHandler`, `PortNumberValidator`  
+
+**Entity rules:**
+
+- `delete` Allowed only when State ≠ Active and no Asset references the class.
+
+**Sections and references**
+
+```mermaid
+flowchart LR
+    D["<b>Asset Class</b>"]
+    S1["AssetClassInfo"]
+    S2["AssetClassLifecycleInformation"]
+    S3["Holders"]
+    S4["DataPortInfo"]
+    S5["PowerPortInfo"]
+    S6["ProtocolLink"]
+    S7["Attachment"]
+    T_devicetype["Device Type"]
+    PNO[("People and Organizations")]
+    T_porttype["Port Type"]
+
+    D --> S1
+    S1 --> T_devicetype
+    S1 --> PNO
+    D --> S2
+    D -- "repeatable" --> S3
+    D -- "repeatable, optional" --> S4
+    S4 --> T_porttype
+    D -- "repeatable, optional" --> S5
+    S5 --> T_porttype
+    D --> S6
+    D -- "repeatable" --> S7
+    classDef def fill:#1d4ed8,stroke:#0b2a85,color:#ffffff,stroke-width:2px
+    classDef shared fill:#b45309,stroke:#6b2d05,color:#ffffff
+    classDef other fill:#4b5563,stroke:#1f2937,color:#ffffff
+    class D def
+    class S3,S4,S5,S7 shared
+    class PNO other
+```
+
+#### 3.2.1 AssetClassInfo
+
+**Section ID:** `311b421b-8c62-4fb2-b211-3740a6a17b40` · **Link:** mandatory
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| Name | `string` | `Name` |  | `no-db` Not empty / whitespace<br>`db` Unique across Asset Classes<br>`batch` Unique within the batch |
+| DeviceType | `Guid` | `DeviceTypeId` | → DeviceType | `no-db` Must be a Guid<br>`db` Device Type must exist |
+| Description | `string` | `Description` |  |  |
+| Manufacturer | `Guid` | `Manufacturer` | → Organization (P&O) | `no-db` Required<br>`db` Must exist as a P&O Organization |
+| Height | `double` | `Height` |  | `no-db` ≥ 0 when set |
+| Depth | `double` | `Depth` |  | `no-db` ≥ 0 when set |
+| Width | `double` | `Width` |  | `no-db` ≥ 0 when set |
+| HeightU | `double` | `HeightU` |  | `no-db` ≥ 0 when set<br>`db` **> 0 and required** when the Device Type has tag `RackUnitConsumer` |
+| Weight | `double` | `Weight` |  | `no-db` ≥ 0 when set |
+| MaximumPowerConsumption | `double` | `MaximumPowerConsumption` |  | `no-db` ≥ 0 when set |
+| TypicalPowerConsumption | `double` | `TypicalPowerConsumption` |  | `no-db` ≥ 0 when set |
+| FrontImage | `string` | `FrontImage` |  | `no-db` Must be one of the Attachments |
+| BackImage | `string` | `BackImage` |  | `no-db` Must be one of the Attachments |
+| PowerSupply | `string` | `PowerSupply` |  | `db` Required when the Device Type has tag `PowerProvider` |
+| Citype | `string` | `CIType` |  |  |
+| Isbookable | `bool` | `IsBookable` |  |  |
+
+#### 3.2.2 AssetClassLifecycleInformation
+
+**Section ID:** `7146ed89-798f-46f9-a534-99ed91d15e29` · **Link:** mandatory
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| EOLDate | `DateTime` | `Lifecycle.EndOfLife` |  |  |
+| EOSDate | `DateTime` | `Lifecycle.EndOfService` |  |  |
+| NominalLifetime | `TimeSpan` | `Lifecycle.NominalLifetime` |  |  |
+
+#### 3.2.3 Holders
+
+**Section ID:** `f2048e2c-8d4a-4d18-a808-f2bff352905f` · **Link:** repeatable · **Shared with:** [Asset](#31-asset)
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| SlotNumber | `long` | `Holders[].SlotNumber` |  | `no-db` ≥ 0; (SlotNumber, HierarchyRole) pair unique |
+| HierarchyRole | `string` | `Holders[].HierarchyRole` |  | `no-db` (SlotNumber, HierarchyRole) pair unique |
+| Label | `string` | `Holders[].Label` |  |  |
+
+#### 3.2.4 DataPortInfo
+
+**Section ID:** `7918fb83-c6de-43c7-82d1-e561aefac746` · **Link:** repeatable, optional · **Shared with:** [Data Port](#36-data-port)
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| PortNumber | `long` | `DataPorts[].PortNumber` |  | `no-db` Required; ≥ 0; unique across the class's Data Ports |
+| PortName | `string` | `DataPorts[].Name` |  | `no-db` Required |
+| PortExposure | `string` | `DataPorts[].PortExposure` |  |  |
+| OutputType | `int` | `DataPorts[].OutputType` |  |  |
+| PortType | `Guid` | `DataPorts[].PortType` | → PortType | `no-db` Required<br>`db` Port Type must exist |
+| Label | `string` | `DataPorts[].Label` |  |  |
+
+#### 3.2.5 PowerPortInfo
+
+**Section ID:** `75f703c9-dff8-44ef-9606-49c94a3f2ee4` · **Link:** repeatable, optional · **Shared with:** [Power Port](#310-power-port)
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| PortNumber | `long` | `PowerPorts[].PortNumber` |  | `no-db` Required; ≥ 0; unique across the class's Power Ports |
+| PortName | `string` | `PowerPorts[].Name` |  | `no-db` Required |
+| PortExposure | `string` | `PowerPorts[].PortExposure` |  |  |
+| OutputType | `int` | `PowerPorts[].OutputType` |  |  |
+| PortType | `Guid` | `PowerPorts[].PortType` | → PortType | `no-db` Required<br>`db` Port Type must exist |
+| Label | `string` | `PowerPorts[].Label` |  |  |
+
+#### 3.2.6 ProtocolLink
+
+**Section ID:** `6d0fc563-f531-4663-98f7-84a13f47f39a` · **Link:** mandatory
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| Protocol | `string` | `ProtocolLink.Protocol` |  |  |
+
+#### 3.2.7 Attachment
+
+**Section ID:** `cdfaec69-e775-47f2-bbc0-7ca98d5bbe34` · **Link:** repeatable · **Shared with:** [Asset](#31-asset)
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| Path | `string` | `Attachments[].FilePath` |  |  |
+| AttachedAt | `DateTime` | `Attachments[].AttachedAt` |  |  |
+| AttachedBy | `string` | `Attachments[].AttachedBy` |  |  |
+
+### 3.3 Asset Manager App Settings
+
+**Definition ID:** `5372272a-65f3-43e3-9ef4-f7f879de5a26`  
+**Model:** `AssetManagerAppSettings`  
+**Behavior:** none  
+
+**Entity rules:**
+
+- No field rules (null guard only).
+
+**Sections and references**
+
+```mermaid
+flowchart LR
+    D["<b>Asset Manager App Settings</b>"]
+    S1["AppSettings"]
+
+    D --> S1
+    classDef def fill:#1d4ed8,stroke:#0b2a85,color:#ffffff,stroke-width:2px
+    classDef shared fill:#b45309,stroke:#6b2d05,color:#ffffff
+    classDef other fill:#4b5563,stroke:#1f2937,color:#ffffff
+    class D def
+```
+
+#### 3.3.1 AppSettings
+
+**Section ID:** `941488bf-bb5a-46e0-968c-4b96f18fcbf1` · **Link:** mandatory
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| EnableAssetHistory | `bool` | `EnableAssetHistory` |  |  |
+| PlanAndBuildJobPrompt | `int` | `PlanAndBuildJobPrompt` |  |  |
+| EnableConnectionHistory | `bool` | `EnableConnectionHistory` |  |  |
+| HistoryTTL | `TimeSpan` | `HistoryTTL` |  |  |
+| HistoryLimit | `long` | `HistoryLimit` |  |  |
+| EnableResourceLink | `bool` | `EnableResourceLink` |  |  |
+
+### 3.4 Cable Type
+
+**Definition ID:** `b2e24be2-a559-4628-bcfd-e0398644d46a`  
+**Model:** `CableType`  
+**Behavior:** none  
+**Validator:** `CableTypeValidator`, `CableTypeValidationHandler`  
+
+**Entity rules:**
+
+- `delete` Blocked while any Connection uses the cable type or any Port Type lists it as compatible.
+
+**Sections and references**
+
+```mermaid
+flowchart LR
+    D["<b>Cable Type</b>"]
+    S1["CableTypeInformation"]
+    S2["CategoryLink"]
+
+    D --> S1
+    D --> S2
+    classDef def fill:#1d4ed8,stroke:#0b2a85,color:#ffffff,stroke-width:2px
+    classDef shared fill:#b45309,stroke:#6b2d05,color:#ffffff
+    classDef other fill:#4b5563,stroke:#1f2937,color:#ffffff
+    class D def
+    class S2 shared
+```
+
+#### 3.4.1 CableTypeInformation
+
+**Section ID:** `08974346-b8ff-4e00-8cdd-34d401774092` · **Link:** mandatory
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| Name | `string` | `Name` |  | `no-db` Not empty / whitespace<br>`db` Unique across Cable Types<br>`batch` Unique within the batch |
+| Description | `string` | `Description` |  |  |
+
+#### 3.4.2 CategoryLink
+
+**Section ID:** `bda370db-b7e1-431b-991d-37044d0b9176` · **Link:** mandatory · **Shared with:** [Port Type](#39-port-type)
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| Categories | `List<string>` | `CategoryLinks.Categories` |  | `no-db` At least one category |
+
+### 3.5 Connections
+
+**Definition ID:** `a7844a51-8221-48da-9a0e-7cfa20262715`  
+**Model:** `Connection`  
+**Behavior:** none  
+**Validator:** `ConnectionValidator`, `ConnectionValidationHandler`, `ConnectionValidationExtensions`  
+
+**Entity rules:**
+
+- `no-db` Source and Destination ports must differ.
+- `no-db` Both endpoint Assets must exist, have an Asset Class that is Active, and not be in State NotAvailable or Disposed.
+- `no-db` Data connection: both endpoint Device Types need tag `AcceptsDataConnection`. Power connection: the source Device Type needs tag `PowerProvider`.
+- `db` A port may carry at most `MaxConnectionsPerPort` (= 1) connection.
+
+**Sections and references**
+
+```mermaid
+flowchart LR
+    D["<b>Connections</b>"]
+    S1["ConnectionInfo"]
+    S2["CableInformation"]
+    S3["SourceInfo"]
+    S4["DestinationInfo"]
+    T_cabletype["Cable Type"]
+    IPORT(["Data Port or Power Port<br/>(untyped IPort)"])
+    T_porttype["Port Type"]
+
+    D --> S1
+    D --> S2
+    S2 --> T_cabletype
+    D --> S3
+    S3 -. "SourcePort" .-> IPORT
+    S3 -- "SourcePortType" --> T_porttype
+    D --> S4
+    S4 -. "DestinationPort" .-> IPORT
+    S4 -- "DestinationPortType" --> T_porttype
+    classDef def fill:#1d4ed8,stroke:#0b2a85,color:#ffffff,stroke-width:2px
+    classDef shared fill:#b45309,stroke:#6b2d05,color:#ffffff
+    classDef other fill:#4b5563,stroke:#1f2937,color:#ffffff
+    class D def
+    class IPORT other
+```
+
+#### 3.5.1 ConnectionInfo
+
+**Section ID:** `a8035b4d-f36e-4093-9002-b80238449b14` · **Link:** mandatory
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| Notes | `string` | `Notes` |  |  |
+| Description | `string` | `Description` |  |  |
+| ConnectionType | `int` | `ConnectionType` |  | `no-db` Required |
+
+#### 3.5.2 CableInformation
+
+**Section ID:** `d0b3100f-6a88-4c32-b3fd-4cb7a662c75b` · **Link:** mandatory
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| CableLength | `double` | `CableLength` |  | `no-db` ≥ 0 |
+| CableType | `Guid` | `CableType` | → CableType; stored as string (§13) | `no-db` Required<br>`db` Cable Type must exist |
+
+#### 3.5.3 SourceInfo
+
+**Section ID:** `ea1c78c3-9670-4cf6-8752-29fa9756f275` · **Link:** mandatory
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| CableSourceTag | `string` | `Source.CableTag` |  |  |
+| SourcePort | `Guid` | `Source.Port` | → IPort (untyped) | `no-db` Required; OutputType ∈ {Out, I/O}<br>`db` Must exist; must be a Data port for Data connections and a Power port for Power connections |
+| SourcePortType | `Guid` | `Source.PortType` | → PortType | `no-db` Required<br>`db` Must exist; kind must match ConnectionType; must equal the connected port's own Port Type |
+
+#### 3.5.4 DestinationInfo
+
+**Section ID:** `cae60cfd-5a48-4e6b-8f52-e69e8e468a9c` · **Link:** mandatory
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| CableDestinationTag | `string` | `Destination.CableTag` |  |  |
+| DestinationPort | `Guid` | `Destination.Port` | → IPort (untyped) | `no-db` Required; OutputType ∈ {In, I/O}<br>`db` Must exist; port kind must match ConnectionType |
+| DestinationPortType | `Guid` | `Destination.PortType` | → PortType | `no-db` Required<br>`db` Must exist; kind must match ConnectionType; must equal the connected port's own Port Type |
+
+### 3.6 Data Port
+
+**Definition ID:** `280b26f8-7245-4b67-85c1-d42bcf3e9c41`  
+**Model:** `DataPort`  
+**Behavior:** none  
+**Validator:** `DataPortValidator`, `DataPortValidationCore`, `DataPortValidationHandler`  
+
+**Entity rules:**
+
+- `no-db` OutputType cannot change to `In` while the port is a connection source, nor to `Out` while it is a destination.
+- `delete` Blocked while connections are assigned to the port.
+
+**Sections and references**
+
+```mermaid
+flowchart LR
+    D["<b>Data Port</b>"]
+    S1["DataPortInfo"]
+    S2["AddressInfo"]
+    S3["Asset"]
+    S4["PrimaryPortRelation"]
+    T_porttype["Port Type"]
+    T_asset["Asset"]
+
+    D --> S1
+    S1 --> T_porttype
+    D -- "optional" --> S2
+    D --> S3
+    S3 -- "AssetID" --> T_asset
+    D -- "optional" --> S4
+    classDef def fill:#1d4ed8,stroke:#0b2a85,color:#ffffff,stroke-width:2px
+    classDef shared fill:#b45309,stroke:#6b2d05,color:#ffffff
+    classDef other fill:#4b5563,stroke:#1f2937,color:#ffffff
+    class D def
+    class S1,S3,S4 shared
+```
+
+#### 3.6.1 DataPortInfo
+
+**Section ID:** `7918fb83-c6de-43c7-82d1-e561aefac746` · **Link:** mandatory · **Shared with:** [Asset Class](#32-asset-class)
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| PortNumber | `long` | `DataPortInfo.PortNumber` |  | `no-db` Required; ≥ 0 |
+| PortName | `string` | `DataPortInfo.Name` |  | `no-db` Required |
+| PortExposure | `string` | `DataPortInfo.PortExposure` |  |  |
+| OutputType | `int` | `DataPortInfo.OutputType` |  | `no-db` Required |
+| PortType | `Guid` | `DataPortInfo.PortType` | → PortType | `db` Required; must exist; must be a **Data** Port Type |
+| Label | `string` | `DataPortInfo.Label` |  |  |
+
+#### 3.6.2 AddressInfo
+
+**Section ID:** `73f92de5-317d-41dc-b8c3-2563fcb13e50` · **Link:** optional
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| IPV4Address | `string` | `AddressInfo.Ipv4Address` |  | `no-db` Valid IPv4 format when set |
+| IPV6Address | `string` | `AddressInfo.Ipv6Address` |  | `no-db` Valid IPv6 format when set |
+| Hostname | `string` | `AddressInfo.Hostname` |  |  |
+| DNS | `bool` | `AddressInfo.DNS` |  |  |
+
+#### 3.6.3 Asset
+
+**Section ID:** `45368cbd-a605-4930-8bf2-d0f649edeae0` · **Link:** mandatory · **Shared with:** [Power Port](#310-power-port)
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| AssetID | `Guid` | `Asset` | → Asset | `no-db` Required<br>`db` Asset must exist |
+
+#### 3.6.4 PrimaryPortRelation
+
+**Section ID:** `2ad90463-9998-4df9-a068-93a13cfa2e6a` · **Link:** optional · **Shared with:** [Power Port](#310-power-port)
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| Isprimaryipv4 | `bool` | `PrimaryPortRelation.IsPrimaryIpv4` |  | `no-db` Requires `AddressInfo.Ipv4Address`; at most one primary IPv4 per Asset |
+| Isprimaryipv6 | `bool` | `PrimaryPortRelation.IsPrimaryIpv6` |  | `no-db` Requires `AddressInfo.Ipv6Address`; at most one primary IPv6 per Asset |
+
+### 3.7 Device Type
+
+**Definition ID:** `f369e97b-51b2-4cdc-90b4-7a4f86fad82c`  
+**Model:** `DeviceType`  
+**Behavior:** none  
+**Validator:** `DeviceTypeValidator`, `DeviceTypeValidationHandler`  
+
+**Entity rules:**
+
+- `db` Update rejected while any non-Disposed Asset uses the type.
+- `delete` Blocked while any Asset Class references the type or any non-Disposed Asset uses it.
+
+**Sections and references**
+
+```mermaid
+flowchart LR
+    D["<b>Device Type</b>"]
+    S1["DeviceTypeInformation"]
+    S2["TagsInfo"]
+    S3["HierarchyInfo"]
+
+    D --> S1
+    D --> S2
+    D --> S3
+    classDef def fill:#1d4ed8,stroke:#0b2a85,color:#ffffff,stroke-width:2px
+    classDef shared fill:#b45309,stroke:#6b2d05,color:#ffffff
+    classDef other fill:#4b5563,stroke:#1f2937,color:#ffffff
+    class D def
+```
+
+#### 3.7.1 DeviceTypeInformation
+
+**Section ID:** `516210a2-f739-4462-9df8-2a8146c30bf0` · **Link:** mandatory
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| Name | `string` | `Name` |  | `no-db` Not empty / whitespace<br>`db` Unique across Device Types<br>`batch` Unique within the batch |
+| Description | `string` | `Description` |  |  |
+
+#### 3.7.2 TagsInfo
+
+**Section ID:** `9d0bbc4b-e0be-45e9-8280-6fe36efe12e8` · **Link:** mandatory
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| Tags | `List<int>` | `TagsInfo.Tags` |  |  |
+
+#### 3.7.3 HierarchyInfo
+
+**Section ID:** `ca44f3ce-2725-49f1-93f2-8eb53d1d858c` · **Link:** mandatory
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| HierarchyRole | `string` | `HierarchyInfo.HierarchyRole` |  |  |
+
+### 3.8 History
+
+**Definition ID:** `4d4ad8f7-fe8f-48c4-a373-6d36184de4fb`  
+**Model:** `History`  
+**Behavior:** none  
+
+**Entity rules:**
+
+- No field rules (null guard only).
+
+**Sections and references**
+
+```mermaid
+flowchart LR
+    D["<b>History</b>"]
+    S1["HistoryInfo"]
+    ANY(["any SDM object"])
+
+    D --> S1
+    S1 -. "Job, InstanceID" .-> ANY
+    classDef def fill:#1d4ed8,stroke:#0b2a85,color:#ffffff,stroke-width:2px
+    classDef shared fill:#b45309,stroke:#6b2d05,color:#ffffff
+    classDef other fill:#4b5563,stroke:#1f2937,color:#ffffff
+    class D def
+    class ANY other
+```
+
+#### 3.8.1 HistoryInfo
+
+**Section ID:** `cec87feb-30d0-4270-8bf8-7e8282d0513c` · **Link:** mandatory
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| Description | `string` | `HistoryInfo.Description` |  |  |
+| Job | `Guid` | `HistoryInfo.Job` | → ISdmObject (untyped) |  |
+| UserID | `Guid` | — | **unused** — mapped, never read/written (§13) |  |
+| InstanceDefinitionID | `string` | `HistoryInfo.ModifiedInstanceDefinitionID` |  |  |
+| InstanceID | `string` | `HistoryInfo.ModifiedInstanceID` | → ISdmObject (untyped) |  |
+| ExtraInfo | `string` | `HistoryInfo.ExtraInfo` |  |  |
+| TypeOfHistory | `string` | `HistoryInfo.TypeOfHistory` | string enum `Typeofhistory` |  |
+
+### 3.9 Port Type
+
+**Definition ID:** `ff930185-a380-46bf-8bfb-8c70f6933c67`  
+**Model:** `PortType`  
+**Behavior:** none  
+**Validator:** `PortTypeValidator`  
+
+**Entity rules:**
+
+- `delete` Blocked while any Asset port or Asset Class port uses the Port Type.
+
+**Sections and references**
+
+```mermaid
+flowchart LR
+    D["<b>Port Type</b>"]
+    S1["PortTypeInformation"]
+    S2["CategoryLink"]
+    S3["CableCompatibility"]
+    T_cabletype["Cable Type"]
+
+    D --> S1
+    D --> S2
+    D --> S3
+    S3 -- "CableTypes" --> T_cabletype
+    classDef def fill:#1d4ed8,stroke:#0b2a85,color:#ffffff,stroke-width:2px
+    classDef shared fill:#b45309,stroke:#6b2d05,color:#ffffff
+    classDef other fill:#4b5563,stroke:#1f2937,color:#ffffff
+    class D def
+    class S2 shared
+```
+
+#### 3.9.1 PortTypeInformation
+
+**Section ID:** `7b019f7b-024c-46ec-814d-5a65b1e5fabe` · **Link:** mandatory
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| Name | `string` | `Name` |  |  |
+| Description | `string` | `Description` |  |  |
+
+#### 3.9.2 CategoryLink
+
+**Section ID:** `bda370db-b7e1-431b-991d-37044d0b9176` · **Link:** mandatory · **Shared with:** [Cable Type](#34-cable-type)
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| Categories | `List<string>` | `CategoryLinks.Categories` |  | `no-db` At least one category |
+
+#### 3.9.3 CableCompatibility
+
+**Section ID:** `bccf76f0-1c97-4e8b-8c78-156a18ec4e2c` · **Link:** mandatory
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| CableTypes | `List<Guid>` | `CableFKs.CableTypeFks` | → CableType | `no-db` At least one; none empty<br>`db` Each Cable Type must exist |
+
+### 3.10 Power Port
+
+**Definition ID:** `edfd08fd-ecae-44db-949a-8ca5d17ee22d`  
+**Model:** `PowerPort`  
+**Behavior:** none  
+**Validator:** `PowerPortValidator`, `PowerPortValidationCore`, `PowerPortValidationHandler`  
+
+**Entity rules:**
+
+- `no-db` OutputType cannot change to `In` while the port is a connection source, nor to `Out` while it is a destination.
+- `delete` Blocked while connections are assigned to the port.
+
+**Sections and references**
+
+```mermaid
+flowchart LR
+    D["<b>Power Port</b>"]
+    S1["PowerPortInfo"]
+    S2["Asset"]
+    S3["PrimaryPortRelation"]
+    T_porttype["Port Type"]
+    T_asset["Asset"]
+
+    D --> S1
+    S1 --> T_porttype
+    D --> S2
+    S2 -- "AssetID" --> T_asset
+    D -- "optional" --> S3
+    classDef def fill:#1d4ed8,stroke:#0b2a85,color:#ffffff,stroke-width:2px
+    classDef shared fill:#b45309,stroke:#6b2d05,color:#ffffff
+    classDef other fill:#4b5563,stroke:#1f2937,color:#ffffff
+    class D def
+    class S1,S2,S3 shared
+```
+
+#### 3.10.1 PowerPortInfo
+
+**Section ID:** `75f703c9-dff8-44ef-9606-49c94a3f2ee4` · **Link:** mandatory · **Shared with:** [Asset Class](#32-asset-class)
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| PortNumber | `long` | `PowerPortInfo.PortNumber` |  | `no-db` Required; ≥ 0 |
+| PortName | `string` | `PowerPortInfo.Name` |  | `no-db` Required |
+| PortExposure | `string` | `PowerPortInfo.PortExposure` |  |  |
+| OutputType | `int` | `PowerPortInfo.OutputType` |  | `no-db` Required |
+| PortType | `Guid` | `PowerPortInfo.PortType` | → PortType | `db` Required; must exist; must be a **Power** Port Type |
+| Label | `string` | `PowerPortInfo.Label` |  |  |
+
+#### 3.10.2 Asset
+
+**Section ID:** `45368cbd-a605-4930-8bf2-d0f649edeae0` · **Link:** mandatory · **Shared with:** [Data Port](#36-data-port)
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| AssetID | `Guid` | `Asset` | → Asset | `no-db` Required<br>`db` Asset must exist |
+
+#### 3.10.3 PrimaryPortRelation
+
+**Section ID:** `2ad90463-9998-4df9-a068-93a13cfa2e6a` · **Link:** optional · **Shared with:** [Data Port](#36-data-port)
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| Isprimaryipv4 | `bool` | — | **unused** — mapped, never read/written (§13) |  |
+| Isprimaryipv6 | `bool` | — | **unused** — mapped, never read/written (§13) |  |
+
+### 3.11 Reservations
+
+**Definition ID:** `203aacf0-ad18-4d52-b243-9547fa8b2553`  
+**Model:** `InfraopsReservation`  
+**Behavior:** none  
+**Validator:** `InfraopsReservationValidator`, `RackPlacementValidation`  
+
+**Entity rules:**
+
+- `no-db` At least one reserved position range is required.
+- `db` Each reserved range must lie inside the Rack's capacity and must not overlap an installed Asset or another Reservation.
+
+**Sections and references**
+
+```mermaid
+flowchart LR
+    D["<b>Reservations</b>"]
+    S1["ReservationInfo"]
+    S2["ReservationRack"]
+    S3["ReservedPositions"]
+    S4["LinkedJob"]
+    T_rack["Rack"]
+    ANY(["any SDM object"])
+
+    D --> S1
+    D --> S2
+    S2 --> T_rack
+    D -- "repeatable" --> S3
+    D -- "optional" --> S4
+    S4 -. "Job" .-> ANY
+    classDef def fill:#1d4ed8,stroke:#0b2a85,color:#ffffff,stroke-width:2px
+    classDef shared fill:#b45309,stroke:#6b2d05,color:#ffffff
+    classDef other fill:#4b5563,stroke:#1f2937,color:#ffffff
+    class D def
+    class T_rack,ANY other
+```
+
+#### 3.11.1 ReservationInfo
+
+**Section ID:** `2ad67f52-0826-4234-ba7e-bbf9ef046fad` · **Link:** mandatory
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| Description | `string` | `Description` |  |  |
+
+#### 3.11.2 ReservationRack
+
+**Section ID:** `5b1c5bb2-ec0e-4f65-a195-58f47eb40d61` · **Link:** mandatory
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| Rack | `Guid` | `RackFk.Rack` | → Rack | `no-db` Required<br>`db` Rack must exist |
+
+#### 3.11.3 ReservedPositions
+
+**Section ID:** `a22f5492-2021-4eea-8d02-357f778297df` · **Link:** repeatable
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| ReservedPositionsLowerBound | `long` | `ReservedPositions[].LowerBound` |  |  |
+| ReservedPositionsUpperBound | `long` | `ReservedPositions[].UpperBound` |  |  |
+
+#### 3.11.4 LinkedJob
+
+**Section ID:** `affb2069-39ff-4318-868e-f19b298477f1` · **Link:** optional
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| Job | `Guid` | `JobFk.Job` | → ISdmObject (untyped) |  |
+
+---
+
+## 4. Facility Manager — `SlcFacility_Management`
+
+`ModuleId` `(slc)facility_management` · one behaviour per physical entity, all identical Draft → Active → Deprecated.
+
+```mermaid
+flowchart TB
+    Site["<b>Site</b>"]
+    Facility["<b>Facility</b>"]
+    Floor["<b>Floor</b>"]
+    Room["<b>Room</b>"]
+    Row["<b>Row</b>"]
+    Zone["<b>Zone</b>"]
+    Desk["<b>Desk</b>"]
+    Rack["<b>Rack</b>"]
+    PNO[("People and Organizations")]
+
+    Site -- "1 : n" --> Facility
+    Facility -- "1 : n" --> Floor
+    Floor -- "1 : n" --> Room
+    Room -- "1 : n" --> Row
+    Room -- "1 : n" --> Zone
+    Room -- "1 : n" --> Desk
+    Row -- "1 : n" --> Rack
+    Zone -- "1 : n" --> Rack
+    Room -. "RoomOwnership<br/>Team / Owner" .-> PNO
+```
+
+Each definition has a **Sections and references** diagram and one table per Section; see [§3](#3-asset-manager--slcasset_management) for how to read them.
+
+The tree is a strict hierarchy except **Rack**, which has two mandatory parents (**Row** and **Zone**). Every arrow is a 1 : n parent link.
+
+Two sections are shared across definitions: `Room` (`3ee83337-…`) is the parent link of **Row**, **Zone** and **Desk**; `Resource` (`2f8f34af-…`) carries the DataMiner booking-resource id on **Rack**, **Zone**, **Row**, **Desk** and **Room**. The parent-link field names are generator-suffixed (`Site_f08b42c7`, `Facility_fc282509`, `Floor_6a3f0eeb`, `Room_8d904f8d`, `Row_5d2f9bb3`, `Zone_45922fd2`); the mapper aliases them to `<Parent>Fk.<Parent>` (rule D8).
+
+**Rack** is the only definition with two mandatory parent links (`Row` and `Zone`); the repository writes whichever references are set — neither is enforced as present.
+
+### 4.1 Desk
+
+**Definition ID:** `9af0e791-b171-4b92-86e7-79dbb8282f66`  
+**Model:** `Desk`  
+**Behavior:** `Desk_Behaviour`  
+**Validator:** `DeskValidator`, `DeskValidationHandler`  
+
+**Sections and references**
+
+```mermaid
+flowchart LR
+    D["<b>Desk</b>"]
+    S1["DeskInformation"]
+    S2["Room"]
+    S3["Resource"]
+    T_room["Room"]
+
+    D --> S1
+    D --> S2
+    S2 --> T_room
+    D --> S3
+    classDef def fill:#1d4ed8,stroke:#0b2a85,color:#ffffff,stroke-width:2px
+    classDef shared fill:#b45309,stroke:#6b2d05,color:#ffffff
+    classDef other fill:#4b5563,stroke:#1f2937,color:#ffffff
+    class D def
+    class S2,S3 shared
+```
+
+#### 4.1.1 DeskInformation
+
+**Section ID:** `20bcc5d1-5065-4091-a5b0-82a09ecb9ddb` · **Link:** mandatory
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| Name | `string` | `Name` |  | `no-db` Not empty / whitespace |
+| Plan | `string` | `Plan` |  |  |
+| Description | `string` | `Description` |  |  |
+| DeskID | `string` | `DeskID` |  | `no-db` Not empty / whitespace<br>`db` Unique<br>`batch` Unique within the batch |
+
+#### 4.1.2 Room
+
+**Section ID:** `3ee83337-fe05-417e-b328-08a7931da62f` · **Link:** mandatory · **Shared with:** [Row](#47-row), [Zone](#49-zone)
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| Room_8d904f8d | `Guid` | `RoomFk.Room` | → Room | `no-db` Required<br>`db` Room must exist |
+
+#### 4.1.3 Resource
+
+**Section ID:** `2f8f34af-8405-4a7e-b996-da6b9d97e61c` · **Link:** mandatory · **Shared with:** [Rack](#45-rack), [Room](#46-room), [Row](#47-row), [Zone](#49-zone)
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| LinkedResource | `Guid` | `Resource.ResourceId` | written/read as `string` (§13) |  |
+
+### 4.2 Facility
+
+**Definition ID:** `dab0442b-b092-4dbf-a249-19dd421c69db`  
+**Model:** `Facility`  
+**Behavior:** `Facility_Behaviour`  
+**Validator:** `FacilityValidator`, `FacilityValidationHandler`  
+
+**Entity rules:**
+
+- `delete` Blocked while Floors reference the facility.
+
+**Sections and references**
+
+```mermaid
+flowchart LR
+    D["<b>Facility</b>"]
+    S1["FacilityInformation"]
+    S2["Site"]
+    T_site["Site"]
+
+    D --> S1
+    D --> S2
+    S2 --> T_site
+    classDef def fill:#1d4ed8,stroke:#0b2a85,color:#ffffff,stroke-width:2px
+    classDef shared fill:#b45309,stroke:#6b2d05,color:#ffffff
+    classDef other fill:#4b5563,stroke:#1f2937,color:#ffffff
+    class D def
+```
+
+#### 4.2.1 FacilityInformation
+
+**Section ID:** `125d4f2c-4d9f-4efe-9af6-1e6a5d4bcaab` · **Link:** mandatory
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| Name | `string` | `Name` |  | `no-db` Not empty / whitespace |
+| FacilityType | `string` | `FacilityType` |  |  |
+| Description | `string` | `Description` |  |  |
+| Address | `string` | `Address` |  |  |
+| City | `string` | `City` |  |  |
+| ZipCode | `string` | `ZipCode` |  |  |
+| Country | `string` | `Country` |  |  |
+| Latitude | `double` | `Latitude` |  | `no-db` −90 … 90 when set |
+| Longitude | `double` | `Longitude` |  | `no-db` −180 … 180 when set |
+| FacilityID | `string` | `FacilityId` |  | `no-db` Not empty / whitespace<br>`db` Unique<br>`batch` Unique within the batch |
+
+#### 4.2.2 Site
+
+**Section ID:** `9a6552d4-c538-45be-93fd-a879587d25cc` · **Link:** mandatory
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| Site_f08b42c7 | `Guid` | `SiteFk.Site` | → Site | `db` Site must exist **when set** (not required) |
+
+### 4.3 Facility Manager App Settings
+
+**Definition ID:** `a07a6f21-b919-4903-ae76-c8442fd97f54`  
+**Model:** `FacilityManagerAppSettings`  
+**Behavior:** none  
+
+**Entity rules:**
+
+- No field rules (null guard only).
+
+**Sections and references**
+
+```mermaid
+flowchart LR
+    D["<b>Facility Manager App Settings</b>"]
+    S1["AppSettings"]
+
+    D --> S1
+    classDef def fill:#1d4ed8,stroke:#0b2a85,color:#ffffff,stroke-width:2px
+    classDef shared fill:#b45309,stroke:#6b2d05,color:#ffffff
+    classDef other fill:#4b5563,stroke:#1f2937,color:#ffffff
+    class D def
+```
+
+#### 4.3.1 AppSettings
+
+**Section ID:** `67ba4303-7c6b-4c2c-bb8b-0fb2fb4d970d` · **Link:** mandatory
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| GoogleMapsAPIKey | `string` | `GoogleMapsAPIKey` |  |  |
+
+### 4.4 Floor
+
+**Definition ID:** `9bbb18c2-8284-4e12-a1d1-f2ebb7e2c1fc`  
+**Model:** `Floor`  
+**Behavior:** `Floor_Behaviour`  
+**Validator:** `FloorValidator`, `FloorValidationHandler`  
+
+**Entity rules:**
+
+- `delete` Blocked while Rooms reference the floor.
+
+**Sections and references**
+
+```mermaid
+flowchart LR
+    D["<b>Floor</b>"]
+    S1["FloorInformation"]
+    S2["Facility"]
+    T_facility["Facility"]
+
+    D --> S1
+    D --> S2
+    S2 --> T_facility
+    classDef def fill:#1d4ed8,stroke:#0b2a85,color:#ffffff,stroke-width:2px
+    classDef shared fill:#b45309,stroke:#6b2d05,color:#ffffff
+    classDef other fill:#4b5563,stroke:#1f2937,color:#ffffff
+    class D def
+```
+
+#### 4.4.1 FloorInformation
+
+**Section ID:** `f3b701eb-5ae6-4cb3-8207-b11c7801e136` · **Link:** mandatory
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| Name | `string` | `Name` |  | `no-db` Not empty / whitespace |
+| Plan | `string` | `Plan` |  |  |
+| Description | `string` | `Description` |  |  |
+| FloorID | `string` | `FloorId` |  | `no-db` Not empty / whitespace<br>`db` Unique<br>`batch` Unique within the batch |
+
+#### 4.4.2 Facility
+
+**Section ID:** `9f0aade4-5dc5-4d88-b350-15bd8fafed28` · **Link:** mandatory
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| Facility_fc282509 | `Guid` | `FacilityFk.Facility` | → Facility | `no-db` Required<br>`db` Facility must exist (failure is keyed to `FloorId`, see §13) |
+
+### 4.5 Rack
+
+**Definition ID:** `c7877685-0295-40b2-acb1-9aea5d7d9c21`  
+**Model:** `Rack`  
+**Behavior:** `Rack_Behaviour`  
+**Validator:** `RackValidator`, `RackValidationHandler` (constants `MAX_RACK_HEIGHT_CM` = 320, `MAX_RACK_SIZE_CM` = 120, `MAX_RACK_CAPACITY_U` = 70)  
+
+**Sections and references**
+
+```mermaid
+flowchart LR
+    D["<b>Rack</b>"]
+    S1["RackInformation"]
+    S2["RackCapacity"]
+    S3["Row"]
+    S4["Zone"]
+    S5["Resource"]
+    S6["ImageInfo"]
+    T_row["Row"]
+    T_zone["Zone"]
+
+    D --> S1
+    D --> S2
+    D --> S3
+    S3 --> T_row
+    D --> S4
+    S4 --> T_zone
+    D --> S5
+    D -- "repeatable" --> S6
+    classDef def fill:#1d4ed8,stroke:#0b2a85,color:#ffffff,stroke-width:2px
+    classDef shared fill:#b45309,stroke:#6b2d05,color:#ffffff
+    classDef other fill:#4b5563,stroke:#1f2937,color:#ffffff
+    class D def
+    class S5 shared
+```
+
+#### 4.5.1 RackInformation
+
+**Section ID:** `05207b85-724c-4b96-8e50-e8419bb32696` · **Link:** mandatory
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| Name | `string` | `Name` |  | `no-db` Not empty / whitespace |
+| Model | `string` | `Model` |  |  |
+| Position | `string` | `Position` |  | `no-db` Required |
+| Width | `double` | `Width` |  | `no-db` 0 … 120 cm when set |
+| Depth | `double` | `Depth` |  | `no-db` 0 … 120 cm when set |
+| Height | `double` | `Height` |  | `no-db` 0 … 320 cm when set |
+| Description | `string` | `Description` |  |  |
+| Bookable | `bool` | `Bookable` |  |  |
+| CoolingFlow | `string` | `CoolingFlow` |  |  |
+| X | `double` | `XPosition` |  |  |
+| Y | `double` | `YPosition` |  |  |
+| Label | `string` | `Label` |  |  |
+| Color | `string` | `Color` |  |  |
+| PlacementOrientation | `int` | `Orientation` |  |  |
+| RackID | `string` | `RackId` |  | `no-db` Not empty / whitespace<br>`db` Unique<br>`batch` Unique within the batch |
+
+#### 4.5.2 RackCapacity
+
+**Section ID:** `790bcbea-9659-4340-91ff-46dc8c37b251` · **Link:** mandatory
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| MaximumRackCapacity | `double` | `Capacity.MaximumRackCapacity` |  | `no-db` Required; 1 … 70 U |
+| MaximumPowerCapacity | `double` | `Capacity.MaximumPowerCapacity` |  | `no-db` ≥ 0 |
+
+#### 4.5.3 Row
+
+**Section ID:** `8a81a86b-7372-4c83-bde7-680004bb3eb4` · **Link:** mandatory
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| Row_5d2f9bb3 | `Guid` | `RowFk.Row` | → Row | `no-db` Required<br>`db` Row must exist |
+
+#### 4.5.4 Zone
+
+**Section ID:** `785e2397-0f0e-4b82-ace6-9e372a208bf6` · **Link:** mandatory
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| Zone_45922fd2 | `Guid` | `ZoneFk.Zone` | → Zone | Not validated (see §13) |
+
+#### 4.5.5 Resource
+
+**Section ID:** `2f8f34af-8405-4a7e-b996-da6b9d97e61c` · **Link:** mandatory · **Shared with:** [Desk](#41-desk), [Room](#46-room), [Row](#47-row), [Zone](#49-zone)
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| LinkedResource | `Guid` | `Resource.ResourceId` | written/read as `string` (§13) |  |
+
+#### 4.5.6 ImageInfo
+
+**Section ID:** `67f72a06-cb71-4a21-9973-0ba04e966be9` · **Link:** repeatable
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| ImageFilepath | `string` | `ImageDetails[].ImageFilePath` |  | `no-db` No duplicate paths (case-insensitive) |
+| UploadTimestamp | `DateTime` | `ImageDetails[].UploadTimestamp` |  |  |
+
+### 4.6 Room
+
+**Definition ID:** `a09ef2ae-78b6-435a-a5b6-f4b91b3ba14f`  
+**Model:** `Room`  
+**Behavior:** `Room_Behaviour`  
+**Validator:** `RoomValidator`, `RoomValidationHandler`  
+
+**Entity rules:**
+
+- `delete` Blocked while Rows, Zones or Desks reference the room.
+
+**Sections and references**
+
+```mermaid
+flowchart LR
+    D["<b>Room</b>"]
+    S1["RoomInformation"]
+    S2["RoomOwnership"]
+    S3["Floor"]
+    S4["Resource"]
+    PNO[("People and Organizations")]
+    T_floor["Floor"]
+
+    D --> S1
+    D --> S2
+    S2 --> PNO
+    D --> S3
+    S3 --> T_floor
+    D --> S4
+    classDef def fill:#1d4ed8,stroke:#0b2a85,color:#ffffff,stroke-width:2px
+    classDef shared fill:#b45309,stroke:#6b2d05,color:#ffffff
+    classDef other fill:#4b5563,stroke:#1f2937,color:#ffffff
+    class D def
+    class S4 shared
+    class PNO other
+```
+
+#### 4.6.1 RoomInformation
+
+**Section ID:** `45f3a9f1-93ca-486b-99f2-70c00f8f80ec` · **Link:** mandatory
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| Name | `string` | `Name` |  | `no-db` Not empty / whitespace |
+| Plan | `string` | `Plan` |  |  |
+| Description | `string` | `Description` |  |  |
+| Width | `long` | `Width` |  | `no-db` ≥ 0 when set |
+| Depth | `long` | `Depth` |  | `no-db` ≥ 0 when set |
+| RoomID | `string` | `RoomId` |  | `no-db` Not empty / whitespace<br>`db` Unique<br>`batch` Unique within the batch |
+
+#### 4.6.2 RoomOwnership
+
+**Section ID:** `92517859-4d32-471f-93d6-2a41de0d94ce` · **Link:** mandatory
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| Team | `Guid` | `Ownership.Team` | → Team (P&O) |  |
+| Owner | `Guid` | `Ownership.Owner` | → Person (P&O) |  |
+
+#### 4.6.3 Floor
+
+**Section ID:** `cdbc1f3d-70c8-49e3-a3a3-b310d20b4b6e` · **Link:** mandatory
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| Floor_6a3f0eeb | `Guid` | `FloorFk.Floor` | → Floor | `no-db` Required<br>`db` Floor must exist |
+
+#### 4.6.4 Resource
+
+**Section ID:** `2f8f34af-8405-4a7e-b996-da6b9d97e61c` · **Link:** mandatory · **Shared with:** [Desk](#41-desk), [Rack](#45-rack), [Row](#47-row), [Zone](#49-zone)
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| LinkedResource | `Guid` | `ResourceLink.ResourceId` | written/read as `string` (§13) |  |
+
+### 4.7 Row
+
+**Definition ID:** `29eef06e-ed52-4a26-95da-fd35cc4433df`  
+**Model:** `Row`  
+**Behavior:** `Row_Behaviour`  
+**Validator:** `RowValidator`, `RowValidationHandler`  
+
+**Entity rules:**
+
+- `delete` Blocked while Racks reference the row.
+
+**Sections and references**
+
+```mermaid
+flowchart LR
+    D["<b>Row</b>"]
+    S1["RowInformation"]
+    S2["Room"]
+    S3["Resource"]
+    T_room["Room"]
+
+    D --> S1
+    D --> S2
+    S2 --> T_room
+    D --> S3
+    classDef def fill:#1d4ed8,stroke:#0b2a85,color:#ffffff,stroke-width:2px
+    classDef shared fill:#b45309,stroke:#6b2d05,color:#ffffff
+    classDef other fill:#4b5563,stroke:#1f2937,color:#ffffff
+    class D def
+    class S2,S3 shared
+```
+
+#### 4.7.1 RowInformation
+
+**Section ID:** `12edb830-c667-4e93-9f9b-94e6992a3bf6` · **Link:** mandatory
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| Name | `string` | `Name` |  | `no-db` Not empty / whitespace |
+| RowPlan | `string` | `Plan` |  |  |
+| RowDescription | `string` | `Description` |  |  |
+| Y | `double` | `YPosition` |  |  |
+| Label | `string` | `Label` |  |  |
+| RowID | `string` | `RowId` |  | `no-db` Not empty / whitespace<br>`db` Unique<br>`batch` Unique within the batch |
+
+#### 4.7.2 Room
+
+**Section ID:** `3ee83337-fe05-417e-b328-08a7931da62f` · **Link:** mandatory · **Shared with:** [Desk](#41-desk), [Zone](#49-zone)
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| Room_8d904f8d | `Guid` | `RoomFk.Room` | → Room | `no-db` Required<br>`db` Room must exist |
+
+#### 4.7.3 Resource
+
+**Section ID:** `2f8f34af-8405-4a7e-b996-da6b9d97e61c` · **Link:** mandatory · **Shared with:** [Desk](#41-desk), [Rack](#45-rack), [Room](#46-room), [Zone](#49-zone)
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| LinkedResource | `Guid` | `Resource.ResourceId` | written/read as `string` (§13) |  |
+
+### 4.8 Site
+
+**Definition ID:** `5320914d-ffec-486a-9950-b69276b6c13f`  
+**Model:** `Site`  
+**Behavior:** `Site_Behaviour`  
+**Validator:** `SiteValidator`, `SiteValidationHandler`  
+
+**Entity rules:**
+
+- `delete` Blocked while Facilities reference the site.
+
+**Sections and references**
+
+```mermaid
+flowchart LR
+    D["<b>Site</b>"]
+    S1["SiteInformation"]
+
+    D --> S1
+    classDef def fill:#1d4ed8,stroke:#0b2a85,color:#ffffff,stroke-width:2px
+    classDef shared fill:#b45309,stroke:#6b2d05,color:#ffffff
+    classDef other fill:#4b5563,stroke:#1f2937,color:#ffffff
+    class D def
+```
+
+#### 4.8.1 SiteInformation
+
+**Section ID:** `b082f391-0fdd-4eda-b4dc-f246c5e0063f` · **Link:** mandatory
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| Name | `string` | `Name` |  | `no-db` Not empty / whitespace |
+| Description | `string` | `Description` |  |  |
+| Address | `string` | `Address` |  |  |
+| City | `string` | `City` |  |  |
+| ZipCode | `string` | `ZipCode` |  |  |
+| Country | `string` | `Country` |  |  |
+| Latitude | `double` | `Latitude` |  | `no-db` −90 … 90 when set |
+| Longitude | `double` | `Longitude` |  | `no-db` −180 … 180 when set |
+| SiteID | `string` | `SiteId` |  | `no-db` Not empty / whitespace<br>`db` Unique<br>`batch` Unique within the batch |
+
+### 4.9 Zone
+
+**Definition ID:** `4576240b-b3da-4739-89d1-c3c5e79a26d9`  
+**Model:** `Zone`  
+**Behavior:** `Zone_Behaviour`  
+**Validator:** `ZoneValidator`, `ZoneValidationHandler`  
+
+**Entity rules:**
+
+- `delete` Blocked while Racks reference the zone.
+
+**Sections and references**
+
+```mermaid
+flowchart LR
+    D["<b>Zone</b>"]
+    S1["ZoneInformation"]
+    S2["ZoneCapacity"]
+    S3["Room"]
+    S4["Resource"]
+    T_room["Room"]
+
+    D --> S1
+    D --> S2
+    D --> S3
+    S3 --> T_room
+    D --> S4
+    classDef def fill:#1d4ed8,stroke:#0b2a85,color:#ffffff,stroke-width:2px
+    classDef shared fill:#b45309,stroke:#6b2d05,color:#ffffff
+    classDef other fill:#4b5563,stroke:#1f2937,color:#ffffff
+    class D def
+    class S3,S4 shared
+```
+
+#### 4.9.1 ZoneInformation
+
+**Section ID:** `8d225b1a-d69c-4efa-86c3-7f45d6ea7e92` · **Link:** mandatory
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| Name | `string` | `Name` |  | `no-db` Not empty / whitespace |
+| Plan | `string` | `Plan` |  |  |
+| Description | `string` | `Description` |  |  |
+| ThermalType | `int` | `ThermalType` |  |  |
+| X | `double` | `XPosition` |  |  |
+| Y | `double` | `YPosition` |  |  |
+| Width | `double` | `Width` |  |  |
+| Depth | `double` | `Depth` |  |  |
+| ZoneID | `string` | `ZoneId` |  | `no-db` Not empty / whitespace<br>`db` Unique<br>`batch` Unique within the batch |
+
+#### 4.9.2 ZoneCapacity
+
+**Section ID:** `136914bb-3580-450f-ad38-3bb709ddc68f` · **Link:** mandatory
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| CoolingCapacity | `double` | `ZoneCapacity.CoolingCapacity` |  | `no-db` Required ("must be defined"); ≥ 0 |
+
+#### 4.9.3 Room
+
+**Section ID:** `3ee83337-fe05-417e-b328-08a7931da62f` · **Link:** mandatory · **Shared with:** [Desk](#41-desk), [Row](#47-row)
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| Room_8d904f8d | `Guid` | `RoomFk.Room` | → Room | `no-db` Required<br>`db` Room must exist |
+
+#### 4.9.4 Resource
+
+**Section ID:** `2f8f34af-8405-4a7e-b996-da6b9d97e61c` · **Link:** mandatory · **Shared with:** [Desk](#41-desk), [Rack](#45-rack), [Room](#46-room), [Row](#47-row)
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| LinkedResource | `Guid` | `Resource.ResourceId` | written/read as `string` (§13) |  |
+
+---
+
+## 5. Plan & Build — `SlcPlan_And_Build`
+
+`ModuleId` `(slc)plan_and_build` · behaviour `Job_Behavior`.
+
+```mermaid
+flowchart LR
+    Job["<b>Job</b>"]
+    JobType["<b>Job Type</b>"]
+    PNO[("People and Organizations")]
+    subgraph AM["Asset Manager"]
+        Asset
+        Connections
+        CableType["Cable Type"]
+    end
+
+    Job -- "JobInformation.Type" --> JobType
+    Job -- "JobOwnership.AssignedTo /<br/>AssignmentGroup" --> PNO
+    Job -- "AssetsUsed[].AssetID" --> Asset
+    Job -- "ConnectionsOnJob[].ConnectionID" --> Connections
+    Job -- "ConnectionsOnJob[].Cabletype" --> CableType
+```
+
+App Settings has no relations and is not drawn. Each definition has a **Sections and references** diagram and one table per Section; see [§3](#3-asset-manager--slcasset_management) for how to read them.
+
+**Job** carries two type notions side by side: `JobInformation.JobType` (`string`, DOM enum `Jobtype` = Add / Update / Remove) and `JobInformation.Type` (`Guid` → **Job Type** definition). Both are mapped and persisted. `JobInformation.Locations` is a plain `List<Guid>`; the repository does not wrap it in references, so the target definition is not asserted anywhere in code. `ConnectionsOnJob[].Cabletype` is declared `string` in DOM yet the repository wraps it in `SdmObjectReference<CableType>` and writes `.Identifier` — the only reference in the repo stored as `string` rather than `Guid` (see [§13](#13-known-deviations-flagged-not-fixed)).
+
+**App Settings** holds the job-id numbering parameters (`JobIDPrefix`, `JobIDNextSequence`, `JobIDIncrement`, `JobIDStartingSeed`, `JobIDMinimumDigits`). How they are combined into a `JobID` is application logic outside this repo. [Likely]
+
+### 5.1 App Settings
+
+**Definition ID:** `529f8806-4f41-44fb-afa7-8df6e40dd509`  
+**Model:** `PlanAndBuildAppSettings`  
+**Behavior:** none  
+
+**Entity rules:**
+
+- No field rules (null guard only).
+
+**Sections and references**
+
+```mermaid
+flowchart LR
+    D["<b>App Settings</b>"]
+    S1["JobSettings"]
+
+    D --> S1
+    classDef def fill:#1d4ed8,stroke:#0b2a85,color:#ffffff,stroke-width:2px
+    classDef shared fill:#b45309,stroke:#6b2d05,color:#ffffff
+    classDef other fill:#4b5563,stroke:#1f2937,color:#ffffff
+    class D def
+```
+
+#### 5.1.1 JobSettings
+
+**Section ID:** `c4c6de12-bbc6-4e61-b818-f7c538369235` · **Link:** mandatory
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| JobIDPrefix | `string` | `JobIDPrefix` |  |  |
+| JobIDNextSequence | `long` | `JobIDNextSequence` |  |  |
+| JobIDIncrement | `long` | `JobIDIncrement` |  |  |
+| JobIDStartingSeed | `long` | `JobIDStartingSeed` |  |  |
+| JobIDMinimumDigits | `long` | `JobIDMinimumDigits` |  |  |
+
+### 5.2 Job
+
+**Definition ID:** `01bfa461-bdcb-442a-b624-93658d570c9a`  
+**Model:** `PlanAndBuildJob`  
+**Behavior:** `Job_Behavior`  
+**Validator:** `PlanAndBuildJobValidator`, `PlanAndBuildJobValidationHandler`, `PlanAndBuildExternalReferenceChecker`  
+
+**Entity rules:**
+
+- `no-db` Ownership.AssignedTo **and** Ownership.AssignmentGroup are both required when State ∈ {Assigned, Active, Review, Resolved}.
+
+**Sections and references**
+
+```mermaid
+flowchart LR
+    D["<b>Job</b>"]
+    S1["JobInformation"]
+    S2["JobOwnership"]
+    S3["AssetsUsed"]
+    S4["JobAttachment"]
+    S5["ConnectionsOnJob"]
+    T_jobtype["Job Type"]
+    PNO[("People and Organizations")]
+    T_asset["Asset"]
+    T_cabletype["Cable Type"]
+    T_connection["Connections"]
+
+    D --> S1
+    S1 -- "Type" --> T_jobtype
+    D --> S2
+    S2 --> PNO
+    D -- "repeatable" --> S3
+    S3 -- "AssetID" --> T_asset
+    D -- "repeatable" --> S4
+    D -- "repeatable" --> S5
+    S5 --> T_cabletype
+    S5 -- "ConnectionID" --> T_connection
+    classDef def fill:#1d4ed8,stroke:#0b2a85,color:#ffffff,stroke-width:2px
+    classDef shared fill:#b45309,stroke:#6b2d05,color:#ffffff
+    classDef other fill:#4b5563,stroke:#1f2937,color:#ffffff
+    class D def
+    class PNO,T_asset,T_cabletype,T_connection other
+```
+
+#### 5.2.1 JobInformation
+
+**Section ID:** `b28ce9cf-96a1-45bf-8e3d-0f3d1ddc586d` · **Link:** mandatory
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| JobID | `string` | `JobID` |  |  |
+| JobName | `string` | `JobName` |  | `no-db` Not empty / whitespace; editable only while State = New<br>`db` Unique across Jobs<br>`batch` Unique within the batch |
+| Start | `DateTime` | `Start` |  | `no-db` Editable only while State = New |
+| JobType | `string` | `JobType` |  |  |
+| End | `DateTime` | `End` |  | `no-db` Must be after Start |
+| JobDescription | `string` | `JobDescription` |  |  |
+| Remarks | `string` | `Remarks` |  |  |
+| Priority | `string` | `Priority` |  |  |
+| SubState | `string` | `SubState` |  |  |
+| Locations | `List<Guid>` | `Locations` |  | `no-db` Editable only while State ∈ {New, Assigned}<br>`db` Each referenced location must exist |
+| Type | `Guid` | `Type` | → JobType | `no-db` Required; editable only while State = New<br>`db` Job Type must exist |
+
+#### 5.2.2 JobOwnership
+
+**Section ID:** `520a7dac-97ab-42bf-9177-32aeb7b8b9e8` · **Link:** mandatory
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| AssignedTo | `Guid` | `Ownership.AssignedTo` | → Person (P&O) | `db` Must exist as a P&O Person when set |
+| AssignmentGroup | `Guid` | `Ownership.AssignmentGroup` | → Team (P&O) | `db` Must exist as a P&O Team when set |
+
+#### 5.2.3 AssetsUsed
+
+**Section ID:** `c708731e-b09b-4eed-9a96-27fcc0116db6` · **Link:** repeatable
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| AssetID | `Guid` | `AssetsUsed[].AssetId` | → Asset | `no-db` Not editable when State ∈ {Resolved, Canceled}<br>`db` Each referenced Asset must exist |
+| Action | `string` | `AssetsUsed[].Action` |  |  |
+| AssetName | `string` | `AssetsUsed[].AssetName` |  |  |
+| AssetClassName | `string` | `AssetsUsed[].AssetClassName` |  |  |
+| IPAddress | `string` | `AssetsUsed[].IPAddress` |  |  |
+
+#### 5.2.4 JobAttachment
+
+**Section ID:** `ec7a3725-7f71-4373-9e22-e34a1ae82135` · **Link:** repeatable
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| FilePath | `string` | `Attachments[].FilePath` |  |  |
+| AttachedAt | `DateTime` | `Attachments[].AttachedAt` |  |  |
+| AttachedBy | `string` | `Attachments[].AttachedBy` |  | `db` Not empty |
+
+#### 5.2.5 ConnectionsOnJob
+
+**Section ID:** `8c165732-abfb-48d6-981e-6f685b7f94ba` · **Link:** repeatable
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| Source | `string` | `ConnectionsOnJob[].Source` |  |  |
+| Destination | `string` | `ConnectionsOnJob[].Destination` |  |  |
+| Status | `string` | `ConnectionsOnJob[].Status` |  |  |
+| Cabletype | `string` | `ConnectionsOnJob[].CableType` | → CableType; stored as string (§13) | `db` Each referenced Cable Type must exist |
+| CableLength | `double` | `ConnectionsOnJob[].CableLength` |  |  |
+| ConnectionID | `Guid` | `ConnectionsOnJob[].ConnectionId` | → Connection | `no-db` Not editable when State ∈ {Resolved, Canceled}<br>`db` Each referenced Connection must exist |
+
+### 5.3 Job Type
+
+**Definition ID:** `447da12d-a9bc-471b-bb90-f33f140851ee`  
+**Model:** `JobType`  
+**Behavior:** none  
+**Validator:** `JobTypeValidator`, `JobTypeValidationHandler`  
+
+**Entity rules:**
+
+- `delete` Blocked while Jobs use the type.
+
+**Sections and references**
+
+```mermaid
+flowchart LR
+    D["<b>Job Type</b>"]
+    S1["JobTypeInfo"]
+
+    D --> S1
+    classDef def fill:#1d4ed8,stroke:#0b2a85,color:#ffffff,stroke-width:2px
+    classDef shared fill:#b45309,stroke:#6b2d05,color:#ffffff
+    classDef other fill:#4b5563,stroke:#1f2937,color:#ffffff
+    class D def
+```
+
+#### 5.3.1 JobTypeInfo
+
+**Section ID:** `eba2120c-77d0-43c9-a63a-86abd42be359` · **Link:** mandatory
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| Name | `string` | `Name` |  | `no-db` Not empty / whitespace<br>`db` Unique across Job Types; cannot be renamed while Jobs use the type<br>`batch` Unique within the batch |
+| Description | `string` | `Description` |  |  |
+| Icon | `string` | `Icon` |  |  |
+
+---
+
+## 6. InfraOps Properties — `InfraopsProperties`
+
+`ModuleId` `(infraops)properties` · no behaviours.
+
+```mermaid
+flowchart LR
+    PV["<b>Property Values</b>"]
+    P["<b>Property</b>"]
+    ANY(["any SDM object"])
+
+    PV -- "PropertyValue[].PropertyID<br/>(1 per property)" --> P
+    PV -. "LinkedObjectID + Scope<br/>(string, untyped)" .-> ANY
+```
+
+Each definition has a **Sections and references** diagram and one table per Section; see [§3](#3-asset-manager--slcasset_management) for how to read them.
+
+**Property** is the schema (name, `PropertyType` = string / discrete / boolean, `Scope`, default, optional discrete options and layout). **Property Values** is one instance per *(object, scope)* pair holding a repeatable `PropertyValue` section per property. The link to the owning object is a plain `string` identifier plus the `Scope` string; no typed reference exists, so this module has no compile-time dependency on any other SDM package. `Scope` values are the generic `PropertyScope` contract (see the PropertyScope tests in `SDM.InfraOpsProperties.Common.Tests`), not a DOM enum.
+
+### 6.1 Property
+
+**Definition ID:** `d7e4ecb9-dc79-496e-90c7-310b340a248b`  
+**Model:** `Property`  
+**Behavior:** none  
+**Validator:** `PropertyValidator`, `PropertyValidationHandler`  
+
+**Sections and references**
+
+```mermaid
+flowchart LR
+    D["<b>Property</b>"]
+    S1["PropertyInfo"]
+    S2["Discrete"]
+    S3["Layout"]
+
+    D --> S1
+    D -- "repeatable, optional" --> S2
+    D -- "optional" --> S3
+    classDef def fill:#1d4ed8,stroke:#0b2a85,color:#ffffff,stroke-width:2px
+    classDef shared fill:#b45309,stroke:#6b2d05,color:#ffffff
+    classDef other fill:#4b5563,stroke:#1f2937,color:#ffffff
+    class D def
+```
+
+#### 6.1.1 PropertyInfo
+
+**Section ID:** `a99ddb61-78b5-42c5-939d-521cd6cdc0ef` · **Link:** mandatory
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| Name | `string` | `Name` |  | `no-db` Not empty / whitespace<br>`db` Unique **within its Scope**<br>`batch` Unique per Scope within the batch |
+| PropertyType | `string` | `PropertyType` |  |  |
+| Scope | `string` | `Scope` |  | `no-db` Not empty / whitespace |
+| Default | `string` | `Default` |  |  |
+| StringSizeLimit | `long` | `StringSizeLimit` |  | `no-db` > 0 when defined |
+| IsMultiLineString | `bool` | `IsMultiLineString` |  |  |
+
+#### 6.1.2 Discrete
+
+**Section ID:** `3ca75450-2b4b-48df-a893-2ca712f521f7` · **Link:** repeatable, optional
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| Option | `string` | `Discreets[].Option` |  | `no-db` Non-empty **iff** PropertyType = Discrete; no duplicates |
+
+#### 6.1.3 Layout
+
+**Section ID:** `bd33a4c7-9e7b-44f5-9048-6737ab3191e2` · **Link:** optional
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| SectionName | `string` | `Layout.SectionName` |  |  |
+| Order | `long` | `Layout.Order` |  |  |
+
+### 6.2 Property Values
+
+**Definition ID:** `239ed807-3508-4f00-b950-6681cc25a332`  
+**Model:** `PropertyValues`  
+**Behavior:** none  
+**Validator:** `PropertyValuesValidator`, `PropertyValuesValidationHandler`  
+
+**Entity rules:**
+
+- `db` (LinkedObjectID, Scope, SubID) must be unique, also within the batch.
+
+**Sections and references**
+
+```mermaid
+flowchart LR
+    D["<b>Property Values</b>"]
+    S1["PropertyValueInfo"]
+    S2["PropertyValue"]
+    T_property["Property"]
+
+    D --> S1
+    D -- "repeatable, optional" --> S2
+    S2 -- "PropertyID" --> T_property
+    classDef def fill:#1d4ed8,stroke:#0b2a85,color:#ffffff,stroke-width:2px
+    classDef shared fill:#b45309,stroke:#6b2d05,color:#ffffff
+    classDef other fill:#4b5563,stroke:#1f2937,color:#ffffff
+    class D def
+```
+
+#### 6.2.1 PropertyValueInfo
+
+**Section ID:** `98c6c75e-855a-438a-b96a-ad14fafe1db7` · **Link:** mandatory
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| LinkedObjectID | `string` | `LinkedObjectID` |  | `no-db` Not empty |
+| Scope | `string` | `Scope` |  | `no-db` Not empty / whitespace |
+| SubID | `string` | `SubID` |  |  |
+
+#### 6.2.2 PropertyValue
+
+**Section ID:** `3f0e4530-8569-4eb6-aac3-8e4306b5d3ff` · **Link:** repeatable, optional
+
+| Field | DOM type | Model property | Notes | Rules |
+|---|---|---|---|---|
+| PropertyName | `string` | `Values[].PropertyName` |  | `no-db` Required on every entry; no duplicates within the list<br>`db` Referenced Property must exist |
+| Value | `string` | `Values[].Value` |  |  |
+| PropertyID | `Guid` | `Values[].PropertyId` | → Property |  |
+
+---
+
+## 7. State machines
+
+A behaviour definition owns the status list, the initial status and the allowed transitions. The model exposes the status as `State` (rule A2); transitions are performed only through the hand-written repository partial (`TransitionTo` / `UpdateAndTransitionTo` / `TransitionAndUpdate`), each guarded by that entity's `*StateMachine` — Asset alone adds its own `AssetDomRepositoryExtensions` transition partial. Status and transition ids live in `DomIds.Behaviors.<Behaviour>.Statuses` / `.Transitions`; the seed re-declares them with display names so tests see the same ids as DomIds.
+
+### 7.1 `Asset_Behavior` (Asset)
+
+Behaviour ID `a3301105-8724-4a36-af03-aa196a6d83df` · 9 statuses · 41 transitions · initial **Not Available**.
+
+| Status const | Display name |
+|---|---|
+| `NotAvailable` | Not Available |
+| `Available` | Available |
+| `InPlanning` | In Planning |
+| `BuildPlanReady` | Build Plan Ready |
+| `Installed` | Installed |
+| `InService` | In Service |
+| `InTransit` | In Transit |
+| `InRepair` | In Repair |
+| `Disposed` | Disposed |
+
+`InTransit` and `InRepair` are **detour statuses**: they are not steps of the lifecycle, they are temporary excursions that any non-terminal asset can take and that must return to a path status. They are drawn apart from the lifecycle path for that reason. The matrix below lists every one of the 41 transitions.
+
+**Lifecycle path** (the nominal route, plus `InService`):
+
+```mermaid
+flowchart TB
+    subgraph Path["Lifecycle path"]
+        NA["NotAvailable"] <--> AV["Available"] <--> IP["InPlanning"] <--> BPR["BuildPlanReady"] --> IN["Installed"]
+        IN -- "back" --> IP
+    end
+    IS["<b>InService</b>"]
+
+    IN --> IS
+    IS -- "back to any one of<br/>the five path statuses" --> Path
+
+    classDef live fill:#15803d,stroke:#064e22,color:#ffffff
+    class IS live
+```
+
+`<-->` means both directions exist. `Installed` may step back only to `InPlanning`. `InService` is reached only from `Installed` and may return directly to any of the five path statuses.
+
+**Detour statuses** (`InTransit`, `InRepair`) and `Disposed`:
+
+```mermaid
+flowchart LR
+    PATH["<b>Path statuses</b><br/>NotAvailable, Available, InPlanning,<br/>BuildPlanReady, Installed"]
+    IS["<b>InService</b>"]
+    subgraph Detour["Detour statuses"]
+        direction TB
+        TR["<b>InTransit</b>"] <--> RP["<b>InRepair</b>"]
+    end
+    DS(["<b>Disposed</b><br/>terminal"])
+
+    PATH <--> Detour
+    IS -- "one way in" --> Detour
+    PATH -- "NotAvailable only" --> DS
+    Detour --> DS
+
+    classDef live fill:#15803d,stroke:#064e22,color:#ffffff
+    classDef detour fill:#b45309,stroke:#6b2d05,color:#ffffff
+    classDef term fill:#4b5563,stroke:#1f2937,color:#ffffff
+    class IS live
+    class TR,RP detour
+    class DS term
+```
+
+- An arrow to or from the **Path statuses** box applies to each of its five statuses; the arrow between **Path statuses** and **Detour statuses** is two-way.
+- `InService` has a **one-way** arrow into the detours: an asset in service can go to transit or repair, but a detour never returns to `InService`. It returns to a path status and is re-installed.
+- `InTransit` and `InRepair` can move to each other.
+- `Disposed` is terminal and reachable only from `NotAvailable`, `InTransit` and `InRepair`.
+- The detours also change what is editable (see §3.1 Entity rules): `DestinationLocation` is mandatory and editable only while `InTransit`; `Location` is editable in `InRepair` (and in `Available`, `InPlanning`, `BuildPlanReady`, `Disposed`).
+
+Transition matrix (row = from, column = to; `●` = transition defined):
+
+| from \ to | NotAvailable | Available | InPlanning | BuildPlanReady | Installed | InService | InTransit | InRepair | Disposed | out |
+|---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|--:|
+| **NotAvailable** | | ● | | | | | ● | ● | ● | 4 |
+| **Available** | ● | | ● | | | | ● | ● | | 4 |
+| **InPlanning** | | ● | | ● | | | ● | ● | | 4 |
+| **BuildPlanReady** | | | ● | | ● | | ● | ● | | 4 |
+| **Installed** | | | ● | | | ● | ● | ● | | 4 |
+| **InService** | ● | ● | ● | ● | ● | | ● | ● | | 7 |
+| **InTransit** | ● | ● | ● | ● | ● | | | ● | ● | 7 |
+| **InRepair** | ● | ● | ● | ● | ● | | ● | | ● | 7 |
+| **Disposed** | | | | | | | | | | 0 |
+
+Reading the matrix:
+
+- The nominal path is `NotAvailable → Available → InPlanning → BuildPlanReady → Installed → InService`; every step forward has a step back except `Installed → BuildPlanReady` (return goes via `InPlanning`).
+- `InTransit` and `InRepair` are reachable from every non-terminal status and return to every status except `InService` — an asset coming back from transit or repair must be re-installed first.
+- `Disposed` is terminal and reachable only from `NotAvailable`, `InTransit` and `InRepair`. An `Available` or `InService` asset cannot be disposed directly.
+- Among the nominal-path statuses, `InService` is the only one that can jump back more than one step (`→ NotAvailable`, `Available`, `InPlanning`, `BuildPlanReady`, `Installed` directly).
+- Repository rule C4 hangs off this machine: `AssetLocationDestination` is written only while `State == InTransit`.
+
+Transition constants are named `<From>_To_<To>` in `DomIds.Behaviors.Asset_Behavior.Transitions`; their values are the lower-case transition ids (`Notavailable_To_Available = "notavailable_to_available"`, `Intransit_To_Inrepair = "intransit_to_inrepair"`).
+
+### 7.2 `Asset_Class_Behavior` (Asset Class)
+
+Behaviour ID `e9e2d567-68f4-4c3f-8154-b3862a1b277b` · 3 statuses · 2 transitions · initial **Draft**.
+
+```mermaid
+stateDiagram-v2
+    [*] --> Draft
+    Draft --> Active : Draft_Active
+    Active --> Deprecated : Active_Deprecated
+    Deprecated --> [*]
+```
+
+No path back: a deprecated class stays deprecated; a draft cannot be deprecated without passing through `Active`.
+
+### 7.3 Facility Manager behaviours (8 × Draft → Active → Deprecated)
+
+Every physical Facility entity has its own behaviour definition with the same three statuses (`Draft`, `Active`, `Deprecated`), the same two transitions and initial **Draft**. **Facility Manager App Settings** has no behaviour.
+
+| Behaviour | Definition | Behaviour ID |
+|---|---|---|
+| `Site_Behaviour` | Site | `903a2ba4-5467-4e8e-b728-8f3cd1ff0e72` |
+| `Facility_Behaviour` | Facility | `843615ba-3f5d-46a7-91d8-504ddabcdad4` |
+| `Floor_Behaviour` | Floor | `558627ea-71eb-4ac6-a655-dedce737649d` |
+| `Room_Behaviour` | Room | `cce8f754-26c5-4e5e-97fb-0e474afbec5c` |
+| `Row_Behaviour` | Row | `c620b4a2-2139-4f15-ac6f-c8235f669296` |
+| `Zone_Behaviour` | Zone | `98f2c20b-c4a6-4297-9d57-291915d298c5` |
+| `Rack_Behaviour` | Rack | `4139c312-2b0f-40f3-b875-26cf5066b705` |
+| `Desk_Behaviour` | Desk | `fa64f66c-35a8-4b32-8a68-0b0b1341886d` |
+
+```mermaid
+stateDiagram-v2
+    [*] --> Draft
+    Draft --> Active
+    Active --> Deprecated
+    Deprecated --> [*]
+```
+
+The spelling is `_Behaviour` (British) in Facility Manager and `_Behavior` in Asset Manager and Plan & Build; the constants must be used as generated.
+
+### 7.4 `Job_Behavior` (Job)
+
+Behaviour ID `f66fbbcb-70c8-46ad-acbb-04f8e4b469e9` · 6 statuses · 7 transitions · initial **New**.
+
+| Status const | Display name | Status ID |
+|---|---|---|
+| `New` | New | `6c75283d-3e15-4377-8459-93ba7764cd35` |
+| `Assigned` | Assigned | `2db65456-8365-4da8-b37e-c0f04227549e` |
+| `Active` | Active | `fac92634-798d-453e-a76f-d4630e572aaa` |
+| `Review` | Review | `0163e48c-a9d0-4bda-9eb8-ce192942605f` |
+| `Resolved` | Resolved | `6ddd0ea7-e40a-4844-9d17-5da7cfa9056c` |
+| `Canceled` | Canceled | `1fc95659-1f75-4e50-b6e7-7567fc6ff30b` |
+
+```mermaid
+stateDiagram-v2
+    [*] --> New
+    New --> Assigned
+    Assigned --> Active
+    Active --> Review
+    Review --> Resolved
+    New --> Canceled
+    Assigned --> Canceled
+    Active --> Canceled
+    Resolved --> [*]
+    Canceled --> [*]
+```
+
+Strictly forward: no transition goes back, `Review` cannot be cancelled, and `Resolved` / `Canceled` are terminal. The 12-value `Substate` string enum on `JobInformation.SubState` is **not** governed by this behaviour — it is a free DOM enum field with no transition rules.
+
+### 7.5 Definitions without a behaviour
+
+Asset Manager: Data Port, Power Port, Connections, History, Reservations, Device Type, Port Type, Cable Type, App Settings. Facility Manager: App Settings. Plan & Build: Job Type, App Settings. InfraOps Properties: both. Their `State` is irrelevant and `DomInstance.StatusId` is never written.
+
+### 7.6 Status-id anomaly in the Asset Manager DomIds
+
+[Certain, in-repo] The status constants of both Asset Manager behaviours are not all GUIDs:
+
+| Behaviour | Const | Value |
+|---|---|---|
+| `Asset_Behavior` | `NotAvailable` | `2ef172ae-2905-4f4d-ac19-76417e3174cb` |
+| | `Available` | `2ef172ae-… (duplicate)` |
+| | `BuildPlanReady` | `2ef172ae-… (duplicate) (duplicate) (duplicate)` |
+| | `Installed` | `2ef172ae-…` + 4 × ` (duplicate)` |
+| | `InService` | `2ef172ae-…` + 5 × ` (duplicate)` |
+| | `Disposed` | `2ef172ae-…` + 6 × ` (duplicate)` |
+| | `InPlanning` | `59cd7bd7-ea07-43d4-bc64-f27cebe2b194` |
+| | `InTransit` | `f4d9841a-20b8-4918-ac48-611a50520601` |
+| | `InRepair` | `6278e82d-8681-42c6-b593-92212e15b42f` |
+| `Asset_Class_Behavior` | `Draft` | `d749849b-9071-44e4-ba2d-64debdd94758` |
+| | `Active` | `d749849b-… (duplicate) (duplicate)` |
+| | `Deprecated` | `d749849b-… (duplicate) (duplicate) (duplicate)` |
+
+Facility Manager and Plan & Build status ids are all plain GUIDs. The strings are distinct, so `ToValue/ToEnum` and every test still work, and the seed uses the same constants. Whether the **live** module's `DomStatus.Id` values are these literal strings or real GUIDs cannot be determined from this repository; the DomIds file is generated from the live module, so the suffixes most plausibly originate there. [Guessing] Treat as a reviewed-but-unresolved deviation ([§13](#13-known-deviations-flagged-not-fixed)); do not "fix" the constants in this repo without checking the module.
+
+---
+
+## 8. Validation rules
+
+This section lists the **data** side of validation: the rules per field and the limits they use. How validation runs (phases, conventions V1–V9, rules F1–F7, failure shapes) is in [CAN-003 §5](CAN-003-repository-and-middleware-pipeline.md#5-validation).
+
+Constants:
+
+| Constant | Value | Used by |
+|---|---|---|
+| `MAX_RACK_HEIGHT_CM` | 320 | Rack.Height |
+| `MAX_RACK_SIZE_CM` | 120 | Rack.Width, Rack.Depth |
+| `MAX_RACK_CAPACITY_U` | 70 | Rack.Capacity.MaximumRackCapacity |
+| `MaxConnectionsPerPort` | 1 | Connection endpoints |
+| Latitude / Longitude range | −90…90 / −180…180 | Site, Facility |
+
+Where the rules are listed: every definition in §3–§6 carries
+- a **Validator** line naming the classes that enforce it,
+- a **Rules** column in each Section's field table, one cell per model property, and
+- an **Entity rules** list above the Section tables for rules that span several fields or the whole instance (state-gated edits, "at most one location", delete guards).
+
+Each rule is prefixed with the phase in which it runs: `no-db` (static handler), `batch` (duplicates inside one call), `db` (needs a loader), `delete` (in-use guard). A rule is placed on the field it constrains; exceptions are noted in §13. Null-guard failures (`"X cannot be null."`) are omitted, and message text is paraphrased. A field with an empty Rules cell has no validation.
+
+---
+
+## 9. Enum reference
+
+Two encodings exist and are fixed per field (rule D4). **String enums** are a `static class` in `DomIds.Enums` with `const string` values plus `ToValue/ToEnum` and a sibling `<Name>Enum`; the DOM field is `string`. **Numeric enums** are a plain C# `enum` with explicit values; the DOM field is `int` (or `List<int>`).
+
+### 9.1 String enums (DOM type `string`)
+
+| Module | `Enums.` class | Values | Used by field(s) |
+|---|---|---|---|
+| Asset Manager | `Hierarchyrole` | Chassis, Card, Sub-Card, Module, Fan, Power Supply, None | `Holders.HierarchyRole`, `HierarchyInfo.HierarchyRole` |
+| Asset Manager | `Portexposure` | Back, Front | `DataPortInfo.PortExposure`, `PowerPortInfo.PortExposure` |
+| Asset Manager | `Typeofhistory` | Add, Modification, Removal | `HistoryInfo.TypeOfHistory` |
+| Asset Manager | `Categories` | Networking, Power, Audio, Storage, Peripheral, Video, Misc, Data, Broadcast | `CategoryLink.Categories` (`List<string>`) |
+| Asset Manager | `Powersupply` | AC, DC | `AssetClassInfo.PowerSupply` |
+| Asset Manager | `Side` | Front, Back, Right, Left | `AssetLocation.Side`, `AssetLocationDestination.Side` |
+| Facility Manager | `Facilitytype` | Truck, Container, Building | `FacilityInformation.FacilityType` |
+| Facility Manager | `Rackpositionenum` | Bottom, Top | `RackInformation.Position` |
+| Facility Manager | `Coolingflowenum` | Front To Rear, Rear To Front, Side To Side, Top To Bottom, Bottom To Top | `RackInformation.CoolingFlow` |
+| Plan & Build | `Jobtype` | Add, Update, Remove | `JobInformation.JobType` |
+| Plan & Build | `Priority` | Critical, High, Normal, Low | `JobInformation.Priority` |
+| Plan & Build | `Substate` | draft, PendingApproval, DocumentationMontage, Reviewed, ResourceAllocation, Scheduled, PendingKickoff, InProgress, UnderReview, OnHold, DocumentationCompleted, Archived | `JobInformation.SubState` |
+| Plan & Build | `Actionforassetenum` | Newly Installed, Reinstalled, Provisioned, Commissioned, Removed, Decommissioned, Uninstalled, Dismantled, Modified, Upgraded, Reconfigured, Expanded, Relocated, Patched, Repaired, Serviced, Cleaned, Tested, Audited, Inspected, Tagged, Locked, Unlocked, Connected, Disconnected, Virtualized | `AssetsUsed.Action` |
+| InfraOps Properties | `Propertytype` | string, discrete, boolean | `PropertyInfo.PropertyType` |
+
+`Substate.draft` is the only lower-case value in the set; `Categories` is the only string enum stored as a list. Field-to-enum pairing above is taken from the repository `ToValue/ToEnum` calls (`DeviceType` uses local `ToDomHierarchyRole/FromDomHierarchyRole` wrappers around the same enum).
+
+### 9.2 Numeric enums (DOM type `int` / `List<int>`)
+
+| Module | Enum | Values | Used by field(s) |
+|---|---|---|---|
+| Asset Manager | `Outputtype` | Out = 0, In = 1, IO = 2 | `DataPortInfo.OutputType`, `PowerPortInfo.OutputType` |
+| Asset Manager | `ConnectionType` | Data = 0, Power = 1 | `ConnectionInfo.ConnectionType` |
+| Asset Manager | `Planandbuildjobpromptenum` | Disabled = 0, Enabled = 1 | `AppSettings.PlanAndBuildJobPrompt` |
+| Asset Manager | `Operationalflagsenum` | Faulty = 0 | `AssetInformation.OperationalFlags` (`List<int>`) |
+| Asset Manager | `TagOption` | PowerProvider = 0, AcceptsDataConnection = 1, RackUnitConsumer = 2 | `TagsInfo.Tags` (`List<int>`) |
+| Facility Manager | `Placementorientationenum` | Vertical = 0, Horizontal = 1 | `RackInformation.PlacementOrientation` |
+| Facility Manager | `ThermalType` | None = 0, Warm = 1, Cold = 2 | `ZoneInformation.ThermalType` |
+
+Adding a value to a numeric enum is additive; renumbering or removing one is a data migration. Adding a value to a string enum requires the DOM module to accept it as well — the repo does not validate enum membership on write.
+
+---
+
+## 10. Field rules
+
+Confidence for this whole section: [Certain] unless tagged otherwise. "Enforced by" names the code that makes a violation fail; "convention" means only review catches it.
+
+### A. Identity, status and audit
+
+| # | Rule | Enforced by |
+|---|---|---|
+| A1 | `Identifier` is the `DomInstance.ID.Id` GUID as a string. `ToInstance` parses it; when empty it mints `Guid.NewGuid()` and the object is treated as new (`IsNew \|\| IsNullOrWhiteSpace(Identifier)`). | repository `ToInstance` |
+| A2 | `State` (entity status) is the only model property that maps to `DomInstance.StatusId`, through `Behaviors.<X>_Behavior.Statuses.ToValue/ToEnum`. It is `[SdmIgnore]`, has an `internal` setter and is changed only through the hand-written repository partial (`TransitionTo` / `UpdateAndTransitionTo` / `TransitionAndUpdate`) guarded by the entity's `*StateMachine`; Asset uses its own transition partial instead. | model, `<Entity>DomRepository`, state machines |
+| A3 | `CreatedAt`, `CreatedBy`, `LastModified`, `LastModifiedBy` are read from `ITrackBase` on the instance in `FromInstance` and never written. Setters are `internal` on `SdmObjectBase<T>`. | `SdmObjectBase<T>` |
+| A4 | Every `*Field` tracker, `IsNew`, `Changed`, `FieldHandler`, section-id holders and other bookkeeping members carry both `[JsonIgnore]` and `[SdmIgnore]`. Only domain data is visible to JSON and to SDM exposers. | convention; checked in review |
+
+### B. One property, one tracker
+
+| # | Rule | Enforced by |
+|---|---|---|
+| B1 | A public data property never holds state itself. It delegates to an `internal` tracker named `<Property>Field` obtained from `FieldHandler.GetOrCreateField(nameof(Property), () => new ChangeTrackingField<T>(...))`. The key passed is always `nameof(Property)`; it is the name reported in `GetChanges()`. | `ChangeTrackingFieldHandler` throws when a key is reused with another type |
+| B2 | `ChangeTrackingField<T>` accepts only value types and `string`. Reference-type data goes through `ChangeTrackingArrayField<T>` (lists) or a nested `ChangeTrackingBase` (section-detail). | `ChangeTrackingField` constructor throws `InvalidOperationException` |
+| B3 | Reference-struct fields (`SdmObjectReference<T>`, `PnoObjectReference<T>`, `ISdmObjectReference<T>`) pass `reference => reference.Identifier` as the change converter so diffs compare identifiers, not structs. | convention |
+| B4 | Scalars that are optional in DOM are nullable on the model (`long?`, `double?`, `DateTime?`, `Enum?`) and are written only when set. Non-nullable scalars (for example `AssetHolder.SlotNumber`, `RackCapacity.MaximumRackCapacity`) are always written whenever their section is written; choose non-nullable only when `0`/`false` is a legitimate stored value. | convention |
+| B5 | List properties never return `null`: getter lazily assigns an empty list, setter coalesces `null` to an empty list. Tracker is `ChangeTrackingArrayField<T>` via `GetOrCreateArrayField`. | model pattern |
+| B6 | Section-detail properties are get-only and lazily constructed (`Location => _location ?? (_location = new AssetLocation())`). The entity's `Changed`, `GetChanges()` and `ResetChangeTracking()` must include every section-detail and every list. | model pattern |
+
+### C. Sections
+
+| # | Rule | Enforced by |
+|---|---|---|
+| C1 | Each section-detail type and each repeating-section element type implements `ISectionTrackable` **explicitly** (`Guid? ISectionTrackable.SectionId`), marked `[JsonIgnore][SdmIgnore]`. `FromInstance` stores the DOM `SectionID` there; `ToInstance` reuses it. Entity-level inline sections keep an `internal Guid? <Section>SectionId` for the same purpose. Reason: a fresh random `SectionID` per save trips DOM's read-only-field check (`ReadOnlyFieldsChangedForCurrentStatus`). | `ISectionTrackable` remarks; repository |
+| C2 | Each section-detail type implements `ISectionEmptyState.IsEmpty`, true only when **every** property is at its default. `ToInstance` writes an optional section only when `!IsEmpty`, and omits it otherwise. Never gate on a single field. | `ISectionEmptyState` remarks; repository |
+| C3 | Mandatory inline sections (for example Asset `AssetProperties`, `NetworkDetails`, `Lifecycle`) are always added to the instance, even when no field is set. | repository |
+| C4 | A section may additionally be status-gated (Asset `DestinationLocation` is written only when `State == InTransit`). Such gates live in `ToInstance`, not in the model. | repository |
+| C5 | Repeating sections: `ToInstance` emits one `Section` per list item; `FromInstance` rebuilds the list from `instance.Sections.Where(sameDefinition)` and assigns it wholesale. Each element gets its `SectionId` set. | repository |
+| C6 | Every section definition and field descriptor GUID comes from DomIds. Mappers re-wrap `SectionDefinitionID` with `ModuleId` set; field ids are used as-is. No literal GUIDs outside the `*DomIds` classes. | mapper pattern |
+| C7 | A section definition may be linked by more than one definition (§3, §4 list them). Its descriptor types are therefore shared: changing a field type on a shared section changes it for every definition that links it. | DOM |
+
+### D. Field value types
+
+The DOM-side type is the `FieldDescriptor` type in the seed, which mirrors the live module. The write side (`AddOrUpdateValue<T>` / `AddOrUpdateListValue<T>`) and read side (`GetValue<T>` / `GetListValue<T>`) must use **exactly** that `T`.
+
+| Model type | DOM descriptor type | Write expression | Read expression |
+|---|---|---|---|
+| `string` | `string` | `Convert.ToString(x)`, gated `!= default` | `.Value` |
+| `long?` / `long` | `long` | `(long)x.Value` | `.Value` |
+| `double?` | `double` | `(double)x.Value` | `.Value` |
+| `bool` / `bool?` | `bool` | `x` | `.Value` |
+| `DateTime?` | `DateTime` | `(DateTime)x` | `(DateTime)v.Value` |
+| `TimeSpan?` | `TimeSpan` | `x.Value` | `.Value` |
+| `SdmObjectReference<T>` | `Guid` | `x.GetIdentifierAsGuid()`, gated `x.HasValue()` | `new SdmObjectReference<T>(Convert.ToString(guid))` |
+| `PnoObjectReference<T>` | `Guid` | implicit/explicit `Guid`, gated `x.HasValue()` | `new PnoObjectReference<T>(guid)` |
+| DOM string-enum (`Enums.X` with `ToValue/ToEnum`) | `string` | `Enums.X.ToValue(e)` | `Enums.X.ToEnum(s)` |
+| Numeric enum (§9.2) | `int` | `(int)e` | `(Enum)v.Value` |
+| `List<enum>` | `List<int>` | `AddOrUpdateListValue<int>(..., list.Select(e => (int)e).ToList())`, gated `IsNotNullOrEmpty()` | `GetListValue<int>(...).Values.Select(i => (Enum)i)` |
+| `List<SdmObjectReference<T>>` | `List<Guid>` | `list.Where(x => x.HasValue()).Select(x => x.GetIdentifierAsGuid()).ToList()`, gated `IsNotNullOrEmpty()` | `.Values.Select(g => new SdmObjectReference<T>(Convert.ToString(g)))` |
+| `List<Guid>` | `List<Guid>` | list | `.Values` |
+| `List<string>` | `List<string>` | list | `.Values` |
+
+| # | Rule | Enforced by |
+|---|---|---|
+| D1 | Integers are `long` in DOM, never `int`. `int` is reserved for numeric enums. | seed; type table |
+| D2 | References are stored as `Guid`, never as string. `GetIdentifierAsGuid()` throws on non-GUID or `Guid.Empty`, so a reference must be gated with `HasValue()` before writing. | `SdmObjectReferenceExtensions` |
+| D3 | Null handling: a scalar/reference that is unset is **not written** (no field value emitted). On read, a missing field leaves the model default. Never write `Guid.Empty`, empty string or `default(DateTime)` as a placeholder. | repository gates |
+| D4 | Enum encoding is fixed per DOM field and follows the DomIds artefact: if DomIds generated a static class with `ToValue/ToEnum`, the field is a string enum; if it generated a plain `enum` with explicit values, the field is `int`. Do not switch encodings for an existing field — it is a data migration. | DomIds |
+| D5 | Seed descriptors are the in-repo oracle. A mapper that writes a different CLR type than the seed declares is a bug even if tests pass today (the current mock does not type-check — see TRK-001/SPC-001, Draft). | seed; ITM-001 when delivered |
+| D6 | [Likely] `DateTime` kind is not normalised anywhere in this repo; callers are expected to pass UTC. Flag, do not fix silently. | — |
+| D7 | Filter translation for a reference field: `Equals`/`NotEquals` against an empty reference becomes `FieldValues.KeyExists(fieldId).Equal(comparer == NotEquals)`; any other value becomes a `DomInstanceField` filter on the GUID. Filtering on "no value" never compares against `Guid.Empty`. | repository `CreateFilter` |
+| D8 | Mapper member names follow the **model** (`CableFKs.CableTypeFks`, `RoomFk.Room`), DomIds names follow the **DOM module** (`CableCompatibility.CableTypes`, `Room.Room_8d904f8d`). Aliasing happens only in the mapper; never rename a DomIds constant to match a model. | mapper pattern |
+
+### E. Change tracking
+
+How tracked fields behave (`Changed` semantics, list trackers, reset cascade, lifecycle) is in [CAN-004](CAN-004-change-tracking.md), rules T1–T9.
+
+### F. Validation
+
+How validation runs, and the rules every validator follows, is in [CAN-003 §5](CAN-003-repository-and-middleware-pipeline.md#5-validation), rules F1–F7.
+
+---
+
+## 11. Adding or changing a DOM field — checklist
+
+1. Add the `FieldDescriptorID` to the module's `DomIds` class (regenerate from the DOM module; do not hand-type GUIDs).
+2. Add the descriptor to the matching `GenerateSectionsDefinitions_<Section>()` in the seed with the DOM type from the table in §10.D. If the section is shared (rule C7), every linking definition gets the field.
+3. Bind it in `<Entity>DomMapper` under the right section class (alias per D8).
+4. Add the property + `<Property>Field` tracker to the model (rules B1–B6); extend `Equals`/`GetHashCode` and, for section-details, `IsEmpty`.
+5. Add both the write (`ToInstance`, gated per D3) and the read (`FromInstance`) in `<Entity>DomRepository`.
+6. If the field is filterable, add the exposer/filter translation in the same repository.
+7. If the field has a rule: add the `<Entity>ValidationField` member, the rule in `<Entity>ValidationHandler` (pure) or `<Entity>Validator` (needs other instances), gated by `ShouldValidate` ([CAN-003 §5](CAN-003-repository-and-middleware-pipeline.md#5-validation), rules F1–F5), plus a unit test per failure path.
+8. Add or extend: a repository round-trip test, a JSON round-trip test (SPC-002) and, if a new section type, an `ISectionTrackable`/`ISectionEmptyState` test.
+9. Update the matching Section table (and the definition's diagram) in §3–§6 of this document (field, type, model property, reference target, **Rules** cell and Entity rules if a rule was added) and §9 if an enum changed.
+
+---
+
+## 12. Facts reviewers must know
+
+| Fact | Confidence |
+|---|---|
+| The mapper and repository `.g` source files are checked in and **hand-maintained**: the `Skyline.DataMiner.SDM.SourceGenerator` package is disabled in the project and the generator attributes (`[SdmDomMapper]`, `[GenerateExposers]`, `[SdmDomStorage]`) are commented out on the types. The "auto-generated" header is historical. Edit them directly; there is no regeneration step. | [Certain] |
+| The `*DomIds` classes are generated by the Dom Editor automation script from the live module. They are the source of truth for GUIDs and enum encodings. | [Certain] |
+| The seed is not validated against the live DOM module by any test. Drift between seed and module is detected only on a real system. Everything in §1–§9 is therefore "what the repo believes the module looks like". | [Certain] |
+| Validation rules (§3–§6, mechanism in [CAN-003](CAN-003-repository-and-middleware-pipeline.md#5-validation)) are enforced only by the repository pipeline in this codebase. The live DOM module may carry its own field constraints; none are read or mirrored here. | [Certain] |
+| The mock does not check field value CLR types (`Utils.DOM` 10.5.2.6). ITM-001 proposes a validating decorator in the test project. | [Certain] |
+| Section and field GUIDs are stable identifiers; display labels in the seed (`"Asset Information"`, `"Rack Capacity"`, …) are not used by any code path and may differ from the live module without effect. | [Certain] |
+
+---
+
+## 13. Known deviations (flagged, not fixed)
+
+Snapshot as of 2026-10-28. Unlike the rest of this document, this section lists defects that are expected to be fixed or re-triaged; once an item is resolved, remove its row.
+
+| Where | Deviation from rule | Action |
+|---|---|---|
+| `Asset.Id` (`Guid`, `[JsonIgnore][SdmIgnore]`, public setter) | Unused second identity alongside `Identifier` (A1); no reader or writer in the repo. | Candidate work-item: remove. |
+| `AssetLocation.PowerSupplyRackPosition`, `AssetLocationDestination.PowerSupplyRackPosition` (`long`) | Seeded and mapped (`AssetDomMapper.Location/DestinationLocation.PowerSupplyRackPosition`) but never read or written by `AssetDomRepository`; no model property. Chain broken at step 4/5. | Decide: add to `AssetLocation` model or drop from mapper. |
+| `HistoryInfo.UserID` (`Guid`) | Mapped (`HistoryDomMapper`) but never read or written; `History` has no user property. | Decide: wire to `PnoObjectReference<Person>` or drop. |
+| **Power Port** → `PrimaryPortRelation` (optional section, 2 × `bool`) | Linked by the definition and bound in `DataPortDomMapper`, but `PowerPortDomMapper`/`PowerPortDomRepository` neither bind nor read it. Data Port handles the same section fully. | Likely intentional (IP primacy is a data-port concern); either drop the link from the Power Port definition in the module or document it as reserved. |
+| `Resource.LinkedResource` (`Guid` in seed) | All five repositories (`Desk`, `Rack`, `Row`, `Zone`, `Room`) read and write it as `string` (`AddOrUpdateValue<string>(…, Convert.ToString(ResourceId))`). Violates D5; the untyped mock hides it. Room additionally `Guid.Parse`s on read, gated `!= Guid.Empty`. | Blocked on ITM-001 (type-checking mock) to confirm which side is wrong; then align seed or repositories. |
+| `ConnectionsOnJob.Cabletype` (`string` in seed) | Repository wraps it in `SdmObjectReference<CableType>` and writes `.Identifier` as a string. The only reference in the repo stored as `string`; D2/D7 filters on it would not work. | Treat as text until the module field is changed to `Guid` (data migration). |
+| `SdmObjectReferenceConverter` JSON read of `null` | Produces a reference with `null` identifier instead of `default` (see SPC-002 rule 3). Not a DOM issue but affects D2 gates after import. | Tracked in SPC-002 review points. |
+| `Asset` entity-level section ids (`AssetPropertiesSectionId`, …) | Held as ad hoc `internal Guid?` properties instead of a shared abstraction; section-details use `ISectionTrackable` (C1). Two mechanisms for one concern. | Accept for now; document here. |
+| `Asset_Behavior` / `Asset_Class_Behavior` status ids | 8 of 12 status constants are a GUID with ` (duplicate)` suffixes (§7.6). Functionally distinct strings, but not GUIDs. | Verify against the live module before any change. |
+| `Rack.Row` and `Rack.Zone` both mandatory | DOM link says mandatory; repository writes each only when its reference `HasValue()`, and `RackValidator` requires only Row (§4.5). A rack with no Zone is accepted by code. | Accept; the module, not the repo, decides whether to enforce. |
+| `FloorValidator` missing-Facility failure | "Referenced Facility does not exist" is keyed to `FloorValidationField.FloorId` although a `FacilityId` member exists and is used for the "required" check (in `FloorValidator`). UI binds the message to the wrong input. | Candidate work-item: key it to `FacilityId`. |
+
+---
+
+## 14. Rejected alternatives
+
+- **Rely on the generator header and regenerate.** The generator package is disabled and the checked-in files have diverged (section tracking, empty-state gates, status gates). Regenerating would discard those.
+- **Validate types with `validateAgainstDefinition: true` in `Utils.DOM` 10.6.x.** It checks presence, not CLR type (verified for SPC-001).
+- **Store references as string in DOM.** The live module declares these fields as `Guid`; changing the encoding is a data migration and breaks `KeyExists`/GUID filters (D7). `ConnectionsOnJob.Cabletype` shows the cost of the exception.
+- **One shared behaviour for all Facility entities.** The module ships eight identical behaviours with distinct ids; collapsing them would change `StatusId` on every instance. Keep as generated.
+- **Hand-counted inventory.** Counts in §1 are produced by a script over the seeds, DomIds, mappers and repositories; re-run it rather than editing numbers by hand.

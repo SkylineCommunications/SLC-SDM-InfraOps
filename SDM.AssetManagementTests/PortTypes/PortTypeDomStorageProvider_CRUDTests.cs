@@ -50,6 +50,39 @@ namespace SDM.AssetManagement.Tests.PortTypes
 
         #region Create Tests
 
+        [DataTestMethod]
+        [DataRow(null)]
+        [DataRow("")]
+        [DataRow("   ")]
+        [DataRow("\t\r\n")]
+        public void PortTypeDomStorageProvider_Create_WithMissingName_ShouldFailWithoutPersisting(string? name)
+        {
+            referencePortType.Name = name!;
+
+            Action act = () => Helper.AssetManagement.PortTypes.Create(referencePortType);
+
+            act.Should().Throw<Exception>().WithMessage("*Port Type Name cannot be empty or whitespace*");
+            Helper.AssetManagement.PortTypes.Count(new TRUEFilterElement<PortType>()).Should().Be(0);
+        }
+
+        [DataTestMethod]
+        [DataRow(null)]
+        [DataRow("")]
+        [DataRow("   ")]
+        [DataRow("\t\r\n")]
+        public void PortTypeDomStorageProvider_Update_WithMissingName_ShouldFailWithoutChangingPersistedName(string? name)
+        {
+            Helper.AssetManagement.PortTypes.Create(referencePortType);
+            var persisted = Helper.AssetManagement.PortTypes.Read(PortTypeExposers.Identifier.Equal(referencePortType.Identifier)).Single();
+            persisted.Name = name!;
+
+            Action act = () => Helper.AssetManagement.PortTypes.Update(persisted);
+
+            act.Should().Throw<Exception>().WithMessage("*Port Type Name cannot be empty or whitespace*");
+            var unchanged = Helper.AssetManagement.PortTypes.Read(PortTypeExposers.Identifier.Equal(referencePortType.Identifier)).Single();
+            unchanged.Name.Should().Be(referencePortType.Name);
+        }
+
         [TestMethod]
         public void PortTypeDomStorageProvider_EmptyDOM_Create()
         {

@@ -14,6 +14,13 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
     /// </summary>
     public class HistoryValidator : ValidatorBase<History>
     {
+        protected override ValidationResult CreateNullEntityResult()
+        {
+            var result = new ValidationResult();
+            result.AddFailReason(HistoryValidationHandler.HistoryValidationField.History, "History cannot be null.");
+            return result;
+        }
+
         protected override List<ValidationResult> ValidateBulkNoDatabaseBusinessRules(List<History> entities)
         {
             return entities.Select(ValidateInfo).ToList();

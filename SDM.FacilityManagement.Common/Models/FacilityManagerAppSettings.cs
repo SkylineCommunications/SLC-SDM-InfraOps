@@ -13,6 +13,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
     //[GenerateExposers]
     //[SdmDomStorage("(slc)facility_management")]
+    [PropertyScope("FacilityManagerAppSettings")]
     public sealed class FacilityManagerAppSettings : SdmObjectBase<FacilityManagerAppSettings>, IEquatable<FacilityManagerAppSettings>, IEntityTracking, IReadOnlyModuleIdReferencer
 	{
         [JsonIgnore]

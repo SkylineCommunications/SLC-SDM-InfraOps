@@ -2,6 +2,7 @@ namespace SDM.AssetManagement.Tests.Assets
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
 
     using FluentAssertions;
 
@@ -115,12 +116,15 @@ namespace SDM.AssetManagement.Tests.Assets
         }
 
         [TestMethod]
-        public void ReservationPlacement_WithNullReservation_ShouldThrowArgumentNullException()
+        public void ReservationPlacement_WithNullReservation_ShouldReturnNullFailure()
         {
             var validator = new InfraopsReservationValidator(new SdmEntityLoader());
 
-            validator.Invoking(v => v.Validate(null, RepositoryAction.Create))
-                .Should().Throw<ArgumentNullException>();
+            var result = validator.Validate(null!, RepositoryAction.Create);
+
+            result.IsValid.Should().BeFalse();
+            result.GetFailReason(InfraopsReservationValidator.InfraopsReservationValidationField.Reservation)
+                .Should().Be("Reservation cannot be null.");
         }
 
         [TestMethod]
@@ -132,6 +136,17 @@ namespace SDM.AssetManagement.Tests.Assets
 
             result.IsValid.Should().BeFalse();
             result.FailureReasons.Should().Contain(reason => reason.ToString().Contains("Reservation must have a Rack specified."));
+        }
+
+        [TestMethod]
+        public void ReservationPlacement_WithoutJobAndDescription_ShouldFailOnDescription()
+        {
+            var validator = new InfraopsReservationValidator(new SdmEntityLoader());
+
+            var result = validator.Validate(new InfraopsReservation { Description = " " }, RepositoryAction.Create);
+
+            result.IsValid.Should().BeFalse();
+            result.FailureReasons.Should().Contain(reason => reason.ToString().Contains("Reservation without a linked Job must have a description."));
         }
 
         [TestMethod]
@@ -160,6 +175,7 @@ namespace SDM.AssetManagement.Tests.Assets
             var rackfK = Guid.NewGuid().ToString();
             var reservation = new InfraopsReservation
             {
+                Description = "Reservation description",
                 RackFk =
                 {
                     Rack = new SdmObjectReference<Rack>(rackfK),
@@ -552,6 +568,11 @@ namespace SDM.AssetManagement.Tests.Assets
         [DataRow(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InService, false, DisplayName = "In Service")]
         [DataRow(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InTransit, false, DisplayName = "In Transit")]
         [DataRow(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InRepair, true, DisplayName = "In Repair")]
+        [DataRow(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InPlanning, true, DisplayName = "In Planning")]
+        [DataRow(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.BuildPlanReady, true, DisplayName = "Build Plan Ready")]
+        [DataRow(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Disposed, true, DisplayName = "Disposed")]
+        [DataRow(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable, false, DisplayName = "Not Available")]
+        [DataRow(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Installed, false, DisplayName = "Installed")]
         public void CanEditLocation_ForExistingAssetInState_ShouldReturnExpected(
             SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum state,
             bool expected)
@@ -561,6 +582,31 @@ namespace SDM.AssetManagement.Tests.Assets
             asset.ResetChangeTracking();
 
             AssetValidationHandler.CanEditLocation(asset).Should().Be(expected);
+        }
+
+        [TestMethod]
+        public void LocationEditableStates_ShouldMatchCanEditLocationForEveryState()
+        {
+            foreach (var state in Enum.GetValues(typeof(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum)).Cast<SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum>())
+            {
+                var asset = new Asset { State = state };
+                asset.IsNewInternal = false;
+                asset.ResetChangeTracking();
+
+                AssetValidationHandler.CanEditLocation(asset).Should().Be(AssetValidationHandler.LocationEditableStates.Contains(state), state.ToString());
+            }
+        }
+
+        [TestMethod]
+        public void RackAssignableStates_ShouldBeLocationEditableStatesWithoutDisposed()
+        {
+            AssetValidationHandler.RackAssignableStates.Should().BeEquivalentTo(new[]
+            {
+                SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available,
+                SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InPlanning,
+                SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.BuildPlanReady,
+                SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.InRepair,
+            });
         }
 
         [TestMethod]

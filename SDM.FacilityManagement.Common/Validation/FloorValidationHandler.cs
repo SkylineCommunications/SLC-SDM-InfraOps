@@ -14,6 +14,7 @@
             FloorId,
             FloorName,
             FacilityId,
+            Floor,
         }
 
         /// <summary>

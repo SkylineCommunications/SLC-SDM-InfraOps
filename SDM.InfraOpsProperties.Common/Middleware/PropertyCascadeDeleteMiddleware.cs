@@ -5,15 +5,11 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Middleware
     using System.Linq;
 
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
-    using Skyline.DataMiner.SDM.InfraOpsProperties.Extensions;
     using Skyline.DataMiner.SDM.InfraOpsProperties.Helpers;
     using Skyline.DataMiner.SDM.InfraOpsProperties.Models;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Extensions;
-    using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Middleware;
 
     using SLDataGateway.API.Types.Querying;
-
-    using static SLDataGateway.API.Util.ReferenceManager;
 
     /// <summary>
     /// Middleware that cascade-deletes <see cref="PropertyValues"/> entries referencing a <see cref="Property"/>

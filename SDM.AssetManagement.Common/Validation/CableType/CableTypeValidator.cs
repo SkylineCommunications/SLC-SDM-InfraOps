@@ -28,7 +28,7 @@
 
         /// <summary>
         /// Validates name uniqueness — used for real-time UI validation.
-        /// <para><b>Not suitable for bulk scenarios</b>: issues one DB query per call. Use <see cref="ValidateBulk"/> instead.</para>
+        /// <para><b>Not suitable for bulk scenarios</b>: issues one DB query per call. Use <see cref="ValidatorBase{T}.ValidateBulk(List{T}, RepositoryAction)"/> instead.</para>
         /// </summary>
         public ValidationResult IsCableTypeNameValid(string name, string exceptIdentifier = null)
         {
@@ -53,11 +53,18 @@
         /// <summary>
         /// Validates name uniqueness for the specified <see cref="CableType"/> instance.
         /// Excludes the current cable type identifier from the uniqueness check.
-        /// <para><b>Not suitable for bulk scenarios</b>: issues one DB query per call. Use <see cref="ValidateBulk"/> instead.</para>
+        /// <para><b>Not suitable for bulk scenarios</b>: issues one DB query per call. Use <see cref="ValidatorBase{T}.ValidateBulk(List{T}, RepositoryAction)"/> instead.</para>
         /// </summary>
         public ValidationResult IsCableTypeNameValid(CableType cableType)
         {
             return IsCableTypeNameValid(cableType.Name, cableType.Identifier);
+        }
+
+        protected override ValidationResult CreateNullEntityResult()
+        {
+            var result = new ValidationResult();
+            result.AddFailReason(CableTypeValidationHandler.CableTypeValidationField.CableType, "Cable Type cannot be null.");
+            return result;
         }
 
         protected override List<ValidationResult> ValidateBulkNoDatabaseBusinessRules(List<CableType> entities)
@@ -231,11 +238,6 @@
 
 
         #region Validation Methods
-
-        private ValidationResult ValidateCriticalFields(CableType cableType)
-        {
-            return IsCableTypeNameValid(cableType);
-        }
 
         private ValidationResult ValidateCategories(CableType cableType)
         {

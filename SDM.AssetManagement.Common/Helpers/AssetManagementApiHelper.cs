@@ -3,7 +3,6 @@ using Skyline.DataMiner.Net;
 using Skyline.DataMiner.SDM;
 using Skyline.DataMiner.SDM.AssetManagement.Common.Middleware;
 using Skyline.DataMiner.SDM.AssetManagement.Common.Validation.Reservations;
-using Skyline.DataMiner.SDM.AssetManagement.Deletion;
 using Skyline.DataMiner.SDM.AssetManagement.Helpers;
 using Skyline.DataMiner.SDM.AssetManagement.Models;
 using Skyline.DataMiner.SDM.AssetManagement.Validation;
@@ -103,6 +102,7 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
             .WithMiddleware(new IdentifierMiddleware<PortType>());
         Connections = connectionDomRepository
             .WithMiddleware(new ConnectionValidationMiddleware(_connectionValidator))
+            .WithMiddleware(new ConnectionPortTypeMiddleware(entityLoader))
             .WithMiddleware(new IdentifierMiddleware<Connection>());
         CableTypes = cableTypeRepository
             .WithMiddleware(new CableTypeValidationMiddleware(_cableTypeValidator))

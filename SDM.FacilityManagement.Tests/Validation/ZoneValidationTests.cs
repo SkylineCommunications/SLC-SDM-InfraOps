@@ -9,11 +9,8 @@ namespace SDM.FacilityManagement.Tests.Validation
 
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
-    using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
-    using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM.FacilityManagement.Services;
-    using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM.FacilityManagement.Validation;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
@@ -219,6 +216,42 @@ namespace SDM.FacilityManagement.Tests.Validation
 
             result.IsValid.Should().BeFalse();
             result.TryGetFailReason(ZoneValidationHandler.ZoneValidationField.Name, out _).Should().BeTrue();
+        }
+
+        [TestMethod]
+        public void ZoneValidator_Validate_WithNullZone_ShouldReturnNullFailure()
+        {
+            var result = CreateValidator().Validate(null!, RepositoryAction.Create);
+
+            result.IsValid.Should().BeFalse();
+            result.GetFailReason(ZoneValidationHandler.ZoneValidationField.Zone).Should().Be("Zone cannot be null.");
+        }
+
+        [TestMethod]
+        public void ZoneValidator_ValidateAndThrow_WithNullZone_ShouldThrowValidationException()
+        {
+            var validator = CreateValidator();
+
+            var action = () => validator.ValidateAndThrow(null!, RepositoryAction.Create);
+
+            action.Should().Throw<Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Exceptions.ValidationException>()
+                .WithMessage("*Zone cannot be null.*");
+        }
+
+        [TestMethod]
+        public void ZoneValidator_ValidateBulk_WithValidAndNullZone_ShouldReturnResultsInOrder()
+        {
+            var room = Helper.Rooms.Create(Helper.AttachFloor(new Room { Identifier = Guid.NewGuid().ToString(), RoomId = "ROOM-VALID", Name = "Room VALID" }));
+            var entity = NewZone("VALID");
+            entity.RoomFk.Room = new SdmObjectReference<Room>(room.Identifier);
+            var validator = CreateValidator();
+
+            var results = validator.ValidateBulk(new List<Zone> { entity, null! }, RepositoryAction.Create);
+
+            results.Should().HaveCount(2);
+            results[0].IsValid.Should().BeTrue(results[0].GetCombinedFailureReasons(";"));
+            results[1].IsValid.Should().BeFalse();
+            results[1].GetFailReason(ZoneValidationHandler.ZoneValidationField.Zone).Should().Be("Zone cannot be null.");
         }
 
         private ZoneValidator CreateValidator()
