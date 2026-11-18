@@ -21,7 +21,7 @@ namespace SharedMappers.DomIds
                 public const string Truck = "Truck";
                 public const string Container = "Container";
                 public const string Building = "Building";
-                public const string EarthStation = "EarthStation";
+                public const string EarthStation = "Earth Station";
                 public static string ToValue(FacilityTypeEnum @enum)
                 {
                     switch (@enum)
