@@ -92,12 +92,6 @@
             set => HistoryLimitField.Value = value;
         }
 
-        public bool EnableResourceLink
-        {
-            get => EnableResourceLinkField.Value;
-            set => EnableResourceLinkField.Value = value;
-        }
-
         public bool EnableAutoAssetId
         {
             get => EnableAutoAssetIdField.Value;
@@ -151,12 +145,6 @@
         internal IChangeTrackingField<long?> HistoryLimitField => FieldHandler.GetOrCreateField(
             nameof(HistoryLimit),
             () => new ChangeTrackingField<long?>(null));
-
-        [JsonIgnore]
-        [SdmIgnore]
-        internal IChangeTrackingField<bool> EnableResourceLinkField => FieldHandler.GetOrCreateField(
-            nameof(EnableResourceLink),
-            () => new ChangeTrackingField<bool>(default));
 
         [JsonIgnore]
         [SdmIgnore]
@@ -241,7 +229,6 @@
                 EnableConnectionHistory == other.EnableConnectionHistory &&
                 HistoryTTL == other.HistoryTTL &&
                 HistoryLimit == other.HistoryLimit &&
-                EnableResourceLink == other.EnableResourceLink &&
                 EnableAutoAssetId == other.EnableAutoAssetId &&
                 AssetIdNextSequence == other.AssetIdNextSequence &&
                 AssetIdIncrement == other.AssetIdIncrement &&
@@ -258,7 +245,6 @@
                 hash = (hash * 23) + EnableConnectionHistory.GetHashCode();
                 hash = (hash * 23) + HistoryTTL.GetHashCode();
                 hash = (hash * 23) + HistoryLimit.GetHashCode();
-                hash = (hash * 23) + EnableResourceLink.GetHashCode();
                 hash = (hash * 23) + EnableAutoAssetId.GetHashCode();
                 hash = (hash * 23) + AssetIdNextSequence.GetHashCode();
                 hash = (hash * 23) + AssetIdIncrement.GetHashCode();

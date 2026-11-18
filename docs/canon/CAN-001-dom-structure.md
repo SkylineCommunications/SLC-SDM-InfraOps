@@ -508,7 +508,6 @@ flowchart LR
 | BackImage | `string` | `BackImage` |  | `no-db` Must be one of the Attachments |
 | PowerSupply | `string` | `PowerSupply` |  | `db` Required when the Device Type has tag `PowerProvider` |
 | Citype | `string` | `CIType` |  |  |
-| Isbookable | `bool` | `IsBookable` |  |  |
 
 #### 3.2.2 AssetClassLifecycleInformation
 
@@ -609,7 +608,6 @@ flowchart LR
 | EnableConnectionHistory | `bool` | `EnableConnectionHistory` |  |  |
 | HistoryTTL | `TimeSpan` | `HistoryTTL` |  |  |
 | HistoryLimit | `long` | `HistoryLimit` |  |  |
-| EnableResourceLink | `bool` | `EnableResourceLink` |  |  |
 | EnableAutoAssetId | `bool` | `EnableAutoAssetId` | Generates `{AssetClassName}-{sequence}` Asset IDs when on |  |
 | AssetIdNextSequence | `long` | `AssetIdNextSequence` | System-managed counter, advanced only by the SDM generator; ≤ 0 = unset, defaults to 1 |  |
 | AssetIdIncrement | `long` | `AssetIdIncrement` | ≤ 0 = unset, defaults to 1 |  |

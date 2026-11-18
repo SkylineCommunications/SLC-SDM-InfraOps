@@ -27,7 +27,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             internal static FieldDescriptorID EnableConnectionHistory = SharedMappers.DomIds.SlcAsset_Management.Sections.AppSettings.EnableConnectionHistory;
             internal static FieldDescriptorID HistoryTTL = SharedMappers.DomIds.SlcAsset_Management.Sections.AppSettings.HistoryTTL;
             internal static FieldDescriptorID HistoryLimit = SharedMappers.DomIds.SlcAsset_Management.Sections.AppSettings.HistoryLimit;
-            internal static FieldDescriptorID EnableResourceLink = SharedMappers.DomIds.SlcAsset_Management.Sections.AppSettings.EnableResourceLink;
             internal static FieldDescriptorID EnableAutoAssetId = SharedMappers.DomIds.SlcAsset_Management.Sections.AppSettings.EnableAutoAssetId;
             internal static FieldDescriptorID AssetIdNextSequence = SharedMappers.DomIds.SlcAsset_Management.Sections.AppSettings.AssetIdNextSequence;
             internal static FieldDescriptorID AssetIdIncrement = SharedMappers.DomIds.SlcAsset_Management.Sections.AppSettings.AssetIdIncrement;

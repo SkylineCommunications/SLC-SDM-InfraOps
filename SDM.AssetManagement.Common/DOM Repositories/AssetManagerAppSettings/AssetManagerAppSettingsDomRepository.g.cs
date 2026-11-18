@@ -545,12 +545,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     obj.HistoryLimit = _historylimit.Value;
                 }
 
-                var _enableresourcelink = _appsettingsSection.GetValue<bool>(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.EnableResourceLink);
-                if (_enableresourcelink != null)
-                {
-                    obj.EnableResourceLink = _enableresourcelink.Value;
-                }
-
                 var _enableautoassetid = _appsettingsSection.GetValue<bool>(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.EnableAutoAssetId);
                 if (_enableautoassetid != null)
                 {
@@ -609,7 +603,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             _appsettings.AddOrUpdateValue<bool>(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.EnableAssetHistory, obj.EnableAssetHistory);
             _appsettings.AddOrUpdateValue<int>(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.PlanAndBuildJobPrompt, (int)obj.PlanAndBuildJobPrompt);
             _appsettings.AddOrUpdateValue<bool>(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.EnableConnectionHistory, obj.EnableConnectionHistory);
-            _appsettings.AddOrUpdateValue<bool>(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.EnableResourceLink, obj.EnableResourceLink);
             _appsettings.AddOrUpdateValue<bool>(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.EnableAutoAssetId, obj.EnableAutoAssetId);
             _appsettings.AddOrUpdateValue<long>(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.AssetIdNextSequence, obj.AssetIdNextSequence);
             _appsettings.AddOrUpdateValue<long>(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.AssetIdIncrement, obj.AssetIdIncrement);
@@ -662,9 +655,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 case "HistoryLimit":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.HistoryLimit), comparer, ((long?)value).Value);
 
-                case "EnableResourceLink":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.EnableResourceLink), comparer, (bool)value);
-
                 case "EnableAutoAssetId":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.EnableAutoAssetId), comparer, (bool)value);
 
@@ -706,8 +696,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.HistoryTTL), sortOrder, naturalSort);
                 case "HistoryLimit":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.HistoryLimit), sortOrder, naturalSort);
-                case "EnableResourceLink":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.EnableResourceLink), sortOrder, naturalSort);
                 case "EnableAutoAssetId":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.EnableAutoAssetId), sortOrder, naturalSort);
                 case "AssetIdNextSequence":
