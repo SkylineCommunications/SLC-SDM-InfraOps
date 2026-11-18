@@ -39,7 +39,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             internal static FieldDescriptorID BackImage = SharedMappers.DomIds.SlcAsset_Management.Sections.AssetClassInfo.BackImage;
             internal static FieldDescriptorID PowerSupply = SharedMappers.DomIds.SlcAsset_Management.Sections.AssetClassInfo.PowerSupply;
             internal static FieldDescriptorID CIType = SharedMappers.DomIds.SlcAsset_Management.Sections.AssetClassInfo.Citype;
-            internal static FieldDescriptorID IsBookable = SharedMappers.DomIds.SlcAsset_Management.Sections.AssetClassInfo.Isbookable;
         }
 
         internal static class Lifecycle

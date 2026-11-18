@@ -30,6 +30,5 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         public static readonly Exposer<AssetManagement.Models.AssetManagerAppSettings, bool> EnableConnectionHistory = new Exposer<AssetManagement.Models.AssetManagerAppSettings, bool>((obj) => obj.EnableConnectionHistory, "EnableConnectionHistory");
         public static readonly Exposer<AssetManagement.Models.AssetManagerAppSettings, TimeSpan?> HistoryTTL = new Exposer<AssetManagement.Models.AssetManagerAppSettings, TimeSpan?>((obj) => obj.HistoryTTL, "HistoryTTL");
         public static readonly Exposer<AssetManagement.Models.AssetManagerAppSettings, long?> HistoryLimit = new Exposer<AssetManagement.Models.AssetManagerAppSettings, long?>((obj) => obj.HistoryLimit, "HistoryLimit");
-        public static readonly Exposer<AssetManagement.Models.AssetManagerAppSettings, bool> EnableResourceLink = new Exposer<AssetManagement.Models.AssetManagerAppSettings, bool>((obj) => obj.EnableResourceLink, "EnableResourceLink");
     }
 }

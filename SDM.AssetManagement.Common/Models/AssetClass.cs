@@ -187,12 +187,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             set => HoldersField.Value = value ?? new List<AssetHolder>();
         }
 
-        public bool IsBookable
-        {
-            get => IsBookableField.Value;
-            set => IsBookableField.Value = value;
-        }
-
         public ProtocolLink ProtocolLink
         {
             get => _protocolLink ?? (_protocolLink = new ProtocolLink());
@@ -347,12 +341,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
         [JsonIgnore]
         [SdmIgnore]
-        internal IChangeTrackingField<bool> IsBookableField => FieldHandler.GetOrCreateField(
-            nameof(IsBookable),
-            () => new ChangeTrackingField<bool>(false));
-
-        [JsonIgnore]
-        [SdmIgnore]
         internal ChangeTrackingArrayField<Attachment> AttachmentsField => FieldHandler.GetOrCreateArrayField(
             nameof(Attachments),
             () => new ChangeTrackingArrayField<Attachment>(new List<Attachment>()));
@@ -491,7 +479,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 ListsEqual(DataPorts, other.DataPorts) &&
                 ListsEqual(PowerPorts, other.PowerPorts) &&
                 ListsEqual(Holders, other.Holders) &&
-                IsBookable == other.IsBookable &&
                 Equals(ProtocolLink, other.ProtocolLink) &&
                 ListsEqual(Attachments, other.Attachments) &&
                 State == other.State;
@@ -506,7 +493,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 hash = (hash * 23) + (DeviceTypeId.Identifier?.GetHashCode() ?? 0);
                 hash = (hash * 23) + (Description != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(Description) : 0);
                 hash = (hash * 23) + Manufacturer.GetHashCode();
-                hash = (hash * 23) + IsBookable.GetHashCode();
                 hash = (hash * 23) + State.GetHashCode();
                 return hash;
             }

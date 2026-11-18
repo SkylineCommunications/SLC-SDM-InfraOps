@@ -90,7 +90,6 @@
                 (SlcAsset_Management.Sections.AppSettings.EnableConnectionHistory, typeof(bool), "Enable Connection History"),
                 (SlcAsset_Management.Sections.AppSettings.HistoryTTL, typeof(TimeSpan), "History TTL"),
                 (SlcAsset_Management.Sections.AppSettings.HistoryLimit, typeof(long), "History Limit"),
-                (SlcAsset_Management.Sections.AppSettings.EnableResourceLink, typeof(bool), "Enable Resource Link"),
             };
 
             return BuildSectionDefinition(SlcAsset_Management.Sections.AppSettings.Id, "App Settings", fields);
@@ -125,7 +124,6 @@
                 (SlcAsset_Management.Sections.AssetClassInfo.BackImage, typeof(string), "Back Image"),
                 (SlcAsset_Management.Sections.AssetClassInfo.PowerSupply, typeof(string), "Power Supply"),
                 (SlcAsset_Management.Sections.AssetClassInfo.Citype, typeof(string), "CIType"),
-                (SlcAsset_Management.Sections.AssetClassInfo.Isbookable, typeof(bool), "IsBookable"),
             };
 
             return BuildSectionDefinition(SlcAsset_Management.Sections.AssetClassInfo.Id, "Asset Class Info", fields);

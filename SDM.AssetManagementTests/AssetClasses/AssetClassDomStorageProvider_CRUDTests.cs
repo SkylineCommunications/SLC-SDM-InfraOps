@@ -215,7 +215,7 @@ namespace SDM.AssetManagement.Tests.AssetClasses
         }
 
         [TestMethod]
-        public void Create_WithIsBookableAndProtocolLink_ShouldRoundTrip()
+        public void Create_WithProtocolLink_ShouldRoundTrip()
         {
             // Arrange
             Helper.PopulateWithDemoData(upTo: DemoDataLayer.DeviceTypes);
@@ -233,7 +233,6 @@ namespace SDM.AssetManagement.Tests.AssetClasses
                 port.PortType = powerPortType;
             }
 
-            referenceAssetClass.IsBookable = true;
             referenceAssetClass.ProtocolLink.Protocol = "Generic Protocol";
 
             // Act
@@ -243,13 +242,11 @@ namespace SDM.AssetManagement.Tests.AssetClasses
             // Assert
             using (new AssertionScope())
             {
-                created.IsBookable.Should().BeTrue();
                 created.ProtocolLink.Protocol.Should().Be("Generic Protocol");
                 created.PowerPorts.Should().OnlyContain(p => p.PortType.HasValue());
             }
 
-            // Act: update both flags
-            created.IsBookable = false;
+            // Act: update protocol link
             created.ProtocolLink.Protocol = "Other Protocol";
             Helper.AssetManagement.AssetClasses.Update(created);
             var updated = Helper.AssetManagement.AssetClasses.Read(new TRUEFilterElement<AssetClass>()).Single();
@@ -257,7 +254,6 @@ namespace SDM.AssetManagement.Tests.AssetClasses
             // Assert
             using (new AssertionScope())
             {
-                updated.IsBookable.Should().BeFalse();
                 updated.ProtocolLink.Protocol.Should().Be("Other Protocol");
             }
         }
