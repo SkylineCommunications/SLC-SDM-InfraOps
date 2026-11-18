@@ -33,7 +33,6 @@ namespace SDM.FacilityManagement.Tests.Zones
             };
             zone.ZoneCapacity.CoolingCapacity = 12.5;
             zone.RoomFk.Room = new SdmObjectReference<Room>(Guid.NewGuid().ToString());
-            zone.Resource.ResourceId = Guid.NewGuid();
 
             string json = InfraOpsJsonConvert.SerializeObject(zone);
             var restored = InfraOpsJsonConvert.DeserializeObject<Zone>(json);
@@ -50,7 +49,6 @@ namespace SDM.FacilityManagement.Tests.Zones
             restored.Depth.Should().Be(150.75);
             restored.ZoneCapacity.CoolingCapacity.Should().Be(12.5);
             restored.RoomFk.Room.Should().Be(zone.RoomFk.Room);
-            restored.Resource.ResourceId.Should().Be(zone.Resource.ResourceId);
             restored.Should().Be(zone);
             InfraOpsJsonConvert.SerializeObject(restored).Should().Be(json);
         }

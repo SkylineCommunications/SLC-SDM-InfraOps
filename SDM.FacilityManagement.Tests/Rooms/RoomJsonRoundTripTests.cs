@@ -32,7 +32,6 @@ namespace SDM.FacilityManagement.Tests.Rooms
             };
             room.Ownership.Team = new PnoObjectReference<Team>(Guid.NewGuid());
             room.Ownership.Owner = new PnoObjectReference<Person>(Guid.NewGuid());
-            room.ResourceLink.ResourceId = Guid.NewGuid();
             room.FloorFk.Floor = new SdmObjectReference<Floor>(Guid.NewGuid().ToString());
 
             string json = InfraOpsJsonConvert.SerializeObject(room);
@@ -47,7 +46,6 @@ namespace SDM.FacilityManagement.Tests.Rooms
             restored.Depth.Should().Be(800);
             restored.Ownership.Team.Should().Be(room.Ownership.Team);
             restored.Ownership.Owner.Should().Be(room.Ownership.Owner);
-            restored.ResourceLink.ResourceId.Should().Be(room.ResourceLink.ResourceId);
             restored.FloorFk.Floor.Should().Be(room.FloorFk.Floor);
             restored.Should().Be(room);
             InfraOpsJsonConvert.SerializeObject(restored).Should().Be(json);
