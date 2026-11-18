@@ -632,12 +632,6 @@ namespace SharedMappers.DomIds
                 }
 
                 = new FieldDescriptorID(new Guid("ca9c44c6-e189-4c39-b1a0-37b3ec1d8b78"));
-                public static FieldDescriptorID EnableResourceLink
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("87b8713d-0078-439a-ac42-f5b7f94a1217"));
             }
 
             public static class AssetNetworkDetails
@@ -907,12 +901,6 @@ namespace SharedMappers.DomIds
                 }
 
                 = new FieldDescriptorID(new Guid("43fe2474-b7d2-4f2b-b690-b5064e5e7786"));
-                public static FieldDescriptorID Isbookable
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("dc0b787e-338d-428e-8d56-8c02bceaf51e"));
             }
 
             public static class AssetOwnership

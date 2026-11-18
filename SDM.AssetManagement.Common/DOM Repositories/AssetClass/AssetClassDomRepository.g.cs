@@ -642,12 +642,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 					obj.BackImage = _backimage.Value;
                 }
 
-                var _isBookable = _assetclasspropertiesSection.GetValue<bool>(AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.IsBookable);
-                if (_isBookable != null)
-                {
-                    obj.IsBookable = _isBookable.Value;
-                }
-
                 var _typicalpowerconsumption = _assetclasspropertiesSection.GetValue<double>(AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.TypicalPowerConsumption);
 				if (_typicalpowerconsumption != null)
 				{
@@ -943,8 +937,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 			{
 				_assetclassproperties.AddOrUpdateValue<string>(AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.BackImage, Convert.ToString(obj.BackImage));
 			}
-
-			_assetclassproperties.AddOrUpdateValue<bool>(AssetManagement.Models.AssetClassDomMapper.AssetClassProperties.IsBookable, obj.IsBookable);
 
 			if (obj.TypicalPowerConsumption != default)
 			{

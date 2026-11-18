@@ -40,7 +40,6 @@ namespace SDM.AssetManagement.Tests.AssetClasses
                 MaximumPowerConsumption = 200.5,
                 PowerSupply = SlcAsset_Management.Enums.PowerSupplyEnum.DC,
                 CIType = "CI",
-                IsBookable = true,
             };
             assetClass.Lifecycle.EndOfLife = new DateTime(2030, 1, 1, 0, 0, 0, DateTimeKind.Utc);
             assetClass.Lifecycle.EndOfService = new DateTime(2029, 6, 1, 0, 0, 0, DateTimeKind.Utc);

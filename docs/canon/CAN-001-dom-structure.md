@@ -508,7 +508,6 @@ flowchart LR
 | BackImage | `string` | `BackImage` |  | `no-db` Must be one of the Attachments |
 | PowerSupply | `string` | `PowerSupply` |  | `db` Required when the Device Type has tag `PowerProvider` |
 | Citype | `string` | `CIType` |  |  |
-| Isbookable | `bool` | `IsBookable` |  |  |
 
 #### 3.2.2 AssetClassLifecycleInformation
 
@@ -609,7 +608,6 @@ flowchart LR
 | EnableConnectionHistory | `bool` | `EnableConnectionHistory` |  |  |
 | HistoryTTL | `TimeSpan` | `HistoryTTL` |  |  |
 | HistoryLimit | `long` | `HistoryLimit` |  |  |
-| EnableResourceLink | `bool` | `EnableResourceLink` |  |  |
 
 ### 3.4 Cable Type
 

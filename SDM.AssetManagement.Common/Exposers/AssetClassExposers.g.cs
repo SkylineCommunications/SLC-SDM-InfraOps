@@ -37,7 +37,6 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 		public static readonly Exposer<AssetManagement.Models.AssetClass, SlcAsset_Management.Enums.PowerSupplyEnum?> PowerSupply = new Exposer<AssetManagement.Models.AssetClass, SlcAsset_Management.Enums.PowerSupplyEnum?>((obj) => obj.PowerSupply, "PowerSupply");
 		public static readonly Exposer<AssetManagement.Models.AssetClass, string> CIType = new Exposer<AssetManagement.Models.AssetClass, string>((obj) => obj.CIType, "CIType");
 		public static readonly Exposer<AssetManagement.Models.AssetClass, SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum> State = new Exposer<AssetManagement.Models.AssetClass, SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum>((obj) => obj.State, "State");
-        public static readonly Exposer<AssetManagement.Models.AssetClass, bool> IsBookable = new Exposer<AssetManagement.Models.AssetClass, bool>((obj) => obj.IsBookable, "IsBookable");
 
         static AssetClassExposers()
         {

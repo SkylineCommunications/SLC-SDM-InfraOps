@@ -92,12 +92,6 @@
             set => HistoryLimitField.Value = value;
         }
 
-        public bool EnableResourceLink
-        {
-            get => EnableResourceLinkField.Value;
-            set => EnableResourceLinkField.Value = value;
-        }
-
         [JsonIgnore]
         [SdmIgnore]
         internal IChangeTrackingField<bool> EnableAssetHistoryField => FieldHandler.GetOrCreateField(
@@ -127,12 +121,6 @@
         internal IChangeTrackingField<long?> HistoryLimitField => FieldHandler.GetOrCreateField(
             nameof(HistoryLimit),
             () => new ChangeTrackingField<long?>(null));
-
-        [JsonIgnore]
-        [SdmIgnore]
-        internal IChangeTrackingField<bool> EnableResourceLinkField => FieldHandler.GetOrCreateField(
-            nameof(EnableResourceLink),
-            () => new ChangeTrackingField<bool>(default));
 
         public IEnumerable<TrackingFieldValueDifference> GetChanges()
         {
@@ -192,8 +180,7 @@
                 PlanAndBuildJobPrompt == other.PlanAndBuildJobPrompt &&
                 EnableConnectionHistory == other.EnableConnectionHistory &&
                 HistoryTTL == other.HistoryTTL &&
-                HistoryLimit == other.HistoryLimit &&
-                EnableResourceLink == other.EnableResourceLink;
+                HistoryLimit == other.HistoryLimit;
         }
 
         public override int GetHashCode()
@@ -206,7 +193,6 @@
                 hash = (hash * 23) + EnableConnectionHistory.GetHashCode();
                 hash = (hash * 23) + HistoryTTL.GetHashCode();
                 hash = (hash * 23) + HistoryLimit.GetHashCode();
-                hash = (hash * 23) + EnableResourceLink.GetHashCode();
                 return hash;
             }
         }

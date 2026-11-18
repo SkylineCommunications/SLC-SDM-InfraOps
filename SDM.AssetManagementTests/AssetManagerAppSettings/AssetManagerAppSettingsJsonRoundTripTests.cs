@@ -25,7 +25,6 @@ namespace SDM.AssetManagement.Tests.AssetManagerAppSettings
                 EnableConnectionHistory = true,
                 HistoryTTL = new TimeSpan(30, 2, 3, 4),
                 HistoryLimit = 500,
-                EnableResourceLink = true,
             };
 
             string json = InfraOpsJsonConvert.SerializeObject(settings);
