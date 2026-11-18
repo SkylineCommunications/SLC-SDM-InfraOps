@@ -632,9 +632,7 @@ namespace SharedMappers.DomIds
                 }
 
                 = new FieldDescriptorID(new Guid("ca9c44c6-e189-4c39-b1a0-37b3ec1d8b78"));
-            }
 
-                = new FieldDescriptorID(new Guid("87b8713d-0078-439a-ac42-f5b7f94a1217"));
                 public static FieldDescriptorID EnableAutoAssetId
                 {
                     get;
