@@ -22,6 +22,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Helpers
         public const long DefaultMinimumDigits = 4;
 
         private const int MaxAttempts = 10000;
+        private const int MaxMinimumDigits = 18;
 
         private static readonly object Lock = new object();
 
@@ -44,12 +45,19 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Helpers
         /// </summary>
         /// <param name="api">The Asset Management API helper.</param>
         /// <param name="assetClassName">The name of the Asset Class used as prefix.</param>
+        /// <remarks>Values of the settings that are not set (zero or negative) fall back to the <c>Default*</c> constants.</remarks>
         /// <returns>The generated Asset ID, or <see langword="null"/> if automatic generation is not enabled.</returns>
+        /// <exception cref="ArgumentException">The Asset Class name is empty.</exception>
         public static string GenerateNextAssetId(this IAssetManagementApiHelper api, string assetClassName)
         {
             if (api == null)
             {
                 throw new ArgumentNullException(nameof(api));
+            }
+
+            if (string.IsNullOrWhiteSpace(SanitizePrefix(assetClassName)))
+            {
+                throw new ArgumentException("An Asset Class name is required to generate an Asset ID.", nameof(assetClassName));
             }
 
             lock (Lock)
@@ -62,7 +70,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Helpers
 
                 long increment = settings.AssetIdIncrement > 0 ? settings.AssetIdIncrement : DefaultIncrement;
                 long sequence = settings.AssetIdNextSequence > 0 ? settings.AssetIdNextSequence : DefaultNextSequence;
-                int minimumDigits = (int)Math.Max(0, Math.Min(settings.AssetIdMinimumDigits, 18));
+                int minimumDigits = (int)Math.Min(settings.AssetIdMinimumDigits > 0 ? settings.AssetIdMinimumDigits : DefaultMinimumDigits, MaxMinimumDigits);
 
                 for (int attempt = 0; attempt < MaxAttempts; attempt++)
                 {

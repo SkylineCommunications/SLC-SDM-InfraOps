@@ -81,7 +81,15 @@ namespace SDM.AssetManagement.Tests.AssetManagerAppSettings
         {
             Helper.AssetManagement.AppSettings.Create(CreateSettings(true, 0, 0, 0));
 
-            Helper.AssetManagement.GenerateNextAssetId("Rack").Should().Be("Rack-1");
+            Helper.AssetManagement.GenerateNextAssetId("Rack").            Should().Be("Rack-0001");
+                    }
+
+                    [TestMethod]
+                    public void GenerateNextAssetId_EmptyClassName_Throws()
+                    {
+                        Helper.AssetManagement.AppSettings.Create(CreateSettings(true));
+
+                        Helper.AssetManagement.Invoking(x => x.GenerateNextAssetId(" ")).Should().Throw<ArgumentException>();
         }
 
         [TestMethod]
