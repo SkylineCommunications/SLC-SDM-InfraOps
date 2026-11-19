@@ -51,7 +51,6 @@
         public bool Changed =>
             FieldHandler.HasChanges ||
             _ownership?.Changed == true ||
-            _resourceLink?.Changed == true ||
             _floorFk?.Changed == true;
 
         [JsonIgnore]
@@ -114,10 +113,6 @@
 
         public RoomOwnership Ownership => _ownership ?? (_ownership = new RoomOwnership());
 
-        private ResourceLink _resourceLink;
-
-        public ResourceLink ResourceLink => _resourceLink ?? (_resourceLink = new ResourceLink());
-
         private FloorRelation _floorFk;
 
         public FloorRelation FloorFk => _floorFk ?? (_floorFk = new FloorRelation());
@@ -163,7 +158,6 @@
                     NewValue = kvp.Value.newVal,
                 })
                 .Concat(_ownership.GetSectionChanges("Ownership"))
-                .Concat(_resourceLink.GetSectionChanges("ResourceLink"))
                 .Concat(_floorFk.GetSectionChanges("FloorFk"));
         }
 
@@ -171,7 +165,6 @@
         {
             FieldHandler.ApplyChanges();
             _ownership?.ResetChangeTracking();
-            _resourceLink?.ResetChangeTracking();
             _floorFk?.ResetChangeTracking();
         }
 
@@ -222,7 +215,6 @@
                 Depth == other.Depth &&
                 string.Equals(RoomId, other.RoomId, StringComparison.OrdinalIgnoreCase) &&
                 Equals(Ownership, other.Ownership) &&
-                Equals(ResourceLink, other.ResourceLink) &&
                 Equals(FloorFk, other.FloorFk) &&
                 State == other.State;
         }

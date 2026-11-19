@@ -60,7 +60,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
          DepthField?.Changed == true ||
          DescriptionField?.Changed == true ||
          CoolingFlowField?.Changed == true ||
-         BookableField?.Changed == true ||
          XPositionField?.Changed == true ||
          YPositionField?.Changed == true ||
          LabelField?.Changed == true ||
@@ -70,7 +69,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
          Capacity?.Changed == true ||
          RowFk?.Changed == true ||
          ZoneFk?.Changed == true ||
-         Resource?.Changed == true ||
          ImageDetailsField?.Changed == true;
 
         [JsonIgnore]
@@ -136,12 +134,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             set => DescriptionField.Value = value;
         }
 
-        public bool? Bookable
-        {
-            get => BookableField.Value;
-            set => BookableField.Value = value;
-        }
-
         public SlcFacility_Management.Enums.CoolingflowenumEnum? CoolingFlow
         {
             get => CoolingFlowField.Value;
@@ -196,10 +188,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 
         public ZoneRelation ZoneFk => _zoneFk ?? (_zoneFk = new ZoneRelation());
 
-        private ResourceLink _resource;
-
-        public ResourceLink Resource => _resource ?? (_resource = new ResourceLink());
-
         public List<ImageInfo> ImageDetails
         {
             get => ImageDetailsField.Value ?? (ImageDetailsField.Value = new List<ImageInfo>());
@@ -247,11 +235,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
         internal IChangeTrackingField<string> DescriptionField => FieldHandler.GetOrCreateField(
             nameof(Description),
             () => new ChangeTrackingStringField(null));
-
-        [JsonIgnore]
-        internal IChangeTrackingField<bool?> BookableField => FieldHandler.GetOrCreateField(
-            nameof(Bookable),
-            () => new ChangeTrackingField<bool?>(null));
 
         [JsonIgnore]
         internal IChangeTrackingField<SlcFacility_Management.Enums.CoolingflowenumEnum?> CoolingFlowField => FieldHandler.GetOrCreateField(
@@ -308,8 +291,7 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 })
                 .Concat(Capacity.GetSectionChanges(nameof(Capacity)))
                 .Concat(RowFk.GetSectionChanges(nameof(RowFk)))
-                .Concat(ZoneFk.GetSectionChanges(nameof(ZoneFk)))
-                .Concat(Resource.GetSectionChanges(nameof(Resource)));
+                .Concat(ZoneFk.GetSectionChanges(nameof(ZoneFk)));
         }
 
         // Reset change tracking after deserialization or save
@@ -319,7 +301,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             Capacity?.ResetChangeTracking();
             RowFk?.ResetChangeTracking();
             ZoneFk?.ResetChangeTracking();
-            Resource?.ResetChangeTracking();
 
             // Cascade to list items if they implement IChangeTracking
             if (ImageDetails != null)
@@ -378,7 +359,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 Height == other.Height &&
                 Depth == other.Depth &&
                 string.Equals(Description, other.Description, StringComparison.OrdinalIgnoreCase) &&
-                Bookable == other.Bookable &&
                 CoolingFlow == other.CoolingFlow &&
                 XPosition == other.XPosition &&
                 YPosition == other.YPosition &&
@@ -389,7 +369,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 Equals(Capacity, other.Capacity) &&
                 Equals(RowFk, other.RowFk) &&
                 Equals(ZoneFk, other.ZoneFk) &&
-                Equals(Resource, other.Resource) &&
                 ListsEqual(ImageDetails, other.ImageDetails) &&
                 State == other.State;
         }

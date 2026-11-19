@@ -597,17 +597,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 }
             }
 
-            var _resourceSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(FacilityManagement.Models.ZoneDomMapper.Resource.SectionDefinitionId));
-            if (_resourceSection != default)
-            {
-                ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Resource).SectionId = _resourceSection.ID.Id;
-                var _resourceresourceid = _resourceSection.GetValue<string>(FacilityManagement.Models.ZoneDomMapper.Resource.ResourceId);
-                if (_resourceresourceid != null)
-                {
-                    obj.Resource.ResourceId = System.Guid.Parse(Convert.ToString(_resourceresourceid.Value));
-                }
-            }
-
             obj.ResetChangeTracking();
 
             return obj;
@@ -720,23 +709,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 instance.Sections.Add(_roomfk);
             }
 
-            if (!obj.Resource.IsEmpty)
-            {
-                var _resource = new Section(FacilityManagement.Models.ZoneDomMapper.Resource.SectionDefinitionId);
-                var _resourceSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Resource).SectionId;
-                if (_resourceSectionId.HasValue)
-                {
-                    _resource.ID = new SectionID(_resourceSectionId.Value);
-                }
-
-                if (obj.Resource.ResourceId != Guid.Empty)
-                {
-                    _resource.AddOrUpdateValue<string>(FacilityManagement.Models.ZoneDomMapper.Resource.ResourceId, Convert.ToString(obj.Resource.ResourceId));
-                }
-
-                instance.Sections.Add(_resource);
-            }
-
             return instance;
         }
 
@@ -803,9 +775,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 case "RoomFk.Room":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.RoomFk.Room), comparer, SdmObjectReference<FacilityManagement.Models.Room>.Convert(value).GetIdentifierAsGuid());
 
-                case "Resource.ResourceId":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.Resource.ResourceId), comparer, Convert.ToString((System.Guid)value));
-
                 default:
                     throw new NotImplementedException();
             }
@@ -847,8 +816,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.ZoneCapacity.CoolingCapacity), sortOrder, naturalSort);
                 case "RoomFk.Room":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.RoomFk.Room), sortOrder, naturalSort);
-                case "Resource.ResourceId":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.Resource.ResourceId), sortOrder, naturalSort);
                 default:
                     throw new NotImplementedException();
             }

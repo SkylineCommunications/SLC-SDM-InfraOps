@@ -27,7 +27,6 @@ namespace SDM.FacilityManagement.Tests.Desks
                 Description = "Window desk",
             };
             desk.RoomFk.Room = new SdmObjectReference<Room>(Guid.NewGuid().ToString());
-            desk.Resource.ResourceId = Guid.NewGuid();
 
             string json = InfraOpsJsonConvert.SerializeObject(desk);
             var restored = InfraOpsJsonConvert.DeserializeObject<Desk>(json);
@@ -38,7 +37,6 @@ namespace SDM.FacilityManagement.Tests.Desks
             restored.Plan.Should().Be("plan.png");
             restored.Description.Should().Be("Window desk");
             restored.RoomFk.Room.Should().Be(desk.RoomFk.Room);
-            restored.Resource.ResourceId.Should().Be(desk.Resource.ResourceId);
             restored.Should().Be(desk);
             InfraOpsJsonConvert.SerializeObject(restored).Should().Be(json);
         }

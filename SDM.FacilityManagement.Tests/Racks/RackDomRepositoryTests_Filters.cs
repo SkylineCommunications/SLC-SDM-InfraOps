@@ -59,7 +59,6 @@ namespace SDM.FacilityManagement.Tests.Racks
                 rack.Model.Should().Be(expected.Model);
                 rack.Position.Should().Be(expected.Position);
                 rack.RackId.Should().Be(expected.RackId);
-                rack.Bookable.Should().Be(expected.Bookable);
                 rack.CoolingFlow.Should().Be(expected.CoolingFlow);
                 rack.Label.Should().Be(expected.Label);
                 rack.Description.Should().Be(expected.Description);

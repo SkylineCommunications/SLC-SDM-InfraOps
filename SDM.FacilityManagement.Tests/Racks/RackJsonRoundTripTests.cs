@@ -31,7 +31,6 @@ namespace SDM.FacilityManagement.Tests.Racks
                 Height = 200.25,
                 Depth = 100.75,
                 Description = "Main rack",
-                Bookable = true,
                 CoolingFlow = SlcFacility_Management.Enums.CoolingflowenumEnum.SideToSide,
                 XPosition = 10.5,
                 YPosition = 20.5,
@@ -43,7 +42,6 @@ namespace SDM.FacilityManagement.Tests.Racks
             rack.Capacity.MaximumPowerCapacity = 7.5;
             rack.RowFk.Row = new SdmObjectReference<Row>(Guid.NewGuid().ToString());
             rack.ZoneFk.Zone = new SdmObjectReference<Zone>(Guid.NewGuid().ToString());
-            rack.Resource.ResourceId = Guid.NewGuid();
             rack.ImageDetails.Add(new ImageInfo { ImageFilePath = "front.png", UploadTimestamp = firstUpload });
             rack.ImageDetails.Add(new ImageInfo { ImageFilePath = "rear.png", UploadTimestamp = secondUpload });
 
@@ -59,7 +57,6 @@ namespace SDM.FacilityManagement.Tests.Racks
             restored.Height.Should().Be(200.25);
             restored.Depth.Should().Be(100.75);
             restored.Description.Should().Be("Main rack");
-            restored.Bookable.Should().BeTrue();
             restored.CoolingFlow.Should().Be(SlcFacility_Management.Enums.CoolingflowenumEnum.SideToSide);
             restored.XPosition.Should().Be(10.5);
             restored.YPosition.Should().Be(20.5);
@@ -70,7 +67,6 @@ namespace SDM.FacilityManagement.Tests.Racks
             restored.Capacity.MaximumPowerCapacity.Should().Be(7.5);
             restored.RowFk.Row.Should().Be(rack.RowFk.Row);
             restored.ZoneFk.Zone.Should().Be(rack.ZoneFk.Zone);
-            restored.Resource.ResourceId.Should().Be(rack.Resource.ResourceId);
             restored.ImageDetails.Should().HaveCount(2);
             restored.ImageDetails[0].ImageFilePath.Should().Be("front.png");
             restored.ImageDetails[0].UploadTimestamp.Should().Be(firstUpload);
