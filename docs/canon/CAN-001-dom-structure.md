@@ -608,6 +608,10 @@ flowchart LR
 | EnableConnectionHistory | `bool` | `EnableConnectionHistory` |  |  |
 | HistoryTTL | `TimeSpan` | `HistoryTTL` |  |  |
 | HistoryLimit | `long` | `HistoryLimit` |  |  |
+| EnableAutoAssetId | `bool` | `EnableAutoAssetId` | Generates `{AssetClassName}-{sequence}` Asset IDs when on |  |
+| AssetIdNextSequence | `long` | `AssetIdNextSequence` | System-managed counter, advanced only by the SDM generator; ≤ 0 = unset, defaults to 1 |  |
+| AssetIdIncrement | `long` | `AssetIdIncrement` | ≤ 0 = unset, defaults to 1 |  |
+| AssetIdMinimumDigits | `long` | `AssetIdMinimumDigits` | ≤ 0 = unset, defaults to 4 |  |
 
 ### 3.4 Cable Type
 
@@ -2187,7 +2191,7 @@ Two encodings exist and are fixed per field (rule D4). **String enums** are a `s
 | Asset Manager | `Categories` | Networking, Power, Audio, Storage, Peripheral, Video, Misc, Data, Broadcast | `CategoryLink.Categories` (`List<string>`) |
 | Asset Manager | `Powersupply` | AC, DC | `AssetClassInfo.PowerSupply` |
 | Asset Manager | `Side` | Front, Back, Right, Left | `AssetLocation.Side`, `AssetLocationDestination.Side` |
-| Facility Manager | `Facilitytype` | Truck, Container, Building | `FacilityInformation.FacilityType` |
+| Facility Manager | `Facilitytype` | Truck, Container, Building, Earth Station | `FacilityInformation.FacilityType` |
 | Facility Manager | `Rackpositionenum` | Bottom, Top | `RackInformation.Position` |
 | Facility Manager | `Coolingflowenum` | Front To Rear, Rear To Front, Side To Side, Top To Bottom, Bottom To Top | `RackInformation.CoolingFlow` |
 | Plan & Build | `Jobtype` | Add, Update, Remove | `JobInformation.JobType` |

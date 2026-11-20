@@ -544,6 +544,30 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 {
                     obj.HistoryLimit = _historylimit.Value;
                 }
+
+                var _enableautoassetid = _appsettingsSection.GetValue<bool>(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.EnableAutoAssetId);
+                if (_enableautoassetid != null)
+                {
+                    obj.EnableAutoAssetId = _enableautoassetid.Value;
+                }
+
+                var _assetidnextsequence = _appsettingsSection.GetValue<long>(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.AssetIdNextSequence);
+                if (_assetidnextsequence != null)
+                {
+                    obj.AssetIdNextSequence = _assetidnextsequence.Value;
+                }
+
+                var _assetidincrement = _appsettingsSection.GetValue<long>(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.AssetIdIncrement);
+                if (_assetidincrement != null)
+                {
+                    obj.AssetIdIncrement = _assetidincrement.Value;
+                }
+
+                var _assetidminimumdigits = _appsettingsSection.GetValue<long>(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.AssetIdMinimumDigits);
+                if (_assetidminimumdigits != null)
+                {
+                    obj.AssetIdMinimumDigits = _assetidminimumdigits.Value;
+                }
             }
 
             obj.ResetChangeTracking();
@@ -579,6 +603,10 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             _appsettings.AddOrUpdateValue<bool>(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.EnableAssetHistory, obj.EnableAssetHistory);
             _appsettings.AddOrUpdateValue<int>(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.PlanAndBuildJobPrompt, (int)obj.PlanAndBuildJobPrompt);
             _appsettings.AddOrUpdateValue<bool>(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.EnableConnectionHistory, obj.EnableConnectionHistory);
+            _appsettings.AddOrUpdateValue<bool>(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.EnableAutoAssetId, obj.EnableAutoAssetId);
+            _appsettings.AddOrUpdateValue<long>(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.AssetIdNextSequence, obj.AssetIdNextSequence);
+            _appsettings.AddOrUpdateValue<long>(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.AssetIdIncrement, obj.AssetIdIncrement);
+            _appsettings.AddOrUpdateValue<long>(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.AssetIdMinimumDigits, obj.AssetIdMinimumDigits);
             if (obj.HistoryTTL != default)
             {
                 _appsettings.AddOrUpdateValue<TimeSpan>(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.HistoryTTL, (TimeSpan)obj.HistoryTTL.Value);
@@ -627,6 +655,18 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 case "HistoryLimit":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.HistoryLimit), comparer, ((long?)value).Value);
 
+                case "EnableAutoAssetId":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.EnableAutoAssetId), comparer, (bool)value);
+
+                case "AssetIdNextSequence":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.AssetIdNextSequence), comparer, (long)value);
+
+                case "AssetIdIncrement":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.AssetIdIncrement), comparer, (long)value);
+
+                case "AssetIdMinimumDigits":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.AssetIdMinimumDigits), comparer, (long)value);
+
                 default:
                     throw new NotImplementedException();
             }
@@ -656,6 +696,14 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.HistoryTTL), sortOrder, naturalSort);
                 case "HistoryLimit":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.HistoryLimit), sortOrder, naturalSort);
+                case "EnableAutoAssetId":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.EnableAutoAssetId), sortOrder, naturalSort);
+                case "AssetIdNextSequence":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.AssetIdNextSequence), sortOrder, naturalSort);
+                case "AssetIdIncrement":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.AssetIdIncrement), sortOrder, naturalSort);
+                case "AssetIdMinimumDigits":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetManagerAppSettingsDomMapper.AppSettings.AssetIdMinimumDigits), sortOrder, naturalSort);
                 default:
                     throw new NotImplementedException();
             }

@@ -92,6 +92,30 @@
             set => HistoryLimitField.Value = value;
         }
 
+        public bool EnableAutoAssetId
+        {
+            get => EnableAutoAssetIdField.Value;
+            set => EnableAutoAssetIdField.Value = value;
+        }
+
+        public long AssetIdNextSequence
+        {
+            get => AssetIdNextSequenceField.Value;
+            set => AssetIdNextSequenceField.Value = value;
+        }
+
+        public long AssetIdIncrement
+        {
+            get => AssetIdIncrementField.Value;
+            set => AssetIdIncrementField.Value = value;
+        }
+
+        public long AssetIdMinimumDigits
+        {
+            get => AssetIdMinimumDigitsField.Value;
+            set => AssetIdMinimumDigitsField.Value = value;
+        }
+
         [JsonIgnore]
         [SdmIgnore]
         internal IChangeTrackingField<bool> EnableAssetHistoryField => FieldHandler.GetOrCreateField(
@@ -121,6 +145,30 @@
         internal IChangeTrackingField<long?> HistoryLimitField => FieldHandler.GetOrCreateField(
             nameof(HistoryLimit),
             () => new ChangeTrackingField<long?>(null));
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal IChangeTrackingField<bool> EnableAutoAssetIdField => FieldHandler.GetOrCreateField(
+            nameof(EnableAutoAssetId),
+            () => new ChangeTrackingField<bool>(default));
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal IChangeTrackingField<long> AssetIdNextSequenceField => FieldHandler.GetOrCreateField(
+            nameof(AssetIdNextSequence),
+            () => new ChangeTrackingField<long>(default));
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal IChangeTrackingField<long> AssetIdIncrementField => FieldHandler.GetOrCreateField(
+            nameof(AssetIdIncrement),
+            () => new ChangeTrackingField<long>(default));
+
+        [JsonIgnore]
+        [SdmIgnore]
+        internal IChangeTrackingField<long> AssetIdMinimumDigitsField => FieldHandler.GetOrCreateField(
+            nameof(AssetIdMinimumDigits),
+            () => new ChangeTrackingField<long>(default));
 
         public IEnumerable<TrackingFieldValueDifference> GetChanges()
         {
@@ -180,7 +228,11 @@
                 PlanAndBuildJobPrompt == other.PlanAndBuildJobPrompt &&
                 EnableConnectionHistory == other.EnableConnectionHistory &&
                 HistoryTTL == other.HistoryTTL &&
-                HistoryLimit == other.HistoryLimit;
+                HistoryLimit == other.HistoryLimit &&
+                EnableAutoAssetId == other.EnableAutoAssetId &&
+                AssetIdNextSequence == other.AssetIdNextSequence &&
+                AssetIdIncrement == other.AssetIdIncrement &&
+                AssetIdMinimumDigits == other.AssetIdMinimumDigits;
         }
 
         public override int GetHashCode()
@@ -193,6 +245,10 @@
                 hash = (hash * 23) + EnableConnectionHistory.GetHashCode();
                 hash = (hash * 23) + HistoryTTL.GetHashCode();
                 hash = (hash * 23) + HistoryLimit.GetHashCode();
+                hash = (hash * 23) + EnableAutoAssetId.GetHashCode();
+                hash = (hash * 23) + AssetIdNextSequence.GetHashCode();
+                hash = (hash * 23) + AssetIdIncrement.GetHashCode();
+                hash = (hash * 23) + AssetIdMinimumDigits.GetHashCode();
                 return hash;
             }
         }

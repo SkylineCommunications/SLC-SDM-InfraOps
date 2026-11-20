@@ -632,6 +632,31 @@ namespace SharedMappers.DomIds
                 }
 
                 = new FieldDescriptorID(new Guid("ca9c44c6-e189-4c39-b1a0-37b3ec1d8b78"));
+
+                public static FieldDescriptorID EnableAutoAssetId
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("0ba3ed8f-5101-430e-9691-b83013e8b3c6"));
+                public static FieldDescriptorID AssetIdNextSequence
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("4e57d030-a10d-478e-8b0d-10a331a19a52"));
+                public static FieldDescriptorID AssetIdIncrement
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("42291268-ee4f-4e4e-b10c-bb30eb5730a1"));
+                public static FieldDescriptorID AssetIdMinimumDigits
+                {
+                    get;
+                }
+
+                = new FieldDescriptorID(new Guid("bebbe584-857e-40c5-bea1-27133acef980"));
             }
 
             public static class AssetNetworkDetails
