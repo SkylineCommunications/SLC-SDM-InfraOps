@@ -93,7 +93,6 @@ namespace SDM.FacilityManagement.Tests.Validation
 			var room = NewRoom("ROOM-1");
 			room.Ownership.Owner = new PnoObjectReference<Skyline.DataMiner.Solutions.PeopleAndOrganizations.API.Person>(Guid.NewGuid());
 			room.Ownership.Team = new PnoObjectReference<Skyline.DataMiner.Solutions.PeopleAndOrganizations.API.Team>(Guid.NewGuid());
-			room.ResourceLink.ResourceId = Guid.NewGuid();
 
 			Action action = () => Helper.Rooms.Create(Helper.AttachFloor(room));
 

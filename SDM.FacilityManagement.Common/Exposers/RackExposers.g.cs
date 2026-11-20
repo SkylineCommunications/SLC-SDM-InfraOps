@@ -27,7 +27,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             RuntimeHelpers.RunClassConstructor(typeof(Capacity).TypeHandle);
             RuntimeHelpers.RunClassConstructor(typeof(RowFk).TypeHandle);
             RuntimeHelpers.RunClassConstructor(typeof(ZoneFk).TypeHandle);
-            RuntimeHelpers.RunClassConstructor(typeof(Resource).TypeHandle);
             RuntimeHelpers.RunClassConstructor(typeof(ImageDetails).TypeHandle);
         }
 
@@ -40,7 +39,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             public static readonly Exposer<FacilityManagement.Models.Rack, double?> Height = new Exposer<FacilityManagement.Models.Rack, double?>((obj) => obj.Height, "Height");
             public static readonly Exposer<FacilityManagement.Models.Rack, double?> Depth = new Exposer<FacilityManagement.Models.Rack, double?>((obj) => obj.Depth, "Depth");
             public static readonly Exposer<FacilityManagement.Models.Rack, string> Description = new Exposer<FacilityManagement.Models.Rack, string>((obj) => obj.Description, "Description");
-            public static readonly Exposer<FacilityManagement.Models.Rack, bool?> Bookable = new Exposer<FacilityManagement.Models.Rack, bool?>((obj) => obj.Bookable, "Bookable");
             public static readonly Exposer<FacilityManagement.Models.Rack, SharedMappers.DomIds.SlcFacility_Management.Enums.CoolingflowenumEnum?> CoolingFlow = new Exposer<FacilityManagement.Models.Rack, SharedMappers.DomIds.SlcFacility_Management.Enums.CoolingflowenumEnum?>((obj) => obj.CoolingFlow, "CoolingFlow");
             public static readonly Exposer<FacilityManagement.Models.Rack, double?> XPosition = new Exposer<FacilityManagement.Models.Rack, double?>((obj) => obj.XPosition, "XPosition");
             public static readonly Exposer<FacilityManagement.Models.Rack, double?> YPosition = new Exposer<FacilityManagement.Models.Rack, double?>((obj) => obj.YPosition, "YPosition");
@@ -64,11 +62,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
         public static partial class ZoneFk
         {
             public static readonly Exposer<FacilityManagement.Models.Rack, SdmObjectReference<FacilityManagement.Models.Zone>> Zone = new Exposer<FacilityManagement.Models.Rack, SdmObjectReference<FacilityManagement.Models.Zone>>((obj) => obj.ZoneFk.Zone, "ZoneFk.Zone");
-        }
-
-        public static partial class Resource
-        {
-            public static readonly Exposer<FacilityManagement.Models.Rack, System.Guid> ResourceId = new Exposer<FacilityManagement.Models.Rack, System.Guid>((obj) => obj.Resource.ResourceId, "Resource.ResourceId");
         }
 
         public static partial class ImageDetails

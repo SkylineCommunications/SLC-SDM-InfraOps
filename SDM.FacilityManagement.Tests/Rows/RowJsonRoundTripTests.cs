@@ -29,7 +29,6 @@ namespace SDM.FacilityManagement.Tests.Rows
                 YPosition = 42.5,
             };
             row.RoomFk.Room = new SdmObjectReference<Room>(Guid.NewGuid().ToString());
-            row.Resource.ResourceId = Guid.NewGuid();
 
             string json = InfraOpsJsonConvert.SerializeObject(row);
             var restored = InfraOpsJsonConvert.DeserializeObject<Row>(json);
@@ -42,7 +41,6 @@ namespace SDM.FacilityManagement.Tests.Rows
             restored.Label.Should().Be("A");
             restored.YPosition.Should().Be(42.5);
             restored.RoomFk.Room.Should().Be(row.RoomFk.Room);
-            restored.Resource.ResourceId.Should().Be(row.Resource.ResourceId);
             restored.Should().Be(row);
             InfraOpsJsonConvert.SerializeObject(restored).Should().Be(json);
         }

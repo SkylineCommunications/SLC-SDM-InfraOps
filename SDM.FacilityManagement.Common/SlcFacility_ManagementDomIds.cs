@@ -515,23 +515,6 @@ namespace SharedMappers.DomIds
 				= new FieldDescriptorID(new Guid("45922fd2-c869-46ac-a95d-012fad5adb59"));
 			}
 
-			public static class Resource
-			{
-				public static SectionDefinitionID Id
-				{
-					get;
-				}
-
-				= new SectionDefinitionID(new Guid("2f8f34af-8405-4a7e-b996-da6b9d97e61c"))
-				{ ModuleId = "(slc)facility_management" };
-				public static FieldDescriptorID LinkedResource
-				{
-					get;
-				}
-
-				= new FieldDescriptorID(new Guid("af0981cf-d4c0-4016-823b-bd34a385aa2e"));
-			}
-
 			public static class DeskInformation
 			{
 				public static SectionDefinitionID Id
@@ -805,12 +788,6 @@ namespace SharedMappers.DomIds
 				}
 
 				= new FieldDescriptorID(new Guid("0fce02b2-8ddc-4518-900e-8f1fae8ec542"));
-				public static FieldDescriptorID Bookable
-				{
-					get;
-				}
-
-				= new FieldDescriptorID(new Guid("7369d14b-12e4-4208-a3e9-6222e086d9ce"));
 				public static FieldDescriptorID CoolingFlow
 				{
 					get;

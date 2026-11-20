@@ -30,7 +30,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
         {
             RuntimeHelpers.RunClassConstructor(typeof(DeskInformation).TypeHandle);
             RuntimeHelpers.RunClassConstructor(typeof(RoomFk).TypeHandle);
-            RuntimeHelpers.RunClassConstructor(typeof(Resource).TypeHandle);
         }
 
         public static partial class DeskInformation
@@ -44,11 +43,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
         public static partial class RoomFk
         {
             public static readonly Exposer<FacilityManagement.Models.Desk, SdmObjectReference<FacilityManagement.Models.Room>> Room = new Exposer<FacilityManagement.Models.Desk, SdmObjectReference<FacilityManagement.Models.Room>>((obj) => obj.RoomFk.Room, "RoomFk.Room");
-        }
-
-        public static partial class Resource
-        {
-            public static readonly Exposer<FacilityManagement.Models.Desk, System.Guid> ResourceId = new Exposer<FacilityManagement.Models.Desk, System.Guid>((obj) => obj.Resource.ResourceId, "Resource.ResourceId");
         }
     }
 }

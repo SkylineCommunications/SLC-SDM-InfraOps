@@ -562,12 +562,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     obj.Description = _rackpropertiesdescription.Value;
                 }
 
-                var _rackpropertiesbookable = _rackpropertiesSection.GetValue<bool>(FacilityManagement.Models.RackDomMapper.RackProperties.Bookable);
-                if (_rackpropertiesbookable != null)
-                {
-                    obj.Bookable = _rackpropertiesbookable.Value;
-                }
-
                 var _rackpropertiescoolingflow = _rackpropertiesSection.GetValue<string>(FacilityManagement.Models.RackDomMapper.RackProperties.CoolingFlow);
                 if (_rackpropertiescoolingflow != null)
                 {
@@ -647,17 +641,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 if (_zonefkzone != null)
                 {
                     obj.ZoneFk.Zone = new SdmObjectReference<Zone>(Convert.ToString(_zonefkzone.Value));
-                }
-            }
-
-            var _resourceSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(FacilityManagement.Models.RackDomMapper.Resource.SectionDefinitionId));
-            if (_resourceSection != default)
-            {
-                ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Resource).SectionId = _resourceSection.ID.Id;
-                var _resourceresourceid = _resourceSection.GetValue<string>(FacilityManagement.Models.RackDomMapper.Resource.ResourceId);
-                if (_resourceresourceid != null)
-                {
-                    obj.Resource.ResourceId = System.Guid.Parse(Convert.ToString(_resourceresourceid.Value));
                 }
             }
 
@@ -750,11 +733,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 _rackproperties.AddOrUpdateValue<string>(FacilityManagement.Models.RackDomMapper.RackProperties.Description, Convert.ToString(obj.Description));
             }
 
-            if (obj.Bookable != default)
-            {
-                _rackproperties.AddOrUpdateValue<bool>(FacilityManagement.Models.RackDomMapper.RackProperties.Bookable, (bool)(obj.Bookable).Value);
-            }
-
             if (obj.CoolingFlow != default)
             {
                 _rackproperties.AddOrUpdateValue<string>(FacilityManagement.Models.RackDomMapper.RackProperties.CoolingFlow, SharedMappers.DomIds.SlcFacility_Management.Enums.Coolingflowenum.ToValue((obj.CoolingFlow).Value));
@@ -838,23 +816,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 instance.Sections.Add(_zonefk);
             }
 
-            if (!obj.Resource.IsEmpty)
-            {
-                var _resource = new Section(FacilityManagement.Models.RackDomMapper.Resource.SectionDefinitionId);
-                var _resourceSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.Resource).SectionId;
-                if (_resourceSectionId.HasValue)
-                {
-                    _resource.ID = new SectionID(_resourceSectionId.Value);
-                }
-
-                if (obj.Resource.ResourceId != Guid.Empty)
-                {
-                    _resource.AddOrUpdateValue<string>(FacilityManagement.Models.RackDomMapper.Resource.ResourceId, Convert.ToString(obj.Resource.ResourceId));
-                }
-
-                instance.Sections.Add(_resource);
-            }
-
             foreach (var imagedetails in obj.ImageDetails)
             {
                 var _imagedetailsSection = new Section(FacilityManagement.Models.RackDomMapper.ImageDetails.SectionDefinitionId);
@@ -924,11 +885,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 case "Description":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.RackProperties.Description), comparer, (string)value);
 
-                case "Bookable" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
-                    return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.RackDomMapper.RackProperties.Bookable.Id.ToString()).Equal(comparer == Comparer.NotEquals);
-                case "Bookable":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.RackProperties.Bookable), comparer, (bool)((bool?)value).Value);
-
                 case "CoolingFlow" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
                     return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.RackDomMapper.RackProperties.CoolingFlow.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "CoolingFlow":
@@ -973,9 +929,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 case "ZoneFk.Zone":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.ZoneFk.Zone), comparer, SdmObjectReference<Zone>.Convert(value).GetIdentifierAsGuid());
 
-                case "Resource.ResourceId":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.Resource.ResourceId), comparer, Convert.ToString((System.Guid)value));
-
                 case "ImageDetails.ImageFilePath":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.ImageDetails.ImageFilePath), comparer, (string)value);
 
@@ -1015,8 +968,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.RackProperties.Depth), sortOrder, naturalSort);
                 case "Description":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.RackProperties.Description), sortOrder, naturalSort);
-                case "Bookable":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.RackProperties.Bookable), sortOrder, naturalSort);
                 case "CoolingFlow":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.RackProperties.CoolingFlow), sortOrder, naturalSort);
                 case "XPosition":
@@ -1039,8 +990,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.RowFk.Row), sortOrder, naturalSort);
                 case "ZoneFk.Zone":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.ZoneFk.Zone), sortOrder, naturalSort);
-                case "Resource.ResourceId":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.Resource.ResourceId), sortOrder, naturalSort);
                 case "ImageDetails.ImageFilePath":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.ImageDetails.ImageFilePath), sortOrder, naturalSort);
                 case "ImageDetails.UploadTimestamp":

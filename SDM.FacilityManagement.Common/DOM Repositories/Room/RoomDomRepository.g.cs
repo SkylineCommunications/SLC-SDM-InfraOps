@@ -576,17 +576,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 				}
 			}
 
-			var _resourcelinkSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(FacilityManagement.Models.RoomDomMapper.ResourceLink.SectionDefinitionId));
-			if (_resourcelinkSection != default)
-			{
-				((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.ResourceLink).SectionId = _resourcelinkSection.ID.Id;
-				var _resourcelinkresourceid = _resourcelinkSection.GetValue<string>(FacilityManagement.Models.RoomDomMapper.ResourceLink.ResourceId);
-				if (_resourcelinkresourceid != null)
-				{
-					obj.ResourceLink.ResourceId = System.Guid.Parse(Convert.ToString(_resourcelinkresourceid.Value));
-				}
-			}
-
 			var _floorfkSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(FacilityManagement.Models.RoomDomMapper.FloorFk.SectionDefinitionId));
 			if (_floorfkSection != default)
 			{
@@ -684,23 +673,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 				instance.Sections.Add(_Ownership);
 			}
 
-			if (!obj.ResourceLink.IsEmpty)
-			{
-				var _resourcelink = new Section(FacilityManagement.Models.RoomDomMapper.ResourceLink.SectionDefinitionId);
-				var _resourcelinkSectionId = ((Skyline.DataMiner.Utils.InfraOps.Common.Fields.ISectionTrackable)obj.ResourceLink).SectionId;
-				if (_resourcelinkSectionId.HasValue)
-				{
-					_resourcelink.ID = new SectionID(_resourcelinkSectionId.Value);
-				}
-
-				if (obj.ResourceLink.ResourceId != Guid.Empty)
-				{
-					_resourcelink.AddOrUpdateValue<string>(FacilityManagement.Models.RoomDomMapper.ResourceLink.ResourceId, Convert.ToString(obj.ResourceLink.ResourceId));
-				}
-
-				instance.Sections.Add(_resourcelink);
-			}
-
 			if (!obj.FloorFk.IsEmpty)
 			{
 				var _floorfk = new Section(FacilityManagement.Models.RoomDomMapper.FloorFk.SectionDefinitionId);
@@ -764,9 +736,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 case "Ownership.Owner":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.Ownership.Owner), comparer, Convert.ToString((System.Guid)value));
 
-                case "ResourceLink.ResourceId":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.ResourceLink.ResourceId), comparer, Convert.ToString((System.Guid)value));
-
                 case "FloorFk.Floor" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && !SdmObjectReference<FacilityManagement.Models.Floor>.Convert(value).HasValue():
 					return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.RoomDomMapper.FloorFk.Floor.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "FloorFk.Floor":
@@ -807,8 +776,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.Ownership.Team), sortOrder, naturalSort);
 				case "Ownership.Owner":
 					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.Ownership.Owner), sortOrder, naturalSort);
-				case "ResourceLink.ResourceId":
-					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.ResourceLink.ResourceId), sortOrder, naturalSort);
 				case "FloorFk.Floor":
 					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.FloorFk.Floor), sortOrder, naturalSort);
 				default:
