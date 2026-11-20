@@ -77,23 +77,23 @@ A field exists only when all five places agree: DomIds constant, seed descriptor
 | Module | `ModuleId` | Project | Definitions | Behaviours | Sections | Field descriptors |
 |---|---|---|---|---|---|---|
 | Asset Manager | `(slc)asset_management` | `SDM.AssetManagement.Common` | 11 | 2 | 35 | 131 |
-| Facility Manager | `(slc)facility_management` | `SDM.FacilityManagement.Common` | 9 | 8 | 20 | 78 |
+| Facility Manager | `(slc)facility_management` | `SDM.FacilityManagement.Common` | 9 | 8 | 19 | 76 |
 | Plan & Build | `(slc)plan_and_build` | `SDM.PlanAndBuild.Common` | 3 | 1 | 7 | 35 |
 | InfraOps Properties | `(infraops)properties` | `SDM.InfraOpsProperties.Common` | 2 | 0 | 5 | 15 |
-| **Total** | | | **25** | **11** | **67** | **259** |
+| **Total** | | | **25** | **11** | **66** | **257** |
 
-"Field descriptors" counts descriptors per section definition, so a section shared by two definitions (Asset Manager `Holders`, `Attachment`, `CategoryLink`, `DataPortInfo`, `PowerPortInfo`, `Asset`, `PrimaryPortRelation`; Facility Manager `Room`, `Resource`) is counted once. **All counts in this document are a snapshot of 2026-10-28 and live only in this section**; they change whenever a field is added, so re-derive them rather than trusting them.
+"Field descriptors" counts descriptors per section definition, so a section shared by two definitions (Asset Manager `Holders`, `Attachment`, `CategoryLink`, `DataPortInfo`, `PowerPortInfo`, `Asset`, `PrimaryPortRelation`; Facility Manager `Room`) is counted once. **All counts in this document are a snapshot of 2026-10-28 and live only in this section**; they change whenever a field is added, so re-derive them rather than trusting them.
 
-Field-descriptor CLR types in use across all 259 descriptors:
+Field-descriptor CLR types in use across all 257 descriptors:
 
 | DOM type | Count | Used for |
 |---|---|---|
 | `string` | 150 | free text, string enums (`Enums.X` with `ToValue/ToEnum`), identifiers that are not GUIDs |
-| `Guid` | 48 | typed references (`SdmObjectReference<T>`, `PnoObjectReference<T>`) and untyped `ISdmObjectReference` |
+| `Guid` | 47 | typed references (`SdmObjectReference<T>`, `PnoObjectReference<T>`) and untyped `ISdmObjectReference` |
 | `double` | 29 | dimensions, coordinates, capacities, cable length |
 | `DateTime` | 15 | lifecycle, custody, attachment timestamps |
 | `long` | 14 | counts, positions, sequences — never `int` |
-| `bool` | 10 | flags |
+| `bool` | 9 | flags |
 | `int` | 6 | numeric enums only: `Planandbuildjobpromptenum`, `ConnectionType`, `Outputtype` (×2), `Placementorientationenum`, `ThermalType` |
 | `TimeSpan` | 2 | `AssetClassLifecycleInformation.NominalLifetime`, `AppSettings.HistoryTTL` |
 | `List<Guid>` | 2 | `CableCompatibility.CableTypes`, `JobInformation.Locations` |
@@ -105,7 +105,7 @@ Definition size at a glance (fields = sum of descriptors over the definition's l
 | Module | Definition → fields |
 |---|---|
 | Asset Manager | Asset **53** · Asset Class **38** · Data Port **13** · Connections **11** · Power Port **9** · History **7** · App Settings **6** · Reservations **5** · Device Type **4** · Port Type **4** · Cable Type **3** |
-| Facility Manager | Rack **22** · Zone **12** · Facility **11** · Room **10** · Site **9** · Row **8** · Desk **6** · Floor **5** · App Settings **1** |
+| Facility Manager | Rack **20** · Facility **11** · Zone **11** · Room **9** · Site **9** · Row **7** · Desk **5** · Floor **5** · App Settings **1** |
 | Plan & Build | Job **27** · App Settings **5** · Job Type **3** |
 | InfraOps Properties | Property **9** · Property Values **6** |
 
@@ -162,7 +162,7 @@ The Facility tree is the only strict hierarchy; `Rack` has two parents (`Row` **
 
 Cross-package dependencies implied by the references: `PlanAndBuild → AssetManagement` (Asset, Connection, Cable Type), `AssetManagement → FacilityManagement` (Rack, Desk, Facility, Room), all three → People & Organizations. `InfraopsProperties` links to any object only through the untyped `PropertyValueInfo.LinkedObjectID` (`string`) + `Scope` pair, never through a typed reference.
 
-`Guid` fields that are **not** wrapped in a reference: `JobInformation.Locations` (`List<Guid>`, kept as plain GUIDs), `Resource.LinkedResource` (DataMiner resource id; see [§13](#13-known-deviations-flagged-not-fixed)), `HistoryInfo.UserID` (mapped, not read or written).
+`Guid` fields that are **not** wrapped in a reference: `JobInformation.Locations` (`List<Guid>`, kept as plain GUIDs), `HistoryInfo.UserID` (mapped, not read or written).
 
 ---
 
@@ -1139,7 +1139,7 @@ Each definition has a **Sections and references** diagram and one table per Sect
 
 The tree is a strict hierarchy except **Rack**, which has two mandatory parents (**Row** and **Zone**). Every arrow is a 1 : n parent link.
 
-Two sections are shared across definitions: `Room` (`3ee83337-…`) is the parent link of **Row**, **Zone** and **Desk**; `Resource` (`2f8f34af-…`) carries the DataMiner booking-resource id on **Rack**, **Zone**, **Row**, **Desk** and **Room**. The parent-link field names are generator-suffixed (`Site_f08b42c7`, `Facility_fc282509`, `Floor_6a3f0eeb`, `Room_8d904f8d`, `Row_5d2f9bb3`, `Zone_45922fd2`); the mapper aliases them to `<Parent>Fk.<Parent>` (rule D8).
+One section is shared across definitions: `Room` (`3ee83337-…`) is the parent link of **Row**, **Zone** and **Desk**. The parent-link field names are generator-suffixed (`Site_f08b42c7`, `Facility_fc282509`, `Floor_6a3f0eeb`, `Room_8d904f8d`, `Row_5d2f9bb3`, `Zone_45922fd2`); the mapper aliases them to `<Parent>Fk.<Parent>` (rule D8).
 
 **Rack** is the only definition with two mandatory parent links (`Row` and `Zone`); the repository writes whichever references are set — neither is enforced as present.
 
@@ -1157,18 +1157,16 @@ flowchart LR
     D["<b>Desk</b>"]
     S1["DeskInformation"]
     S2["Room"]
-    S3["Resource"]
     T_room["Room"]
 
     D --> S1
     D --> S2
     S2 --> T_room
-    D --> S3
     classDef def fill:#1d4ed8,stroke:#0b2a85,color:#ffffff,stroke-width:2px
     classDef shared fill:#b45309,stroke:#6b2d05,color:#ffffff
     classDef other fill:#4b5563,stroke:#1f2937,color:#ffffff
     class D def
-    class S2,S3 shared
+    class S2 shared
 ```
 
 #### 4.1.1 DeskInformation
@@ -1189,14 +1187,6 @@ flowchart LR
 | Field | DOM type | Model property | Notes | Rules |
 |---|---|---|---|---|
 | Room_8d904f8d | `Guid` | `RoomFk.Room` | → Room | `no-db` Required<br>`db` Room must exist |
-
-#### 4.1.3 Resource
-
-**Section ID:** `2f8f34af-8405-4a7e-b996-da6b9d97e61c` · **Link:** mandatory · **Shared with:** [Rack](#45-rack), [Room](#46-room), [Row](#47-row), [Zone](#49-zone)
-
-| Field | DOM type | Model property | Notes | Rules |
-|---|---|---|---|---|
-| LinkedResource | `Guid` | `Resource.ResourceId` | written/read as `string` (§13) |  |
 
 ### 4.2 Facility
 
@@ -1348,8 +1338,7 @@ flowchart LR
     S2["RackCapacity"]
     S3["Row"]
     S4["Zone"]
-    S5["Resource"]
-    S6["ImageInfo"]
+    S5["ImageInfo"]
     T_row["Row"]
     T_zone["Zone"]
 
@@ -1359,13 +1348,11 @@ flowchart LR
     S3 --> T_row
     D --> S4
     S4 --> T_zone
-    D --> S5
-    D -- "repeatable" --> S6
+    D -- "repeatable" --> S5
     classDef def fill:#1d4ed8,stroke:#0b2a85,color:#ffffff,stroke-width:2px
     classDef shared fill:#b45309,stroke:#6b2d05,color:#ffffff
     classDef other fill:#4b5563,stroke:#1f2937,color:#ffffff
     class D def
-    class S5 shared
 ```
 
 #### 4.5.1 RackInformation
@@ -1381,7 +1368,6 @@ flowchart LR
 | Depth | `double` | `Depth` |  | `no-db` 0 … 120 cm when set |
 | Height | `double` | `Height` |  | `no-db` 0 … 320 cm when set |
 | Description | `string` | `Description` |  |  |
-| Bookable | `bool` | `Bookable` |  |  |
 | CoolingFlow | `string` | `CoolingFlow` |  |  |
 | X | `double` | `XPosition` |  |  |
 | Y | `double` | `YPosition` |  |  |
@@ -1415,15 +1401,7 @@ flowchart LR
 |---|---|---|---|---|
 | Zone_45922fd2 | `Guid` | `ZoneFk.Zone` | → Zone | Not validated (see §13) |
 
-#### 4.5.5 Resource
-
-**Section ID:** `2f8f34af-8405-4a7e-b996-da6b9d97e61c` · **Link:** mandatory · **Shared with:** [Desk](#41-desk), [Room](#46-room), [Row](#47-row), [Zone](#49-zone)
-
-| Field | DOM type | Model property | Notes | Rules |
-|---|---|---|---|---|
-| LinkedResource | `Guid` | `Resource.ResourceId` | written/read as `string` (§13) |  |
-
-#### 4.5.6 ImageInfo
+#### 4.5.5 ImageInfo
 
 **Section ID:** `67f72a06-cb71-4a21-9973-0ba04e966be9` · **Link:** repeatable
 
@@ -1451,7 +1429,6 @@ flowchart LR
     S1["RoomInformation"]
     S2["RoomOwnership"]
     S3["Floor"]
-    S4["Resource"]
     PNO[("People and Organizations")]
     T_floor["Floor"]
 
@@ -1460,12 +1437,10 @@ flowchart LR
     S2 --> PNO
     D --> S3
     S3 --> T_floor
-    D --> S4
     classDef def fill:#1d4ed8,stroke:#0b2a85,color:#ffffff,stroke-width:2px
     classDef shared fill:#b45309,stroke:#6b2d05,color:#ffffff
     classDef other fill:#4b5563,stroke:#1f2937,color:#ffffff
     class D def
-    class S4 shared
     class PNO other
 ```
 
@@ -1499,14 +1474,6 @@ flowchart LR
 |---|---|---|---|---|
 | Floor_6a3f0eeb | `Guid` | `FloorFk.Floor` | → Floor | `no-db` Required<br>`db` Floor must exist |
 
-#### 4.6.4 Resource
-
-**Section ID:** `2f8f34af-8405-4a7e-b996-da6b9d97e61c` · **Link:** mandatory · **Shared with:** [Desk](#41-desk), [Rack](#45-rack), [Row](#47-row), [Zone](#49-zone)
-
-| Field | DOM type | Model property | Notes | Rules |
-|---|---|---|---|---|
-| LinkedResource | `Guid` | `ResourceLink.ResourceId` | written/read as `string` (§13) |  |
-
 ### 4.7 Row
 
 **Definition ID:** `29eef06e-ed52-4a26-95da-fd35cc4433df`  
@@ -1525,18 +1492,16 @@ flowchart LR
     D["<b>Row</b>"]
     S1["RowInformation"]
     S2["Room"]
-    S3["Resource"]
     T_room["Room"]
 
     D --> S1
     D --> S2
     S2 --> T_room
-    D --> S3
     classDef def fill:#1d4ed8,stroke:#0b2a85,color:#ffffff,stroke-width:2px
     classDef shared fill:#b45309,stroke:#6b2d05,color:#ffffff
     classDef other fill:#4b5563,stroke:#1f2937,color:#ffffff
     class D def
-    class S2,S3 shared
+    class S2 shared
 ```
 
 #### 4.7.1 RowInformation
@@ -1559,14 +1524,6 @@ flowchart LR
 | Field | DOM type | Model property | Notes | Rules |
 |---|---|---|---|---|
 | Room_8d904f8d | `Guid` | `RoomFk.Room` | → Room | `no-db` Required<br>`db` Room must exist |
-
-#### 4.7.3 Resource
-
-**Section ID:** `2f8f34af-8405-4a7e-b996-da6b9d97e61c` · **Link:** mandatory · **Shared with:** [Desk](#41-desk), [Rack](#45-rack), [Room](#46-room), [Zone](#49-zone)
-
-| Field | DOM type | Model property | Notes | Rules |
-|---|---|---|---|---|
-| LinkedResource | `Guid` | `Resource.ResourceId` | written/read as `string` (§13) |  |
 
 ### 4.8 Site
 
@@ -1628,19 +1585,17 @@ flowchart LR
     S1["ZoneInformation"]
     S2["ZoneCapacity"]
     S3["Room"]
-    S4["Resource"]
     T_room["Room"]
 
     D --> S1
     D --> S2
     D --> S3
     S3 --> T_room
-    D --> S4
     classDef def fill:#1d4ed8,stroke:#0b2a85,color:#ffffff,stroke-width:2px
     classDef shared fill:#b45309,stroke:#6b2d05,color:#ffffff
     classDef other fill:#4b5563,stroke:#1f2937,color:#ffffff
     class D def
-    class S3,S4 shared
+    class S3 shared
 ```
 
 #### 4.9.1 ZoneInformation
@@ -1674,14 +1629,6 @@ flowchart LR
 | Field | DOM type | Model property | Notes | Rules |
 |---|---|---|---|---|
 | Room_8d904f8d | `Guid` | `RoomFk.Room` | → Room | `no-db` Required<br>`db` Room must exist |
-
-#### 4.9.4 Resource
-
-**Section ID:** `2f8f34af-8405-4a7e-b996-da6b9d97e61c` · **Link:** mandatory · **Shared with:** [Desk](#41-desk), [Rack](#45-rack), [Room](#46-room), [Row](#47-row)
-
-| Field | DOM type | Model property | Notes | Rules |
-|---|---|---|---|---|
-| LinkedResource | `Guid` | `Resource.ResourceId` | written/read as `string` (§13) |  |
 
 ---
 
@@ -2386,7 +2333,6 @@ Snapshot as of 2026-10-28. Unlike the rest of this document, this section lists 
 | `AssetLocation.PowerSupplyRackPosition`, `AssetLocationDestination.PowerSupplyRackPosition` (`long`) | Seeded and mapped (`AssetDomMapper.Location/DestinationLocation.PowerSupplyRackPosition`) but never read or written by `AssetDomRepository`; no model property. Chain broken at step 4/5. | Decide: add to `AssetLocation` model or drop from mapper. |
 | `HistoryInfo.UserID` (`Guid`) | Mapped (`HistoryDomMapper`) but never read or written; `History` has no user property. | Decide: wire to `PnoObjectReference<Person>` or drop. |
 | **Power Port** → `PrimaryPortRelation` (optional section, 2 × `bool`) | Linked by the definition and bound in `DataPortDomMapper`, but `PowerPortDomMapper`/`PowerPortDomRepository` neither bind nor read it. Data Port handles the same section fully. | Likely intentional (IP primacy is a data-port concern); either drop the link from the Power Port definition in the module or document it as reserved. |
-| `Resource.LinkedResource` (`Guid` in seed) | All five repositories (`Desk`, `Rack`, `Row`, `Zone`, `Room`) read and write it as `string` (`AddOrUpdateValue<string>(…, Convert.ToString(ResourceId))`). Violates D5; the untyped mock hides it. Room additionally `Guid.Parse`s on read, gated `!= Guid.Empty`. | Blocked on ITM-001 (type-checking mock) to confirm which side is wrong; then align seed or repositories. |
 | `ConnectionsOnJob.Cabletype` (`string` in seed) | Repository wraps it in `SdmObjectReference<CableType>` and writes `.Identifier` as a string. The only reference in the repo stored as `string`; D2/D7 filters on it would not work. | Treat as text until the module field is changed to `Guid` (data migration). |
 | `SdmObjectReferenceConverter` JSON read of `null` | Produces a reference with `null` identifier instead of `default` (see SPC-002 rule 3). Not a DOM issue but affects D2 gates after import. | Tracked in SPC-002 review points. |
 | `Asset` entity-level section ids (`AssetPropertiesSectionId`, …) | Held as ad hoc `internal Guid?` properties instead of a shared abstraction; section-details use `ISectionTrackable` (C1). Two mechanisms for one concern. | Accept for now; document here. |

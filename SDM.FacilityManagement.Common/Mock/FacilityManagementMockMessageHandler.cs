@@ -160,7 +160,6 @@
         (SlcFacility_Management.Sections.RackInformation.Depth, typeof(double), "Depth"),
         (SlcFacility_Management.Sections.RackInformation.Height, typeof(double), "Height"),
         (SlcFacility_Management.Sections.RackInformation.Description, typeof(string), "Description"),
-        (SlcFacility_Management.Sections.RackInformation.Bookable, typeof(bool), "Bookable"),
         (SlcFacility_Management.Sections.RackInformation.CoolingFlow, typeof(string), "Cooling Flow"),
         (SlcFacility_Management.Sections.RackInformation.X, typeof(double), "X"),
         (SlcFacility_Management.Sections.RackInformation.Y, typeof(double), "Y"),

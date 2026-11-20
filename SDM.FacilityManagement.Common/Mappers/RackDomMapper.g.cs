@@ -32,7 +32,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             internal static FieldDescriptorID Height = SlcFacility_Management.Sections.RackInformation.Height;
             internal static FieldDescriptorID Depth = SlcFacility_Management.Sections.RackInformation.Depth;
             internal static FieldDescriptorID Description = SlcFacility_Management.Sections.RackInformation.Description;
-            internal static FieldDescriptorID Bookable = SlcFacility_Management.Sections.RackInformation.Bookable;
             internal static FieldDescriptorID CoolingFlow = SlcFacility_Management.Sections.RackInformation.CoolingFlow;
             internal static FieldDescriptorID XPosition = SlcFacility_Management.Sections.RackInformation.X;
             internal static FieldDescriptorID YPosition = SlcFacility_Management.Sections.RackInformation.Y;

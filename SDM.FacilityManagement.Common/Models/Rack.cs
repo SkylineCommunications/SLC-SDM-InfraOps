@@ -60,7 +60,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
          DepthField?.Changed == true ||
          DescriptionField?.Changed == true ||
          CoolingFlowField?.Changed == true ||
-         BookableField?.Changed == true ||
          XPositionField?.Changed == true ||
          YPositionField?.Changed == true ||
          LabelField?.Changed == true ||
@@ -133,12 +132,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
         {
             get => DescriptionField.Value;
             set => DescriptionField.Value = value;
-        }
-
-        public bool? Bookable
-        {
-            get => BookableField.Value;
-            set => BookableField.Value = value;
         }
 
         public SlcFacility_Management.Enums.CoolingflowenumEnum? CoolingFlow
@@ -242,11 +235,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
         internal IChangeTrackingField<string> DescriptionField => FieldHandler.GetOrCreateField(
             nameof(Description),
             () => new ChangeTrackingStringField(null));
-
-        [JsonIgnore]
-        internal IChangeTrackingField<bool?> BookableField => FieldHandler.GetOrCreateField(
-            nameof(Bookable),
-            () => new ChangeTrackingField<bool?>(null));
 
         [JsonIgnore]
         internal IChangeTrackingField<SlcFacility_Management.Enums.CoolingflowenumEnum?> CoolingFlowField => FieldHandler.GetOrCreateField(
@@ -371,7 +359,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 Height == other.Height &&
                 Depth == other.Depth &&
                 string.Equals(Description, other.Description, StringComparison.OrdinalIgnoreCase) &&
-                Bookable == other.Bookable &&
                 CoolingFlow == other.CoolingFlow &&
                 XPosition == other.XPosition &&
                 YPosition == other.YPosition &&

@@ -31,7 +31,6 @@ namespace SDM.FacilityManagement.Tests.Racks
                 Height = 200.25,
                 Depth = 100.75,
                 Description = "Main rack",
-                Bookable = true,
                 CoolingFlow = SlcFacility_Management.Enums.CoolingflowenumEnum.SideToSide,
                 XPosition = 10.5,
                 YPosition = 20.5,
@@ -58,7 +57,6 @@ namespace SDM.FacilityManagement.Tests.Racks
             restored.Height.Should().Be(200.25);
             restored.Depth.Should().Be(100.75);
             restored.Description.Should().Be("Main rack");
-            restored.Bookable.Should().BeTrue();
             restored.CoolingFlow.Should().Be(SlcFacility_Management.Enums.CoolingflowenumEnum.SideToSide);
             restored.XPosition.Should().Be(10.5);
             restored.YPosition.Should().Be(20.5);

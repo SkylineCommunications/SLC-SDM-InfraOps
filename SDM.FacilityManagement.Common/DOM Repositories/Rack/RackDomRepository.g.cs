@@ -562,12 +562,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     obj.Description = _rackpropertiesdescription.Value;
                 }
 
-                var _rackpropertiesbookable = _rackpropertiesSection.GetValue<bool>(FacilityManagement.Models.RackDomMapper.RackProperties.Bookable);
-                if (_rackpropertiesbookable != null)
-                {
-                    obj.Bookable = _rackpropertiesbookable.Value;
-                }
-
                 var _rackpropertiescoolingflow = _rackpropertiesSection.GetValue<string>(FacilityManagement.Models.RackDomMapper.RackProperties.CoolingFlow);
                 if (_rackpropertiescoolingflow != null)
                 {
@@ -739,11 +733,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 _rackproperties.AddOrUpdateValue<string>(FacilityManagement.Models.RackDomMapper.RackProperties.Description, Convert.ToString(obj.Description));
             }
 
-            if (obj.Bookable != default)
-            {
-                _rackproperties.AddOrUpdateValue<bool>(FacilityManagement.Models.RackDomMapper.RackProperties.Bookable, (bool)(obj.Bookable).Value);
-            }
-
             if (obj.CoolingFlow != default)
             {
                 _rackproperties.AddOrUpdateValue<string>(FacilityManagement.Models.RackDomMapper.RackProperties.CoolingFlow, SharedMappers.DomIds.SlcFacility_Management.Enums.Coolingflowenum.ToValue((obj.CoolingFlow).Value));
@@ -896,11 +885,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 case "Description":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.RackProperties.Description), comparer, (string)value);
 
-                case "Bookable" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
-                    return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.RackDomMapper.RackProperties.Bookable.Id.ToString()).Equal(comparer == Comparer.NotEquals);
-                case "Bookable":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.RackProperties.Bookable), comparer, (bool)((bool?)value).Value);
-
                 case "CoolingFlow" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
                     return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.RackDomMapper.RackProperties.CoolingFlow.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "CoolingFlow":
@@ -984,8 +968,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.RackProperties.Depth), sortOrder, naturalSort);
                 case "Description":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.RackProperties.Description), sortOrder, naturalSort);
-                case "Bookable":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.RackProperties.Bookable), sortOrder, naturalSort);
                 case "CoolingFlow":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.RackProperties.CoolingFlow), sortOrder, naturalSort);
                 case "XPosition":

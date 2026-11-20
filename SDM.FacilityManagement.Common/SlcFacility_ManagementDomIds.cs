@@ -793,17 +793,11 @@ namespace SharedMappers.DomIds
                     get;
                 }
 
-                = new FieldDescriptorID(new Guid("0fce02b2-8ddc-4518-900e-8f1fae8ec542"));
-                public static FieldDescriptorID Bookable
-                {
-                    get;
-                }
-
-                = new FieldDescriptorID(new Guid("7369d14b-12e4-4208-a3e9-6222e086d9ce"));
-                public static FieldDescriptorID CoolingFlow
-                {
-                    get;
-                }
+				= new FieldDescriptorID(new Guid("0fce02b2-8ddc-4518-900e-8f1fae8ec542"));
+				public static FieldDescriptorID CoolingFlow
+				{
+					get;
+				}
 
                 = new FieldDescriptorID(new Guid("94fddd93-29a6-4ae3-a8a6-7ffe2e94a1ab"));
                 public static FieldDescriptorID X

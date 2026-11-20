@@ -39,7 +39,6 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
             public static readonly Exposer<FacilityManagement.Models.Rack, double?> Height = new Exposer<FacilityManagement.Models.Rack, double?>((obj) => obj.Height, "Height");
             public static readonly Exposer<FacilityManagement.Models.Rack, double?> Depth = new Exposer<FacilityManagement.Models.Rack, double?>((obj) => obj.Depth, "Depth");
             public static readonly Exposer<FacilityManagement.Models.Rack, string> Description = new Exposer<FacilityManagement.Models.Rack, string>((obj) => obj.Description, "Description");
-            public static readonly Exposer<FacilityManagement.Models.Rack, bool?> Bookable = new Exposer<FacilityManagement.Models.Rack, bool?>((obj) => obj.Bookable, "Bookable");
             public static readonly Exposer<FacilityManagement.Models.Rack, SharedMappers.DomIds.SlcFacility_Management.Enums.CoolingflowenumEnum?> CoolingFlow = new Exposer<FacilityManagement.Models.Rack, SharedMappers.DomIds.SlcFacility_Management.Enums.CoolingflowenumEnum?>((obj) => obj.CoolingFlow, "CoolingFlow");
             public static readonly Exposer<FacilityManagement.Models.Rack, double?> XPosition = new Exposer<FacilityManagement.Models.Rack, double?>((obj) => obj.XPosition, "XPosition");
             public static readonly Exposer<FacilityManagement.Models.Rack, double?> YPosition = new Exposer<FacilityManagement.Models.Rack, double?>((obj) => obj.YPosition, "YPosition");
