@@ -19,14 +19,12 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Extensions
     {
 
         /// <summary>
-        /// Reads all PropertyValues matching any of the given LinkedObjectID and scope type, using a single
-        /// batched big-OR query (see <see cref="RepositoryQueryExtensions.ReadByBigOrFilter{T, TKey}"/>)
-        /// instead of one query per pair. Use this for bulk (LinkedObjectID, Scope, SubID) uniqueness checks
-        /// instead of looping <see cref="IReadableRepository{PropertyValues}.Read(FilterElement{PropertyValues})"/> once per candidate entry.
+        /// Reads all PropertyValues matching any of the given LinkedObjectID and scope type.
         /// </summary>
         /// <typeparam name="T">the Scope type</typeparam>
-        /// <param name="linkedObjectIds"></param>
-        /// <returns></returns>
+        /// <param name="repository">The PropertyValues repository.</param>
+        /// <param name="linkedObjectIds">The linked object identifiers.</param>
+        /// <returns>A list of PropertyValues for the scope type <typeparamref name="T"/>.</returns>
 
         public static List<PropertyValues> GetByLinkedObjectIDs<T>(this IPropertyValuesRepository repository, List<Guid> linkedObjectIds) where T : SdmObject<T>
         {
