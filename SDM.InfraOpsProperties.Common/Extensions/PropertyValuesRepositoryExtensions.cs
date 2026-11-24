@@ -9,6 +9,7 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Extensions
     using Skyline.DataMiner.SDM.Extensions;
     using Skyline.DataMiner.SDM.InfraOps.Core.Models;
     using Skyline.DataMiner.SDM.InfraOpsProperties.Models;
+    using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Extensions;
 
     /// <summary>
     /// Extension methods for <see cref="IBulkRepository{PropertyValues}"/> mirroring the scope/linked-object
@@ -16,6 +17,27 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Extensions
     /// </summary>
     public static class PropertyValuesRepositoryExtensions
     {
+
+        /// <summary>
+        /// Reads all PropertyValues matching any of the given LinkedObjectID and scope type.
+        /// </summary>
+        /// <typeparam name="T">the Scope type</typeparam>
+        /// <param name="repository">The PropertyValues repository.</param>
+        /// <param name="linkedObjectIds">The linked object identifiers.</param>
+        /// <returns>A list of PropertyValues for the scope type <typeparamref name="T"/>.</returns>
+
+        public static List<PropertyValues> GetByLinkedObjectIDs<T>(this IPropertyValuesRepository repository, List<Guid> linkedObjectIds) where T : SdmObject<T>
+        {
+            var cleanedIds = linkedObjectIds?.Where(id => id != Guid.Empty).Distinct().ToList() ?? new List<Guid>();
+
+            if (cleanedIds.Count == 0)
+            {
+                return new List<PropertyValues>();
+            }
+
+            return repository.GetByLinkedObjectIDsAndScopes(cleanedIds.Select(id => (id, PropertyScopeAttribute.GetScope<T>())));
+        }
+
         /// <summary>
         /// Gets the PropertyValues linked to a given object, within a given scope, optionally scoped further by SubID.
         /// </summary>
@@ -58,6 +80,24 @@ namespace Skyline.DataMiner.SDM.InfraOpsProperties.Extensions
             }
 
             return repository.Read(filter);
+        }
+
+        /// <summary>
+        /// Gets the PropertyValues linked to a given object, within the scope declared on <typeparamref name="T"/>, optionally scoped further by SubID.
+        /// </summary>
+        /// <param name="repository">The PropertyValues repository.</param>
+        /// <param name="linkedObjectId">The linked object identifier.</param>
+        /// <param name="subId">
+        /// Controls how the SubID is filtered, matching the legacy PropertyValuesDefinitionHandler behavior:
+        /// <list type="bullet">
+        /// <item><description><c>null</c> (default) - only matches PropertyValues that have <b>no</b> SubID set.</description></item>
+        /// <item><description><c>"*"</c> - wildcard, matches PropertyValues regardless of their SubID (no SubID filter applied).</description></item>
+        /// <item><description>any other value - matches PropertyValues with that exact SubID.</description></item>
+        /// </list>
+        /// </param>
+        public static IEnumerable<PropertyValues> GetByLinkedObjectID<T>(this IBulkRepository<PropertyValues> repository, Guid linkedObjectId, string subId = null) where T : SdmObject<T>
+        {
+            return repository.GetByLinkedObjectID(linkedObjectId, PropertyScopeAttribute.GetScope<T>(), subId);
         }
 
         /// <summary>
