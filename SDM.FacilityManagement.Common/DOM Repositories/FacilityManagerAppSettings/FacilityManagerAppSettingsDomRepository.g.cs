@@ -577,6 +577,8 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 case "LastModifiedBy":
                     return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModifiedBy, comparer, (string)value);
 
+                case "AppSettings.GoogleMapsAPIKey" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.FacilityManagerAppSettingsDomMapper.AppSettings.GoogleMapsAPIKey.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "AppSettings.GoogleMapsAPIKey":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.FacilityManagerAppSettingsDomMapper.AppSettings.GoogleMapsAPIKey), comparer, (string)value);
 
