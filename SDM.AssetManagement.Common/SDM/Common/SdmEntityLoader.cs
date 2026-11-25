@@ -989,6 +989,23 @@ namespace Skyline.DataMiner.SDM.Common.Services
         }
 
         /// <summary>
+        /// Retrieves all assets whose parent asset is any of the provided identifiers.
+        /// Uses <see cref="Tools.RetrieveBigOrFilter"/> to safely handle large sets.
+        /// </summary>
+        public List<Asset> GetChildAssetsByParentIds(List<string> parentAssetIdentifiers)
+        {
+            if (assetManagerApiHelper?.Assets == null || parentAssetIdentifiers == null || !parentAssetIdentifiers.Any())
+            {
+                return new List<Asset>();
+            }
+
+            return Tools.RetrieveBigOrFilter(
+                parentAssetIdentifiers,
+                id => AssetExposers.Location.ParentAsset.Equal(new SdmObjectReference<Asset>(id)),
+                filter => assetManagerApiHelper.Assets.Read(filter).ToList());
+        }
+
+        /// <summary>
         /// Finds reservations for a specific rack.
         /// </summary>
         public List<InfraopsReservation> FindReservationsInRack(Rack rack)

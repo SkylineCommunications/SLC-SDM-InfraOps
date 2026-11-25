@@ -75,6 +75,10 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
         _infraopsReservationValidator = new InfraopsReservationValidator(entityLoader);
         _appSettingsValidator = new AssetManagerAppSettingsValidator();
         _historyValidator = new HistoryValidator();
+
+        assetRepository.TransitionGuard = _assetValidator.EnsureTransitionAllowed;
+        assetClassRepository.TransitionGuard = _assetClassValidator.EnsureTransitionAllowed;
+
         // Wrap with middleware
         Assets = assetRepository
             .WithMiddleware(_assetDeletionCascadeMiddleware)

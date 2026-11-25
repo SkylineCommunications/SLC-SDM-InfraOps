@@ -24,6 +24,7 @@ namespace SharedMappers.DomIds
                 public const string Fan = "Fan";
                 public const string PowerSupply = "Power Supply";
                 public const string None = "None";
+                public const string Shelf = "Shelf";
                 public static string ToValue(HierarchyRoleEnum @enum)
                 {
                     switch (@enum)
@@ -42,6 +43,8 @@ namespace SharedMappers.DomIds
                             return PowerSupply;
                         case HierarchyRoleEnum.None:
                             return None;
+                        case HierarchyRoleEnum.Shelf:
+                            return Shelf;
                         default:
                             throw new ArgumentOutOfRangeException(nameof(@enum), @enum, "Invalid value.");
                     }
@@ -65,6 +68,8 @@ namespace SharedMappers.DomIds
                             return HierarchyRoleEnum.PowerSupply;
                         case None:
                             return HierarchyRoleEnum.None;
+                        case Shelf:
+                            return HierarchyRoleEnum.Shelf;
                         default:
                             throw new ArgumentOutOfRangeException(nameof(s), s, "Invalid value.");
                     }
@@ -79,7 +84,8 @@ namespace SharedMappers.DomIds
                 Module,
                 Fan,
                 PowerSupply,
-                None
+                None,
+                Shelf
             }
 
             public static class Portexposure

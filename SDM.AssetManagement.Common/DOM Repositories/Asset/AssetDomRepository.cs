@@ -22,6 +22,11 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
     internal partial class AssetDomRepository : IAssetRepository
     {
+        /// <summary>
+        /// Optional business-rule check run before a state transition executes (e.g. Shelf with children).
+        /// </summary>
+        internal Action<Asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum> TransitionGuard { get; set; }
+
         public Asset TransitionToInternal(Asset asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum newState)
         {
             if (asset == null) throw new ArgumentNullException(nameof(asset));
@@ -32,6 +37,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
 
             asset.ValidateTransitionPath(newState);
+
+            TransitionGuard?.Invoke(asset, newState);
 
             return ExecuteStateTransition(asset, newState);
         }

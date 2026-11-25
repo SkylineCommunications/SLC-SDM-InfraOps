@@ -7,6 +7,7 @@
     using SharedMappers.DomIds;
 
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
+    using Skyline.DataMiner.SDM.AssetManagement.Common.Extensions;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.Common.Services;
     using Skyline.DataMiner.SDM.Extensions;
@@ -159,6 +160,66 @@
             }
 
             return ValidateNotInUseWhenDeleted(assetClasses);
+        }
+
+        /// <summary>
+        /// Validates a state transition without executing it: the state machine path and the business rules
+        /// (e.g. no Deprecated while assets not in 'Disposed' State still use the class).
+        /// Use it to check a transition up front, the same way Validate is used before an Update.
+        /// </summary>
+        public ValidationResult ValidateTransition(AssetClass assetClass, SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum newState)
+        {
+            if (assetClass == null)
+            {
+                return CreateNullEntityResult();
+            }
+
+            if (assetClass.State == newState)
+            {
+                return new ValidationResult();
+            }
+
+            if (!assetClass.IsTransitionAllowed(newState))
+            {
+                var result = new ValidationResult();
+                result.AddFailReason(AssetClassValidationHandler.AssetClassValidationField.State,
+                    $"State transition from {assetClass.State} to {newState} is not allowed.");
+                return result;
+            }
+
+            return ValidateTransitionRules(assetClass, newState);
+        }
+
+        /// <summary>
+        /// Transition guard used by the repository; the path is already checked there.
+        /// </summary>
+        internal void EnsureTransitionAllowed(AssetClass assetClass, SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum newState)
+        {
+            var result = ValidateTransitionRules(assetClass, newState);
+            if (!result.IsValid)
+            {
+                throw result.ToException();
+            }
+        }
+
+        private ValidationResult ValidateTransitionRules(AssetClass assetClass, SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum newState)
+        {
+            var result = new ValidationResult();
+
+            if (assetClass == null
+                || newState != SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Deprecated
+                || string.IsNullOrWhiteSpace(assetClass.Identifier))
+            {
+                return result;
+            }
+
+            if (_entityLoader.HasNonDisposedAssetsForAssetClasses(new List<string> { assetClass.Identifier }))
+            {
+                result.AddFailReason(AssetClassValidationHandler.AssetClassValidationField.State,
+                    "Asset Class cannot be Deprecated while Assets not in 'Disposed' State still use it.");
+            }
+
+            return result;
         }
 
         private List<ValidationResult> ValidateNotInUseWhenDeleted(List<AssetClass> assetClasses)

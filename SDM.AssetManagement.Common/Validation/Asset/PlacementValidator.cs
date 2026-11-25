@@ -20,6 +20,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
     /// </summary>
     public class PlacementValidator
     {
+        // Safety cap on parent chain walks; the hierarchy has no business depth limit.
+        private const int MaxHierarchyDepth = 20;
+
         private readonly SdmEntityLoader _entityLoader;
 
         public PlacementValidator(SdmEntityLoader entityLoader)
@@ -95,14 +98,15 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
         }
 
         // The Asset Class drives the Hierarchy Role and the height, so changing it re-triggers placement validation.
+        // Side is included because it is only allowed under a Shelf parent.
         private static bool ShouldValidateHolder(Asset asset) =>
-            asset.ShouldValidateAny(asset.Location.ParentAssetField, asset.Location.HolderNumberField, asset.AssetClassIdField);
+            asset.ShouldValidateAny(asset.Location.ParentAssetField, asset.Location.HolderNumberField, asset.Location.SideField, asset.AssetClassIdField);
 
         private static bool ShouldValidateRack(Asset asset) =>
             asset.ShouldValidateAny(asset.Location.RackIdField, asset.Location.RackPositionField, asset.Location.SideField, asset.AssetClassIdField);
 
         private static bool ShouldValidateDestinationHolder(Asset asset) =>
-            asset.ShouldValidateAny(asset.DestinationLocation.ParentAssetField, asset.DestinationLocation.HolderNumberField, asset.AssetClassIdField);
+            asset.ShouldValidateAny(asset.DestinationLocation.ParentAssetField, asset.DestinationLocation.HolderNumberField, asset.DestinationLocation.SideField, asset.AssetClassIdField);
 
         private static bool ShouldValidateDestinationRack(Asset asset) =>
             asset.ShouldValidateAny(asset.DestinationLocation.RackIdField, asset.DestinationLocation.RackPositionField, asset.DestinationLocation.SideField, asset.AssetClassIdField);
@@ -121,6 +125,11 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             {
                 AssetsBeingValidated = assets
             };
+
+            foreach (var batchAsset in assets.Where(a => !String.IsNullOrWhiteSpace(a.Identifier)))
+            {
+                context.BatchAssetsById[batchAsset.Identifier] = batchAsset;
+            }
 
             var assetIds = assets.Where(a => !String.IsNullOrWhiteSpace(a.Identifier)).Select(a => a.Identifier).ToList();
 
@@ -242,35 +251,44 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
                 return result;
             }
 
+            if (!IsParentChainValid(asset, parentId, AssetValidationField.ParentAsset, context, result))
+            {
+                return result;
+            }
+
+            var isShelfParent = IsShelf(parentAsset, context);
+            if (!AreShelfRulesValid(asset, parentAsset, isShelfParent, asset.Location.Side, AssetValidationField.Side, context, result))
+            {
+                return result;
+            }
+
             // Get AssetClass and DeviceType
             var hierarchyRole = ResolveHierarchyRole(asset, context);
 
-            if (hierarchyRole == null)
+            // A Shelf holds any device, with or without a Hierarchy Role.
+            if (hierarchyRole == null && !isShelfParent)
             {
                 result.AddFailReason(AssetValidationField.AssetClass,
                     "Asset Class Device Type must have a Hierarchy Role to be attached to a parent asset.");
                 return result;
             }
 
-            // Check if holder slot exists
-            var matchingHolder = parentAsset.Holders?
-                .FirstOrDefault(h => h.SlotNumber == holderNumber && h.HierarchyRole == hierarchyRole);
-
-            if (matchingHolder == null)
+            if (!HasMatchingHolder(parentAsset, holderNumber, hierarchyRole, isShelfParent))
             {
-                result.AddFailReason(AssetValidationField.HolderNumber,
-                    $"Invalid Holder Number: Parent Asset does not have a holder slot '{holderNumber}' for Hierarchy Role '{hierarchyRole}'.");
+                result.AddFailReason(AssetValidationField.HolderNumber, isShelfParent
+                    ? $"Invalid Holder Number: Parent Shelf does not have a holder slot '{holderNumber}'."
+                    : $"Invalid Holder Number: Parent Asset does not have a holder slot '{holderNumber}' for Hierarchy Role '{hierarchyRole}'.");
                 return result;
             }
 
-            if (IsHolderOccupiedByExistingChild(parentId, holderNumber, hierarchyRole, context))
+            if (IsHolderOccupiedByExistingChild(parentId, holderNumber, hierarchyRole, isShelfParent, context))
             {
                 result.AddFailReason(AssetValidationField.HolderNumber,
                     $"Holder Number '{holderNumber}' is already occupied on the Parent Asset by another asset.");
                 return result;
             }
 
-            if (HasBatchHolderConflict(assetIndex, parentId, holderNumber, hierarchyRole, context))
+            if (HasBatchHolderConflict(assetIndex, parentId, holderNumber, hierarchyRole, isShelfParent, context))
             {
                 result.AddFailReason(AssetValidationField.HolderNumber,
                     $"Holder Number '{holderNumber}' conflicts with another asset in the same batch.");
@@ -279,40 +297,154 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             return result;
         }
 
-        // Existing children (from DB, excluding batch): same number AND same Hierarchy Role
+        // Shelf holders match on slot number only; other parents also match on Hierarchy Role.
+        private static bool HasMatchingHolder(
+            Asset parentAsset,
+            long? holderNumber,
+            SlcAsset_Management.Enums.HierarchyRoleEnum? hierarchyRole,
+            bool isShelfParent)
+        {
+            return parentAsset.Holders?
+                .Any(h => h.SlotNumber == holderNumber && (isShelfParent || h.HierarchyRole == hierarchyRole)) == true;
+        }
+
+        // Existing children (from DB, excluding batch): same number AND same Hierarchy Role (number only for a Shelf)
         private bool IsHolderOccupiedByExistingChild(
             string parentId,
             long? holderNumber,
             SlcAsset_Management.Enums.HierarchyRoleEnum? hierarchyRole,
+            bool isShelfParent,
             PlacementValidationContext context)
         {
             return context.ExistingChildrenInParents.TryGetValue(parentId, out var existingChildren)
-                && existingChildren.Any(c => OccupiesHolder(c, holderNumber, hierarchyRole, context));
+                && existingChildren.Any(c => OccupiesHolder(c, holderNumber, hierarchyRole, isShelfParent, context));
         }
 
-        // Conflicts within the batch (excluding the asset itself): same parent, same number AND same Hierarchy Role
+        // Conflicts within the batch (excluding the asset itself): same parent, same number AND same Hierarchy Role (number only for a Shelf)
         private bool HasBatchHolderConflict(
             int assetIndex,
             string parentId,
             long? holderNumber,
             SlcAsset_Management.Enums.HierarchyRoleEnum? hierarchyRole,
+            bool isShelfParent,
             PlacementValidationContext context)
         {
             return context.AssetsBeingValidated
                 .Where((other, i) => i != assetIndex
                     && other.Location.ParentAsset.HasValue()
                     && other.Location.ParentAsset.Identifier == parentId)
-                .Any(other => OccupiesHolder(other, holderNumber, hierarchyRole, context));
+                .Any(other => OccupiesHolder(other, holderNumber, hierarchyRole, isShelfParent, context));
         }
 
         private bool OccupiesHolder(
             Asset asset,
             long? holderNumber,
             SlcAsset_Management.Enums.HierarchyRoleEnum? hierarchyRole,
+            bool isShelfParent,
             PlacementValidationContext context)
         {
             return asset.Location.HolderNumber == holderNumber
-                && ResolveHierarchyRole(asset, context) == hierarchyRole;
+                && (isShelfParent || ResolveHierarchyRole(asset, context) == hierarchyRole);
+        }
+
+        /// <summary>
+        /// Validates the rules that depend on the parent being a Shelf: a Side is only allowed under a Shelf,
+        /// and a child cannot be taller than its Shelf when both heights are known.
+        /// </summary>
+        private bool AreShelfRulesValid(
+            Asset asset,
+            Asset parentAsset,
+            bool isShelfParent,
+            SlcAsset_Management.Enums.SideEnum? side,
+            AssetValidationField sideField,
+            PlacementValidationContext context,
+            ValidationResult result)
+        {
+            if (!isShelfParent)
+            {
+                if (side != null)
+                {
+                    result.AddFailReason(sideField, "Rack Side can only be set under a Parent Asset when the parent is a Shelf.");
+                    return false;
+                }
+
+                return true;
+            }
+
+            var childHeight = ResolveClassInfo(asset, context).AssetClass?.HeightU;
+            var shelfHeight = ResolveClassInfo(parentAsset, context).AssetClass?.HeightU;
+            if (childHeight > 0 && shelfHeight > 0 && childHeight > shelfHeight)
+            {
+                result.AddFailReason(AssetValidationField.AssetClass,
+                    $"Asset Class Height ({childHeight}U) cannot exceed the Height of the parent Shelf ({shelfHeight}U).");
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Walks up the parent chain from <paramref name="parentId"/>. Fails when the chain reaches the asset itself
+        /// (a cycle), loops in existing data, or exceeds <see cref="MaxHierarchyDepth"/> levels.
+        /// Batch versions are preferred so moves within the same batch are taken into account.
+        /// </summary>
+        private bool IsParentChainValid(
+            Asset asset,
+            string parentId,
+            AssetValidationField field,
+            PlacementValidationContext context,
+            ValidationResult result)
+        {
+            var hasIdentifier = !String.IsNullOrWhiteSpace(asset.Identifier);
+            var visited = new HashSet<string>();
+            var currentId = parentId;
+
+            for (int depth = 0; depth < MaxHierarchyDepth; depth++)
+            {
+                if (hasIdentifier && currentId == asset.Identifier)
+                {
+                    result.AddFailReason(field, "Parent Asset cannot be the asset itself or one of its descendants.");
+                    return false;
+                }
+
+                if (!visited.Add(currentId))
+                {
+                    result.AddFailReason(field, "The parent chain of the Parent Asset contains a cycle. Please check the asset hierarchy data.");
+                    return false;
+                }
+
+                var current = GetChainAsset(currentId, context);
+                if (current == null || !current.Location.ParentAsset.HasValue())
+                {
+                    return true;
+                }
+
+                currentId = current.Location.ParentAsset.Identifier;
+            }
+
+            result.AddFailReason(field, $"The parent chain of the Parent Asset is deeper than {MaxHierarchyDepth} levels. Please check the asset hierarchy data.");
+            return false;
+        }
+
+        private Asset GetChainAsset(string assetId, PlacementValidationContext context)
+        {
+            if (context.BatchAssetsById.TryGetValue(assetId, out var batchAsset))
+            {
+                return batchAsset;
+            }
+
+            if (context.LoadedParentAssets.TryGetValue(assetId, out var parentAsset))
+            {
+                return parentAsset;
+            }
+
+            if (!context.ChainAssets.TryGetValue(assetId, out var chainAsset))
+            {
+                chainAsset = _entityLoader.LoadAsset(new SdmObjectReference<Asset>(assetId));
+                context.ChainAssets[assetId] = chainAsset;
+            }
+
+            return chainAsset;
         }
 
         /// <summary>
@@ -335,8 +467,19 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
                 return result;
             }
 
+            if (!IsParentChainValid(asset, destination.ParentAsset.Identifier, AssetValidationField.DestinationParentAsset, context, result))
+            {
+                return result;
+            }
+
+            var isShelfParent = IsShelf(parentAsset, context);
+            if (!AreShelfRulesValid(asset, parentAsset, isShelfParent, destination.Side, AssetValidationField.DestinationSide, context, result))
+            {
+                return result;
+            }
+
             var hierarchyRole = ResolveHierarchyRole(asset, context);
-            if (hierarchyRole == null)
+            if (hierarchyRole == null && !isShelfParent)
             {
                 result.AddFailReason(AssetValidationField.AssetClass,
                     "Asset Class Device Type must have a Hierarchy Role to be attached to a parent asset.");
@@ -344,16 +487,39 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             }
 
             var holderNumber = destination.HolderNumber;
-            var holderExists = parentAsset.Holders?
-                .Any(h => h.SlotNumber == holderNumber && h.HierarchyRole == hierarchyRole) == true;
-
-            if (!holderExists)
+            if (!HasMatchingHolder(parentAsset, holderNumber, hierarchyRole, isShelfParent))
             {
-                result.AddFailReason(AssetValidationField.DestinationHolderNumber,
-                    $"Invalid Destination Holder Number: Destination Parent Asset does not have a holder slot '{holderNumber}' for Hierarchy Role '{hierarchyRole}'.");
+                result.AddFailReason(AssetValidationField.DestinationHolderNumber, isShelfParent
+                    ? $"Invalid Destination Holder Number: Destination Parent Shelf does not have a holder slot '{holderNumber}'."
+                    : $"Invalid Destination Holder Number: Destination Parent Asset does not have a holder slot '{holderNumber}' for Hierarchy Role '{hierarchyRole}'.");
             }
 
             return result;
+        }
+
+        private bool IsShelf(Asset asset, PlacementValidationContext context) =>
+            ResolveClassInfo(asset, context).DeviceType?.HierarchyInfo.HierarchyRole == SlcAsset_Management.Enums.HierarchyRoleEnum.Shelf;
+
+        /// <summary>
+        /// Resolves the Asset Class and its Device Type of an asset, cached per Asset Class.
+        /// </summary>
+        private (AssetClass AssetClass, DeviceType DeviceType) ResolveClassInfo(Asset asset, PlacementValidationContext context)
+        {
+            if (!asset.AssetClassId.HasValue())
+            {
+                return (null, null);
+            }
+
+            var assetClassId = asset.AssetClassId.Identifier;
+            if (!context.ClassInfoByAssetClass.TryGetValue(assetClassId, out var info))
+            {
+                var assetClass = _entityLoader.LoadAssetClass(asset.AssetClassId);
+                var deviceType = assetClass == null ? null : _entityLoader.LoadDeviceType(assetClass.DeviceTypeId);
+                info = (assetClass, deviceType);
+                context.ClassInfoByAssetClass[assetClassId] = info;
+            }
+
+            return info;
         }
 
         /// <summary>
@@ -361,29 +527,10 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
         /// </summary>
         private SlcAsset_Management.Enums.HierarchyRoleEnum? ResolveHierarchyRole(Asset asset, PlacementValidationContext context)
         {
-            if (!asset.AssetClassId.HasValue())
-            {
-                return null;
-            }
+            var role = ResolveClassInfo(asset, context).DeviceType?.HierarchyInfo.HierarchyRole;
 
-            var assetClassId = asset.AssetClassId.Identifier;
-            if (!context.HierarchyRoleByAssetClass.TryGetValue(assetClassId, out var role))
-            {
-                var assetClass = _entityLoader.LoadAssetClass(asset.AssetClassId);
-                role = assetClass == null
-                    ? null
-                    : _entityLoader.LoadDeviceType(assetClass.DeviceTypeId)?.HierarchyInfo.HierarchyRole;
-
-                // "None" means the Device Type cannot occupy a holder, same as no role.
-                if (role == SlcAsset_Management.Enums.HierarchyRoleEnum.None)
-                {
-                    role = null;
-                }
-
-                context.HierarchyRoleByAssetClass[assetClassId] = role;
-            }
-
-            return role;
+            // "None" means the Device Type cannot occupy a holder, same as no role.
+            return role == SlcAsset_Management.Enums.HierarchyRoleEnum.None ? null : role;
         }
 
         /// <summary>
@@ -530,6 +677,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
         public Dictionary<string, List<Asset>> ExistingChildrenInParents { get; set; } = new Dictionary<string, List<Asset>>();
         public Dictionary<string, Rack> LoadedRacks { get; set; } = new Dictionary<string, Rack>();
         public Dictionary<string, List<Asset>> ExistingAssetsInRacks { get; set; } = new Dictionary<string, List<Asset>>();
-        public Dictionary<string, SlcAsset_Management.Enums.HierarchyRoleEnum?> HierarchyRoleByAssetClass { get; set; } = new Dictionary<string, SlcAsset_Management.Enums.HierarchyRoleEnum?>();
+        public Dictionary<string, (AssetClass AssetClass, DeviceType DeviceType)> ClassInfoByAssetClass { get; set; } = new Dictionary<string, (AssetClass AssetClass, DeviceType DeviceType)>();
+        public Dictionary<string, Asset> BatchAssetsById { get; set; } = new Dictionary<string, Asset>();
+        public Dictionary<string, Asset> ChainAssets { get; set; } = new Dictionary<string, Asset>();
     }
 }

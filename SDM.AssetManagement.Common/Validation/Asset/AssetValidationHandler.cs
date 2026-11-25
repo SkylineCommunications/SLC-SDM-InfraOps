@@ -205,6 +205,7 @@
             //TODO SDM-1234: Change rack check to only check for HasValue() once all code is updated to use nullable DomIds
             var hasPosition = asset.Location.RackPosition != null;
             var hasSide = asset.Location.Side != null;
+            var hasParentAsset = asset.Location.ParentAsset.HasValue();
 
             // If no rack, position and side must not be set
             if (!hasRack)
@@ -216,7 +217,8 @@
                     return result.IsValid;
                 }
 
-                if (hasSide)
+                // A Side under a Parent Asset is checked against the parent's Hierarchy Role in PlacementValidator.
+                if (hasSide && !hasParentAsset)
                 {
                     result.AddFailReason(AssetValidationField.Side,
                         "Rack Side cannot be set when there is no Rack.");
@@ -384,6 +386,7 @@
             var hasRack = asset.DestinationLocation.RackId != null && asset.DestinationLocation.RackId != default;
             var hasPosition = asset.DestinationLocation.RackPosition != null;
             var hasSide = asset.DestinationLocation.Side != null;
+            var hasParentAsset = asset.DestinationLocation.ParentAsset.HasValue();
 
             // If no rack, position and side must not be set
             if (!hasRack)
@@ -395,7 +398,8 @@
                     return result.IsValid;
                 }
 
-                if (hasSide)
+                // A Side under a Parent Asset is checked against the parent's Hierarchy Role in PlacementValidator.
+                if (hasSide && !hasParentAsset)
                 {
                     result.AddFailReason(AssetValidationField.DestinationSide,
                         "Rack Side cannot be set when there is no Rack.");

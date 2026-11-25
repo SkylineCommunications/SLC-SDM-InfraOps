@@ -2148,6 +2148,298 @@
                 .WithMessage("*Device Type must have a Hierarchy Role*");
         }
 
+        [TestMethod]
+        public void Create_UnderShelf_WithAnyOrNoHierarchyRole_ShouldPass()
+        {
+            var shelf = CreateShelf(CreateShelfClass(2), 1, 2);
+            var cardClass = CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum.Card);
+            var noRoleClass = CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum.None);
+
+            Action act = () =>
+            {
+                Helper.AssetManagement.Assets.Create(NewChildAsset("SHELF-CARD", cardClass, shelf, 1));
+                Helper.AssetManagement.Assets.Create(NewChildAsset("SHELF-NOROLE", noRoleClass, shelf, 2));
+            };
+
+            act.Should().NotThrow();
+        }
+
+        [TestMethod]
+        public void Create_UnderShelf_WithOccupiedSlotAndDifferentRole_ShouldFail()
+        {
+            var shelf = CreateShelf(CreateShelfClass(2), 1);
+            Helper.AssetManagement.Assets.Create(NewChildAsset("SHELF-OCC-1", CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum.Card), shelf, 1));
+
+            Action act = () => Helper.AssetManagement.Assets.Create(
+                NewChildAsset("SHELF-OCC-2", CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum.Fan), shelf, 1));
+
+            act.Should().Throw<Exception>().WithMessage("*Holder Number '1' is already occupied*");
+        }
+
+        [TestMethod]
+        public void Create_UnderShelf_BatchWithSameSlotAndDifferentRoles_ShouldFail()
+        {
+            var shelf = CreateShelf(CreateShelfClass(2), 1);
+            var batch = new[]
+            {
+                NewChildAsset("SHELF-BATCH-1", CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum.Card), shelf, 1),
+                NewChildAsset("SHELF-BATCH-2", CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum.Fan), shelf, 1),
+            };
+
+            Action act = () => Helper.AssetManagement.Assets.Create(batch);
+
+            act.Should().Throw<Exception>().WithMessage("*conflicts with another asset in the same batch*");
+        }
+
+        [TestMethod]
+        public void Create_UnderShelf_WithMissingSlot_ShouldFail()
+        {
+            var shelf = CreateShelf(CreateShelfClass(2), 1);
+
+            Action act = () => Helper.AssetManagement.Assets.Create(
+                NewChildAsset("SHELF-NOSLOT", CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum.Card), shelf, 5));
+
+            act.Should().Throw<Exception>().WithMessage("*Parent Shelf does not have a holder slot '5'*");
+        }
+
+        [TestMethod]
+        public void Create_UnderShelf_WithSide_ShouldPass()
+        {
+            var shelf = CreateShelf(CreateShelfClass(2), 1);
+            var child = NewChildAsset("SHELF-SIDE", CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum.Card), shelf, 1);
+            child.Location.Side = SlcAsset_Management.Enums.SideEnum.Front;
+
+            Action act = () => Helper.AssetManagement.Assets.Create(child);
+
+            act.Should().NotThrow();
+        }
+
+        [TestMethod]
+        public void Create_UnderNonShelfParent_WithSide_ShouldFail()
+        {
+            var parent = CreateParentWithHolders((1, SlcAsset_Management.Enums.HierarchyRoleEnum.Card));
+            var child = NewChildAsset("NONSHELF-SIDE", CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum.Card), parent, 1);
+            child.Location.Side = SlcAsset_Management.Enums.SideEnum.Front;
+
+            Action act = () => Helper.AssetManagement.Assets.Create(child);
+
+            act.Should().Throw<Exception>().WithMessage("*Rack Side can only be set under a Parent Asset when the parent is a Shelf*");
+        }
+
+        [TestMethod]
+        public void Create_WithSideAndNoParentOrRack_ShouldFail()
+        {
+            var asset = new Asset
+            {
+                AssetID = $"SIDE-ONLY-{Guid.NewGuid():N}",
+                Name = $"Side Only {Guid.NewGuid():N}",
+                AssetClassId = new SdmObjectReference<AssetClass>(testAssetClass.Identifier),
+                Location = { Side = SlcAsset_Management.Enums.SideEnum.Front },
+            };
+
+            Action act = () => Helper.AssetManagement.Assets.Create(asset);
+
+            act.Should().Throw<Exception>().WithMessage("*Rack Side cannot be set when there is no Rack*");
+        }
+
+        [TestMethod]
+        public void Create_UnderShelf_WithChildTallerThanShelf_ShouldFail()
+        {
+            var shelf = CreateShelf(CreateShelfClass(1), 1);
+            var tallClass = CreateShelfClass(2);
+
+            Action act = () => Helper.AssetManagement.Assets.Create(NewChildAsset("SHELF-TALL", tallClass, shelf, 1));
+
+            act.Should().Throw<Exception>().WithMessage("*cannot exceed the Height of the parent Shelf*");
+        }
+
+        [TestMethod]
+        public void Create_NestedShelfUnderShelf_ShouldPass()
+        {
+            var outer = CreateShelf(CreateShelfClass(2), 1);
+
+            Action act = () => Helper.AssetManagement.Assets.Create(NewChildAsset("SHELF-NESTED", CreateShelfClass(1), outer, 1));
+
+            act.Should().NotThrow();
+        }
+
+        [TestMethod]
+        public void Update_ShelfUnderItsOwnDescendant_ShouldFail()
+        {
+            var outerClass = CreateShelfClass(1);
+            var outer = CreateShelf(outerClass, 1);
+            var inner = Helper.AssetManagement.Assets.Create(WithHolders(NewChildAsset("SHELF-INNER", outerClass, outer, 1), 1));
+
+            outer.State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available;
+            outer.Location.ParentAsset = new SdmObjectReference<Asset>(inner.Identifier);
+            outer.Location.HolderNumber = 1;
+
+            Action act = () => Helper.AssetManagement.Assets.Update(outer);
+
+            act.Should().Throw<Exception>().WithMessage("*Parent Asset cannot be the asset itself or one of its descendants*");
+        }
+
+        [TestMethod]
+        public void Create_InTransitToShelf_WithAnyRole_ShouldPass()
+        {
+            var shelf = CreateShelf(CreateShelfClass(2), 1);
+
+            Action act = () => Helper.AssetManagement.Assets.Create(
+                NewInTransitAsset("SHELF-DEST", CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum.Fan), shelf, 1));
+
+            act.Should().NotThrow();
+        }
+
+        [TestMethod]
+        public void Create_InTransitToShelf_WithMissingSlot_ShouldFail()
+        {
+            var shelf = CreateShelf(CreateShelfClass(2), 1);
+
+            Action act = () => Helper.AssetManagement.Assets.Create(
+                NewInTransitAsset("SHELF-DEST-NOSLOT", CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum.Fan), shelf, 7));
+
+            act.Should().Throw<Exception>().WithMessage("*Destination Parent Shelf does not have a holder slot '7'*");
+        }
+
+        [TestMethod]
+        public void Create_WithRackAndParentAsset_ShouldStillFail()
+        {
+            var shelf = CreateShelf(CreateShelfClass(2), 1);
+            var child = NewChildAsset("SHELF-RACK-AND-PARENT", CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum.Card), shelf, 1);
+            child.Location.RackId = new SdmObjectReference<Rack>(GetBottomRack().Identifier);
+
+            Action act = () => Helper.AssetManagement.Assets.Create(child);
+
+            act.Should().Throw<Exception>();
+        }
+
+        [TestMethod]
+        public void Delete_ShelfWithChildren_ShouldFail()
+        {
+            var shelf = CreateShelf(CreateShelfClass(2), 1);
+            Helper.AssetManagement.Assets.Create(NewChildAsset("SHELF-DEL-CHILD", CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum.Card), shelf, 1));
+            shelf.State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable;
+
+            Action act = () => Helper.AssetManagement.Assets.Delete(shelf);
+
+            act.Should().Throw<Exception>().WithMessage("*Shelf still holds child assets*");
+        }
+
+        [TestMethod]
+        public void Delete_ShelfTogetherWithItsChildren_ShouldPass()
+        {
+            var shelf = CreateShelf(CreateShelfClass(2), 1);
+            var child = Helper.AssetManagement.Assets.Create(NewChildAsset("SHELF-DEL-BATCH", CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum.Card), shelf, 1));
+            shelf.State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable;
+            child.State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable;
+
+            Action act = () => Helper.AssetManagement.Assets.Delete(new[] { shelf, child });
+
+            act.Should().NotThrow();
+        }
+
+        [TestMethod]
+        public void TransitionTo_Disposed_ShelfWithChildren_ShouldFail()
+        {
+            var shelf = CreateShelf(CreateShelfClass(2), 1);
+            Helper.AssetManagement.Assets.Create(NewChildAsset("SHELF-TRANS-CHILD", CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum.Card), shelf, 1));
+
+            Action act = () => Helper.AssetManagement.Assets.TransitionTo(
+                shelf,
+                SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Disposed);
+
+            act.Should().Throw<AssetTransitionValidationException>()
+                .Which.ValidationResult.FailureReasons.Values.Should().Contain(v => v.Contains("Shelf still holds child assets"));
+        }
+
+        [TestMethod]
+        public void ValidateTransition_Disposed_ShelfWithChildren_ShouldReturnInvalidWithoutThrowing()
+        {
+            var shelf = CreateShelf(CreateShelfClass(2), 1);
+            Helper.AssetManagement.Assets.Create(NewChildAsset("SHELF-VALTRANS-CHILD", CreateAssetClassWithRole(SlcAsset_Management.Enums.HierarchyRoleEnum.Card), shelf, 1));
+
+            var result = Helper.AssetManagement.AssetValidator.ValidateTransition(
+                shelf,
+                SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Disposed);
+
+            result.IsValid.Should().BeFalse();
+            result.GetCombinedFailureReasons(";").Should().Contain("Shelf still holds child assets");
+        }
+
+        [TestMethod]
+        public void ValidateTransition_InvalidPath_ShouldReturnInvalid()
+        {
+            var shelf = CreateShelf(CreateShelfClass(2), 1);
+            shelf.State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Disposed;
+
+            var result = Helper.AssetManagement.AssetValidator.ValidateTransition(
+                shelf,
+                SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available);
+
+            result.IsValid.Should().BeFalse();
+            result.GetCombinedFailureReasons(";").Should().Contain("is not allowed");
+        }
+
+        [TestMethod]
+        public void ValidateTransition_Disposed_EmptyShelf_ShouldReturnValid()
+        {
+            var shelf = CreateShelf(CreateShelfClass(2), 1);
+
+            var result = Helper.AssetManagement.AssetValidator.ValidateTransition(
+                shelf,
+                SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Disposed);
+
+            result.IsValid.Should().BeTrue(result.GetCombinedFailureReasons(";"));
+        }
+
+        [TestMethod]
+        public void TransitionTo_Disposed_EmptyShelf_ShouldPass()
+        {
+            var shelf = CreateShelf(CreateShelfClass(2), 1);
+
+            Action act = () => Helper.AssetManagement.Assets.TransitionTo(
+                shelf,
+                SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Disposed);
+
+            act.Should().NotThrow();
+        }
+
+        private AssetClass CreateShelfClass(long heightU)
+        {
+            var deviceType = Helper.TestData.DeviceTypes.First(dt => dt.HierarchyInfo.HierarchyRole == SlcAsset_Management.Enums.HierarchyRoleEnum.Shelf);
+
+            return Helper.AssetManagement.AssetClasses.Create(new AssetClass
+            {
+                Manufacturer = SDM.AssetManagement.Tests.Setup.PeopleApiMock.NewManufacturer(),
+                Name = $"Shelf asset class {Guid.NewGuid():N}",
+                DeviceTypeId = new SdmObjectReference<DeviceType>(deviceType.Identifier),
+                State = SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Active,
+                Height = 4.45 * heightU,
+                Width = 10,
+                Depth = 1,
+                HeightU = heightU,
+                Weight = 1,
+            });
+        }
+
+        private Asset CreateShelf(AssetClass shelfClass, params long[] slots)
+        {
+            return Helper.AssetManagement.Assets.Create(WithHolders(new Asset
+            {
+                AssetID = $"SHELF-{Guid.NewGuid():N}",
+                Name = $"Shelf {Guid.NewGuid():N}",
+                AssetClassId = new SdmObjectReference<AssetClass>(shelfClass.Identifier),
+            }, slots));
+        }
+
+        private static Asset WithHolders(Asset asset, params long[] slots)
+        {
+            asset.Holders = slots
+                .Select(s => new AssetHolder { SlotNumber = s, HierarchyRole = SlcAsset_Management.Enums.HierarchyRoleEnum.None })
+                .ToList();
+            return asset;
+        }
+
         private Asset CreateParentWithHolders(params (long Slot, SlcAsset_Management.Enums.HierarchyRoleEnum Role)[] holders)
         {
             return Helper.AssetManagement.Assets.Create(new Asset

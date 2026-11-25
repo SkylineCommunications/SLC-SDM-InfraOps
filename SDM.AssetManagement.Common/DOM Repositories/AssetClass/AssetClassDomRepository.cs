@@ -17,6 +17,11 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
     internal partial class AssetClassDomRepository : IAssetClassRepository
     {
+        /// <summary>
+        /// Optional business-rule check run before a state transition executes (e.g. Deprecated while in use).
+        /// </summary>
+        internal Action<AssetClass, SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum> TransitionGuard { get; set; }
+
         public AssetClass TransitionTo(
             AssetClass assetClass,
             SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum newState)
@@ -35,6 +40,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             {
                 throw new InvalidOperationException($"State transition from {assetClass.State} to {newState} is not allowed.");
             }
+
+            TransitionGuard?.Invoke(assetClass, newState);
 
             return ExecuteStateTransition(assetClass, newState);
         }

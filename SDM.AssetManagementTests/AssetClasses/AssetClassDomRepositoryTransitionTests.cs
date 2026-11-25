@@ -13,6 +13,7 @@
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
+    using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Exceptions;
 
     [TestClass]
     public class AssetClassDomRepositoryTransitionTests
@@ -75,6 +76,56 @@
 
             act.Should().Throw<InvalidOperationException>()
                 .WithMessage($"State transition from {from} to {to} is not allowed.");
+        }
+
+        [TestMethod]
+        public void TransitionTo_Deprecated_WithNonDisposedAssets_ShouldThrow()
+        {
+            var assetClass = CreateAssetClass(SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Active);
+            _helper.AssetManagement.Assets.Create(new Asset
+            {
+                AssetID = "DEPRECATE-BLOCK-" + Guid.NewGuid().ToString("N"),
+                Name = "Deprecate block " + Guid.NewGuid().ToString("N"),
+                AssetClassId = new SdmObjectReference<AssetClass>(assetClass.Identifier),
+            });
+
+            Action act = () => _helper.AssetManagement.AssetClasses.TransitionTo(
+                assetClass,
+                SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Deprecated);
+
+            act.Should().Throw<ValidationException>()
+                .WithMessage("*cannot be Deprecated while Assets not in 'Disposed' State still use it*");
+        }
+
+        [TestMethod]
+        public void ValidateTransition_Deprecated_WithNonDisposedAssets_ShouldReturnInvalidWithoutThrowing()
+        {
+            var assetClass = CreateAssetClass(SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Active);
+            _helper.AssetManagement.Assets.Create(new Asset
+            {
+                AssetID = "DEPRECATE-VAL-" + Guid.NewGuid().ToString("N"),
+                Name = "Deprecate val " + Guid.NewGuid().ToString("N"),
+                AssetClassId = new SdmObjectReference<AssetClass>(assetClass.Identifier),
+            });
+
+            var result = _helper.AssetManagement.AssetClassValidator.ValidateTransition(
+                assetClass,
+                SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Deprecated);
+
+            result.IsValid.Should().BeFalse();
+            result.GetCombinedFailureReasons(";").Should().Contain("cannot be Deprecated while Assets not in 'Disposed' State still use it");
+        }
+
+        [TestMethod]
+        public void ValidateTransition_Deprecated_WithoutAssets_ShouldReturnValid()
+        {
+            var assetClass = CreateAssetClass(SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Active);
+
+            var result = _helper.AssetManagement.AssetClassValidator.ValidateTransition(
+                assetClass,
+                SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Deprecated);
+
+            result.IsValid.Should().BeTrue(result.GetCombinedFailureReasons(";"));
         }
     }
 }

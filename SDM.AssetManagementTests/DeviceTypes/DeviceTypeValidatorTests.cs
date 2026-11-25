@@ -107,6 +107,23 @@ namespace SDM.AssetManagement.Tests.DeviceTypes
             result.IsValid.Should().BeTrue(result.GetCombinedFailureReasons(";"));
         }
 
+        [DataTestMethod]
+        [DataRow(false, false)]
+        [DataRow(true, true)]
+        public void Validate_ShelfRole_RequiresRackUnitConsumerTag(bool withTag, bool expectedValid)
+        {
+            var deviceType = CreateDeviceType("ShelfType");
+            deviceType.HierarchyInfo.HierarchyRole = SlcAsset_Management.Enums.HierarchyRoleEnum.Shelf;
+            if (withTag)
+            {
+                deviceType.TagsInfo.Tags.Add(SlcAsset_Management.Enums.TagOption.RackUnitConsumer);
+            }
+
+            var result = Validator.Validate(deviceType, RepositoryAction.Create);
+
+            result.IsValid.Should().Be(expectedValid, result.GetCombinedFailureReasons(";"));
+        }
+
         private static DeviceType CreateDeviceType(string name)
         {
             return new DeviceType

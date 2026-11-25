@@ -4,6 +4,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
     using System.Collections.Generic;
     using System.Linq;
 
+    using SharedMappers.DomIds;
+
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.Common.Services;
     using Skyline.DataMiner.SDM.Extensions;
@@ -227,6 +229,15 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
                 result.AddFailReason(
                     DeviceTypeValidationHandler.DeviceTypeValidationField.Name,
                     "Device Type Name cannot be empty or whitespace.");
+            }
+
+            if ((deviceType.ShouldValidate(deviceType.HierarchyInfo) || deviceType.ShouldValidate(deviceType.TagsInfo))
+                && deviceType.HierarchyInfo?.HierarchyRole == SlcAsset_Management.Enums.HierarchyRoleEnum.Shelf
+                && !(deviceType.TagsInfo?.Tags.Contains(SlcAsset_Management.Enums.TagOption.RackUnitConsumer) ?? false))
+            {
+                result.AddFailReason(
+                    DeviceTypeValidationHandler.DeviceTypeValidationField.DeviceType,
+                    "A Device Type with Hierarchy Role 'Shelf' must have the 'Rack Unit Consumer' tag.");
             }
 
             return result;

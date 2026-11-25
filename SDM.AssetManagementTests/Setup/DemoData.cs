@@ -49,6 +49,7 @@ namespace SDM.AssetManagement.Tests.Setup
         private const string DeviceType_CoolingFan = "Cooling Fan";
         private const string DeviceType_UPSSystem = "UPS System";
         private const string DeviceType_EnterpriseStorageDrive = "Enterprise Storage Drive";
+        private const string DeviceType_Shelf = "Shelf";
 
         private static readonly Random _random = new Random();
 
@@ -74,6 +75,7 @@ namespace SDM.AssetManagement.Tests.Setup
             CreateDeviceType(DeviceType_CoolingFan, SlcAsset_Management.Enums.HierarchyRoleEnum.Fan),
             CreateDeviceType(DeviceType_UPSSystem, SlcAsset_Management.Enums.HierarchyRoleEnum.Chassis, SlcAsset_Management.Enums.TagOption.PowerProvider, SlcAsset_Management.Enums.TagOption.RackUnitConsumer),
             CreateDeviceType(DeviceType_EnterpriseStorageDrive, SlcAsset_Management.Enums.HierarchyRoleEnum.Module, SlcAsset_Management.Enums.TagOption.AcceptsDataConnection, SlcAsset_Management.Enums.TagOption.RackUnitConsumer),
+            CreateDeviceType(DeviceType_Shelf, SlcAsset_Management.Enums.HierarchyRoleEnum.Shelf, SlcAsset_Management.Enums.TagOption.RackUnitConsumer),
         ];
 
         // AssetClasses reference DeviceTypes
