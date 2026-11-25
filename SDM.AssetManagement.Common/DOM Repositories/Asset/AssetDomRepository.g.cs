@@ -1322,9 +1322,13 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				case "LastModifiedBy":
 					return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModifiedBy, comparer, (string)value);
 
+                case "AssetID" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+					return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.AssetDomMapper.AssetProperties.AssetId.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "AssetID":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetDomMapper.AssetProperties.AssetId), comparer, (string)value);
 
+                case "Name" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+					return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.AssetDomMapper.AssetProperties.AssetName.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Name":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetDomMapper.AssetProperties.AssetName), comparer, (string)value);
 
@@ -1333,15 +1337,23 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				case "AssetClassId":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetDomMapper.AssetProperties.AssetClass), comparer, System.Guid.Parse(SdmObjectReference<AssetManagement.Models.AssetClass>.Convert(value).Identifier));
 
+                case "Description" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+					return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.AssetDomMapper.AssetProperties.AssetDescription.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Description":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetDomMapper.AssetProperties.AssetDescription), comparer, (string)value);
 
+                case "FW_OS" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+					return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.AssetDomMapper.AssetProperties.FwOs.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "FW_OS":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetDomMapper.AssetProperties.FwOs), comparer, (string)value);
 
+                case "SerialNumber" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+					return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.AssetDomMapper.AssetProperties.SerialNumber.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "SerialNumber":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetDomMapper.AssetProperties.SerialNumber), comparer, (string)value);
 
+                case "HardwareVersion" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+					return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.AssetDomMapper.AssetProperties.HardwareVersion.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "HardwareVersion":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetDomMapper.AssetProperties.HardwareVersion), comparer, (string)value);
 
@@ -1350,6 +1362,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				case "OperationalFlags":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetDomMapper.AssetProperties.OperationalFlags), comparer, (int)(SlcAsset_Management.Enums.Operationalflagsenum)value);
 				
+                case "NetworkDetails.MacAddress" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+					return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.AssetDomMapper.NetworkDetails.MACAddress.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "NetworkDetails.MacAddress":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetDomMapper.NetworkDetails.MACAddress), comparer, (string)value);
 
@@ -1496,12 +1510,16 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 case "Holders.HierarchyRole":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetDomMapper.Holders.HierarchyRole), comparer, SlcAsset_Management.Enums.Hierarchyrole.ToValue((SlcAsset_Management.Enums.HierarchyRoleEnum)value));
 
+                case "Holders.Label" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+					return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.AssetDomMapper.Holders.Label.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Holders.Label":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetDomMapper.Holders.Label), comparer, (string)value);
 
                 case "ElementLinks.Identifier":
 					return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.SectionIds, comparer, Guid.Parse((string)value));
 
+                case "ElementLinks.ElementID" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+					return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.AssetDomMapper.ElementLinks.ElementID.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "ElementLinks.ElementID":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.AssetDomMapper.ElementLinks.ElementID), comparer, (string)value);
 

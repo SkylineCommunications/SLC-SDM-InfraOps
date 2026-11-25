@@ -652,6 +652,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 case "LastModifiedBy":
                     return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModifiedBy, comparer, (string)value);
 
+                case "HistoryInfo.Description" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(HistoryDomMapper.HistoryInfo.Description.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "HistoryInfo.Description":
                     return FieldFilter(HistoryDomMapper.HistoryInfo.Description, comparer, value);
 
@@ -665,12 +667,18 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
                 case "HistoryInfo.ModifiedInstanceID":
                     return FieldFilter(HistoryDomMapper.HistoryInfo.ModifiedInstanceId, comparer, ISdmObjectReference<ISdmObject>.Convert<ISdmObject>(value).Identifier);
 
+                case "HistoryInfo.ModifiedInstanceDefinitionID" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(HistoryDomMapper.HistoryInfo.ModifiedInstanceDefinitionId.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "HistoryInfo.ModifiedInstanceDefinitionID":
                     return FieldFilter(HistoryDomMapper.HistoryInfo.ModifiedInstanceDefinitionId, comparer, value);
 
+                case "HistoryInfo.ExtraInfo" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(HistoryDomMapper.HistoryInfo.ExtraInfo.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "HistoryInfo.ExtraInfo":
                     return FieldFilter(HistoryDomMapper.HistoryInfo.ExtraInfo, comparer, value);
 
+                case "HistoryInfo.TypeOfHistory" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(HistoryDomMapper.HistoryInfo.TypeOfHistory.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "HistoryInfo.TypeOfHistory":
                     return FieldFilter(
                         HistoryDomMapper.HistoryInfo.TypeOfHistory,

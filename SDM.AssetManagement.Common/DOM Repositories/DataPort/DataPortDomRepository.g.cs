@@ -753,7 +753,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				case "LastModifiedBy":
 					return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModifiedBy, comparer, (string)value);
 
-                case "DataPortInfo.Name":
+                case "DataPortInfo.Name" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+					return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.DataPortDomMapper.DataPortInfo.Name.Id.ToString()).Equal(comparer == Comparer.NotEquals);
+				case "DataPortInfo.Name":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DataPortDomMapper.DataPortInfo.Name), comparer, (string)value);
 
                 case "DataPortInfo.PortNumber" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
@@ -774,7 +776,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				case "DataPortInfo.PortType":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DataPortDomMapper.DataPortInfo.Type), comparer, SdmObjectReference<AssetManagement.Models.PortType>.Convert(value).GetIdentifierAsGuid());
 
-                case "DataPortInfo.Label":
+                case "DataPortInfo.Label" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+					return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.DataPortDomMapper.DataPortInfo.Label.Id.ToString()).Equal(comparer == Comparer.NotEquals);
+				case "DataPortInfo.Label":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DataPortDomMapper.DataPortInfo.Label), comparer, (string)value);
 
                 case "Asset" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && !SdmObjectReference<AssetManagement.Models.Asset>.Convert(value).HasValue():
@@ -782,13 +786,19 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 				case "Asset":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.PowerPortDomMapper.AssetRelationProperties.Asset), comparer, SdmObjectReference<AssetManagement.Models.Asset>.Convert(value).GetIdentifierAsGuid());
 
-                case "AddressInfo.Ipv4Address":
+                case "AddressInfo.Ipv4Address" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+					return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.DataPortDomMapper.AddressInfo.Ipv4Address.Id.ToString()).Equal(comparer == Comparer.NotEquals);
+				case "AddressInfo.Ipv4Address":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DataPortDomMapper.AddressInfo.Ipv4Address), comparer, (string)value);
 
-                case "AddressInfo.Ipv6Address":
+                case "AddressInfo.Ipv6Address" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+					return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.DataPortDomMapper.AddressInfo.Ipv6Address.Id.ToString()).Equal(comparer == Comparer.NotEquals);
+				case "AddressInfo.Ipv6Address":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DataPortDomMapper.AddressInfo.Ipv6Address), comparer, (string)value);
 
-                case "AddressInfo.Hostname":
+                case "AddressInfo.Hostname" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+					return DomInstanceExposers.FieldValues.KeyExists(AssetManagement.Models.DataPortDomMapper.AddressInfo.Hostname.Id.ToString()).Equal(comparer == Comparer.NotEquals);
+				case "AddressInfo.Hostname":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(AssetManagement.Models.DataPortDomMapper.AddressInfo.Hostname), comparer, (string)value);
 
                 case "AddressInfo.DNS":
