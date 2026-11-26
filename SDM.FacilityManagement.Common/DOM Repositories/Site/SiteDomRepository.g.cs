@@ -675,21 +675,33 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 case "LastModifiedBy":
                     return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModifiedBy, comparer, (string)value);
 
+                case "Name" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.SiteDomMapper.SiteProperties.Name.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Name":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.SiteDomMapper.SiteProperties.Name), comparer, (string)value);
 
+                case "Description" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.SiteDomMapper.SiteProperties.Description.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Description":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.SiteDomMapper.SiteProperties.Description), comparer, (string)value);
 
+                case "Address" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.SiteDomMapper.SiteProperties.Address.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Address":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.SiteDomMapper.SiteProperties.Address), comparer, (string)value);
 
+                case "City" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.SiteDomMapper.SiteProperties.City.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "City":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.SiteDomMapper.SiteProperties.City), comparer, (string)value);
 
+                case "ZipCode" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.SiteDomMapper.SiteProperties.ZipCode.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "ZipCode":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.SiteDomMapper.SiteProperties.ZipCode), comparer, (string)value);
 
+                case "Country" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.SiteDomMapper.SiteProperties.Country.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Country":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.SiteDomMapper.SiteProperties.Country), comparer, (string)value);
 
@@ -703,6 +715,8 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 case "Longitude":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.SiteDomMapper.SiteProperties.Longitude), comparer, (double)((double?)value).Value);
 
+                case "SiteProperties.SiteId" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.SiteDomMapper.SiteProperties.SiteId.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "SiteProperties.SiteId":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.SiteDomMapper.SiteProperties.SiteId), comparer, (string)value);
 
