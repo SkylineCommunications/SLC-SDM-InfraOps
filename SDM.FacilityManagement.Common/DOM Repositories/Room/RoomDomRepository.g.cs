@@ -708,12 +708,18 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 				case "LastModifiedBy":
 					return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModifiedBy, comparer, (string)value);
 
+                case "Name" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+					return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.RoomDomMapper.RoomProperties.Name.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Name":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.RoomProperties.Name), comparer, (string)value);
 
+                case "Plan" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+					return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.RoomDomMapper.RoomProperties.Plan.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Plan":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.RoomProperties.Plan), comparer, (string)value);
 
+                case "Description" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+					return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.RoomDomMapper.RoomProperties.Description.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Description":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.RoomProperties.Description), comparer, (string)value);
 
@@ -727,6 +733,8 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
 				case "Depth":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.RoomProperties.Depth), comparer, (long)((long?)value).Value);
 
+                case "RoomId" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+					return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.RoomDomMapper.RoomProperties.RoomId.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "RoomId":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RoomDomMapper.RoomProperties.RoomId), comparer, (string)value);
 

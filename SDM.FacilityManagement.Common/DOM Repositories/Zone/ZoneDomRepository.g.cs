@@ -727,12 +727,18 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 case "LastModifiedBy":
                     return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModifiedBy, comparer, (string)value);
 
+                case "Name" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Name.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Name":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Name), comparer, (string)value);
 
+                case "Plan" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Plan.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Plan":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Plan), comparer, (string)value);
 
+                case "Description" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Description.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Description":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Description), comparer, (string)value);
 
@@ -762,6 +768,8 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 case "ZoneProperties.Depth":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.Depth), comparer, (double)((double?)value).Value);
 
+                case "ZoneProperties.ZoneId" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.ZoneId.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "ZoneProperties.ZoneId":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.ZoneDomMapper.ZoneProperties.ZoneId), comparer, (string)value);
 

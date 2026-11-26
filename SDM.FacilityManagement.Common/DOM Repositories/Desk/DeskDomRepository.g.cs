@@ -639,15 +639,23 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 case "LastModifiedBy":
                     return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModifiedBy, comparer, (string)value);
 
+                case "DeskInformation.Name" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.DeskDomMapper.DeskInformation.Name.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "DeskInformation.Name":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.DeskDomMapper.DeskInformation.Name), comparer, (string)value);
 
+                case "DeskInformation.Plan" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.DeskDomMapper.DeskInformation.Plan.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "DeskInformation.Plan":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.DeskDomMapper.DeskInformation.Plan), comparer, (string)value);
 
+                case "DeskInformation.Description" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.DeskDomMapper.DeskInformation.Description.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "DeskInformation.Description":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.DeskDomMapper.DeskInformation.Description), comparer, (string)value);
 
+                case "DeskInformation.DeskID" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.DeskDomMapper.DeskInformation.DeskID.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "DeskInformation.DeskID":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.DeskDomMapper.DeskInformation.DeskID), comparer, (string)value);
 
