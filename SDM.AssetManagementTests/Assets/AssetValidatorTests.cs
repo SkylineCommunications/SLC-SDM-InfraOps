@@ -1150,6 +1150,37 @@
         }
 
         [TestMethod]
+        public void ValidateTransition_InvalidPath_ShouldReturnInvalid()
+        {
+            var asset = new Asset
+            {
+                State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Disposed,
+            };
+
+            var result = Helper.AssetManagement.AssetValidator.ValidateTransition(
+                asset,
+                SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available);
+
+            result.IsValid.Should().BeFalse();
+            result.GetCombinedFailureReasons(Environment.NewLine).Should().Contain("is not allowed");
+        }
+
+        [TestMethod]
+        public void ValidateTransition_ValidPath_ShouldReturnValid()
+        {
+            var asset = new Asset
+            {
+                State = SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available,
+            };
+
+            var result = Helper.AssetManagement.AssetValidator.ValidateTransition(
+                asset,
+                SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.BuildPlanReady);
+
+            result.IsValid.Should().BeTrue();
+        }
+
+        [TestMethod]
         public void GetTransitionDestinationStates_NotAvailableToInService_ShouldReturnOrderedEnteredStates()
         {
             var enteredStates = StateMachine.GetTransitionDestinationStates(

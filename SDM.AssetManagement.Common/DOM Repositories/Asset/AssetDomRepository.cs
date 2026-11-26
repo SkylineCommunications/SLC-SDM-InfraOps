@@ -7,6 +7,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
     using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
     using Skyline.DataMiner.SDM.AssetManagement.Common.Extensions;
+    using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
     [AllowSdmMiddleware]
     public interface IAssetRepository : IBulkRepository<Asset>
@@ -18,11 +19,28 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
         Asset TransitionToInternal(Asset asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum newState);
+
+        /// <summary>
+        /// Infrastructure hook used by <c>AssetDomRepositoryExtensions.UpdateAndTransitionTo</c> to prevalidate the
+        /// transition (path and attached transition rules) before persisting field updates. Throws when not allowed.
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        void EnsureTransitionAllowedInternal(Asset asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum newState);
     }
 
     internal partial class AssetDomRepository : IAssetRepository
     {
+        // Optional: null keeps raw repositories used for system writes unvalidated (CAN-003 V8).
+        internal TransitionValidatorBase<Asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum> TransitionValidator { get; set; }
+
         public Asset TransitionToInternal(Asset asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum newState)
+        {
+            EnsureTransitionAllowedInternal(asset, newState);
+
+            return ExecuteStateTransition(asset, newState);
+        }
+
+        public void EnsureTransitionAllowedInternal(Asset asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum newState)
         {
             if (asset == null) throw new ArgumentNullException(nameof(asset));
 
@@ -32,8 +50,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             }
 
             asset.ValidateTransitionPath(newState);
-
-            return ExecuteStateTransition(asset, newState);
+            TransitionValidator?.EnsureTransitionAllowed(asset, newState);
         }
 
         private Asset ExecuteStateTransition(Asset asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum toState)

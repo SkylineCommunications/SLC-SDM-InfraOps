@@ -90,12 +90,7 @@
 
             if (asset.State != newState)
             {
-                if (!asset.IsTransitionAllowed(newState))
-                {
-                    throw new InvalidOperationException($"State transition from {asset.State} to {newState} is not allowed.");
-                }
-
-                asset.ValidateTransitionPath(newState);
+                repository.EnsureTransitionAllowedInternal(asset, newState);
             }
 
             var updated = repository.Update(asset);

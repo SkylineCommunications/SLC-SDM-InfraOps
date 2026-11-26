@@ -12,10 +12,17 @@
 
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.AssetManagement.Common.Exceptions;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
     using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
     using Skyline.DataMiner.Solutions.PeopleAndOrganizations.API;
+    using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Exceptions;
+    using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
+
+    using BlockedAssetValidator = SDM.AssetManagement.Tests.Setup.BlockingTransitionValidator<
+        Skyline.DataMiner.SDM.AssetManagement.Models.Asset,
+        SharedMappers.DomIds.SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum>;
 
     [TestClass]
     public class AssetDomRepositoryTransitionTests
@@ -259,6 +266,84 @@
                 AssetExposers.Identifier.Equal(asset.Identifier)).Single();
             reread.Name.Should().Be(originalName);
             reread.State.Should().Be(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Disposed);
+        }
+
+        [TestMethod]
+        public void TransitionTo_WhenTransitionRuleFails_ShouldNotTransition()
+        {
+            var asset = CreateAsset(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available);
+            var repository = CreateBlockedRepository();
+
+            Action act = () => repository.TransitionTo(
+                asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable);
+
+            act.Should().Throw<ValidationException>().WithMessage($"*{BlockedAssetValidator.Reason}*");
+            var reread = _helper.AssetManagement.Assets.Read(
+                AssetExposers.Identifier.Equal(asset.Identifier)).Single();
+            reread.State.Should().Be(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available);
+        }
+
+        [TestMethod]
+        public void UpdateAndTransitionTo_WhenTransitionRuleFails_DoesNotPersistEdit()
+        {
+            var asset = CreateAsset(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available);
+            var originalName = asset.Name;
+            asset.Name = "Renamed " + Guid.NewGuid();
+            var repository = CreateBlockedRepository();
+
+            Action act = () => repository.UpdateAndTransitionTo(
+                asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable);
+
+            act.Should().Throw<ValidationException>().WithMessage($"*{BlockedAssetValidator.Reason}*");
+            var reread = _helper.AssetManagement.Assets.Read(
+                AssetExposers.Identifier.Equal(asset.Identifier)).Single();
+            reread.Name.Should().Be(originalName);
+            reread.State.Should().Be(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available);
+        }
+
+        [TestMethod]
+        public void TransitionTo_Disposed_WhenChildInHolder_ShouldThrowAndNotTransition()
+        {
+            var parent = CreateAsset(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable);
+            AttachChild(parent);
+
+            Action act = () => _helper.AssetManagement.Assets.TransitionTo(
+                parent, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Disposed);
+
+            act.Should().Throw<AssetTransitionValidationException>().WithMessage("*cannot be disposed*");
+            _helper.AssetManagement.Assets.Read(AssetExposers.Identifier.Equal(parent.Identifier)).Single()
+                .State.Should().Be(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable);
+            _helper.AssetManagement.AssetValidator
+                .ValidateTransition(parent, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Disposed)
+                .IsValid.Should().BeFalse();
+        }
+
+        [TestMethod]
+        public void TransitionTo_Disposed_WithoutChildren_ShouldPersist()
+        {
+            var parent = CreateAsset(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable);
+
+            var result = _helper.AssetManagement.Assets.TransitionTo(
+                parent, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Disposed);
+
+            result.State.Should().Be(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Disposed);
+        }
+
+        private void AttachChild(Asset parent)
+        {
+            var child = CreateAsset(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available);
+            child.Location.ParentAsset = new SdmObjectReference<Asset>(parent.Identifier);
+            child.Location.HolderNumber = 1;
+
+            // Raw repository: skips placement validation, which would require a parent with holders.
+            new AssetDomRepository(_helper.Connection).Update(new[] { child });
+        }
+
+        private IAssetRepository CreateBlockedRepository()
+        {
+            var repository = new AssetDomRepository(_helper.Connection);
+            repository.TransitionValidator = new BlockedAssetValidator(a => a.State);
+            return repository;
         }
 
         [TestMethod]
