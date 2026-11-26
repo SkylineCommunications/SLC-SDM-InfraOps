@@ -121,5 +121,45 @@
                 AssetClassExposers.Identifier.Equal(assetClass.Identifier)).Single();
             reread.State.Should().Be(SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Draft);
         }
+
+        [TestMethod]
+        public void TransitionTo_Deprecated_WhenNonDisposedAssetUsesClass_ShouldThrowAndNotTransition()
+        {
+            var assetClass = CreateAssetClass(SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Active);
+            CreateAssetOfClass(assetClass, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available);
+
+            Action act = () => _helper.AssetManagement.AssetClasses.TransitionTo(
+                assetClass,
+                SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Deprecated);
+
+            act.Should().Throw<ValidationException>().WithMessage("*cannot be deprecated*");
+            var reread = _helper.AssetManagement.AssetClasses.Read(
+                AssetClassExposers.Identifier.Equal(assetClass.Identifier)).Single();
+            reread.State.Should().Be(SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Active);
+        }
+
+        [TestMethod]
+        public void TransitionTo_Deprecated_WhenOnlyDisposedAssetsUseClass_ShouldPersist()
+        {
+            var assetClass = CreateAssetClass(SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Active);
+            CreateAssetOfClass(assetClass, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Disposed);
+
+            var result = _helper.AssetManagement.AssetClasses.TransitionTo(
+                assetClass,
+                SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Deprecated);
+
+            result.State.Should().Be(SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Deprecated);
+        }
+
+        private void CreateAssetOfClass(AssetClass assetClass, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum state)
+        {
+            _helper.AssetManagement.Assets.Create(new Asset
+            {
+                Name = "Class user " + Guid.NewGuid(),
+                AssetID = Guid.NewGuid().ToString(),
+                AssetClassId = new SdmObjectReference<AssetClass>(assetClass.Identifier),
+                State = state,
+            });
+        }
     }
 }

@@ -95,6 +95,21 @@
             return result;
         }
 
+        protected override ValidationResult ValidateTransitionRules(AssetClass entity, SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum newState)
+        {
+            var result = new ValidationResult();
+
+            if (newState == SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Deprecated
+                && _entityLoader.HasNonDisposedAssetsForAssetClasses(new List<string> { entity.Identifier }))
+            {
+                result.AddFailReason(
+                    AssetClassValidationHandler.AssetClassValidationField.State,
+                    "Asset Class cannot be deprecated while non-disposed Assets use it.");
+            }
+
+            return result;
+        }
+
         protected override List<ValidationResult> ValidateBulkNoDatabaseBusinessRules(List<AssetClass> entities)
         {
             // ============================================================

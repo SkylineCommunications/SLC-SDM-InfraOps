@@ -76,7 +76,6 @@ public class AssetManagementApiHelper : IAssetManagementApiHelper
         _appSettingsValidator = new AssetManagerAppSettingsValidator();
         _historyValidator = new HistoryValidator();
 
-        // Transitions bypass the middleware, so the repositories run the transition rules themselves.
         assetRepository.TransitionValidator = _assetValidator;
         assetClassRepository.TransitionValidator = _assetClassValidator;
 

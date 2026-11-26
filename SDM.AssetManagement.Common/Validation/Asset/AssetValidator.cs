@@ -90,6 +90,21 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             return AssetTransitionValidator.ValidatePath(entity, newState);
         }
 
+        protected override ValidationResult ValidateTransitionRules(Asset entity, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum newState)
+        {
+            var result = new ValidationResult();
+
+            if (newState == SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Disposed
+                && _entityLoader.HasChildAssets(entity.Identifier))
+            {
+                result.AddFailReason(
+                    AssetValidationHandler.AssetValidationField.Holder,
+                    "Asset cannot be disposed while other Assets are placed in its holders. Please remove them first.");
+            }
+
+            return result;
+        }
+
         protected override Exception CreateTransitionException(ValidationResult result)
         {
             return new AssetTransitionValidationException(result);

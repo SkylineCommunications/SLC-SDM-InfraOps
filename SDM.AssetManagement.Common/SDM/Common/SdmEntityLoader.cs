@@ -964,6 +964,21 @@ namespace Skyline.DataMiner.SDM.Common.Services
         }
 
         /// <summary>
+        /// Determines whether any asset is currently placed in a holder of the given parent asset.
+        /// Counts without loading entities; destination (incoming) placements are not included.
+        /// </summary>
+        public bool HasChildAssets(string parentAssetIdentifier)
+        {
+            if (assetManagerApiHelper?.Assets == null || string.IsNullOrWhiteSpace(parentAssetIdentifier))
+            {
+                return false;
+            }
+
+            return assetManagerApiHelper.Assets.Count(
+                AssetExposers.Location.ParentAsset.Equal(new SdmObjectReference<Asset>(parentAssetIdentifier))) > 0;
+        }
+
+        /// <summary>
         /// Finds child assets of a specific parent asset, excluding specified asset identifiers.
         /// <para><b>Not suitable for bulk scenarios</b>: builds an AND clause per excluded identifier.</para>
         /// </summary>

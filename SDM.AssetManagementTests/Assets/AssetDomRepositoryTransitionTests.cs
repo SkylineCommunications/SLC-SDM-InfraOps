@@ -12,6 +12,7 @@
 
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.SDM.AssetManagement.Common.Exceptions;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.FacilityManagement.Models;
     using Skyline.DataMiner.SDM.InfraOps.Core.ApiReferences;
@@ -298,6 +299,44 @@
                 AssetExposers.Identifier.Equal(asset.Identifier)).Single();
             reread.Name.Should().Be(originalName);
             reread.State.Should().Be(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available);
+        }
+
+        [TestMethod]
+        public void TransitionTo_Disposed_WhenChildInHolder_ShouldThrowAndNotTransition()
+        {
+            var parent = CreateAsset(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable);
+            AttachChild(parent);
+
+            Action act = () => _helper.AssetManagement.Assets.TransitionTo(
+                parent, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Disposed);
+
+            act.Should().Throw<AssetTransitionValidationException>().WithMessage("*cannot be disposed*");
+            _helper.AssetManagement.Assets.Read(AssetExposers.Identifier.Equal(parent.Identifier)).Single()
+                .State.Should().Be(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable);
+            _helper.AssetManagement.AssetValidator
+                .ValidateTransition(parent, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Disposed)
+                .IsValid.Should().BeFalse();
+        }
+
+        [TestMethod]
+        public void TransitionTo_Disposed_WithoutChildren_ShouldPersist()
+        {
+            var parent = CreateAsset(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.NotAvailable);
+
+            var result = _helper.AssetManagement.Assets.TransitionTo(
+                parent, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Disposed);
+
+            result.State.Should().Be(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Disposed);
+        }
+
+        private void AttachChild(Asset parent)
+        {
+            var child = CreateAsset(SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum.Available);
+            child.Location.ParentAsset = new SdmObjectReference<Asset>(parent.Identifier);
+            child.Location.HolderNumber = 1;
+
+            // Raw repository: skips placement validation, which would require a parent with holders.
+            new AssetDomRepository(_helper.Connection).Update(new[] { child });
         }
 
         private IAssetRepository CreateBlockedRepository()
