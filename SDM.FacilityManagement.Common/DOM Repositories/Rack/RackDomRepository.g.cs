@@ -856,9 +856,13 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 case "LastModifiedBy":
                     return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.LastModifiedBy, comparer, (string)value);
 
+                case "Name" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.RackDomMapper.RackProperties.Name.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Name":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.RackProperties.Name), comparer, (string)value);
 
+                case "Model" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.RackDomMapper.RackProperties.Model.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Model":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.RackProperties.Model), comparer, (string)value);
 
@@ -882,6 +886,8 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 case "Depth":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.RackProperties.Depth), comparer, (double)((double?)value).Value);
 
+                case "Description" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.RackDomMapper.RackProperties.Description.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Description":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.RackProperties.Description), comparer, (string)value);
 
@@ -900,9 +906,13 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 case "YPosition":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.RackProperties.YPosition), comparer, (double)((double?)value).Value);
 
+                case "Label" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.RackDomMapper.RackProperties.Label.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Label":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.RackProperties.Label), comparer, (string)value);
 
+                case "Color" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.RackDomMapper.RackProperties.Color.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "Color":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.RackProperties.Color), comparer, (string)value);
 
@@ -911,6 +921,8 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 case "Orientation":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.RackProperties.Orientation), comparer, (int)((SharedMappers.DomIds.SlcFacility_Management.Enums.Placementorientationenum?)value).Value);
 
+                case "RackId" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.RackDomMapper.RackProperties.RackId.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "RackId":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.RackProperties.RackId), comparer, (string)value);
 
@@ -929,6 +941,8 @@ namespace Skyline.DataMiner.SDM.FacilityManagement.Models
                 case "ZoneFk.Zone":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.ZoneFk.Zone), comparer, SdmObjectReference<Zone>.Convert(value).GetIdentifierAsGuid());
 
+                case "ImageDetails.ImageFilePath" when (comparer is Comparer.Equals || comparer is Comparer.NotEquals) && value is null:
+                    return DomInstanceExposers.FieldValues.KeyExists(FacilityManagement.Models.RackDomMapper.ImageDetails.ImageFilePath.Id.ToString()).Equal(comparer == Comparer.NotEquals);
                 case "ImageDetails.ImageFilePath":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(FacilityManagement.Models.RackDomMapper.ImageDetails.ImageFilePath), comparer, (string)value);
 
