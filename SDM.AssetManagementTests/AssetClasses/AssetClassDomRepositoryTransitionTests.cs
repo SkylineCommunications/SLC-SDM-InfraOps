@@ -13,6 +13,8 @@
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
+    using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Exceptions;
+    using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
     [TestClass]
     public class AssetClassDomRepositoryTransitionTests
@@ -75,6 +77,49 @@
 
             act.Should().Throw<InvalidOperationException>()
                 .WithMessage($"State transition from {from} to {to} is not allowed.");
+        }
+
+        [TestMethod]
+        public void ValidateTransition_NotAllowed_ShouldReturnInvalidWithoutThrowing()
+        {
+            var assetClass = CreateAssetClass(SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Active);
+
+            var result = _helper.AssetManagement.AssetClassValidator.ValidateTransition(
+                assetClass,
+                SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Draft);
+
+            result.IsValid.Should().BeFalse();
+            result.GetCombinedFailureReasons(Environment.NewLine).Should().Contain("is not allowed");
+        }
+
+        [TestMethod]
+        public void ValidateTransition_Allowed_ShouldReturnValid()
+        {
+            var assetClass = CreateAssetClass(SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Draft);
+
+            var result = _helper.AssetManagement.AssetClassValidator.ValidateTransition(
+                assetClass,
+                SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Active);
+
+            result.IsValid.Should().BeTrue();
+        }
+
+        [TestMethod]
+        public void TransitionTo_WhenTransitionRuleFails_ShouldNotTransition()
+        {
+            var assetClass = CreateAssetClass(SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Draft);
+            var repository = new AssetClassDomRepository(_helper.Connection);
+            repository.TransitionValidator =
+                new BlockingTransitionValidator<AssetClass, SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum>(a => a.State);
+
+            Action act = () => repository.TransitionTo(
+                assetClass,
+                SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Active);
+
+            act.Should().Throw<ValidationException>().WithMessage($"*{BlockingTransitionValidator<AssetClass, SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum>.Reason}*");
+            var reread = _helper.AssetManagement.AssetClasses.Read(
+                AssetClassExposers.Identifier.Equal(assetClass.Identifier)).Single();
+            reread.State.Should().Be(SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum.Draft);
         }
     }
 }

@@ -7,6 +7,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
     using SharedMappers.DomIds;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
 
+    using Skyline.DataMiner.SDM.AssetManagement.Common.Exceptions;
     using Skyline.DataMiner.SDM.AssetManagement.Common.Validation;
     using Skyline.DataMiner.SDM.Common.Services;
     using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
@@ -14,7 +15,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
     /// <summary>
     /// Public validator service for Asset validation with comprehensive error handling.
     /// </summary>
-    public class AssetValidator : ValidatorBase<Asset>
+    public class AssetValidator : TransitionValidatorBase<Asset, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum>
     {
         private readonly SdmEntityLoader _entityLoader;
         private readonly AssetValidationCore _validationCore;
@@ -77,6 +78,21 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Validation
             var result = new ValidationResult();
             result.AddFailReason(AssetValidationHandler.AssetValidationField.Asset, "Asset cannot be null.");
             return result;
+        }
+
+        protected override SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum GetState(Asset entity)
+        {
+            return entity.State;
+        }
+
+        protected override ValidationResult ValidateTransitionPath(Asset entity, SlcAsset_Management.Behaviors.Asset_Behavior.StatusesEnum newState)
+        {
+            return AssetTransitionValidator.ValidatePath(entity, newState);
+        }
+
+        protected override Exception CreateTransitionException(ValidationResult result)
+        {
+            return new AssetTransitionValidationException(result);
         }
 
         protected override List<ValidationResult> ValidateBulkNoDatabaseBusinessRules(List<Asset> entities)

@@ -8,6 +8,7 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
     using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
     using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.Utils.InfraOps.SharedCommonLibrary.Validations;
 
     [AllowSdmMiddleware]
     public interface IAssetClassRepository : IBulkRepository<AssetClass>
@@ -17,6 +18,9 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
 
     internal partial class AssetClassDomRepository : IAssetClassRepository
     {
+        // Optional: null keeps raw repositories used for system writes unvalidated (CAN-003 V8).
+        internal TransitionValidatorBase<AssetClass, SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum> TransitionValidator { get; set; }
+
         public AssetClass TransitionTo(
             AssetClass assetClass,
             SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum newState)
@@ -35,6 +39,8 @@ namespace Skyline.DataMiner.SDM.AssetManagement.Models
             {
                 throw new InvalidOperationException($"State transition from {assetClass.State} to {newState} is not allowed.");
             }
+
+            TransitionValidator?.EnsureTransitionAllowed(assetClass, newState);
 
             return ExecuteStateTransition(assetClass, newState);
         }

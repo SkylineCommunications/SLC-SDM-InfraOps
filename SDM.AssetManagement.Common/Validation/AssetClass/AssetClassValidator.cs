@@ -7,6 +7,7 @@
     using SharedMappers.DomIds;
 
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
+    using Skyline.DataMiner.SDM.AssetManagement.Common.Extensions;
     using Skyline.DataMiner.SDM.AssetManagement.Models;
     using Skyline.DataMiner.SDM.Common.Services;
     using Skyline.DataMiner.SDM.Extensions;
@@ -17,7 +18,7 @@
     /// <summary>
     /// Public validator service for AssetClass validation with comprehensive error handling.
     /// </summary>
-    public class AssetClassValidator : ValidatorBase<AssetClass>
+    public class AssetClassValidator : TransitionValidatorBase<AssetClass, SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum>
     {
         private readonly SdmEntityLoader _entityLoader;
         private readonly IPeopleAndOrganizationsApi _peopleApi;
@@ -74,6 +75,23 @@
         {
             var result = new ValidationResult();
             result.AddFailReason(AssetClassValidationHandler.AssetClassValidationField.AssetClass, "Asset Class cannot be null.");
+            return result;
+        }
+
+        protected override SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum GetState(AssetClass entity)
+        {
+            return entity.State;
+        }
+
+        protected override ValidationResult ValidateTransitionPath(AssetClass entity, SlcAsset_Management.Behaviors.Asset_Class_Behavior.StatusesEnum newState)
+        {
+            var result = new ValidationResult();
+            if (!entity.IsTransitionAllowed(newState))
+            {
+                result.AddFailReason(AssetClassValidationHandler.AssetClassValidationField.State,
+                    $"State transition from {entity.State} to {newState} is not allowed.");
+            }
+
             return result;
         }
 
